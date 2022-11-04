@@ -1,0 +1,40 @@
+<!--posts to voting-->
+{% extends 'memberbase.html' %}
+{% load static %}
+
+{% block content %}
+
+<head>
+</head>
+
+<body>
+
+
+<div class="postww">
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+<div class="banpost">
+   <h1 class = "banh1">Ban Appeals</h1>
+   <br>
+   <br>
+  <form method="POST" class="post">
+    {% csrf_token %}
+    {{form.as_p}}
+
+    <button type="submit">Submit</button>
+  </form>
+</div> 
+</div>
+
+
+
+ </body> 
+
+
+{% endblock content %}

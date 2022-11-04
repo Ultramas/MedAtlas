@@ -1,0 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
+@import url("https://fonts.googleapis.com/css?family=Montserrat:900");
+
+@import url("https://fonts.googleapis.com/css?family=Josefin+Sans:300,400");
+  
+.ebackgroundimages {
+  /*maintain consistency with background images*/
+  /*theme: professional creativity*/
+  image-rendering: auto;  
+  height: 100%;
+  width: 100%;
+  background-repeat: no-repeat;
+  position: fixed;
+}

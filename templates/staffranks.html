@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load static %}
+    {% for StaffRanksBackgroundImage in Titles %}
+      {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+         {{ StaffRanksBackgroundImage.overtitle }} 
+      {% endif %}
+    {% endfor %}
+{% block content %}
+
+<head>
+  <!--change title tags to django form -->
+<title> MegaClan〖𐌑𐌂〗</title>
+
+<link rel="icon" href="{% static 'images/favicon.ico' type='image/ico' %}">
+</head>
+  
+<body>   
+
+  <div id="overlay">  
+    <img src = "76.gif">
+    </div>
+   {% for StaffRanksBackgroundImage in object_list %}
+    <!--<h2>{{ StaffRanksBackgroundImage.title }}</h2>-->
+      <img class = "backgroundimages" src="{{StaffRanksBackgroundImage.cover.url}}" alt="{{ StaffRanksBackgroundImage.backgroundtitle  }}">
+  {% endfor %}
+  
+    <div class="parallax1tq" id = "main">
+      <h2 class = "openingtq">
+            {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 1 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}  </h2> <h2 class="caption1tq">
+            {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 2 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </h2>
+    </div>  
+       
+    <div class="parallax2tq" id = "leaders">
+        <h2 class = "opening2tq">
+                      {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 3 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </h2>
+          <h2 class="caption2tq">
+                       {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 4 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}  </h2>
+    </div>
+</div>
+
+    <div class="parallax3tq" id = "innovation">
+      <h2 class = "opening3tq">
+                    {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 5 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </h2><h2 class="caption3tq">
+               {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 6 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </h2></div>  
+  
+
+    <div class="parallax4tq" id = "difference"><h2 class = "opening4tq">
+                  {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 7 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </h2><h2 class="caption4tq">
+                {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 8 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </h2></div>
+    </div>
+  </div> 
+
+    
+     <div class="parallax5tq"><h2 class = "opening5tq">
+                   {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 9 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </h2><h2 class="caption5tq">
+                {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 10 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </h2></div>
+    </div>
+         
+    </div>
+
+    </div>
+
+    
+     <div class="parallax6tq">
+  <h2 class = "opening6tq">
+               {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 11 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </h2><h2 class="caption6tq"> </h2>            {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 12 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </div>
+    </div>
+         
+    </div>
+
+    </div>
+
+    
+    
+     <div class="parallax7tq">
+  <h2 class = "opening7tq">
+                {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 13 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} 
+  </h2><h2 class="caption7tq"></h2>            
+       {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 14 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </div>
+    </div>
+         
+    </div>
+
+       <div class="parallax8tq"><h2 class = "opening6tq">            {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 15 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </h2><h2 class="caption6tq"> </h2>            {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 16 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </div>
+    </div>
+         
+    </div>
+
+    </div>
+
+    
+    
+     <div class="parallax9tq">            {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 17 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} <h2 class = "opening7tq">            {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 18 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </h2><h2 class="caption7tq"></h2>            {% for StaffRanksBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == StaffRanksBackgroundImage.section %}
+         {% if StaffRanksBackgroundImage.page == 'staffranks.html' %}
+       {% if StaffRanksBackgroundImage.section == 19 %}
+     {{ StaffRanksBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </div>
+    </div>
+         
+    </div>
+
+
+  
+    <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    
+</body>
+
+{% endblock content %}
+
+

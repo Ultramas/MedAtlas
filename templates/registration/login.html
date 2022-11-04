@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %} MegaClan〖𐌑𐌂〗- Login {% endblock title %} 
+{% block content %}
+
+<div class="poste2">
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+
+  <div class="forming">
+  <form method="post">
+    {% csrf_token %}
+    {{form.as_p}}
+        <div class="signuphere">
+    <a href = "{% url 'showcase:cv-form' %}">If you are not currently a member, please sign up here.</a>
+      </div>
+    <div class="buttonu">
+      <button class = "button" type="submit">Login</button>
+    </div>
+           <div class="passwordreset">
+        <a href="{% url 'showcase:password_reset' %}">Forgot Password?</a>
+      </div>
+  </form>
+  </div>
+</div>  
+{% endblock content %}

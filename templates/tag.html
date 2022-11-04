@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+    {% for TagBackgroundImage in Titles %}
+      {% if TagBackgroundImage.page == 'tag.html' %}
+         {{ TagBackgroundImage.overtitle }} 
+      {% endif %}
+    {% endfor %}
+{% block content %}
+        
+<head>
+  <!--change title tags to django form -->
+<title> Quantumism Badge </title>
+
+<link rel="icon" href="{% static 'images/favicon.ico' type='image/ico' %}">
+</head>
+  
+<body>   
+  
+  <div id="overlay">   
+    <img src = "76.gif">
+    </div>
+  {% for TagBackgroundImage in object_list %}
+    <!--<h2>{{ StaffRanksBackgroundImage.title }}</h2>-->
+      <img class = "backgroundimages" src="{{TagBackgroundImage.cover.url}}" alt="{{ TagBackgroundImage.backgroundtitle  }}">
+  {% endfor %}
+    <div class="parallax1ip" id = "main">
+      <h2 class = "opening"> 
+        {% for TagBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == TagBackgroundImage.section %}
+         {% if TagBackgroundImage.page == 'tag.html' %}
+       {% if TagBackgroundImage.section == 1 %}
+     {{ TagBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</h2> <h2 class="caption1a"> 
+  {% for TagBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == TagBackgroundImage.section %}
+         {% if TagBackgroundImage.page == 'tag.html' %}
+       {% if TagBackgroundImage.section == 2 %}
+     {{ TagBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}
+<input type="text" value="⚛" id="myInput">
+<button onclick="myFunction()">  
+  {% for TagBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == TagBackgroundImage.section %}
+         {% if TagBackgroundImage.page == 'tag.html' %}
+       {% if TagBackgroundImage.section == 3 %}
+     {{ TagBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</button>
+
+<script>
+function myFunction() {
+  /* Get the text field */
+  var copyText = document.getElementById("myInput");
+
+  /* Select the text field */
+  copyText.select();
+  copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+  /* Copy the text inside the text field */
+  navigator.clipboard.writeText(copyText.value);
+  
+  /* Alert the copied text */
+  alert("Tag copied!");
+}
+</script>
+</h2>
+    </div>  
+   
+
+
+  
+    <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    
+</body>
+
+{% endblock content %}

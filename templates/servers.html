@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<html>
+  <head>
+     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">  
+    <title>MegaClan Servers</title>
+  </head>
+  <body>
+
+
+    <div id="overlay">
+    <img src = "76.gif">
+    </div>
+    
+    <div class="parallaxt"><h2 class = "openinge">Website Showcase</h2><h2 class="caption1a">This is a showcase of some of our agency's websites, to give you . </h2></div>  
+   
+
+    <div class="parallax2c"><h2 class = "opening2e">New Hits</h2>
+    <br>
+    <br>
+    <br>
+    <br>
+    <!-- Slideshow container -->
+<div class="slideshow-container fade">
+
+  <!-- Full images with numbers and message Info -->
+  <div class="Containers">
+    <div class="MessageInfo">1 / 3</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+        <img src="../static/css/images/ch.png" style="width: 35%">
+   <br>
+    <br>
+    <br>
+    <br>
+    <div class="Info">IntelleX</div>
+  </div>
+
+  <div class="Containers">
+    
+    <div class="MessageInfo">2 / 3</div>
+    <img src="image2.jpg" style="width:80%">
+    <div class="Info">Second Caption</div>
+  </div>
+
+  <div class="Containers">
+    <div class="MessageInfo">3 / 3</div>
+    <img src="image3.jpg" style="width:80%">
+    <div class="Info">Third Caption</div>
+  </div>
+
+  <!-- Back and forward buttons -->
+  <a class="Back" onclick="plusSlides(-1)">&#10094;</a>
+  <a class="forward" onclick="plusSlides(1)">&#10095;</a>
+</div>
+<br>
+
+<!-- The circles/dots -->
+<div style="text-align:center">
+  <span class="dots" onclick="currentSlide(1)"></span>
+  <span class="dots" onclick="currentSlide(2)"></span>
+  <span class="dots" onclick="currentSlide(3)"></span>
+</div>  
+
+
+</div>
+</div>
+    <div class="parallax3c"><h2 class = "opening3e">Our Bestselling Products</h2><h2 class="caption3a">These are our bestselling products (updated regularly).</h2></div>  
+   
+
+    <div class="parallax4t"><h2 class = "opening4e">Online Training</h2><h2 class="caption4a">We will give you all of the tools you will need to succeed, with attentive staff, adaptive instruction, and a wealth of knowledge. Our goal is to train you as well as possible in a short amount of time. To this end, we offer intruction adaptive to the individual (you), and intructors actively teaching rather than passively waiting to help.</h2></div>
+    </div>
+
+
+
+
+   
+    <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    <script src="{% static 'css/js/carousel.js' %}"></script>
+   </div>
+  </body>
+</html>
+
+
+{% endblock content %}

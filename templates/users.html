@@ -1,0 +1,47 @@
+{% extends 'memberbase.html' %}
+
+{% load static %}
+
+{% block title %} Home {% endblock title %}
+
+{% block content %}
+    
+
+
+</form>
+</div>
+
+<div class="poste1"> 
+  <br>
+    <h1 class="hello">Hello {{user.username}}!</h1>
+      <br>
+        <br>
+    <!--saved items here-->
+    {% for Post in object_list %}
+      <div class = "postop">
+        <h1>{{Post.name}}</h1>
+        <br>
+        <p class="describe">
+          {{Post.description}}</p> 
+        <br>
+        <br>
+          <img class = "hunt" src="{{Post.image}}">
+        <br>
+        <br>
+        <br>
+  </div>
+      <br>
+      <br>
+      <br>
+      <br>
+
+   <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    
+{% endfor %} 
+ 
+
+{% endblock content %}

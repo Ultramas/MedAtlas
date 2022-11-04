@@ -1,0 +1,248 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% for BackgroundImage in Titles %}
+      {% if BackgroundImage.page == 'index.html' %}
+         {{ BackgroundImage.overtitle }} 
+      {% endif %}
+  {% endfor %}
+{% endblock title %} 
+
+{% block content %}
+                
+<head>
+      <!--change title tags to django form -->
+      {% for BackgroundImage in Favicons %}
+      {% if BackgroundImage.faviconpage == 'index.html' %}
+        <link rel="shortcut icon" type="image/ico" href="{% static 'favicon_1.ico' %}"/>
+        <link rel="{{BackgroundImage.faviconrelationship}}" type="{{BackgroundImage.favicontype}}" href="{{BackgroundImage.faviconlink}}">
+      {% endif %}
+    {% endfor %}
+</head>
+  
+<body>       
+
+  <div id="overlay">  
+    <img src = "76.gif">
+    </div>
+    
+
+    <!--<div class="parallax1" id = "main">
+
+  <a href="#leaders"><span></span></a>
+    -->
+
+<!--keeps using the same image repetitively-->
+
+ <!--</div>-->
+  
+<!--
+<section id="section02" class="demo">
+<a href="#innovation"><span></span></a>
+</section>
+            </div>
+    </div>
+<div class='wrap'>
+
+  <div class='tri'></div>
+  <div class='tri'></div>
+  <div class='tri'></div>
+  <div class='tri'></div>
+  <div class='tri'></div>
+  <div class='tri'></div>
+  <div class='tri'></div>
+  <div class='tri'></div>
+</div>-->
+  
+  
+    <div class="parallax2" id = "leaders">
+      <!--{% for BackgroundImages in object_list %}
+      {% endfor %}
+      -->
+  {% for BackgroundImage in Background %}
+      <img class = "backgroundimages" src="{{BackgroundImage.cover.url}}" alt="{{ BackgroundImage.backgroundtitle }}">
+  {% endfor %}
+
+        <h2 class = "opening2vb">  
+           {% for BackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == BackgroundImage.section %}
+         {% if BackgroundImage.page == 'index.html' %}
+       {% if BackgroundImage.section == 1 %}
+     {{ BackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}      </h2>
+          <h2 class="caption2a">
+           {% for BackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+            {% if BackgroundImage.page == 'index.html' %}
+            {% if BackgroundImage.section == 2 %}
+          {% if section.section == BackgroundImage.section %}
+    {{ BackgroundImage.text }}
+            {% endif %}
+            {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}
+            <!--section 2a-->
+          </h2>
+
+    </div>
+
+    <div class="parallax3" id = "innovation">
+
+      
+      <h2 class = "opening3vb">           
+        {% for BackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == BackgroundImage.section %}
+         {% if BackgroundImage.page == 'index.html' %}
+       {% if BackgroundImage.section == 3 %}
+     {{ BackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}  </h2><h2 class="caption3a">
+             {% for BackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == BackgroundImage.section %}
+         {% if BackgroundImage.page == 'index.html' %}
+       {% if BackgroundImage.section == 4 %}
+     {{ BackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}  </h2>
+ 
+<div class="night">
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+  <div class="shooting_star"></div>
+</div>
+      <section id="section03" class="demo">
+<a href="#difference"><span></span></a>
+</section>  
+      </div>  
+
+    <div class="parallax4" id = "difference"><h2 class = "opening4">           {% for BackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == BackgroundImage.section %}
+         {% if BackgroundImage.page == 'index.html' %}
+       {% if BackgroundImage.section == 5 %}
+     {{ BackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}  </h2><h2 class="caption4a">           
+  {% for BackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == BackgroundImage.section %}
+         {% if BackgroundImage.page == 'index.html' %}
+       {% if BackgroundImage.section == 6 %}
+     {{ BackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}  </h2>
+    <section id="section04" class="demo">
+<a href="#join"><span></span></a>
+</section>
+    </div>
+    </div>
+  </div> 
+
+   <!--<h2>{{ STRIPE_PUBLIC_KEY }} undefined key</h2>-->
+
+    
+     <div class="parallax5" id = "join"><h2 class = "opening5vb">
+                  {% for BackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == BackgroundImage.section %}
+         {% if BackgroundImage.page == 'index.html' %}
+       {% if BackgroundImage.section == 7 %}
+     {{ BackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}  </h2><h2 class="caption5a">
+                  {% for BackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == BackgroundImage.section %}
+         {% if BackgroundImage.page == 'index.html' %}
+       {% if BackgroundImage.section == 8 %}
+     {{ BackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}  </h2>
+     </div>
+
+           <div class="metaclass">
+    <a href="https://discord.gg/g43uGbURUz">
+         <img alt="Qries" src="../static/css/images/MC.png"
+         width="150" height="150">
+      </a>
+
+          </div>
+    </div>
+         
+    </div>
+
+    </div>
+
+  
+    <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    <script src="{% static 'css/js/header1.js' %}"></script>
+
+
+
+  
+    <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    <script src="{% static 'css/js/header1.js' %}"></script>
+    <script src="{% static 'css/js/arrowscroll.js' %}"></script>
+
+</body>
+
+
+{% endblock content %}
+
+<!--use console to check work in HTML & Javascript-->
+
+<!--html is the issue with backend background images-->
+<!--backgroundimages work when ehome code is pasted into index-->

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+    {% for AboutBackgroundImage in Titles %}
+      {% if AboutBackgroundImage.page == 'about.html' %}
+         {{ AboutBackgroundImage.overtitle }} 
+      {% endif %}
+    {% endfor %}
+{% block content %}
+
+{% block content %}
+
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <title>Gluons & Leptons</title>
+  </head>
+  <body>        
+       
+ <div id="overlay">  
+    <img src = "{% static 'css/images/76.gif' %}">
+    </div>
+   
+    
+    <div class="subscripteds"><h2 class = "opening">
+               {% for AboutBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == AboutBackgroundImage.section %}
+         {% if AboutBackgroundImage.page == 'about.html' %}
+       {% if AboutBackgroundImage.section == 1 %}
+     {{ AboutBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}  </h2></div>  
+
+    <div class="parallaxc2">
+          {% for AboutBackgroundImage in object_list %}
+    <!--<h2>{{ AboutBackgroundImage.title }}</h2>-->
+      <img class = "backgroundimages" src="{{AboutBackgroundImage.cover.url}}" alt="{{ AboutBackgroundImage.backgroundtitle  }}">
+  {% endfor %}
+      <h2 class="opening2">
+        {% for AboutBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == AboutBackgroundImage.section %}
+         {% if AboutBackgroundImage.page == 'about.html' %}
+       {% if AboutBackgroundImage.section == 2 %}
+     {{ AboutBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</h2>
+      <h2 class = "caption2">
+        {% for AboutBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == AboutBackgroundImage.section %}
+         {% if AboutBackgroundImage.page == 'about.html' %}
+       {% if AboutBackgroundImage.section == 3 %}
+     {{ AboutBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</h2></div>  
+
+    <div class="parallaxc3"><h2 class="opening3">
+      {% for AboutBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == AboutBackgroundImage.section %}
+         {% if AboutBackgroundImage.page == 'about.html' %}
+       {% if AboutBackgroundImage.section == 4 %}
+     {{ AboutBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</h2><h2 class="caption3">{% for AboutBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == AboutBackgroundImage.section %}
+         {% if AboutBackgroundImage.page == 'about.html' %}
+       {% if AboutBackgroundImage.section == 5 %}
+     {{ AboutBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}
+  <br><br><br><br><br><br><br><br><br><br><br>
+  </h2>
+    <div class = "qgp"><img src = "{% static 'css/images/qgp.png' %}"></div>
+    </div>
+    
+    <div class="parallaxc4"><h2 class="opening3">
+      {% for AboutBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == AboutBackgroundImage.section %}
+         {% if AboutBackgroundImage.page == 'about.html' %}
+       {% if AboutBackgroundImage.section == 6 %}
+     {{ AboutBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</h2>
+
+   
+   
+     <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+  </body>
+</html>
+
+{% endblock content %}
+

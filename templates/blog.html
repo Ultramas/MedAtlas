@@ -1,0 +1,126 @@
+{% extends "blogbase.html" %} 
+
+{% load static %}
+
+{% block title %}
+    {% for BlogBackgroundImage in Titles %}
+      {% if BlogBackgroundImage.page == 'blog.html' %}
+         {{ BlogBackgroundImage.overtitle }}
+      {% endif %}
+    {% endfor %}
+{% endblock title %}
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+
+ 
+
+  
+
+<style>
+    body {
+        font-family: "Roboto", sans-serif;
+        font-size: 18px;
+        background-color: #fdfdfd;
+    }
+    
+    .head_text {
+        color: white;
+    }
+    
+    .card {
+        box-shadow: 0 16px 48px #E3E7EB;
+    }
+</style>
+
+<header class="masthead">
+    <div class="overlay"></div>
+    <div class="container4">
+        <div class="row">
+            <div class=" col-md-8 col-md-10 mx-auto">
+                <div class="site-heading">
+                    <h3 class=" site-heading my-4 mt-3 text-white"> Quantum Blog </h3>
+                    <p class="text-light"> Quantum Blogging Consiousness? &nbsp
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<div class="container4">
+  {% for BlogBackgroundImage in Background %}
+     {% if BlogBackgroundImage.page == 'blog.html' %}
+      <img class = "backgroundimages" src="{{BlogBackgroundImage.cover.url}}" alt="{{ BlogBackgroundImage.title }}">
+     {% endif %}
+  {% endfor %}
+      <div class = "navbarx">
+
+    <ul>
+      {% for column in Header %}
+        <div class="dropdown">     
+          <a href="#{{ column.section }}" class="glass"> {{ column.text }}</a>
+          <div class="dropdown-content">
+          {% for row in DropDown %}
+        
+            {% if row.row == column.row %}
+                                                
+                {% if row.opennew == True %}
+                    <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
+                {% else %}
+                    <a href="{{ row.url }}">{{ row.text }}</a>
+                {% endif %}
+            {% endif %}
+          
+          {% endfor %}
+          </div>        
+        </div>
+      {% endfor %}
+      </ul>
+      </div>  
+    <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-md-8 mt-3 left">
+            {% for blog in blog_list %}
+            <div class="card mb-4">
+                <div class="card-body1">
+                    <h2 class="card-title">{{ blog.title }}</h2>
+                    <p class="card-text text-muted h6">{{ blog.author }} | {{ blog.created_on}} </p>
+                  
+                  <img class = "backgroundimages" src="{{blog.image.url}}" alt="{{ blog.title }}">
+                  
+                    <p class="card-text">{{blog.content|slice:":200" }}...</p>
+                    <a href="{% url 'showcase:post_detail' blog.slug  %}" class="btn btn-primary">Read More &rarr;</a>
+                    
+          {% for comment in comments %}
+        <div class="comments" style="padding: 10px;">
+          <p class="font-weight-bold">
+            {{ comment.name }}
+            <span class=" text-muted font-weight-normal">
+              {{ comment.created_on }}
+            </span>
+          </p>
+          {{ comment.body | linebreaks }}
+        </div>
+        {% endfor %}
+                </div>
+            </div>        
+
+
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+
+
+{% endblock %}

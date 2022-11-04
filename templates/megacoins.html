@@ -1,0 +1,211 @@
+
+{% extends 'base.html' %}
+{% load static %}
+    {% for MegaBackgroundImage in Titles %}
+      {% if MegaBackgroundImage.page == 'mega.html' %}
+         {{ MegaBackgroundImage.overtitle }} 
+      {% endif %}
+    {% endfor %} 
+{% block content %}
+
+<head>
+  <!--change title tags to django form -->
+<link rel="icon" href="{% static 'images/favicon.ico' type='image/ico' %}">
+</head>
+  
+<body>   
+
+  <div id="overlay">  
+    <img src = "76.gif">
+    </div>
+
+    <div class="parallax1" id = "main">
+       {% for MegaBackgroundImage in object_list %}
+    <!--<h2>{{ MegaBackgroundImage.title }}</h2>-->
+      <img class = "backgroundimages" src="{{MegaBackgroundImage.cover.url}}" alt="{{ MegaBackgroundImage.backgroundtitle  }}">
+  {% endfor %}
+  <span>〖𐌑𐌂〗</span>
+  <section id="section01" class="demo">
+  <a href="#leaders"><span></span></a>
+</section>
+  </div>
+    <div class="parallax2" id = "leaders">
+        <h2 class = "opening2vb">
+          {% for MegaBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == MegaBackgroundImage.section %}
+         {% if MegaBackgroundImage.page == 'mega.html' %}
+       {% if MegaBackgroundImage.section == 1 %}
+     {{ MegaBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</h2>
+          <h2 class="caption2a">
+           {% for MegaBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == MegaBackgroundImage.section %}
+         {% if MegaBackgroundImage.page == 'mega.html' %}
+       {% if MegaBackgroundImage.section == 2 %}
+     {{ MegaBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}
+<br>
+{% for MegaBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == MegaBackgroundImage.section %}
+         {% if MegaBackgroundImage.page == 'mega.html' %}
+       {% if MegaBackgroundImage.section == 3 %}
+     {{ MegaBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}
+<br>
+<br>
+{% for MegaBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == MegaBackgroundImage.section %}
+         {% if MegaBackgroundImage.page == 'mega.html' %}
+       {% if MegaBackgroundImage.section == 4 %}
+     {{ MegaBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</h3> 
+<br>
+          </h2>
+
+<section id="section02" class="demo">
+<a href="#innovation"><span></span></a>
+</section>
+            </div>
+    </div>
+
+
+    <div class="parallax3" id = "innovation">
+      <h2 class = "opening3vb">
+       {% for MegaBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == MegaBackgroundImage.section %}
+         {% if MegaBackgroundImage.page == 'mega.html' %}
+       {% if MegaBackgroundImage.section == 5 %}
+     {{ MegaBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</h2><h2 class="caption3a">
+    {% for MegaBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == MegaBackgroundImage.section %}
+         {% if MegaBackgroundImage.page == 'mega.html' %}
+       {% if MegaBackgroundImage.section == 6 %}
+     {{ MegaBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %} </h2>
+
+      <section id="section03" class="demo">
+<a href="#difference"><span></span></a>
+</section>  
+      </div>  
+
+    <div class="parallax4" id = "difference"><h2 class = "opening4">{% for MegaBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == MegaBackgroundImage.section %}
+         {% if MegaBackgroundImage.page == 'mega.html' %}
+       {% if MegaBackgroundImage.section == 7 %}
+     {{ MegaBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</h2><h2 class="caption4a">
+   {% for MegaBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == MegaBackgroundImage.section %}
+         {% if MegaBackgroundImage.page == 'mega.html' %}
+       {% if MegaBackgroundImage.section == 8 %}
+     {{ MegaBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</h2>
+    <section id="section04" class="demo">
+<a href="#join"><span></span></a>
+</section>
+    </div>
+    </div>
+  </div> 
+
+    
+     <div class="parallax5" id = "join"><h2 class = "opening5vb">{% for MegaBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == MegaBackgroundImage.section %}
+         {% if MegaBackgroundImage.page == 'mega.html' %}
+       {% if MegaBackgroundImage.section == 9 %}
+     {{ MegaBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</h2><h2 class="caption5a">{% for MegaBackgroundImage in TextFielde %}
+             {% for section in TextFielde %}
+          {% if section.section == MegaBackgroundImage.section %}
+         {% if MegaBackgroundImage.page == 'mega.html' %}
+       {% if MegaBackgroundImage.section == 10 %}
+     {{ MegaBackgroundImage.text }}
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}</h2>
+     </div>
+
+           <div class="metaclass">
+    <a href="https://discord.gg/g43uGbURUz">
+         <img alt="Qries" src="../static/css/images/MC.png"
+         width="350" height="150">
+      </a>
+
+          </div>
+    </div>
+         
+    </div>
+
+    </div>
+
+  
+    <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    <script src="{% static 'css/js/header1.js' %}"></script>
+
+
+
+  
+    <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    <script src="{% static 'css/js/header1.js' %}"></script>
+    <script src="{% static 'css/js/arrowscroll.js' %}"></script>
+
+</body>
+
+{% endblock content %}  
+
+

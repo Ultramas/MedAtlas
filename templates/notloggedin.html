@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
+{% block title %} Home {% endblock title %}
+
+{% block content %}
+  {% if user.is_authenticated %}
+    <h1>Hello {{user.username}}!</h1>
+    <a href = "{% url 'showcase' %}">Showcase</a>
+    <a href = "{% url 'logout' %}">Logout</a>
+  {% else %}
+  <div class="login">
+    <p>You are not logged in. Please Login to access the MegaClan VIP Area.</p>
+    <a href="{% url 'login' %}">Login</a>
+  </a>
+  {% endif %}
+{% endblock content %}

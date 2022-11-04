@@ -1,0 +1,156 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+        <meta name="google" content="notranslate" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmostFcJlSAwiGgFAW/dAiS6JXm"
+            crossorigin="anonymous" />
+
+    <title>{% block title %}PokeTrove{% endblock title %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.blog.css' %}">
+      
+    </head>
+
+    <body>
+ <header>
+
+  <div class="column three mobile-twelve section_header_logo vertical-align-middle">
+ <a class = "logo" href="/"><img class = "imageicon"  src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6khv+EqxJLmRfFwXs1M3EMoAJtliUohPZi8...oz " width="145vh" 
+     height="80vh"></a>
+ </div>        
+
+    
+     </header>
+       
+    <div class = "navbarx">
+
+    <ul>
+      {% for column in Header %}
+        <div class="dropdown">     
+          <a href="#{{ column.section }}" class="glass"> {{ column.text }}</a>
+          <div class="dropdown-content">
+          {% for row in DropDown %}
+        
+            {% if row.row == column.row %}
+                                
+                {% if row.opennew == True %}
+                    <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
+                {% else %}
+                    <a href="{{ row.url }}">{{ row.text }}</a>
+                {% endif %}
+            {% endif %}
+          
+          {% endfor %}
+          </div>        
+        </div>
+      {% endfor %}
+    </ul>
+
+     <!--{% for BlogBackgroundImage in object_list %}
+   <img class = "ebackgroundimages" src="{{ BlogBackgroundImage.cover.url }}" alt="{{ BlogBackgroundImage.title }}">
+       <div class="view overlay">
+                  <div class="mask rgba-white-slight"></div>
+              </div>
+{% endfor %}-->
+      
+     <nav>
+     <div class="bell"></div>
+     <div onclick='navToggle(this)'  class="hamburger">
+       <div class="bun"></div>
+       <div class="bun"></div>
+       <div class="bun"></div>
+     </div>
+     
+<h2 class = "navtext">Quantumism</h2>  
+    <div class="navItem"><a href = "{% url 'showcase:index' %}">Home</a></div>
+     <div class="navItem2"><a href = "{% url 'showcase:about' %}">About Us</a></div>
+     <div class="navItem3"><a href = "{% url 'showcase:servers' %}" target="_blank">Discord Servers</a></li></div>
+     <!--<div class="navItem10"><a href = "{% url 'showcase:perks' %}">Member Perks</a></li></div>-->
+     <div class="navItem4"><a href = "{% url 'showcase:admin'%}" target="_blank">Administration</a></li></div>
+     <div class="navItem5"><a href="https://discord.com/channels/813761567304843315/813779502190297108" target="_blank">Quantum Discord</a></li></div>
+     <div class="navItem8"><a href = "{% url 'showcase:rules' %}">Rules</a></li></div>
+     <div class="navItem9"><a href = "{% url 'showcase:showcase' %}">VIP Area</a></div>
+<br>
+<br>
+           
+<div class="metaclass1">
+    <a href="https://discord.gg/g43uGbURUz">
+         <img alt="Qries" src="../static/css/images/MC.png"
+         width="150" height="150">
+      </a>
+
+          </div>
+    </div>
+</nav>
+
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    
+      
+        <style>    
+            body {
+            font-family: "Roboto", sans-serif;
+            font-size: 17px;
+            background-color: #fdfdfd;
+        }
+        .shadow {
+            box-shadow: 0 4px 2px -2px rgba(0, 0, 0, 0.1);
+        }
+        .btn-danger {
+            color: #fff;
+            background-color: #f00000;
+            border-color: #dc281e;
+        }
+        /*.masthead {
+            background: #3398E1;
+            height: auto;
+            padding-bottom: 15px;
+            box-shadow: 0 16px 48px #E3E7EB;
+            padding-top: 10px;
+        }*/
+    </style>
+
+
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+      
+        {% block content %}
+        <!-- Content Goes here -->
+        {% endblock content %}
+        <!-- Footer -->
+   
+
+
+{% block sidebar %}
+
+<style>
+        .card{
+            box-shadow: 0 16px 48px #E3E7EB;
+        }
+       
+</style>
+
+
+
+
+
+<footer>
+     <div class = "copyright">
+     <h5>PokeTrove 2022©.   All Rights Reserved.</h5>
+   </div>
+   
+  </footer>  </body>
+</html>
+
+<!-- Sidebar Widgets Column -->
+
+
+{% endblock sidebar %}

@@ -1,0 +1,142 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} MegaClan History{% endblock title %} 
+
+{% block content %}
+
+
+<html>
+  <head>
+     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+     </div>
+  </head>
+  
+  <div id="overlay">  
+    <img src = "76.gif">
+    </div>
+
+    <div class="parallax1fr">
+      <br>
+      <br>
+
+      <h2 class = "openingywe">
+        {% for FaqTextField in FaqTexts %}
+    {{ FaqTextField.text }}
+  {% endfor %}</h2>
+          
+          <ul class = "caption1a2">
+            <h3 class="banh1">
+              {% for FaqTextField2 in FaqTexts2 %}
+    {{ FaqTextField2.text }}
+  {% endfor %}</h3> 
+<br>
+  
+  <h3 class="caption1avb">
+    {% for FaqTextField3 in FaqTexts3 %}
+    {{ FaqTextField3.text }}
+  {% endfor %} </h3>
+                {% for FaqBackgroundImage in object_list %}
+    <!--<h2>{{ BilletBackgroundImage.title }}</h2>-->
+      <img class = "backgroundimages" src="{{FaqBackgroundImage.cover.url}}" alt="{{ FaqBackgroundImage.title }}">
+  {% endfor %}
+             <h3>
+               {% for FaqTextField4 in FaqTexts4 %}
+    {{ FaqTextField4.text }}
+  {% endfor %}
+             </h3>
+              <h3 class="caption1avb">
+                 {% for FaqTextField5 in FaqTexts5 %}
+    {{ FaqTextField5.text }}
+  {% endfor %}  
+                </h3>
+                <h3>       
+                {% for FaqTextField6 in FaqTexts6 %}
+    {{ FaqTextField6.text }}
+  {% endfor %}
+                </h3>
+                <h3>  
+                {% for FaqTextField7 in FaqTexts7 %}
+    {{ FaqTextField7.text }}
+  {% endfor %}
+                </h3>
+                <h3>
+                {% for FaqTextField8 in FaqTexts8 %}
+    {{ FaqTextField8.text }}
+  {% endfor %}
+                </h3>
+                <h3>
+                {% for FaqTextField9 in FaqTexts9 %}
+    {{ FaqTextField9.text }}
+  {% endfor %} 
+                </h3>
+                <h3>
+                {% for FaqTextField10 in FaqTexts10 %}
+    {{ FaqTextField10.text }}
+  {% endfor %}
+                </h3>
+              <ul>
+    </div>  
+   
+    
+    <div class="parallax2fr">
+        <h2 class = "opening2ywo">
+          {% for FaqTextField11 in FaqTexts11 %}
+    {{ FaqTextField11.text }}
+  {% endfor %} </h2>
+          <h2 class="caption2avb">
+          {% for FaqTextField12 in FaqTexts12 %}
+    {{ FaqTextField12.text }}
+  {% endfor %}
+            </div>
+          </h2>
+    </div>
+
+
+    <div class="parallax3fr">
+      <h2 class = "opening3ywo">
+        {% for FaqTextField13 in FaqTexts13 %}
+    {{ FaqTextField13.text }}
+  {% endfor %} 
+      </h2>
+      <h2 class="caption3avb">
+        {% for FaqTextField14 in FaqTexts14 %}
+    {{ FaqTextField14.text }}
+  {% endfor %} </h2></div>  
+
+    <div class="parallax4fr">
+      {% for FaqTextField15 in FaqTexts15 %}
+    {{ FaqTextField15.text }}
+  {% endfor %} <h2 class = "opening4ywo">
+    {% for FaqTextField16 in FaqTexts16 %}
+    {{ FaqTextField16.text }}
+  {% endfor %} </h2>
+      <h2 class="caption4avb">
+        {% for FaqTextField17 in FaqTexts17 %}
+    {{ FaqTextField17.text }}
+  {% endfor %} </h2>
+    <h2 class="caption4avb">
+        {% for FaqTextField18 in FaqTexts18 %}
+    {{ FaqTextField18.text }}
+  {% endfor %} </h2>
+    </div>
+    </div>
+
+
+
+
+  </footer>
+   
+    <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    
+   </div>
+</body>
+</html>
+
+
+{% endblock content %}

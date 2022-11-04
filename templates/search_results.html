@@ -1,0 +1,69 @@
+{% extends 'memberbase.html' %}
+{% block content %}
+
+<div class = "searcherbackground">
+  <div class = "searcher">
+  <ul>
+
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+
+
+      {% for poste in object_list.vote_list %}
+      <h1 class = "banh1t">Votes</h1>
+    <div class = "searchere"> 
+        <li>
+      <a href="{% url 'showcase:voting'%}">
+           {{ poste.catagory}}, by {{ poste.name }}
+          </a>
+        </li>
+    </div>
+    <br>
+     {% endfor %}
+
+     {% for post in object_list.idea_list %}
+        <h1 class = "banh1t">Ideas</h1>
+    <div class = "searchere">
+        <li>
+      <a href="{% url 'showcase:users'%}">
+          {{ post.catagory}}, by {{ post.name }}
+      </a>
+        </li>
+    </div>
+    <br>
+       {% endfor %}
+
+
+      {% for ShowcasePost in object_list.profile_list %}
+          <h1 class = "banh1t">Profiles</h1>
+    <div class = "searchere">
+       <li>
+      <a href="{% url 'showcase:showcase'%}">
+          {{ ShowcasePost.catagory}}, by {{ ShowcasePost.name }}
+      </a>
+        </li>
+    </div>
+      <br>
+  {% endfor %}
+  
+  {% for Partner in object_list.Partner_list %}
+    <div class = "searchere">
+        <li>
+      <a href="{% url 'showcase:partners'%}">
+          {{ Partner.catagory}}, by {{ Partner.name }}
+      </a>
+        </li>
+    </div>
+    <br>
+     {% endfor %}
+    </ul>
+  </div>
+</div>
+
+{% endblock content %}

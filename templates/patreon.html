@@ -1,0 +1,92 @@
+{% extends 'memberbase.html' %}
+
+{% load static %}
+
+{% block title %}
+    {% for PatreonBackgroundImage in Titles %}
+      {% if PatreonBackgroundImage.page == 'patreon.html' %}
+         {{ PatreonBackgroundImage.overtitle }}
+      {% endif %}
+    {% endfor %}
+{% endblock title %}
+
+{% block content %}
+    
+  {% if user.is_authenticated %}
+
+
+
+<div class="poste1"> 
+  
+      
+{% for PatreonBackgroundImage in Background %}
+    <img class = "backgroundimages" src="{{PatreonBackgroundImage.cover.url}}" alt="{{ PatreonBackgroundImage.backgroundtitle }}">
+
+
+  
+  {% load guest_user %}
+
+{% if user|is_guest_user %}
+  {# user is a guest instance, link to conversion page #}
+  <a href="{% url "guest_user_convert" %}">Sign up and save your work!</a>
+{% else %}
+<!--{# regular sign up link #}
+  <a href="{% url "form"}">Register now!</a>-->
+{% endif %}
+<div class = "search">
+    
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<form action="{% url 'showcase:search_results' %}" method="get">
+  <input name="q" type="text" placeholder="Search...">
+</form>
+</div>
+<br>
+  <br>
+    <h1 class="hello">Hello {{user.username}}!</h1>
+      <br>
+        <br>
+    <!--saved items here-->
+    {% for Patreon in object_list %}
+      <div class = "postop">
+        <h1>{{Patreon.patreon_username}}</h1>
+        <br>
+        <p class="describe">
+          {{Patreon.description}}</p> 
+        <br>
+        <br>
+          <img class = "hunt" src="{{Patreon.image}}">
+        <br>
+        <br>
+        <br>
+  </div>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+
+
+   <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    
+     {% endfor %}
+    {% endfor %}
+  {% else %}
+<head>
+  <meta http-equiv="refresh" content="0; {% url 'login' %}">
+  </head>
+  {% endif %}
+{% endblock content %}

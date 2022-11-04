@@ -1,0 +1,55 @@
+<!--recieves from  vote-->
+{% extends 'memberbase.html' %}
+
+{% load static %}
+
+{% block title %} Home {% endblock title %}
+
+{% block content %}
+    
+  {% if user.is_authenticated %}
+
+    <head>
+      
+    </head>
+    <body>
+      
+
+<div class="poste1"> 
+  <br>
+    <h1 class="hello">Hello {{user.username}}!</h1>
+      <br>
+        <br>
+    <!--saved items here-->
+    {% for Poste in object_list %}
+      <div class = "postop">
+        <h1>{{Poste.name}}</h1>
+        <br>
+        <p class="describe">
+          {{Poste.description}}</p> 
+        <br>
+        <br>
+          <img class = "hunt" src="{{Poste.image}}">
+        <br>
+        <br>
+        <br>
+  </div>
+      <br>
+      <br>
+      <br>
+      <br>
+
+   <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    
+   
+    {% endfor %}
+  {% else %}
+<head>
+  <meta http-equiv="refresh" content="0; {% url 'login' %}">
+  </head>
+  {% endif %}
+{% endblock content %}

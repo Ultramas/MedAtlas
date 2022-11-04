@@ -1,0 +1,33 @@
+{% extends 'memberbase.html' %}
+{% block content %}
+
+<div class = "searcherbackground">
+  <div class = "searcher">
+  <ul>
+  <br>
+  <br>        
+  <br>                 
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+
+
+      {% for item in object_list.item_list %}
+      <h1 class = "banh1t">Pokemon Products</h1>
+    <div class = "searchere"> 
+        <li>    
+          hi andy
+      <a href="{% url 'showcase:ehome'%}">
+           {{ item.title}}, by {{ item.slug }}
+          </a>
+        </li>
+    </div>
+    <br>
+     {% endfor %}
+    </ul>
+  </div>
+</div>
+
+{% endblock content %}

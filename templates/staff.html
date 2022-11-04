@@ -1,0 +1,76 @@
+{% extends 'memberbase.html' %}
+
+{% load static %}
+
+{% block title %} Home {% endblock title %}
+
+{% block content %}
+    
+  {% if user.is_authenticated %}
+
+<div class="poste1"> 
+<div class = "search">
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+        
+<form action="{% url 'showcase:search_results' %}" method="get">
+  <input name="q" type="text" placeholder="Search...">
+</form>
+</div>
+<br>
+  <br>
+
+  
+               {% for StaffBackgroundImage in object_list %}
+    <!--<h2>{{ BilletBackgroundImage.title }}</h2>-->
+      <img class = "backgroundimages" src="{{StaffBackgroundImage.cover.url}}" alt="{{ StaffBackgroundImage.title }}">
+  {% endfor %}
+  
+    <h1 class="hello">Hello {{user.username}}!</h1>
+      <br>
+        <br>
+    <!--saved items here-->
+    {% for StaffProfile in object_list %}
+      <div class = "postop">
+        <h1>{{StaffProfile.name}}</h1>
+        <br>
+        <p class="describe">
+          {{StaffProfile.position}}</p> 
+        <br>
+        <p class="describe">
+          {{StaffProfile.description}}</p> 
+        <br>
+        <p class="describe">
+          {{StaffProfile.stafffeats}}</p> 
+        <br>
+        <br>
+          <img class = "hunt" src="{{StaffProfile.image}}">
+        <br>
+        <br>
+        <br>
+  </div>
+      <br>
+      <br>
+      <br>
+      <br>
+
+   <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    
+   
+    {% endfor %}
+  {% else %}
+<head>
+  <meta http-equiv="refresh" content="0; {% url 'login' %}">
+  </head>
+  {% endif %}
+{% endblock content %}
