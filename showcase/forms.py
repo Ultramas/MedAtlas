@@ -16,7 +16,7 @@ from .models import Contact
 from .models import ProfileDetails    
 from .models import UserProfile2
 from .models import Support
-from .models import Settings
+from .models import SettingsModel
 from .models import BackgroundImage
 from .models import EBackgroundImage
 from .models import ShowcaseBackgroundImage
@@ -73,7 +73,8 @@ class SignUpForm(UserCreationForm):
         attrs={
             'placeholder':
             '150 Characters or fewer. Letters, digits and @/./+/-/_ only.'
-        }))    
+        }))
+    email = forms.EmailField(widget=forms.TextInput(attrs={'placeholder': 'Your email address'}))
     password1 = forms.CharField(widget=forms.TextInput(
         attrs={'placeholder': 'Your password must be at least 8 characters.'}), label = 'Password')
     password2 = forms.CharField(widget=forms.TextInput(
@@ -82,7 +83,7 @@ class SignUpForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'password1', 'password2')
+        fields = ('username', 'email', 'password1', 'password2')
 
 
 CONTACT_PREFERENCE = [
@@ -340,7 +341,7 @@ class Eventform(forms.ModelForm):
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = 'post', 'name', 'email', 'body', 'active'
 
 #class EditProfileForm(forms.Form):
     #username = forms.CharField()
@@ -350,8 +351,8 @@ class CommentForm(forms.ModelForm):
 class SettingsForm(forms.ModelForm):     
 
     class Meta:
-      model = Settings
-      fields = '__all__'
+      model = SettingsModel
+      fields = 'username', 'password', 'coupons', 'news'
       
 class TextFielde(forms.ModelForm):
 #    image = forms.ImageField(widget=forms.TextInput(

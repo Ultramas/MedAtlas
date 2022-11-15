@@ -46,8 +46,11 @@ from .models import ContentBackgroundImage
 from .models import PartnerBackgroundImage
 from .models import ShareBackgroundImage
 from .models import WhyBackgroundImage
+from .models import SettingsModel
+from .models import ImageCarousel
 from .models import PatreonBackgroundImage
 from .models import ConvertBackgroundImage
+from .models import SettingsBackgroundImage
 from .models import BackgroundImageBase
 from .models import TextBase
 from .models import RuleTextField9
@@ -136,7 +139,7 @@ from .models import NavBar
 from .models import NavBarHeader
 from .models import DonateIcon
 from .models import Titled
-#from .models import Background2aImage
+# from .models import Background2aImage
 from .forms import MyForm
 from .forms import PosteForm
 from .forms import PostForm
@@ -196,7 +199,7 @@ from .forms import AboutTextFielde6
 from .forms import AboutTextFielde7
 from .forms import AboutTextFielde8
 from .forms import BaseCopyrightTextField
-#from .forms import OrderItems
+# from .forms import OrderItems
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth import login
@@ -229,6 +232,9 @@ from django.contrib.auth.decorators import login_required
 
 from guest_user.mixins import RegularUserRequiredMixin
 
+from django.views.generic.edit import FormView
+
+
 def my_form(request):
     print('signup')
     if request.method == 'POST':
@@ -242,11 +248,15 @@ def my_form(request):
             user.save()
             raw_password = form.cleaned_data.get('password')
 
-            #login user after signing up
+            # login user after signing up
             user = form.save()
-            login(request,
-                  user,
+            login(request, user,
                   backend='django.contrib.auth.backends.ModelBackend')
+            subject = "Welcome to IntelleX!"
+            message = 'Hello {user.username}, thank you for becoming a member of the IntelleX Community!'
+            email_from = settings.EMAIL_HOST_USER
+            recipent_list = [user.email, ]
+            send_mail(subject, message, email_from, recipent_list)
 
             # redirect user to home page
             return redirect('showcase:showcase')
@@ -382,9 +392,9 @@ class supportview(ListView):
 
 class PostList(ListView):
     model = BlogBackgroundImage
-    #backgroundqueryset = BackgroundImageBase.objects.filter('page').order_by('position')
-    #queryset = Blog.objects.filter(status=1).order_by('-created_on')
-    #normally can only filter once per view
+    # backgroundqueryset = BackgroundImageBase.objects.filter('page').order_by('position')
+    # queryset = Blog.objects.filter(status=1).order_by('-created_on')
+    # normally can only filter once per view
     paginate_by = 10
     template_name = 'blog.html'
 
@@ -399,15 +409,15 @@ class PostList(ListView):
             is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(
             is_active=1).order_by('position')
-        #context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.all
         return context
 
     def get_queryset(self):
         return Blog.objects.filter(status=1).order_by('-created_on')
 
-    #def get(self, request, *args, **kwargs):
-    #return super().get(request, *args, **kwargs)
+    # def get(self, request, *args, **kwargs):
+    # return super().get(request, *args, **kwargs)
 
 
 class PostDetail(generic.DetailView):
@@ -416,7 +426,7 @@ class PostDetail(generic.DetailView):
     template_name = 'post_detail.html'
 
 
-#class BackgroundView(ListView):
+# class BackgroundView(ListView):
 #  paginate_by = 10
 #  template_name = 'index.html'
 
@@ -425,7 +435,8 @@ class PostDetail(generic.DetailView):
 
 from django.views.generic import ListView, CreateView
 
-#class TextFieldView(ListView):
+
+# class TextFieldView(ListView):
 #    model = TextField
 #    template_name = "index.html"
 
@@ -442,7 +453,7 @@ class FaviconBaseView(ListView):
 class BackgroundBaseView(ListView):
     model = BackgroundImageBase
 
-    #ought to span multiple pages, not simply index
+    # ought to span multiple pages, not simply index
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -450,68 +461,77 @@ class BackgroundBaseView(ListView):
             'page').order_by('position')
         return context
 
-    #def backgrounds(request, showcase, index, blog):
+    # def backgrounds(request, showcase, index, blog):
     #    page = get_object_or_404(BackgroundImageBase,
     #                             showcase=showcase,
     #                             index=index,
     #                             blog=blog)
 
-    #context = {
+    # context = {
     #    'page': page,
-    #}
+    # }
 
-    #if index == 'index':
+    # if index == 'index':
     #    template = 'index.html'
     #    print(index)
-    #elif index == 'showcase':
+    # elif index == 'showcase':
     #    template = 'showcase.html'
     #    print(index)
-    #else render the one you're already rendering
-    #else:
+    # else render the one you're already rendering
+    # else:
     #    template = 'blog.html'
     #    print(index)
 
-    #return render(request, template, context)
+    # return render(request, template, context)
 
 
 class TextBaseView(ListView):
     model = TextBase
 
-    #ought to span multiple pages, not simply index
+    # ought to span multiple pages, not simply index
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['TextFielde'] = TextBase.objects.filter(
             is_active=1).order_by("section")
-        #texts = TextBase.objects.all()
+        # texts = TextBase.objects.all()
 
-        #if texts.exists():
+        # if texts.exists():
         #    return JsonResponse({})
-        #else:
+        # else:
         #    return context
 
-        #def backgrounds(request, showcase, index, blog):
+        # def backgrounds(request, showcase, index, blog):
         #    page = get_object_or_404(BackgroundImageBase,
         #                             showcase=showcase,
         #                             index=index,
         #                             blog=blog)
 
-        #context = {
+        # context = {
         #    'page': page,
-        #}
+        # }
 
-        #if index == 'index':
+        # if index == 'index':
         #    template = 'index.html'
         #    print(index)
-        #elif index == 'showcase':
+        # elif index == 'showcase':
         #    template = 'showcase.html'
         #    print(index)
-        #else render the one you're already rendering
-        #else:
+        # else render the one you're already rendering
+        # else:
         #    template = 'blog.html'
         #    print(index)
 
         return render(context)
+
+
+class ImageCarouselView(BaseView):
+    model = ImageCarousel
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Carousel'] = ImageCarousel.objects.filter(is_active=1).order_by('position')
+        return context
 
 
 class BackgroundView(BaseView):
@@ -527,6 +547,8 @@ class BackgroundView(BaseView):
         context['TextFielde'] = TextBase.objects.filter(
             page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['Carousel'] = ImageCarousel.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['Favicons'] = FaviconBase.objects.all()
         print(FaviconBase.objects.all())
@@ -568,7 +590,7 @@ class ShowcaseBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        #context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
         context[
             'BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
         context['Background'] = BackgroundImageBase.objects.filter(
@@ -590,8 +612,7 @@ class ChatBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context[
-            'BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
         context['Background'] = BackgroundImageBase.objects.filter(
             page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(
@@ -655,7 +676,7 @@ class BlogBackgroundView(ListView):
         context['BlogBackgroundImage'] = BlogBackgroundImage.objects.all()
         context['Background'] = BackgroundImageBase.objects.filter(
             page=self.template_name).order_by("position")
-        #context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Titles'] = Titled.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         return context
@@ -674,19 +695,20 @@ class PatreonBackgroundView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        #context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
         context[
             'BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
-        #context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
-        #context['Patreon'] = Patreon.objects.all()
+        # context['Patreon'] = Patreon.objects.all()
         return context
 
+
 @login_required
-@RegularUserRequiredMixin
+# @RegularUserRequiredMixin
 class PostBackgroundView(FormMixin, ListView):
     model = ShowcasePost
     template_name = "post_edit.html"
@@ -699,13 +721,12 @@ class PostBackgroundView(FormMixin, ListView):
             'BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
-        #context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['ShowcasePost'] = ShowcasePost.objects.all()
         return context
 
-    @RegularUserRequiredMixin
     @login_required
     def post_new(self, request, *args, **kwargs):
         if (request.method == "POST"):
@@ -721,7 +742,9 @@ class PostBackgroundView(FormMixin, ListView):
         else:
             form = PostForm()
             return render(request, "post_edit.html", {'form': form})
-            messages.error(request, 'Form submission failed to register, please try again.')
+            messages.error(
+                request,
+                'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
 
 
@@ -875,7 +898,7 @@ class StaffApplyBackgroundView(FormMixin, ListView):
         context = super().get_context_data(**kwargs)
         context[
             'StaffApplyBackgroundImage'] = StaffApplyBackgroundImage.objects.all(
-            )
+        )
         context[
             'BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
         context['Titles'] = Titled.objects.filter(
@@ -884,7 +907,7 @@ class StaffApplyBackgroundView(FormMixin, ListView):
             is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(
             is_active=1).order_by('position')
-        #context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         return context
@@ -986,7 +1009,7 @@ class StaffRanksBackgroundView(BaseView):
         context = super().get_context_data(**kwargs)
         context[
             'StaffRanksBackgroundImage'] = StaffRanksBackgroundImage.objects.all(
-            )
+        )
         context['TextFielde'] = TextBase.objects.filter(
             page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(
@@ -1083,7 +1106,7 @@ class DonorView(BaseView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
-        #context['BaseHomeTexted'] = BaseHomeText.objects.all()
+        # context['BaseHomeTexted'] = BaseHomeText.objects.all()
         context['TextFielde'] = TextBase.objects.filter(
             page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(
@@ -1091,6 +1114,7 @@ class DonorView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(
             page=self.template_name).order_by("position")
         return context
+
 
 class ContributorBackgroundView(BaseView):
     model = ContributorBackgroundImage
@@ -1103,8 +1127,6 @@ class ContributorBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
         return context
-  
-
 
 
 class ContentBackgroundView(BaseView):
@@ -1157,13 +1179,14 @@ class ShareBackgroundView(BaseView):
             page=self.template_name).order_by("position")
         return context
 
+
 class ConvertBackgroundView(BaseView):
     model = ConvertBackgroundImage
     template_name = "convert.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        #context['ConvertBackgroundImage'] = ConvertBackgroundImage.objects.all()
+        # context['ConvertBackgroundImage'] = ConvertBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
         context['TextFielde'] = TextBase.objects.filter(
             page=self.template_name).order_by("section")
@@ -1171,7 +1194,8 @@ class ConvertBackgroundView(BaseView):
             page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         return context
-      
+
+
 #  def get_queryset(self):
 #    return BackgroundImage.objects.all()
 
@@ -1180,7 +1204,7 @@ class ConvertBackgroundView(BaseView):
 #    context = {'images': images}
 #    return render(request,'/home/runner/PokeTrove-Attempt-Backedmore/templates',context)
 
-#class Background2aView(ListView):
+# class Background2aView(ListView):
 #  model = Background2aImage
 #  paginate_by = 10
 #  template_name = 'index.html'
@@ -1308,7 +1332,7 @@ class PostingView(FormMixin, ListView):
     model = PostBackgroundImage
     template_name = "post_edit.html"
     form_class = PostForm
-        
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Background'] = BackgroundImageBase.objects.filter(
@@ -1372,8 +1396,7 @@ class PostView(FormMixin, ListView):
         context['ShareBackgroundImage'] = ShareBackgroundImage.objects.all()
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
-        context[
-            'BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
         context['Titles'] = Titled.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(
@@ -1395,9 +1418,7 @@ class PostView(FormMixin, ListView):
         else:
             form = Postit()
             return render(request, 'share.html', {'form': form})
-            messages.error(
-                request,
-                'Form submission failed to register, please try again.')
+            messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
             return super().get(request, *args, **kwargs)
 
@@ -1454,7 +1475,7 @@ class PosteView(FormMixin, ListView):
             is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(
             is_active=1).order_by('position')
-        #context['Poste'] = Poste.objects.all()
+        # context['Poste'] = Poste.objects.all()
         return context
 
     @login_required
@@ -1471,6 +1492,67 @@ class PosteView(FormMixin, ListView):
             messages.error(
                 request,
                 'Form submission failed to register, please try again.')
+            messages.error(request, form.errors)
+
+
+@login_required
+class SettingsView(RegularUserRequiredMixin, FormView):
+    """Only allow registered users to change their settings."""
+    form_class = SettingsForm
+    model = SettingsModel
+    template_name = "myaccount.html"
+    context = {
+        'username': User.username,
+        'password': User.password,
+        'coupons': SettingsModel.coupons,
+        'news': SettingsModel.news,
+    }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['name'] = Showcase.objects.filter(
+            page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        return context
+        return HttpResponse(template.render(context, request))
+
+
+class SettingsBackgroundView(FormMixin, ListView):
+    model = SettingsBackgroundImage
+    form_class = SettingsForm
+    template_name = "changesettings.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(
+            page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['Favicons'] = FaviconBase.objects.all()
+        print(FaviconBase.objects.all())
+        # context['SettingsView'] = SettingsView.objects.all()
+        return context
+
+    # @RegularUserRequiredMixin
+    @login_required
+    def settingschange(self, request, *args, **kwargs):
+        if (request.method == "POST"):
+            form = SettingsForm(request.POST)
+            if (form.is_valid()):
+                post = form.save(commit=False)
+                post.save()
+                return redirect('showcase:showcase')
+                messages.success(request, 'Form submitted successfully.')
+            else:
+                messages.error(request, "Form submission invalid")
+                return render(request, "changesettings.html", {'form': form})
+        else:
+            form = SettingsForm()
+            return render(request, "changesettings.html", {'form': form})
+            messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
 
 
@@ -1553,7 +1635,7 @@ class EcommerceSearchResultsView(ListView):
         return (all_list)
 
 
-#class ProductSearchResultsView(ListView):
+# class ProductSearchResultsView(ListView):
 #    model = Item
 #    template_name = 'search_results.html'
 
@@ -1639,7 +1721,6 @@ def issue(request):
 
 
 def contactView(request):
-
     if request.method == 'GET':
         form = ContactForm()
     else:
@@ -1656,7 +1737,7 @@ def contactView(request):
 
             return redirect('success')
     print('success')
-    #pdb.set_trace()
+    # pdb.set_trace()
     return render(request, "email.html", {'form': form})
 
 
@@ -1679,7 +1760,6 @@ def post_detail(request, slug):
     if request.method == 'POST':
         comment_form = CommentForm(data=request.POST)
         if comment_form.is_valid():
-
             # Create Comment object but don't save to database yet
             new_comment = comment_form.save(commit=False)
             # Assign the current post to the comment
@@ -1702,38 +1782,38 @@ def post_detail(request, slug):
 
 # ...
 
-#@login_required
-#def profile(request, username):
+# @login_required
+# def profile(request, username):
 #    user = get_object_or_404(User, username=username)
 #    profile = get_object_or_404(Profile, user=user)
 #    return render(request, 'like.html', {'profile': profile, 'user': user})
 
 # ...
 
-#@login_required
-#def edit_profile(request):
-#if request.method == "POST":
-#form = EditProfileForm(request.POST, request.FILES)
-#if form.is_valid():
-#about_me = form.cleaned_data["about_me"]
-#username = form.cleaned_data["username"]
-#image = form.cleaned_data["image"]
+# @login_required
+# def edit_profile(request):
+# if request.method == "POST":
+# form = EditProfileForm(request.POST, request.FILES)
+# if form.is_valid():
+# about_me = form.cleaned_data["about_me"]
+# username = form.cleaned_data["username"]
+# image = form.cleaned_data["image"]
 
-#user = User.objects.get(id=request.user.id)
-#profile = Profile.objects.get(user=user)
-#user.username = username
-#user.save()
-#profile.about_me = about_me
-#if image:
-#profile.image = image
-#profile.save()
-#return redirect('like', username=user.username)
-#else:
-#form = EditProfileForm()
-#return render(request, 'edit_profile.html', {'form': form})
+# user = User.objects.get(id=request.user.id)
+# profile = Profile.objects.get(user=user)
+# user.username = username
+# user.save()
+# profile.about_me = about_me
+# if image:
+# profile.image = image
+# profile.save()
+# return redirect('like', username=user.username)
+# else:
+# form = EditProfileForm()
+# return render(request, 'edit_profile.html', {'form': form})
 
-#@login_required
-#def backgroundimages(request):
+# @login_required
+# def backgroundimages(request):
 #  if(request.method == "POST"):
 #    form = BackgroundImagery(request.POST)
 #    if(form.is_valid()):
@@ -1827,7 +1907,7 @@ class CheckoutView(View):
 
     def post(self, *args, **kwargs):
         form = CheckoutForm(self.request.POST or None)
-        #print(self.request.GET)
+        # print(self.request.GET)
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
             if form.is_valid():
@@ -1858,7 +1938,7 @@ class CheckoutView(View):
                                       "No default shipping address available")
                         return redirect('showcase:checkout')
                 else:
-                    #change to allow for saved information without posting
+                    # change to allow for saved information without posting
                     print("shipping_address1")
                     shipping_address1 = form.cleaned_data.get(
                         'shipping_address')
@@ -1869,7 +1949,7 @@ class CheckoutView(View):
                     shipping_zip = form.cleaned_data.get('shipping_zip')
 
                     if is_valid_form(
-                        [shipping_address1, shipping_country, shipping_zip]):
+                            [shipping_address1, shipping_country, shipping_zip]):
                         shipping_address = Address(
                             user=self.request.user,
                             street_address=shipping_address1,
@@ -1905,8 +1985,8 @@ class CheckoutView(View):
                             self.request,
                             "Please fill in the required shipping address fields"
                         )
-                        #save = form.data.get('save')
-                        #order.save()
+                        # save = form.data.get('save')
+                        # order.save()
                         return redirect('showcase:checkout')
 
                 use_default_billing = form.cleaned_data.get(
@@ -1945,7 +2025,7 @@ class CheckoutView(View):
                     billing_zip = form.cleaned_data.get('billing_zip')
 
                     if is_valid_form(
-                        [billing_address1, billing_country, billing_zip]):
+                            [billing_address1, billing_country, billing_zip]):
                         billing_address = Address(
                             user=self.request.user,
                             street_address=billing_address1,
@@ -1988,36 +2068,35 @@ class CheckoutView(View):
             return redirect("showcase:order-summary")
 
 
-
 class PaymentView(View):
     def get(self, *args, **kwargs):
-      #request (self) does not seem to be getting user
+        # request (self) does not seem to be getting user
         order = Order.objects.get(user=self.request.user, ordered=False)
         if order.billing_address:
             context = {
                 'order': order,
                 'DISPLAY_COUPON_FORM': False,
-                'STRIPE_PUBLIC_KEY' : settings.STRIPE_PUBLIC_KEY
+                'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY
             }
             userprofile = User.objects.get(username=self.request.user.username)
             if hasattr(userprofile, "one_click_purchasing"):
-              #userprofile is probably not linked to database
-              if userprofile.one_click_purchasing:
-                  # fetch the users card list
-                  cards = stripe.Customer.list_sources(
-                      userprofile.stripe_customer_id,
-                      limit=3,
-                      object='card'
-                  )
-                  card_list = cards['data']
-                  if len(card_list) > 0:
-                      # update the context with the default card
-                      context.update({
-                          'card': card_list[0]
-                      })
+                # userprofile is probably not linked to database
+                if userprofile.one_click_purchasing:
+                    # fetch the users list
+                    cards = stripe.Customer.list_sources(
+                        userprofile.stripe_customer_id,
+                        limit=3,
+                        object='card'
+                    )
+                    card_list = cards['data']
+                    if len(card_list) > 0:
+                        # update the context with the default card
+                        context.update({
+                            'card': card_list[0]
+                        })
             else:
-              userprofile.one_click_purchasing = False
-              return render(self.request, "payment.html", context)
+                userprofile.one_click_purchasing = False
+                return render(self.request, "payment.html", context)
         else:
             messages.warning(
                 self.request, "You have not added a billing address.")
@@ -2030,13 +2109,14 @@ class PaymentView(View):
         if form.is_valid():
             print(form.cleaned_data)
             print(form.cleaned_data.get("expiry"))
+
             token = stripe.Token.create(
-                        card={
-                          "number": form.cleaned_data.get("number"),
-                          "exp_month": form.cleaned_data.get("exp_month"),
-                          "exp_year": form.cleaned_data.get("exp_year"),
-                          "cvc": form.cleaned_data.get("cvc"),
-                        },
+                card={
+                    "number": form.cleaned_data.get("number"),
+                    "exp_month": form.cleaned_data.get("exp_month"),
+                    "exp_year": form.cleaned_data.get("exp_year"),
+                    "cvc": form.cleaned_data.get("cvc"),
+                },
             )
             save = form.cleaned_data.get('save')
             use_default = form.cleaned_data.get('use_default')
@@ -2074,7 +2154,7 @@ class PaymentView(View):
                         amount=amount,  # cents
                         currency="usd",
                         source=token
-                    )   
+                    )
                     print('the payment went through')
 
                 # create the payment
@@ -2095,7 +2175,6 @@ class PaymentView(View):
                 order.payment = payment
                 order.ref_code = create_ref_code()
                 order.save()
-                
 
                 messages.success(self.request, "Your order was successful!")
                 return redirect("showcase:ehome")
@@ -2114,8 +2193,8 @@ class PaymentView(View):
             except stripe.error.InvalidRequestError as e:
                 # Invalid parameters were supplied to Stripe's API
                 print(e)
-                print(12345)    
-                #print ('stripeToken', stripeToken)
+                print(12345)
+                # print ('stripeToken', stripeToken)
                 messages.warning(self.request, "Invalid parameters")
                 return redirect("/ehome")
 
@@ -2143,7 +2222,6 @@ class PaymentView(View):
                     self.request, "A serious error occurred. We have been notifed.")
                 return redirect("/ehome")
 
-            
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
 
@@ -2158,7 +2236,7 @@ def add_to_cart(request, slug):
         item=item,
         user=request.user,
         ordered=False,
-        #id=10,
+        # id=10,
     )
     order_qs = Order.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
@@ -2207,13 +2285,13 @@ def remove_from_cart(request, slug):
             order_item.delete()
             messages.info(
                 request, "Item \"" + order_item.item.title +
-                "\" was removed from your cart")
+                         "\" was removed from your cart")
             return redirect("showcase:order-summary")
         else:
             messages.info(request, "This item is no longer in your cart")
             return redirect("showcase:product", slug=slug)
     else:
-        #add message doesnt have order
+        # add message doesnt have order
         messages.info(request, "You do not seem to have an order currently")
         return redirect("showcase:product", slug=slug)
 
@@ -2243,7 +2321,7 @@ def reduce_quantity_item(request, slug):
             messages.info(request, "This Item is not in your cart")
             return redirect("showcase:order-summary")
     else:
-        #add message doesnt have order
+        # add message doesnt have order
         messages.info(request, "You do not have an Order")
         return redirect("showcase:order-summary")
 
@@ -2254,9 +2332,11 @@ import string
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .forms import CouponForm, RefundForm, PaymentForm
-#from .models import Address, Coupon, Refund, UserProfile
 
-#stripe.api_key = settings.STRIPE_SECRET_KEY
+
+# from .models import Address, Coupon, Refund, UserProfile
+
+# stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def create_ref_code():
@@ -2371,8 +2451,8 @@ class RequestRefundView(View):
                 return redirect("showcase:request-refund")
 
 
-#@login_required
-#def ProfileDetaile(request):
+# @login_required
+# def ProfileDetaile(request):
 #  user = get_object_or_404(User, username=username)
 #  profile = get_object_or_404(Profile, user=user)
 #  aboutme = get_object_or_404(Aboutme, user=user)
@@ -2393,65 +2473,65 @@ class UserEditView(generic.CreateView):
     sucess_url = reverse_lazy('login')
 
 
-#from .models import PublicProfile
-#from .forms import PublicForm
+# from .models import PublicProfile
+# from .forms import PublicForm
 from django.forms.models import inlineformset_factory
 from django.core.exceptions import PermissionDenied
 
-#def edit_user(request, pk):
+# def edit_user(request, pk):
 # querying the User object with pk from url
-#user = User.objects.get(pk=pk)
+# user = User.objects.get(pk=pk)
 
 # prepopulate UserProfileForm with retrieved user values from above.
-#user_form = PublicForm(instance=user)
+# user_form = PublicForm(instance=user)
 
 # The sorcery begins from here, see explanation below
-#ProfileInlineFormset = inlineformset_factory(User, PublicProfile, fields=('website', 'bio', 'phone', 'city', 'country', 'organization'))
-#formset = ProfileInlineFormset(instance=user)
+# ProfileInlineFormset = inlineformset_factory(User, PublicProfile, fields=('website', 'bio', 'phone', 'city', 'country', 'organization'))
+# formset = ProfileInlineFormset(instance=user)
 
-#if request.user.is_authenticated() and request.user.id == user.id:
-#if request.method == "POST":
-#user_form = PublicForm(request.POST, request.FILES, instance=user)
-#formset = ProfileInlineFormset(request.POST, request.FILES, instance=user)
+# if request.user.is_authenticated() and request.user.id == user.id:
+# if request.method == "POST":
+# user_form = PublicForm(request.POST, request.FILES, instance=user)
+# formset = ProfileInlineFormset(request.POST, request.FILES, instance=user)
 
-#if user_form.is_valid():
-#created_user = user_form.save(commit=False)
-#formset = ProfileInlineFormset(request.POST, request.FILES, instance=created_user)
+# if user_form.is_valid():
+# created_user = user_form.save(commit=False)
+# formset = ProfileInlineFormset(request.POST, request.FILES, instance=created_user)
 
-#if formset.is_valid():
-#created_user.save()
-#formset.save()
-#return HttpResponseRedirect('/accounts/profile/')
+# if formset.is_valid():
+# created_user.save()
+# formset.save()
+# return HttpResponseRedirect('/accounts/profile/')
 
-#return render(request, "account/account_update.html", {
-#"noodle": pk,
-#"noodle_form": user_form,
-#"formset": formset,
-#})
-#else:
-#raise PermissionDenied
+# return render(request, "account/account_update.html", {
+# "noodle": pk,
+# "noodle_form": user_form,
+# "formset": formset,
+# })
+# else:
+# raise PermissionDenied
 
-#from .forms import NewUserForm, UserForm, ProfileForm
+# from .forms import NewUserForm, UserForm, ProfileForm
 
-#def userpage(request):
-#if request.method == "POST":
-#user_form = UserForm(request.POST, instance=request.user)
-#profile_form = ProfileForm(request.POST, instance=request.user.profile)
-#if user_form.is_valid():
-#user_form.save()
-#messages.success(request,('Your profile was successfully updated!'))
-#elif profile_form.is_valid():
+# def userpage(request):
+# if request.method == "POST":
+# user_form = UserForm(request.POST, instance=request.user)
+# profile_form = ProfileForm(request.POST, instance=request.user.profile)
+# if user_form.is_valid():
+# user_form.save()
+# messages.success(request,('Your profile was successfully updated!'))
+# elif profile_form.is_valid():
 #    profile_form.save()
 #    messages.success(request,('Your wishlist was successfully updated!'))
-#else:
+# else:
 #    messages.error(request,('Unable to complete request'))
-#return redirect ("showcase:userpage")
-#user_form = UserForm(instance=request.user)
-#profile_form = ProfileForm(instance=request.user.profile)
-#return render(request = request, template_name ="showcase/user.html", context = {"user":request.user,
+# return redirect ("showcase:userpage")
+# user_form = UserForm(instance=request.user)
+# profile_form = ProfileForm(instance=request.user.profile)
+# return render(request = request, template_name ="showcase/user.html", context = {"user":request.user,
 #	"user_form": user_form, "profile_form": profile_form })
 
-#@def products(request):
+# @def products(request):
 #	if request.method == "POST":
 #		product_id = request.POST.get("product_pk")
 #		product = Product.objects.get(id = product_id)
@@ -2464,10 +2544,10 @@ from django.core.exceptions import PermissionDenied
 #	page_obj = paginator.get_page(page_number)
 #	return render(request = request, template_name="showcase/products.html", context = { "page_obj":page_obj})
 
-#from .models import ExtendUser
+# from .models import ExtendUser
 # Create your views here.
 
-#def phome(request):
+# def phome(request):
 #    data = request.user
 #    return render(request,'showcase/profile.html',{'data':data})
 
@@ -2475,10 +2555,12 @@ from .forms import (EditProfileForm)
 
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
-#from django.contrib.auth.decorators import login_required
 
-#def index1(request):
-#return HttpResponse('Welcome to my Registration System')
+
+# from django.contrib.auth.decorators import login_required
+
+# def index1(request):
+# return HttpResponse('Welcome to my Registration System')
 #    numbers = [1,2,3,4,5]
 #    name = 'apoorva'
 
@@ -2539,9 +2621,6 @@ def register(request):
         return render(request, 'registration/regform.html', args)
 
 
-
-
-
 @allow_guest_user
 def my_view(request):
     assert request.user.is_authenticated
@@ -2554,12 +2633,10 @@ stripe.api_key = "sk_test_51JSB5LH4sbqF1dn75jWAc2wiQvhKq0HfNkQXthKPYmycweqQQkmyT
 
 
 def donate(request):
-
     return render(request, 'donate.html')
 
 
 def charge(request):
-
     if request.method == 'POST':
         print('Data:', request.POST)
 
@@ -2568,7 +2645,7 @@ def charge(request):
         customer = stripe.Customer.create(email=request.POST['email'],
                                           name=request.POST['nickname'],
                                           source=request.POST['stripeToken']
-                                          #stripetoken not defined
+                                          # stripetoken not defined
                                           )
 
         charge = stripe.Charge.create(customer=customer,
@@ -2597,19 +2674,13 @@ def hello_guest(request):
 
 from guest_user.decorators import guest_user_required
 
-
 from django.template.response import TemplateResponse
-from django.views.generic.edit import FormView
+
 
 @guest_user_required
 def why_convert(request):
     """Show reasons why to convert, only for guest users."""
     return TemplateResponse("reasons_to_convert.html")
-
-@login_required
-class SettingsView(RegularUserRequiredMixin, FormView):
-    """Only allow registered users to change their settings."""
-    form_class = SettingsForm
 
 
 from django.dispatch import receiver

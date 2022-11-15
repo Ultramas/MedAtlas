@@ -187,12 +187,12 @@ LOGOUT_REDIRECT_URL = '/'
 
 # config/settings.py
 #CRISPY_TEMPLATE_PACK = 'bootstrap4'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 #EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' # new
 DEFAULT_FROM_EMAIL = 'intellexcompany1@gmail.com'
-EMAIL_HOST = 'smtp.sendgrid.net'  # new
-EMAIL_HOST_USER = 'apikey'  # new
-EMAIL_HOST_PASSWORD = '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'  # new
+EMAIL_HOST = 'smtp.gmail.com'  # new
+EMAIL_HOST_USER = 'intellexcompany1@gmail.com'  # new
+EMAIL_HOST_PASSWORD = 'Ultra123456!'  # new
 EMAIL_PORT = 587  # new
 EMAIL_USE_TLS = True  # new
 

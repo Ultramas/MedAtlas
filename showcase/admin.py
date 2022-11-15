@@ -20,7 +20,7 @@ from .models import Room, Message
 #from .models import ProfileDetails
 from .models import UserProfile
 from .models import UserProfile2
-from .models import Settings
+from .models import SettingsModel
 from .models import ConvertBackgroundImage
 from .models import BackgroundImage
 #from .models import BackgroundImage2a
@@ -46,12 +46,14 @@ from .models import DonorBackgroundImage
 from .models import ContentBackgroundImage
 from .models import PartnerBackgroundImage
 from .models import WhyBackgroundImage
+from .models import SettingsBackgroundImage
 from .models import FaviconBase
 from .models import BackgroundImageBase
 from .models import TextBase
 from .models import Titled
 from .models import NavBar
 from .models import NavBarHeader
+from .models import ImageCarousel
 from .models import TextField
 from .models import TextField2
 from .models import TextField3
@@ -171,7 +173,8 @@ admin.site.register(StaffProfile)
 admin.site.register(Event)
 admin.site.register(Profile)
 admin.site.register(Patreon)
-admin.site.register(Settings)
+admin.site.register(SettingsModel)
+admin.site.register(SettingsBackgroundImage)
 admin.site.register(ConvertBackgroundImage)
 admin.site.register(NavBar)
 admin.site.register(NavBarHeader)
@@ -205,6 +208,7 @@ admin.site.register(WhyBackgroundImage)
 admin.site.register(FaviconBase)
 admin.site.register(BackgroundImageBase)
 admin.site.register(TextBase)
+admin.site.register(ImageCarousel)
 admin.site.register(Titled)
 admin.site.register(TextField)
 admin.site.register(TextField2)

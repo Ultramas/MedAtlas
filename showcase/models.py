@@ -510,7 +510,7 @@ class BackgroundImageBase(models.Model):
     cover = models.ImageField(upload_to='images/')
     page = models.TextField(verbose_name="Page Name")
     url = models.URLField(verbose_name="Page URL")
-    position = models.IntegerField(verbose_name="Positioning of Image")
+    position = models.IntegerField(verbose_name="Image Position")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -619,7 +619,7 @@ class NavBarHeader(models.Model):
         verbose_name_plural = "Navigational Bar Headers"
 
 
-class Settings(models.Model):
+class SettingsModel(models.Model):
     username = models.CharField(help_text='Your username', max_length=200)
     password = models.CharField(help_text='Your password', max_length=200)
     coupons = models.BooleanField(verbose_name="Send me coupons", default=True, blank=True, null=True,
@@ -1755,6 +1755,16 @@ class ContributorBackgroundImage(models.Model):
         verbose_name = "Contributors Background Image"
         verbose_name_plural = "Contributors Background Images"
 
+class SettingsBackgroundImage(models.Model):
+    title = models.TextField()
+    cover = models.ImageField(upload_to='images/')
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Settings Background Image"
+        verbose_name_plural = "Settings Background Images"
 
 class DonateIcon(models.Model):
     row = models.IntegerField()
@@ -2656,6 +2666,21 @@ class CheckoutAddress(models.Model):
     class Meta:
         verbose_name_plural = 'Checkout Addresses'
 
+class ImageCarousel(models.Model):
+    title = models.CharField(max_length=100, help_text='Your name goes here.')
+    caption = models.TextField(help_text='Caption for the image.')
+    image = models.ImageField(help_text='Link a URL for your profile (scales to your picture`s dimensions.)')
+    position = models.IntegerField(help_text='Positioning of image.')
+    page = models.TextField(verbose_name="Page Name")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')))
+
+    class Meta:
+        verbose_name = "Image Carousel Post"
+        verbose_name_plural = "Image Carousel Posts"
 
 from django.utils import timezone
 

@@ -1,9 +1,8 @@
  {% load static %}
-<!DOCTYPE html>
-<html>            
+ <html>
   <head>
-    <meta charset="utf-8">         
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >   
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >
     <title>{% block title %}Quantumism{% endblock title %}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
 
@@ -14,65 +13,67 @@
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
- 
-   
-  </head>  
+
+
+  </head>
+   {% if user.is_authenticated %}
+
   <body>
        <header>
 
   <div class="column three mobile-twelve section_header_logo vertical-align-middle">
- <a class = "logo" href="/"><img class = "imageicon"  src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6khv+EqxJLmRfFwXs1M3EMoAJtliUohPZi8...oz " width="145vh" 
+ <a class = "logo" href="/"><img class = "imageicon"  src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6khv+EqxJLmRfFwXs1M3EMoAJtliUohPZi8...oz " width="145vh"
      height="100vh"></a>
- </div>        
+ </div>
 
-    
+
      </header>
     <div class = "navbarx">
 
     <ul>
       {% for column in Header %}
-        <div class="dropdown">     
+        <div class="dropdown">
           <a href="#{{ column.section }}" class="glass"> {{ column.text }}</a>
           <div class="dropdown-content">
           {% for row in DropDown %}
-        
+
             {% if row.row == column.row %}
-                                                
+
                 {% if row.opennew == True %}
                     <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
                 {% else %}
                     <a href="{{ row.url }}">{{ row.text }}</a>
                 {% endif %}
             {% endif %}
-          
+
           {% endfor %}
-          </div>        
+          </div>
         </div>
       {% endfor %}
-        <!--<div class="dropdown2">      
+        <!--<div class="dropdown2">
         <a href="#leaders" class="glass">
           {% for BaseHomeText201 in BaseHomeTexted201 %}
     {{ BaseHomeText201.text }}
   {% endfor %}</a>
-          <div class="dropdown-content">    
+          <div class="dropdown-content">
       <a href="{% url 'showcase:billets'%}">
         {% for BaseDropdown201 in Texts201 %}
     {{ BaseDropdown201.text }}
   {% endfor %}</a>
-      <a href="{% url 'showcase:about'%}">        
+      <a href="{% url 'showcase:about'%}">
         {% for BaseDropdown202 in Texts202 %}
     {{ BaseDropdown202.text }}
-  {% endfor %}</a>    
-      <a href="{% url 'showcase:faq'%}">        
+  {% endfor %}</a>
+      <a href="{% url 'showcase:faq'%}">
         {% for BaseDropdown203 in Texts203 %}
     {{ BaseDropdown203.text }}
-  {% endfor %}</a>   
-      <a href="{% url 'showcase:staffranks'%}">        
+  {% endfor %}</a>
+      <a href="{% url 'showcase:staffranks'%}">
         {% for BaseDropdown204 in Texts204 %}
     {{ BaseDropdown204.text }}
-  {% endfor %}</a>  
-      <!--<a href="{% url 'showcase:originalmembers'%}">Original Members</a> -- 
-      <a href="{% url 'showcase:information'%}">         
+  {% endfor %}</a>
+      <!--<a href="{% url 'showcase:originalmembers'%}">Original Members</a> --
+      <a href="{% url 'showcase:information'%}">
         {% for BaseDropdown205 in Texts205 %}
     {{ BaseDropdown205.text }}
   {% endfor %}</a>
@@ -81,9 +82,9 @@
     {{ BaseDropdown206.text }}
   {% endfor %}</a>
         </div>
-      </div>    
+      </div>
 
-        <div class="dropdown3">      
+        <div class="dropdown3">
         <a href="#innovation" class="glass">
           {% for BaseHomeText301 in BaseHomeTexted301 %}
     {{ BaseHomeText301.text }}
@@ -93,7 +94,7 @@
       <a href="{% url 'showcase:post_edit'%}">
         {% for BaseDropdown301 in Texts301 %}
     {{ BaseDropdown301.text }}
-  {% endfor %}</a>  
+  {% endfor %}</a>
       <a href="{% url 'showcase:newsfeed'%}">
         {% for BaseDropdown302 in Texts302 %}
     {{ BaseDropdown302.text }}
@@ -122,24 +123,24 @@
         {% for BaseDropdown308 in Texts308 %}
     {{ BaseDropdown308.text }}
   {% endfor %}</a>
-            
+
         </div>
       </div>
- 
-        <div class="dropdown4">      
+
+        <div class="dropdown4">
         <a href="#difference" class="glass">
           {% for BaseHomeText401 in BaseHomeTexted401 %}
     {{ BaseHomeText401.text }}
   {% endfor %}</a>
-          <div class="dropdown-content">    
-       <a href="{% url 'showcase:home'%}">        
+          <div class="dropdown-content">
+       <a href="{% url 'showcase:home'%}">
          {% for BaseDropdown401 in Texts401 %}
     {{ BaseDropdown401.text }}
   {% endfor %}</a>
-      <a href="{% url 'showcase:rules'%}">        
+      <a href="{% url 'showcase:rules'%}">
         {% for BaseDropdown402 in Texts402 %}
     {{ BaseDropdown402.text }}
-  {% endfor %}</a> 
+  {% endfor %}</a>
       <a href="{% url 'showcase:punishapps'%}">
         {% for BaseDropdown403 in Texts403 %}
     {{ BaseDropdown403.text }}
@@ -151,11 +152,11 @@
       <a href="{% url 'showcase:issues'%}">
         {% for BaseDropdown405 in Texts405 %}
     {{ BaseDropdown405.text }}
-  {% endfor %}</a>  
+  {% endfor %}</a>
       <a href="{% url 'showcase:support'%}">
         {% for BaseDropdown406 in Texts406 %}
     {{ BaseDropdown406.text }}
-  {% endfor %}</a> 
+  {% endfor %}</a>
         </div>
       </div>
 
@@ -169,7 +170,7 @@
       <a href="{% url 'showcase:tag'%}">
         {% for BaseDropdown501 in Texts501 %}
     {{ BaseDropdown501.text }}
-  {% endfor %}</a> 
+  {% endfor %}</a>
       <a href="{% url 'showcase:staff' %}">
         {% for BaseDropdown502 in Texts502 %}
     {{ BaseDropdown502.text }}
@@ -179,10 +180,10 @@
     {{ BaseDropdown503.text }}
   {% endfor %}
       </a>
-      <a href="{% url 'showcase:staffapplications'%}">        
+      <a href="{% url 'showcase:staffapplications'%}">
         {% for BaseDropdown504 in Texts504 %}
     {{ BaseDropdown504.text }}
-  {% endfor %}</a> 
+  {% endfor %}</a>
       <a href="{% url 'showcase:morecontent'%}">
         {% for BaseDropdown505 in Texts505 %}
     {{ BaseDropdown505.text }}
@@ -194,11 +195,11 @@
       <a href="{% url 'showcase:donors' %}">
         {% for BaseDropdown507 in Texts507 %}
     {{ BaseDropdown507.text }}
-  {% endfor %}</a>  
+  {% endfor %}</a>
       <a href="{% url 'showcase:lordsmonkey' %}">
         {% for BaseDropdown508 in Texts508 %}
     {{ BaseDropdown508.text }}
-  {% endfor %}</a>    
+  {% endfor %}</a>
          </div>
       </div>
 
@@ -209,7 +210,7 @@
     {{ BaseHomeText601.text }}
   {% endfor %}</a>
         <div class="dropdown-content">
-      
+
             <!--<a href="{% url 'showcase:boosts'%}">〖𐌑𐌂〗Boosts</a>--
       <a href="{% url 'showcase:whydonate'%}">
         {% for BaseDropdown601 in Texts601 %}
@@ -231,16 +232,16 @@
 
 
       </div>
-    </ul>   
+    </ul>
 
   </div>
-       
+
     </div>
          </div>
       </div>
     </ul>
 
-    
+
      <nav>
      <div class="bell"></div>
      <div onclick='navToggle(this)'  class="hamburger">
@@ -248,8 +249,8 @@
        <div class="bun"></div>
        <div class="bun"></div>
      </div>
-     
-<h2 class = "navtext">Quantumism</h2>  
+
+<h2 class = "navtext">Quantumism</h2>
     <div class="navItem"><a href = "{% url 'showcase:index' %}">Home</a></div>
      <div class="navItem2"><a href = "{% url 'showcase:about' %}">About Us</a></div>
      <div class="navItem3"><a href = "{% url 'showcase:servers' %}" target="_blank">Discord Servers</a></li></div>
@@ -257,7 +258,7 @@
      <div class="navItem4"><a href = "{% url 'showcase:admin'%}" target="_blank">Administration</a></li></div>
      <div class="navItem5"><a href="https://discord.com/channels/813761567304843315/813779502190297108" target="_blank">Quantum Discord</a></li></div>
      <div class="navItem8"><a href = "{% url 'showcase:rules' %}">Rules</a></li></div>
-     <div class="navItem9"><a href = "{% url 'showcase:showcase' %}">VIP Only Area</a></div>
+     <div class="navItem9"><a href = "{% url 'showcase:showcase' %}">Member Area</a></div>
      <div class="navItem11"><a href = "{% url 'logout' %}">Logout</a></div>
 <br>
 <br>
@@ -276,7 +277,270 @@
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
-    
+
+       {% else %}
+
+
+  <body>
+       <header>
+
+  <div class="column three mobile-twelve section_header_logo vertical-align-middle">
+ <a class = "logo" href="/"><img class = "imageicon"  src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6khv+EqxJLmRfFwXs1M3EMoAJtliUohPZi8...oz " width="145vh"
+     height="100vh"></a>
+ </div>
+
+
+     </header>
+    <div class = "navbarx">
+
+    <ul>
+      {% for column in Header %}
+        <div class="dropdown">
+          <a href="#{{ column.section }}" class="glass"> {{ column.text }}</a>
+          <div class="dropdown-content">
+          {% for row in DropDown %}
+
+            {% if row.row == column.row %}
+
+                {% if row.opennew == True %}
+                    <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
+                {% else %}
+                    <a href="{{ row.url }}">{{ row.text }}</a>
+                {% endif %}
+            {% endif %}
+
+          {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+        <!--<div class="dropdown2">
+        <a href="#leaders" class="glass">
+          {% for BaseHomeText201 in BaseHomeTexted201 %}
+    {{ BaseHomeText201.text }}
+  {% endfor %}</a>
+          <div class="dropdown-content">
+      <a href="{% url 'showcase:billets'%}">
+        {% for BaseDropdown201 in Texts201 %}
+    {{ BaseDropdown201.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:about'%}">
+        {% for BaseDropdown202 in Texts202 %}
+    {{ BaseDropdown202.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:faq'%}">
+        {% for BaseDropdown203 in Texts203 %}
+    {{ BaseDropdown203.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:staffranks'%}">
+        {% for BaseDropdown204 in Texts204 %}
+    {{ BaseDropdown204.text }}
+  {% endfor %}</a>
+      <!--<a href="{% url 'showcase:originalmembers'%}">Original Members</a> --
+      <a href="{% url 'showcase:information'%}">
+        {% for BaseDropdown205 in Texts205 %}
+    {{ BaseDropdown205.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:megacoins' %}">
+        {% for BaseDropdown206 in Texts206 %}
+    {{ BaseDropdown206.text }}
+  {% endfor %}</a>
+        </div>
+      </div>
+
+        <div class="dropdown3">
+        <a href="#innovation" class="glass">
+          {% for BaseHomeText301 in BaseHomeTexted301 %}
+    {{ BaseHomeText301.text }}
+  {% endfor %}</a>
+          <div class="dropdown-content">
+      <!--<a href="{% url 'showcase:perks'%}">Member Profiles</a>--
+      <a href="{% url 'showcase:post_edit'%}">
+        {% for BaseDropdown301 in Texts301 %}
+    {{ BaseDropdown301.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:newsfeed'%}">
+        {% for BaseDropdown302 in Texts302 %}
+    {{ BaseDropdown302.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:events'%}">
+        {% for BaseDropdown303 in Texts303 %}
+    {{ BaseDropdown303.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:voting'%}">
+        {% for BaseDropdown304 in Texts304 %}
+    {{ BaseDropdown304.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:vote'%}">
+        {% for BaseDropdown305 in Texts305 %}
+    {{ BaseDropdown305.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:users'%}">
+        {% for BaseDropdown306 in Texts306 %}
+    {{ BaseDropdown306.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:share'%}">
+        {% for BaseDropdown307 in Texts307 %}
+    {{ BaseDropdown307.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:perks'%}">
+        {% for BaseDropdown308 in Texts308 %}
+    {{ BaseDropdown308.text }}
+  {% endfor %}</a>
+
+        </div>
+      </div>
+
+        <div class="dropdown4">
+        <a href="#difference" class="glass">
+          {% for BaseHomeText401 in BaseHomeTexted401 %}
+    {{ BaseHomeText401.text }}
+  {% endfor %}</a>
+          <div class="dropdown-content">
+       <a href="{% url 'showcase:home'%}">
+         {% for BaseDropdown401 in Texts401 %}
+    {{ BaseDropdown401.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:rules'%}">
+        {% for BaseDropdown402 in Texts402 %}
+    {{ BaseDropdown402.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:punishapps'%}">
+        {% for BaseDropdown403 in Texts403 %}
+    {{ BaseDropdown403.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:banappeals'%}">
+        {% for BaseDropdown404 in Texts404 %}
+    {{ BaseDropdown404.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:issues'%}">
+        {% for BaseDropdown405 in Texts405 %}
+    {{ BaseDropdown405.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:support'%}">
+        {% for BaseDropdown406 in Texts406 %}
+    {{ BaseDropdown406.text }}
+  {% endfor %}</a>
+        </div>
+      </div>
+
+         <div class="dropdown5">
+        <a href="#difference" class="glass">
+        {% for BaseHomeText501 in BaseHomeTexted501 %}
+    {{ BaseHomeText501.text }}
+  {% endfor %}</a>
+        <div class="dropdown-content">
+      <!--<a href="{% url 'showcase:email'%}">Contact Us</a>--
+      <a href="{% url 'showcase:tag'%}">
+        {% for BaseDropdown501 in Texts501 %}
+    {{ BaseDropdown501.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:staff' %}">
+        {% for BaseDropdown502 in Texts502 %}
+    {{ BaseDropdown502.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:admin' %}" target="_blank">
+        {% for BaseDropdown503 in Texts503 %}
+    {{ BaseDropdown503.text }}
+  {% endfor %}
+      </a>
+      <a href="{% url 'showcase:staffapplications'%}">
+        {% for BaseDropdown504 in Texts504 %}
+    {{ BaseDropdown504.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:morecontent'%}">
+        {% for BaseDropdown505 in Texts505 %}
+    {{ BaseDropdown505.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:contributors' %}">
+        {% for BaseDropdown506 in Texts506 %}
+    {{ BaseDropdown506.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:donors' %}">
+        {% for BaseDropdown507 in Texts507 %}
+    {{ BaseDropdown507.text }}
+  {% endfor %}</a>
+      <a href="{% url 'showcase:lordsmonkey' %}">
+        {% for BaseDropdown508 in Texts508 %}
+    {{ BaseDropdown508.text }}
+  {% endfor %}</a>
+         </div>
+      </div>
+
+
+         <div class="dropdown">
+        <a href="#difference" class="glass">
+          {% for BaseHomeText601 in BaseHomeTexted601 %}
+    {{ BaseHomeText601.text }}
+  {% endfor %}</a>
+        <div class="dropdown-content">
+
+            <!--<a href="{% url 'showcase:boosts'%}">〖𐌑𐌂〗Boosts</a>--
+      <a href="{% url 'showcase:whydonate'%}">
+        {% for BaseDropdown601 in Texts601 %}
+    {{ BaseDropdown601.text }}
+  {% endfor %}</a>
+      <!--<a href="{% url 'showcase:invite'%}">〖𐌑𐌂〗Invites Leaderboard</a>--
+      <a href="{% url 'showcase:donate' %}" target="_blank">
+        {% for BaseDropdown602 in Texts602 %}
+    {{ BaseDropdown602.text }}
+  {% endfor %}
+      </a>
+      <a href="{% url 'showcase:partners'%}">
+        {% for BaseDropdown603 in Texts603 %}
+    {{ BaseDropdown603.text }}
+  {% endfor %}</a>
+
+         </div>  -->
+      </div>
+
+
+      </div>
+    </ul>
+
+  </div>
+
+    </div>
+         </div>
+      </div>
+    </ul>
+
+
+     <nav>
+     <div class="bell"></div>
+     <div onclick='navToggle(this)'  class="hamburger">
+       <div class="bun"></div>
+       <div class="bun"></div>
+       <div class="bun"></div>
+     </div>
+
+<h2 class = "navtext">Quantumism</h2>
+    <div class="navItem"><a href = "{% url 'showcase:index' %}">Home</a></div>
+     <div class="navItem2"><a href = "{% url 'showcase:about' %}">About Us</a></div>
+     <div class="navItem3"><a href = "{% url 'showcase:servers' %}" target="_blank">Discord Servers</a></li></div>
+     <!--<div class="navItem10"><a href = "{% url 'showcase:perks' %}">Member Perks</a></li></div>-->
+     <div class="navItem4"><a href = "{% url 'showcase:admin'%}" target="_blank">Administration</a></li></div>
+     <div class="navItem5"><a href="https://discord.com/channels/813761567304843315/813779502190297108" target="_blank">Quantum Discord</a></li></div>
+     <div class="navItem8"><a href = "{% url 'showcase:rules' %}">Rules</a></li></div>
+     <div class="navItem9"><a href = "{% url 'showcase:showcase' %}">VIP Only Area</a></div>
+<br>
+<br>
+
+<div class="metaclass1">
+    <a href="https://discord.gg/g43uGbURUz">
+         <img alt="Qries" src="../static/css/images/MC.png"
+         width="280" height="150">
+      </a>
+
+          </div>
+    </div>
+</nav>
+
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+
+       {% endif %}
     {% block content %}
     {% endblock content %}
 
