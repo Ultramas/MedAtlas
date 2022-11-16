@@ -504,6 +504,22 @@ class FaviconBase(models.Model):
         verbose_name = "Favicon"
         verbose_name_plural = "Favicons"
 
+class LogoBase(models.Model):
+    title = models.TextField(verbose_name="Background Title")
+    cover = models.ImageField(upload_to='images/')
+    page = models.TextField(verbose_name="Page Name")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')))
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Logo"
+        verbose_name_plural = "Logo"
 
 class BackgroundImageBase(models.Model):
     backgroundtitle = models.TextField(verbose_name="Background Title")

@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "social_django",
     "guest_user.contrib.allauth",
     'changelogs',
+    'favicon',
     #'django.chatbot',
     #'chat',
 ]
@@ -217,6 +218,9 @@ warnings.filterwarnings(
 
 CSRF_TRUSTED_ORIGINS = [
     'http://0.0.0.0:3000'
+    'http://0.0.0.0:8000'
+    'http://127.0.0.1:8000/'
+
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

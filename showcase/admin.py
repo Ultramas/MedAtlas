@@ -48,6 +48,7 @@ from .models import PartnerBackgroundImage
 from .models import WhyBackgroundImage
 from .models import SettingsBackgroundImage
 from .models import FaviconBase
+from .models import LogoBase
 from .models import BackgroundImageBase
 from .models import TextBase
 from .models import Titled
@@ -206,6 +207,7 @@ admin.site.register(ContentBackgroundImage)
 admin.site.register(PartnerBackgroundImage)
 admin.site.register(WhyBackgroundImage)
 admin.site.register(FaviconBase)
+admin.site.register(LogoBase)
 admin.site.register(BackgroundImageBase)
 admin.site.register(TextBase)
 admin.site.register(ImageCarousel)

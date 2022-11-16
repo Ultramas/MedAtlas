@@ -53,6 +53,7 @@ from .models import ConvertBackgroundImage
 from .models import SettingsBackgroundImage
 from .models import BackgroundImageBase
 from .models import TextBase
+from .models import LogoBase
 from .models import RuleTextField9
 from .models import RuleTextField10
 from .models import RuleTextField11
@@ -199,6 +200,7 @@ from .forms import AboutTextFielde6
 from .forms import AboutTextFielde7
 from .forms import AboutTextFielde8
 from .forms import BaseCopyrightTextField
+from .forms import ContactForme
 # from .forms import OrderItems
 from django.contrib import messages
 from django.contrib.auth import authenticate
@@ -266,8 +268,21 @@ def my_form(request):
     return render(request, 'cv-form.html', {'form': form})
 
 
+class LogoView(ListView):
+    model = LogoBase
+
+    # ought to span multiple pages, not simply index
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Logo'] = LogoBase.objects.filter(
+            'page')
+        return context
+
+
 class BaseView(ListView):
     template_name = "base.html"
+    model = LogoBase
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -275,11 +290,14 @@ class BaseView(ListView):
             is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(
             is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name,
+            is_active=1)
         return context
 
 
 class EBaseView(ListView):
     template_name = "ebase.html"
+    model = LogoBase
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -287,11 +305,14 @@ class EBaseView(ListView):
             is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(
             is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name,
+            is_active=1)
         return context
 
 
 class BlogBaseView(ListView):
     template_name = "blogbase.html"
+    model = LogoBase
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -299,11 +320,14 @@ class BlogBaseView(ListView):
             is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(
             is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name,
+            is_active=1)
         return context
 
 
 class DonateBaseView(ListView):
     model = "donatebase.html"
+    model = LogoBase
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -311,11 +335,14 @@ class DonateBaseView(ListView):
             is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(
             is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name,
+            is_active=1)
         return context
 
 
 class MemberBaseView(ListView):
     template_name = "memberbase.html"
+    model = LogoBase
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -323,6 +350,8 @@ class MemberBaseView(ListView):
             is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(
             is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name,
+            is_active=1)
         return context
 
 
@@ -1349,25 +1378,17 @@ class PostingView(FormMixin, ListView):
         context['Post'] = Post.objects.all()
         return context
 
-    @login_required
-    def post_new(self, request, *args, **kwargs):
-        if (request.method == "POST"):
-            form = PostForm(request.POST)
-            if (form.is_valid()):
-                post = form.save(commit=False)
-                post.save()
-                return redirect('showcase:showcase')
-                messages.success(request, 'Form submitted successfully.')
-            else:
-                messages.error(request, "Form submission invalid")
-                return render(request, "post_edit.html", {'form': form})
+    def post(self, request, *args, **kwargs):
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+            return redirect('showcase:showcase')
+            messages.success(request, 'Form submitted successfully.')
         else:
-            form = PostForm()
+            messages.error(request, "Form submission invalid")
             return render(request, "post_edit.html", {'form': form})
-            messages.error(
-                request,
-                'Form submission failed to register, please try again.')
-            messages.error(request, form.errors)
+
 
 
 """@login_required
@@ -2684,3 +2705,17 @@ def why_convert(request):
 
 
 from django.dispatch import receiver
+
+
+class ContactView(FormView):
+    template_name = 'contact/contact.html'
+    form_class = ContactForm
+    success_url = reverse_lazy('contact:success')
+
+    def form_valid(self, form):
+        # Calls the custom send method
+        form.send()
+        return super().form_valid(form)
+
+class ContactSuccessView(TemplateView):
+    template_name = 'showcase/success.html'

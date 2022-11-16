@@ -3,9 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >
-    <title>{% block title %}Quantumism{% endblock title %}</title>
+    <title>Quantumism</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -22,8 +21,10 @@
        <header>
 
   <div class="column three mobile-twelve section_header_logo vertical-align-middle">
- <a class = "logo" href="/"><img class = "imageicon"  src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6khv+EqxJLmRfFwXs1M3EMoAJtliUohPZi8...oz " width="145vh"
+      {% for BaseView in Logo %}
+ <a class = "logo" href="/"><img class = "imageicon"  src="{{BaseView.cover}} " width="145vh"
      height="100vh"></a>
+      {% endfor %}
  </div>
 
 
@@ -280,7 +281,7 @@
 
        {% else %}
 
-
+  </body>
   <body>
        <header>
 
