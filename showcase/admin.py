@@ -47,6 +47,7 @@ from .models import ContentBackgroundImage
 from .models import PartnerBackgroundImage
 from .models import WhyBackgroundImage
 from .models import SettingsBackgroundImage
+from .models import PerksBackgroundImage
 from .models import FaviconBase
 from .models import LogoBase
 from .models import BackgroundImageBase
@@ -135,6 +136,7 @@ from .models import InformationTextField9
 from .models import RuleTextField
 from .models import RuleTextField2
 from .models import BaseCopyrightTextField
+from .models import AdvertisementBase
 from .models import DonateIcon
 from .models import Coupon
 #from  django.contrib.auth.models import BackgroundImages
@@ -206,6 +208,7 @@ admin.site.register(DonorBackgroundImage)
 admin.site.register(ContentBackgroundImage)
 admin.site.register(PartnerBackgroundImage)
 admin.site.register(WhyBackgroundImage)
+admin.site.register(PerksBackgroundImage)
 admin.site.register(FaviconBase)
 admin.site.register(LogoBase)
 admin.site.register(BackgroundImageBase)
@@ -292,6 +295,7 @@ admin.site.register(InformationTextField9)
 admin.site.register(RuleTextField)
 admin.site.register(RuleTextField2)
 admin.site.register(BaseCopyrightTextField)
+admin.site.register(AdvertisementBase)
 admin.site.register(DonateIcon)
 #admin.site.register(BackgroundImages)
 admin.site.register(Coupon)

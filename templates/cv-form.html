@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
-{% block title %} Sign Up {% endblock title %} 
+{% block title %} Sign Up {% endblock title %}
 {% block content %}
 
 
 <div class="containerc">
-  
+
 <br>
 <br>
-<br>    
+<br>
 <br>
 <br>
 <br>
@@ -17,15 +17,15 @@
 <br>
 <br>
 
-    <form method="POST" class="signit">  
+    <form method="POST" class="signit">
          <div class="signupe">
         <legend>Sign Up Form</legend>
          </div>
         {% csrf_token %}
         {{ form.as_p }}
-        <button class "buttei" type="submit" class="btn btn-primary">Submit</button>
+        <button class = "buttei" type="submit" class="btn btn-primary">Submit</button>
     </form>
-</div>    
+</div>
 
 
 {% endblock content %}

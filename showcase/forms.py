@@ -69,16 +69,10 @@ users = User.objects.filter()
 
 
 class SignUpForm(UserCreationForm):
-    username = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder':
-            '150 Characters or fewer. Letters, digits and @/./+/-/_ only.'
-        }))
+    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': '150 Characters or fewer. Letters, digits and @/./+/-/_ only.'}))
     email = forms.EmailField(widget=forms.TextInput(attrs={'placeholder': 'Your email address'}))
-    password1 = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Your password must be at least 8 characters.'}), label = 'Password')
-    password2 = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Please confirm your password.'}), label = 'Confirm Password')
+    password1 = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Your password must be at least 8 characters.'}), label = 'Password')
+    password2 = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Please confirm your password.'}), label = 'Confirm Password')
    
 
     class Meta:
@@ -94,8 +88,7 @@ CONTACT_PREFERENCE = [
 
 
 class ContactForm(forms.ModelForm):
-    prefered_contact = forms.MultipleChoiceField(
-        choices=CONTACT_PREFERENCE, widget=forms.CheckboxSelectMultiple())
+    prefered_contact = forms.MultipleChoiceField(choices=CONTACT_PREFERENCE, widget=forms.CheckboxSelectMultiple())
 
 
     class Meta:
@@ -104,14 +97,9 @@ class ContactForm(forms.ModelForm):
 
 
 class MyForm(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
-    catagory = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'Choose a catagory you want your idea to affect.'
-        }))    
-    image = forms.ImageField(widget=forms.TextInput(
-        attrs={'placeholder': 'Link an image for your post.'}))
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
+    catagory = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Choose a catagory you want your idea to affect.'}))
+    image = forms.ImageField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = MyModel
@@ -119,13 +107,9 @@ class MyForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'e.g. Liam Mannara'}))
-    catagory = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Choose a catagory you want your idea to affect.'
-        }))
-    image = forms.URLField(widget=forms.TextInput(
-        attrs={'placeholder': 'Link an image for your post.'}))
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
+    catagory = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Choose a catagory you want your idea to affect.'}))
+    image = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = ShowcasePost
@@ -137,14 +121,9 @@ class PostForm(forms.ModelForm):
 
 
 class Postit(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'e.g. Liam Mannara'}))
-    catagory = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'Choose a catagory you want your idea to affect.'
-        }))
-    image = forms.URLField(widget=forms.TextInput(
-        attrs={'placeholder': 'Link an image for your post.'}))
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
+    catagory = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Choose a catagory you want your idea to affect.'}))
+    image = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = Post    
@@ -152,14 +131,9 @@ class Postit(forms.ModelForm):
 
 
 class PosteForm(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'e.g. Liam Mannara'}))
-    catagory = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'Choose a catagory you want your idea to affect.'
-        }))
-    image = forms.URLField(widget=forms.TextInput(
-        attrs={'placeholder': 'Link an image url for your post.'}))
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
+    catagory = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Choose a catagory you want your idea to affect.'}))
+    image = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Link an image url for your post.'}))
 
     class Meta:
         model = Poste
@@ -180,19 +154,14 @@ class ProfileForm(forms.ModelForm):
             ]
 
 class StaffJoin(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'e.g. Lime#6510'}))
-    role = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'What role are you applying for?'
-        }))
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Lime#6510'}))
+    role = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'What role are you applying for?'}))
     I_have_been_in_MC_for_at_least_2_months = forms.BooleanField()
     I_have_been_in_a_previous_role_for_at_least_1_month = forms.BooleanField()
     I_can_attend_at_least_half_of_the_staff_meetings = forms.BooleanField()
     I_have_no_strikes_on_my_account_currently = forms.BooleanField()
     Why_do_you_want_to_apply_for_staff = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Tell us why you want to be a MegaClan Staff Member. Be descriptive.'}))
-    How_do_you_think_you_can_make_MC_better = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Tell us what you will do to make MC better as a staff member.'}))
+    How_do_you_think_you_can_make_MC_better = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Tell us what you will do to make MC better as a staff member.'}))
     I_confirm_that_I_have_read_all_the_staff_requiernments_and_meet_all_of_them = forms.BooleanField()  
 
     class Meta:
@@ -202,10 +171,7 @@ class StaffJoin(forms.ModelForm):
 
 class Server_Partner(forms.ModelForm):
   name = forms.CharField(max_length = 100, help_text='Your server name goes here.')
-  catagory = forms.CharField(widget=forms.TextInput(
-        attrs={
-           'placeholder': 'Pick a catagory you feel your server represents (gaming, community, etc).'
-        }))
+  catagory = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Pick a catagory you feel your server represents (gaming, community, etc).'}))
   description = forms.CharField(help_text='Describe your server. Tell potential members why they should join.')
   server_invite = forms.URLField(help_text='Post your server invite link here.')
      
@@ -213,7 +179,7 @@ class Server_Partner(forms.ModelForm):
       model = Partner
       fields = '__all__'
 
-class Support(forms.ModelForm):
+class SupportForm(forms.ModelForm):
   name = forms.CharField(max_length = 100, help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
   catagory = forms.CharField(max_length = 200, help_text='Please let us know what type of issue you are dealing with.')
   issue = forms.CharField(help_text='Describe your issue in detail. We will try to get back to you as soon as possible.')
@@ -225,35 +191,21 @@ class Support(forms.ModelForm):
       model = Support
       fields = '__all__'
     
-class PunishAppeal(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
-    Rule_broken = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'Tell us the numbers of the rule(s) you broke. Refer to our rules page to see the rules and their corresponding numbers.'
-        }))
-    Why_I_should_have_my_punishment_revoked = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Tell us why we should revoke your punishment, and what you can do to fix your mistake. If you think your punishment is a mistake, tell us why.'}))
-    
-    Additional_comments = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Put any additional evidence or comments you may have here.'}))
+class PunishAppeale(forms.ModelForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
+    Rule_broken = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Tell us the numbers of the rule(s) you broke. Refer to our rules page to see the rules and their corresponding numbers.'}))
+    Why_I_should_have_my_punishment_revoked = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Tell us why we should revoke your punishment, and what you can do to fix your mistake. If you think your punishment is a mistake, tell us why.'}), label = 'Why I should have my punishment revoked: ')
+    Additional_comments = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Put any additional evidence or comments you may have here.'}))
 
     class Meta:
         model = PunishAppeal
         fields = '__all__'
 
-class BanAppeal(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
-    Rule_broken = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'Tell us the numbers of the rule(s) you broke. Refer to our rules page to see the rules and their corresponding numbers.'
-        }))
-    Why_I_should_have_my_punishment_revoked = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Tell us why we should revoke your ban, and what you can do to fix your mistake. If you think your ban is a mistake, tell us why.'}))
-    
-    Additional_comments = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Put any additional evidence or comments you may have here.'}))
+class BanAppeale(forms.ModelForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
+    Rule_broken = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Tell us the numbers of the rule(s) you broke. Refer to our rules page to see the rules and their corresponding numbers.'}))
+    Why_I_should_have_my_punishment_revoked = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Tell us why we should revoke your ban, and what you can do to fix your mistake. If you think your ban is a mistake, tell us why.'}))
+    Additional_comments = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Put any additional evidence or comments you may have here.'}))
 
     class Meta:
         model = BanAppeal
@@ -261,19 +213,10 @@ class BanAppeal(forms.ModelForm):
 
 
 class ReportIssues(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
-    catagory = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'Please let us know what type of issue this is.'
-        })
-        )
-    issue = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Describe the issue in detail. We will try to get to it as soon as possible.'}))
-    
-    additional_comments = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Put any additional comments you may have here.'}))
-    
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
+    catagory = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Please let us know what type of issue this is.'}))
+    issue = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Describe the issue in detail. We will try to get to it as soon as possible.'}))
+    additional_comments = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Put any additional comments you may have here.'}))
     image = forms.FileField(help_text='Please put a screenshot of the issue.')
 
     class Meta:
@@ -282,37 +225,21 @@ class ReportIssues(forms.ModelForm):
 
 
 class News_Feed(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
-    catagory = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'Please let us know what form of news this is.'
-        }))
-    description = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Write the news here.'}))
-    
-    image = forms.FileField(widget=forms.TextInput(
-        attrs={'placeholder': 'Please provide a cover image for the news.'}))
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
+    catagory = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Please let us know what form of news this is.'}))
+    description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Write the news here.'}))
+    image = forms.FileField(widget=forms.TextInput(attrs={'placeholder': 'Please provide a cover image for the news.'}))
 
     class Meta:
         model = NewsFeed
         fields = '__all__'        
         
 class Staffprofile(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
-    position = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'Please let us know what staff position you serve currently.'
-        }))    
-    description = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Write whatever you want on your profile here (within regulations).'}))
-    staff_feats = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'Let us know of your transcendental feats of making MegaClan a better place.'
-        })) 
-    image = forms.FileField(widget=forms.TextInput(
-        attrs={'placeholder': 'Please provide a cover image for your profile.'}))
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
+    position = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Please let us know what staff position you serve currently.'}))
+    description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Write whatever you want on your profile here (within regulations).'}))
+    staff_feats = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Let us know of your transcendental feats of making MegaClan a better place.'}))
+    image = forms.FileField(widget=forms.TextInput(attrs={'placeholder': 'Please provide a cover image for your profile.'}))
 
     class Meta:
         model = StaffProfile
@@ -321,18 +248,11 @@ class Staffprofile(forms.ModelForm):
 
 class Eventform(forms.ModelForm):
 
-  name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'The event name goes here'}))
-  catagory = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'Please let us know what type of event this is (tournament, stage night, etc).'}))
-  description = forms.CharField(widget=forms.TextInput(
-        attrs={
-          'placeholder': 'Give a brief description of the event.'
-          }))
+  name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'The event name goes here'}))
+  catagory = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Please let us know what type of event this is (tournament, stage night, etc).'}))
+  description = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Give a brief description of the event.'}))
   date_and_time = forms.DateTimeField( )
-  image = forms.FileField(widget=forms.TextInput(
-        attrs={'placeholder': 'Please provide a cover image for the event.'}))
+  image = forms.FileField(widget=forms.TextInput(attrs={'placeholder': 'Please provide a cover image for the event.'}))
         
   class Meta:
     model = Event
@@ -716,20 +636,12 @@ PAYMENT_CHOICES = (
 class CheckoutForm(forms.Form):
     shipping_address = forms.CharField(required=False)
     shipping_address2 = forms.CharField(required=False)
-    shipping_country = CountryField(blank_label='(select country)').formfield(
-        required=False,
-        widget=CountrySelectWidget(attrs={
-            'class': 'custom-select d-block w-100',
-        }))
+    shipping_country = CountryField(blank_label='(select country)').formfield(required=False, widget=CountrySelectWidget(attrs={'class': 'custom-select d-block w-100',}))
     shipping_zip = forms.CharField(required=False)
 
     billing_address = forms.CharField(required=False)
     billing_address2 = forms.CharField(required=False)
-    billing_country = CountryField(blank_label='(select country)').formfield(
-        required=False,
-        widget=CountrySelectWidget(attrs={
-            'class': 'custom-select d-block w-100',
-        }))
+    billing_country = CountryField(blank_label='(select country)').formfield(required=False, widget=CountrySelectWidget(attrs={'class': 'custom-select d-block w-100',}))
     billing_zip = forms.CharField(required=False)
 
     same_billing_address = forms.BooleanField(required=False)
@@ -753,18 +665,16 @@ class CouponForm(forms.Form):
 
 class RefundForm(forms.Form):
     ref_code = forms.CharField()
-    message = forms.CharField(widget=forms.Textarea(attrs={
-        'rows': 4
-    }))
+    message = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}))
     email = forms.EmailField()
 
 
 class PaymentForm(forms.Form):
-    number = forms.IntegerField(required=False)
-    exp_month = forms.IntegerField(required=False)
-    expiry = forms.CharField(required=False)
-    exp_year = forms.IntegerField(required=False)
-    cvc = forms.IntegerField(required=False)
+    number = forms.IntegerField(required=True)
+    exp_month = forms.IntegerField(required=True)
+    expiry = forms.CharField(required=True)
+    exp_year = forms.IntegerField(required=True)
+    cvc = forms.IntegerField(required=True)
     save = forms.BooleanField(required=False)
     use_default = forms.BooleanField(required=False)
 
@@ -804,14 +714,7 @@ class RegistrationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields =(
-            'username',
-            'first_name',
-            'last_name',
-            'email',
-            'password1',
-            'password2'
-        )
+        fields =('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
 
     def save(self, commit=True):
         user = super(RegistrationForm,self).save(commit=False)
@@ -830,12 +733,7 @@ class EditProfileForm(UserChangeForm):
 
     class Meta:
         model = User
-        fields = (
-            'email',
-            'first_name',
-            'last_name',
-            'password',
-        )
+        fields = ('email', 'first_name', 'last_name', 'password',)
 
 
 class BilletBackgroundImagery(forms.ModelForm):
@@ -868,28 +766,18 @@ class TagBackgroundImagery(forms.ModelForm):
         fields = '__all__'
 
 class StaffRanksBackgroundImagery(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'e.g. Liam Mannara'}))
-    catagory = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'Choose a catagory you want your idea to affect.'
-        }))
-    image = forms.URLField(widget=forms.TextInput(
-        attrs={'placeholder': 'Link an image for your post.'}))
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
+    catagory = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Choose a catagory you want your idea to affect.'}))
+    image = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = StaffRanksBackgroundImage        
         fields = '__all__'
 
 class MegaBackgroundImagery(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'e.g. Liam Mannara'}))
-    catagory = forms.CharField(widget=forms.TextInput(
-        attrs={
-            'placeholder': 'Choose a catagory you want your idea to affect.'
-        }))
-    image = forms.URLField(widget=forms.TextInput(
-        attrs={'placeholder': 'Link an image for your post.'}))
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
+    catagory = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Choose a catagory you want your idea to affect.'}))
+    image = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = MegaBackgroundImage        

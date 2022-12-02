@@ -1,27 +1,32 @@
-{% extends 'base.html' %}
+{% extends 'memberbase.html' %}
 
 {% load static %}
 
-{% block title %} Home {% endblock title %}
+{% block title %}
+    {% for ShowcaseBackgroundImage in Titles %}
+      {% if ShowcaseBackgroundImage.page == 'showcase.html' %}
+         {{ ShowcaseBackgroundImage.overtitle }}
+      {% endif %}
+    {% endfor %}
+{% endblock title %}
 
 {% block content %}
-    
+
   {% if user.is_authenticated %}
 
 
 
-<div class="poste1"> 
-  {% load guest_user %}
+<div class="poste1">
 
-{% if user|is_guest_user %}
-  {# user is a guest instance, link to conversion page #}
-  <a href="{% url 'showcase:reasons_to_convert' %}">Sign up and save your work!</a>
-{% else %}
-<!--{# regular sign up link #}
-  <a href="{% url "form"}">Register now!</a>-->
-{% endif %}
+
+{% for ShowcaseBackgroundImage in Background %}
+    <img class = "backgroundimages" src="{{ShowcaseBackgroundImage.cover.url}}" alt="{{ ShowcaseBackgroundImage.backgroundtitle }}" style="background-position: fixed;">
+
+</div>
+{% endfor %}
+
 <div class = "search">
-    
+
 <br>
 <br>
 <br>
@@ -39,15 +44,15 @@
       <br>
         <br>
     <!--saved items here-->
-    {% for EBackgroundImage in object_list %}
+    {% for Post in ShowcasePost %}
       <div class = "postop">
-        <h1>{{EBackgroundImage.name}}</h1>
+        <h1>{{Post.name}}</h1>
         <br>
         <p class="describe">
-          {{EBackgroundImage.description}}</p> 
+          {{Post.description}}</p>
         <br>
         <br>
-          <img class = "hunt" src="{{EBackgroundImage.image}}">
+          <img class = "hunt" src="{{Post.image}}">
         <br>
         <br>
         <br>
@@ -68,12 +73,23 @@
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
-    
-</div>
+
     {% endfor %}
-  {% else %}
+
+
+  {% load guest_user %}
+
+    {% elif user|is_guest_user %}
+    {# user is a guest instance, link to conversion page #}
+
+  <a href="{% url 'showcase:convert' %}">Sign up and save your work!</a>
+    {% else %}
 <head>
-  <meta http-equiv="refresh" content="0; {% url 'login' %}">
+  <meta http-equiv="refresh" content="0; url=http://{{ request.get_host }}/accounts/login">
   </head>
-  {% endif %}
+<!--{# regular sign up link #}
+  <a href="{% url "form"}">Register now!</a>-->
+    {% endif %}
+
+
 {% endblock content %}

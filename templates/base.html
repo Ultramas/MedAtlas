@@ -3,11 +3,12 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >
-    <title>Quantumism</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    {% for BaseView in Favicons %}
+      {% if BaseView.faviconpage == 'base.html' %}
+        <link rel="shortcut icon" type="image/{{ BaseView.favicontype }}" href="{% static 'css/images/' %}{{ BaseView.faviconlink }}"/>
+      {% endif %}
+    {% endfor %}
     <link rel="manifest" href="/site.webmanifest">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
@@ -22,7 +23,7 @@
 
   <div class="column three mobile-twelve section_header_logo vertical-align-middle">
       {% for BaseView in Logo %}
- <a class = "logo" href="/"><img class = "imageicon"  src="{{BaseView.cover}} " width="145vh"
+ <a class = "logo" href="/"><img class = "imageicon"  src="media/{{BaseView.logocover}}" alt = "{{BaseView.alternate}}" width="145vh"
      height="100vh"></a>
       {% endfor %}
  </div>

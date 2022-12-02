@@ -5,10 +5,10 @@
 {% block title %}
     {% for ConvertBackgroundImage in Titles %}
       {% if ConvertBackgroundImage.page == 'index.html' %}
-         {{ ConvertBackgroundImage.overtitle }} 
+         {{ ConvertBackgroundImage.overtitle }}
       {% endif %}
   {% endfor %}
-{% endblock title %} 
+{% endblock title %}
 
 {% block content %}
 
@@ -17,9 +17,9 @@
 {% include "socialaccount/snippets/provider_list.html" with process=user|is_guest_user|yesno:"connect,login" %}
 
 
-                
+
 <head>
-  <!--change title tags to django form -->   
+  <!--change title tags to django form -->
         <link rel="shortcut icon" type="image/ico" href="{% static 'favicon.ico' %}"/>
       {% for ConvertBackgroundImage in Favicons %}
       {% if ConvertBackgroundImage.faviconpage == 'index.html' %}
@@ -32,13 +32,13 @@
       {% endif %}
     {% endfor %}
 </head>
-  
-<body>       
 
-  <div id="overlay">  
+<body>
+
+  <div id="overlay">
     <img src = "76.gif">
     </div>
-    
+
 
     <!--<div class="parallax1" id = "main">
 
@@ -48,7 +48,7 @@
 <!--keeps using the same image repetitively-->
 
  <!--</div>-->
-  
+
 <!--
 <section id="section02" class="demo">
 <a href="#innovation"><span></span></a>
@@ -66,8 +66,8 @@
   <div class='tri'></div>
   <div class='tri'></div>
 </div>-->
-  
-  
+
+
     <div class="parallax2" id = "leaders">
       <!--{% for ConvertBackgroundImages in object_list %}
       {% endfor %}
@@ -76,7 +76,7 @@
       <img class = "backgroundimages" src="{{ConvertBackgroundImage.cover.url}}" alt="{{ ConvertBackgroundImage.backgroundtitle }}">
   {% endfor %}
 
-        <h2 class = "opening2vb">  
+        <h2 class = "opening2vb">
            {% for ConvertBackgroundImage in TextFielde %}
              {% for section in TextFielde %}
           {% if section.section == ConvertBackgroundImage.section %}
@@ -107,8 +107,8 @@
 
     <div class="parallax3" id = "innovation">
 
-      
-      <h2 class = "opening3vb">           
+
+      <h2 class = "opening3vb">
         {% for ConvertBackgroundImage in TextFielde %}
              {% for section in TextFielde %}
           {% if section.section == ConvertBackgroundImage.section %}
@@ -131,7 +131,7 @@
           {% endif %}
   {% endfor %}
 {% endfor %}  </h2>
- 
+
 <div class="night">
   <div class="shooting_star"></div>
   <div class="shooting_star"></div>
@@ -156,8 +156,8 @@
 </div>
       <section id="section03" class="demo">
 <a href="#difference"><span></span></a>
-</section>  
-      </div>  
+</section>
+      </div>
 
     <div class="parallax4" id = "difference"><h2 class = "opening4">           {% for ConvertBackgroundImage in TextFielde %}
              {% for section in TextFielde %}
@@ -169,7 +169,7 @@
           {% endif %}
           {% endif %}
   {% endfor %}
-{% endfor %}  </h2><h2 class="caption4a">           
+{% endfor %}  </h2><h2 class="caption4a">
   {% for ConvertBackgroundImage in TextFielde %}
              {% for section in TextFielde %}
           {% if section.section == ConvertBackgroundImage.section %}
@@ -186,11 +186,11 @@
 </section>
     </div>
     </div>
-  </div> 
+  </div>
 
    <!--<h2>{{ STRIPE_PUBLIC_KEY }} undefined key</h2>-->
 
-    
+
      <div class="parallax5" id = "join"><h2 class = "opening5vb">
                   {% for ConvertBackgroundImage in TextFielde %}
              {% for section in TextFielde %}
@@ -224,12 +224,12 @@
 
           </div>
     </div>
-         
-    </div>
 
     </div>
 
-  
+    </div>
+
+
     <!--Custom JS-->
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js.darkmode.js' %}"></script>
@@ -239,7 +239,7 @@
 
 
 
-  
+
     <!--Custom JS-->
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js.darkmode.js' %}"></script>

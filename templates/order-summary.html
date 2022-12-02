@@ -1,5 +1,8 @@
 {% extends 'ebase.html' %}
 
+{% load static %}
+
+
 {% block content %}
 
 <main>
@@ -27,7 +30,7 @@
             <td>{{ order_item.item.title }}</td>
             <td>
             {% if order_item.item.discount_price %}
-                <del>${{ order_item.item.price}}</del> 
+                <del>${{ order_item.item.price}}</del>
                 ${{ order_item.item.discount_price }}
             {% else %}
                 ${{ order_item.item.price}}
@@ -41,7 +44,7 @@
             </td>
             <td>
             {% if order_item.item.discount_price %}
-                ${{ order_item.get_discount_item_price }} 
+                ${{ order_item.get_discount_item_price }}
                 <span class="badge badge-success" >Saved ${{ order_item.get_amount_saved }}</span>
             {% else %}
                 ${{ order_item.get_total_item_price}}
@@ -77,9 +80,9 @@
                 <a href="{% url 'showcase:ehome' %}" class="btn btn-primary float-right">Continue Shopping</a>
             </td>
         </tr>
-        
+
         {% endif %}
-        
+
         </tbody>
     </table>
 

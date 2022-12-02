@@ -2,12 +2,22 @@
 
 {% load static %}
 
-{% block title %} Home {% endblock title %}
+{% block title %}
+    {% for PartnerBackgroundImage in Titles %}
+      {% if PartnerBackgroundImage.page == 'partners.html' %}
+         {{ PartnerBackgroundImage.overtitle }}
+      {% endif %}
+    {% endfor %}
+{% endblock title %}
 
 {% block content %}
     
   {% if user.is_authenticated %}
 
+{% for PartnerBackgroundImage in Background %}
+    <img class = "backgroundimages" src="{{PartnerBackgroundImage.cover.url}}" alt="{{ PartnerBackgroundImage.backgroundtitle }}">
+{% endfor %}
+<!--may cause issues due to endfor before form-->
 
 
 <div class="poste1"> 
