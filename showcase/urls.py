@@ -93,6 +93,7 @@ from .views import (
     SignupView,
     ChangePasswordView,
     PerksBackgroundView,
+    IssueBackgroundView,
     #Background2aView,
 )
 
@@ -125,12 +126,13 @@ urlpatterns = [
     #path('post_edit/', views.post_new, name='post_edit'),
     path('vote/', views.PosteView.as_view(), name='vote'),
     #path('share/', views.post, name='share'),
-    path('share/', views.PostView.as_view(), name='share'),
+    path('share/', views.ShareBackgroundView.as_view(), name='share'),
+    path('ideas/', views.PostView.as_view(), name='ideas'),
     path('cv-form/', views.SignupView.as_view(), name='cv-form'),
     path('staffapplications/', views.StaffApplyBackgroundView.as_view(), name='staffapplications'),
     path('punishapps/', views.PunishAppsBackgroundView.as_view(), name='punishapps'),
     path('banappeals/', views.BanAppealBackgroundView.as_view(), name='banappeals'),
-    path('issues/', views.issue, name='issues'),
+    path('issues/', views.IssueBackgroundView.as_view(), name='issues'),
     #    path('profile/', views.phome, name='profile'),
 
     # changed name to cv-form, is that what you want?

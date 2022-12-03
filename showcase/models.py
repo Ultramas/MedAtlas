@@ -2508,6 +2508,17 @@ class ChangePasswordBackgroundImage(models.Model):
        verbose_name = "Change Password Background Image"
        verbose_name_plural = "Change Password Background Images"
 
+class IssueBackgroundImage(models.Model):
+   title = models.TextField()
+   cover = models.ImageField(upload_to='images/')
+
+   def __str__(self):
+       return self.title
+
+   class Meta:
+       verbose_name = "Issue Background Image"
+       verbose_name_plural = "Issue Background Images"
+
 class OrderItem(models.Model):
    user = models.ForeignKey(settings.AUTH_USER_MODEL,
                             on_delete=models.CASCADE)

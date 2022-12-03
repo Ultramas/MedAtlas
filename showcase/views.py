@@ -62,6 +62,7 @@ from .models import CheckoutBackgroundImage
 from .models import SignupBackgroundImage
 from .models import PerksBackgroundImage
 from .models import ChangePasswordBackgroundImage
+from .models import IssueBackgroundImage
 from .models import BackgroundImageBase
 from .models import TextBase
 from .models import LogoBase
@@ -1196,6 +1197,7 @@ class ShareBackgroundView(BaseView):
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Idea'] = Post.objects.all()
         return context
 
 
@@ -1373,34 +1375,6 @@ def supportgetMessages(request, **kwargs):
 #  template_name = 'users.html'
 
 
-class PostingView(FormMixin, ListView):
-    model = PostBackgroundImage
-    template_name = "post_edit.html"
-    form_class = PostForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['Background'] = BackgroundImageBase.objects.filter(
-            is_active=1, page=self.template_name).order_by("position")
-        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Post'] = Post.objects.all()
-        return context
-
-    def post(self, request, *args, **kwargs):
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.save()
-            return redirect('showcase:showcase')
-            messages.success(request, 'Form submitted successfully.')
-        else:
-            messages.error(request, "Form submission invalid")
-            return render(request, "post_edit.html", {'form': form})
-
 
 """@login_required
 def poste(request):
@@ -1418,16 +1392,33 @@ def poste(request):
         messages.error(request, form.errors)"""
 
 
+class PostBackgroundView(FormMixin, ListView):
+    model = ShowcasePost
+    template_name = "post_edit.html"
+    form_class = PostForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        return context
+
+    # @login_required
+
+
 class PostView(FormMixin, ListView):
     model = PostBackgroundImage
-    template_name = "share.html"
+    template_name = "ideas.html"
     form_class = Postit
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ShareBackgroundImage'] = ShareBackgroundImage.objects.all()
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -1435,21 +1426,24 @@ class PostView(FormMixin, ListView):
         context['Post'] = Post.objects.all()
         return context
 
-    @login_required
-    def poste(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         if (request.method == "POST"):
             form = Postit(request.POST)
             if (form.is_valid()):
                 post = form.save(commit=False)
                 post.save()
                 return redirect('showcase:users')
-            return super().get(request, *args, **kwargs)
+                messages.success(request, 'Form submitted successfully.')
+                #return super().get(request, *args, **kwargs)
+            else:
+                messages.error(request, "Form submission invalid")
+                return render(request, "ideas.html", {'form': form})
         else:
             form = Postit()
-            return render(request, 'share.html', {'form': form})
+            return render(request, 'ideas.html', {'form': form})
             messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
-            return super().get(request, *args, **kwargs)
+            #return super().get(request, *args, **kwargs)
 
 
 """@login_required
@@ -1790,7 +1784,7 @@ class BanAppealBackgroundView(FormMixin, ListView):
         context['BanAppeal'] = BanAppeal.objects.all()
         return context
 
-    @login_required
+    #@login_required
     def unban(self, request, *args, **kwargs):
         if (request.method == "POST"):
             form = BanAppeal(request.POST)
@@ -1807,21 +1801,37 @@ class BanAppealBackgroundView(FormMixin, ListView):
             messages.error(request, form.errors)
             return super().get(request, *args, **kwargs)
 
+class IssueBackgroundView(FormMixin, ListView):
+    model = IssueBackgroundImage
+    template_name = "issues.html"
+    form_class = ReportIssues
 
-@login_required
-def issue(request):
-    if (request.method == "POST"):
-        form = ReportIssues(request.POST)
-        if (form.is_valid()):
-            post = form.save(commit=False)
-            post.save()
-            return redirect('issuedone')
-    else:
-        form = ReportIssues()
-        return render(request, 'issues.html', {'form': form})
-        messages.error(
-            request, 'Form submission failed to register, please try again.')
-        messages.error(request, form.errors)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['IssueBackgroundImage'] = IssueBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        #context['Support'] = Support.objects.all()
+        return context
+
+    #@login_required
+    def post(self, request, *args, **kwargs):
+        if (request.method == "POST"):
+            form = ReportIssues(request.POST)
+            if (form.is_valid()):
+                post = form.save(commit=False)
+                post.save()
+                return redirect('issuedone')
+        else:
+            form = ReportIssues()
+            return render(request, 'issues.html', {'form': form})
+            messages.error(
+                request, 'Form submission failed to register, please try again.')
+            messages.error(request, form.errors)
 
 
 # sendemail/views.py
