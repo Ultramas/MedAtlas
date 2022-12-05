@@ -1,4 +1,6 @@
 from django import forms
+
+from mysite import settings
 from .models import Post
 from .models import ShowcasePost
 from .models import Poste
@@ -629,7 +631,8 @@ from django_countries.widgets import CountrySelectWidget
 
 PAYMENT_CHOICES = (
     ('S', 'Stripe'),
-    ('P', 'PayPal')
+    ('P', 'PayPal'),
+    ('C', 'Card')
 )
 
 

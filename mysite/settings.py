@@ -26,7 +26,7 @@ import django.utils.encoding
 
 django.utils.encoding.python_2_unicode_compatible = python_2_unicode_compatible
 
-#from decouple import config
+# from decouple import config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,11 +36,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-#STRIPE_PUBLIC_KEY = config('STRIPE_TEST_PUBLIC_KEY')
+# STRIPE_PUBLIC_KEY = config('STRIPE_TEST_PUBLIC_KEY')
 
 SECRET_KEY = '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'
 
-#SECRET_KEY = config('SECRET_KEY')
+# SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -72,16 +72,16 @@ INSTALLED_APPS = [
     "guest_user.contrib.allauth",
     'changelogs',
     'favicon',
-    #'django.chatbot',
-    #'chat',
+    # 'django.chatbot',
+    # 'chat',
 ]
 
-#BACKGROUND_TASK_RUN_ASYNC = True
-#CHATBOT_TEMPLATE = os.path.join(BASE_DIR, "chatbotTemplate", "webbot.template")  
-#START_MESSAGE = "Hello! My name is ."
+# BACKGROUND_TASK_RUN_ASYNC = True
+# CHATBOT_TEMPLATE = os.path.join(BASE_DIR, "chatbotTemplate", "webbot.template")
+# START_MESSAGE = "Hello! My name is ."
 
-#admin_interface/colorfield error command: pip install django-admin-interface (uninstalls every refresh/close)
-#python manage.py loaddata admin_interface_theme_django.json
+# admin_interface/colorfield error command: pip install django-admin-interface (uninstalls every refresh/close)
+# python manage.py loaddata admin_interface_theme_django.json
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'  # only if django version >= 3.0
 
@@ -93,7 +93,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #'django.contrib.messages.middleware.MessageMiddleware',
+    # 'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'
@@ -144,19 +144,19 @@ AUTHENTICATION_BACKENDS = [
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME':
-        'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+            'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
         'NAME':
-        'django.contrib.auth.password_validation.MinimumLengthValidator',
+            'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
         'NAME':
-        'django.contrib.auth.password_validation.CommonPasswordValidator',
+            'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
         'NAME':
-        'django.contrib.auth.password_validation.NumericPasswordValidator',
+            'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -178,7 +178,7 @@ MEDIA_URL = '/media/'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
 X_FRAME_OPTIONS = '*'
@@ -186,24 +186,32 @@ X_FRAME_OPTIONS = '*'
 LOGIN_REDIRECT_URL = '/showcase'
 LOGOUT_REDIRECT_URL = '/'
 
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
+
 # config/settings.py
-#CRISPY_TEMPLATE_PACK = 'bootstrap4'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' # new
-DEFAULT_FROM_EMAIL = 'intellexcompany1@gmail.com'
-EMAIL_HOST = 'smtp.gmail.com'  # new
-EMAIL_HOST_USER = 'intellexcompany1@gmail.com'  # new
-EMAIL_HOST_PASSWORD = 'Ultra123456!'  # new
-EMAIL_PORT = 587  # new
-EMAIL_USE_TLS = True  # new
+# CRISPY_TEMPLATE_PACK = 'bootstrap4'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'  # new
+# DEFAULT_FROM_EMAIL='intellexcompany1@gmail.com'
+EMAIL_HOST=env('EMAIL_HOST')  # new
+EMAIL_HOST_USER=env('EMAIL_HOST_USER')  # new
+EMAIL_HOST_PASSWORD=env('EMAIL_HOST_PASSWORD')  # new
+EMAIL_PORT=587  # new
+EMAIL_USE_TLS=True  # new
+
+# Custom setting. To email
+RECIPIENT_ADDRESS = env('RECIPIENT_ADDRESS')
 
 SECRET = os.getenv('payment')
 
-#stripe payment
+# stripe payment
 STRIPE_KEY = 'SECRET'
 
 STRIPE_PUBLIC_KEY = 'pk_live_51JSB5LH4sbqF1dn7tt0NoySzoJ2Zat2D5DHmH8vmbu0SOzZCz8sgjyki7tXSabs1LVV314uDa5ik0vFZ55p8CLce002GzKHkrI'
-#possibly linked to "invalid request error (invalid parameters)" issue
+# possibly linked to "invalid request error (invalid parameters)" issue
 
 STRIPE_SECRET_KEY = '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'
 

@@ -1183,6 +1183,7 @@ class PartnerBackgroundView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Partner'] = Partner.objects.all()
         return context
 
 
@@ -1861,6 +1862,20 @@ def contactView(request):
 def successView(request):
     return HttpResponse('Success! Thank you for your message.')
 
+class ContacteView(FormView):
+    template_name = 'showcase/email.html'
+    form_class = ContactForme
+    success_url = reverse_lazy('contact:success')
+
+    def form_valid(self, form):
+        # Calls the custom send method
+        form.send()
+        return super().form_valid(form)
+
+
+class ContactSuccessView(TemplateView):
+    template_name = 'showcase/email.html'
+
 
 class contact(TemplateView):
     paginate_by = 10
@@ -2208,7 +2223,10 @@ class CheckoutView(EBaseView):
 
                 payment_option = form.cleaned_data.get('payment_option')
 
-                if payment_option == 'S':
+                if payment_option == 'C':
+                    return redirect('showcase:payment',
+                                    payment_option='card')
+                elif payment_option == 'S':
                     return redirect('showcase:payment',
                                     payment_option='stripe')
                 elif payment_option == 'P':
@@ -2230,8 +2248,7 @@ class PaymentView(EBaseView):
         context = super().get_context_data(**kwargs)
         # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.all()
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
 
         return context
