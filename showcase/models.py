@@ -114,6 +114,11 @@ class ShowcasePost(models.Model):
    name = models.CharField(max_length=100, help_text='Your name goes here.')
    description = models.TextField(help_text='Post your profile here.')
    image = models.ImageField(help_text='Link a URL for your profile (scales to your picture`s dimensions.)')
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    # change rest to either imagefields or urlfields (has to be uniform throughout the form)
 
@@ -148,6 +153,11 @@ class Poste(models.Model):
    description = models.TextField(help_text='Please share any ideas you may have.')
    image = models.URLField(help_text='Link a URL for your profile (scales to your picture`s dimensions.)')
    mfg_date = models.DateTimeField(auto_now_add=True)
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    class Meta:
        verbose_name = "Vote"
@@ -192,6 +202,11 @@ class Feedback(models.Model):
    subject = models.CharField(max_length=200)
    message = models.TextField()
    date = models.DateTimeField(auto_now_add=True)
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    class Meta:
        verbose_name_plural = "Feedback"
@@ -212,6 +227,11 @@ class StaffApplication(models.Model):
    verbose_name="How do you think you can make MC better?")
    I_confirm_that_I_have_read_all_the_staff_requiernments_and_meet_all_of_them = models.BooleanField(verbose_name="I confirm that I have read all the staff requiernments and meet all of them.", default=False,
    choices=((True, 'Yes'), (False, 'No')))
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    class Meta:
        verbose_name = "Staff Application"
@@ -223,6 +243,11 @@ class Partner(models.Model):
    catagory = models.CharField(max_length=100, help_text='Pick a catagory you feel your server represents (gaming, community, etc).')
    description = models.TextField(help_text='Describe your server. Tell potential members why they should join.')
    server_invite = models.URLField(help_text='Post your server invite link here.')
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
 
 class PunishAppeal(models.Model):
@@ -231,6 +256,11 @@ class PunishAppeal(models.Model):
    Why_I_should_have_my_punishment_revoked = models.TextField(help_text='Tell us why we should revoke your punishment, and what you can do to fix your mistake. If you think your punishment is a mistake, tell us why.',
    verbose_name="Why I should have my punishment revoked: ")
    Additional_comments = models.TextField(help_text='Put any additional evidence or comments you may have here.', verbose_name="additional comments ")
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    class Meta:
        verbose_name = "Punish Appeal"
@@ -244,6 +274,11 @@ class BanAppeal(models.Model):
    verbose_name="Why I should have my ban revoked.")
    Additional_comments = models.TextField(
    help_text='Put any additional evidence or comments you may have here.')
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    class Meta:
        verbose_name = "Ban Appeal"
@@ -256,6 +291,11 @@ class ReportIssue(models.Model):
    issue = models.TextField(help_text='Describe the issue in detail. We will try to get to it as soon as possible.')
    Additional_comments = models.TextField(help_text='Put any additional comments you may have here.', verbose_name="additional comments")
    image = models.FileField(help_text='Please put a screenshot of the issue.')
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    # class Changelog(models.Model):
    #  name = models.CharField(max_length = 100, help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
@@ -275,6 +315,11 @@ class Support(models.Model):
    issue = models.TextField(help_text= 'Describe your issue in detail. We will try to get back to you as soon as possible.')
    Additional_comments = models.TextField(help_text='Put any additional comments you may have here.', verbose_name="additional comments")
    image = models.URLField(help_text='Please attach a screenshot of your issue.')
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    # class Changelog(models.Model):
    #  name = models.CharField(max_length = 100, help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
@@ -305,6 +350,11 @@ class StaffProfile(models.Model):
    description = models.TextField(help_text='Write whatever you want on your profile here (within regulations).')
    staff_feats = models.TextField(help_text='Let us know of your transcendental feats of making MegaClan a better place.', verbose_name="staff feats")
    image = models.FileField(help_text='Please provide a cover image for your profile.')
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    class Meta:
        verbose_name = "Staff Profile"
@@ -317,6 +367,11 @@ class Event(models.Model):
    description = models.TextField(help_text='Give a brief description of the event.')
    date_and_time = models.DateTimeField(null=True, verbose_name="time and date")
    image = models.FileField(help_text='Please provide a cover image for your profile.')
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
 
 class Blog(models.Model):
@@ -2269,7 +2324,12 @@ class Message(models.Model):
    date = models.DateTimeField(default=timezone.now, blank=True)
    user = models.CharField(max_length=1000000)
    room = models.CharField(max_length=1000000)
-
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+#is_active is new
 
 # Create your models here.
 class SupportChat(models.Model):
@@ -2285,7 +2345,12 @@ class SupportMessage(models.Model):
    date = models.DateTimeField(default=timezone.now, blank=True)
    user = models.CharField(max_length=1000000)
    room = models.CharField(max_length=1000000)
-
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+#is_active is new
 
 # from django.db.models.signals import post_save
 from django.conf import settings
@@ -2322,6 +2387,11 @@ class UserProfile(models.Model):
    stripe_customer_id = models.CharField(max_length=50, blank=True, null=True)
    # related name could be a possible solution
    one_click_purchasing = models.BooleanField(default=False)
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    def __str__(self):
        return self.user.username
@@ -2335,6 +2405,11 @@ class ProfileDetails(models.Model):
    username = models.OneToOneField(User, on_delete=models.CASCADE)
    profile_picture = models.ImageField(upload_to='profile_image', null=True, blank=True)
    about_me = models.CharField(max_length=200, blank=True, null=True)
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    def __str__(self):
        return self.username.username
@@ -2367,6 +2442,11 @@ class Item(models.Model):
    description = models.TextField()
    image = models.ImageField()
    relateditems = models.ManyToManyField("self", blank=True)
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
 
    def __str__(self):
        return self.title
@@ -2525,6 +2605,11 @@ class OrderItem(models.Model):
    ordered = models.BooleanField(default=False)
    item = models.ForeignKey(Item, on_delete=models.CASCADE)
    quantity = models.IntegerField(default=1)
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    def __str__(self):
        return f"{self.quantity} of {self.item.title}"
@@ -2566,6 +2651,11 @@ class Order(models.Model):
    refund_requested = models.BooleanField(default=False)
    refund_granted = models.BooleanField(default=False)
    id = uuid4()
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active order?")
    '''
    1. Item added to cart
    2. Adding a billing address
@@ -2600,6 +2690,11 @@ class Address(models.Model):
    zip = models.CharField(max_length=100)
    address_type = models.CharField(max_length=1000, choices=ADDRESS_CHOICES)
    default = models.BooleanField(default=False)
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active address?")
 
    def __str__(self):
        return self.user.username
@@ -2613,6 +2708,11 @@ class Payment(models.Model):
    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
    amount = models.FloatField()
    timestamp = models.DateTimeField(auto_now_add=True)
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
    def __str__(self):
        return self.user.username
@@ -2622,6 +2722,11 @@ class Coupon(models.Model):
    code = models.CharField(max_length=150)
    amount = models.FloatField()
    percentDollars = models.BooleanField(default=False)
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active coupon?")
 
    def __str__(self):
        return self.code
@@ -2632,6 +2737,11 @@ class Refund(models.Model):
    reason = models.TextField()
    accepted = models.BooleanField(default=False)
    email = models.EmailField()
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active refund?")
 
    def __str__(self):
        return f"{self.pk}"
@@ -2662,6 +2772,11 @@ class CheckoutAddress(models.Model):
    apartment_address = models.CharField(max_length=100)
    country = CountryField(multiple=False)
    zip = models.CharField(max_length=100)
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active address?")
 
    def __str__(self):
        return self.user.username
