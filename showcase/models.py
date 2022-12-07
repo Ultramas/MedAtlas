@@ -403,6 +403,11 @@ class Blog(models.Model):
 
        return reverse("post_detail", kwargs={"slug": str(self.slug)})
 
+   def comment_count(self):
+       return Comment.objects.filter(post=self).count()
+
+   def view_count(self):
+       return Blog.objects.filter(post=self).count()
 
 class Comment(models.Model):
    post = models.ForeignKey(Blog,on_delete=models.CASCADE, related_name='comments')
@@ -2464,7 +2469,7 @@ class Item(models.Model):
 class EBackgroundImage(models.Model):
    title = models.TextField()
    cover = models.ImageField(upload_to='images/')
-   items = Item.objects.all()
+   items = Item.objects.filter(is_active=1)
    is_active = models.IntegerField(default=1,
                                    blank=True,
                                    null=True,
@@ -2756,9 +2761,9 @@ post_save.connect(userprofile_receiver, sender=settings.AUTH_USER_MODEL)
 
 
 class Contact(models.Model):
-   from_email = models.EmailField(max_length=200)
-   subject = models.CharField(max_length=100,
-                              help_text='Subject of your message.')
+   name = models.TextField(help_text="Name")
+   email = models.EmailField(max_length=200, verbose_name="Recipient of your message.")
+   inquiry = models.CharField(max_length=100, help_text='Subject of your message.')
    message = models.TextField(help_text='Your message goes here.')
 
    class Meta:

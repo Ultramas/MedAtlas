@@ -829,12 +829,23 @@ class GroupAdminForm(forms.ModelForm):
 
 from django.core.mail import send_mail
 
-class ContactForme(forms.Form):
+class ContactForme(forms.ModelForm):
+    class Meta:
+        model = Contact
+        fields = {"name", "email", "inquiry", "message"}
 
-    name = forms.CharField(max_length=120)
-    email = forms.EmailField()
-    inquiry = forms.CharField(max_length=70)
-    message = forms.CharField(widget=forms.Textarea)
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "form-control"}),
+            "email": forms.TextInput(attrs={"class": "form-control"}),
+            "inquiry": forms.TextInput(attrs={"class": "form-control"}),
+            "message": forms.TextInput(attrs={"class": "form-control"})
+        }
+
+
+
+
+
+
 
     def get_info(self):
         """

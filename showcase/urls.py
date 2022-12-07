@@ -85,6 +85,7 @@ from .views import (
     PosteView,
     BlogBackgroundView,
     BlogBaseView,
+    ContactViewe,
     WhyBackgroundView,
     StaffApplyBackgroundView,
     PatreonBackgroundView,
@@ -164,7 +165,7 @@ urlpatterns = [
     path('staff/', views.StaffBackgroundView.as_view(),  name='staff'),
     path('admin/', TemplateView.as_view(template_name='admin.html'), name='admin'),
     path('voting/', TemplateView.as_view(template_name='voting.html'), name='voting'),
-    path('contact/', TemplateView.as_view(template_name='email.html'), name='contact'),
+    #path('contact/', TemplateView.as_view(template_name='email.html'), name='contact'),
     path('ao/', TemplateView.as_view(template_name='ao.html'), name='ao'),
     path('contributors/', views.ContributorBackgroundView.as_view(), name='contributors'),
     path('mantenience/', TemplateView.as_view(template_name='mantenience.html'), name='mantenience'),
@@ -270,9 +271,10 @@ urlpatterns = [
     #         ),
     #         name='password_reset_form'),
 
-    #   path('', contactView, name='contact'),
+    path('contact/', views.ContactViewe.as_view(), name='contact'),
     #path('success/', successView, name='success'),
     path('success/', views.ContactSuccessView.as_view(), name='success'),
+    path('contactbase/', views.TemplateView.as_view(template_name='contactbase.html'), name='contactbase'),
     path('email/', TemplateView.as_view(template_name='email.html'), name='email'),
 
     #path('<slug:slug>/', views.PostDetail.as_view(), name='post_detail'),

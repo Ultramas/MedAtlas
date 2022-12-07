@@ -192,7 +192,7 @@ env = environ.Env()
 environ.Env.read_env()
 
 # config/settings.py
-# CRISPY_TEMPLATE_PACK = 'bootstrap4'
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'  # new
 # DEFAULT_FROM_EMAIL='intellexcompany1@gmail.com'
