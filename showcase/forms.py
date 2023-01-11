@@ -15,6 +15,7 @@ from .models import StaffProfile
 from .models import Event
 from .models import Comment                
 from .models import Contact
+from .models import BusinessMailingContact
 from .models import ProfileDetails    
 from .models import UserProfile2
 from .models import Support
@@ -96,6 +97,15 @@ class ContactForm(forms.ModelForm):
     class Meta:
         model = Contact
         fields = '__all__'
+
+class BusinessContactForm(forms.ModelForm):
+    prefered_contact = forms.MultipleChoiceField(choices=CONTACT_PREFERENCE, widget=forms.CheckboxSelectMultiple())
+
+
+    class Meta:
+        model = BusinessMailingContact
+        fields = '__all__'
+
 
 
 class MyForm(forms.ModelForm):
@@ -191,7 +201,7 @@ class SupportForm(forms.ModelForm):
      
   class Meta:
       model = Support
-      fields = '__all__'
+      fields = ('name', 'catagory', 'issue', 'Additional_comments', 'image',)
     
 class PunishAppeale(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
@@ -274,7 +284,7 @@ class SettingsForm(forms.ModelForm):
 
     class Meta:
       model = SettingsModel
-      fields = 'username', 'password', 'coupons', 'news'
+      fields = ('username', 'password', 'coupons', 'news')
       
 class TextFielde(forms.ModelForm):
 #    image = forms.ImageField(widget=forms.TextInput(
@@ -841,6 +851,47 @@ class ContactForme(forms.ModelForm):
             "message": forms.TextInput(attrs={"class": "form-control"})
         }
 
+    def get_info(self):
+        """
+        Method that returns formatted information
+        :return: subject, msg
+        """
+        # Cleaned data
+        cl_data = super().clean()
+
+        name = cl_data.get('name').strip()
+        from_email = cl_data.get('email')
+        subject = cl_data.get('inquiry')
+
+        msg = f'{name} with email {from_email} said:'
+        msg += f'\n"{subject}"\n\n'
+        msg += cl_data.get('message')
+
+        return subject, msg, from_email
+
+    def send(self):
+
+        subject, msg, from_email = self.get_info()
+
+        send_mail(
+            subject=subject,
+            message=msg,
+            from_email=from_email,
+            recipient_list=[settings.EMAIL_HOST_USER]
+        )
+
+class BusinessMailingForm(forms.ModelForm):
+    class Meta:
+        model = Contact
+        fields = {"name", "email", "inquiry", "message"}
+
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "form-control"}),
+            "email": forms.TextInput(attrs={"class": "form-control"}),
+            "inquiry": forms.TextInput(attrs={"class": "form-control"}),
+            "message": forms.TextInput(attrs={"class": "form-control"})
+        }
+
 
 
 
@@ -863,16 +914,16 @@ class ContactForme(forms.ModelForm):
         msg += f'\n"{subject}"\n\n'
         msg += cl_data.get('message')
 
-        return subject, msg
+        return subject, msg, from_email
 
     def send(self):
 
-        subject, msg = self.get_info()
+        subject, msg, to_email = self.get_info()
 
         send_mail(
             subject=subject,
             message=msg,
             from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[settings.RECIPIENT_ADDRESS]
+            recipient_list=[to_email]
         )
 

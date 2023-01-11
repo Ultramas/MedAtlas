@@ -338,7 +338,11 @@ class NewsFeed(models.Model):
    catagory = models.CharField(max_length=200, help_text='Please let us know what form of news this is.')
    description = models.TextField(help_text='Write the news here.')
    image = models.FileField(help_text='Please provide a cover image for the news.')
-
+   is_active = models.IntegerField(default=1,
+                                   blank=True,
+                                   null=True,
+                                   help_text='1->Active, 0->Inactive',
+                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
    class Meta:
        verbose_name = "News Feed"
        verbose_name_plural = "News Feed"
@@ -374,7 +378,7 @@ class Event(models.Model):
                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
 
-class Blog(models.Model):
+class BlogPost(models.Model):
    title = models.CharField(max_length=200, unique=True)
    slug = models.SlugField(max_length=200, unique=True)
    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
@@ -383,6 +387,7 @@ class Blog(models.Model):
    created_on = models.DateTimeField(auto_now_add=True)
    status = models.IntegerField(choices=STATUS, default=0)
    image = models.ImageField(upload_to='images/')
+   likes = models.ManyToManyField(User, blank=True, verbose_name='post likes')
    # blogbackgroundimage
    is_active = models.IntegerField(default=1,
                                    blank=True,
@@ -407,10 +412,13 @@ class Blog(models.Model):
        return Comment.objects.filter(post=self).count()
 
    def view_count(self):
-       return Blog.objects.filter(post=self).count()
+       return BlogPost.objects.filter(post=self).count()
+
+   def number_of_likes(self):
+       return self.likes.count()
 
 class Comment(models.Model):
-   post = models.ForeignKey(Blog,on_delete=models.CASCADE, related_name='comments')
+   post = models.ForeignKey(BlogPost,on_delete=models.CASCADE, related_name='comments')
    name = models.CharField(max_length=80)
    email = models.EmailField()
    body = models.TextField()
@@ -428,6 +436,10 @@ class Comment(models.Model):
    def __str__(self):
        return 'Comment {} by {}'.format(self.body, self.name)
 
+class PostLikes(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE,)
+    created = models.DateTimeField(auto_now_add=True)
 
 class Profile(models.Model):
    about_me = models.TextField()
@@ -2769,6 +2781,16 @@ class Contact(models.Model):
    class Meta:
        verbose_name = "Contact Message"
        verbose_name_plural = "Contact Messages"
+
+class BusinessMailingContact(models.Model):
+   name = models.TextField(help_text="Name")
+   email = models.EmailField(max_length=200, verbose_name="Recipient of your message.")
+   inquiry = models.CharField(max_length=100, help_text='Subject of your message.')
+   message = models.TextField(help_text='Your message goes here.')
+
+   class Meta:
+       verbose_name = "Business Mailing Message"
+       verbose_name_plural = "Business Mailing Messages"
 
 
 class CheckoutAddress(models.Model):

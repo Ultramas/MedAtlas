@@ -26,7 +26,7 @@ body{
 
 .search{
     height: 50px;
-    border-radius: 20px;
+    /*border-radius: 20px;*/
     justify-content: right;
     flex-direction: row;
     margin-left: 71%;
@@ -39,7 +39,9 @@ body{
  font-size: 21px;
 }
 
-
+.searchbar{
+    border-radius: 30px;
+}
 
 .navbarx{
   position: fixed;

@@ -13,7 +13,8 @@ from .models import NewsFeed
 from .models import StaffProfile
 from .models import Event
 from .models import Patreon
-from .models import Blog
+from .models import BlogPost
+from .models import PostLikes
 from .models import Post, Comment
 from .models import Profile
 from .models import Room, Message
@@ -21,6 +22,7 @@ from .models import Room, Message
 from .models import UserProfile
 from .models import UserProfile2
 from .models import SettingsModel
+from .models import Support
 from .models import ConvertBackgroundImage
 from .models import BackgroundImage
 #from .models import BackgroundImage2a
@@ -141,6 +143,8 @@ from .models import DonateIcon
 from .models import Coupon
 #from  django.contrib.auth.models import BackgroundImages
 from .models import (Item, OrderItem, Order, CheckoutAddress, Payment)
+from .models import Contact
+from .models import BusinessMailingContact
 from django.contrib.auth.models import Group
 from django.contrib.admin import AdminSite
 from django.utils.translation import gettext_lazy
@@ -184,6 +188,8 @@ admin.site.register(NavBarHeader)
 #admin.site.register(ProfileDetails)
 admin.site.register(UserProfile)
 admin.site.register(UserProfile2)
+admin.site.register(Support)
+admin.site.register(PostLikes)
 admin.site.register(BackgroundImage)
 #admin.site.register(BackgroundImage2a)
 admin.site.register(EBackgroundImage)
@@ -297,6 +303,8 @@ admin.site.register(RuleTextField2)
 admin.site.register(BaseCopyrightTextField)
 admin.site.register(AdvertisementBase)
 admin.site.register(DonateIcon)
+admin.site.register(Contact)
+admin.site.register(BusinessMailingContact)
 #admin.site.register(BackgroundImages)
 admin.site.register(Coupon)
 
@@ -362,7 +370,7 @@ class PostAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title', )}
 
 
-admin.site.register(Blog, PostAdmin)
+admin.site.register(BlogPost, PostAdmin)
 
 
 @admin.register(Comment)
