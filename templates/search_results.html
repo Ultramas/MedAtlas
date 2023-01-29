@@ -40,12 +40,12 @@
        {% endfor %}
 
 
-      {% for ShowcasePost in object_list.profile_list %}
+      {% for UpdateProfile in object_list.profile_list %}
           <h1 class = "banh1t">Profiles</h1>
     <div class = "searchere">
        <li>
       <a href="{% url 'showcase:showcase'%}">
-          {{ ShowcasePost.catagory}}, by {{ ShowcasePost.name }}
+          {{ UpdateProfile.catagory}}, by {{ UpdateProfile.name }}
       </a>
         </li>
     </div>

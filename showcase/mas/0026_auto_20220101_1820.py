@@ -11,32 +11,32 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Post',
+            name='Idea',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='Your name goes here.', max_length=100)),
-                ('catagory', models.CharField(help_text='Choose a catagory you want your idea to affect (server layout, event idea, etc).', max_length=100)),
+                ('category', models.CharField(help_text='Choose a category you want your idea to affect (server layout, event idea, etc).', max_length=100)),
                 ('description', models.TextField(help_text='Please share any ideas you may have.')),
                 ('image', models.URLField(help_text='Link a URL for your profile (scales to your picture`s dimensions.)')),
             ],
         ),
         migrations.CreateModel(
-            name='Poste',
+            name='Vote',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='Your name goes here.', max_length=100)),
-                ('catagory', models.CharField(help_text='Choose a catagory you want your idea to affect (server layout, event idea, etc).', max_length=100)),
+                ('category', models.CharField(help_text='Choose a category you want your idea to affect (server layout, event idea, etc).', max_length=100)),
                 ('description', models.TextField(help_text='Please share any ideas you may have.')),
                 ('image', models.URLField(help_text='Link a URL for your profile (scales to your picture`s dimensions.)')),
                 ('mfg_date', models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.CreateModel(
-            name='ShowcasePost',
+            name='UpdateProfile',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='Your name goes here.', max_length=100)),
-                ('description', models.TextField(help_text='Post your profile here.')),
+                ('description', models.TextField(help_text='Idea your profile here.')),
                 ('image', models.URLField(help_text='Link a URL for your profile (scales to your picture`s dimensions.)')),
             ],
         ),
@@ -61,32 +61,32 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='staffapplication',
-            name='How_do_you_think_you_can_make_MC_better',
+            name='how_better',
             field=models.TextField(help_text='Tell us what you will do to make MC better as a staff member.', verbose_name='How do you think you can make MC better?'),
         ),
         migrations.AlterField(
             model_name='staffapplication',
-            name='I_can_attend_at_least_half_of_the_staff_meetings',
-            field=models.BooleanField(verbose_name='I_can_attend_at_least_half_of_the_staff_meetings.'),
+            name='meeting_attendance_check',
+            field=models.BooleanField(verbose_name='meeting_attendance_check.'),
         ),
         migrations.AlterField(
             model_name='staffapplication',
-            name='I_confirm_that_I_have_read_all_the_staff_requiernments_and_meet_all_of_them',
+            name='read_requirements',
             field=models.BooleanField(verbose_name='I confirm that I have read all the staff requiernments and meet all of them.'),
         ),
         migrations.AlterField(
             model_name='staffapplication',
-            name='I_have_been_in_MC_for_at_least_2_months',
+            name='overall_time_check',
             field=models.BooleanField(verbose_name='I have been in MC for at least 2 months '),
         ),
         migrations.AlterField(
             model_name='staffapplication',
-            name='I_have_been_in_a_previous_role_for_at_least_1_month',
+            name='previous_role_time_check',
             field=models.BooleanField(verbose_name='I have been in MC for at least 1 month,'),
         ),
         migrations.AlterField(
             model_name='staffapplication',
-            name='Why_do_you_want_to_apply_for_staff',
+            name='why',
             field=models.TextField(help_text='Tell us why you want to be a MegaClan Staff Member. Be descriptive.', verbose_name='Why do you want to apply for staff?'),
         ),
         migrations.AlterField(

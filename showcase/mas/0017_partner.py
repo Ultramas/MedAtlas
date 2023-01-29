@@ -11,13 +11,13 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Partner',
+            name='PartnerApplication',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='Your server name goes here.', max_length=100)),
-                ('catagory', models.CharField(help_text='Pick a catagory you feel your server represents (gaming, community, etc).', max_length=100)),
+                ('category', models.CharField(help_text='Pick a category you feel your server represents (gaming, community, etc).', max_length=100)),
                 ('description', models.TextField(help_text='Describe your server. Tell potential members why they should join.')),
-                ('server_invite', models.FileField(help_text='Post your server invite link here.', upload_to='')),
+                ('server_invite', models.FileField(help_text='Idea your server invite link here.', upload_to='')),
             ],
         ),
     ]

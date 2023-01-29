@@ -49,7 +49,7 @@
       <a href="{% url 'newsfeed'%}">News Feed</a>
       <a href="{% url 'events'%}">Events</a>
       <a href="{% url 'voting'%}">Community Posts</a>
-      <a href="{% url 'vote'%}">Make A Post</a>
+      <a href="{% url 'vote'%}">Make A Idea</a>
       <a href="{% url 'users'%}">Community Ideas</a>
       <a href="{% url 'share'%}">Share An Idea</a>
       <a href="{% url 'perks'%}">Member Perks</a>
@@ -145,15 +145,15 @@
       <br>
         <br>
     <!--saved items here-->
-    {% for ShowcasePost in object_list %}
+    {% for UpdateProfile in object_list %}
       <div class = "postop">
-        <h1>{{ShowcasePost.name}}</h1>
+        <h1>{{UpdateProfile.name}}</h1>
         <br>
         <p class="describe">
-          {{ShowcasePost.description}}</p> 
+          {{UpdateProfile.description}}</p>
         <br>
         <br>
-          <img class = "hunt" src="{{ShowcasePost.image}}">
+          <img class = "hunt" src="{{UpdateProfile.image}}">
         <br>
         <br>
         <br>

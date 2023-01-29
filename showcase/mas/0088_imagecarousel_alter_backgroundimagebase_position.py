@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('is_active', models.IntegerField(blank=True, choices=[(1, 'Active'), (0, 'Inactive')], default=1, help_text='1->Active, 0->Inactive', null=True)),
             ],
             options={
-                'verbose_name': 'Image Carousel Post',
+                'verbose_name': 'Image Carousel Idea',
                 'verbose_name_plural': 'Image Carousel Posts',
             },
         ),

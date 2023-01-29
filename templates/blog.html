@@ -6,6 +6,22 @@
     {% for BlogBackgroundImage in Titles %}
       {% if BlogBackgroundImage.page == 'blog.html' %}
          {{ BlogBackgroundImage.overtitle }}
+
+<a href="#" onClick="document.getElementById('likebutton').submit()">Like This Post</a> {{eachpost.likes}}   |   <a href="#" onClick="document.getElementById('dislikebutton').submit()">Dislike This Post</a> {{eachpost.dislikes}}
+
+
+<form id="likebutton" method="POST" action="/posts/{{eachpost.id}}/preference/1/">
+{% csrf_token %}
+    hiiiiiiiiiiiiiiii
+<input type="hidden">
+</form>
+
+<form id="dislikebutton" method="POST" action="/posts/{{eachpost.id}}/preference/2/">
+{% csrf_token %}
+<input type="hidden">
+</form>
+
+
       {% endif %}
     {% endfor %}
 {% endblock title %}
@@ -14,9 +30,9 @@
 
 {% load crispy_forms_tags %}
 
- 
 
-  
+
+
 
 <style>
     body {
@@ -24,11 +40,11 @@
         font-size: 18px;
         background-color: #fdfdfd;
     }
-    
+
     .head_text {
         color: white;
     }
-    
+
     .card {
         box-shadow: 0 16px 48px #E3E7EB;
     }
@@ -85,21 +101,21 @@
         </div>
       {% endfor %}
       </ul>-->
-      </div>  
+      </div>
     <div class="row">
         <!-- Blog Entries Column -->
         <div class="col-md-8 mt-3 left">
-            {% for blog in blog_list %}
+            {% for blog in BlogPosts %}
             <div class="card mb-4">
                 <div class="card-body1">
                     <h2 class="card-title">{{ blog.title }}</h2>
                     <p class="card-text text-muted h6">{{ blog.author }} | {{ blog.created_on}} </p>
-                  
+
                   <img class = "backgroundimages" src="{{blog.image.url}}" alt="{{ blog.title }}">
-                  
+
                     <p class="card-text">{{blog.content|slice:":200" }}...</p>
                     <a href="{% url 'showcase:post_detail' blog.slug  %}" class="btn btn-primary">Read More &rarr;</a>
-                    
+
           {% for comment in comments %}
         <div class="comments" style="padding: 10px;">
           <p class="font-weight-bold">
@@ -112,13 +128,14 @@
         </div>
         {% endfor %}
                 </div>
-            </div>        
+            </div>
 
 
             {% endfor %}
         </div>
     </div>
 </div>
+
 
 
 

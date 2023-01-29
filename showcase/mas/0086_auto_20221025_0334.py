@@ -925,8 +925,8 @@ class Migration(migrations.Migration):
                 ('cover', models.ImageField(upload_to='images/')),
             ],
             options={
-                'verbose_name': 'Post Background Image',
-                'verbose_name_plural': 'Post Background Images',
+                'verbose_name': 'Idea Background Image',
+                'verbose_name_plural': 'Idea Background Images',
             },
         ),
         migrations.CreateModel(
@@ -937,8 +937,8 @@ class Migration(migrations.Migration):
                 ('cover', models.ImageField(upload_to='images/')),
             ],
             options={
-                'verbose_name': 'Post Background Image',
-                'verbose_name_plural': 'Post Background Images',
+                'verbose_name': 'Idea Background Image',
+                'verbose_name_plural': 'Idea Background Images',
             },
         ),
         migrations.CreateModel(
@@ -1534,7 +1534,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name='showcasepost',
-            options={'verbose_name': 'User Profile Post', 'verbose_name_plural': 'User Profile Posts'},
+            options={'verbose_name': 'User Profile Idea', 'verbose_name_plural': 'User Profile Posts'},
         ),
         migrations.RemoveField(
             model_name='settings',
@@ -1593,27 +1593,27 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='staffapplication',
-            name='I_can_attend_at_least_half_of_the_staff_meetings',
+            name='meeting_attendance_check',
             field=models.BooleanField(choices=[(True, 'Yes'), (False, 'No')], default=False, verbose_name='I can attend at least half of the staff meetings.'),
         ),
         migrations.AlterField(
             model_name='staffapplication',
-            name='I_confirm_that_I_have_read_all_the_staff_requiernments_and_meet_all_of_them',
+            name='read_requirements',
             field=models.BooleanField(choices=[(True, 'Yes'), (False, 'No')], default=False, verbose_name='I confirm that I have read all the staff requiernments and meet all of them.'),
         ),
         migrations.AlterField(
             model_name='staffapplication',
-            name='I_have_been_in_MC_for_at_least_2_months',
+            name='overall_time_check',
             field=models.BooleanField(choices=[(True, 'Yes'), (False, 'No')], default=False, verbose_name='I have been in MC for at least 2 months'),
         ),
         migrations.AlterField(
             model_name='staffapplication',
-            name='I_have_been_in_a_previous_role_for_at_least_1_month',
+            name='previous_role_time_check',
             field=models.BooleanField(choices=[(True, 'Yes'), (False, 'No')], default=False, verbose_name='I have been in MC for at least 1 month'),
         ),
         migrations.AlterField(
             model_name='staffapplication',
-            name='I_have_no_strikes_on_my_account_currently',
+            name='strikes_check',
             field=models.BooleanField(choices=[(True, 'Yes'), (False, 'No')], default=False, verbose_name='I have no strikes on my account currently'),
         ),
         migrations.AlterField(

@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='Event name goes here.', max_length=100)),
-                ('catagory', models.CharField(help_text='Please let us know what type of event this is (tournament, stage night, etc).', max_length=200)),
+                ('category', models.CharField(help_text='Please let us know what type of event this is (tournament, stage night, etc).', max_length=200)),
                 ('description', models.TextField(help_text='Give a brief description of the event.')),
                 ('date_and_time', models.DateTimeField(null=True)),
                 ('staff_feats', models.TextField(help_text='Let us know of your transcendental feats of making MegaClan a better place.')),

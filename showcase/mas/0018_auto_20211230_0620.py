@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='PunishAppeal',
+            name='PunishmentAppeal',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='Your name and tag go here.', max_length=100)),
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".', max_length=100)),
-                ('catagory', models.CharField(help_text='Please let us know what type of issue this is.', max_length=200)),
+                ('category', models.CharField(help_text='Please let us know what type of issue this is.', max_length=200)),
                 ('issue', models.TextField(help_text='Describe the issue in detail. We will try to get to it as soon as possible.')),
                 ('Additional_comments', models.TextField(help_text='Put any additional evidence or comments you may have here.')),
                 ('image', models.FileField(help_text='Please put a screenshot of the issue.', upload_to='')),
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='partner',
             name='server_invite',
-            field=models.URLField(help_text='Post your server invite link here.'),
+            field=models.URLField(help_text='Idea your server invite link here.'),
         ),
         migrations.AlterField(
             model_name='post',
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='poste',
-            name='catagory',
+            name='category',
             field=models.CharField(help_text='Please put your candidate here.', max_length=100),
         ),
         migrations.AlterField(

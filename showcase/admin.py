@@ -1,21 +1,20 @@
 from django.contrib import admin
-from .models import ShowcasePost
-from .models import Post
-from .models import Poste
+from .models import UpdateProfile
+from .models import Idea
+from .models import Vote
 from .models import Product
 from .models import City
 from .models import StaffApplication
-from .models import Partner
-from .models import PunishAppeal
+from .models import PartnerApplication
+from .models import PunishmentAppeal
 from .models import BanAppeal
 from .models import ReportIssue
 from .models import NewsFeed
 from .models import StaffProfile
 from .models import Event
-from .models import Patreon
-from .models import BlogPost
+from .models import Blog
 from .models import PostLikes
-from .models import Post, Comment
+from .models import Idea, Comment
 from .models import Profile
 from .models import Room, Message
 #from .models import ProfileDetails
@@ -58,90 +57,10 @@ from .models import Titled
 from .models import NavBar
 from .models import NavBarHeader
 from .models import ImageCarousel
-from .models import TextField
-from .models import TextField2
-from .models import TextField3
-from .models import TextField4
-from .models import TextField5
-from .models import TextField6
-from .models import TextField7
-from .models import TextField8
-from .models import BilletTextField
-from .models import BilletTextField2
-from .models import BilletTextField3
-from .models import BilletTextField4
-from .models import BilletTextField5
-from .models import BilletTextField6
-from .models import BilletTextField7
-from .models import BilletTextField8
-from .models import AboutTextField
-from .models import AboutTextField2
-from .models import AboutTextField3
-from .models import AboutTextField4
-from .models import AboutTextField5
-from .models import AboutTextField6
-from .models import AboutTextField7
-from .models import AboutTextField8
-from .models import FaqTextField
-from .models import FaqTextField2
-from .models import FaqTextField3
-from .models import FaqTextField4
-from .models import FaqTextField5
-from .models import FaqTextField6
-from .models import FaqTextField7
-from .models import FaqTextField8
-from .models import FaqTextField9
-from .models import FaqTextField10
-from .models import FaqTextField11
-from .models import FaqTextField12
-from .models import FaqTextField13
-from .models import FaqTextField14
-from .models import FaqTextField15
-from .models import FaqTextField16
-from .models import FaqTextField17
-from .models import FaqTextField18
-from .models import StaffRanksTextField
-from .models import StaffRanksTextField2
-from .models import StaffRanksTextField3
-from .models import StaffRanksTextField4
-from .models import StaffRanksTextField5
-from .models import StaffRanksTextField6
-from .models import StaffRanksTextField7
-from .models import StaffRanksTextField8
-from .models import StaffRanksTextField9
-from .models import StaffRanksTextField10
-from .models import StaffRanksTextField11
-from .models import StaffRanksTextField12
-from .models import StaffRanksTextField13
-from .models import StaffRanksTextField14
-from .models import StaffRanksTextField15
-from .models import StaffRanksTextField16
-from .models import StaffRanksTextField17
-from .models import StaffRanksTextField18
-from .models import MegaCoinsTextField
-from .models import MegaCoinsTextField2
-from .models import MegaCoinsTextField3
-from .models import MegaCoinsTextField4
-from .models import MegaCoinsTextField5
-from .models import MegaCoinsTextField6
-from .models import MegaCoinsTextField7
-from .models import MegaCoinsTextField8
-from .models import InformationTextField
-from .models import InformationTextField2
-from .models import InformationTextField3
-from .models import InformationTextField4
-from .models import InformationTextField5
-from .models import InformationTextField6
-from .models import InformationTextField7
-from .models import InformationTextField8
-from .models import InformationTextField9
-from .models import RuleTextField
-from .models import RuleTextField2
 from .models import BaseCopyrightTextField
 from .models import AdvertisementBase
 from .models import DonateIcon
 from .models import Coupon
-#from  django.contrib.auth.models import BackgroundImages
 from .models import (Item, OrderItem, Order, CheckoutAddress, Payment)
 from .models import Contact
 from .models import BusinessMailingContact
@@ -167,19 +86,18 @@ class authorAdmin(admin.ModelAdmin):
 
 
 # Register your models here.
-admin.site.register(ShowcasePost, categoryAdmin)
-admin.site.register(Post, categoryAdmin)
-admin.site.register(Poste, authorAdmin)
+admin.site.register(UpdateProfile, categoryAdmin)
+admin.site.register(Idea, categoryAdmin)
+admin.site.register(Vote, authorAdmin)
 admin.site.register(StaffApplication, authorAdmin)
-admin.site.register(Partner)
-admin.site.register(PunishAppeal)
+admin.site.register(PartnerApplication)
+admin.site.register(PunishmentAppeal)
 admin.site.register(BanAppeal)
 admin.site.register(ReportIssue)
 admin.site.register(NewsFeed)
 admin.site.register(StaffProfile)
 admin.site.register(Event)
 admin.site.register(Profile)
-admin.site.register(Patreon)
 admin.site.register(SettingsModel)
 admin.site.register(SettingsBackgroundImage)
 admin.site.register(ConvertBackgroundImage)
@@ -221,85 +139,6 @@ admin.site.register(BackgroundImageBase)
 admin.site.register(TextBase)
 admin.site.register(ImageCarousel)
 admin.site.register(Titled)
-admin.site.register(TextField)
-admin.site.register(TextField2)
-admin.site.register(TextField3)
-admin.site.register(TextField4)
-admin.site.register(TextField5)
-admin.site.register(TextField6)
-admin.site.register(TextField7)
-admin.site.register(TextField8)
-admin.site.register(BilletTextField)
-admin.site.register(BilletTextField2)
-admin.site.register(BilletTextField3)
-admin.site.register(BilletTextField4)
-admin.site.register(BilletTextField5)
-admin.site.register(BilletTextField6)
-admin.site.register(BilletTextField7)
-admin.site.register(BilletTextField8)
-admin.site.register(AboutTextField)
-admin.site.register(AboutTextField2)
-admin.site.register(AboutTextField3)
-admin.site.register(AboutTextField4)
-admin.site.register(AboutTextField5)
-admin.site.register(AboutTextField6)
-admin.site.register(AboutTextField7)
-admin.site.register(AboutTextField8)
-admin.site.register(FaqTextField)
-admin.site.register(FaqTextField2)
-admin.site.register(FaqTextField3)
-admin.site.register(FaqTextField4)
-admin.site.register(FaqTextField5)
-admin.site.register(FaqTextField6)
-admin.site.register(FaqTextField7)
-admin.site.register(FaqTextField8)
-admin.site.register(FaqTextField9)
-admin.site.register(FaqTextField10)
-admin.site.register(FaqTextField11)
-admin.site.register(FaqTextField12)
-admin.site.register(FaqTextField13)
-admin.site.register(FaqTextField14)
-admin.site.register(FaqTextField15)
-admin.site.register(FaqTextField16)
-admin.site.register(FaqTextField17)
-admin.site.register(FaqTextField18)
-admin.site.register(StaffRanksTextField)
-admin.site.register(StaffRanksTextField2)
-admin.site.register(StaffRanksTextField3)
-admin.site.register(StaffRanksTextField4)
-admin.site.register(StaffRanksTextField5)
-admin.site.register(StaffRanksTextField6)
-admin.site.register(StaffRanksTextField7)
-admin.site.register(StaffRanksTextField8)
-admin.site.register(StaffRanksTextField9)
-admin.site.register(StaffRanksTextField10)
-admin.site.register(StaffRanksTextField11)
-admin.site.register(StaffRanksTextField12)
-admin.site.register(StaffRanksTextField13)
-admin.site.register(StaffRanksTextField14)
-admin.site.register(StaffRanksTextField15)
-admin.site.register(StaffRanksTextField16)
-admin.site.register(StaffRanksTextField17)
-admin.site.register(StaffRanksTextField18)
-admin.site.register(MegaCoinsTextField)
-admin.site.register(MegaCoinsTextField2)
-admin.site.register(MegaCoinsTextField3)
-admin.site.register(MegaCoinsTextField4)
-admin.site.register(MegaCoinsTextField5)
-admin.site.register(MegaCoinsTextField6)
-admin.site.register(MegaCoinsTextField7)
-admin.site.register(MegaCoinsTextField8)
-admin.site.register(InformationTextField)
-admin.site.register(InformationTextField2)
-admin.site.register(InformationTextField3)
-admin.site.register(InformationTextField4)
-admin.site.register(InformationTextField5)
-admin.site.register(InformationTextField6)
-admin.site.register(InformationTextField7)
-admin.site.register(InformationTextField8)
-admin.site.register(InformationTextField9)
-admin.site.register(RuleTextField)
-admin.site.register(RuleTextField2)
 admin.site.register(BaseCopyrightTextField)
 admin.site.register(AdvertisementBase)
 admin.site.register(DonateIcon)
@@ -370,7 +209,7 @@ class PostAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title', )}
 
 
-admin.site.register(BlogPost, PostAdmin)
+admin.site.register(Blog, PostAdmin)
 
 
 @admin.register(Comment)

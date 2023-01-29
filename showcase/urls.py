@@ -15,7 +15,7 @@ Including another URLconf
 """
     
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.views.generic.base import TemplateView
 from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView
 
@@ -41,11 +41,6 @@ from .views import (
     remove_from_cart,
     reduce_quantity_item,
     add_to_cart,
-    ProductView,
-    HomeView,
-    OrderSummaryView,
-    CheckoutView,
-    PaymentView,
     remove_single_item_from_cart,
     AddCouponView,
     RequestRefundView,
@@ -83,7 +78,7 @@ from .views import (
     PostView,
     PostList,
     PosteView,
-    PostDetail,
+    BlogComment,
     BlogBackgroundView,
     BlogBaseView,
     ContactViewe,
@@ -91,7 +86,6 @@ from .views import (
     BusinessEmailViewe,
     WhyBackgroundView,
     StaffApplyBackgroundView,
-    PatreonBackgroundView,
     ConvertBackgroundView,
     ReasonsBackgroundView,
     ContactSuccessView,
@@ -100,7 +94,8 @@ from .views import (
     ChangePasswordView,
     PerksBackgroundView,
     IssueBackgroundView,
-    #Background2aView,
+    postpreference,
+
 )
 
 from django.contrib.auth.views import (PasswordResetView,
@@ -113,6 +108,9 @@ app_name = 'showcase'
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+
+    re_path(r'^postid/preference/(?P<userpreference>\d+)/$', postpreference, name='postpreference'),
+
     # add these
     path('showcase/', views.ShowcaseBackgroundView.as_view(), name='showcase'),
     path('post_edit/', views.PostingView.as_view(), name='post_edit'),
@@ -215,7 +213,6 @@ urlpatterns = [
     path('blogbase/', BlogBaseView.as_view(), name='blogbase'),
     path('base/', BaseView.as_view(), name='base'),
     path('sidebar/', TemplateView.as_view(template_name='sidebar.html'), name='sidebar'),
-    path('patreon/', views.PatreonBackgroundView.as_view(), name='patreon'),
     path('quantumentangling/',TemplateView.as_view(template_name='quantumentangling.html'), name='quantumentangling'),
     path('featuredproducts/', TemplateView.as_view(template_name='featuredproducts.html'), name='featuredproducts'),
     path('ecommercesearch/', EcommerceSearchResultsView.as_view(), name='ecommercesearch_results'),
@@ -282,9 +279,9 @@ urlpatterns = [
     path('email/', TemplateView.as_view(template_name='email.html'), name='email'),
     path('businessemail/', views.BusinessMailingView.as_view(), name='businessemail'),
     path('businessemail/businessmailingsuccess', views.BusinessSuccessMailingView.as_view(), name='businessmailingsuccess'),
-    #path('<slug:slug>/', views.PostDetail.as_view(), name='post_detail'),
+    #path('<slug:slug>/', views.BlogComment.as_view(), name='post_detail'),
     path('blogpost-like/<int:pk>/', views.BlogPostLike, name='blogpost_like'),
-    path('post/<slug:slug>/', views.PostDetail.as_view(), name='post_detail'),
+    path('post/<slug:slug>/', views.BlogComment.as_view(), name='post_detail'),
     path('like/<username>/', profile, name='like'),
     path('home/<str:room>/', views.room, name='room'),
     path('home/checkview', views.checkview, name='checkview'),

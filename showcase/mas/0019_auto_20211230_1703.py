@@ -11,15 +11,15 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameModel(
-            old_name='Post',
+            old_name='Idea',
             new_name='Idea',
         ),
         migrations.RenameModel(
-            old_name='ShowcasePost',
+            old_name='UpdateProfile',
             new_name='Profile',
         ),
         migrations.RenameModel(
-            old_name='Poste',
+            old_name='Vote',
             new_name='Vote',
         ),
     ]

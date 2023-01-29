@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='mymodel',
             name='description',
-            field=models.TextField(default=django.utils.timezone.now, help_text='Post your profile here.'),
+            field=models.TextField(default=django.utils.timezone.now, help_text='Idea your profile here.'),
             preserve_default=False,
         ),
         migrations.AddField(

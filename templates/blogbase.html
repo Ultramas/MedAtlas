@@ -12,51 +12,45 @@
 
     <title>{% block title %}PokeTrove{% endblock title %}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.blog.css' %}">
-      
+
     </head>
 
     <body>
  <header>
 
   <div class="column three mobile-twelve section_header_logo vertical-align-middle">
- <a class = "logo" href="/"><img class = "imageicon"  src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6khv+EqxJLmRfFwXs1M3EMoAJtliUohPZi8...oz " width="145vh" 
+ <a class = "logo" href="/"><img class = "imageicon"  src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6khv+EqxJLmRfFwXs1M3EMoAJtliUohPZi8...oz " width="145vh"
      height="80vh"></a>
- </div>        
+ </div>
 
-    
+
      </header>
-       
+
     <div class = "navbarx">
 
     <ul>
       {% for column in Header %}
-        <div class="dropdown">     
+        <div class="dropdown">
           <a href="#{{ column.section }}" class="glass"> {{ column.text }}</a>
           <div class="dropdown-content">
           {% for row in DropDown %}
-        
+
             {% if row.row == column.row %}
-                                
+
                 {% if row.opennew == True %}
                     <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
                 {% else %}
                     <a href="{{ row.url }}">{{ row.text }}</a>
                 {% endif %}
             {% endif %}
-          
+
           {% endfor %}
-          </div>        
+          </div>
         </div>
       {% endfor %}
     </ul>
 
-     <!--{% for BlogBackgroundImage in object_list %}
-   <img class = "ebackgroundimages" src="{{ BlogBackgroundImage.cover.url }}" alt="{{ BlogBackgroundImage.title }}">
-       <div class="view overlay">
-                  <div class="mask rgba-white-slight"></div>
-              </div>
-{% endfor %}-->
-      
+
      <nav>
      <div class="bell"></div>
      <div onclick='navToggle(this)'  class="hamburger">
@@ -64,8 +58,8 @@
        <div class="bun"></div>
        <div class="bun"></div>
      </div>
-     
-<h2 class = "navtext">Quantumism</h2>  
+
+<h2 class = "navtext">Quantumism</h2>
     <div class="navItem"><a href = "{% url 'showcase:index' %}">Home</a></div>
      <div class="navItem2"><a href = "{% url 'showcase:about' %}">About Us</a></div>
      <div class="navItem3"><a href = "{% url 'showcase:servers' %}" target="_blank">Discord Servers</a></li></div>
@@ -74,9 +68,8 @@
      <div class="navItem5"><a href="https://discord.com/channels/813761567304843315/813779502190297108" target="_blank">Quantum Discord</a></li></div>
      <div class="navItem8"><a href = "{% url 'showcase:rules' %}">Rules</a></li></div>
      <div class="navItem9"><a href = "{% url 'showcase:showcase' %}">VIP Area</a></div>
-<br>
-<br>
-           
+
+
 <div class="metaclass1">
     <a href="https://discord.gg/g43uGbURUz">
          <img alt="Qries" src="../static/css/images/MC.png"
@@ -91,9 +84,9 @@
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
-    
-      
-        <style>    
+
+
+        <style>
             body {
             font-family: "Roboto", sans-serif;
             font-size: 17px;
@@ -121,22 +114,11 @@
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
-      
+
         {% block content %}
         <!-- Content Goes here -->
         {% endblock content %}
         <!-- Footer -->
-   
-
-
-{% block sidebar %}
-
-<style>
-        .card{
-            box-shadow: 0 16px 48px #E3E7EB;
-        }
-       
-</style>
 
 
 
@@ -146,11 +128,6 @@
      <div class = "copyright">
      <h5>PokeTrove 2022©.   All Rights Reserved.</h5>
    </div>
-   
+
   </footer>  </body>
 </html>
-
-<!-- Sidebar Widgets Column -->
-
-
-{% endblock sidebar %}

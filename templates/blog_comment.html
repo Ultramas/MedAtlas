@@ -1,4 +1,6 @@
-{% extends 'blogbase.html' %} {% block content %}
+{% extends 'blogbase.html' %}
+
+{% block content %}
 
 <div class="container">
   <div class="row">
@@ -9,14 +11,14 @@
         <p class="card-text ">{{ blog.content | safe }}</p>
       </div>
     </div>
-    {% block sidebar %} {% include 'sidebar.html' %} {% endblock sidebar %}
+
 
     <div class="col-md-8 card mb-4  mt-3 ">
       <div class="card-body">
         <!-- comments -->
-        <h2>{{ comments.count }} comments</h2>
+        <h2>{{ blog.comments.count }} comments</h2>
 
-        {% for comment in comments %}
+        {% for comment in blog.comments.all %}
         <div class="comments" style="padding: 10px;">
           <p class="font-weight-bold">
             {{ comment.name }}
@@ -25,7 +27,7 @@
             </span>
           </p>
           {{ comment.body | linebreaks }}
-        </div>        
+        </div>
         {% endfor %}
       </div>
     </div>

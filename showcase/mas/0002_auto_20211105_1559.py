@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='showcasepost',
             name='description',
-            field=models.TextField(help_text='Post your profile here.'),
+            field=models.TextField(help_text='Idea your profile here.'),
         ),
         migrations.AlterField(
             model_name='showcasepost',

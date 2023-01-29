@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".', max_length=100)),
-                ('catagory', models.CharField(help_text='Please let us know what type of issue you are dealing with.', max_length=200)),
+                ('category', models.CharField(help_text='Please let us know what type of issue you are dealing with.', max_length=200)),
                 ('issue', models.TextField(help_text='Describe your issue in detail. We will try to get back to you as soon as possible.')),
                 ('Additional_comments', models.TextField(help_text='Put any additional comments you may have here.')),
                 ('image', models.URLField(help_text='Please attach a screenshot of your issue.')),

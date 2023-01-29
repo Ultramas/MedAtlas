@@ -27,9 +27,11 @@
   <br>
 
   
-               {% for StaffBackgroundImage in object_list %}
+               {% for BackgroundImage in object_list %}
+  {% if BackgroundImage.page == 'staff.html' %}
     <!--<h2>{{ BilletBackgroundImage.title }}</h2>-->
-      <img class = "backgroundimages" src="{{StaffBackgroundImage.cover.url}}" alt="{{ StaffBackgroundImage.title }}">
+      <img class = "backgroundimages" src="{{BackgroundImage.cover.url}}" alt="{{ BackgroundImage.title }}">
+  {% endif %}
   {% endfor %}
   
     <h1 class="hello">Hello {{user.username}}!</h1>

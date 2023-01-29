@@ -1,23 +1,21 @@
 import django
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
-from .models import ShowcasePost
-from .models import Post
-from .models import Poste
-from .models import MyModel
+from .models import UpdateProfile
+from .models import Idea
+from .models import Vote
 from .models import StaffApplication
 from .models import Contact
 from .models import BusinessMailingContact
-from .models import Partner
-from .models import PunishAppeal
+from .models import PartnerApplication
+from .models import PunishmentAppeal
 from .models import BanAppeal
 from .models import ReportIssue
 from .models import NewsFeed
 from .models import StaffProfile
 from .models import Event
-from .models import City, Poste, ShowcasePost, Post, Partner
+from .models import City, Vote, UpdateProfile, Idea, PartnerApplication
 from .models import Support
-from .models import Patreon
 from .models import CheckoutAddress
 from .models import Item
 from .models import FaviconBase
@@ -27,6 +25,8 @@ from .models import ShowcaseBackgroundImage
 from .models import ChatBackgroundImage
 from .models import SupportChatBackgroundImage
 from .models import BilletBackgroundImage
+from .models import PatreonBackgroundImage
+from .models import Patreon
 from .models import BlogBackgroundImage
 from .models import PostBackgroundImage
 from .models import PosteBackgroundImage
@@ -53,7 +53,6 @@ from .models import ProductBackgroundImage
 from .models import SettingsModel
 from .models import ImageCarousel
 from .models import PostLikes
-from .models import PatreonBackgroundImage
 from .models import ConvertBackgroundImage
 from .models import ReasonsBackgroundImage
 from .models import SettingsBackgroundImage
@@ -69,95 +68,13 @@ from .models import IssueBackgroundImage
 from .models import BackgroundImageBase
 from .models import TextBase
 from .models import LogoBase
-from .models import RuleTextField9
-from .models import RuleTextField10
-from .models import RuleTextField11
-from .models import RuleTextField12
-from .models import AboutTextField
-from .models import AboutTextField2
-from .models import AboutTextField3
-from .models import AboutTextField4
-from .models import AboutTextField5
-from .models import AboutTextField6
-from .models import AboutTextField7
-from .models import AboutTextField8
-from .models import BilletTextField
-from .models import BilletTextField2
-from .models import BilletTextField3
-from .models import BilletTextField4
-from .models import BilletTextField5
-from .models import BilletTextField6
-from .models import BilletTextField7
-from .models import BilletTextField8
-from .models import FaqTextField
-from .models import FaqTextField2
-from .models import FaqTextField3
-from .models import FaqTextField4
-from .models import FaqTextField5
-from .models import FaqTextField6
-from .models import FaqTextField7
-from .models import FaqTextField8
-from .models import FaqTextField9
-from .models import FaqTextField10
-from .models import FaqTextField11
-from .models import FaqTextField12
-from .models import FaqTextField13
-from .models import FaqTextField14
-from .models import FaqTextField15
-from .models import FaqTextField16
-from .models import FaqTextField17
-from .models import FaqTextField18
-from .models import StaffRanksTextField
-from .models import StaffRanksTextField2
-from .models import StaffRanksTextField3
-from .models import StaffRanksTextField4
-from .models import StaffRanksTextField5
-from .models import StaffRanksTextField6
-from .models import StaffRanksTextField7
-from .models import StaffRanksTextField8
-from .models import StaffRanksTextField9
-from .models import StaffRanksTextField10
-from .models import StaffRanksTextField11
-from .models import StaffRanksTextField12
-from .models import StaffRanksTextField13
-from .models import StaffRanksTextField14
-from .models import StaffRanksTextField15
-from .models import StaffRanksTextField16
-from .models import StaffRanksTextField17
-from .models import StaffRanksTextField18
-from .models import MegaCoinsTextField
-from .models import MegaCoinsTextField2
-from .models import MegaCoinsTextField3
-from .models import MegaCoinsTextField4
-from .models import MegaCoinsTextField5
-from .models import MegaCoinsTextField6
-from .models import MegaCoinsTextField7
-from .models import MegaCoinsTextField8
-from .models import InformationTextField
-from .models import InformationTextField2
-from .models import InformationTextField3
-from .models import InformationTextField4
-from .models import InformationTextField5
-from .models import InformationTextField6
-from .models import InformationTextField7
-from .models import InformationTextField8
-from .models import InformationTextField9
-from .models import ContentTextField
-from .models import ContentTextField2
-from .models import ContentTextField3
-from .models import ContentTextField4
-from .models import ContentTextField5
-from .models import ContentTextField6
-from .models import ContentTextField7
-from .models import ContentTextField8
-from .models import BaseCopyrightTextField
+
 from .models import NavBar
 from .models import NavBarHeader
 from .models import DonateIcon
 from .models import Titled
 from .models import AdvertisementBase
 # from .models import Background2aImage
-from .forms import MyForm
 from .forms import PosteForm
 from .forms import PostForm
 from .forms import Postit
@@ -191,30 +108,7 @@ from .forms import StaffRanksBackgroundImagery
 from .forms import MegaBackgroundImagery
 from .forms import EventBackgroundImagery
 from .forms import NewsBackgroundImagery
-from .forms import TextFielde
-from .forms import TextFielde2
-from .forms import TextFielde3
-from .forms import TextFielde4
-from .forms import TextFielde5
-from .forms import TextFielde6
-from .forms import TextFielde7
-from .forms import TextFielde8
-from .forms import BilletTextFielde
-from .forms import BilletTextFielde2
-from .forms import BilletTextFielde3
-from .forms import BilletTextFielde4
-from .forms import BilletTextFielde5
-from .forms import BilletTextFielde6
-from .forms import BilletTextFielde7
-from .forms import BilletTextFielde8
-from .forms import AboutTextFielde
-from .forms import AboutTextFielde2
-from .forms import AboutTextFielde3
-from .forms import AboutTextFielde4
-from .forms import AboutTextFielde5
-from .forms import AboutTextFielde6
-from .forms import AboutTextFielde7
-from .forms import AboutTextFielde8
+
 from .forms import BaseCopyrightTextField
 from .forms import ContactForme
 from .forms import SignUpForm
@@ -230,7 +124,7 @@ from django.urls import reverse_lazy
 from django.views.generic import UpdateView
 from .forms import ProfileForm
 from django.contrib.auth.models import User
-from .models import BlogPost
+from .models import Blog
 from .models import UserProfile2
 from django.views.generic.edit import FormMixin
 
@@ -393,6 +287,105 @@ class BlogBaseView(ListView):
         return context
 
 
+from .models import Preference
+
+
+@login_required
+def postpreference(request, postid, userpreference):
+    if request.method == "POST":
+        eachpost = get_object_or_404(Post, id=postid)
+
+        obj = ''
+
+        valueobj = ''
+
+        try:
+            obj = Preference.objects.get(user=request.user, post=eachpost)
+
+            valueobj = obj.value  # value of userpreference
+
+            valueobj = int(valueobj)
+
+            userpreference = int(userpreference)
+
+            if valueobj != userpreference:
+                obj.delete()
+
+                upref = Preference()
+                upref.user = request.user
+
+                upref.post = eachpost
+
+                upref.value = userpreference
+
+                if userpreference == 1 and valueobj != 1:
+                    eachpost.likes += 1
+                    eachpost.dislikes -= 1
+                elif userpreference == 2 and valueobj != 2:
+                    eachpost.dislikes += 1
+                    eachpost.likes -= 1
+
+                upref.save()
+
+                eachpost.save()
+
+                context = {'eachpost': eachpost,
+                           'postid': postid}
+
+                return render(request, 'showcase:blog_comment.html', context)
+
+            elif valueobj == userpreference:
+                obj.delete()
+
+                if userpreference == 1:
+                    eachpost.likes -= 1
+                elif userpreference == 2:
+                    eachpost.dislikes -= 1
+
+                eachpost.save()
+
+                context = {'eachpost': eachpost,
+                           'postid': postid}
+
+                return render(request, 'showcase:blog_comment.html', context)
+
+
+
+
+        except Preference.DoesNotExist:
+            upref = Preference()
+
+            upref.user = request.user
+
+            upref.post = eachpost
+
+            upref.value = userpreference
+
+            userpreference = int(userpreference)
+
+            if userpreference == 1:
+                eachpost.likes += 1
+            elif userpreference == 2:
+                eachpost.dislikes += 1
+
+            upref.save()
+
+            eachpost.save()
+
+            context = {'eachpost': eachpost,
+                       'postid': postid}
+
+            return render(request, 'showcase:blog_comment.html', context)
+
+
+    else:
+        eachpost = get_object_or_404(Post, id=postid)
+        context = {'eachpost': eachpost,
+                   'postid': postid}
+
+        return render(request, 'showcase:blog_comment.html', context)
+
+
 class DonateBaseView(ListView):
     model = "donatebase.html"
     model = LogoBase
@@ -422,11 +415,11 @@ class usersview(ListView):
     template_name = 'users.html'
 
     def get_queryset(self):
-        return Post.objects.all()
+        return Idea.objects.all()
 
 
 class PostList(ListView):
-    model = BlogPost
+    model = BlogBackgroundImage
     # backgroundqueryset = BackgroundImageBase.objects.filter('page').order_by('position')
     # queryset = Blog.objects.filter(status=1).order_by('-created_on')
     # normally can only filter once per view
@@ -440,25 +433,14 @@ class PostList(ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
-
+        context['BlogPosts'] = Blog.objects.filter(status=1).order_by('-created_on')
         return context
 
-        data = super().get_context_data(**kwargs)
-
-        likes_connected = get_object_or_404(BlogPost, id=self.kwargs['slug'])
-        liked = False
-        if likes_connected.likes.filter(id=self.request.user.id).exists():
-            liked = True
-        data['number_of_likes'] = likes_connected.number_of_likes()
-        data['post_is_liked'] = liked
-        return data
-
     def get_queryset(self):
-        return BlogPost.objects.filter(status=1).order_by('-created_on')
+        return Blog.objects.filter(status=1).order_by('-created_on')
 
 
 class votingview(ListView):
@@ -475,11 +457,11 @@ class votingview(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Poste'] = Poste.objects.all()
+        context['Vote'] = Vote.objects.all()
         return context
 
     def get_queryset(self):
-        return Poste.objects.all()
+        return Vote.objects.all()
 
 
 class partnerview(ListView):
@@ -487,7 +469,7 @@ class partnerview(ListView):
     template_name = 'partners.html'
 
     def get_queryset(self):
-        return Partner.objects.all()
+        return PartnerApplication.objects.all()
 
 
 class newsfeedview(ListView):
@@ -529,82 +511,57 @@ class supportview(ListView):
     def get_queryset(self):
         return Support.objects.all()
 
+class PatreonBackgroundView(ListView):
+   model = Patreon
+   template_name = "patreon.html"
 
-class BlogPostDetailView(DetailView):
-    model = BlogPost
-    template_name = 'post_detail.html'
-
-    # context_object_name = 'object'
-
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-
-        likes_connected = get_object_or_404(BlogPost, id=self.kwargs['slug'])
-        liked = False
-        if likes_connected.likes.filter(id=self.request.user.id).exists():
-            liked = True
-        data['number_of_likes'] = likes_connected.number_of_likes()
-        data['post_is_liked'] = liked
-        return data
+   def get_context_data(self, **kwargs):
+       context = super().get_context_data(**kwargs)
+       # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+       context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+       context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+           "position")
+       # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+       context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+       # context['Patreon'] = Patreon.objects.all()
+       return context
 
 
-class PostDetail(generic.DetailView):
-    model = PostLikes
+class BlogComment(generic.DetailView):
+    model = Blog
     paginate_by = 10
-    template_name = 'post_detail.html'
+    template_name = 'blog_comment.html'
 
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
+    def post(self, request, slug, *args, **kwargs):
+        most_recent = Blog.objects.order_by('-created_on')[:3]
 
-        likes_connected = get_object_or_404(BlogPost, id=self.kwargs['slug'])
-        liked = False
-        if likes_connected.likes.filter(id=self.request.user.id).exists():
-            liked = True
-        data['number_of_likes'] = likes_connected.number_of_likes()
-        data['post_is_liked'] = liked
-        return data
+        post = get_object_or_404(Blog, slug=slug)
+        category_count = post.likes
 
-    def post(self, request, slug):
-        # category_count = get_category_count()
-        # most_recent = Blog.objects.order_by('-timestamp')[:3]
-        post = get_object_or_404(BlogPost, id=id)
-        if request.user.is_authenticated and request.user not in post.likes.all():
-            post.likes.add(request.user)
-        else:
-            post.likes.remove(request.user)
+        #if request.user.is_authenticated:
+        #    BlogLikeView.objects.get_or_create(user=request.user, post=post)
 
-        return HttpResponseRedirect(reverse('post_detail', args=[str(slug)]))
-
-    # @login_required
-    def post_detail(self, request):
-        template_name = 'post_detail.html'
-        post = get_object_or_404(BlogPost, id=id)
-        comments = post.comments.filter(active=True).order_by("-created_on")
-        new_comment = None
-        # Comment posted
-        if request.method == 'POST':
-            comment_form = CommentForm(data=request.POST)
-            if comment_form.is_valid():
-                # Create Comment object but don't save to database yet
-                new_comment = comment_form.save(commit=False)
-                # Assign the current post to the comment
-                new_comment.blog = post
-                # Save the comment to the database
-                new_comment.save()
-        else:
-            comment_form = CommentForm()
-
-        return render(
-            request, template_name, {
-                'post': post,
-                'comments': comments,
-                'new_comment': new_comment,
-                'comment_form': comment_form
-            })
+        form = CommentForm(request.POST or None)
+        if request.method == "POST":
+            if form.is_valid():
+                form.instance.user = request.user
+                form.instance.post = post
+                form.save()
+                return redirect(reverse("blog_comment", kwargs={
+                    'id': post.pk
+                }))
+        context = {
+            'form': form,
+            'post': post,
+            'most_recent': most_recent,
+            'category_count': category_count,
+            'form': form
+        }
+        return render(request, 'blog_comment.html', context)
 
 
 def BlogPostLike(request, slug):
-    post = get_object_or_404(BlogPost, id=request.POST.get('blogpost_id'))
+    post = get_object_or_404(Blog, id=request.POST.get('blog_id'))
     if post.likes.filter(id=request.user.id).exists():
         post.likes.remove(request.user)
     else:
@@ -776,7 +733,7 @@ class ShowcaseBackgroundView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        context['ShowcasePost'] = ShowcasePost.objects.all()
+        context['UpdateProfile'] = UpdateProfile.objects.all()
         return context
 
 
@@ -837,7 +794,7 @@ class BlogBackgroundView(ListView):
     model = BlogBackgroundImage
     template_name = "blog.html"
 
-    queryset = BlogPost.objects.filter(status=1).order_by('-created_on')
+    queryset = Blog.objects.filter(status=1).order_by('-created_on')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -857,26 +814,10 @@ class BlogCreatePostView(CreateView):
     success_url = reverse_lazy("blog")
 
 
-class PatreonBackgroundView(ListView):
-    model = Patreon
-    template_name = "patreon.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        # context['Patreon'] = Patreon.objects.all()
-        return context
-
-
 # @login_required
 # @RegularUserRequiredMixin
 class PostBackgroundView(FormMixin, ListView):
-    model = ShowcasePost
+    model = UpdateProfile
     template_name = "post_edit.html"
     form_class = PostForm
 
@@ -937,16 +878,6 @@ class BilletCreatePostView(CreateView):
     form_class = BilletBackgroundImagery
     template_name = "billetbackgroundimagechange.html"
     success_url = reverse_lazy("billets")
-
-
-from .models import RuleTextField
-from .models import RuleTextField2
-from .models import RuleTextField3
-from .models import RuleTextField4
-from .models import RuleTextField5
-from .models import RuleTextField6
-from .models import RuleTextField7
-from .models import RuleTextField8
 
 
 class RuleBackgroundView(BaseView):
@@ -1013,7 +944,7 @@ class FaqCreatePostView(CreateView):
 
 
 class StaffBackgroundView(BaseView):
-    model = StaffBackgroundImage
+    model = BackgroundImage
     template_name = "staff.html"
 
     def get_context_data(self, **kwargs):
@@ -1038,7 +969,6 @@ class StaffApplyBackgroundView(FormMixin, ListView):
     form_class = StaffJoin
 
     def get_context_data(self, **kwargs):
-        print(124)
         context = super().get_context_data(**kwargs)
         context['StaffApplyBackgroundImage'] = StaffApplyBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -1262,7 +1192,7 @@ class PartnerBackgroundView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Partner'] = Partner.objects.all()
+        context['Partner'] = PartnerApplication.objects.all()
         return context
 
 
@@ -1277,7 +1207,7 @@ class ShareBackgroundView(BaseView):
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['Idea'] = Post.objects.all()
+        context['Idea'] = Idea.objects.all()
         return context
 
 
@@ -1472,7 +1402,7 @@ def poste(request):
 
 
 class PostBackgroundView(FormMixin, ListView):
-    model = ShowcasePost
+    model = UpdateProfile
     template_name = "post_edit.html"
     form_class = PostForm
 
@@ -1503,7 +1433,7 @@ class PostView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Post'] = Post.objects.all()
+        context['Idea'] = Idea.objects.all()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1574,7 +1504,7 @@ class PostingView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Post'] = Post.objects.all()
+        context['Idea'] = Idea.objects.all()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1603,7 +1533,7 @@ class PosteView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Poste'] = Poste.objects.all()
+        context['Vote'] = Vote.objects.all()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1720,7 +1650,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 class SearchResultsView(ListView):
-    model = City, Poste, ShowcasePost, Post, Partner, UserProfile2
+    model = City, Vote, UpdateProfile, Idea, PartnerApplication, UserProfile2
     template_name = 'search_results.html'
 
     def get_queryset(self):
@@ -1728,19 +1658,19 @@ class SearchResultsView(ListView):
         city_list = City.objects.filter(
             Q(name__icontains=query) | Q(state__icontains=query))
 
-        vote_list = Poste.objects.filter(
+        vote_list = Vote.objects.filter(
             Q(name__icontains=query) | Q(catagory__icontains=query)
             | Q(description__icontains=query) | Q(image__icontains=query))
 
-        profile_list = ShowcasePost.objects.filter(
+        profile_list = UpdateProfile.objects.filter(
             Q(name__icontains=query) | Q(description__icontains=query)
             | Q(image__icontains=query))
 
-        idea_list = Post.objects.filter(
+        idea_list = Idea.objects.filter(
             Q(name__icontains=query) | Q(catagory__icontains=query)
             | Q(description__icontains=query) | Q(image__icontains=query))
 
-        partner_list = Partner.objects.filter(
+        partner_list = PartnerApplication.objects.filter(
             Q(name__icontains=query) | Q(description__icontains=query)
             | Q(server_invite__icontains=query))
 
@@ -1810,7 +1740,7 @@ class StaffJoine(ListView):
 
 # @RegularUserRequiredMixin
 class PunishAppsBackgroundView(FormMixin, ListView):
-    model = PunishAppeal
+    model = PunishmentAppeal
     template_name = "punishapps.html"
     form_class = PunishAppeale
 
@@ -1824,19 +1754,19 @@ class PunishAppsBackgroundView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['PunishApps'] = PunishAppeal.objects.all()
+        context['PunishApps'] = PunishmentAppeal.objects.all()
         return context
 
     # @login_required
     def unpunish(self, request, *args, **kwargs):
         if (request.method == "POST"):
-            form = PunishAppeal(request.POST)
+            form = PunishmentAppeal(request.POST)
             if (form.is_valid()):
                 post = form.save(commit=False)
                 post.save()
                 return redirect('showcase:punishdone')
         else:
-            form = PunishAppeal()
+            form = PunishmentAppeal()
             return render(request, 'punishapps.html', {'form': form})
             messages.error(
                 request, 'Form submission failed to register, please try again.')
@@ -1962,6 +1892,7 @@ class ContactSuccessView(TemplateView):
         context["Contact"] = "2123123123123"
         return context
 
+
 def businessemailcontactView(request):
     if request.method == 'GET':
         form = BusinessContactForm()
@@ -1980,6 +1911,7 @@ def businessemailcontactView(request):
     print('success')
     # pdb.set_trace()
     return render(request, "email.html", {'form': form})
+
 
 class BusinessMailingView(FormView):
     template_name = 'businessemail.html'
@@ -2006,9 +1938,39 @@ class contact(TemplateView):
     paginate_by = 10
     template_name = 'email.html'
 
+
 class businessemailcontact(TemplateView):
     paginate_by = 10
     template_name = 'businessemail.html'
+
+
+@login_required
+def post_detail(request, slug):
+    template_name = 'post_detail.html'
+    post = get_object_or_404(Blog, slug=slug)
+    comments = post.comments.filter(active=True).order_by("-created_on")
+    new_comment = None
+    # Comment posted
+    if request.method == 'POST':
+        comment_form = CommentForm(data=request.POST)
+        if comment_form.is_valid():
+            # Create Comment object but don't save to database yet
+            new_comment = comment_form.save(commit=False)
+            # Assign the current post to the comment
+            new_comment.blog = post
+            # Save the comment to the database
+            new_comment.save()
+    else:
+        comment_form = CommentForm()
+
+    return render(
+        request, template_name, {
+            'post': post,
+            'comments': comments,
+            'new_comment': new_comment,
+            'comment_form': comment_form
+        })
+
 
 # users/views.py
 
@@ -3047,11 +3009,13 @@ class ContactSuccessView(BaseView):
         context = super().get_context_data(**kwargs)
         # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
         context['Contact'] = Contact.objects.all()[len(Contact.objects.all()) - 1]
         print(context["Contact"])
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         return context
+
 
 class BusinessEmailViewe(CreateView):
     template_name = 'businessemail.html'
@@ -3071,7 +3035,8 @@ class BusinessEmaiSuccessView(BaseView):
         context = super().get_context_data(**kwargs)
         # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
         context['Contact'] = Contact.objects.all()[len(Contact.objects.all()) - 1]
         print(context["Contact"])
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")

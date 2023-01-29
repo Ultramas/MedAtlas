@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".', max_length=100)),
-                ('catagory', models.CharField(help_text='Please let us know what form of news this is.', max_length=200)),
+                ('category', models.CharField(help_text='Please let us know what form of news this is.', max_length=200)),
                 ('description', models.TextField(help_text='Write the news here.')),
                 ('image', models.FileField(help_text='Please provide a cover image for the news.', upload_to='')),
             ],

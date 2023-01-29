@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='poste',
-            name='catagory',
-            field=models.CharField(help_text='Type the catagory that you are voting on (server layout, event idea, administration position, etc).', max_length=100),
+            name='category',
+            field=models.CharField(help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).', max_length=100),
         ),
     ]

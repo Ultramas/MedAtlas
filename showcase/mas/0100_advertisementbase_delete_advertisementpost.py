@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 ('correlating_product', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='showcase.item')),
             ],
             options={
-                'verbose_name': 'Image Carousel Post',
+                'verbose_name': 'Image Carousel Idea',
                 'verbose_name_plural': 'Image Carousel Posts',
             },
         ),
