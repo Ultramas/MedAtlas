@@ -94,6 +94,7 @@ from .views import (
     ChangePasswordView,
     PerksBackgroundView,
     IssueBackgroundView,
+    detail_post_view,
     postpreference,
 
 )
@@ -109,6 +110,7 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
 
+    re_path(r'^(id)/$', detail_post_view, name='like'),
     re_path(r'^postid/preference/(?P<userpreference>\d+)/$', postpreference, name='postpreference'),
 
     # add these
@@ -280,7 +282,7 @@ urlpatterns = [
     path('businessemail/', views.BusinessMailingView.as_view(), name='businessemail'),
     path('businessemail/businessmailingsuccess', views.BusinessSuccessMailingView.as_view(), name='businessmailingsuccess'),
     #path('<slug:slug>/', views.BlogComment.as_view(), name='post_detail'),
-    path('blogpost-like/<int:pk>/', views.BlogPostLike, name='blogpost_like'),
+    #path('blogpost-like/<int:pk>/', views.BlogPostLike, name='blogpost_like'),
     path('post/<slug:slug>/', views.BlogComment.as_view(), name='post_detail'),
     path('like/<username>/', profile, name='like'),
     path('home/<str:room>/', views.room, name='room'),

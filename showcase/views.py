@@ -290,6 +290,13 @@ class BlogBaseView(ListView):
 from .models import Preference
 
 
+def detail_post_view(request, id=None):
+    eachpost = get_object_or_404(Post, id=id)
+
+    context = {'eachpost': eachpost}
+
+    return render(request, 'showcase:likes.html', context)
+
 @login_required
 def postpreference(request, postid, userpreference):
     if request.method == "POST":
@@ -332,7 +339,7 @@ def postpreference(request, postid, userpreference):
                 context = {'eachpost': eachpost,
                            'postid': postid}
 
-                return render(request, 'showcase:blog_comment.html', context)
+                return render(request, 'showcase:likes', context)
 
             elif valueobj == userpreference:
                 obj.delete()
@@ -347,7 +354,7 @@ def postpreference(request, postid, userpreference):
                 context = {'eachpost': eachpost,
                            'postid': postid}
 
-                return render(request, 'showcase:blog_comment.html', context)
+                return render(request, 'showcase:likes.html', context)
 
 
 
@@ -375,7 +382,7 @@ def postpreference(request, postid, userpreference):
             context = {'eachpost': eachpost,
                        'postid': postid}
 
-            return render(request, 'showcase:blog_comment.html', context)
+            return render(request, 'showcase:likes.html', context)
 
 
     else:
@@ -383,8 +390,9 @@ def postpreference(request, postid, userpreference):
         context = {'eachpost': eachpost,
                    'postid': postid}
 
-        return render(request, 'showcase:blog_comment.html', context)
+        return render(request, 'showcase:likes.html', context)
 
+#id is used by this model but the blogpost uses slugs
 
 class DonateBaseView(ListView):
     model = "donatebase.html"
@@ -560,14 +568,14 @@ class BlogComment(generic.DetailView):
         return render(request, 'blog_comment.html', context)
 
 
-def BlogPostLike(request, slug):
-    post = get_object_or_404(Blog, id=request.POST.get('blog_id'))
-    if post.likes.filter(id=request.user.id).exists():
-        post.likes.remove(request.user)
-    else:
-        post.likes.add(request.user)
+#def BlogPostLike(request, slug):
+#    post = get_object_or_404(Blog, id=request.POST.get('blog_id'))
+#    if post.likes.filter(id=request.user.id).exists():
+#        post.likes.remove(request.user)
+#    else:
+#        post.likes.add(request.user)
 
-    return HttpResponseRedirect(reverse('showcase:post_detail', args=[str(slug)]))
+#    return HttpResponseRedirect(reverse('showcase:post_detail', args=[str(slug)]))
 
 
 # class BackgroundView(ListView):

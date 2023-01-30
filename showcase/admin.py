@@ -13,6 +13,7 @@ from .models import NewsFeed
 from .models import StaffProfile
 from .models import Event
 from .models import Blog
+from .models import Preference
 from .models import PostLikes
 from .models import Idea, Comment
 from .models import Profile
@@ -107,6 +108,7 @@ admin.site.register(NavBarHeader)
 admin.site.register(UserProfile)
 admin.site.register(UserProfile2)
 admin.site.register(Support)
+admin.site.register(Preference)
 admin.site.register(PostLikes)
 admin.site.register(BackgroundImage)
 #admin.site.register(BackgroundImage2a)

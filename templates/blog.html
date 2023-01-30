@@ -10,13 +10,12 @@
 <a href="#" onClick="document.getElementById('likebutton').submit()">Like This Post</a> {{eachpost.likes}}   |   <a href="#" onClick="document.getElementById('dislikebutton').submit()">Dislike This Post</a> {{eachpost.dislikes}}
 
 
-<form id="likebutton" method="POST" action="/posts/{{eachpost.id}}/preference/1/">
+<form id="likebutton" method="POST" action="/blogpost-like/{{eachpost.id}}/preference/1/">
 {% csrf_token %}
-    hiiiiiiiiiiiiiiii
 <input type="hidden">
 </form>
 
-<form id="dislikebutton" method="POST" action="/posts/{{eachpost.id}}/preference/2/">
+<form id="dislikebutton" method="POST" action="/blogpost-like/{{eachpost.id}}/preference/2/">
 {% csrf_token %}
 <input type="hidden">
 </form>

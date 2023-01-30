@@ -361,7 +361,7 @@ class Blog(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
 
-        return reverse("post_detail", kwargs={"slug": str(self.slug)})
+        return reverse("showcase:post_detail", kwargs={"slug": str(self.slug)})
 
     def comment_count(self):
         return Comment.objects.filter(post=self).count()
@@ -376,8 +376,8 @@ class Blog(models.Model):
 class Preference(models.Model):
     DoesNotExist = None  # added outside tutorial
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    post = models.ForeignKey(Idea, on_delete=models.CASCADE, related_name='blog_posts')
-    value = models.IntegerField()
+    post = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='blog_posts')
+    value = models.IntegerField(help_text="1->Like, 2->Dislike")
     date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -385,6 +385,8 @@ class Preference(models.Model):
 
     class Meta:
         unique_together = ("user", "post", "value")
+        verbose_name = "Blog Like"
+        verbose_name_plural = "Blog Like"
 
 
 class Comment(models.Model):
@@ -407,11 +409,19 @@ class Comment(models.Model):
         return 'Comment {} by {}'.format(self.body, self.name)
 
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+
+        return reverse("showcase:post_detail", kwargs={"slug": self.post.slug})
+
 class PostLikes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, )
     post = models.ForeignKey(Idea, on_delete=models.CASCADE, )
     created = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "Post Like"
+        verbose_name_plural = "Post Likes"
 
 class Profile(models.Model):
     about_me = models.TextField()
