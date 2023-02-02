@@ -874,3 +874,10 @@ form input {
     text-shadow: 2px 2px 4px rgb(0 0 0 / 20%);
 }
 
+.like{
+text-decoration: none;
+}
+
+.dislike{
+text-decoration: none;
+}

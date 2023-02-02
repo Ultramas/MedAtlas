@@ -6,6 +6,13 @@
     {% for BlogBackgroundImage in Titles %}
       {% if BlogBackgroundImage.page == 'likes.html' %}
          {{ BlogBackgroundImage.overtitle }}
+      {% endif %}
+     {% endfor %}
+{% endblock title %}
+{% block content %}
+<head>
+  <meta http-equiv="refresh" content="0; url=http://127.0.0.1:8000/blog/">
+  </head>
 
 <h1>Posts</h1>
 
@@ -31,3 +38,4 @@
 {% csrf_token %}
 <input type="hidden">
 </form>
+{% endblock content %}

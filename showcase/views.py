@@ -248,6 +248,18 @@ class AdvertisementView(ListView):
         context['Advertisement'] = AdvertisementBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
+    def handle_uploaded_image(i):
+        # resize image
+        imagefile  = StringIO.StringIO(i.read())
+        imageImage = Image.open(imagefile)
+
+        (width, height) = imageImage.size
+        (width, height) = scale_dimensions(width, height, longest_side=240)
+
+        resizedImage = imageImage.resize((width, height))
+
+        imagefile = StringIO.StringIO()
+        resizedImage.save(imagefile,'JPEG')
 
 class BaseView(ListView):
     template_name = "base.html"
@@ -298,99 +310,33 @@ def detail_post_view(request, id=None):
     return render(request, 'showcase:likes.html', context)
 
 @login_required
-def postpreference(request, postid, userpreference):
+def postpreference(request, post_name, like_or_dislike):
     if request.method == "POST":
-        eachpost = get_object_or_404(Post, id=postid)
+        eachpost = get_object_or_404(Blog, slug=post_name)
 
-        obj = ''
+        if request.user in eachpost.likes.iterator():
+            eachpost.likes.remove(request.user)
+        if request.user in eachpost.dislikes.iterator():
+            eachpost.dislikes.remove(request.user)
 
-        valueobj = ''
+        if int(like_or_dislike) == 1:
+            eachpost.likes.add(request.user)
+        else:
+            eachpost.dislikes.add(request.user)
 
-        try:
-            obj = Preference.objects.get(user=request.user, post=eachpost)
+        context = {'eachpost': eachpost,
+                   'post_name': post_name}
 
-            valueobj = obj.value  # value of userpreference
-
-            valueobj = int(valueobj)
-
-            userpreference = int(userpreference)
-
-            if valueobj != userpreference:
-                obj.delete()
-
-                upref = Preference()
-                upref.user = request.user
-
-                upref.post = eachpost
-
-                upref.value = userpreference
-
-                if userpreference == 1 and valueobj != 1:
-                    eachpost.likes += 1
-                    eachpost.dislikes -= 1
-                elif userpreference == 2 and valueobj != 2:
-                    eachpost.dislikes += 1
-                    eachpost.likes -= 1
-
-                upref.save()
-
-                eachpost.save()
-
-                context = {'eachpost': eachpost,
-                           'postid': postid}
-
-                return render(request, 'showcase:likes', context)
-
-            elif valueobj == userpreference:
-                obj.delete()
-
-                if userpreference == 1:
-                    eachpost.likes -= 1
-                elif userpreference == 2:
-                    eachpost.dislikes -= 1
-
-                eachpost.save()
-
-                context = {'eachpost': eachpost,
-                           'postid': postid}
-
-                return render(request, 'showcase:likes.html', context)
-
-
-
-
-        except Preference.DoesNotExist:
-            upref = Preference()
-
-            upref.user = request.user
-
-            upref.post = eachpost
-
-            upref.value = userpreference
-
-            userpreference = int(userpreference)
-
-            if userpreference == 1:
-                eachpost.likes += 1
-            elif userpreference == 2:
-                eachpost.dislikes += 1
-
-            upref.save()
-
-            eachpost.save()
-
-            context = {'eachpost': eachpost,
-                       'postid': postid}
-
-            return render(request, 'showcase:likes.html', context)
-
+        return render(request, 'likes.html', context)
 
     else:
-        eachpost = get_object_or_404(Post, id=postid)
+        eachpost = get_object_or_404(Blog, slug=post_name)
         context = {'eachpost': eachpost,
-                   'postid': postid}
+                   'post_name': post_name}
 
         return render(request, 'showcase:likes.html', context)
+
+#like is not connected to blog yet is used to filter
 
 #id is used by this model but the blogpost uses slugs
 
@@ -717,6 +663,7 @@ class EBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['items'] = Item.objects.filter(is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
@@ -1938,6 +1885,7 @@ class BusinessSuccessMailingView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["BusinessMailingContact"] = Contact.objects.all()[len(Contact.objects.all()) - 1]
+        #might produce error due to lack of list of contacts
 
         return context
 
@@ -2812,8 +2760,8 @@ from django.contrib.auth import update_session_auth_hash
 #    return render(request,'showcase/index.html',args)
 
 
-def profile(request):
-    args = {'user': request.user}
+def profile(request, username):
+    args = {'user': username}
     return render(request, 'profile.html', args)
 
 

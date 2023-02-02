@@ -111,7 +111,9 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
 
     re_path(r'^(id)/$', detail_post_view, name='like'),
-    re_path(r'^postid/preference/(?P<userpreference>\d+)/$', postpreference, name='postpreference'),
+    path(r'blogpost-like/<str:post_name>/preference/<like_or_dislike>/', postpreference, name='preference'),
+    #path(r'blogpost-like/<slug:slug>/preference/<like_or_dislike>/', postpreference, name='preference'),
+    #path('preference/<int:like_or_dislike>/', postpreference, name='preference'),
 
     # add these
     path('showcase/', views.ShowcaseBackgroundView.as_view(), name='showcase'),
@@ -280,10 +282,10 @@ urlpatterns = [
     path('contactbase/', views.TemplateView.as_view(template_name='contactbase.html'), name='contactbase'),
     path('email/', TemplateView.as_view(template_name='email.html'), name='email'),
     path('businessemail/', views.BusinessMailingView.as_view(), name='businessemail'),
-    path('businessemail/businessmailingsuccess', views.BusinessSuccessMailingView.as_view(), name='businessmailingsuccess'),
+    path('businessemail/success', views.BusinessSuccessMailingView.as_view(), name='businessmailingsuccess'),
     #path('<slug:slug>/', views.BlogComment.as_view(), name='post_detail'),
     #path('blogpost-like/<int:pk>/', views.BlogPostLike, name='blogpost_like'),
-    path('post/<slug:slug>/', views.BlogComment.as_view(), name='post_detail'),
+    path('post/<slug:slug>/', views.post_detail, name='post_detail'),
     path('like/<username>/', profile, name='like'),
     path('home/<str:room>/', views.room, name='room'),
     path('home/checkview', views.checkview, name='checkview'),

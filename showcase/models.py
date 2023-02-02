@@ -336,9 +336,9 @@ class Blog(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=0)
     image = models.ImageField(upload_to='images/')
-    # likes = models.ManyToManyField(User, blank=True, verbose_name='post likes')
-    likes = models.IntegerField(default=0)
-    dislikes = models.IntegerField(default=0)
+    likes = models.ManyToManyField(User, blank=True, verbose_name='post likes')
+    #likes = models.IntegerField(default=0)
+    dislikes = models.ManyToManyField(User, blank=True, verbose_name='post dislikes', related_name="post_dislikes")
     # blogbackgroundimage
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -1734,13 +1734,14 @@ class CheckoutAddress(models.Model):
 class ImageCarousel(models.Model):
     carouseltitle = models.CharField(max_length=100, help_text='Title of the image.', verbose_name="title")
     carouselcaption = models.TextField(help_text='Caption for the image.', verbose_name="caption")
-    carouselimage = models.ImageField(help_text='Link a URL for your profile (scales to your picture`s dimensions.)',
+    carouselimage = models.ImageField(help_text='Upload an image for the carousel.)',
                                       upload_to='images/', verbose_name='image')
     carouselposition = models.IntegerField(help_text='Positioning of the image within the carousel.',
                                            verbose_name='position')
     carouseltotal = models.IntegerField(help_text='Total number of images within the carousel.',
                                         verbose_name='total images')
     carouselpage = models.TextField(verbose_name="Page Name")
+    hyperlink = models.TextField(verbose_name="Hyperlink")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1755,13 +1756,16 @@ class ImageCarousel(models.Model):
 class AdvertisementBase(models.Model):
     advertisementtitle = models.CharField(max_length=100, help_text='Advertisement title.',
                                           verbose_name="advertisement title")
-    advertisement = models.ImageField(help_text='Image of the advertisement.', upload_to='images/')
+    advertisement = models.ImageField(help_text='Image of the advertisement.', upload_to='images/',
+    height_field = "advertisement_width",
+    width_field = "advertisement_length")
+    advertisement_width = models.PositiveIntegerField(null=True, blank=True, editable=False, default="100",
+                                                      help_text='Width of the advertisement (in percent relative).',
+                                                      verbose_name="advertisement width")
+    advertisement_length = models.PositiveIntegerField(null=True, blank=True, editable=False, default="100", help_text='Length of the advertisement (in percent relative).',
+                                               verbose_name="advertisement length")
     position = models.IntegerField(help_text='Positioning of the advertisement.')
     page = models.TextField(verbose_name="Page Name")
-    advertisement_width = models.IntegerField(help_text='Width of the advertisement (in percent relative).',
-                                              verbose_name="advertisement width")
-    advertisement_length = models.IntegerField(help_text='Length of the advertisement (in percent relative).',
-                                               verbose_name="advertisement length")
     xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position")
     yposition = models.IntegerField(help_text='x-position.', verbose_name="y-position")
     relevance = models.TextField(help_text='Relevance of advertisement')
