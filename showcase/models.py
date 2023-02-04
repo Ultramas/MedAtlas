@@ -1799,8 +1799,8 @@ class ImageBase(models.Model):
     title = models.CharField(max_length=100, help_text='Advertisement title.',
                                           verbose_name="advertisement title")
     image = models.ImageField(help_text='Image of the advertisement.', upload_to='images/',
-                                      height_field="advertisement_length",
-                                      width_field="advertisement_width")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
+                                      height_field="image_length",
+                                      width_field="image_width")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
     image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
                                                       help_text='Width of the advertisement (in percent relative).',
                                                       verbose_name="advertisement width")
