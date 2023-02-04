@@ -1,3 +1,4 @@
+from PIL.Image import Image
 from django.db import models
 from django.contrib.auth.models import User
 from uuid import uuid4
@@ -1757,20 +1758,21 @@ class AdvertisementBase(models.Model):
     advertisementtitle = models.CharField(max_length=100, help_text='Advertisement title.',
                                           verbose_name="advertisement title")
     advertisement = models.ImageField(help_text='Image of the advertisement.', upload_to='images/',
-    height_field = "advertisement_width",
-    width_field = "advertisement_length")
-    advertisement_width = models.PositiveIntegerField(null=True, blank=True, editable=False, default="100",
+    height_field = "advertisement_length",
+    width_field = "advertisement_width") #the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
+    advertisement_width = models.PositiveIntegerField(blank=True, null=True, default="100",
                                                       help_text='Width of the advertisement (in percent relative).',
                                                       verbose_name="advertisement width")
-    advertisement_length = models.PositiveIntegerField(null=True, blank=True, editable=False, default="100", help_text='Length of the advertisement (in percent relative).',
+    advertisement_length = models.PositiveIntegerField(blank=True, null=True, default="100", help_text='Length of the advertisement (in percent relative).',
                                                verbose_name="advertisement length")
-    position = models.IntegerField(help_text='Positioning of the advertisement.')
+    advertisement_position = models.IntegerField(help_text='Positioning of the advertisement.', verbose_name='Position')
     page = models.TextField(verbose_name="Page Name")
     xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position")
     yposition = models.IntegerField(help_text='x-position.', verbose_name="y-position")
     relevance = models.TextField(help_text='Relevance of advertisement')
     correlating_product = models.OneToOneField(Item, blank=True, null=True, on_delete=models.CASCADE)
     type = models.CharField(max_length=200, help_text='Type of product.')
+    advertisement_hyperlink = models.TextField(verbose_name="Hyperlink")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1781,6 +1783,49 @@ class AdvertisementBase(models.Model):
         verbose_name = "Advertisement Base"
         verbose_name_plural = "Advertisement Base"
 
+    from io import StringIO
+    from PIL import Image
+
+    def save(self, advertisement_length=None, advertisement_width=None, *args, **kwargs):
+        super().save(*args, **kwargs)
+        img = Image.open(self.image.path)
+
+        if 1 == 1:
+            output_size = (advertisement_length, advertisement_width)
+            img.thumbnail(output_size)
+            img.save(self.image.path)
+
+class ImageBase(models.Model):
+    title = models.CharField(max_length=100, help_text='Advertisement title.',
+                                          verbose_name="advertisement title")
+    image = models.ImageField(help_text='Image of the advertisement.', upload_to='images/',
+                                      height_field="advertisement_length",
+                                      width_field="advertisement_width")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                                      help_text='Width of the advertisement (in percent relative).',
+                                                      verbose_name="advertisement width")
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                                       help_text='Length of the advertisement (in percent relative).',
+                                                       verbose_name="advertisement length")
+    image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position')
+    alternate = models.TextField(verbose_name="Alternate Text")
+    page = models.TextField(verbose_name="Page Name")
+    xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position")
+    yposition = models.IntegerField(help_text='x-position.', verbose_name="y-position")
+    relevance = models.TextField(help_text='Relevance of advertisement')
+    correlating_product = models.OneToOneField(Item, blank=True, null=True, on_delete=models.CASCADE)
+    #try incorporating other models in addition to Item
+    type = models.CharField(max_length=200, help_text='Type of image.')
+    hyperlink = models.TextField(verbose_name="Hyperlink")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+    class Meta:
+        # Add verbose name
+        verbose_name = 'Image Base'
+        verbose_name_plural = 'Image Base'
 
 from django.utils import timezone
 

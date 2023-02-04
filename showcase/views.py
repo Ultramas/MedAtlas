@@ -74,6 +74,7 @@ from .models import NavBarHeader
 from .models import DonateIcon
 from .models import Titled
 from .models import AdvertisementBase
+from .models import ImageBase
 # from .models import Background2aImage
 from .forms import PosteForm
 from .forms import PostForm
@@ -260,6 +261,14 @@ class AdvertisementView(ListView):
 
         imagefile = StringIO.StringIO()
         resizedImage.save(imagefile,'JPEG')
+
+class ImageView(ListView):
+    model = ImageBase
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1)
+        return context
 
 class BaseView(ListView):
     template_name = "base.html"
@@ -644,7 +653,9 @@ class BackgroundView(BaseView):
         context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by(
             "carouselposition")
         context['Advertisement'] = AdvertisementBase.objects.filter(page=self.template_name, is_active=1).order_by(
-            "position")
+            "advertisement_position")
+        context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by(
+            "image_position")
         print(FaviconBase.objects.all())
         print(213324)
         return context

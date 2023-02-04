@@ -57,8 +57,10 @@
     <div class="parallax2" id = "leaders">
             {% for BackgroundImage in Advertisement %}
       {% if BackgroundImage.page == 'index.html' %}
+        <a href="{{BackgroundImage.advertisement_hyperlink}}">
           <img class = "backgroundimages" src="{{ BackgroundImage.advertisement.url}}" alt="{{ BackgroundImage.advertisementtitle}}" width="{{ BackgroundImage.advertisement_width }}"%; height="{{ BackgroundImage.advertisement_length }}"%;>
-      {% endif %}
+        </a>
+        {% endif %}
     {% endfor %}
 
   {% for BackgroundImage in Background %}
