@@ -96,6 +96,7 @@ from .views import (
     IssueBackgroundView,
     detail_post_view,
     postpreference,
+    AdvertisementView,
 
 )
 
@@ -133,7 +134,7 @@ urlpatterns = [
     path('featuredproducts/', views.Featured.as_view(), name='featuredproducts'),
     #path('post_edit/', views.post_new, name='post_edit'),
     path('vote/', views.PosteView.as_view(), name='vote'),
-    #path('share/', views.post, name='share'),
+    #path('share/, views.post, name='share'),
     path('share/', views.ShareBackgroundView.as_view(), name='share'),
     path('ideas/', views.PostView.as_view(), name='ideas'),
     path('cv-form/', views.SignupView.as_view(), name='cv-form'),
@@ -282,7 +283,7 @@ urlpatterns = [
     path('contactbase/', views.TemplateView.as_view(template_name='contactbase.html'), name='contactbase'),
     path('email/', TemplateView.as_view(template_name='email.html'), name='email'),
     path('businessemail/', views.BusinessMailingView.as_view(), name='businessemail'),
-    path('businessemail/success', views.BusinessSuccessMailingView.as_view(), name='businessmailingsuccess'),
+    path('businessmailingsuccess', views.BusinessEmailSuccessView.as_view(), name='businessmailingsuccess'),
     #path('<slug:slug>/', views.BlogComment.as_view(), name='post_detail'),
     #path('blogpost-like/<int:pk>/', views.BlogPostLike, name='blogpost_like'),
     path('post/<slug:slug>/', views.post_detail, name='post_detail'),

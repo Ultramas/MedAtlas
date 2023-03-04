@@ -704,11 +704,11 @@ class ContactForme(forms.ModelForm):
 
 class BusinessMailingForm(forms.ModelForm):
     class Meta:
-        model = Contact
+        model = BusinessMailingContact
         fields = {"name", "email", "inquiry", "message"}
 
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}),
+            "name": forms.TextInput(attrs={"class": "form-control"}), #get this instead of Contact.name in views
             "email": forms.TextInput(attrs={"class": "form-control"}),
             "inquiry": forms.TextInput(attrs={"class": "form-control"}),
             "message": forms.TextInput(attrs={"class": "form-control"})

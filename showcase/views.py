@@ -241,18 +241,67 @@ class LogoView(ListView):
         return context
 
 
+from io import BytesIO
+from PIL import Image
+from django.core.files.base import ContentFile
+
+
 class AdvertisementView(ListView):
     model = AdvertisementBase
+
+    def resize_image(request, id, width, height):
+        # Retrieve the image from the database
+        ad = AdvertisementBase.objects.get(id=id)
+
+        # Load the image using BytesIO
+        image_data = BytesIO(ad.advertisement.read())
+        img = Image.open(image_data)
+
+        # Resize the image to 300x300 pixels
+        img_resized = img.resize((int(width), int(height)), Image.ANTIALIAS)
+
+        # Save the resized image
+        image_data_resized = BytesIO()
+        img_resized.save(image_data_resized, format='JPEG')
+        ad.image.save('my_image_resized.jpg', ContentFile(image_data_resized.getvalue()), save=True)
+
+        return HttpResponse('Image resized and saved successfully.')
+
+    def position_image(request, id):
+        # Retrieve the image from the database
+        ad = AdvertisementBase.objects.get(id=id)
+
+        # Load the image using BytesIO
+        image_data = BytesIO(ad.advertisement.read())
+        img = Image.open(image_data)
+
+        # Create a new blank image to composite the resized image onto
+        bg = Image.new('RGB', (600, 600), (255, 255, 255))
+
+        # Resize the image to fit within a 400x400 square
+        img_resized = ImageOps.fit(img, (400, 400), Image.ANTIALIAS)
+
+        # Position the resized image in the center of the blank image
+        offset = ((bg.width - img_resized.width) // 2, (bg.height - img_resized.height) // 2)
+        bg.paste(img_resized, offset)
+
+        # Save the positioned image
+        image_data_positioned = BytesIO()
+        bg.save(image_data_positioned, format='JPEG')
+        ad.image.save('my_image_positioned.jpg', ContentFile(image_data_positioned.getvalue()), save=True)
+
+        return HttpResponse('Image positioned and saved successfully.')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Advertisement'] = AdvertisementBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
-    def handle_uploaded_image(i):
+
+"""    def handle_uploaded_image(i):
         # resize image
         imagefile  = StringIO.StringIO(i.read())
-        imageImage = Image.open(imagefile)
+        imageImage = Image
 
         (width, height) = imageImage.size
         (width, height) = scale_dimensions(width, height, longest_side=240)
@@ -260,7 +309,8 @@ class AdvertisementView(ListView):
         resizedImage = imageImage.resize((width, height))
 
         imagefile = StringIO.StringIO()
-        resizedImage.save(imagefile,'JPEG')
+        resizedImage.save(imagefile,'JPEG')"""
+
 
 class ImageView(ListView):
     model = ImageBase
@@ -269,6 +319,7 @@ class ImageView(ListView):
         context = super().get_context_data(**kwargs)
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1)
         return context
+
 
 class BaseView(ListView):
     template_name = "base.html"
@@ -318,6 +369,7 @@ def detail_post_view(request, id=None):
 
     return render(request, 'showcase:likes.html', context)
 
+
 @login_required
 def postpreference(request, post_name, like_or_dislike):
     if request.method == "POST":
@@ -345,9 +397,10 @@ def postpreference(request, post_name, like_or_dislike):
 
         return render(request, 'showcase:likes.html', context)
 
-#like is not connected to blog yet is used to filter
 
-#id is used by this model but the blogpost uses slugs
+# like is not connected to blog yet is used to filter
+
+# id is used by this model but the blogpost uses slugs
 
 class DonateBaseView(ListView):
     model = "donatebase.html"
@@ -474,20 +527,21 @@ class supportview(ListView):
     def get_queryset(self):
         return Support.objects.all()
 
-class PatreonBackgroundView(ListView):
-   model = Patreon
-   template_name = "patreon.html"
 
-   def get_context_data(self, **kwargs):
-       context = super().get_context_data(**kwargs)
-       # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
-       context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-       context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-           "position")
-       # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
-       context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-       # context['Patreon'] = Patreon.objects.all()
-       return context
+class PatreonBackgroundView(ListView):
+    model = Patreon
+    template_name = "patreon.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        # context['Patreon'] = Patreon.objects.all()
+        return context
 
 
 class BlogComment(generic.DetailView):
@@ -501,7 +555,7 @@ class BlogComment(generic.DetailView):
         post = get_object_or_404(Blog, slug=slug)
         category_count = post.likes
 
-        #if request.user.is_authenticated:
+        # if request.user.is_authenticated:
         #    BlogLikeView.objects.get_or_create(user=request.user, post=post)
 
         form = CommentForm(request.POST or None)
@@ -523,7 +577,7 @@ class BlogComment(generic.DetailView):
         return render(request, 'blog_comment.html', context)
 
 
-#def BlogPostLike(request, slug):
+# def BlogPostLike(request, slug):
 #    post = get_object_or_404(Blog, id=request.POST.get('blog_id'))
 #    if post.likes.filter(id=request.user.id).exists():
 #        post.likes.remove(request.user)
@@ -1824,6 +1878,7 @@ def contactView(request):
             subject = form.cleaned_data['subject']
             from_email = form.cleaned_data['from_email']
             message = form.cleaned_data['message']
+            print(from_email)
             try:
                 send_mail(subject, message, 'intellexcompany1@gmail.com', ['intellexcompany1@gmail.com'])
             except BadHeaderError:
@@ -1868,25 +1923,28 @@ def businessemailcontactView(request):
             subject = form.cleaned_data['subject']
             from_email = form.cleaned_data['from_email']
             message = form.cleaned_data['message']
+            print(from_email)
+            form.save()
             try:
                 send_mail(subject, message, from_email, ['intellexcompany1@gmail.com'])
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
 
-            return redirect('success')
+            return redirect('businessemailsuccess')
     print('success')
     # pdb.set_trace()
-    return render(request, "email.html", {'form': form})
+    return render(request, "businessemail.html", {'form': form})
 
 
 class BusinessMailingView(FormView):
     template_name = 'businessemail.html'
     form_class = BusinessMailingForm
-    success_url = 'success'
+    success_url = reverse_lazy('showcase:businessmailingsuccess')
 
     def form_valid(self, form):
         # Calls the custom send method
         form.send()
+        form.save()
         return super().form_valid(form)
 
 
@@ -1894,12 +1952,9 @@ class BusinessSuccessMailingView(TemplateView):
     template_name = 'businessmailingsuccess.html'
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["BusinessMailingContact"] = Contact.objects.all()[len(Contact.objects.all()) - 1]
-        #might produce error due to lack of list of contacts
-
+        context = super().get_context_data(kwargs)
+        context["BusinessMailingContact"] = "2123123123123"
         return context
-
 
 class contact(TemplateView):
     paginate_by = 10
@@ -2760,6 +2815,7 @@ from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 
 
+
 # from django.contrib.auth.decorators import login_required
 
 # def index1(request):
@@ -2986,7 +3042,7 @@ class ContactSuccessView(BaseView):
 
 class BusinessEmailViewe(CreateView):
     template_name = 'businessemail.html'
-    form_class = BusinessMailingForm
+    form_class = BusinessContactForm
     success_url = reverse_lazy('showcase:businessmailingsuccess')
 
     def form_valid(self, form):
@@ -2995,7 +3051,7 @@ class BusinessEmailViewe(CreateView):
         return super().form_valid(form)
 
 
-class BusinessEmaiSuccessView(BaseView):
+class BusinessEmailSuccessView(BaseView):
     template_name = 'businessmailingsuccess.html'
 
     def get_context_data(self, **kwargs):
@@ -3004,7 +3060,7 @@ class BusinessEmaiSuccessView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        context['Contact'] = Contact.objects.all()[len(Contact.objects.all()) - 1]
-        print(context["Contact"])
+        context['BusinessMailingContact'] = BusinessMailingContact.objects.all()[len(BusinessMailingContact.objects.all()) - 1]
+        print(context["BusinessMailingContact"])
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         return context

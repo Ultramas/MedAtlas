@@ -1,5 +1,5 @@
-from PIL.Image import Image
-from django.db import models
+from PIL import Image
+from django.db import models, migrations
 from django.contrib.auth.models import User
 from uuid import uuid4
 
@@ -291,37 +291,41 @@ class Event(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+
 class PatreonBackgroundImage(models.Model):
-   title = models.TextField()
-   cover = models.ImageField(upload_to='images/')
+    title = models.TextField()
+    cover = models.ImageField(upload_to='images/')
 
-   def __str__(self):
-       return self.title
+    def __str__(self):
+        return self.title
 
-   class Meta:
-       verbose_name = "Patreon Background Image"
-       verbose_name_plural = "Patreon Background Images"
+    class Meta:
+        verbose_name = "Patreon Background Image"
+        verbose_name_plural = "Patreon Background Images"
+
 
 class Partner(models.Model):
-   name = models.CharField(max_length=100, help_text='Your server name goes here.')
-   catagory = models.CharField(max_length=100, help_text='Pick a catagory you feel your server represents (gaming, community, etc).')
-   description = models.TextField(help_text='Describe your server. Tell potential members why they should join.')
-   server_invite = models.URLField(help_text='Post your server invite link here.')
+    name = models.CharField(max_length=100, help_text='Your server name goes here.')
+    catagory = models.CharField(max_length=100,
+                                help_text='Pick a catagory you feel your server represents (gaming, community, etc).')
+    description = models.TextField(help_text='Describe your server. Tell potential members why they should join.')
+    server_invite = models.URLField(help_text='Post your server invite link here.')
+
 
 class Patreon(models.Model):
-   patreon_username = models.CharField(max_length=100, verbose_name='Patreon`s Username',
-                                       help_text='The patreon`s username goes here.')
-   description = models.TextField(help_text='Description of Patreon`s patreonage.')
-   image = models.ImageField(
-       help_text=
-       'The patreon`s avatar goes here.')
+    patreon_username = models.CharField(max_length=100, verbose_name='Patreon`s Username',
+                                        help_text='The patreon`s username goes here.')
+    description = models.TextField(help_text='Description of Patreon`s patreonage.')
+    image = models.ImageField(
+        help_text=
+        'The patreon`s avatar goes here.')
 
-   # change rest to either imagefields or urlfields (has to be uniform throughout the form)
+    # change rest to either imagefields or urlfields (has to be uniform throughout the form)
 
-   # widget=form.TextInput, help_text='Your name goes here.')
-   class Meta:
-       verbose_name = "Patreon"
-       verbose_name_plural = "Patreons"
+    # widget=form.TextInput, help_text='Your name goes here.')
+    class Meta:
+        verbose_name = "Patreon"
+        verbose_name_plural = "Patreons"
 
 
 from django.template.defaultfilters import slugify
@@ -338,7 +342,7 @@ class Blog(models.Model):
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=0)
     image = models.ImageField(upload_to='images/')
     likes = models.ManyToManyField(User, blank=True, verbose_name='post likes')
-    #likes = models.IntegerField(default=0)
+    # likes = models.IntegerField(default=0)
     dislikes = models.ManyToManyField(User, blank=True, verbose_name='post dislikes', related_name="post_dislikes")
     # blogbackgroundimage
     is_active = models.IntegerField(default=1,
@@ -409,11 +413,11 @@ class Comment(models.Model):
     def __str__(self):
         return 'Comment {} by {}'.format(self.body, self.name)
 
-
     def get_absolute_url(self):
         from django.urls import reverse
 
         return reverse("showcase:post_detail", kwargs={"slug": self.post.slug})
+
 
 class PostLikes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, )
@@ -423,6 +427,7 @@ class PostLikes(models.Model):
     class Meta:
         verbose_name = "Post Like"
         verbose_name_plural = "Post Likes"
+
 
 class Profile(models.Model):
     about_me = models.TextField()
@@ -504,6 +509,7 @@ class TextBase(models.Model):
     section = models.IntegerField(verbose_name="Text Section", help_text="Section Number of Text")
     exists = models.BooleanField(verbose_name="Section Taken", help_text="Is this section taken?", default=1,
                                  choices=((1, 'Yes'), (0, 'No')))
+    hyperlink = models.TextField(blank=True, null=True, verbose_name="Hyperlink")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1754,17 +1760,29 @@ class ImageCarousel(models.Model):
         verbose_name_plural = "Image Carousel Posts"
 
 
+import uuid
+
+from io import BytesIO
+from django.core.files import File
+from django.core.files.base import ContentFile
+from django.db import models
+
+
+
+
+
 class AdvertisementBase(models.Model):
     advertisementtitle = models.CharField(max_length=100, help_text='Advertisement title.',
                                           verbose_name="advertisement title")
     advertisement = models.ImageField(help_text='Image of the advertisement.', upload_to='images/',
-    height_field = "advertisement_length",
-    width_field = "advertisement_width") #the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
+                                      height_field="advertisement_width",
+                                      width_field="advertisement_length")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
     advertisement_width = models.PositiveIntegerField(blank=True, null=True, default="100",
                                                       help_text='Width of the advertisement (in percent relative).',
                                                       verbose_name="advertisement width")
-    advertisement_length = models.PositiveIntegerField(blank=True, null=True, default="100", help_text='Length of the advertisement (in percent relative).',
-                                               verbose_name="advertisement length")
+    advertisement_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                                       help_text='Length of the advertisement (in percent relative).',
+                                                       verbose_name="advertisement length")
     advertisement_position = models.IntegerField(help_text='Positioning of the advertisement.', verbose_name='Position')
     page = models.TextField(verbose_name="Page Name")
     xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position")
@@ -1783,30 +1801,33 @@ class AdvertisementBase(models.Model):
         verbose_name = "Advertisement Base"
         verbose_name_plural = "Advertisement Base"
 
-    from io import StringIO
-    from PIL import Image
+        def __unicode__(self):
+            return self.advertisementtitle
 
-    def save(self, advertisement_length=None, advertisement_width=None, *args, **kwargs):
+    def save(self, *args, **kwargs):
+        # Open the image using PIL
+        img = Image.open(self.advertisement.path)
+        #only can open existing images (AdvertisementBase -> advertisement -> path)
+
+        # Resize the image and update the width and height fields
+        img = img.resize((600, 40), Image.ANTIALIAS)
+        self.advertisement_width, self.advertisement_length = img.size
+
+        # Call the parent save method to save the model instance
         super().save(*args, **kwargs)
-        img = Image.open(self.image.path)
-
-        if 1 == 1:
-            output_size = (advertisement_length, advertisement_width)
-            img.thumbnail(output_size)
-            img.save(self.image.path)
 
 class ImageBase(models.Model):
     title = models.CharField(max_length=100, help_text='Advertisement title.',
-                                          verbose_name="advertisement title")
+                             verbose_name="advertisement title")
     image = models.ImageField(help_text='Image of the advertisement.', upload_to='images/',
-                                      height_field="image_length",
-                                      width_field="image_width")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
+                              height_field="image_length",
+                              width_field="image_width")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
     image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
-                                                      help_text='Width of the advertisement (in percent relative).',
-                                                      verbose_name="advertisement width")
+                                              help_text='Width of the advertisement (in percent relative).',
+                                              verbose_name="advertisement width")
     image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
-                                                       help_text='Length of the advertisement (in percent relative).',
-                                                       verbose_name="advertisement length")
+                                               help_text='Length of the advertisement (in percent relative).',
+                                               verbose_name="advertisement length")
     image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position')
     alternate = models.TextField(verbose_name="Alternate Text")
     page = models.TextField(verbose_name="Page Name")
@@ -1814,18 +1835,20 @@ class ImageBase(models.Model):
     yposition = models.IntegerField(help_text='x-position.', verbose_name="y-position")
     relevance = models.TextField(help_text='Relevance of advertisement')
     correlating_product = models.OneToOneField(Item, blank=True, null=True, on_delete=models.CASCADE)
-    #try incorporating other models in addition to Item
+    # try incorporating other models in addition to Item
     type = models.CharField(max_length=200, help_text='Type of image.')
-    hyperlink = models.TextField(verbose_name="Hyperlink")
+    hyperlink = models.TextField(verbose_name="Hyperlink", blank=True, null=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
     class Meta:
         # Add verbose name
         verbose_name = 'Image Base'
         verbose_name_plural = 'Image Base'
+
 
 from django.utils import timezone
 

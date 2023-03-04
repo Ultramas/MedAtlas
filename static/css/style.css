@@ -154,9 +154,9 @@ imageicon{
 .backgroundimages {
   /*maintain consistency with background images*/
   /*theme: professional creativity*/
-  image-rendering: auto;  
+  /*image-rendering: auto;
   height: 100%;
-  width: 100%;
+  width: 100%;*/
   background-repeat: no-repeat;
   /*position: fixed;*/
 }
@@ -1920,6 +1920,7 @@ nav.show {
     font-size: 18px;
     font-family: 'Times New Roman', Times, serif;
     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+    margin-left: 10px;
 }
 
 .navItem2 {
@@ -1931,6 +1932,8 @@ nav.show {
     font-size: 18px;
     font-family: 'Times New Roman', Times, serif;
      background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
+
 }
 
 .navItem3 {
@@ -1942,6 +1945,7 @@ nav.show {
     font-size: 18px;
     font-family: 'Times New Roman', Times, serif;
     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+    margin-left: 10px;
 }
 
 .navItem4 {
@@ -1953,6 +1957,7 @@ nav.show {
     font-size: 18px;
     font-family: 'Times New Roman', Times, serif;
      background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
 }
 
 .navItem5 {
@@ -1964,6 +1969,7 @@ nav.show {
     font-size: 18px;
     font-family: 'Times New Roman', Times, serif;
      background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
 }
 
 .navItem6 {
@@ -1976,6 +1982,7 @@ nav.show {
     font-size: 18px;
     font-family: 'Times New Roman', Times, serif;
      background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
 }
 
 .navItem7 {
@@ -1987,6 +1994,7 @@ nav.show {
     font-size: 18px;
     font-family: 'Times New Roman', Times, serif;
      background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
 }
 
 .navItem8 {
@@ -1998,6 +2006,7 @@ nav.show {
     font-size: 18px;
     font-family: 'Times New Roman', Times, serif;
      background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
 }
 
 .navItem9 {
@@ -2009,6 +2018,7 @@ nav.show {
     font-size: 18px;
     font-family: 'Times New Roman', Times, serif;
      background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
 }
 
 .navItem10 {
@@ -2019,10 +2029,12 @@ nav.show {
     text-align: center;
     font-size: 18px;
     font-family: 'Times New Roman', Times, serif;
-    background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;}
+    background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+    margin-left: 10px;}
 
 .navItem11 {
     margin-top: 20px;
+    margin-left: 10px;
     background-color: blue;
     width: 80px;
     border-radius: 15px;
@@ -2030,6 +2042,8 @@ nav.show {
     font-size: 18px;
     font-family: 'Times New Roman', Times, serif;
     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;}
+    margin-left: 20px;
+
 
 @media screen and (max-width: 1400px) {
 
@@ -2151,6 +2165,7 @@ nav.show {
     font-size: 14px;
     font-family: 'Times New Roman', Times, serif;
     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;}
+    margin-left: 10px;
 }
 
 .song{
@@ -3355,9 +3370,9 @@ a,p{
 
 nav h2{
     color: gold;
-    margin-left: 0px;
-    margin-top: 15px;
-    
+    margin-left: 10px;
+    margin-top: 55px;
+    font-size: 30px;
 }
 
 nav ul{

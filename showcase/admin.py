@@ -60,6 +60,7 @@ from .models import NavBarHeader
 from .models import ImageCarousel
 from .models import BaseCopyrightTextField
 from .models import AdvertisementBase
+#from .models import ResizeImageMixin
 from .models import ImageBase
 from .models import DonateIcon
 from .models import Coupon
@@ -144,6 +145,7 @@ admin.site.register(ImageCarousel)
 admin.site.register(Titled)
 admin.site.register(BaseCopyrightTextField)
 admin.site.register(AdvertisementBase)
+#admin.site.register(ResizeImageMixin)
 admin.site.register(ImageBase)
 admin.site.register(DonateIcon)
 admin.site.register(Contact)
