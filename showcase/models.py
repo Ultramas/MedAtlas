@@ -1287,7 +1287,6 @@ class SupportMessage(models.Model):
 
 # from django.db.models.signals import post_save
 from django.conf import settings
-from django.db import models
 from django.db.models import Sum
 from django.shortcuts import reverse
 from django_countries.fields import CountryField
@@ -1765,7 +1764,6 @@ import uuid
 from io import BytesIO
 from django.core.files import File
 from django.core.files.base import ContentFile
-from django.db import models
 
 
 
@@ -1783,6 +1781,8 @@ class AdvertisementBase(models.Model):
     advertisement_length = models.PositiveIntegerField(blank=True, null=True, default="100",
                                                        help_text='Length of the advertisement (in percent relative).',
                                                        verbose_name="advertisement length")
+    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resize Width")
+    height_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resize Height")
     advertisement_position = models.IntegerField(help_text='Positioning of the advertisement.', verbose_name='Position')
     page = models.TextField(verbose_name="Page Name")
     xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position")
@@ -1805,16 +1805,19 @@ class AdvertisementBase(models.Model):
             return self.advertisementtitle
 
     def save(self, *args, **kwargs):
-        # Open the image using PIL
-        img = Image.open(self.advertisement.path)
-        #only can open existing images (AdvertisementBase -> advertisement -> path)
+        if not self.id:  # object is being created for the first time
+            super().save(*args, **kwargs)
+            img = Image.open(self.advertisement.path)
+            img = img.resize((self.width_for_resize, self.height_for_resize), Image.ANTIALIAS)
+            self.advertisement_length, self.advertisement_width = img.size
+            super().save(*args, **kwargs)
+        else:  # object already exists and is being updated
+            img = Image.open(self.advertisement.path)
+            img = img.resize((self.width_for_resize, self.height_for_resize), Image.ANTIALIAS)
+            self.advertisement_width, self.advertisement_length = img.size
+            super().save(*args, **kwargs)
 
-        # Resize the image and update the width and height fields
-        img = img.resize((600, 40), Image.ANTIALIAS)
-        self.advertisement_width, self.advertisement_length = img.size
 
-        # Call the parent save method to save the model instance
-        super().save(*args, **kwargs)
 
 class ImageBase(models.Model):
     title = models.CharField(max_length=100, help_text='Advertisement title.',
@@ -1823,16 +1826,18 @@ class ImageBase(models.Model):
                               height_field="image_length",
                               width_field="image_width")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
     image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
-                                              help_text='Width of the advertisement (in percent relative).',
-                                              verbose_name="advertisement width")
+                                              help_text='Width of the image (in percent relative).',
+                                              verbose_name="image width")
     image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
-                                               help_text='Length of the advertisement (in percent relative).',
-                                               verbose_name="advertisement length")
+                                               help_text='Length of the image (in percent relative).',
+                                               verbose_name="image length")
+    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resize Width")
+    height_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resize Height")
     image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position')
     alternate = models.TextField(verbose_name="Alternate Text")
     page = models.TextField(verbose_name="Page Name")
-    xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position")
-    yposition = models.IntegerField(help_text='x-position.', verbose_name="y-position")
+    xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position", default="0")
+    yposition = models.IntegerField(help_text='x-position.', verbose_name="y-position", default="0")
     relevance = models.TextField(help_text='Relevance of advertisement')
     correlating_product = models.OneToOneField(Item, blank=True, null=True, on_delete=models.CASCADE)
     # try incorporating other models in addition to Item
@@ -1849,6 +1854,18 @@ class ImageBase(models.Model):
         verbose_name = 'Image Base'
         verbose_name_plural = 'Image Base'
 
+    def image_save(self, *args, **kwargs):
+        if not self.id:  # object is being created for the first time
+            super().save(*args, **kwargs)
+            img = Image.open(self.image.path)
+            img = img.resize((self.width_for_resize, self.height_for_resize), Image.ANTIALIAS)
+            self.image_length, self.image_width = img.size
+            super().save(*args, **kwargs)
+        else:  # object already exists and is being updated
+            img = Image.open(self.advertisement.path)
+            img = img.resize((self.width_for_resize, self.height_for_resize), Image.ANTIALIAS)
+            self.image_width, self.image_length = img.size
+            super().save(*args, **kwargs)
 
 from django.utils import timezone
 
