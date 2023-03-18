@@ -1766,23 +1766,20 @@ from django.core.files import File
 from django.core.files.base import ContentFile
 
 
-
-
-
 class AdvertisementBase(models.Model):
     advertisementtitle = models.CharField(max_length=100, help_text='Advertisement title.',
                                           verbose_name="advertisement title")
     advertisement = models.ImageField(help_text='Image of the advertisement.', upload_to='images/',
                                       height_field="advertisement_width",
                                       width_field="advertisement_length")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
-    advertisement_width = models.PositiveIntegerField(blank=True, null=True, default="100",
-                                                      help_text='Width of the advertisement (in percent relative).',
-                                                      verbose_name="advertisement width")
     advertisement_length = models.PositiveIntegerField(blank=True, null=True, default="100",
-                                                       help_text='Length of the advertisement (in percent relative).',
+                                                       help_text='Original length of the advertisement (use for original ratio).',
                                                        verbose_name="advertisement length")
-    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resize Width")
-    height_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resize Height")
+    advertisement_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                                      help_text='Original width of the advertisement (use for original ratio).',
+                                                      verbose_name="advertisement width")
+    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
     advertisement_position = models.IntegerField(help_text='Positioning of the advertisement.', verbose_name='Position')
     page = models.TextField(verbose_name="Page Name")
     xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position")
@@ -1817,6 +1814,9 @@ class AdvertisementBase(models.Model):
             self.advertisement_width, self.advertisement_length = img.size
             super().save(*args, **kwargs)
 
+
+class Advertising(AdvertisementBase):
+    pass
 
 
 class ImageBase(models.Model):
@@ -1866,6 +1866,7 @@ class ImageBase(models.Model):
             img = img.resize((self.width_for_resize, self.height_for_resize), Image.ANTIALIAS)
             self.image_width, self.image_length = img.size
             super().save(*args, **kwargs)
+
 
 from django.utils import timezone
 

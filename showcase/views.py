@@ -245,53 +245,16 @@ from io import BytesIO
 from PIL import Image
 from django.core.files.base import ContentFile
 
+from .models import Advertising
 
 class AdvertisementView(ListView):
     model = AdvertisementBase
 
-    def resize_image(request, id, width, height):
-        # Retrieve the image from the database
-        ad = AdvertisementBase.objects.get(id=id)
 
-        # Load the image using BytesIO
-        image_data = BytesIO(ad.advertisement.read())
-        img = Image.open(image_data)
-
-        # Resize the image to 300x300 pixels
-        img_resized = img.resize((int(width), int(height)), Image.ANTIALIAS)
-
-        # Save the resized image
-        image_data_resized = BytesIO()
-        img_resized.save(image_data_resized, format='JPEG')
-        ad.image.save('my_image_resized.jpg', ContentFile(image_data_resized.getvalue()), save=True)
-
-        return HttpResponse('Image resized and saved successfully.')
-
-    def position_image(request, id):
-        # Retrieve the image from the database
-        ad = AdvertisementBase.objects.get(id=id)
-
-        # Load the image using BytesIO
-        image_data = BytesIO(ad.advertisement.read())
-        img = Image.open(image_data)
-
-        # Create a new blank image to composite the resized image onto
-        bg = Image.new('RGB', (600, 600), (255, 255, 255))
-
-        # Resize the image to fit within a 400x400 square
-        img_resized = ImageOps.fit(img, (400, 400), Image.ANTIALIAS)
-
-        # Position the resized image in the center of the blank image
-        offset = ((bg.width - img_resized.width) // 2, (bg.height - img_resized.height) // 2)
-        bg.paste(img_resized, offset)
-
-        # Save the positioned image
-        image_data_positioned = BytesIO()
-        bg.save(image_data_positioned, format='JPEG')
-        ad.image.save('my_image_positioned.jpg', ContentFile(image_data_positioned.getvalue()), save=True)
-
-        return HttpResponse('Image positioned and saved successfully.')
-
+    def display_advertisement(request, advertisement_id):
+        advertising = Advertising.objects.get(id=advertising_id)
+        context = {'advertising': advertising}
+        return render(request, 'index.html', context)
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Advertisement'] = AdvertisementBase.objects.filter(page=self.template_name, is_active=1)

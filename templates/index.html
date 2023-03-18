@@ -17,6 +17,13 @@
       {% endif %}
     {% endfor %}
     <!--index favicon type & link likely gets overwritten by base favicon type & link-->
+    <style>
+        .advertisement-image {
+            position: absolute;
+            left: {{ advertising.x_position }}px;
+            top: {{ advertising.y_position }}px;
+        }
+    </style>
 </head>
 
 <body>
@@ -249,7 +256,7 @@
 		the animation stops to that particular image
 		to which the button is associated. */
 		.slide-btn-1:focus~.slideshow-wrapper {
-			animation: none;
+			animation: none;        
 			left: 0;
 		}
 		.slide-btn-2:focus~.slideshow-wrapper {
@@ -273,6 +280,8 @@
 	<title>Geeks For Geeks</title>
 </head>
 <body>
+<img class="advertisement-image" src="{{ advertisement.image.url }}" alt="Advertisement">
+
 	<div class="container">
 		<h1 class="main-heading">Hot Items</h1>
 		<div class="content">
