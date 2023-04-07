@@ -14,7 +14,19 @@
     </head>
     <body>
       
+<div class = "search">
 
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<form action="{% url 'showcase:search_results' %}" method="get">
+  <input name="q" type="text" placeholder="Search...">
+</form>
+</div>
 <div class="poste1"> 
   <br>
     <h1 class="hello">Hello {{user.username}}!</h1>
@@ -44,7 +56,7 @@
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
-    
+</div> <!--recently added-->
    
     {% endfor %}
   {% else %}

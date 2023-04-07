@@ -31,8 +31,7 @@
 
      </header>
 
-<section class="gt_section-77035 gt_animation-zoom-out-left gt_animated" data-name="Header" style="height: auto;"> <div class="gt_header"> <div class="gt_flex gt_logo"> <div class="icon_when_scroll"> <div class="icon_when_scroll_content"> <span> </span> <span> </span> <span> </span> </div> </div> <div class="logo_header">
-
+<section class="gt_section-77035 gt_animation-zoom-out-left gt_animated" data-name="Header" style="height: auto;"> <div class="gt_header"> <div class="gt_flex gt_logo"> <div class="icon_when_scroll"> <div class="icon_when_scroll_content">  </div> </div> <div class="logo_header">
 
 
     <div class = "navbarx">
@@ -348,12 +347,17 @@
 
 <footer>
      <div class = "copyright">
-     <h3> 
-       {% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
-    {{ BaseCopyrightTextField.text }}
-  {% endfor %}</h3>
+     <p>
+       {% for BackgroundImage in BaseCopyrightTextFielded %}
+                    {% if BackgroundImage.page == 'index.html' %}
+                         <a href="{{BackgroundImage.hyperlink}}" class="gf_product-title gf_gs-text-heading-3" data-bss-pl="active">
+                                {{BackgroundImage.copyright}}
+                         </a>
+                    {% endif %}
+    {% endfor %}
+     </p>
    </div>
-   
+
   </footer>  </body>
 </html>
 

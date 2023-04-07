@@ -40,7 +40,55 @@
 </div>
 <br>
   <br>
-    <h1 class="hello">Hello {{user.username}}!</h1>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>replit</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <style>
+    .boedy{
+  display: flex;
+  justify-content: center;
+    }
+
+/* DEMO-SPECIFIC STYLES */
+.containereatede h1 {
+  color: red;
+  font-family: 'Playfair Display', serif;
+  overflow: hidden; /* Ensures the content is not revealed until the animation */
+  border-right: .15em solid red; /* The typewriter cursor */
+  white-space: nowrap; /* Keeps the content on a single line */
+  margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+  letter-spacing: .0em; /* Adjust as needed */
+  animation:
+    typing 3.5s steps(30, end),
+    blink-caret .5s step-end infinite;
+}
+
+/* The typing effect */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: red }
+}
+  </style>
+</head>
+
+  <div class = "boedy">
+  <div class="containereatede">
+ <h1 class="hello">Hello {{user.username}}!</h1>
+</div>
+  </div>
+
       <br>
         <br>
     <!--saved items here-->

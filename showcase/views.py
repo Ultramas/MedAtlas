@@ -26,6 +26,7 @@ from .models import ChatBackgroundImage
 from .models import SupportChatBackgroundImage
 from .models import BilletBackgroundImage
 from .models import PatreonBackgroundImage
+from .models import BusinessMessageBackgroundImage
 from .models import Patreon
 from .models import BlogBackgroundImage
 from .models import PostBackgroundImage
@@ -68,13 +69,14 @@ from .models import IssueBackgroundImage
 from .models import BackgroundImageBase
 from .models import TextBase
 from .models import LogoBase
-
+from .models import MemberHomeBackgroundImage
 from .models import NavBar
 from .models import NavBarHeader
 from .models import DonateIcon
 from .models import Titled
 from .models import AdvertisementBase
 from .models import ImageBase
+from .models import SocialMedia
 # from .models import Background2aImage
 from .forms import PosteForm
 from .forms import PostForm
@@ -275,13 +277,39 @@ class AdvertisementView(ListView):
         resizedImage.save(imagefile,'JPEG')"""
 
 
+def set_image_position(image_id, xposition, yposition):
+    # Retrieve the Image object from the database
+    image = ImageBase.objects.get(id=image_id)
+    print("Current coordinates: x={image.x}, y={image.y}")
+
+    # Set the x and y positions to the desired values
+    image.x = xposition
+    image.y = yposition
+
+    # Save the updated Image object back to the database
+    image.save()
+
+
 class ImageView(ListView):
     model = ImageBase
+
+    def post(self, request, *args, **kwargs):
+        # Get the image ID and new position values from the request
+        image_id = request.POST.get('image_id')
+        xposition = request.POST.get('xposition')
+        yposition = request.POST.get('yposition')
+
+        # Update the image position in the database
+        set_image_position(image_id, xposition, yposition)
+
+        # Render a response to the user
+        return HttpResponse('Image position updated.')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1)
         return context
+
 
 
 class BaseView(ListView):
@@ -490,6 +518,36 @@ class supportview(ListView):
     def get_queryset(self):
         return Support.objects.all()
 
+class MemberHomeBackgroundView(ListView):
+    model = MemberHomeBackgroundImage
+    template_name = "memberhome.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['MemberHomeBackgroundImage'] = MemberHomeBackgroundImage.objects.all()
+        return context
+
+
+class BusinessMessageBackgroundView(ListView):
+    model = BusinessMessageBackgroundImage
+    template_name = "businessemail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BusinessMessageBackgroundImage'] = BusinessMessageBackgroundImage.objects.all()
+        return context
 
 class PatreonBackgroundView(ListView):
     model = Patreon
@@ -673,6 +731,8 @@ class BackgroundView(BaseView):
             "advertisement_position")
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by(
             "image_position")
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
         print(FaviconBase.objects.all())
         print(213324)
         return context
@@ -1631,18 +1691,39 @@ class HomePageView(TemplateView):
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+class EcommerceSearchResultsView(ListView):
+    model = Item
+    template_name = 'ecommercesearch_results.html'
+
+    def get_queryset(self):
+        print(1234)
+        query = self.request.GET.get('q')
+        item_list = Item.objects.filter(
+            Q(title__icontains=query) | Q(slug__icontains=query))
+
+        all_list = {
+            "item_list": item_list,
+        }
+        print(234)
+        print(all_list)
+
+        return (all_list)
+
+from django.views.generic import ListView
+from django.db.models import Q
 
 class SearchResultsView(ListView):
-    model = City, Vote, UpdateProfile, Idea, PartnerApplication, UserProfile2
     template_name = 'search_results.html'
+    paginate_by = 10
 
     def get_queryset(self):
         query = self.request.GET.get('q')
+
         city_list = City.objects.filter(
             Q(name__icontains=query) | Q(state__icontains=query))
 
         vote_list = Vote.objects.filter(
-            Q(name__icontains=query) | Q(catagory__icontains=query)
+            Q(name__icontains=query) | Q(category__icontains=query)
             | Q(description__icontains=query) | Q(image__icontains=query))
 
         profile_list = UpdateProfile.objects.filter(
@@ -1650,7 +1731,7 @@ class SearchResultsView(ListView):
             | Q(image__icontains=query))
 
         idea_list = Idea.objects.filter(
-            Q(name__icontains=query) | Q(catagory__icontains=query)
+            Q(name__icontains=query) | Q(category__icontains=query)
             | Q(description__icontains=query) | Q(image__icontains=query))
 
         partner_list = PartnerApplication.objects.filter(
@@ -1665,7 +1746,14 @@ class SearchResultsView(ListView):
             "partner_list": partner_list,
         }
 
-        return (all_list)
+        # Get the page number from the URL parameters
+        page = self.kwargs.get('page', 1)
+
+        # Filter the results by the current page
+        for key in all_list:
+            all_list[key] = all_list[key][(page-1)*self.paginate_by : page*self.paginate_by]
+
+        return all_list
 
 
 class EcommerceSearchResultsView(ListView):
@@ -2865,7 +2953,7 @@ class ChangePasswordView(BaseView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # context['Change'] = ChangePasswordBackgroundImage.objects.all()
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")

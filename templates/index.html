@@ -3,118 +3,8 @@
 {% load static %}
 
 {% block content %}
-<head>
 
-    {% for BackgroundImage in Titles %}
-      {% if BackgroundImage.page == 'index.html' %}
-         <title>{{ BackgroundImage.overtitle }}</title>
-      {% endif %}
-    {% endfor %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-    {% for BackgroundImage in Favicons %}
-      {% if BackgroundImage.faviconpage == 'index.html' %}
-        <link rel="shortcut icon" type="image/{{ BackgroundImage.favicontype }}" href="{% static 'css/images/' %}{{ BackgroundImage.faviconlink }}"/>
-      {% endif %}
-    {% endfor %}
-    <!--index favicon type & link likely gets overwritten by base favicon type & link-->
-    <style>
-        .advertisement-image {
-            position: absolute;
-            left: {{ advertising.x_position }}px;
-            top: {{ advertising.y_position }}px;
-        }
-    </style>
-</head>
-
-<body>
-
-  <div id="overlay">
-    <img src = "76.gif">
-    </div>
-
-
-    <!--<div class="parallax1" id = "main">
-
-  <a href="#leaders"><span></span></a>
-    -->
-
-<!--keeps using the same image repetitively-->
-
- <!--</div>-->
-
-<!--
-<section id="section02" class="demo">
-<a href="#innovation"><span></span></a>
-</section>
-            </div>
-    </div>
-<div class='wrap'>
-
-  <div class='tri'></div>
-  <div class='tri'></div>
-  <div class='tri'></div>
-  <div class='tri'></div>
-  <div class='tri'></div>
-  <div class='tri'></div>
-  <div class='tri'></div>
-  <div class='tri'></div>
-</div>-->
-
-
-    <div class="parallax2" id = "leaders">
-            {% for BackgroundImage in Advertisement %}
-      {% if BackgroundImage.page == 'index.html' %}
-        <a href="{{BackgroundImage.advertisement_hyperlink}}">
-          <img class = "backgroundimages" src="{{ BackgroundImage.advertisement.url}}" alt="{{ BackgroundImage.advertisementtitle}}" width="{{ BackgroundImage.advertisement_width }}"%; height="{{ BackgroundImage.advertisement_length }}"%;>
-        </a>
-        {% endif %}
-    {% endfor %}
-
-  {% for BackgroundImage in Background %}
-      <img class = "backgroundimages" src="{{BackgroundImage.cover.url}}" alt="{{ BackgroundImage.backgroundtitle }}">
-  {% endfor %}
-{% for BackgroundImage in Image %}
-             {% for image_position in Image %}
-          {% if image_position.image_position == BackgroundImage.image_position %}
-         {% if BackgroundImage.page == 'index.html' %}
-       {% if BackgroundImage.image_position == 1 %}
-        <a href="{{BackgroundImage.hyperlink}}">
-       <img class = "backgroundimages" src="{{ BackgroundImage.image.url}}" alt="{{ BackgroundImage.alternate}}" width="{{ BackgroundImage.advertisement_width }}"%; height="{{ BackgroundImage.advertisement_length }}"%;>
-        </a>
-            {% endif %}
-          {% endif %}
-          {% endif %}
-  {% endfor %}
-{% endfor %}
-        <h2 class = "opening2vb">
-           {% for BackgroundImage in TextFielde %}
-             {% for section in TextFielde %}
-          {% if section.section == BackgroundImage.section %}
-         {% if BackgroundImage.page == 'index.html' %}
-       {% if BackgroundImage.section == 1 %}
-     {{ BackgroundImage.text }}
-            {% endif %}
-          {% endif %}
-          {% endif %}
-  {% endfor %}
-{% endfor %}      </h2>
-          <h2 class="caption2a">
-           {% for BackgroundImage in TextFielde %}
-             {% for section in TextFielde %}
-            {% if BackgroundImage.page == 'index.html' %}
-            {% if BackgroundImage.section == 2 %}
-          {% if section.section == BackgroundImage.section %}
-    {{ BackgroundImage.text }}
-            {% endif %}
-            {% endif %}
-          {% endif %}
-  {% endfor %}
-{% endfor %}
-            <!--section 2a-->
-          </h2>
-
-
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 	<style>
@@ -256,7 +146,7 @@
 		the animation stops to that particular image
 		to which the button is associated. */
 		.slide-btn-1:focus~.slideshow-wrapper {
-			animation: none;        
+			animation: none;
 			left: 0;
 		}
 		.slide-btn-2:focus~.slideshow-wrapper {
@@ -277,10 +167,92 @@
 		}
 		/* ----- end of carousel control buttons stylings ----- */
 	</style>
-	<title>Geeks For Geeks</title>
+
+    {% for BackgroundImage in Titles %}
+      {% if BackgroundImage.page == 'index.html' %}
+         <title>{{ BackgroundImage.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    {% for BackgroundImage in Favicons %}
+      {% if BackgroundImage.faviconpage == 'index.html' %}
+        <link rel="shortcut icon" type="image/{{ BackgroundImage.favicontype }}" href="{% static 'css/images/' %}{{ BackgroundImage.faviconlink }}"/>
+      {% endif %}
+    {% endfor %}
+    <!--index favicon type & link likely gets overwritten by base favicon type & link-->
 </head>
+
 <body>
-<img class="advertisement-image" src="{{ advertisement.image.url }}" alt="Advertisement">
+
+  <div id="overlay">
+    <img src = "76.gif">
+    </div>
+
+
+    <!--<div class="parallax1" id = "main">
+
+  <a href="#leaders"><span></span></a>
+    -->
+
+<!--keeps using the same image repetitively-->
+
+ <!--</div>-->
+
+<!--
+<section id="section02" class="demo">
+<a href="#innovation"><span></span></a>
+</section>
+            </div>
+    </div>
+<div class='wrap'>
+
+  <div class='tri'></div>
+  <div class='tri'></div>
+  <div class='tri'></div>
+  <div class='tri'></div>
+  <div class='tri'></div>
+  <div class='tri'></div>
+  <div class='tri'></div>
+  <div class='tri'></div>
+</div>-->
+{% for BackgroundImage in Background %}
+    {% if BackgroundImage.page == 'index.html' %}
+        {% if BackgroundImage.position == '1' %}
+            <div class="parallax2" id = "leaders" style="{{BackgroundImage.cover}}">
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+
+            <div class = "2x2">
+            {% for BackgroundImage in Image %}
+                {% if BackgroundImage.page == 'index.html' %}
+                <img class = "backgroundimages" src="{{BackgroundImage.image.url}}" alt="{{ BackgroundImage.title }}" style="position:absolute; left:{{ BackgroundImage.xposition }}px; top:{{ BackgroundImage.yposition }}px;">
+
+                {% endif %}
+            {% endfor %}
+            </div>
+
+    {% for BackgroundImage in Advertisement %}
+        {% if BackgroundImage.page == 'index.html' %}
+            <a href="{{BackgroundImage.advertisement_hyperlink}}">
+              <img class = "backgroundimages" src="{{ BackgroundImage.advertisement.url}}" alt="{{ BackgroundImage.advertisementtitle}}" width="{{ BackgroundImage.advertisement_width }}"%; height="{{ BackgroundImage.advertisement_length }}"%; style="left:{{ BackgroundImage.xposition }}px; top:{{ BackgroundImage.yposition }}px;">
+            </a>
+        {% endif %}
+    {% endfor %}
+
+  {% for BackgroundImage in Image %}
+            {% if BackgroundImage.page == 'index.html' %}
+                {% if BackgroundImage.image_position == '1' %}
+                    <img class = "backgroundimages" src="{{BackgroundImage.image.url}}" alt="{{ BackgroundImage.title }}">
+                {% endif %}
+            {% endif %}
+  {% endfor %}
+
+            <!--section 2a-->
+
+
+
 
 	<div class="container">
 		<h1 class="main-heading">Hot Items</h1>
@@ -290,7 +262,7 @@
 				<h1 class="carousel-heading">
 					PokeTrove
 				</h1>
-				<h3>A computer science portal for geeks</h3>
+				<h3>Featured Products</h3>
 			</div>
 			<div class="slideshow">
 				<!-- carousel control buttons -->
@@ -369,14 +341,19 @@
 			</div>
 		</div>
 	</div>
-</body>
-</html>
 
 
 
     </div>
 
-    <div class="parallax3" id = "innovation">
+    {% for BackgroundImage in Background %}
+    {% if BackgroundImage.page == 'index.html' %}
+        {% if BackgroundImage.position == '3' %}
+            <div class="parallax3" id = "innovation" style="{{BackgroundImage.cover}}">
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
 
   <div class="slides slowFade">
         <div class="slide">
@@ -440,7 +417,16 @@
 </section>
       </div>
 
-    <div class="parallax4" id = "difference"><h2 class = "opening4">           {% for BackgroundImage in TextFielde %}
+    {% for BackgroundImage in Background %}
+    {% if BackgroundImage.page == 'index.html' %}
+        {% if BackgroundImage.position == '3' %}
+            <div class="parallax4" id = "difference" style="{{BackgroundImage.cover}}">
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+                <h2 class = "opening4">
+        {% for BackgroundImage in TextFielde %}
              {% for section in TextFielde %}
           {% if section.section == BackgroundImage.section %}
          {% if BackgroundImage.page == 'index.html' %}
@@ -509,11 +495,7 @@
     </div>
 
     </div>
-  <div class = "copyright">
-    {% for BackgroundImage in BaseCopyrightTextFielded %}
-         {{ BackgroundImage.copyright }}
-    {% endfor %}
-</div>
+
 
     <!--Custom JS-->
     <script src="{% static 'css/js/script.js' %}"></script>
@@ -529,11 +511,14 @@
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/dropdownnavbarx.js' %}"></script>
+    <script src="{% static 'css/js/featuredproductsimagecarousel.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
     <script src="{% static 'css/js/header1.js' %}"></script>
     <script src="{% static 'css/js/arrowscroll.js' %}"></script>
 
 </body>
+</html>
 
 {% endblock content %}
 <!--use console to check work in HTML & Javascript-->

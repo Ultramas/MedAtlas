@@ -97,6 +97,7 @@ from .views import (
     detail_post_view,
     postpreference,
     AdvertisementView,
+    MemberHomeBackgroundView,
 
 )
 
@@ -118,6 +119,7 @@ urlpatterns = [
 
     # add these
     path('showcase/', views.ShowcaseBackgroundView.as_view(), name='showcase'),
+    path('memberhome/', views.MemberHomeBackgroundView.as_view(), name='memberhome'),
     path('post_edit/', views.PostingView.as_view(), name='post_edit'),
     #path('post_edit/', views.PostBackgroundView.as_view(), name='post_edit'),
     #works at the cost of the post display

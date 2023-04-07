@@ -7,12 +7,14 @@ from uuid import uuid4
 class Idea(models.Model):
     """Model for sharing ideas and getting user feedback"""
     name = models.CharField(max_length=100, help_text='Your name goes here.')
-    category = models.CharField(
-        max_length=100,
-        help_text='Choose a category you want your idea to affect (server layout, event idea, etc).'
-    )
+    category = models.CharField(max_length=100, help_text='Choose a category you want your idea to affect (server layout, event idea, etc).')
     description = models.TextField(help_text='Please share any ideas you may have.')
-    image = models.URLField(help_text='Link a URL for your idea (scales to your picture`s dimensions).')
+    image = models.ImageField(help_text='Attach an image for your idea (scales to your picture`s dimensions).')
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     class Meta:
         verbose_name = "Idea"
@@ -23,7 +25,7 @@ class UpdateProfile(models.Model):
     """Update user profiles"""
     name = models.CharField(max_length=100, help_text='Your name goes here.')
     description = models.TextField(help_text='Your profile description goes here.')
-    image = models.ImageField(help_text='Link a URL for your profile (scales to your picture`s dimensions.)')
+    image = models.ImageField(help_text='Attach an image for your profile (scales to your picture`s dimensions.)')
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -31,19 +33,16 @@ class UpdateProfile(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     class Meta:
-        verbose_name = "User Profile Idea"
+        verbose_name = "User Profile Post"
         verbose_name_plural = "User Profile Posts"
 
 
 class Vote(models.Model):
     """Used for voting on different new ideas"""
     name = models.CharField(max_length=100, help_text='Your name goes here.')
-    category = models.CharField(
-        max_length=100,
-        help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).'
-    )
+    category = models.CharField(max_length=100, help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).')
     description = models.TextField(help_text='Please share any ideas you may have.')
-    image = models.URLField(help_text='Link a URL for your profile (scales to your picture`s dimensions.)')
+    image = models.ImageField(help_text='Attach an image for your profile (scales to your picture`s dimensions.)')
     mfg_date = models.DateTimeField(auto_now_add=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -291,6 +290,28 @@ class Event(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+class BusinessMessageBackgroundImage(models.Model):
+    title = models.TextField()
+    cover = models.ImageField(upload_to='images/')
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Business Message Background Image"
+        verbose_name_plural = "Business Message Background Images"
+
+class MemberHomeBackgroundImage(models.Model):
+    title = models.TextField()
+    cover = models.ImageField(upload_to='images/')
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Member Home Background Image"
+        verbose_name_plural = "Member Home Background Images"
+
 
 class PatreonBackgroundImage(models.Model):
     title = models.TextField()
@@ -441,6 +462,14 @@ class Profile(models.Model):
 class FaviconBase(models.Model):
     favicontitle = models.TextField(verbose_name="Favicon Title")
     faviconcover = models.ImageField(upload_to='images/', verbose_name="Favicon")
+    favicon_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                                       help_text='Original length of the favicon (use for original ratio).',
+                                                       verbose_name="advertisement length")
+    favicon_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                                      help_text='Original width of the favicon (use for original ratio).',
+                                                      verbose_name="advertisement width")
+    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
     faviconpage = models.TextField(verbose_name="Page Name")
     faviconurl = models.URLField(verbose_name="Page URL")
     faviconlink = models.TextField(verbose_name="Favicon Link")
@@ -464,8 +493,18 @@ class FaviconBase(models.Model):
 class LogoBase(models.Model):
     title = models.TextField(verbose_name="Background Title")
     logocover = models.ImageField(upload_to='images/', verbose_name="Logo")
+    hyperlink = models.TextField(verbose_name="Hyperlink")
+    section = models.IntegerField(verbose_name="Page Section")
     page = models.TextField(verbose_name="Page Name")
     alternate = models.TextField(verbose_name="Alternate Text")
+    logo_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                                       help_text='Original length of the advertisement (use for original ratio).',
+                                                       verbose_name="advertisement length")
+    logo_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                                      help_text='Original width of the advertisement (use for original ratio).',
+                                                      verbose_name="advertisement width")
+    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -711,9 +750,38 @@ class Titled(models.Model):
         verbose_name = "Page Title"
         verbose_name_plural = "Page Titles"
 
+class SocialMedia(models.Model):
+    social = models.TextField(verbose_name="Social Media Platform")
+    image = models.ImageField(verbose_name="Social Media Logo")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Width of the image (in percent relative).',
+                                              verbose_name="image width")
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                               help_text='Length of the image (in percent relative).',
+                                               verbose_name="image length")
+    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resize Width")
+    height_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resize Height")
+    image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position')
+    alternate = models.TextField(verbose_name="Alternate Text")
+    page = models.TextField(verbose_name="Page Name")
+    hyperlink = models.TextField(verbose_name="Hyperlink")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.social
+
+    class Meta:
+        verbose_name = "Social Media"
+        verbose_name_plural = "Social Media"
 
 class BaseCopyrightTextField(models.Model):
     copyright = models.TextField(verbose_name="Copyright Field", help_text="Copyright And Year")
+    page = models.TextField(verbose_name="Page Name")
+    hyperlink = models.TextField(verbose_name="Hyperlink")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1805,18 +1873,22 @@ class AdvertisementBase(models.Model):
         if not self.id:  # object is being created for the first time
             super().save(*args, **kwargs)
             img = Image.open(self.advertisement.path)
-            img = img.resize((self.width_for_resize, self.height_for_resize), Image.ANTIALIAS)
+            img = img.resize((self.width_for_resize, self.length_for_resize), Image.ANTIALIAS)
             self.advertisement_length, self.advertisement_width = img.size
             super().save(*args, **kwargs)
         else:  # object already exists and is being updated
             img = Image.open(self.advertisement.path)
-            img = img.resize((self.width_for_resize, self.height_for_resize), Image.ANTIALIAS)
+            img = img.resize((self.width_for_resize, self.length_for_resize), Image.ANTIALIAS)
             self.advertisement_width, self.advertisement_length = img.size
             super().save(*args, **kwargs)
 
 
 class Advertising(AdvertisementBase):
     pass
+
+
+
+
 
 
 class ImageBase(models.Model):
@@ -1867,6 +1939,17 @@ class ImageBase(models.Model):
             self.image_width, self.image_length = img.size
             super().save(*args, **kwargs)
 
+    def set_image_position(image_id, xposition, yposition):
+        # Retrieve the Image object from the database
+        image = ImageBase.objects.get(id=image_id)
+        print("Current coordinates: x={image.x}, y={image.y}")
+
+        # Set the x and y positions to the desired values
+        image.x = xposition
+        image.y = yposition
+
+        # Save the updated Image object back to the database
+        image.save()
 
 from django.utils import timezone
 

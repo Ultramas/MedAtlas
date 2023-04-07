@@ -88,11 +88,12 @@ class PostForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
     category = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Choose a category you want your idea to affect.'}))
-    image = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
+    image = forms.ImageField(widget=forms.TextInput(attrs={'placeholder': 'Attach an image for your post.'}))
+     #altered image URLField to ImageField, check for bugs please
 
     class Meta:
         model = UpdateProfile
-        fields = '__all__'
+        fields = ('name', 'description', 'image')
         # name = forms.CharField(widget = forms.TextInput(attrs={'placeholder':'Enter your first name'}))
 
         # description = forms.CharField(widget = forms.EmailInput
@@ -103,22 +104,23 @@ class Postit(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
     category = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Choose a category you want your idea to affect.'}))
-    image = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
-
+    image = forms.ImageField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
+    #altered image URLField to ImageField, check for bugs please
     class Meta:
         model = Idea
-        fields = '__all__'
+        fields = ('name', 'category', 'description', 'image')
 
 
 class PosteForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
     category = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Choose a category you want your idea to affect.'}))
-    image = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Link an image url for your post.'}))
+        widget=forms.TextInput(attrs={'placeholder': 'Choose a category you want your vote to affect.'}))
+    image = forms.ImageField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
+    # altered image URLField to ImageField, check for bugs please
 
     class Meta:
         model = Vote
-        fields = '__all__'
+        fields = ('name', 'category', 'description', 'image')
 
 
 # Profile Form
@@ -170,7 +172,7 @@ class SupportForm(forms.ModelForm):
     issue = forms.CharField(
         help_text='Describe your issue in detail. We will try to get back to you as soon as possible.')
     Additional_comments = forms.CharField(help_text='Put any additional comments you may have here.')
-    image = forms.URLField(help_text='Please attach a screenshot of your issue.')
+    image = forms.ImageField(widget=forms.TextInput(attrs={'placeholder': 'Please attach a screenshot of your issue.'}))
 
     class Meta:
         model = Support
@@ -572,8 +574,8 @@ class BilletBackgroundImagery(forms.ModelForm):
         attrs={
             'placeholder': 'Choose a category you want your idea to affect.'
         }))
-    image = forms.URLField(widget=forms.TextInput(
-        attrs={'placeholder': 'Link an image for your post.'}))
+    image = forms.ImageField(widget=forms.TextInput(
+        attrs={'placeholder': 'Attach an image for your post.'}))
 
     class Meta:
         model = BilletBackgroundImage
@@ -587,8 +589,8 @@ class TagBackgroundImagery(forms.ModelForm):
         attrs={
             'placeholder': 'Choose a category you want your idea to affect.'
         }))
-    image = forms.URLField(widget=forms.TextInput(
-        attrs={'placeholder': 'Link an image for your post.'}))
+    image = forms.ImageField(widget=forms.TextInput(
+        attrs={'placeholder': 'Attach an image for your post.'}))
 
     class Meta:
         model = TagBackgroundImage
@@ -599,7 +601,7 @@ class StaffRanksBackgroundImagery(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
     category = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Choose a category you want your idea to affect.'}))
-    image = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
+    image = forms.ImageField(widget=forms.TextInput(attrs={'placeholder': 'Attach an image for your post.'}))
 
     class Meta:
         model = StaffRanksBackgroundImage
@@ -610,7 +612,7 @@ class MegaBackgroundImagery(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
     category = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Choose a category you want your idea to affect.'}))
-    image = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
+    image = forms.ImageField(widget=forms.TextInput(attrs={'placeholder': 'Attach an image for your post.'}))
 
     class Meta:
         model = MegaBackgroundImage
@@ -708,10 +710,10 @@ class BusinessMailingForm(forms.ModelForm):
         fields = {"name", "email", "inquiry", "message"}
 
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}), #get this instead of Contact.name in views
-            "email": forms.TextInput(attrs={"class": "form-control"}),
-            "inquiry": forms.TextInput(attrs={"class": "form-control"}),
-            "message": forms.TextInput(attrs={"class": "form-control"})
+            "name": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'e.g. Liam Mannara'}), #get this instead of Contact.name in views
+            "email": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'e.g. Intellex@gmail.com'}),
+            "inquiry": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'Your inquiry goes here.'}),
+            "message": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'Your message goes here.'})
         }
 
     def get_info(self):
