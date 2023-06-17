@@ -1,0 +1,97 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <link href="style2.css" rel="stylesheet" type="text/css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>PokeTrove</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/featuredproductsstyle.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/featuredproductsstyle2.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/landingpagestyling.css' %}">
+  <style>
+    /* Add the following styles to your CSS file */
+    .chat-window {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 300px;
+      max-height: 400px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      transform: translateY(100%);
+      opacity: 0;
+      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+      z-index: 2;
+    }
+
+    .chat-window.open {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+
+
+
+
+<body>sss
+
+
+    {% for feedback in Feed %}
+    kk
+        {% for slug in Feed %}
+ee
+
+                   {% if Feedback.item == Item.item %}jjjj
+                   <a href="{{Feedback.hyperlink}}">
+                       {{Feedback.user.username }}
+                       {{Feedback.item.title}}
+                       </a>
+                       {% if Feedback.star_rating == 1 %}
+                       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "{{ Feedback.star_rating }}">
+                            <!--show a picture of the star rating-->
+                       </a>
+                        {% endif %}
+                        {% if Feedback.star_rating == 2 %}
+                       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "{{ Feedback.star_rating }}">
+                            <!--show a picture of the star rating-->
+                       </a>
+                        {% endif %}
+                           {% if Feedback.star_rating == 3 %}
+                       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "{{ Feedback.star_rating }}">
+                            <!--show a picture of the star rating-->
+                       </a>
+                        {% endif %}
+                        {% if Feedback.star_rating == 4 %}
+                       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "{{ Feedback.star_rating }}">
+                            <!--show a picture of the star rating-->
+                       </a>
+                        {% endif %}
+    {% endif %}
+                        {% if Feedback.star_rating == 5 %}
+                       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "{{ Feedback.star_rating }}">
+                            <!--show a picture of the star rating-->
+                       </a>
+                        {% endif %}
+                        <h3>{{ Feedback.star_rating }}</h3>
+                    <h3>{{Feedback.comment}} </h3>
+
+  {% endfor %}
+{% endfor %}
+</body>
+</html>
+{% endblock content %}

@@ -3,11 +3,14 @@ from django.db import models, migrations
 from django.contrib.auth.models import User
 from uuid import uuid4
 
+#from image.utils import render
+
 
 class Idea(models.Model):
     """Model for sharing ideas and getting user feedback"""
     name = models.CharField(max_length=100, help_text='Your name goes here.')
-    category = models.CharField(max_length=100, help_text='Choose a category you want your idea to affect (server layout, event idea, etc).')
+    category = models.CharField(max_length=100,
+                                help_text='Choose a category you want your idea to affect (server layout, event idea, etc).')
     description = models.TextField(help_text='Please share any ideas you may have.')
     image = models.ImageField(help_text='Attach an image for your idea (scales to your picture`s dimensions).')
     is_active = models.IntegerField(default=1,
@@ -40,7 +43,8 @@ class UpdateProfile(models.Model):
 class Vote(models.Model):
     """Used for voting on different new ideas"""
     name = models.CharField(max_length=100, help_text='Your name goes here.')
-    category = models.CharField(max_length=100, help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).')
+    category = models.CharField(max_length=100,
+                                help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).')
     description = models.TextField(help_text='Please share any ideas you may have.')
     image = models.ImageField(help_text='Attach an image for your profile (scales to your picture`s dimensions.)')
     mfg_date = models.DateTimeField(auto_now_add=True)
@@ -84,6 +88,19 @@ class City(models.Model):
 
     def __str__(self):
         return self.name
+
+
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
+
+class SearchResult(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    url = models.URLField()
 
 
 class StaffApplication(models.Model):
@@ -290,6 +307,7 @@ class Event(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+
 class BusinessMessageBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -300,6 +318,7 @@ class BusinessMessageBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Business Message Background Image"
         verbose_name_plural = "Business Message Background Images"
+
 
 class MemberHomeBackgroundImage(models.Model):
     title = models.TextField()
@@ -463,11 +482,11 @@ class FaviconBase(models.Model):
     favicontitle = models.TextField(verbose_name="Favicon Title")
     faviconcover = models.ImageField(upload_to='images/', verbose_name="Favicon")
     favicon_length = models.PositiveIntegerField(blank=True, null=True, default="100",
-                                                       help_text='Original length of the favicon (use for original ratio).',
-                                                       verbose_name="advertisement length")
+                                                 help_text='Original length of the favicon (use for original ratio).',
+                                                 verbose_name="advertisement length")
     favicon_width = models.PositiveIntegerField(blank=True, null=True, default="100",
-                                                      help_text='Original width of the favicon (use for original ratio).',
-                                                      verbose_name="advertisement width")
+                                                help_text='Original width of the favicon (use for original ratio).',
+                                                verbose_name="advertisement width")
     length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
     width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
     faviconpage = models.TextField(verbose_name="Page Name")
@@ -498,11 +517,11 @@ class LogoBase(models.Model):
     page = models.TextField(verbose_name="Page Name")
     alternate = models.TextField(verbose_name="Alternate Text")
     logo_length = models.PositiveIntegerField(blank=True, null=True, default="100",
-                                                       help_text='Original length of the advertisement (use for original ratio).',
-                                                       verbose_name="advertisement length")
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
     logo_width = models.PositiveIntegerField(blank=True, null=True, default="100",
-                                                      help_text='Original width of the advertisement (use for original ratio).',
-                                                      verbose_name="advertisement width")
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
     length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
     width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
     is_active = models.IntegerField(default=1,
@@ -750,6 +769,7 @@ class Titled(models.Model):
         verbose_name = "Page Title"
         verbose_name_plural = "Page Titles"
 
+
 class SocialMedia(models.Model):
     social = models.TextField(verbose_name="Social Media Platform")
     image = models.ImageField(verbose_name="Social Media Logo")
@@ -777,6 +797,7 @@ class SocialMedia(models.Model):
     class Meta:
         verbose_name = "Social Media"
         verbose_name_plural = "Social Media"
+
 
 class BaseCopyrightTextField(models.Model):
     copyright = models.TextField(verbose_name="Copyright Field", help_text="Copyright And Year")
@@ -1356,7 +1377,7 @@ class SupportMessage(models.Model):
 # from django.db.models.signals import post_save
 from django.conf import settings
 from django.db.models import Sum
-from django.shortcuts import reverse
+from django.shortcuts import reverse, get_object_or_404
 from django_countries.fields import CountryField
 
 CATEGORY_CHOICES = (
@@ -1430,6 +1451,8 @@ class ProfileDetails(models.Model):
   class Meta:
       verbose_name_plural = "Settings"
       """
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 
 class Item(models.Model):
@@ -1441,7 +1464,7 @@ class Item(models.Model):
     slug = models.SlugField()
     description = models.TextField()
     image = models.ImageField()
-    relateditems = models.ManyToManyField("self", blank=True)
+    relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1480,6 +1503,14 @@ class EBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Ecommerce Background Image"
         verbose_name_plural = "Ecommerce Background Images"
+
+
+from django.core.validators import MinValueValidator, MaxValueValidator
+
+from django.contrib.auth.models import User
+from django.contrib import messages
+
+
 
 
 class ChatBackgroundImage(models.Model):
@@ -1612,6 +1643,7 @@ class OrderItem(models.Model):
     ordered = models.BooleanField(default=False)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
+    #order_date = models.DateTimeField(auto_now_add=True, verbose_name="order date")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1642,10 +1674,11 @@ class OrderItem(models.Model):
 
 
 class Order(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
     items = models.ManyToManyField(OrderItem)
+    itemhistory = models.ForeignKey(Item, on_delete=models.CASCADE)
+    feedback_url = models.URLField(blank=True)
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField()
     ordered = models.BooleanField(default=False)
@@ -1887,10 +1920,6 @@ class Advertising(AdvertisementBase):
     pass
 
 
-
-
-
-
 class ImageBase(models.Model):
     title = models.CharField(max_length=100, help_text='Advertisement title.',
                              verbose_name="advertisement title")
@@ -1951,6 +1980,7 @@ class ImageBase(models.Model):
         # Save the updated Image object back to the database
         image.save()
 
+
 from django.utils import timezone
 
 
@@ -1993,3 +2023,34 @@ def create_profile(sender, **kwargs):
 
 
 post_save.connect(create_profile, sender=User)
+
+
+class Feedback(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE) #might want to replace item with order
+    order = models.ForeignKey(OrderItem, on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=30, blank=True, null=True)
+    last_name = models.CharField(max_length=30, blank=True, null=True)
+    phone_number = models.IntegerField(blank=True, null=True)
+    hyperlink = models.CharField(max_length=200)
+    comment = models.TextField()
+    feedbackpage = models.TextField(verbose_name="Page Name", blank=True, null=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True, null=True,
+                            help_text="Leave blank to use corresponding product slug.")
+    star_rating = models.IntegerField(verbose_name='Star Rating',
+                                      validators=[MinValueValidator(1), MaxValueValidator(5)])
+    timestamp = models.DateTimeField(default=datetime.now(), blank=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return "%s %s" % (self.first_name, self.last_name)
+
+@receiver(pre_save, sender=Feedback)
+def set_slug(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = instance.item.slug
+
+

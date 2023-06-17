@@ -67,6 +67,8 @@ from .models import Coupon
 from .models import (Item, OrderItem, Order, CheckoutAddress, Payment)
 from .models import Contact
 from .models import BusinessMailingContact
+from .models import Feedback
+from .models import Order
 from django.contrib.auth.models import Group
 from django.contrib.admin import AdminSite
 from django.utils.translation import gettext_lazy
@@ -152,6 +154,7 @@ admin.site.register(Contact)
 admin.site.register(BusinessMailingContact)
 #admin.site.register(BackgroundImages)
 admin.site.register(Coupon)
+admin.site.register(Feedback)
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin

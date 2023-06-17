@@ -217,7 +217,7 @@ class SignupView(FormMixin, ListView):
 class TotalView(ListView):
     model = BackgroundImageBase
 
-    def get_context_data(self, **kwargs):
+    def _context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -249,14 +249,15 @@ from django.core.files.base import ContentFile
 
 from .models import Advertising
 
+
 class AdvertisementView(ListView):
     model = AdvertisementBase
-
 
     def display_advertisement(request, advertisement_id):
         advertising = Advertising.objects.get(id=advertising_id)
         context = {'advertising': advertising}
         return render(request, 'index.html', context)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Advertisement'] = AdvertisementBase.objects.filter(page=self.template_name, is_active=1)
@@ -309,7 +310,6 @@ class ImageView(ListView):
         context = super().get_context_data(**kwargs)
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1)
         return context
-
 
 
 class BaseView(ListView):
@@ -518,6 +518,7 @@ class supportview(ListView):
     def get_queryset(self):
         return Support.objects.all()
 
+
 class MemberHomeBackgroundView(ListView):
     model = MemberHomeBackgroundImage
     template_name = "memberhome.html"
@@ -548,6 +549,7 @@ class BusinessMessageBackgroundView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BusinessMessageBackgroundImage'] = BusinessMessageBackgroundImage.objects.all()
         return context
+
 
 class PatreonBackgroundView(ListView):
     model = Patreon
@@ -733,6 +735,8 @@ class BackgroundView(BaseView):
             "image_position")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
+        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by(
+            "slug")
         print(FaviconBase.objects.all())
         print(213324)
         return context
@@ -1691,6 +1695,7 @@ class HomePageView(TemplateView):
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+
 class EcommerceSearchResultsView(ListView):
     model = Item
     template_name = 'ecommercesearch_results.html'
@@ -1709,12 +1714,18 @@ class EcommerceSearchResultsView(ListView):
 
         return (all_list)
 
+
+# views.py
+
 from django.views.generic import ListView
 from django.db.models import Q
+from showcase.models import City, Vote, UpdateProfile, Idea, PartnerApplication, SearchResult
+
 
 class SearchResultsView(ListView):
     template_name = 'search_results.html'
     paginate_by = 10
+    context_object_name = 'all_list'
 
     def get_queryset(self):
         query = self.request.GET.get('q')
@@ -1738,22 +1749,12 @@ class SearchResultsView(ListView):
             Q(name__icontains=query) | Q(description__icontains=query)
             | Q(server_invite__icontains=query))
 
-        all_list = {
-            "city_list": city_list,
-            "vote_list": vote_list,
-            "idea_list": idea_list,
-            "profile_list": profile_list,
-            "partner_list": partner_list,
-        }
-
-        # Get the page number from the URL parameters
-        page = self.kwargs.get('page', 1)
-
-        # Filter the results by the current page
-        for key in all_list:
-            all_list[key] = all_list[key][(page-1)*self.paginate_by : page*self.paginate_by]
-
-        return all_list
+        all_list = list(city_list) + list(vote_list) + list(profile_list) + list(idea_list) + list(partner_list)
+        search_results = []
+        for item in all_list:
+            search_result = SearchResult(content_object=item)
+            search_results.append(search_result)
+        return search_results
 
 
 class EcommerceSearchResultsView(ListView):
@@ -2006,6 +2007,7 @@ class BusinessSuccessMailingView(TemplateView):
         context = super().get_context_data(kwargs)
         context["BusinessMailingContact"] = "2123123123123"
         return context
+
 
 class contact(TemplateView):
     paginate_by = 10
@@ -2653,9 +2655,35 @@ def create_ref_code():
                                   k=20))
 
 
+from django.db.models import Count, Avg
+
+
 def products(request):
     context = {'items': Item.objects.all()}
     return render(request, "products.html", context)
+
+
+def reviewproducts(request, pid):
+    product = Item.objects.get(pid=pid)
+
+    products = ProductReview.objects.filter(product=product).order_by("-date")
+
+    # getting the reviews
+    reviews = ProductReview.objects.filter(Item=Item)
+
+    average_rating = ProductReview.objects.filter(Item=Item).aggregate(rating=Avg('rating'))
+
+    p_image = Item.image.all()
+
+    context = {
+        "p": products,
+        "p_image": p_image,
+        "average_rating": average_rating,
+        "review": review,
+        "products": products,
+    }
+
+    return render(request, "showcase:index.html", context)
 
 
 def is_valid_form(values):
@@ -2864,7 +2892,6 @@ from .forms import (EditProfileForm)
 
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
-
 
 
 # from django.contrib.auth.decorators import login_required
@@ -3111,7 +3138,423 @@ class BusinessEmailSuccessView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        context['BusinessMailingContact'] = BusinessMailingContact.objects.all()[len(BusinessMailingContact.objects.all()) - 1]
+        context['BusinessMailingContact'] = BusinessMailingContact.objects.all()[
+            len(BusinessMailingContact.objects.all()) - 1]
         print(context["BusinessMailingContact"])
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         return context
+
+
+from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from .forms import FeedbackForm
+import json
+import datetime
+
+from .fusioncharts import FusionCharts
+from showcase.models import Feedback
+from django.core.mail import send_mail
+
+data = [
+    ['Year', 'Sales', 'Expenses'],
+    [2004, 1000, 400],
+    [2005, 1170, 460],
+    [2006, 660, 1120],
+    [2007, 1030, 540]
+]
+
+
+def detail(request, slug):
+    try:
+        item = Item.objects.get(slug=slug)
+    except Item.DoesNotExist:
+        raise Http404("Product does not exist")
+    company_list = Item.objects.all()
+    context = {
+        "company_list": company_list,
+        "Item": Item,
+
+    }
+    return render(request, 'review_detail.html', context)
+
+
+def review(request, slug):
+    if request.POST:
+        form = FeedbackForm(request.POST)
+
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.save()
+            return HttpResponseRedirect('/thanks')
+    else:
+        form = FeedbackForm()
+
+    try:
+        company = Item.objects.get(Item, slug=slug)
+    except Item.DoesNotExist:
+        raise Http404("Product does not exist")
+    context = {
+        "Item": Item,
+        "form": form,
+
+    }
+    return render(request, 'company_reviews.html', context)
+
+
+def index(request):
+    username = request.user.username
+    is_employee = request.user.groups.filter(name='Employees').exists()
+    is_manager = request.user.groups.filter(name='Managers').exists()
+
+    if is_employee:
+        company_list = Item.objects.filter(employee=request.user)
+        context = {
+            "companies": company_list,
+            "is_employee": is_employee,
+            "is_manager": is_manager
+        }
+
+        return render(request, 'employee_index.html', context)
+    elif request.user.is_staff:
+
+        dataSource = {}
+        # setting chart cosmetics
+        dataSource['chart'] = {
+            "caption": "Graph for Companies versus their respective reviews",
+            "borderAlpha": "20",
+            "canvasBorderAlpha": "0",
+            "usePlotGradientColor": "0",
+            "xaxisname": "Companies",
+            "yaxisname": "Reviews",
+            "plotBorderAlpha": "10",
+            "showXAxisLine": "1",
+            "xAxisLineColor": "#999999",
+            "showValues": "0",
+            "divlineColor": "#999999",
+            "divLineIsDashed": "1",
+            "showAlternateHGridColor": "0",
+            "exportEnabled": "1"
+        }
+
+        reviewsDataSource = {}
+        # setting chart cosmetics
+        reviewsDataSource['chart'] = {
+            "caption": "Number of reviews added",
+            "subcaption": "Last Year",
+            "borderAlpha": "20",
+            "canvasBorderAlpha": "0",
+            "usePlotGradientColor": "0",
+            "xaxisname": "Months",
+            "yaxisname": "Reviews",
+            "plotBorderAlpha": "10",
+            "showXAxisLine": "1",
+            "xAxisLineColor": "#999999",
+            "showValues": "0",
+            "divlineColor": "#999999",
+            "divLineIsDashed": "1",
+            "showAlternateHGridColor": "0",
+            "exportEnabled": "1"
+        }
+
+        reviewsDataSource['data'] = []
+
+        for i in range(1, 13):
+            data = {}
+            currentMonth = datetime.date(2008, i, 1).strftime('%B')
+            data['label'] = currentMonth
+            count = 0
+            for key in Feedback.objects.all():
+                if currentMonth == key.timestamp.strftime("%B"):
+                    count = count + 1
+            data['value'] = count
+            reviewsDataSource['data'].append(data)
+
+        dataSource['data'] = []
+        # The data for the chart should be in an array wherein each element of the array is a JSON object as
+        # `label` and `value` keys.
+        # Iterate through the data in `Country` model and insert in to the `dataSource['data']` list.
+        for key in Company.objects.all():
+            data = {}
+            data['label'] = key.name
+            data['value'] = Feedback.objects.filter(Company=key).count()
+            dataSource['data'].append(data)
+
+        column2D = FusionCharts("column2D", "ex1", "600", "400", "chart-1", "json", dataSource)
+
+        column3D = FusionCharts("column2D", "ex2", "600", "400", "chart-2", "json", reviewsDataSource)
+
+        company_list = Company.objects.all()
+        review_list = Feedback.objects.all()
+        employees = User.objects.filter(groups__name='Employees')
+        managers = User.objects.filter(groups__name='Managers')
+
+        context = {
+            "companies": company_list,
+            "employees": employees,
+            "managers": managers,
+            "chart": column2D.render(),
+            "chart2": column3D.render(),
+            "reviews": review_list,
+            "latestReviews": Feedback.objects.order_by('-timestamp')[:5]
+        }
+
+        return render(request, 'admin_index.html', context)
+    elif is_manager:
+        employees = User.objects.filter(groups__name='Employees')
+        companies = Company.objects.all()
+
+        context = {
+            "employees": employees,
+            "companies": companies
+        }
+
+        return render(request, 'manager_index.html', context)
+    else:
+        companies = Company.objects.all()
+
+        context = {
+            "companies": companies,
+        }
+
+        return render(request, 'customer_index.html', context)
+
+
+def thanks(request):
+    return render(request, 'thank-you.html')
+
+
+"""@login_required(login_url='/accounts/login/')
+def create_company(request):
+    if request.POST:
+        form = CompanyForm(request.POST)
+
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.save()
+            return HttpResponseRedirect('/thanks')
+    else:
+        form = CompanyForm()
+    return render(request,'create_company.html',{'form':form })"""
+
+from django.template.loader import render_to_string
+
+
+def sendEmployeeEmailOnAddReview(Company, form):
+    subject, from_email, to = "Tech Greatness.com : A customer has added a review", "IntelleXCompany1@gmail.com", \
+                              Company.employee.email
+
+    context = {
+        "employee": Company.employee.get_full_name(),
+        "Company": Company,
+        "form": form,
+        "first_name": form.cleaned_data['first_name'],
+        "last_name": form.cleaned_data['last_name'],
+        "comment": form.cleaned_data['comment'],
+    }
+
+    msg_plain = render_to_string('add_review_email_template.txt', context)
+    msg_html = render_to_string('add_review_email_template.html', context)
+
+    send_mail(subject, msg_plain, from_email, [to], fail_silently=False, html_message=msg_html)
+
+
+from .models import Item
+
+
+class FeedbackView(DetailView):
+    model = Feedback
+    paginate_by = 10
+    template_name = "review_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        return context
+
+    # def get(self, request):
+    # Your code to handle the GET request and render the feedback form
+    #    return render(request, 'review_detail.html')
+
+    def post(self, request):
+        # Process the submitted feedback form data
+        feedback = Feedbackr()  # Create a new Feedback instance
+
+        # Call the get_current_user function to associate the current user with the feedback
+        self.get_current_user(request, feedback)
+
+        # Set other fields of the feedback object based on the submitted form data
+        # feedback.field1 = request.POST['field1']
+        # feedback.field2 = request.POST['field2']
+
+        # Save the feedback object
+        feedback.save()
+
+        messages.success(request, 'Your feedback has been submitted successfully.')
+
+        # Optionally, redirect to a success page or display a success message
+        return render(request, 'index.html')
+
+    @login_required
+    def get_current_user(self, request, feedback):
+        if request.method == 'POST':
+            # Process the form submission
+            username = request.user.username
+            post = form.save(commit=False)
+            post.save()
+            # redirect user to staffdone
+            return redirect('showcase:feedbackfinish')
+
+    def getobject(self, request, item):
+        item = Item.objects.get(pk=item)
+
+        return render(request, 'review_detail.html', {'item': item})
+
+    def create_review(request, item_id):
+        try:
+            Item = Item.objects.get(slug=slug)
+        except Item.DoesNotExist:
+            raise Http404("Product does not exist")
+        if request.POST:
+            form = FeedbackForm(request.POST)
+            url = '/'
+            data = json.dumps(url)
+
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.Item = item
+                instance.save()
+                sendEmployeeEmailOnAddReview(Item, form)
+                return HttpResponse(data, content_type='application/json')
+        else:
+            form = FeedbackForm()
+        context = {
+            "Item": Item,
+            "form": form,
+
+        }
+        return render(request, 'create_review.html', context)
+
+
+@login_required
+def post_detail(request, slug):
+    template_name = 'post_detail.html'
+    post = get_object_or_404(Blog, slug=slug)
+    comments = post.comments.filter(active=True).order_by("-created_on")
+    new_comment = None
+    # Comment posted
+    if request.method == 'POST':
+        comment_form = CommentForm(data=request.POST)
+        if comment_form.is_valid():
+            # Create Comment object but don't save to database yet
+            new_comment = comment_form.save(commit=False)
+            # Assign the current post to the comment
+            new_comment.blog = post
+            # Save the comment to the database
+            new_comment.save()
+    else:
+        comment_form = CommentForm()
+
+    return render(
+        request, template_name, {
+            'post': post,
+            'comments': comments,
+            'new_comment': new_comment,
+            'comment_form': comment_form
+        })
+
+
+@login_required
+def postpreference(request, post_name, like_or_dislike):
+    if request.method == "POST":
+        eachpost = get_object_or_404(Blog, slug=post_name)
+
+        if request.user in eachpost.likes.iterator():
+            eachpost.likes.remove(request.user)
+        if request.user in eachpost.dislikes.iterator():
+            eachpost.dislikes.remove(request.user)
+
+        if int(like_or_dislike) == 1:
+            eachpost.likes.add(request.user)
+        else:
+            eachpost.dislikes.add(request.user)
+
+        context = {'eachpost': eachpost,
+                   'post_name': post_name}
+
+        return render(request, 'likes.html', context)
+
+    else:
+        eachpost = get_object_or_404(Blog, slug=post_name)
+        context = {'eachpost': eachpost,
+                   'post_name': post_name}
+
+        return render(request, 'showcase:likes.html', context)
+
+
+from django.shortcuts import get_object_or_404, redirect, render
+from .forms import FeedbackForm
+from .models import Item, OrderItem, Feedback
+
+from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404
+
+def submit_feedback(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        user = request.user
+        if form.is_valid():
+            order_item = get_object_or_404(OrderItem, user=user, item=item)
+            feedback = form.save(commit=False)
+            feedback.item = item  # Set the related Item instance
+            feedback.order = order_item  # Set the related OrderItem instance
+            feedback.save()
+            return redirect('showcase:feedbackfinish')
+        else:
+            # Form is not valid, show an error message or redirect
+            messages.error(request, "Invalid form data.")
+            return redirect('showcase:create_review', item_id=item_id)
+    else:
+        form = FeedbackForm()
+        return render(request, 'create_review.html', {'form': form})
+
+
+
+
+
+
+
+
+
+
+
+
+
+class OrderHistory(ListView):
+    model = Order
+    template_name = "order_history.html"
+
+
+    def get_context_data(self, request, *args, **kwargs):
+        user = self.request.user
+        context = super(OrderHistory, self).get_context_data(**kwargs)
+        context['orders'] = Order.objects.filter(user=request.user)
+        context['items'] = Item.objects.all()
+        context['feedback'] = Feedback.objects.all()
+        print(user)
+        return context
+
+    def order_history(request):
+        username = request.user.username
+        orderhistory = OrderHistory.objects.get(name=username)
+        return render(request, 'order_history.html', {
+            'username': username,
+            'orderhistory': orderhistory
+        })

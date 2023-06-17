@@ -13,57 +13,33 @@
   <br>
   <br>
   <br>
+<!-- search_results.html -->
 
-
-      {% for poste in object_list.vote_list %}
-      <h1 class = "banh1t">Votes</h1>
-    <div class = "searchere"> 
-        <li>
-      <a href="{% url 'showcase:voting'%}">
-           {{ poste.catagory}}, by {{ poste.name }}
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for result in all_list %}
+      <tr>
+        <a href="{{ result.page }}">
+        <td>{{ result.content_object.name }}</td>
+        <td>{{ result.content_object.description }}</td>
+        <td><a href="{{ result.content_object.get_absolute_url }}">{{ result.content_object.get_absolute_url }}</a></td>
           </a>
-        </li>
-    </div>
-    <br>
-     {% endfor %}
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="3">No results found.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
-     {% for post in object_list.idea_list %}
-        <h1 class = "banh1t">Ideas</h1>
-    <div class = "searchere">
-        <li>
-      <a href="{% url 'showcase:users'%}">
-          {{ post.catagory}}, by {{ post.name }}
-      </a>
-        </li>
-    </div>
-    <br>
-       {% endfor %}
-
-
-      {% for UpdateProfile in object_list.profile_list %}
-          <h1 class = "banh1t">Profiles</h1>
-    <div class = "searchere">
-       <li>
-      <a href="{% url 'showcase:showcase'%}">
-          {{ UpdateProfile.catagory}}, by {{ UpdateProfile.name }}
-      </a>
-        </li>
-    </div>
-      <br>
-  {% endfor %}
-  
-  {% for Partner in object_list.Partner_list %}
-    <div class = "searchere">
-        <li>
-      <a href="{% url 'showcase:partners'%}">
-          {{ Partner.catagory}}, by {{ Partner.name }}
-      </a>
-        </li>
-    </div>
-    <br>
-     {% endfor %}
-    </ul>
-  </div>
-</div>
+  </ul>
 
 {% endblock content %}

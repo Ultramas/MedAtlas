@@ -1,7 +1,7 @@
 from django import forms
 
 from mysite import settings
-from .models import Idea
+from .models import Idea, OrderItem
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -134,6 +134,12 @@ class ProfileForm(forms.ModelForm):
             'email',
         ]
 
+"""class ReviewForm(forms.ModelForm):
+    review = forms.CharField(widget=forms.Textarea(attrs={'placeholder': "Write Your Review Here"}))
+
+    class Meta:
+        model = ProductReview
+        fields = '__all__'"""
 
 class StaffJoin(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Lime#6510'}))
@@ -743,3 +749,20 @@ class BusinessMailingForm(forms.ModelForm):
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[to_email]
         )
+from django import forms
+from .models import Feedback
+
+
+
+class FeedbackForm(forms.ModelForm):
+    star_rating = forms.IntegerField(widget=forms.TextInput(
+        attrs={
+            'placeholder': '5'
+        }))
+    comment = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'Outstanding!'}))
+
+    class Meta:
+        model = Feedback
+        fields = ('order', 'star_rating','comment')
+        #might want to replace item with order (check models)

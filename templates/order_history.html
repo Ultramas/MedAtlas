@@ -82,8 +82,12 @@
       <section class="text-center mb-4">
 
         <!--Grid row-->
-        <div class="row wow fadeIn">
-          {% for item in items %}
+        <div class="row wow fadeIn">eee
+          {% for order in orders %}
+            mml
+            <h3>Product Name: {{ order.items }}</h3>
+            <h4> Order date: {{ order.ordered_date }}</h4>
+
           <!--Grid column-->
           <div class="col-lg-3 col-md-6 mb-4">
 
@@ -91,8 +95,9 @@
             <div class="card">
               <!--Card image-->
               <div class="view overlay">
-                <a href="{{ item.get_absolute_url }}">
-      <img class = "hunt" src="{{item.image.url}}" class="card-img-top"
+                <a href="{{ Order.get_absolute_url }}">
+                    <img src="{{ order.itemhistory.image.url }}" alt="Product Image">
+      <img class = "hunt" src="{{Order.image.url}}" class="card-img-top"
                   alt="{{ item.image.url }}">
                   <div class="mask rgba-white-slight"></div>
                 </a>        
@@ -151,54 +156,38 @@
       <div class="d-flex justify-content-center wow fadeIn">
         <ul class="pagination pg-blue">
 
-          <!--Arrow left-->
-<li class="page-item {% if not items.has_previous %}disabled{% endif %}">
-  {% if items.has_previous %}
-  <a class="page-link" href="?page={{ items.previous_page_number }}" aria-label="Previous">
-    <span aria-hidden="true">&laquo;</span>
-    <span class="sr-only">Previous</span>
-  </a>
-  {% else %}
-   <a class="page-link" href="?page={{ items.previous_page_number }}" aria-label="Previous">
-    <span aria-hidden="true">&laquo;</span>
-    <span class="sr-only">Previous</span>
-  {% endif %}
-   </a>
-</li>
+          <!--Arrow left-->    
+          <li class="page-item disabled">
+            <a class="page-link" href="#" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+              <span class="sr-only">Previous</span>
+            </a>
+          </li>
 
           <li class="page-item active">
-            <a class="page-link" href="?page=1">1
+            <a class="page-link" href="#">1
               <span class="sr-only">(current)</span>
             </a>
           </li>
           <li class="page-item">
-            <a class="page-link" href="?page=2">2</a>
+            <a class="page-link" href="#">2</a>
           </li>
           <li class="page-item">
-            <a class="page-link" href="?page=3">3</a>
+            <a class="page-link" href="#">3</a>
           </li>
           <li class="page-item">
-            <a class="page-link" href="?page=4">4</a>
+            <a class="page-link" href="#">4</a>
           </li>
           <li class="page-item">
-            <a class="page-link" href="?page=5">5</a>
+            <a class="page-link" href="#">5</a>
           </li>
 
-                      <!--Arrow right-->
-<li class="page-item {% if not items.has_next %}disabled{% endif %}">
-  {% if items.has_previous %}
-  <a class="page-link" href="?page={{ items.next_page_number }}" aria-label="Previous">
-    <span aria-hidden="true">&raquo;</span>
-    <span class="sr-only">Next</span>
-  </a>
-  {% else %}
-   <a class="page-link" href="?page={{ items.next_page_number }}" aria-label="Previous">
-    <span aria-hidden="true">&raquo;</span>
-    <span class="sr-only">Next</span>
-  {% endif %}
-   </a>
-</li>
-            
+          <li class="page-item">
+            <a class="page-link" href="#" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+              <span class="sr-only">Next</span>
+            </a>
+          </li>
         </ul>
       </div>
       <!--Pagination-->
