@@ -1,0 +1,23 @@
+
+{% extends 'memberbase.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+            {% for AdminRoles in Roles %}
+                    <a href="{{AdminRoles.hyperlink}}">
+                    <h2>{{ AdminRoles.roles }}</h2>
+                        <h3>{{ AdminRoles.role_description }}</h3>
+                    </a>
+            <!--possibly consider making hyperlink for branching to more descriptive pages-->
+                    {% endfor %}
+</body>
+</html>
+{% endblock content %}

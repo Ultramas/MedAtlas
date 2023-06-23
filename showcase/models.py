@@ -3,7 +3,8 @@ from django.db import models, migrations
 from django.contrib.auth.models import User
 from uuid import uuid4
 
-#from image.utils import render
+
+# from image.utils import render
 
 
 class Idea(models.Model):
@@ -1464,6 +1465,7 @@ class Item(models.Model):
     slug = models.SlugField()
     description = models.TextField()
     image = models.ImageField()
+    hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.")
     relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -1509,8 +1511,6 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 from django.contrib.auth.models import User
 from django.contrib import messages
-
-
 
 
 class ChatBackgroundImage(models.Model):
@@ -1641,9 +1641,10 @@ class OrderItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE)
     ordered = models.BooleanField(default=False)
+    #slug = models.SlugField(max_length=200, help_text="Leave blank to use corresponding product slug.")
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
-    #order_date = models.DateTimeField(auto_now_add=True, verbose_name="order date")
+    # order_date = models.DateTimeField(auto_now_add=True, verbose_name="order date")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1673,11 +1674,68 @@ class OrderItem(models.Model):
         verbose_name_plural = 'Order Items'
 
 
+class AdminRoles(models.Model):
+    roles = models.CharField(max_length=30, verbose_name="Administration roles")
+    role_description = models.TextField(verbose_name="Role Overview", blank='True', null='True')
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this role currently active?")
+    def __str__(self):
+        return self.roles
+
+    class Meta:
+        verbose_name_plural = 'Administrative Roles'
+
+
+class AdminTasks(models.Model):
+    task = models.CharField(max_length=30, verbose_name="Administration tasks")
+    hyperlink = models.CharField(max_length=100, verbose_name="Task hyperlink", help_text='Only add if necessary', blank='True', null='True')
+    opennew = models.BooleanField(verbose_name="Open In New Tab?", default=False,
+                                  choices=((True, 'Yes'), (False, 'No')),
+                                  help_text="Please note all Administration Interface Pages should open in a new tab.")
+    section = models.IntegerField(help_text='Position of the page link.', verbose_name='position')
+    page_name = models.TextField(verbose_name="Page Name", blank="True", null="True")
+    image = models.ImageField(verbose_name = "Task image")
+    alternate = models.TextField(verbose_name = "Alternate text")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this task currently active?")
+    def __str__(self):
+        return self.task
+
+    class Meta:
+        verbose_name_plural = 'Administrative Tasks'
+
+
+class AdminPages(models.Model):
+    pages = models.CharField(max_length=30, verbose_name="Administration pages")
+    hyperlink = models.CharField(max_length=100, verbose_name="Page hyperlinks")
+    opennew = models.BooleanField(verbose_name="Open In New Tab?", default=False,
+                                  choices=((True, 'Yes'), (False, 'No')), help_text="Please note all Administration Interface Pages should open in a new tab.")
+    section = models.IntegerField(help_text='Position of the page link.',
+                                           verbose_name='position')
+    page_name = models.TextField(verbose_name="Page Name", blank="True", null="True")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active page?")
+    def __str__(self):
+        return self.pages
+
+    class Meta:
+        verbose_name_plural = 'Administrative Pages'
+
+
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
     items = models.ManyToManyField(OrderItem)
-    itemhistory = models.ForeignKey(Item, on_delete=models.CASCADE)
+    itemhistory = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name="Order history")
     feedback_url = models.URLField(blank=True)
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField()
@@ -2026,19 +2084,18 @@ post_save.connect(create_profile, sender=User)
 
 
 class Feedback(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE) #might want to replace item with order
-    order = models.ForeignKey(OrderItem, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=30, blank=True, null=True)
-    last_name = models.CharField(max_length=30, blank=True, null=True)
-    phone_number = models.IntegerField(blank=True, null=True)
-    hyperlink = models.CharField(max_length=200)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True,
+                             null=True)  # might want to replace item with order
+    order = models.ForeignKey(OrderItem, on_delete=models.CASCADE, blank=True, null=True)
+    username = models.CharField(max_length=30, blank=True, null=True)
+    hyperlink = models.CharField(max_length=200, blank=True, null=True, help_text="Leave field blank, hyperlink will automatically fill with the link to the associated product.")
     comment = models.TextField()
     feedbackpage = models.TextField(verbose_name="Page Name", blank=True, null=True)
     slug = models.SlugField(max_length=200, unique=True, blank=True, null=True,
                             help_text="Leave blank to use corresponding product slug.")
     star_rating = models.IntegerField(verbose_name='Star Rating',
                                       validators=[MinValueValidator(1), MaxValueValidator(5)])
-    timestamp = models.DateTimeField(default=datetime.now(), blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2046,11 +2103,14 @@ class Feedback(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return "%s %s" % (self.first_name, self.last_name)
+        return "%s %s" % (self.username, self.item)
+
+    def save(self, *args, **kwargs):
+        if not self.hyperlink and self.item:
+            self.hyperlink = self.item.hyperlink
+        super().save(*args, **kwargs)
 
 @receiver(pre_save, sender=Feedback)
 def set_slug(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = instance.item.slug
-
-

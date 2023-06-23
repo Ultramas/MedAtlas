@@ -1,0 +1,22 @@
+
+{% extends 'memberbase.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+            {% for AdminTasks in Tasks %}
+                    <a href="{{AdminTasks.hyperlink}}">
+                    <h2>{{ AdminTasks.task }}</h2>
+                    </a>
+                    {% endfor %}
+
+</body>
+</html>
+{% endblock content %}

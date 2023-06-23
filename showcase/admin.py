@@ -69,6 +69,9 @@ from .models import Contact
 from .models import BusinessMailingContact
 from .models import Feedback
 from .models import Order
+from .models import AdminRoles
+from .models import AdminTasks
+from .models import AdminPages
 from django.contrib.auth.models import Group
 from django.contrib.admin import AdminSite
 from django.utils.translation import gettext_lazy
@@ -154,7 +157,10 @@ admin.site.register(Contact)
 admin.site.register(BusinessMailingContact)
 #admin.site.register(BackgroundImages)
 admin.site.register(Coupon)
-admin.site.register(Feedback)
+#admin.site.register(Feedback)
+admin.site.register(AdminRoles)
+admin.site.register(AdminTasks)
+admin.site.register(AdminPages)
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin

@@ -77,6 +77,9 @@ from .models import Titled
 from .models import AdvertisementBase
 from .models import ImageBase
 from .models import SocialMedia
+from .models import AdminRoles
+from .models import AdminTasks
+from .models import AdminPages
 # from .models import Background2aImage
 from .forms import PosteForm
 from .forms import PostForm
@@ -392,9 +395,70 @@ def postpreference(request, post_name, like_or_dislike):
 # like is not connected to blog yet is used to filter
 
 # id is used by this model but the blogpost uses slugs
+from django.contrib.admin.views.decorators import staff_member_required
+from django.views import View
+from django.utils.decorators import method_decorator
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class AdminRolesView(ListView):
+    template_name = "administrativeroles.html"
+    model = AdminRoles
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Roles'] = AdminRoles.objects.filter(is_active=1)
+
+        return context
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class AdminTasksView(ListView):
+    template_name = "administrativetasks.html"
+    model = AdminTasks
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Tasks'] = AdminTasks.objects.filter(is_active=1)
+        return context
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class AdminPagesView(ListView):
+    template_name = "administrativepages.html"
+    model = AdminPages
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Pages'] = AdminPages.objects.filter(is_active=1)
+        return context
+
+@method_decorator(staff_member_required, name='dispatch')
+class AdministrationView(ListView):
+    template_name = "administration.html"
+    model = AdminPages
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Pages'] = AdminPages.objects.filter(is_active=1)
+        context['Tasks'] = AdminTasks.objects.filter(is_active=1)
+        return context
+
 
 class DonateBaseView(ListView):
-    model = "donatebase.html"
+    template_name = "donatebase.html"
     model = LogoBase
 
     def get_context_data(self, **kwargs):
@@ -3505,6 +3569,12 @@ from .models import Item, OrderItem, Feedback
 from django.shortcuts import get_object_or_404
 from django.shortcuts import get_object_or_404
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .forms import FeedbackForm
+from .models import Item, OrderItem, Feedback
+
+
 def submit_feedback(request, item_id):
     item = get_object_or_404(Item, id=item_id)
     if request.method == 'POST':
@@ -3513,34 +3583,34 @@ def submit_feedback(request, item_id):
         if form.is_valid():
             order_item = get_object_or_404(OrderItem, user=user, item=item)
             feedback = form.save(commit=False)
-            feedback.item = item  # Set the related Item instance
-            feedback.order = order_item  # Set the related OrderItem instance
+            feedback.item = item
+            feedback.order = order_item
             feedback.save()
             return redirect('showcase:feedbackfinish')
         else:
-            # Form is not valid, show an error message or redirect
             messages.error(request, "Invalid form data.")
-            return redirect('showcase:create_review', item_id=item_id)
     else:
         form = FeedbackForm()
-        return render(request, 'create_review.html', {'form': form})
+
+    return render(request, 'create_review.html', {'form': form})
 
 
+def edit_feedback(request, feedback_id):
+    feedback = get_object_or_404(Feedback, id=feedback_id)
 
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST, instance=feedback, request=request)
+        if form.is_valid():
+            form.save()
+            return redirect('showcase:create_review')
+    else:
+        form = FeedbackForm(instance=feedback, request=request)
 
-
-
-
-
-
-
-
-
+    return render(request, 'create_review.html', {'form': form})
 
 class OrderHistory(ListView):
     model = Order
     template_name = "order_history.html"
-
 
     def get_context_data(self, request, *args, **kwargs):
         user = self.request.user

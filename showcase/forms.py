@@ -749,10 +749,11 @@ class BusinessMailingForm(forms.ModelForm):
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[to_email]
         )
-from django import forms
 from .models import Feedback
 
 
+from django.contrib import admin
+from django.contrib.auth.models import User
 
 class FeedbackForm(forms.ModelForm):
     star_rating = forms.IntegerField(widget=forms.TextInput(
@@ -761,8 +762,22 @@ class FeedbackForm(forms.ModelForm):
         }))
     comment = forms.CharField(widget=forms.TextInput(
         attrs={'placeholder': 'Outstanding!'}))
-
     class Meta:
         model = Feedback
-        fields = ('order', 'star_rating','comment')
+        fields = ('order', 'star_rating','comment', 'slug', 'username')
         #might want to replace item with order (check models)
+        widgets = {
+            'hyperlink': forms.TextInput(attrs={'readonly': 'readonly'})
+        }
+
+class FeedbackAdmin(admin.ModelAdmin):
+    form = FeedbackForm
+    readonly_fields = ('hyperlink', 'slug', 'username')
+
+    def save_model(self, request, obj, form, change):
+        if not change:  # Only set the username for new feedbacks
+            obj.username = request.user.username
+        super().save_model(request, obj, form, change)
+
+admin.site.register(Feedback, FeedbackAdmin)
+

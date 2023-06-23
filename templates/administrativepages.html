@@ -1,0 +1,22 @@
+
+{% extends 'memberbase.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+            {% for AdminPages in Pages %}
+                    <a href="{{AdminPages.hyperlink}}">
+
+                    <h2>{{ AdminPages.pages }}</h2>
+                    </a>
+                    {% endfor %}
+</body>
+</html>
+{% endblock content %}
