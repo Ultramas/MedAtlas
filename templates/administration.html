@@ -103,7 +103,12 @@
   <nav>
     <a href="http://127.0.0.1:8000/#" aria-label="forecastr logo" class="logo">
       <svg width="140" height="49">
-        <use xlink:href="#logo"></use>
+          {% for AdministrationView in Logo %}
+             {% if AdministrationView.page == 'administration.html' %}
+ <a class = "logo" href="/"><img class = "imageicon"  src="/media/{{AdministrationView.logocover}}" alt = "{{AdministrationView.alternate}}" width="145vh"
+     height="100vh"></a>
+          {% endif %}
+      {% endfor %}
       </svg>
     </a>
     <button class="toggle-mob-menu" aria-expanded="false" aria-label="open menu">

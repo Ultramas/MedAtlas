@@ -202,6 +202,7 @@ EMAIL_HOST_PASSWORD=env('EMAIL_HOST_PASSWORD')  # new
 EMAIL_PORT=587  # new
 EMAIL_USE_TLS=True  # new
 
+
 # Custom setting. To email
 RECIPIENT_ADDRESS = env('RECIPIENT_ADDRESS')
 
@@ -210,11 +211,10 @@ SECRET = os.getenv('payment')
 # stripe payment
 STRIPE_KEY = 'SECRET'
 
-STRIPE_PUBLIC_KEY = 'pk_live_51JSB5LH4sbqF1dn7tt0NoySzoJ2Zat2D5DHmH8vmbu0SOzZCz8sgjyki7tXSabs1LVV314uDa5ik0vFZ55p8CLce002GzKHkrI'
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
 # possibly linked to "invalid request error (invalid parameters)" issue
 
-STRIPE_SECRET_KEY = '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'
-
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 import warnings
 
 warnings.filterwarnings(

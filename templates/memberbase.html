@@ -21,11 +21,20 @@
   <body>
        <header>
 
-  <div class="column three mobile-twelve section_header_logo vertical-align-middle">
+<!--<div class="column three mobile-twelve section_header_logo vertical-align-middle">
  <a class = "logo" href="/"><img class = "imageicon"  src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6khv+EqxJLmRfFwXs1M3EMoAJtliUohPZi8...oz " width="145vh"
      height="100vh"></a>
- </div>
+ </div>-->
 
+      {% for MemberBaseView in Logo %}
+
+     <a class = "logo" href="{{MemberBaseView.hyperlink}}">
+         <img class = "imageicon"  src="/media/{{MemberBaseView.logocover}}" alt = "{{MemberBaseView.alternate}}" width="145vh"
+     height="100vh" style="z-index: 30;">
+     </a>
+
+
+      {% endfor %}
 
      </header>
     <div class = "navbarx">

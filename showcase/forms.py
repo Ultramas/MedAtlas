@@ -755,20 +755,51 @@ from .models import Feedback
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-class FeedbackForm(forms.ModelForm):
-    star_rating = forms.IntegerField(widget=forms.TextInput(
-        attrs={
-            'placeholder': '5'
-        }))
-    comment = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Outstanding!'}))
+class OrderItemForm(forms.ModelForm):
+
     class Meta:
-        model = Feedback
-        fields = ('order', 'star_rating','comment', 'slug', 'username')
+        model = OrderItem
+        fields = ('user', 'item','quantity', 'slug')
         #might want to replace item with order (check models)
         widgets = {
-            'hyperlink': forms.TextInput(attrs={'readonly': 'readonly'})
+            #'slug': forms.TextInput(attrs={'readonly': 'readonly'})
         }
+
+
+class OrderItemAdmin(admin.ModelAdmin):
+    form = OrderItemForm
+    #readonly_fields = ('user', 'slug', 'item', 'quantity')
+
+
+admin.site.register(OrderItem, OrderItemAdmin)
+
+
+from django.contrib.auth import get_user_model
+from django import forms
+from django.contrib.auth import get_user_model
+from .models import Feedback
+
+class FeedbackForm(forms.ModelForm):
+    star_rating = forms.ChoiceField(choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')])
+    comment = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Outstanding!'}))
+    order = forms.ModelChoiceField(queryset=None)
+
+    class Meta:
+        model = Feedback
+        fields = ('order', 'star_rating', 'comment', 'slug')
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['username'] = forms.CharField(disabled=True, initial=self.get_current_username())
+        self.fields['order'].queryset = OrderItem.objects.filter(user=self.request.user)
+
+    def get_current_username(self):
+        User = get_user_model()
+        return User.objects.get(pk=self.request.user.pk).username
+
+
+
 
 class FeedbackAdmin(admin.ModelAdmin):
     form = FeedbackForm

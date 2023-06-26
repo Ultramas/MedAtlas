@@ -65,6 +65,7 @@ from .models import ImageBase
 from .models import DonateIcon
 from .models import Coupon
 from .models import (Item, OrderItem, Order, CheckoutAddress, Payment)
+from .models import OrderItemField
 from .models import Contact
 from .models import BusinessMailingContact
 from .models import Feedback
@@ -241,7 +242,8 @@ class CommentAdmin(admin.ModelAdmin):
 admin.site.register(Room)
 admin.site.register(Message)
 admin.site.register(Item)
-admin.site.register(OrderItem)
+#admin.site.register(OrderItem)
+admin.site.register(OrderItemField)
 admin.site.register(Order)
 admin.site.register(CheckoutAddress)
 admin.site.register(Payment)

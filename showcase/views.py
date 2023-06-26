@@ -442,6 +442,7 @@ class AdminPagesView(ListView):
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         return context
 
+
 @method_decorator(staff_member_required, name='dispatch')
 class AdministrationView(ListView):
     template_name = "administration.html"
@@ -865,6 +866,7 @@ class ChatBackgroundView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
 
@@ -3426,44 +3428,110 @@ def sendEmployeeEmailOnAddReview(Company, form):
 from .models import Item
 
 
-class FeedbackView(DetailView):
-    model = Feedback
-    paginate_by = 10
+@login_required
+def my_orders(request):
+    # Retrieve orders for the current logged-in user
+    orders = Order.objects.filter(user=request.user)
+    return render(request, 'my_orders.html', {'orders': orders})
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+from .models import Order, Feedback
+from .forms import FeedbackForm
+
+
+@login_required
+def create_feedback(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.order = order
+            feedback.save()
+            return redirect('my_orders')
+    else:
+        form = FeedbackForm()
+    return render(request, 'create_feedback.html', {'form': form})
+
+
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib import messages
+
+
+class FeedbackView(LoginRequiredMixin, FormView):
     template_name = "review_detail.html"
+    form_class = FeedbackForm
+    success_url = '/feedbackfinish'
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
-        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-        return context
 
-    # def get(self, request):
-    # Your code to handle the GET request and render the feedback form
-    #    return render(request, 'review_detail.html')
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+            context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+            context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+            context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
+            context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+            context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+            context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+            return context
 
-    def post(self, request):
-        # Process the submitted feedback form data
-        feedback = Feedbackr()  # Create a new Feedback instance
-
-        # Call the get_current_user function to associate the current user with the feedback
-        self.get_current_user(request, feedback)
-
-        # Set other fields of the feedback object based on the submitted form data
-        # feedback.field1 = request.POST['field1']
-        # feedback.field2 = request.POST['field2']
-
-        # Save the feedback object
+    def form_valid(self, form):
+        # Save the feedback instance
+        feedback = form.save(commit=False)
+        feedback.username = self.request.user.username  # Set the username to the current user
         feedback.save()
+        messages.success(self.request, 'Your feedback has been submitted successfully.')
+        return super().form_valid(form)
+
+    def post(self, request, *args, **kwargs):
+        # Process the submitted feedback form data
+        # ...
 
         messages.success(request, 'Your feedback has been submitted successfully.')
+        return redirect('showcase:feedbackfinish')
 
-        # Optionally, redirect to a success page or display a success message
-        return render(request, 'index.html')
+
+"""
+    def form_valid(self, form):
+        # Save the feedback instance
+        feedback = form.save(commit=False)
+        feedback.username = self.request.user.username  # Set the username to the current user
+        feedback.save()
+        form = FeedbackForm(request=request)
+        messages.success(self.request, 'Your feedback has been submitted successfully.')
+        return super().form_valid(form)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.request.user.is_authenticated:
+            # Filter feedback objects based on the current user's orders
+            queryset = queryset.filter(order__user=self.request.user)
+        else:
+            # If user is not authenticated, return an empty queryset
+            queryset = Feedback.objects.none()
+        return queryset
+
+    def test_func(self):
+        feedback = self.get_object()
+        order = feedback.OrderItem
+        return self.request.user == OrderItem.user
+
+    def post(self, request, *args, **kwargs):
+        # Process the submitted feedback form data
+        feedback = self.get_object()
+        order = feedback.OrderItem
+        if self.request.user == OrderItem.user:
+            # Process the submitted feedback form data
+            # ...
+
+            messages.success(request, 'Your feedback has been submitted successfully.')
+            return redirect('showcase:feedbackfinish')
+        else:
+            messages.error(request, 'You are not allowed to submit feedback for this order.')
+            return redirect('showcase:ehome')
 
     @login_required
     def get_current_user(self, request, feedback):
@@ -3475,12 +3543,13 @@ class FeedbackView(DetailView):
             # redirect user to staffdone
             return redirect('showcase:feedbackfinish')
 
+
     def getobject(self, request, item):
         item = Item.objects.get(pk=item)
 
         return render(request, 'review_detail.html', {'item': item})
 
-    def create_review(request, item_id):
+    def create_review(request, orderitem_id):
         try:
             Item = Item.objects.get(slug=slug)
         except Item.DoesNotExist:
@@ -3504,6 +3573,7 @@ class FeedbackView(DetailView):
 
         }
         return render(request, 'create_review.html', context)
+"""
 
 
 @login_required
@@ -3575,24 +3645,141 @@ from .forms import FeedbackForm
 from .models import Item, OrderItem, Feedback
 
 
+"""
+class SubmitFeedbackView(DetailView):
+    template_name = "review_detail.html"
+    form_class = FeedbackForm
+    success_url = '/feedbackfinish'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def get(self, request, orderitem_id):
+        order_item = get_object_or_404(OrderItem, id=orderitem_id, user=request.user)
+        form = FeedbackForm(request=request, initial={'order_item': order_item})
+        return render(request, 'create_review.html', {'form': form})
+
+    def form_valid(self, form):
+        orderitem_id = self.kwargs['orderitem_id']
+        order_item = get_object_or_404(OrderItem, id=orderitem_id, user=self.request.user)
+
+        feedback = form.save(commit=False)
+        feedback.username = self.request.user.username
+        feedback.order = order_item
+        feedback.slug = order_item.slug
+        feedback.item = order_item.item
+        feedback.save()
+
+        messages.success(self.request, 'Your feedback has been submitted successfully.')
+        return redirect(self.success_url)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Invalid form data.')
+        return render(self.request, 'create_review.html', {'form': form})"""
+
+
+from django.shortcuts import get_object_or_404
+"""
 def submit_feedback(request, item_id):
     item = get_object_or_404(Item, id=item_id)
+    user = request.user
+    order_items = OrderItem.objects.filter(user=user, item=item).first()  # Filter order items by user and item
+
     if request.method == 'POST':
-        form = FeedbackForm(request.POST)
-        user = request.user
+        form = FeedbackForm(request.POST, request=request)
         if form.is_valid():
-            order_item = get_object_or_404(OrderItem, user=user, item=item)
             feedback = form.save(commit=False)
+            feedback.username = user.username
+            feedback.slug = order_item.slug  # Consider changing this line to feedback.slug = order_item.first().slug
             feedback.item = item
-            feedback.order = order_item
+            feedback.order = order_item.first()  # Use order_item.first() to get the first matching order item
             feedback.save()
+            messages.success(request, 'Your feedback has been submitted successfully.')
             return redirect('showcase:feedbackfinish')
         else:
             messages.error(request, "Invalid form data.")
     else:
-        form = FeedbackForm()
+        form = FeedbackForm(request=request)
+
+    # Add the form and order_items to the context
+    context = {
+        'form': form,
+        'order_items': order_items,
+    }
+
+    return render(request, 'create_review.html', context)"""
+
+
+"""
+def submit_feedback(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+    user = request.user
+    order_item = get_object_or_404(OrderItem, user=user, item=item)
+
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST, request=request)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.username = user
+            feedback.slug = order_item.slug
+            feedback.item = item
+            feedback.order = order_item
+            feedback.save()
+            messages.success(request, 'Your feedback has been submitted successfully.')
+            return redirect('showcase:feedbackfinish')
+        else:
+            messages.error(request, "Invalid form data.")
+    else:
+        form = FeedbackForm(request=request)
 
     return render(request, 'create_review.html', {'form': form})
+"""
+
+def submit_feedback(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+    user = request.user
+    order_item = get_object_or_404(OrderItem, user=user, item=item)
+
+    # Check if the user has already left feedback for this order item
+    existing_feedback = Feedback.objects.filter(username=user, order=order_item)
+    if existing_feedback:
+        messages.error(request, 'You have already left feedback for this order item.')
+
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST, request=request)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.user = user
+            feedback.username = request.user
+            feedback.slug = order_item.slug
+            feedback.item = item
+            feedback.order_item = order_item
+            feedback.order = order_item
+            print(order_item)
+            feedback.save()
+            messages.success(request, 'Your feedback has been submitted successfully.')
+            return redirect('showcase:feedbackfinish')
+        else:
+            messages.error(request, "Invalid form data.")
+    else:
+        form = FeedbackForm(request=request)
+
+    return render(request, 'create_review.html', {'form': form})
+
 
 
 def edit_feedback(request, feedback_id):
@@ -3607,6 +3794,7 @@ def edit_feedback(request, feedback_id):
         form = FeedbackForm(instance=feedback, request=request)
 
     return render(request, 'create_review.html', {'form': form})
+
 
 class OrderHistory(ListView):
     model = Order

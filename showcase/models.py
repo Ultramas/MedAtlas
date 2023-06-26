@@ -683,6 +683,7 @@ class NavBarHeader(models.Model):
 
 
 class SettingsModel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     username = models.CharField(help_text='Your username', max_length=200)
     password = models.CharField(help_text='Your password', max_length=200)
     coupons = models.BooleanField(verbose_name="Send me coupons", default=True, blank=True, null=True,
@@ -1424,7 +1425,9 @@ class UserProfile(models.Model):
 
 
 class ProfileDetails(models.Model):
-    username = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    #username = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='profile_image', null=True, blank=True)
     about_me = models.CharField(max_length=200, blank=True, null=True)
     is_active = models.IntegerField(default=1,
@@ -1637,11 +1640,13 @@ class IssueBackgroundImage(models.Model):
         verbose_name_plural = "Issue Background Images"
 
 
+
 class OrderItem(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ordered = models.BooleanField(default=False)
-    #slug = models.SlugField(max_length=200, help_text="Leave blank to use corresponding product slug.")
+    #order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    #order_number = models.IntegerField()
+    slug = models.SlugField(max_length=200, blank=True, null=True, help_text="Leave blank to use corresponding product slug.") #apply unique=True parameter after slugs are actually implemented
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     # order_date = models.DateTimeField(auto_now_add=True, verbose_name="order date")
@@ -1670,8 +1675,50 @@ class OrderItem(models.Model):
             return self.get_discount_item_price()
         return self.get_total_item_price()
 
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        OrderItemField.objects.create(
+            user=self.user,
+            ordered=self.ordered,
+            #order_number=self.order_number,
+            slug=self.slug,
+            item=self.item,
+            orderitem_id = self,
+            quantity=self.quantity,
+            is_active=self.is_active,
+        )
+
     class Meta:
         verbose_name_plural = 'Order Items'
+        
+""" def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.item.slug)
+        super().save(*args, **kwargs)"""
+
+
+
+
+
+class OrderItemField(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    ordered = models.BooleanField(default=False)
+    #order_number = models.IntegerField()
+    slug = models.SlugField(max_length=200, blank=True, null=True, help_text="Leave blank to use corresponding product slug.")
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+    orderitem_id = models.ForeignKey(OrderItem, on_delete=models.CASCADE, verbose_name="Order item id", null=True)
+    is_active = models.IntegerField(default=1, blank=True, null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return f"{self.quantity} of {self.item.title}"
+
+    class Meta:
+        verbose_name_plural = 'Order Item Fields'
+
 
 
 class AdminRoles(models.Model):
@@ -1735,7 +1782,7 @@ class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
     items = models.ManyToManyField(OrderItem)
-    itemhistory = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name="Order history")
+    itemhistory = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name="Order history", null=True)
     feedback_url = models.URLField(blank=True)
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField()
@@ -2083,16 +2130,18 @@ def create_profile(sender, **kwargs):
 post_save.connect(create_profile, sender=User)
 
 
+
 class Feedback(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True,
-                             null=True)  # might want to replace item with order
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True,null=True)  # might want to replace item with order
+    #orderitem = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)  # might want to replace item with order
     order = models.ForeignKey(OrderItem, on_delete=models.CASCADE, blank=True, null=True)
-    username = models.CharField(max_length=30, blank=True, null=True)
+    #order = models.OneToOneField(OrderItem, on_delete=models.CASCADE, related_name='feedback', null=True)
+    username = models.ForeignKey(User, on_delete=models.CASCADE)
     hyperlink = models.CharField(max_length=200, blank=True, null=True, help_text="Leave field blank, hyperlink will automatically fill with the link to the associated product.")
     comment = models.TextField()
     feedbackpage = models.TextField(verbose_name="Page Name", blank=True, null=True)
-    slug = models.SlugField(max_length=200, unique=True, blank=True, null=True,
-                            help_text="Leave blank to use corresponding product slug.")
+    slug = models.SlugField(max_length=200, blank=True, null=True, help_text="Leave blank to use corresponding product slug.")
+    #unique=True prevents saving, but does not prevent the IntegrityError at /create_review/1/ UNIQUE constraint failed: showcase_feedback.slug
     star_rating = models.IntegerField(verbose_name='Star Rating',
                                       validators=[MinValueValidator(1), MaxValueValidator(5)])
     timestamp = models.DateTimeField(default=timezone.now)
@@ -2109,6 +2158,11 @@ class Feedback(models.Model):
         if not self.hyperlink and self.item:
             self.hyperlink = self.item.hyperlink
         super().save(*args, **kwargs)
+        if not self.order and self.item_id:
+            # Retrieve the related OrderItem based on the item_id
+            order_item = OrderItem.objects.filter(item_id=self.item_id).first()
+            if order_item:
+                self.order = order_item
 
 @receiver(pre_save, sender=Feedback)
 def set_slug(sender, instance, *args, **kwargs):

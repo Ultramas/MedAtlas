@@ -23,9 +23,22 @@
 
   <div class="column three mobile-twelve section_header_logo vertical-align-middle">
       {% for BaseView in Logo %}
- <a class = "logo" href="/"><img class = "imageicon"  src="media/{{BaseView.logocover}}" alt = "{{BaseView.alternate}}" width="145vh"
+
+     <a class = "logo" href="/"><img class = "imageicon"  src="media/{{BaseView.logocover}}" alt = "{{BaseView.alternate}}" width="145vh"
      height="100vh"></a>
+
+
       {% endfor %}
+       {% for ChatBackgroundView in Logo %}
+            {% if ChatBackgroundView.page == 'home.html' %}
+                {% if not request.path == '/home.html' %}
+         <a class = "logo" href="{{MemberBaseView.hyperlink}}">
+             <img class = "imageicon"  src="/media/{{ChatBackgroundView.logocover}}" alt = "{{ChatBackgroundView.alternate}}" width="145vh"
+     height="100vh" style="z-index: 30;">
+         </a>
+                 {% endif %}
+         {% endif %}
+  {% endfor %}
  </div>
 
 
