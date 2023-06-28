@@ -172,17 +172,13 @@ class Server_Partner(forms.ModelForm):
 
 
 class SupportForm(forms.ModelForm):
-    name = forms.CharField(max_length=100,
-                           help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
-    category = forms.CharField(max_length=200, help_text='Please let us know what type of issue you are dealing with.')
-    issue = forms.CharField(
-        help_text='Describe your issue in detail. We will try to get back to you as soon as possible.')
-    Additional_comments = forms.CharField(help_text='Put any additional comments you may have here.')
-    image = forms.ImageField(widget=forms.TextInput(attrs={'placeholder': 'Please attach a screenshot of your issue.'}))
-
     class Meta:
         model = Support
         fields = ('name', 'category', 'issue', 'Additional_comments', 'image',)
+        widgets = {
+            'image': forms.ClearableFileInput(attrs={'placeholder': 'Please attach a screenshot of your issue.'})
+        }
+
 
 
 class PunishAppeale(forms.ModelForm):

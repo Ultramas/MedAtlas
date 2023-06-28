@@ -325,6 +325,9 @@ class BaseView(ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(is_active=1)
         context['Favicons'] = FaviconBase.objects.all()
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
         return context
 
 
@@ -1388,15 +1391,19 @@ def home(request):
     return render(request, 'home.html')
 
 
+
 def room(request, room):
     username = request.GET.get('username')
     room_details = Room.objects.get(name=room)
+    profile_details = ProfileDetails.objects.filter(
+        user__username=username).first()  # Fetch profile details for the specified username
+
     return render(request, 'room.html', {
         'username': username,
         'room': room,
-        'room_details': room_details
+        'room_details': room_details,
+        'profile_details': profile_details,
     })
-
 
 def checkview(request):
     room = request.POST['room_name']
@@ -1695,15 +1702,15 @@ class SettingsBackgroundView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Favicons'] = FaviconBase.objects.all()
         print(FaviconBase.objects.all())
-        # context['SettingsView'] = SettingsView.objects.all()
+        context['SettingsView'] = SettingsView.objects.all()
         return context
 
     # @RegularUserRequiredMixin
     @login_required
     def settingschange(self, request, *args, **kwargs):
-        if (request.method == "POST"):
+        if request.method == "POST":
             form = SettingsForm(request.POST)
-            if (form.is_valid()):
+            if form.is_valid():
                 post = form.save(commit=False)
                 post.save()
                 return redirect('showcase:showcase')
@@ -1736,23 +1743,28 @@ class SupportBackgroundView(FormMixin, ListView):
         context['Support'] = Support.objects.all()
         return context
 
+    @login_required
     def post(self, request, *args, **kwargs):
-        if (request.method == "POST"):
+        if request.method == "POST":
             form = SupportForm(request.POST)
-            if (form.is_valid()):
+            if form.is_valid():
                 post = form.save(commit=False)
                 post.save()
                 print('works')
-                return redirect('showcase:supportissues')
-                return super().get(request, *args, **kwargs)
+                messages.success(request, 'Form submitted successfully.')
+                return redirect('showcase:showcase')
+                return HttpResponse('Support ticket generated')
+            else:
+                messages.error(request, "Form submission invalid")
+                return render(request, "support.html", {'form': form})
+                return HttpResponse('Form submission invalid.')
         else:
-            form = Support()
-            return render(request, 'support.html', {'form': form})
-            messages.error(
-                request, 'Form submission failed to register, please try again.')
-            print('resubmit issue')
+            form = SupportForm()
+            return render(request, "support.html", {'form': form})
+            messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
-            return super().get(request, *args, **kwargs)
+            return HttpResponse('Form submission failed to register, please try again.')
+
 
 
 class HomePageView(TemplateView):
@@ -1858,14 +1870,43 @@ class EcommerceSearchResultsView(ListView):
 
 #        return (all_list)
 
+from .models import ProfileDetails
 
 # Edit Profile View
-class ProfileView(UpdateView):
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+class ProfileView(LoginRequiredMixin, UpdateView):
     model = User
     form_class = ProfileForm
     paginate_by = 10
     success_url = reverse_lazy('home')
-    template_name = 'templates/profile.html'
+    template_name = 'profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+        return context
+
+
+@login_required
+def profile_edit(request, pk):
+    profile = get_object_or_404(ProfileDetails, pk=pk)
+
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile_detail', pk=pk)  # Redirect to profile detail page
+    else:
+        form = ProfileForm(instance=profile)
+
+    return render(request, 'profile_edit.html', {'form': form, 'profile': profile})
 
 
 class StaffJoine(ListView):
@@ -2854,12 +2895,8 @@ class RequestRefundView(View):
                 return redirect("showcase:request-refund")
 
 
-# @login_required
-# def ProfileDetaile(request):
-#  user = get_object_or_404(User, username=username)
-#  profile = get_object_or_404(Profile, user=user)
-#  aboutme = get_object_or_404(Aboutme, user=user)
-#  return render(request, 'profile.html', {'profile': profile, 'user': user})
+
+
 
 from django.contrib.auth.forms import UserChangeForm
 
@@ -2971,8 +3008,8 @@ from django.contrib.auth import update_session_auth_hash
 #    return render(request,'showcase/index.html',args)
 
 
-def profile(request, username):
-    args = {'user': username}
+def profile(request, user):
+    args = {'user': user}
     return render(request, 'profile.html', args)
 
 
@@ -3816,3 +3853,4 @@ class OrderHistory(ListView):
             'username': username,
             'orderhistory': orderhistory
         })
+

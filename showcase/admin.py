@@ -18,7 +18,7 @@ from .models import PostLikes
 from .models import Idea, Comment
 from .models import Profile
 from .models import Room, Message
-#from .models import ProfileDetails
+from .models import ProfileDetails
 from .models import UserProfile
 from .models import UserProfile2
 from .models import SettingsModel
@@ -112,7 +112,7 @@ admin.site.register(SettingsBackgroundImage)
 admin.site.register(ConvertBackgroundImage)
 admin.site.register(NavBar)
 admin.site.register(NavBarHeader)
-#admin.site.register(ProfileDetails)
+admin.site.register(ProfileDetails)
 admin.site.register(UserProfile)
 admin.site.register(UserProfile2)
 admin.site.register(Support)

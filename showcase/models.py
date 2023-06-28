@@ -246,7 +246,7 @@ class Support(models.Model):
         help_text='Describe your issue in detail. We will try to get back to you as soon as possible.')
     Additional_comments = models.TextField(help_text='Put any additional comments you may have here.',
                                            verbose_name="additional comments")
-    image = models.URLField(help_text='Please attach a screenshot of your issue.')
+    image = models.ImageField(help_text='Please attach a screenshot of your issue.', null=True, blank=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -476,7 +476,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.user.username
+        return self.user
 
 
 class FaviconBase(models.Model):
@@ -1327,6 +1327,30 @@ from django.db.models.signals import post_save
 # user_profile.save()
 # post_save.connect(create_profile, sender=User)
 
+
+class ProfileDetails(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # username = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='profile_image', null=True, blank=True, verbose_name="Profile picture")
+    alternate = models.TextField(verbose_name="Alternate text")
+    about_me = models.CharField(max_length=200, blank=True, null=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.user)
+
+
+    class Meta:
+        verbose_name = "Account Profile"
+        verbose_name_plural = "Account Profiles"
+
+
+# link the profiledetails page to settings
+
 from django.utils import timezone
 import pytz
 from django.utils.timezone import make_aware
@@ -1344,6 +1368,7 @@ class Message(models.Model):
     date = models.DateTimeField(default=timezone.now, blank=True)
     user = models.CharField(max_length=1000000)
     room = models.CharField(max_length=1000000)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1367,6 +1392,7 @@ class SupportMessage(models.Model):
     date = models.DateTimeField(default=timezone.now, blank=True)
     user = models.CharField(max_length=1000000)
     room = models.CharField(max_length=1000000)
+    avatar = models.ImageField(upload_to='profile_image', null=True, blank=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1423,28 +1449,6 @@ class UserProfile(models.Model):
         verbose_name = "User Profile"
         verbose_name_plural = "User Profiles"
 
-
-class ProfileDetails(models.Model):
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    #username = models.OneToOneField(User, on_delete=models.CASCADE)
-    profile_picture = models.ImageField(upload_to='profile_image', null=True, blank=True)
-    about_me = models.CharField(max_length=200, blank=True, null=True)
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
-
-    def __str__(self):
-        return self.username.username
-
-    class Meta:
-        verbose_name = "User"
-        verbose_name_plural = "Users"
-
-
-# link the profiledetails page to settings
 
 
 """class Settings(models.Model):
@@ -1691,7 +1695,7 @@ class OrderItem(models.Model):
 
     class Meta:
         verbose_name_plural = 'Order Items'
-        
+
 """ def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.item.slug)
