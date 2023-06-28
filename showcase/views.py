@@ -511,7 +511,19 @@ class PostList(ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
-        context['BlogPosts'] = Blog.objects.filter(status=1).order_by('-created_on')
+
+        # Retrieve the signed-in user's profile and profile picture URL
+
+        # Retrieve the author's profile avatar
+        blog_posts = Blog.objects.filter(status=1).order_by('-created_on')
+        context['BlogPosts'] = blog_posts
+        for blog_post in context['BlogPosts']:
+            author = blog_post.author
+            profile = ProfileDetails.objects.filter(user=author).first()
+            if profile:
+                blog_post.author_profile_picture_url = profile.avatar.url
+                print('imgsrcimg')
+
         return context
 
     def get_queryset(self):
@@ -1113,7 +1125,7 @@ class StaffApplyBackgroundView(FormMixin, ListView):
 
 
 class InformationBackgroundView(BaseView):
-    model = InformationBackgroundImage
+    InformationBackgroundImage
     template_name = "information.html"
 
     def get_context_data(self, **kwargs):
@@ -1746,7 +1758,7 @@ class SupportBackgroundView(FormMixin, ListView):
     @login_required
     def post(self, request, *args, **kwargs):
         if request.method == "POST":
-            form = SupportForm(request.POST)
+            form = SupportForm(request.POST, request.FILES)
             if form.is_valid():
                 post = form.save(commit=False)
                 post.save()
@@ -1891,6 +1903,7 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+
         return context
 
 

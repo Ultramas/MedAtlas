@@ -408,6 +408,7 @@ class Blog(models.Model):
         from django.urls import reverse
 
         return reverse("showcase:post_detail", kwargs={"slug": str(self.slug)})
+    
 
     def comment_count(self):
         return Comment.objects.filter(post=self).count()
@@ -476,7 +477,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.user
+        return str(self.user)
 
 
 class FaviconBase(models.Model):
@@ -1333,7 +1334,8 @@ class ProfileDetails(models.Model):
     # username = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True, verbose_name="Profile picture")
     alternate = models.TextField(verbose_name="Alternate text")
-    about_me = models.CharField(max_length=200, blank=True, null=True)
+    about_me = models.TextField(blank=True, null=True)
+    #link_to_profile = models.ForeignKey('self', on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Link to profile") #possibly consider making this automatically fill with the link to the user's profile
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1342,7 +1344,6 @@ class ProfileDetails(models.Model):
 
     def __str__(self):
         return str(self.user)
-
 
     class Meta:
         verbose_name = "Account Profile"
@@ -1516,7 +1517,6 @@ class EBackgroundImage(models.Model):
 
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-from django.contrib.auth.models import User
 from django.contrib import messages
 
 

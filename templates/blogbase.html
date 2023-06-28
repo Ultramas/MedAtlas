@@ -5,6 +5,10 @@
     <head>
         <link rel="stylesheet" type="text/css" href="{% static 'css/style.blog.css' %}">
         <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+
+        <link rel="stylesheet" type="text/css" href="{% static 'css/blogstyle.css' %}">
+
+        <link rel="stylesheet" type="text/css" href="{% static 'css/blogstyle.min.css' %}">
         <meta name="google" content="notranslate" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmostFcJlSAwiGgFAW/dAiS6JXm"
@@ -26,7 +30,7 @@
 
      </header>
 
-    <div class = "navbarx">
+    <div class = "navbarx" style="margin-bottom: 20%;">
 
     <ul>
       {% for column in Header %}
@@ -77,13 +81,17 @@
       </a>
 
           </div>
+     </nav>
     </div>
+
 </nav>
 
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
+    <script src="{% static 'css/js/blogscript.js' %}"></script>
+    <script src="{% static 'css/js/blogscript.min.js' %}"></script>
 
 
         <style>
@@ -110,10 +118,6 @@
     </style>
 
 
-    <script src="{% static 'css/js/script.js' %}"></script>
-    <script src="{% static 'css/js.darkmode.js' %}"></script>
-    <script src="{% static 'css/js/navbar.js' %}"></script>
-    <script src="{% static 'css/js/scroll.js' %}"></script>
 
         {% block content %}
         <!-- Content Goes here -->
@@ -126,8 +130,17 @@
 
 <footer>
      <div class = "copyright">
-     <h5>PokeTrove 2022©.   All Rights Reserved.</h5>
+     <p>
+       {% for BackgroundImage in BaseCopyrightTextFielded %}
+                    {% if BackgroundImage.page == 'index.html' %}
+                         <a href="{{BackgroundImage.hyperlink}}" class="gf_product-title gf_gs-text-heading-3" data-bss-pl="active">
+                                {{BackgroundImage.copyright}}
+                         </a>
+                    {% endif %}
+    {% endfor %}
+     </p>
    </div>
 
-  </footer>  </body>
+  </footer>
+    </body>
 </html>

@@ -101,11 +101,6 @@ class PostForm(forms.ModelForm):
 
 
 class Postit(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
-    category = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Choose a category you want your idea to affect.'}))
-    image = forms.ImageField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
-    #altered image URLField to ImageField, check for bugs please
     class Meta:
         model = Idea
         fields = ('name', 'category', 'description', 'image')
