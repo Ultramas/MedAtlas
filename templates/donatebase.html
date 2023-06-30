@@ -1,11 +1,12 @@
-<!DOCTYPE html>
 {% load static %}
+<!DOCTYPE html>
+
 <html>
 <head>
 	<title>Support Quantumism</title>
 
 	<link href="https://fonts.googleapis.com/css?family=Fjalla+One|Interdisplay=swap" rel="stylesheet">
-
+    <link rel="stylesheet" type="text/css" href="{% static 'css/donatestyle.css' %}">
 	<!-- Landing page styling -->
 	<style type="text/css">
 
@@ -241,6 +242,7 @@
 	</style>
 </head>
 <body>
+<div class="navbarx">
   <ul>
       {% for column in Header %}
         <div class="dropdown">     
@@ -262,8 +264,63 @@
         </div>
       {% endfor %}
     </ul>
+    </div>
+
+    <nav>
+
+     <div onclick='navToggle(this)'  class="hamburger">
+         <div class="bell">
+       <div class="bun" style="margin-left: 8px; margin-top: 4px;"></div>
+       <div class="bun" style="margin-left: 8px; margin-top: 3.5px;"></div>
+       <div class="bun" style="margin-left: 8px; margin-top: 3.5px;"></div>
+     </div>
+         </div>
+
+<h2 class = "navtext">Quantumism</h2>
+    <div class="navItem"><a href = "{% url 'showcase:index' %}">Home</a></div>
+     <div class="navItem2"><a href = "{% url 'showcase:about' %}">About Us</a></div>
+     <div class="navItem3"><a href = "{% url 'showcase:servers' %}" target="_blank">Discord Servers</a></li></div>
+     <!--<div class="navItem10"><a href = "{% url 'showcase:perks' %}">Member Perks</a></li></div>-->
+     <div class="navItem4"><a href = "{% url 'showcase:admin'%}" target="_blank">Administration</a></li></div>
+     <div class="navItem5"><a href="https://discord.com/channels/813761567304843315/813779502190297108" target="_blank">Quantum Discord</a></li></div>
+     <div class="navItem8"><a href = "{% url 'showcase:rules' %}">Rules</a></li></div>
+     <div class="navItem9"><a href = "{% url 'showcase:showcase' %}">Member Area</a></div>
+     <div class="navItem11"><a href = "{% url 'logout' %}">Logout</a></div>
+<br>
+<br>
+
+<div class="metaclass1">
+    <a href="https://discord.gg/g43uGbURUz">
+         <img alt="Qries" src="../static/css/images/MC.png"
+         width="80" height="80">
+      </a>
+
+</div></nav>
+    </div>
+</section>
+
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+
 	{% block content %}
 
 	{% endblock content %}
+
+<footer>
+     <div class = "copyright">
+     <p>
+       {% for BackgroundImage in BaseCopyrightTextFielded %}
+                    {% if BackgroundImage.page == 'index.html' %}
+                         <a href="{{BackgroundImage.hyperlink}}" class="gf_product-title gf_gs-text-heading-3" data-bss-pl="active">
+                                {{BackgroundImage.copyright}}
+                         </a>
+                    {% endif %}
+    {% endfor %}
+     </p>
+   </div>
+</footer>
+
 </body>
 </html>

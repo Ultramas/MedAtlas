@@ -114,7 +114,7 @@ from .forms import StaffRanksBackgroundImagery
 from .forms import MegaBackgroundImagery
 from .forms import EventBackgroundImagery
 from .forms import NewsBackgroundImagery
-
+from .forms import PaypalPaymentForm
 from .forms import BaseCopyrightTextField
 from .forms import ContactForme
 from .forms import SignUpForm
@@ -2113,6 +2113,19 @@ class BusinessMailingView(FormView):
     form_class = BusinessMailingForm
     success_url = reverse_lazy('showcase:businessmailingsuccess')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        return context
+
     def form_valid(self, form):
         # Calls the custom send method
         form.send()
@@ -2125,6 +2138,17 @@ class BusinessSuccessMailingView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(kwargs)
+        context = super().get_context_data(**kwargs)
+        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Contact'] = Contact.objects.all()[len(Contact.objects.all()) - 1]
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        print(context["Contact"])
         context["BusinessMailingContact"] = "2123123123123"
         return context
 
@@ -2659,6 +2683,23 @@ class PaymentView(EBaseView):
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
 
+class PaypalFormView(FormView):
+    template_name = 'paypalpayment.html'
+    form_class = PaypalPaymentForm
+
+    def get_initial(self):
+        return {
+            'business': 'your-paypal-business-address@example.com',
+            'amount': 20,
+            'currency_code': 'EUR',
+            'item_name': 'Example item',
+            'invoice': 1234,
+            'notify_url': self.request.build_absolute_uri(reverse('paypal-ipn')),
+            'return_url': self.request.build_absolute_uri(reverse('paypal-return')),
+            'cancel_return': self.request.build_absolute_uri(reverse('paypal-cancel')),
+            'lc': 'EN',
+            'no_shipping': '1',
+        }
 
 @allow_guest_user
 def add_to_cart(request, slug):
@@ -3153,9 +3194,103 @@ from django.urls import reverse
 
 stripe.api_key = "sk_test_51JSB5LH4sbqF1dn75jWAc2wiQvhKq0HfNkQXthKPYmycweqQQkmyTSYgY0vzxQadtgDd2j1RqXYglHspHQXb22kG0086JLfOxS"
 
+from django.views.decorators.csrf import csrf_exempt
 
-def donate(request):
-    return render(request, 'donate.html')
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        # Invalid payload
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return HttpResponse(status=400)
+
+    # Handle the checkout.session.completed event
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+
+        customer_email = session["customer_details"]["email"]
+        product_id = session["metadata"]["product_id"]
+
+        product = Product.objects.get(id=product_id)
+
+        send_mail(
+            subject="Here is your product",
+            message=f"Thanks for your purchase. Here is the product you ordered. The URL is {product.url}",
+            recipient_list=[customer_email],
+            from_email="IntelleXCompany.com"
+        )
+
+        # TODO - decide whether you want to send the file or the URL
+
+    elif event["type"] == "payment_intent.succeeded":
+        intent = event['data']['object']
+
+        stripe_customer_id = intent["customer"]
+        stripe_customer = stripe.Customer.retrieve(stripe_customer_id)
+
+        customer_email = stripe_customer['email']
+        product_id = intent["metadata"]["product_id"]
+
+        product = Product.objects.get(id=product_id)
+
+        send_mail(
+            subject="Here is your product",
+            message=f"Thanks for your purchase. Here is the product you ordered. The URL is {product.url}",
+            recipient_list=[customer_email],
+            from_email="matt@test.com"
+        )
+
+    return HttpResponse(status=200)
+
+
+class StripeIntentView(View):
+    def post(self, request, *args, **kwargs):
+        try:
+            req_json = json.loads(request.body)
+            customer = stripe.Customer.create(email=req_json['email'])
+            product_id = self.kwargs["pk"]
+            product = Product.objects.get(id=product_id)
+            intent = stripe.PaymentIntent.create(
+                amount=product.price,
+                currency='usd',
+                customer=customer['id'],
+                metadata={
+                    "product_id": product.id
+                }
+            )
+            return JsonResponse({
+                'clientSecret': intent['client_secret']
+            })
+        except Exception as e:
+            return JsonResponse({'error': str(e)})
+
+class DonateView(ListView):
+    model = DonorBackgroundImage
+    template_name = "donate.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['Change'] = ChangePasswordBackgroundImage.objects.all()
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        return context
+    def donate(request):
+        return render(request, 'donate.html')
 
 
 def charge(request):
@@ -3177,10 +3312,25 @@ def charge(request):
 
     return redirect(reverse('showcase:patreoned', args=[amount]))
 
+class PatreonedView(ListView):
+    model = DonorBackgroundImage
+    template_name = "patreoned.html"
 
-def successMsg(request, args):
-    amount = args
-    return render(request, 'patreoned.html', {'amount': amount})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['Change'] = ChangePasswordBackgroundImage.objects.all()
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        return context
+    def successMsg(request, args):
+        amount = args
+        return render(request, 'patreoned.html', {'amount': amount})
 
 
 @allow_guest_user
@@ -3213,6 +3363,21 @@ class ContactViewe(CreateView):
     form_class = ContactForme
     success_url = reverse_lazy('showcase:success')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Contact'] = Contact.objects.all()[len(Contact.objects.all()) - 1]
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        print(context["Contact"])
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        return context
+
     def form_valid(self, form):
         # Calls the custom send method
         form.send()
@@ -3229,6 +3394,10 @@ class ContactSuccessView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Contact'] = Contact.objects.all()[len(Contact.objects.all()) - 1]
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         print(context["Contact"])
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         return context
@@ -3866,4 +4035,5 @@ class OrderHistory(ListView):
             'username': username,
             'orderhistory': orderhistory
         })
+
 

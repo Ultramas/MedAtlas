@@ -4368,6 +4368,7 @@ nav a:hover{
 
 
 .hamburger {
+
     position: fixed;
     top: 40px;
     right: 50px;
@@ -5162,7 +5163,7 @@ footer a:active {
   margin: 0;
   padding: 0;
   text-align: center;
-  margin-left: -25%;
+  margin-left: -20%;
 }
 
 .navbarx li {

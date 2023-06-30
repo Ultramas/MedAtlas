@@ -510,6 +510,15 @@ class PaymentForm(forms.Form):
     save = forms.BooleanField(required=False)
     use_default = forms.BooleanField(required=False)
 
+class PaypalPaymentForm(forms.Form):
+    number = forms.IntegerField(required=True)
+    exp_month = forms.IntegerField(required=True)
+    expiry = forms.CharField(required=True)
+    exp_year = forms.IntegerField(required=True)
+    cvc = forms.IntegerField(required=True)
+    save = forms.BooleanField(required=False)
+    use_default = forms.BooleanField(required=False)
+
 
 class ProfileDetail(forms.Form):
     class Meta:

@@ -70,41 +70,40 @@
         </div>
 
       {% endfor %}
-      </div>
+    </ul>
+    </div>
 
 
       </div>
 
   </div>
-
-    <nav>
-     <div class="bell" style=></div>
-     <div onclick='navToggle(this)'  class="hamburger">
+<nav class="show">
+     <div  onclick="navToggle(this)" class="bell"></div>
+     <div onclick="navToggle(this)" class="hamburger">
        <div class="bun"></div>
        <div class="bun"></div>
        <div class="bun"></div>
      </div>
 
-<h2 class = "navtext">Quantumism</h2>
-    <div class="navItem"><a href = "{% url 'showcase:index' %}">Home</a></div>
-     <div class="navItem2"><a href = "{% url 'showcase:about' %}">About Us</a></div>
-     <div class="navItem3"><a href = "{% url 'showcase:servers' %}" target="_blank">Discord Servers</a></li></div>
-     <!--<div class="navItem10"><a href = "{% url 'showcase:perks' %}">Member Perks</a></li></div>-->
-     <div class="navItem4"><a href = "{% url 'showcase:admin'%}" target="_blank">Administration</a></li></div>
-     <div class="navItem5"><a href="https://discord.com/channels/813761567304843315/813779502190297108" target="_blank">Quantum Discord</a></li></div>
-     <div class="navItem8"><a href = "{% url 'showcase:rules' %}">Rules</a></li></div>
-     <div class="navItem9"><a href = "{% url 'showcase:showcase' %}">Member Area</a></div>
-     <div class="navItem11"><a href = "{% url 'logout' %}">Logout</a></div>
+<h2 class="navtext">Quantumism</h2>
+    <div class="navItem"><a href="/">Home</a></div>
+     <div class="navItem2"><a href="/about/">About Us</a></div>
+     <div class="navItem3"><a href="/servers/" target="_blank">Discord Servers</a></div>
+     <!--<div class="navItem10"><a href = "/perks/">Member Perks</a></li></div>-->
+     <div class="navItem4"><a href="/admin/" target="_blank">Administration</a></div>
+     <div class="navItem5"><a href="https://discord.com/channels/813761567304843315/813779502190297108" target="_blank">Quantum Discord</a></div>
+     <div class="navItem8"><a href="/rules/">Rules</a></div>
+     <div class="navItem9"><a href="/showcase/">Member Area</a></div>
+     <div class="navItem11"><a href="/accounts/logout/">Logout</a></div>
 <br>
 <br>
 
 <div class="metaclass1">
     <a href="https://discord.gg/g43uGbURUz">
-         <img alt="Qries" src="../static/css/images/MC.png"
-         width="280" height="150">
+         <img alt="Qries" src="../static/css/images/MC.png" width="280" height="150">
       </a>
 
-          </div>
+</div></nav>
     </div>
 </section>
 
@@ -333,7 +332,7 @@
   {% endfor %}</a>
 
          </div>  -->
-      </div>
+    </ul>      </div>
 
 
       </div>
@@ -373,8 +372,3 @@
 
 </footer>  </body>
 </html>
-
- <script src="{% static 'css/js/script.js' %}"></script>
-    <script src="{% static 'css/js.darkmode.js' %}"></script>
-    <script src="{% static 'css/js/navbar.js' %}"></script>
-    <script src="{% static 'css/js/scroll.js' %}"></script>
