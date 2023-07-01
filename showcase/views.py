@@ -1706,10 +1706,13 @@ class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
     def test_func(self):
         return self.request.user.is_superuser
 
-class SettingsBackgroundView(FormMixin, ListView):
+from django.contrib.messages.views import SuccessMessageMixin
+
+class SettingsBackgroundView(SuccessMessageMixin, FormView):
     model = SettingsBackgroundImage
     form_class = SettingsForm
     template_name = "settings.html"
+    success_url = reverse_lazy('showcase:myaccount')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1726,17 +1729,30 @@ class SettingsBackgroundView(FormMixin, ListView):
     # @RegularUserRequiredMixin
     #@login_required
 
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-        if form.is_valid():
-            settings_model, created = SettingsModel.objects.get_or_create(user=request.user)
-            form.instance.user = request.user
-            form.save()
-            messages.success(request, 'Settings set successfully.')
-            return redirect('showcase:myaccount')
-        else:
-            messages.error(request, "Form submission invalid")
-        return self.render_to_response(self.get_context_data(form=form))
+    from django.db import transaction
+
+    @transaction.atomic
+    def form_valid(self, form):
+        user = self.request.user
+        settings_model, _ = SettingsModel.objects.get_or_create(user=user)
+
+        # Check if the new username conflicts with existing usernames
+        new_username = form.cleaned_data['username']
+        if User.objects.filter(username=new_username).exclude(pk=user.pk).exists():
+            messages.error(self.request, 'Username already exists. Please choose a different username.')
+            return self.form_invalid(form)
+
+        # Update the user's username and password based on the SettingsModel
+        user.username = new_username
+        user.set_password(form.cleaned_data['password'])
+        user.save()
+
+        # Update the SettingsModel with the new form data
+        settings_model.coupons = form.cleaned_data['coupons']
+        settings_model.news = form.cleaned_data['news']
+        settings_model.save()
+
+        return super().form_valid(form)
 
 
 class SupportBackgroundView(FormMixin, ListView):
@@ -1766,8 +1782,8 @@ class SupportBackgroundView(FormMixin, ListView):
                 post.save()
                 print('works')
                 messages.success(request, 'Form submitted successfully.')
-                return redirect('showcase:showcase')
                 return HttpResponse('Support ticket generated')
+                return redirect('showcase:showcase')
             else:
                 messages.error(request, "Form submission invalid")
                 return render(request, "support.html", {'form': form})
