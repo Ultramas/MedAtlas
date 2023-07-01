@@ -385,6 +385,7 @@ class Blog(models.Model):
     likes = models.ManyToManyField(User, blank=True, verbose_name='post likes')
     # likes = models.IntegerField(default=0)
     dislikes = models.ManyToManyField(User, blank=True, verbose_name='post dislikes', related_name="post_dislikes")
+    #url = models.SlugField(max_length=200, unique=True, blank=True)
     # blogbackgroundimage
     is_active = models.IntegerField(default=1,
                                     blank=True,

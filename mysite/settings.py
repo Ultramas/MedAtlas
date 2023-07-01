@@ -134,6 +134,7 @@ DATABASES = {
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
+    "showcase.backends.UpdatedUsernameBackend",
     # it should be the last entry to prevent unauthorized access
     "guest_user.backends.GuestBackend",
 ]
