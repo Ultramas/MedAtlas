@@ -279,6 +279,13 @@ class SettingsForm(forms.ModelForm):
         model = SettingsModel
         fields = ('username', 'password', 'coupons', 'news')
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.user = self.instance.user
+        if commit:
+            instance.save()
+        return instance
+
 
 class BaseCopyrightTextFielde(forms.ModelForm):
     #    image = forms.ImageField(widget=forms.TextInput(
@@ -484,6 +491,7 @@ class CheckoutForm(forms.Form):
 
     payment_option = forms.ChoiceField(
         widget=forms.RadioSelect, choices=PAYMENT_CHOICES)
+
 
 
 class CouponForm(forms.Form):

@@ -167,6 +167,8 @@ from .models import (Item, OrderItem, Order, Address, Payment, Coupon, Refund,
 
 from django.views.generic.edit import FormView
 
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
 
 class SignupView(FormMixin, ListView):
     model = SignupBackgroundImage
@@ -944,7 +946,7 @@ class BlogCreatePostView(CreateView):
 
 # @login_required
 # @RegularUserRequiredMixin
-class PostBackgroundView(FormMixin, ListView):
+class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
     model = UpdateProfile
     template_name = "post_edit.html"
     form_class = PostForm
@@ -1403,7 +1405,6 @@ def home(request):
     return render(request, 'home.html')
 
 
-
 def room(request, room):
     username = request.GET.get('username')
     room_details = Room.objects.get(name=room)
@@ -1416,6 +1417,7 @@ def room(request, room):
         'room_details': room_details,
         'profile_details': profile_details,
     })
+
 
 def checkview(request):
     room = request.POST['room_name']
@@ -1680,61 +1682,61 @@ class PosteView(FormMixin, ListView):
             return render(request, "vote.html", {'form': form})
 
 
-@login_required
-class SettingsView(RegularUserRequiredMixin, FormView):
+class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
     """Only allow registered users to change their settings."""
     form_class = SettingsForm
     model = SettingsModel
     template_name = "myaccount.html"
-    context = {
-        'username': User.username,
-        'password': User.password,
-        'coupons': SettingsModel.coupons,
-        'news': SettingsModel.news,
-    }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['name'] = Showcase.objects.filter(page=self.template_name).order_by("position")
+        user_settings = self.request.user.settings
+
+        context['username'] = self.request.user.username
+        context['password'] = SettingsModel.password
+        context['coupons'] = SettingsModel.coupons
+        context['news'] = SettingsModel.news
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        # context['name'] = Showcase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         return context
-        return HttpResponse(template.render(context, request))
 
+    def test_func(self):
+        return self.request.user.is_superuser
 
 class SettingsBackgroundView(FormMixin, ListView):
     model = SettingsBackgroundImage
     form_class = SettingsForm
-    template_name = "changesettings.html"
+    template_name = "settings.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Favicons'] = FaviconBase.objects.all()
         print(FaviconBase.objects.all())
-        context['SettingsView'] = SettingsView.objects.all()
+        context['SettingsBackgroundView'] = self.model.objects.all()
         return context
 
     # @RegularUserRequiredMixin
-    @login_required
-    def settingschange(self, request, *args, **kwargs):
-        if request.method == "POST":
-            form = SettingsForm(request.POST)
-            if form.is_valid():
-                post = form.save(commit=False)
-                post.save()
-                return redirect('showcase:showcase')
-                messages.success(request, 'Form submitted successfully.')
-            else:
-                messages.error(request, "Form submission invalid")
-                return render(request, "changesettings.html", {'form': form})
+    #@login_required
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            settings_model, created = SettingsModel.objects.get_or_create(user=request.user)
+            form.instance.user = request.user
+            form.save()
+            messages.success(request, 'Settings set successfully.')
+            return redirect('showcase:myaccount')
         else:
-            form = SettingsForm()
-            return render(request, "changesettings.html", {'form': form})
-            messages.error(request, 'Form submission failed to register, please try again.')
-            messages.error(request, form.errors)
+            messages.error(request, "Form submission invalid")
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class SupportBackgroundView(FormMixin, ListView):
@@ -1755,7 +1757,7 @@ class SupportBackgroundView(FormMixin, ListView):
         context['Support'] = Support.objects.all()
         return context
 
-    @login_required
+    @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         if request.method == "POST":
             form = SupportForm(request.POST, request.FILES)
@@ -1776,7 +1778,6 @@ class SupportBackgroundView(FormMixin, ListView):
             messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
             return HttpResponse('Form submission failed to register, please try again.')
-
 
 
 class HomePageView(TemplateView):
@@ -1885,7 +1886,7 @@ class EcommerceSearchResultsView(ListView):
 from .models import ProfileDetails
 
 # Edit Profile View
-from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 class ProfileView(LoginRequiredMixin, UpdateView):
     model = User
@@ -1898,12 +1899,14 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
-
+        context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
+        #settings to alter the username & password
         return context
 
 
@@ -2683,6 +2686,7 @@ class PaymentView(EBaseView):
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
 
+
 class PaypalFormView(FormView):
     template_name = 'paypalpayment.html'
     form_class = PaypalPaymentForm
@@ -2700,6 +2704,7 @@ class PaypalFormView(FormView):
             'lc': 'EN',
             'no_shipping': '1',
         }
+
 
 @allow_guest_user
 def add_to_cart(request, slug):
@@ -2949,9 +2954,6 @@ class RequestRefundView(View):
                 return redirect("showcase:request-refund")
 
 
-
-
-
 from django.contrib.auth.forms import UserChangeForm
 
 
@@ -3196,6 +3198,7 @@ stripe.api_key = "sk_test_51JSB5LH4sbqF1dn75jWAc2wiQvhKq0HfNkQXthKPYmycweqQQkmyT
 
 from django.views.decorators.csrf import csrf_exempt
 
+
 @csrf_exempt
 def stripe_webhook(request):
     payload = request.body
@@ -3273,6 +3276,7 @@ class StripeIntentView(View):
         except Exception as e:
             return JsonResponse({'error': str(e)})
 
+
 class DonateView(ListView):
     model = DonorBackgroundImage
     template_name = "donate.html"
@@ -3289,6 +3293,7 @@ class DonateView(ListView):
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         return context
+
     def donate(request):
         return render(request, 'donate.html')
 
@@ -3312,6 +3317,7 @@ def charge(request):
 
     return redirect(reverse('showcase:patreoned', args=[amount]))
 
+
 class PatreonedView(ListView):
     model = DonorBackgroundImage
     template_name = "patreoned.html"
@@ -3328,6 +3334,7 @@ class PatreonedView(ListView):
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         return context
+
     def successMsg(request, args):
         amount = args
         return render(request, 'patreoned.html', {'amount': amount})
@@ -3685,7 +3692,6 @@ class FeedbackView(LoginRequiredMixin, FormView):
     success_url = '/feedbackfinish'
 
     def get_context_data(self, **kwargs):
-
         def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
             context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -3863,7 +3869,6 @@ from django.contrib import messages
 from .forms import FeedbackForm
 from .models import Item, OrderItem, Feedback
 
-
 """
 class SubmitFeedbackView(DetailView):
     template_name = "review_detail.html"
@@ -3910,8 +3915,8 @@ class SubmitFeedbackView(DetailView):
         messages.error(self.request, 'Invalid form data.')
         return render(self.request, 'create_review.html', {'form': form})"""
 
-
 from django.shortcuts import get_object_or_404
+
 """
 def submit_feedback(request, item_id):
     item = get_object_or_404(Item, id=item_id)
@@ -3942,7 +3947,6 @@ def submit_feedback(request, item_id):
 
     return render(request, 'create_review.html', context)"""
 
-
 """
 def submit_feedback(request, item_id):
     item = get_object_or_404(Item, id=item_id)
@@ -3967,6 +3971,7 @@ def submit_feedback(request, item_id):
 
     return render(request, 'create_review.html', {'form': form})
 """
+
 
 def submit_feedback(request, item_id):
     item = get_object_or_404(Item, id=item_id)
@@ -3998,7 +4003,6 @@ def submit_feedback(request, item_id):
         form = FeedbackForm(request=request)
 
     return render(request, 'create_review.html', {'form': form})
-
 
 
 def edit_feedback(request, feedback_id):
@@ -4035,5 +4039,3 @@ class OrderHistory(ListView):
             'username': username,
             'orderhistory': orderhistory
         })
-
-

@@ -682,9 +682,10 @@ class NavBarHeader(models.Model):
         verbose_name = "Navigational Bar Header"
         verbose_name_plural = "Navigational Bar Headers"
 
+from django.contrib.auth.models import AbstractUser
 
 class SettingsModel(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='settings')
     username = models.CharField(help_text='Your username', max_length=200)
     password = models.CharField(help_text='Your password', max_length=200)
     coupons = models.BooleanField(verbose_name="Send me coupons", default=True, blank=True, null=True,

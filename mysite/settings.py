@@ -224,6 +224,9 @@ warnings.filterwarnings(
     r'django\.db\.models\.fields',
 )
 
+# settings.py
+
+
 CSRF_TRUSTED_ORIGINS = [
     'http://0.0.0.0:3000'
     'http://0.0.0.0:8000'
