@@ -962,24 +962,19 @@ class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         return context
 
     # @login_required
-    def post_new(self, request, *args, **kwargs):
-        if (request.method == "POST"):
-            form = PostForm(request.POST)
-            if (form.is_valid()):
-                post = form.save(commit=False)
-                post.save()
-                return redirect('showcase:showcase')
-                messages.success(request, 'Form submitted successfully.')
-            else:
-                messages.error(request, "Form submission invalid")
-                return render(request, "post_edit.html", {'form': form})
+    def post(self, request, *args, **kwargs):
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            return redirect('showcase:showcase')
         else:
-            form = PostForm()
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
             return render(request, "post_edit.html", {'form': form})
-            messages.error(
-                request,
-                'Form submission failed to register, please try again.')
-            messages.error(request, form.errors)
 
 
 class PostCreatePostView(CreateView):
@@ -1570,24 +1565,30 @@ class PostView(FormMixin, ListView):
         context['Idea'] = Idea.objects.all()
         return context
 
+
+
+    @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
-        if (request.method == "POST"):
-            form = Postit(request.POST)
-            if (form.is_valid()):
+        if request.method == "POST":
+            form = Postit(request.POST, request.FILES)
+            if form.is_valid():
                 post = form.save(commit=False)
                 post.save()
-                return redirect('showcase:users')
                 messages.success(request, 'Form submitted successfully.')
-                # return super().get(request, *args, **kwargs)
+                return redirect('showcase:share')
             else:
+                print(form.errors)
+                print(form.non_field_errors())
+                print(form.cleaned_data)
                 messages.error(request, "Form submission invalid")
                 return render(request, "ideas.html", {'form': form})
         else:
             form = Postit()
-            return render(request, 'ideas.html', {'form': form})
             messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
-            # return super().get(request, *args, **kwargs)
+            return render(request, "ideas.html", {'form': form})
+
+
 
 
 """@login_required
@@ -1622,137 +1623,6 @@ class Title(ListView):
 class DonateIconView(ListView):
     model = DonateIcon
     template_name = "donatebase.html"
-
-
-class PostingView(FormMixin, ListView):
-    model = PostBackgroundImage
-    template_name = "post_edit.html"
-    form_class = PostForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['Background'] = BackgroundImageBase.objects.filter(
-            is_active=1, page=self.template_name).order_by("position")
-        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Idea'] = Idea.objects.all()
-        return context
-
-    def post(self, request, *args, **kwargs):
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.save()
-            return redirect('showcase:showcase')
-            messages.success(request, 'Form submitted successfully.')
-        else:
-            messages.error(request, "Form submission invalid")
-            return render(request, "post_edit.html", {'form': form})
-
-
-class PosteView(FormMixin, ListView):
-    model = VoteBackgroundImage
-    template_name = "vote.html"
-    form_class = PosteForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['Background'] = BackgroundImageBase.objects.filter(
-            is_active=1, page=self.template_name).order_by("position")
-        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Vote'] = Vote.objects.all()
-        return context
-
-    def post(self, request, *args, **kwargs):
-        form = PosteForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.save()
-            return redirect('showcase:voting')
-            messages.success(request, 'Form submitted successfully.')
-        else:
-            messages.error(request, "Form submission invalid")
-            return render(request, "vote.html", {'form': form})
-
-
-class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
-    """Only allow registered users to change their settings."""
-    form_class = SettingsForm
-    model = SettingsModel
-    template_name = "myaccount.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user_settings = self.request.user.settings
-
-        context['username'] = self.request.user.username
-        context['password'] = SettingsModel.password
-        context['coupons'] = SettingsModel.coupons
-        context['news'] = SettingsModel.news
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        # context['name'] = Showcase.objects.filter(page=self.template_name).order_by("position")
-        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        return context
-
-    def test_func(self):
-        return self.request.user.is_superuser
-
-from django.contrib.messages.views import SuccessMessageMixin
-
-class SettingsBackgroundView(SuccessMessageMixin, FormView):
-    model = SettingsBackgroundImage
-    form_class = SettingsForm
-    template_name = "settings.html"
-    success_url = reverse_lazy('showcase:myaccount')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Favicons'] = FaviconBase.objects.all()
-        print(FaviconBase.objects.all())
-        context['SettingsBackgroundView'] = self.model.objects.all()
-        return context
-
-    # @RegularUserRequiredMixin
-    #@login_required
-
-    from django.db import transaction
-
-    @transaction.atomic
-    def form_valid(self, form):
-        user = self.request.user
-        settings_model, _ = SettingsModel.objects.get_or_create(user=user)
-
-        # Check if the new username conflicts with existing usernames
-        new_username = form.cleaned_data['username']
-        if User.objects.filter(username=new_username).exclude(pk=user.pk).exists():
-            messages.error(self.request, 'Username already exists. Please choose a different username.')
-            return self.form_invalid(form)
-
-        # Update the user's username and password based on the SettingsModel
-        user.username = new_username
-        user.set_password(form.cleaned_data['password'])
-        user.save()
-
-        # Update the SettingsModel with the new form data
-        settings_model.coupons = form.cleaned_data['coupons']
-        settings_model.news = form.cleaned_data['news']
-        settings_model.save()
-
-        return super().form_valid(form)
 
 
 class SupportBackgroundView(FormMixin, ListView):
@@ -1794,6 +1664,166 @@ class SupportBackgroundView(FormMixin, ListView):
             messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
             return HttpResponse('Form submission failed to register, please try again.')
+
+class PostingView(FormMixin, ListView):
+    model = UpdateProfile
+    template_name = "post_edit.html"
+    form_class = PostForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Profile'] = UpdateProfile.objects.all()
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        return context
+
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST":
+            form = PostForm(request.POST, request.FILES)
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.save()
+                messages.success(request, 'Form submitted successfully.')
+                return redirect('showcase:showcase')
+            else:
+                print(form.errors)
+                print(form.non_field_errors())
+                print(form.cleaned_data)
+                messages.error(request, "Form submission invalid")
+                return render(request, "post_edit.html", {'form': form})
+        else:
+            form = PostForm()
+            messages.error(request, 'Form submission failed to register, please try again.')
+            messages.error(request, form.errors)
+            return render(request, "post_edit.html", {'form': form})
+
+
+
+class PosteView(FormMixin, ListView):
+    model = VoteBackgroundImage
+    template_name = "vote.html"
+    form_class = PosteForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Vote'] = Vote.objects.all()
+        return context
+
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST":
+            form = PosteForm(request.POST, request.FILES)
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.save()
+                messages.success(request, 'Form submitted successfully.')
+                return redirect('showcase:voting')
+            else:
+                print(form.errors)
+                print(form.non_field_errors())
+                print(form.cleaned_data)
+                messages.error(request, "Form submission invalid")
+                return render(request, "vote.html", {'form': form})
+        else:
+            form = PostForm()
+            messages.error(request, 'Form submission failed to register, please try again.')
+            messages.error(request, form.errors)
+            return render(request, "vote.html", {'form': form})
+
+
+
+
+
+class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
+    """Only allow registered users to change their settings."""
+    form_class = SettingsForm
+    model = SettingsModel
+    template_name = "myaccount.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_settings = self.request.user.settings
+
+        context['username'] = self.request.user.username
+        context['password'] = SettingsModel.password
+        context['coupons'] = SettingsModel.coupons
+        context['news'] = SettingsModel.news
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        # context['name'] = Showcase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        return context
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+
+from django.contrib.messages.views import SuccessMessageMixin
+
+
+class SettingsBackgroundView(SuccessMessageMixin, FormView):
+    model = SettingsBackgroundImage
+    form_class = SettingsForm
+    template_name = "settings.html"
+    success_url = reverse_lazy('showcase:myaccount')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Favicons'] = FaviconBase.objects.all()
+        print(FaviconBase.objects.all())
+        context['SettingsBackgroundView'] = self.model.objects.all()
+        return context
+
+    # @RegularUserRequiredMixin
+    # @login_required
+
+    from django.db import transaction
+
+    @transaction.atomic
+    def form_valid(self, form):
+        user = self.request.user
+        settings_model, _ = SettingsModel.objects.get_or_create(user=user)
+
+        # Check if the new username conflicts with existing usernames
+        new_username = form.cleaned_data['username']
+        if User.objects.filter(username=new_username).exclude(pk=user.pk).exists():
+            messages.error(self.request, 'Username already exists. Please choose a different username.')
+            return self.form_invalid(form)
+
+        # Update the user's username and password based on the SettingsModel
+        user.username = new_username
+        user.set_password(form.cleaned_data['password'])
+        user.save()
+
+        # Update the SettingsModel with the new form data
+        settings_model.coupons = form.cleaned_data['coupons']
+        settings_model.news = form.cleaned_data['news']
+        settings_model.save()
+
+        return super().form_valid(form)
+
 
 
 class HomePageView(TemplateView):
@@ -1901,6 +1931,7 @@ class EcommerceSearchResultsView(ListView):
 
 from .models import ProfileDetails
 
+
 # Edit Profile View
 
 
@@ -1922,7 +1953,7 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
-        #settings to alter the username & password
+        # settings to alter the username & password
         return context
 
 

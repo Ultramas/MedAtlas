@@ -84,13 +84,8 @@ class BusinessContactForm(forms.ModelForm):
         fields = '__all__'
 
 
-class PostForm(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
-    category = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Choose a category you want your idea to affect.'}))
-    image = forms.ImageField(widget=forms.TextInput(attrs={'placeholder': 'Attach an image for your post.'}))
-     #altered image URLField to ImageField, check for bugs please
 
+class PostForm(forms.ModelForm):
     class Meta:
         model = UpdateProfile
         fields = ('name', 'description', 'image')
@@ -110,7 +105,7 @@ class PosteForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
     category = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Choose a category you want your vote to affect.'}))
-    image = forms.ImageField(widget=forms.TextInput(attrs={'placeholder': 'Link an image for your post.'}))
+
     # altered image URLField to ImageField, check for bugs please
 
     class Meta:
@@ -170,9 +165,7 @@ class SupportForm(forms.ModelForm):
     class Meta:
         model = Support
         fields = ('name', 'category', 'issue', 'Additional_comments', 'image',)
-        widgets = {
-            'image': forms.ClearableFileInput(attrs={'placeholder': 'Please attach a screenshot of your issue.'})
-        }
+
 
 
 
