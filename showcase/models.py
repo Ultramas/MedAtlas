@@ -398,9 +398,18 @@ class Blog(models.Model):
         verbose_name_plural = "Blog Entries"
         ordering = ['-created_on']
 
+#    def save(self, *args, **kwargs):
+#        self.url = slugify(self.title)
+#        super(Blog, self).save(*args, **kwargs)
+
     def save(self, *args, **kwargs):
-        self.url = slugify(self.title)
-        super(Blog, self).save(*args, **kwargs)
+        if not self.pk:
+            author_pk = self.author_id
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        return f"http://127.0.0.1:8000/profile/{self.author_id}/"
 
     def __str__(self):
         return self.title
@@ -1330,6 +1339,7 @@ from django.db.models.signals import post_save
 # user_profile.save()
 # post_save.connect(create_profile, sender=User)
 
+from django.contrib.auth import get_user_model
 
 class ProfileDetails(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -1337,7 +1347,8 @@ class ProfileDetails(models.Model):
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True, verbose_name="Profile picture")
     alternate = models.TextField(verbose_name="Alternate text")
     about_me = models.TextField(blank=True, null=True)
-    #link_to_profile = models.ForeignKey('self', on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Link to profile") #possibly consider making this automatically fill with the link to the user's profile
+    link_to_profile = models.URLField(default=1, blank=True, null=True, verbose_name="Link to profile") #possibly consider making this automatically fill with the link to the user's profile
+    #consider making a randomized pk that is assigned to each invididual user and can be attached to the end of the default profile url like in this schema: "http://127.0.0.1:8000/profile/pk/
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1346,6 +1357,15 @@ class ProfileDetails(models.Model):
 
     def __str__(self):
         return str(self.user)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            author_pk = self.author.pk
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        return f"http://127.0.0.1:8000/profile/{self.pk}/"
 
     class Meta:
         verbose_name = "Account Profile"

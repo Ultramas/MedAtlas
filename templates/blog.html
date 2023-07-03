@@ -1,4 +1,4 @@
-{% extends "blogbase.html" %} 
+{% extends "blogbase.html" %}
 
 {% load static %}
 
@@ -349,9 +349,10 @@
 
                     {% for blog_post in BlogPosts %}
     {% if blog_post.author_profile_picture_url %}
-        <a href="{{ request.user.profile.get_absolute_url }}">
-            <img src="{{ blog_post.author_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
-        </a>
+    <a href="{{ blog_post.author_profile_url }}">
+         <img src="{{ blog_post.author_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
+      </a>
+
     {% else %}
     <!-- Placeholder image or default avatar -->
     <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">

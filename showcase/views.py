@@ -518,12 +518,16 @@ class PostList(ListView):
 
         # Retrieve the author's profile avatar
         blog_posts = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['BlogPosts'] = blog_posts
+
         for blog_post in context['BlogPosts']:
             author = blog_post.author
             profile = ProfileDetails.objects.filter(user=author).first()
             if profile:
                 blog_post.author_profile_picture_url = profile.avatar.url
+                blog_post.author_profile_url = blog_post.get_profile_url()
+
                 print('imgsrcimg')
 
         return context
@@ -1555,7 +1559,7 @@ def poste(request):
        messages.error(request, form.errors)"""
 
 
-class PostBackgroundView(FormMixin, ListView):
+"""class PostBackgroundView(FormMixin, ListView):
     model = UpdateProfile
     template_name = "post_edit.html"
     form_class = PostForm
@@ -1569,7 +1573,7 @@ class PostBackgroundView(FormMixin, ListView):
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         return context
-
+"""
     # @login_required
 
 
