@@ -108,6 +108,7 @@ from .views import (
     submit_feedback,
     detail_post_view,
     postpreference,
+    getMessages,
     AdvertisementView,
     MemberHomeBackgroundView,
 

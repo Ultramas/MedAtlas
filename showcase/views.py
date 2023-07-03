@@ -1438,12 +1438,37 @@ def send(request):
     return HttpResponse('Message sent successfully')
     print('returned')
 
+from django.contrib.staticfiles.storage import staticfiles_storage
+from urllib import request
+from django.http import JsonResponse
+from django.views import View
+from django.core import serializers
 
 def getMessages(request, room):
     room_details = Room.objects.get(name=room)
-
     messages = Message.objects.filter(room=room_details.id)
-    return JsonResponse({"messages": list(messages.values())})
+
+    messages_data = []
+    for message in messages:
+        profile_details = ProfileDetails.objects.filter(user__username=message.user).first()
+        if profile_details:
+            avatar_url = profile_details.avatar.url
+        else:
+            # Set a default avatar URL or path in case the user doesn't have an avatar
+            avatar_url = staticfiles_storage.url('css/images/a.jpg')
+
+        message_data = {
+            'user': message.user,
+            'value': message.value,
+            'date': message.date,
+            'avatar_url': avatar_url
+        }
+        messages_data.append(message_data)
+
+    return JsonResponse({"messages": messages_data})
+
+    #consider returning everything, including the avatar, rather than simply the messages themselves
+
 
 
 def supportroom(request):
@@ -1565,8 +1590,6 @@ class PostView(FormMixin, ListView):
         context['Idea'] = Idea.objects.all()
         return context
 
-
-
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         if request.method == "POST":
@@ -1587,8 +1610,6 @@ class PostView(FormMixin, ListView):
             messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
             return render(request, "ideas.html", {'form': form})
-
-
 
 
 """@login_required
@@ -1665,6 +1686,7 @@ class SupportBackgroundView(FormMixin, ListView):
             messages.error(request, form.errors)
             return HttpResponse('Form submission failed to register, please try again.')
 
+
 class PostingView(FormMixin, ListView):
     model = UpdateProfile
     template_name = "post_edit.html"
@@ -1682,7 +1704,6 @@ class PostingView(FormMixin, ListView):
         context['Profile'] = UpdateProfile.objects.all()
         context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
         return context
-
 
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
@@ -1706,7 +1727,6 @@ class PostingView(FormMixin, ListView):
             return render(request, "post_edit.html", {'form': form})
 
 
-
 class PosteView(FormMixin, ListView):
     model = VoteBackgroundImage
     template_name = "vote.html"
@@ -1723,7 +1743,6 @@ class PosteView(FormMixin, ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Vote'] = Vote.objects.all()
         return context
-
 
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
@@ -1745,9 +1764,6 @@ class PosteView(FormMixin, ListView):
             messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
             return render(request, "vote.html", {'form': form})
-
-
-
 
 
 class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
@@ -1823,7 +1839,6 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
         settings_model.save()
 
         return super().form_valid(form)
-
 
 
 class HomePageView(TemplateView):

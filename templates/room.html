@@ -106,7 +106,7 @@ body {
     </form>
   </div>
 </div>
-
+<!--maybe consider shifting other users to the right side and keep current user on left side (optional, based on your asthetic preferences)-->
 <script>
 $(document).ready(function(){
   // Preload avatars
@@ -118,9 +118,11 @@ $(document).ready(function(){
   preloadImages(avatarUrls);
 
   setInterval(function(){
+    var room = "{{ room }}"; // Replace with the actual value of the room
+
     $.ajax({
       type: 'GET',
-      url : "/getMessages/{{room}}/",
+      url : "/getMessages/" + room + "/",
       success: function(response){
         console.log(response);
         $("#display").empty();
@@ -128,7 +130,7 @@ $(document).ready(function(){
           var message = response.messages[key];
           var messageHtml = `
             <div class="message">
-              <img src="${message.user_avatar}" alt="${message.user}">
+              <img src="${message.avatar_url}" alt="${message.user}">
               <div class="message-content">
                 <div class="sender">${message.user}</div>
                 <div>${message.value}</div>
@@ -152,7 +154,11 @@ function preloadImages(urls) {
     img.src = urls[i];
   }
 }
+
+
 </script>
+
+
 
 </body>
 
