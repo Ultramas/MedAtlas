@@ -4193,23 +4193,24 @@ def submit_feedback(request, item_id):
 
     # Check if the user has already left feedback for this order item
     existing_feedback = Feedback.objects.filter(username=user, order=order_item)
-    if existing_feedback:
-        messages.error(request, 'You have already left feedback for this order item.')
 
     if request.method == 'POST':
         form = FeedbackForm(request.POST, request=request)
         if form.is_valid():
-            feedback = form.save(commit=False)
-            feedback.user = user
-            feedback.username = request.user
-            feedback.slug = order_item.slug
-            feedback.item = item
-            feedback.order_item = order_item
-            feedback.order = order_item
-            print(order_item)
-            feedback.save()
-            messages.success(request, 'Your feedback has been submitted successfully.')
-            return redirect('showcase:feedbackfinish')
+            if existing_feedback:
+                messages.error(request, 'You have already left feedback for this order item.')
+            else:
+                feedback = form.save(commit=False)
+                feedback.user = user
+                feedback.username = request.user
+                feedback.slug = order_item.slug
+                feedback.item = item
+                feedback.order_item = order_item
+                feedback.order = order_item
+                print(order_item)
+                feedback.save()
+                messages.success(request, 'Your feedback has been submitted successfully.')
+                return redirect('showcase:feedbackfinish')
         else:
             messages.error(request, "Invalid form data.")
     else:

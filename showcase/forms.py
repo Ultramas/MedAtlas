@@ -795,12 +795,10 @@ class FeedbackForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        self.fields['username'] = forms.CharField(disabled=True, initial=self.get_current_username())
+        self.fields['username'] = forms.CharField(initial=self.request.user.username)
+        self.fields['username'].widget.attrs['readonly'] = True
         self.fields['order'].queryset = OrderItem.objects.filter(user=self.request.user)
 
-    def get_current_username(self):
-        User = get_user_model()
-        return User.objects.get(pk=self.request.user.pk).username
 
 
 

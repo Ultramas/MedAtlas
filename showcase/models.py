@@ -2195,7 +2195,7 @@ class Feedback(models.Model):
     #orderitem = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)  # might want to replace item with order
     order = models.ForeignKey(OrderItem, on_delete=models.CASCADE, blank=True, null=True)
     #order = models.OneToOneField(OrderItem, on_delete=models.CASCADE, related_name='feedback', null=True)
-    username = models.ForeignKey(User, on_delete=models.CASCADE, editable=False)
+    username = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     hyperlink = models.CharField(max_length=200, help_text="Leave field blank, hyperlink will automatically fill with the link to the associated product.")
     comment = models.TextField()
     feedbackpage = models.TextField(verbose_name="Page Name", blank=True, null=True)
@@ -2213,18 +2213,11 @@ class Feedback(models.Model):
     def __str__(self):
         return "%s %s" % (self.username, self.item)
 
-    def save(self, *args, **kwargs):
-        if not self.id:  # Only set the username for new instances
-            current_user = kwargs.pop('user', None)
-            if current_user:
-                self.username_id = current_user.id
-        if not self.hyperlink and self.item:
-            self.hyperlink = self.item.get_profile_url()
-        super().save(*args, **kwargs)
-        if not self.order and self.item_id:
-            order_item = OrderItem.objects.filter(item_id=self.item_id).first()
-            if order_item:
-                self.order = order_item
+    def get_current_username(self):
+        User = get_user_model()
+        return User.objects.get(pk=self.request.user.pk).username
+
+
 
 
 @receiver(pre_save, sender=Feedback)

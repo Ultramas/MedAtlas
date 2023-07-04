@@ -103,7 +103,6 @@ from .views import (
     AdministrationView,
     SettingsView,
     SettingsBackgroundView,
-    sociallogin,
     DonateView,
     PatreonedView,
     OrderHistory,
@@ -167,8 +166,6 @@ urlpatterns = [
     path('', views.BackgroundView.as_view(), name='index'),
     path('ehome/', views.EBackgroundView.as_view(), name='ehome'),
     path('ehome/<int:page>/', views.EBackgroundView.as_view(), name='ehome'),
-    path('paypal/', include('paypal.standard.ipn.urls')),
-    path('paypalpayment/', TemplateView.as_view(template_name='paypalpayment.html'), name='paypalpayment'),
     path('home/', views.ChatBackgroundView.as_view(), name='home'),
     path('billets/', views.BilletBackgroundView.as_view(), name='billets'),
     # path('', views.Background2aView.as_view(), name='index'),
@@ -207,6 +204,8 @@ urlpatterns = [
     path('addons/', TemplateView.as_view(template_name='addons.html'), name='addons'),
     path('rules/', views.RuleBackgroundView.as_view(), name='rules'),
     path('staffapplications/', TemplateView.as_view(template_name='staffapplications.html'), name='staffapplications'),
+    path('social-auth/', include('social_django.urls', namespace='social')),
+    path('social-auth/sociallogin', TemplateView.as_view(template_name='sociallogin.html'), name='sociallogin'),
     path('password_reset/', TemplateView.as_view(template_name='password_reset.html'), name='password_reset'),
     path('password_reset_done/', TemplateView.as_view(template_name='password_reset_done.html'),
          name='password_reset_done'),
@@ -272,7 +271,6 @@ urlpatterns = [
     #possibly consider making wireframes to see where the create feedback form based on bought products url would look like
     path('feedbackfinish/', TemplateView.as_view(template_name='feedbackfinish.html'), name='feedbackfinish'),
     path('feedbackfinish/<slug:slug>/', views.FeedbackView.as_view(), name='feedbackfinish'),
-    # path('accounts/', include('django.contrib.auth.urls')),
     # path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='main/password/password_reset_done.html'), name='password_reset_done'),
 
     # path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name="main/password/password_reset_confirm.html"), name='password_reset_confirm'),
@@ -416,7 +414,6 @@ urlpatterns = [
         template_name='commons/password-reset/password_reset_complete.html'),
          name='password_reset_complete')
 ]
-
 
 # remove these
 # urlpatterns += staticfiles_urlpatterns()
