@@ -502,17 +502,20 @@ class RefundForm(forms.Form):
     email = forms.EmailField()
 
 
+
 class PaymentForm(forms.Form):
-    number = forms.IntegerField(required=True)
-    exp_month = forms.IntegerField(required=True)
-    expiry = forms.CharField(required=True)
-    exp_year = forms.IntegerField(required=True)
-    cvc = forms.IntegerField(required=True)
+    number = forms.IntegerField(required=False)
+    exp_month = forms.IntegerField(required=False)
+    expiry = forms.CharField(required=False)
+    exp_year = forms.IntegerField(required=False)
+    cvc = forms.IntegerField(required=False)
     save = forms.BooleanField(required=False)
     use_default = forms.BooleanField(required=False)
 
+
 class PaypalPaymentForm(forms.Form):
-    number = forms.IntegerField(required=True)
+    #number = forms.IntegerField(required=True)
+    number = forms.CharField(required=True)
     exp_month = forms.IntegerField(required=True)
     expiry = forms.CharField(required=True)
     exp_year = forms.IntegerField(required=True)

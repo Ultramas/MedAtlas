@@ -1403,18 +1403,49 @@ class PerksBackgroundView(BaseView):
 def home(request):
     return render(request, 'home.html')
 
+class RoomView(TemplateView):
+    template_name = 'room.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        room = self.kwargs['room']
+        username = self.request.GET.get('username')
+        room_details = Room.objects.get(name=room)
+        profile_details = ProfileDetails.objects.filter(user__username=username).first()
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        context['username'] = username
+        context['room'] = room
+        context['room_details'] = room_details
+        context['profile_details'] = profile_details
+
+        return context
+    
+
 
 def room(request, room):
     username = request.GET.get('username')
     room_details = Room.objects.get(name=room)
     profile_details = ProfileDetails.objects.filter(
         user__username=username).first()  # Fetch profile details for the specified username
+    Logo = LogoBase.objects.filter(page='room.html', is_active=1)
+    Header = NavBarHeader.objects.filter(is_active=1).order_by("row")
+    DropDown = NavBar.objects.filter(is_active=1).order_by('position')
+
+
+
 
     return render(request, 'room.html', {
         'username': username,
         'room': room,
         'room_details': room_details,
         'profile_details': profile_details,
+        'Logo': Logo,
+        'Header': Header,
+        'Dropdown': DropDown,
     })
 
 
@@ -1442,11 +1473,13 @@ def send(request):
     return HttpResponse('Message sent successfully')
     print('returned')
 
+
 from django.contrib.staticfiles.storage import staticfiles_storage
 from urllib import request
 from django.http import JsonResponse
 from django.views import View
 from django.core import serializers
+
 
 def getMessages(request, room):
     room_details = Room.objects.get(name=room)
@@ -1471,8 +1504,7 @@ def getMessages(request, room):
 
     return JsonResponse({"messages": messages_data})
 
-    #consider returning everything, including the avatar, rather than simply the messages themselves
-
+    # consider returning everything, including the avatar, rather than simply the messages themselves
 
 
 def supportroom(request):
@@ -1558,7 +1590,6 @@ def poste(request):
            request, 'Form submission failed to register, please try again.')
        messages.error(request, form.errors)"""
 
-
 """class PostBackgroundView(FormMixin, ListView):
     model = UpdateProfile
     template_name = "post_edit.html"
@@ -1574,7 +1605,9 @@ def poste(request):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         return context
 """
-    # @login_required
+
+
+# @login_required
 
 
 class PostView(FormMixin, ListView):
@@ -2378,28 +2411,17 @@ class OrderSummaryView(EBaseView):
             return redirect("showcase:ehome")
 
 
-class CheckoutView(EBaseView):
-    model = CheckoutBackgroundImage
-    template_name = "checkout.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
-        return context
-
+class CheckoutView(View):
     def get(self, *args, **kwargs):
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
             form = CheckoutForm()
-            context = self.get_context_data()
-            context['form'] = form
-            context['couponform'] = CouponForm()
-            context['order'] = order
-            context['DISPLAY_COUPON_FORM'] = True
+            context = {
+                'form': form,
+                'couponform': CouponForm(),
+                'order': order,
+                'DISPLAY_COUPON_FORM': True
+            }
 
             shipping_address_qs = Address.objects.filter(
                 user=self.request.user, address_type='S', default=True)
@@ -2420,7 +2442,7 @@ class CheckoutView(EBaseView):
 
     def post(self, *args, **kwargs):
         form = CheckoutForm(self.request.POST or None)
-        # print(self.request.GET)
+        #print(self.request.GET)
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
             if form.is_valid():
@@ -2451,7 +2473,7 @@ class CheckoutView(EBaseView):
                                       "No default shipping address available")
                         return redirect('showcase:checkout')
                 else:
-                    # change to allow for saved information without posting
+                    #change to allow for saved information without posting
                     print("shipping_address1")
                     shipping_address1 = form.cleaned_data.get(
                         'shipping_address')
@@ -2462,7 +2484,7 @@ class CheckoutView(EBaseView):
                     shipping_zip = form.cleaned_data.get('shipping_zip')
 
                     if is_valid_form(
-                            [shipping_address1, shipping_country, shipping_zip]):
+                        [shipping_address1, shipping_country, shipping_zip]):
                         shipping_address = Address(
                             user=self.request.user,
                             street_address=shipping_address1,
@@ -2498,8 +2520,8 @@ class CheckoutView(EBaseView):
                             self.request,
                             "Please fill in the required shipping address fields"
                         )
-                        # save = form.data.get('save')
-                        # order.save()
+                        #save = form.data.get('save')
+                        #order.save()
                         return redirect('showcase:checkout')
 
                 use_default_billing = form.cleaned_data.get(
@@ -2538,7 +2560,7 @@ class CheckoutView(EBaseView):
                     billing_zip = form.cleaned_data.get('billing_zip')
 
                     if is_valid_form(
-                            [billing_address1, billing_country, billing_zip]):
+                        [billing_address1, billing_country, billing_zip]):
                         billing_address = Address(
                             user=self.request.user,
                             street_address=billing_address1,
@@ -2566,10 +2588,7 @@ class CheckoutView(EBaseView):
 
                 payment_option = form.cleaned_data.get('payment_option')
 
-                if payment_option == 'C':
-                    return redirect('showcase:payment',
-                                    payment_option='card')
-                elif payment_option == 'S':
+                if payment_option == 'S':
                     return redirect('showcase:payment',
                                     payment_option='stripe')
                 elif payment_option == 'P':
@@ -2582,6 +2601,9 @@ class CheckoutView(EBaseView):
         except ObjectDoesNotExist:
             messages.warning(self.request, "You do not have an active order")
             return redirect("showcase:order-summary")
+
+
+
 
 
 class PaymentView(EBaseView):
@@ -2751,6 +2773,8 @@ class PaymentView(EBaseView):
 
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
+
+
 
 
 class PaypalFormView(FormView):
@@ -3442,7 +3466,7 @@ class ContactViewe(CreateView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        context['Contact'] = Contact.objects.all()[len(Contact.objects.all()) - 1]
+        context['Contact'] = Contact.objects.order_by('-id').first()
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)

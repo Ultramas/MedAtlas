@@ -37,8 +37,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 
 # STRIPE_PUBLIC_KEY = config('STRIPE_TEST_PUBLIC_KEY')
+SECRET_KEY = 'SECRET_KEY'
 
-SECRET_KEY = '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'
+SECRET = os.getenv('payment')
+
+#stripe payment
+STRIPE_KEY = 'SECRET'
 
 # SECRET_KEY = config('SECRET_KEY')
 
@@ -210,7 +214,7 @@ RECIPIENT_ADDRESS = env('RECIPIENT_ADDRESS')
 SECRET = os.getenv('payment')
 
 # stripe payment
-STRIPE_KEY = 'SECRET'
+STRIPE_KEY = SECRET
 
 STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
 # possibly linked to "invalid request error (invalid parameters)" issue

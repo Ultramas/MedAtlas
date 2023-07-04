@@ -1347,7 +1347,7 @@ class ProfileDetails(models.Model):
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True, verbose_name="Profile picture")
     alternate = models.TextField(verbose_name="Alternate text")
     about_me = models.TextField(blank=True, null=True)
-    link_to_profile = models.URLField(default=1, blank=True, null=True, verbose_name="Link to profile") #possibly consider making this automatically fill with the link to the user's profile
+    #link_to_profile = models.URLField(default=1, blank=True, null=True, verbose_name="Link to profile") #possibly consider making this automatically fill with the link to the user's profile
     #consider making a randomized pk that is assigned to each invididual user and can be attached to the end of the default profile url like in this schema: "http://127.0.0.1:8000/profile/pk/
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -1428,7 +1428,7 @@ class SupportMessage(models.Model):
 # from django.db.models.signals import post_save
 from django.conf import settings
 from django.db.models import Sum
-from django.shortcuts import reverse, get_object_or_404
+from django.shortcuts import reverse, get_object_or_404, render
 from django_countries.fields import CountryField
 
 CATEGORY_CHOICES = (
@@ -1540,6 +1540,7 @@ class EBackgroundImage(models.Model):
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from django.contrib import messages
+
 
 
 class ChatBackgroundImage(models.Model):
@@ -2134,7 +2135,7 @@ class State(models.Model):
 
 
 class UserProfile2(models.Model):
-    user = models.OneToOneField(User, on_delete=models.DO_NOTHING)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100, default='')
     last_name = models.CharField(max_length=100, default='')
     description = models.CharField(max_length=100, default='')

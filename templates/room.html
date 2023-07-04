@@ -87,8 +87,9 @@ body {
 <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 </head>
 <body>
+
 {% for ChatBackgroundImage in Background %}
-  <img class="backgroundimages" src="{{ChatBackgroundImage.cover.url}}" alt="{{ ChatBackgroundImage.backgroundtitle }}">
+  <img class="backgroundimages" src="{{BackgroundImage.cover.url}}" alt="{{ BackgroundImage.backgroundtitle }}">
 {% endfor %}
 
 <div class="chat-container">
@@ -158,6 +159,11 @@ function preloadImages(urls) {
 
 </script>
 
+
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
 
 
 </body>
