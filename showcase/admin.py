@@ -12,6 +12,7 @@ from .models import ReportIssue
 from .models import NewsFeed
 from .models import StaffProfile
 from .models import Event
+from .models import Feedback
 from .models import Blog
 from .models import Preference
 from .models import PostLikes
@@ -297,3 +298,32 @@ class GroupAdmin(admin.ModelAdmin):
 
 # Register the new Group ModelAdmin.
 admin.site.register(Group, GroupAdmin)
+
+from .models import Feedback
+from .forms import FeedbackForm
+class FeedbackAdmin(admin.ModelAdmin):
+    form = FeedbackForm
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.request = request
+        return form
+
+    def save_model(self, request, obj, form, change):
+        if not change:  # Only set the username for new feedbacks
+            obj.username = request.user.username
+        super().save_model(request, obj, form, change)
+
+    def add_view(self, request, form_url='', extra_context=None):
+        form = self.get_form(request)
+        if request.method == 'POST':
+            form = form(request.POST, request=request)  # Pass the request object to the form
+            if form.is_valid():
+                return self.save_form(request, form, change=False)
+        else:
+            form = form(request=request)  # Create an instance of the form with the request object
+        form.request = request  # Set the request object explicitly in the form
+        return super().add_view(request, form_url=form_url, extra_context=extra_context)
+
+
+admin.site.register(Feedback, FeedbackAdmin)

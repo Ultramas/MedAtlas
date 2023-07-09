@@ -610,6 +610,15 @@ class BackgroundImage(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            slug = self.slug
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        return f"http://127.0.0.1:8000/product/{self.slug}/"
+
     class Meta:
         verbose_name = "Background Image"
         verbose_name_plural = "Background Images"
@@ -1360,7 +1369,7 @@ class ProfileDetails(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            author_pk = self.author.pk
+            user_pk = self.user.pk
 
         super().save(*args, **kwargs)
 
@@ -1386,10 +1395,12 @@ class Room(models.Model):
     name = models.CharField(max_length=1000)
 
 
+
 class Message(models.Model):
     value = models.CharField(max_length=1000000)
     date = models.DateTimeField(default=timezone.now, blank=True)
-    user = models.CharField(max_length=1000000)
+    user = models.CharField(max_length=1000000, verbose_name="Username")
+    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='messages', verbose_name="User")
     room = models.CharField(max_length=1000000)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     is_active = models.IntegerField(default=1,
@@ -1398,6 +1409,15 @@ class Message(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+
+
+    def _get_current_user(self):
+        # Logic to retrieve the currently signed-in user
+        # You can modify this according to your authentication mechanism
+        return User.objects.get(username='example_user')
+
+    def get_profile_url(self):
+        return f"http://127.0.0.1:8000/profile/{self.signed_in_user_id}/"
 
 # is_active is new
 
@@ -1491,11 +1511,11 @@ class Item(models.Model):
     price = models.FloatField()
     discount_price = models.FloatField(blank=True, null=True)
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
-    label = models.CharField(choices=LABEL_CHOICES, max_length=1000)
-    slug = models.SlugField()
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1000) #can use for cataloging products
+    slug = models.SlugField() #might change to automatically get the slug
     description = models.TextField()
     image = models.ImageField()
-    hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.")
+    #hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
     relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -1514,6 +1534,15 @@ class Item(models.Model):
 
     def get_remove_from_cart_url(self):
         return reverse("showcase:remove-from-cart", kwargs={'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            slug = self.slug
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        return f"http://127.0.0.1:8000/product/{self.slug}/"
 
 
 class EBackgroundImage(models.Model):
@@ -1855,6 +1884,9 @@ class Order(models.Model):
                 total -= self.coupon.amount
         return total
 
+    def get_profile_url(self):
+        return f"http://127.0.0.1:8000/product/{self.slug}/"
+
 
 class Address(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -2163,11 +2195,11 @@ class Feedback(models.Model):
     #orderitem = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)  # might want to replace item with order
     order = models.ForeignKey(OrderItem, on_delete=models.CASCADE, blank=True, null=True)
     #order = models.OneToOneField(OrderItem, on_delete=models.CASCADE, related_name='feedback', null=True)
-    username = models.ForeignKey(User, on_delete=models.CASCADE)
-    hyperlink = models.CharField(max_length=200, blank=True, null=True, help_text="Leave field blank, hyperlink will automatically fill with the link to the associated product.")
+    username = models.ForeignKey(User, on_delete=models.CASCADE, editable=False)
+    hyperlink = models.CharField(max_length=200, help_text="Leave field blank, hyperlink will automatically fill with the link to the associated product.")
     comment = models.TextField()
     feedbackpage = models.TextField(verbose_name="Page Name", blank=True, null=True)
-    slug = models.SlugField(max_length=200, blank=True, null=True, help_text="Leave blank to use corresponding product slug.")
+    slug = models.SlugField(max_length=200, help_text="Leave blank to use corresponding product slug.") #get the actual item slug
     #unique=True prevents saving, but does not prevent the IntegrityError at /create_review/1/ UNIQUE constraint failed: showcase_feedback.slug
     star_rating = models.IntegerField(verbose_name='Star Rating',
                                       validators=[MinValueValidator(1), MaxValueValidator(5)])
@@ -2182,14 +2214,18 @@ class Feedback(models.Model):
         return "%s %s" % (self.username, self.item)
 
     def save(self, *args, **kwargs):
+        if not self.id:  # Only set the username for new instances
+            current_user = kwargs.pop('user', None)
+            if current_user:
+                self.username_id = current_user.id
         if not self.hyperlink and self.item:
-            self.hyperlink = self.item.hyperlink
+            self.hyperlink = self.item.get_profile_url()
         super().save(*args, **kwargs)
         if not self.order and self.item_id:
-            # Retrieve the related OrderItem based on the item_id
             order_item = OrderItem.objects.filter(item_id=self.item_id).first()
             if order_item:
                 self.order = order_item
+
 
 @receiver(pre_save, sender=Feedback)
 def set_slug(sender, instance, *args, **kwargs):

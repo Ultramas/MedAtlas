@@ -103,6 +103,7 @@ from .views import (
     AdministrationView,
     SettingsView,
     SettingsBackgroundView,
+    sociallogin,
     DonateView,
     PatreonedView,
     OrderHistory,
@@ -166,6 +167,8 @@ urlpatterns = [
     path('', views.BackgroundView.as_view(), name='index'),
     path('ehome/', views.EBackgroundView.as_view(), name='ehome'),
     path('ehome/<int:page>/', views.EBackgroundView.as_view(), name='ehome'),
+    path('paypal/', include('paypal.standard.ipn.urls')),
+    path('paypalpayment/', TemplateView.as_view(template_name='paypalpayment.html'), name='paypalpayment'),
     path('home/', views.ChatBackgroundView.as_view(), name='home'),
     path('billets/', views.BilletBackgroundView.as_view(), name='billets'),
     # path('', views.Background2aView.as_view(), name='index'),
@@ -413,6 +416,7 @@ urlpatterns = [
         template_name='commons/password-reset/password_reset_complete.html'),
          name='password_reset_complete')
 ]
+
 
 # remove these
 # urlpatterns += staticfiles_urlpatterns()

@@ -813,6 +813,3 @@ class FeedbackAdmin(admin.ModelAdmin):
         if not change:  # Only set the username for new feedbacks
             obj.username = request.user.username
         super().save_model(request, obj, form, change)
-
-admin.site.register(Feedback, FeedbackAdmin)
-

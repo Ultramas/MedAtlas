@@ -349,8 +349,7 @@
               <!--Card image-->
               <div class="view overlay">
                 <a href="{{ item.get_absolute_url }}">
-      <img class = "hunt" src="{{item.image.url}}" class="card-img-top"
-                  alt="{{ item.image.url }}">
+      <img class = "hunt" src="{{item.image.url}}" class="card-img-top" alt="{{ item.image.url }}" >
                   <div class="mask rgba-white-slight"></div>
                 </a>
               </div>
@@ -404,21 +403,35 @@
 
 
           </a>
-          <a href="#" class="featured__item">
-            <img src="static/css/images/blz.jpeg" alt="" class="featured__img">
-            <p class="featured__details"><span class="price">$99</span>shoe name</p>
+
+<!--new item additions-->
+           {% for product in Products %}
+    {% if product.image_url %}
+          <a href="{{ product.hyperlink }}" class="featured__item">
+         <img src="{{ product.image_url }}" alt="Profile Picture" class="featured__img" style="height: 300px; width: 300px; border-radius: 0px;">
+            <p class="featured__details">
+                <span class="price">
+                  ${% if product.discount_price %}
+                  {{ product.discount_price }}
+                  {% else %}
+                  {{ product.price }}
+              {% endif %}
+                </span>{{product.title}}</p>
+
           </a>
-          <a href="#" class="featured__item">
-            <img src="static/css/images/ers.jpg" alt="" class="featured__img">
-            <p class="featured__details"><span class="price">$99</span>shoe name</p>
-          </a>
+            {% else %}
+    <!-- Placeholder image or default avatar -->
+            <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
+         {% endif %}
+        {% endfor %}
         </div>
       </div>
     </div>
 
+     <!--older product item selection-->
     <div class="our-products">
         <div class="container">
-        <h2 class="section-title">Our products</h2>
+        <h2 class="section-title">Our Products</h2>
 <!--have the products be an extension of the ecommerce posting section--->
         <div class="product shoe-red spacing">
           <img src="static/css/images/h.jpg" alt="" class="product__image">

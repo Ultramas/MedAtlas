@@ -261,7 +261,11 @@ z-index: 10;
   <br>
 
 
-
+{% if user.is_authenticated %}
+    <head>
+  <meta http-equiv="refresh" content="0; url=http://{{ request.get_host }}/showcase">
+  </head>
+    {% else %}
   <div class="wrapperew">
 	<div class="containerert">
             <div class = "formert">
@@ -270,11 +274,14 @@ z-index: 10;
     <form method="post">
     {% csrf_token %}
     {{form.as_p}}
+
+
         <div class="signuphere">
     <a href = "{% url 'showcase:cv-form' %}">Not a member? Sign up here!</a>
       </div>
     <div class="buttonu">
       <button class = "button" type="submit">Login</button>
+
     </div>
            <div class="passwordreset">
         <a href="{% url 'showcase:accounts/change-password' %}">Forgot Password?</a>
@@ -301,4 +308,5 @@ z-index: 10;
 </div>
 </div>
 </body>
+{% endif %}
 {% endblock content %}

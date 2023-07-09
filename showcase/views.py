@@ -825,6 +825,24 @@ class BackgroundView(BaseView):
             "slug")
         print(FaviconBase.objects.all())
         print(213324)
+        # Retrieve the signed-in user's profile and profile picture URL
+
+        # Retrieve the items
+        product = Item.objects.filter(is_active=1)
+
+        context['Products'] = product
+
+        for product in context['Products']:
+            image = product.image
+            item = Item.objects.filter(slug=product.slug).first()
+            if product:
+                product.title = item.title
+                product.price = item.price
+                product.discount_price = item.discount_price
+                product.image_url = item.image.url
+                product.hyperlink = item.get_profile_url()
+
+
         return context
 
 
@@ -1403,7 +1421,12 @@ class PerksBackgroundView(BaseView):
 def home(request):
     return render(request, 'home.html')
 
+
+from django.http import HttpRequest, JsonResponse
+from django.views.generic import TemplateView
+
 class RoomView(TemplateView):
+    model = Room
     template_name = 'room.html'
 
     def get_context_data(self, **kwargs):
@@ -1422,8 +1445,32 @@ class RoomView(TemplateView):
         context['room_details'] = room_details
         context['profile_details'] = profile_details
 
+        # Retrieve the author's profile avatar
+        messages = Message.objects.all()
+        context['messages'] = messages
+
         return context
-    
+
+    def get_ajax_data(self, request, *args, **kwargs):
+        room = self.kwargs['room']
+        context = self.get_context_data(**kwargs)
+
+        message_data = []
+        messages = context.get('messages', [])
+        for message in messages:
+            message_data.append({
+                'user_profile_url': message.user_profile_url,
+                # Include other message data as needed
+            })
+
+        return JsonResponse({'messages': message_data})
+
+    def get(self, request: HttpRequest, *args, **kwargs):
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return self.get_ajax_data(request, *args, **kwargs)
+        else:
+            return super().get(request, *args, **kwargs)
+
 
 
 def room(request, room):
@@ -1434,9 +1481,6 @@ def room(request, room):
     Logo = LogoBase.objects.filter(page='room.html', is_active=1)
     Header = NavBarHeader.objects.filter(is_active=1).order_by("row")
     DropDown = NavBar.objects.filter(is_active=1).order_by('position')
-
-
-
 
     return render(request, 'room.html', {
         'username': username,
@@ -2411,17 +2455,37 @@ class OrderSummaryView(EBaseView):
             return redirect("showcase:ehome")
 
 
-class CheckoutView(View):
+class CheckoutView(EBaseView):
+    model = CheckoutBackgroundImage
+    template_name = "checkout.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        return context
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        return context
+
     def get(self, *args, **kwargs):
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
             form = CheckoutForm()
-            context = {
-                'form': form,
-                'couponform': CouponForm(),
-                'order': order,
-                'DISPLAY_COUPON_FORM': True
-            }
+            context = self.get_context_data()
+            context['form'] = form
+            context['couponform'] = CouponForm()
+            context['order'] = order
+            context['DISPLAY_COUPON_FORM'] = True
 
             shipping_address_qs = Address.objects.filter(
                 user=self.request.user, address_type='S', default=True)
@@ -2442,7 +2506,7 @@ class CheckoutView(View):
 
     def post(self, *args, **kwargs):
         form = CheckoutForm(self.request.POST or None)
-        #print(self.request.GET)
+        # print(self.request.GET)
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
             if form.is_valid():
@@ -2473,7 +2537,7 @@ class CheckoutView(View):
                                       "No default shipping address available")
                         return redirect('showcase:checkout')
                 else:
-                    #change to allow for saved information without posting
+                    # change to allow for saved information without posting
                     print("shipping_address1")
                     shipping_address1 = form.cleaned_data.get(
                         'shipping_address')
@@ -2484,7 +2548,7 @@ class CheckoutView(View):
                     shipping_zip = form.cleaned_data.get('shipping_zip')
 
                     if is_valid_form(
-                        [shipping_address1, shipping_country, shipping_zip]):
+                            [shipping_address1, shipping_country, shipping_zip]):
                         shipping_address = Address(
                             user=self.request.user,
                             street_address=shipping_address1,
@@ -2520,8 +2584,8 @@ class CheckoutView(View):
                             self.request,
                             "Please fill in the required shipping address fields"
                         )
-                        #save = form.data.get('save')
-                        #order.save()
+                        # save = form.data.get('save')
+                        # order.save()
                         return redirect('showcase:checkout')
 
                 use_default_billing = form.cleaned_data.get(
@@ -2560,7 +2624,7 @@ class CheckoutView(View):
                     billing_zip = form.cleaned_data.get('billing_zip')
 
                     if is_valid_form(
-                        [billing_address1, billing_country, billing_zip]):
+                            [billing_address1, billing_country, billing_zip]):
                         billing_address = Address(
                             user=self.request.user,
                             street_address=billing_address1,
@@ -2603,8 +2667,7 @@ class CheckoutView(View):
             return redirect("showcase:order-summary")
 
 
-
-
+from paypalrestsdk import Payment as PayPalPayment
 
 class PaymentView(EBaseView):
     template_name = "payment.html"
@@ -2646,6 +2709,11 @@ class PaymentView(EBaseView):
             else:
                 userprofile.one_click_purchasing = False
                 return render(self.request, "payment.html", context)
+                # Check if PayPal payment method is available
+            if hasattr(userprofile, 'paypal_enabled') and userprofile.paypal_enabled:
+                context['PAYPAL_CLIENT_ID'] = settings.PAYPAL_CLIENT_ID
+
+            return render(self.request, "payment.html", context)
         else:
             messages.warning(
                 self.request, "You have not added a billing address.")
@@ -2655,6 +2723,8 @@ class PaymentView(EBaseView):
         order = Order.objects.get(user=self.request.user, ordered=False)
         form = PaymentForm(self.request.POST)
         userprofile = User.objects.get(username=self.request.user.username)
+        payment_method = self.request.POST.get('payment_method')
+
         if form.is_valid():
             print(form.cleaned_data)
             print(form.cleaned_data.get("expiry"))
@@ -2672,14 +2742,10 @@ class PaymentView(EBaseView):
 
             if save:
                 if userprofile.stripe_customer_id != '' and userprofile.stripe_customer_id is not None:
-                    customer = stripe.Customer.retrieve(
-                        userprofile.stripe_customer_id)
+                    customer = stripe.Customer.retrieve(userprofile.stripe_customer_id)
                     customer.sources.create(source=token)
-
                 else:
-                    customer = stripe.Customer.create(
-                        email=self.request.user.email,
-                    )
+                    customer = stripe.Customer.create(email=self.request.user.email)
                     customer.sources.create(source=token)
                     userprofile.stripe_customer_id = customer['id']
                     userprofile.one_click_purchasing = True
@@ -2688,7 +2754,6 @@ class PaymentView(EBaseView):
             amount = int(order.get_total_price() * 100)
 
             try:
-
                 if use_default or save:
                     # charge the customer because we cannot charge the token more than once
                     charge = stripe.Charge.create(
@@ -2714,7 +2779,6 @@ class PaymentView(EBaseView):
                 payment.save()
 
                 # assign the payment to the order
-
                 order_items = order.items.all()
                 order_items.update(ordered=True)
                 for item in order_items:
@@ -2726,6 +2790,9 @@ class PaymentView(EBaseView):
                 order.save()
 
                 messages.success(self.request, "Your order was successful!")
+
+                if payment_method == 'paypal':
+                    return HttpResponseRedirect(self.process_paypal_payment(order))
                 return redirect("showcase:ehome")
 
             except stripe.error.CardError as e:
@@ -2762,19 +2829,58 @@ class PaymentView(EBaseView):
                 # Display a very generic error to the user, and maybe send
                 # yourself an email
                 messages.warning(
-                    self.request, "Something went wrong. You were not charged. Please try again.")
+                    self.request, "Something went wrong. You were not charged. Please try again."
+                )
                 return redirect("/ehome")
 
             except Exception as e:
                 # send an email to ourselves
                 messages.warning(
-                    self.request, "A serious error occurred. We have been notifed.")
+                    self.request, "A serious error occurred. We have been notified."
+                )
                 return redirect("/ehome")
 
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
 
 
+class PayPalExecuteView(View):
+    def get(self, request, *args, **kwargs):
+        payer_id = request.GET.get('PayerID')
+        payment_id = request.GET.get('paymentId')
+
+        try:
+            order = Order.objects.get(paypal_payment_id=payment_id, ordered=False)
+            paypal_payment = PayPalPayment.find(payment_id)
+
+            if paypal_payment.execute({'payer_id': payer_id}):
+                # Payment successful
+                payment = Payment()
+                payment.paypal_payment_id = payment_id
+                payment.user = self.request.user
+                payment.amount = order.get_total_price()
+                payment.save()
+
+                # Mark order items as ordered
+                order_items = order.items.all()
+                order_items.update(ordered=True)
+
+                # Associate the payment with the order
+                order.ordered = True
+                order.payment = payment
+                order.ref_code = create_ref_code()
+                order.save()
+
+                messages.success(self.request, 'Your order was successful!')
+                return redirect('showcase:ehome')
+
+            # Payment failed
+            messages.error(self.request, 'Failed to process PayPal payment')
+            return redirect('/payment')
+
+        except Order.DoesNotExist:
+            messages.error(self.request, 'Order not found')
+            return redirect('/payment')
 
 
 class PaypalFormView(FormView):
@@ -3436,7 +3542,7 @@ def hello_guest(request):
    This view will always have an authenticated user, but some may be guests.
    The default username generator will create a UUID4.
 
-   Example response: "Hello, b5daf1dd-1a2f-4d18-a74c-f13bf2f086f7!"
+   Example response: "Hello, b5daf1dd-1a2f-4d18-a74c-f13bf2f086f7!
    """
     return HttpResponse("Hello, {request.user.username}!")
 
@@ -3791,6 +3897,22 @@ class FeedbackView(LoginRequiredMixin, FormView):
             context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
             context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
             context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+
+            # Retrieve the item
+            product = Item.objects.filter(is_active=1)
+
+            context['Products'] = product
+
+            for product in context['Products']:
+                image = product.image
+                item = Item.objects.filter(slug=product.slug).first()
+                if product:
+                    product.title = item.title
+                    product.price = item.price
+                    product.discount_price = item.discount_price
+                    product.image_url = item.image.url
+                    product.hyperlink = item.get_profile_url()
+
             return context
 
     def form_valid(self, form):
@@ -3807,6 +3929,7 @@ class FeedbackView(LoginRequiredMixin, FormView):
 
         messages.success(request, 'Your feedback has been submitted successfully.')
         return redirect('showcase:feedbackfinish')
+
 
 
 """
@@ -4129,3 +4252,6 @@ class OrderHistory(ListView):
             'username': username,
             'orderhistory': orderhistory
         })
+
+def sociallogin(request):
+    return render(request, 'registration/sociallogin.html')

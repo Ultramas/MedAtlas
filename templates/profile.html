@@ -20,12 +20,13 @@
 <br>
 <br>
 <div class="container">
-    <h1>My Profile</h1>
-    <p style="color: black">Username: {{ user }}</p>
-    <p style="color: black">First Name:    {{ user.first_name }}</p>
-    <p style="color: black">Last Name:   {{ user.last_name }}</p>
-    <p style="color: black">Email:   {{ user.email }}</p>
-    
+    {% for ProfileDetails in Profile %}
+        <img src="{{ ProfileDetails.avatar.url }}">
+        <h1>My Profile</h1>
+        <p style="color: black">Username: {{ user }}</p>
+        <p style="color: black">About Me:   {{ ProfileDetails.about_me }}</p>
+        <p style="color: black">Email:   {{ user.email }}</p>
+    {% endfor %}
 </div>
 <!--could make a profile home page that redirects to your profile based on the url (which in turn is based on your profile)-->
 {% endblock %}

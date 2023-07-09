@@ -52,7 +52,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '4929dda8-2133-4047-8e0e-c1bcbd53fc3a.id.repl.co',
     'poketrove-attempt-backeds.andythemaster.repl.co', '10.10.0.141:16524',
-    '10.30.2.204:16410', '10.20.1.253:16451', '127.0.0.1'
+    '10.30.2.204:16410', '10.20.1.253:16451', '127.0.0.1', 'myapp.local', 'localhost'
 ]
 
 # Application definition
@@ -60,10 +60,13 @@ ALLOWED_HOSTS = [
 INSTALLED_APPS = [
     'admin_interface',
     'allauth',
-    "allauth.socialaccount",
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     'colorfield',
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.sites',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -76,6 +79,7 @@ INSTALLED_APPS = [
     "guest_user.contrib.allauth",
     'changelogs',
     'favicon',
+    'paypal.standard.ipn',
     # 'django.chatbot',
     # 'chat',
 ]
@@ -97,6 +101,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
     # 'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
@@ -117,6 +122,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -136,12 +143,19 @@ DATABASES = {
     }
 }
 
+SOCIALACCOUNT_LOGIN_ON_GET=True
+
 AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
-    "showcase.backends.UpdatedUsernameBackend",
-    # it should be the last entry to prevent unauthorized access
-    "guest_user.backends.GuestBackend",
+    'social_core.backends.facebook.FacebookOAuth2',
+    'social_core.backends.linkedin.LinkedinOAuth2',
+    'social_core.backends.instagram.InstagramOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+    'showcase.backends.UpdatedUsernameBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+    'guest_user.backends.GuestBackend',
 ]
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -240,3 +254,33 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+PAYPAL_TEST  = True
+PAYPAL_CLIENT_ID = 'YOUR_PAYPAL_CLIENT_ID'
+PAYPAL_SECRET = 'YOUR_PAYPAL_SECRET'
+PAYPAL_MODE = 'sandbox'  # 'sandbox' for testing, 'live' for production
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '320182083595-gcm00c1dof52qnc1j6nu3rbl63udn4qb.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+
+
+SOCIAL_AUTH_FACEBOOK_KEY = '263958432997410'
+SOCIAL_AUTH_FACEBOOK_SECRET = 'f2f240f4a70af54491b7aa832de335d5'
+
+
+
+#SITE_ID=2
+#issue of "view on site" in administration item/blog pages
