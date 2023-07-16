@@ -1400,7 +1400,7 @@ class Message(models.Model):
     value = models.CharField(max_length=1000000)
     date = models.DateTimeField(default=timezone.now, blank=True)
     user = models.CharField(max_length=1000000, verbose_name="Username")
-    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='messages', verbose_name="User")
+    signed_in_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages', verbose_name="User")
     room = models.CharField(max_length=1000000)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     is_active = models.IntegerField(default=1,
@@ -1415,6 +1415,12 @@ class Message(models.Model):
         # Logic to retrieve the currently signed-in user
         # You can modify this according to your authentication mechanism
         return User.objects.get(username='example_user')
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.signed_in_user_id = self.signed_in_user_id
+
+        super().save(*args, **kwargs)
 
     def get_profile_url(self):
         return f"http://127.0.0.1:8000/profile/{self.signed_in_user_id}/"

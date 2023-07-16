@@ -1425,6 +1425,8 @@ def home(request):
 from django.http import HttpRequest, JsonResponse
 from django.views.generic import TemplateView
 
+
+
 class RoomView(TemplateView):
     model = Room
     template_name = 'room.html'
@@ -1446,30 +1448,19 @@ class RoomView(TemplateView):
         context['profile_details'] = profile_details
 
         # Retrieve the author's profile avatar
-        messages = Message.objects.all()
-        context['messages'] = messages
+        message = Message.objects.all().order_by('-date')
+
+        context['Messages'] = message
+
+        for message in context['Messages']:
+            profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+            if profile:
+                message.user_profile_picture_url = profile.avatar.url
+                message.user_profile_url = message.get_profile_url()
+
 
         return context
 
-    def get_ajax_data(self, request, *args, **kwargs):
-        room = self.kwargs['room']
-        context = self.get_context_data(**kwargs)
-
-        message_data = []
-        messages = context.get('messages', [])
-        for message in messages:
-            message_data.append({
-                'user_profile_url': message.user_profile_url,
-                # Include other message data as needed
-            })
-
-        return JsonResponse({'messages': message_data})
-
-    def get(self, request: HttpRequest, *args, **kwargs):
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return self.get_ajax_data(request, *args, **kwargs)
-        else:
-            return super().get(request, *args, **kwargs)
 
 
 
@@ -1524,6 +1515,8 @@ from django.http import JsonResponse
 from django.views import View
 from django.core import serializers
 
+def get_profile_url(message):
+    return f"http://127.0.0.1:8000/profile/{message.signed_in_user_id}/"
 
 def getMessages(request, room):
     room_details = Room.objects.get(name=room)
@@ -1542,7 +1535,8 @@ def getMessages(request, room):
             'user': message.user,
             'value': message.value,
             'date': message.date,
-            'avatar_url': avatar_url
+            'avatar_url': avatar_url,
+            'get_profile_url': get_profile_url(message),
         }
         messages_data.append(message_data)
 

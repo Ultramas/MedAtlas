@@ -108,6 +108,33 @@ body {
   </div>
 </div>
 
+{% for messages in Messages %}
+ {% if messages.user_profile_picture_url %}
+  <div class="message">
+    <a href="{{ messages.user_profile_url }}">
+      <img src="{{ messages.user_profile_picture_url }}" alt="{{ message.user }}">
+    </a>
+    <div class="message-content">
+      <div class="sender">{{ messages.user }}</div>
+      <div>{{ messages.value }}</div>
+      <div class="time">{{ messages.date }}</div>
+    </div>
+  </div>
+{% else %}
+ <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
+{% endif %}
+{% endfor %}
+
+
+
+{% for messages in Messagese %}
+  {% if messages.user_profile_url %}
+    <a href="{{ messages.user_profile_url }}">
+      <img src="{{ messages.user_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
+    </a>
+  {% endif %}
+{% endfor %}
+
 <!--maybe consider shifting other users to the right side and keep current user on left side (optional, based on your asthetic preferences)-->
 <script>
 $(document).ready(function(){
@@ -135,7 +162,7 @@ $(document).ready(function(){
           console.log(user_profile_url);
           var messageHtml = `
             <div class="message">
-            <a href="http://127.0.0.1:8000/profile/${user_profile_url}">
+            <a href="${message.user_profile_url}">
               <img src="${message.avatar_url}" alt="${message.user}">
               </a>
 
