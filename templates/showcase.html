@@ -92,9 +92,32 @@
       <br>
         <br>
     <!--saved items here-->
+
+<!---->
+{% if UpdateProfile %}
+                    <li>
+                                {% for newprofile in Profiles %}
+                                {% if newprofile.newprofile_profile_picture_url %}
+                                  <a href="{{ newprofile.newprofile_profile_url }}">
+                                     <img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
+                                  </a>
+                                {% else %}
+                                   <!-- Placeholder image or default avatar -->
+                                  <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
+                                {% endif %}
+                                {% endfor %}
+                    </li>
+                {% endif %}
+
     {% for Idea in UpdateProfile %}
       <div class = "postop">
-        <h1>{{Idea.name}}</h1>
+
+
+
+
+        <h1>
+
+                        {{Idea.name}}</h1>
         <br>
         <p class="describe">
           {{Idea.description}}</p>

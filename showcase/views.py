@@ -73,6 +73,7 @@ from .models import MemberHomeBackgroundImage
 from .models import NavBar
 from .models import NavBarHeader
 from .models import DonateIcon
+from .models import Donate
 from .models import Titled
 from .models import AdvertisementBase
 from .models import ImageBase
@@ -551,6 +552,21 @@ class votingview(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Vote'] = Vote.objects.all()
+
+        newprofile = Vote.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
         return context
 
     def get_queryset(self):
@@ -885,6 +901,21 @@ class ShowcaseBackgroundView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['UpdateProfile'] = UpdateProfile.objects.all()
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+
+
         return context
 
 
@@ -988,6 +1019,7 @@ class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         form = PostForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
+            form.instance.user = request.user
             post.save()
             messages.success(request, 'Form submitted successfully.')
             return redirect('showcase:showcase')
@@ -997,6 +1029,7 @@ class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
             print(form.non_field_errors())
             print(form.cleaned_data)
             return render(request, "post_edit.html", {'form': form})
+
 
 
 class PostCreatePostView(CreateView):
@@ -1127,20 +1160,28 @@ class StaffApplyBackgroundView(FormMixin, ListView):
             "position")
         return context
 
-    # @login_required
+    @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
-        print('staffapply')
-        if request.method == 'POST':
-            print('post')
-            form = StaffJoin(request.POST)
-            if (form.is_valid()):
+        if request.method == "POST":
+            form = StaffJoin(request.POST, request.FILES)
+            if form.is_valid():
                 post = form.save(commit=False)
                 post.save()
-                # redirect user to staffdone
+                messages.success(request, 'Form submitted successfully.')
                 return redirect('showcase:staffdone')
+            else:
+                print(form.errors)
+                print(form.non_field_errors())
+                print(form.cleaned_data)
+                messages.error(request, "Form submission invalid")
+                return render(request, "staffapplications.html", {'form': form})
         else:
             form = StaffJoin()
-        return render(request, 'staffapplications.html', {'form': form})
+            messages.error(request, 'Form submission failed to register, please try again.')
+            messages.error(request, form.errors)
+            return render(request, "staffapplications.html", {'form': form})
+
+
 
 
 class InformationBackgroundView(BaseView):
@@ -1257,6 +1298,21 @@ class EventBackgroundView(BaseView):
         context['EventBackgroundImage'] = EventBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Events'] = Event.objects.all()
+
+        newprofile = Event.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+
         return context
 
 
@@ -1276,6 +1332,21 @@ class NewsBackgroundView(BaseView):
         context['NewsBackgroundImage'] = NewsBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['News'] = NewsFeed.objects.all()
+
+        newprofile = NewsFeed.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+
         return context
 
 
@@ -1298,6 +1369,18 @@ class DonorView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         return context
+
+    def dispatch(self, request, *args, **kwargs):
+        # Check if there is a signed-in user
+        if request.user.is_authenticated:
+            user = request.user
+            print(user)
+        else:
+            # If no signed-in user, use a default user or None as desired
+            user = None  # Or use default_user if it is previously defined
+
+        # Continue with the regular flow, passing the determined user to the view
+        return super().dispatch(request, *args, user=user, **kwargs)
 
 
 class ContributorBackgroundView(BaseView):
@@ -1340,6 +1423,19 @@ class PartnerBackgroundView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Partner'] = PartnerApplication.objects.all()
+
+        newprofile = Partner.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
         return context
 
 
@@ -1349,12 +1445,27 @@ class ShareBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['ShareBackgroundImage'] = ShareBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['Idea'] = Idea.objects.all()
+        context['Ideas'] = Idea.objects.all()
+
+        newprofile = Idea.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+
+
+
         return context
 
 
@@ -1448,15 +1559,15 @@ class RoomView(TemplateView):
         context['profile_details'] = profile_details
 
         # Retrieve the author's profile avatar
-        message = Message.objects.all().order_by('-date')
+        messages = Message.objects.all().order_by('-date')
 
-        context['Messages'] = message
+        context['Messaging'] = messages
 
-        for message in context['Messages']:
-            profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+        for messages in context['Messaging']:
+            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
             if profile:
-                message.user_profile_picture_url = profile.avatar.url
-                message.user_profile_url = message.get_profile_url()
+                messages.user_profile_picture_url = profile.avatar.url
+                messages.user_profile_url = messages.get_profile_url()
 
 
         return context
@@ -1515,34 +1626,37 @@ from django.http import JsonResponse
 from django.views import View
 from django.core import serializers
 
+"""
 def get_profile_url(message):
     return f"http://127.0.0.1:8000/profile/{message.signed_in_user_id}/"
+"""
+from django.http import JsonResponse
 
 def getMessages(request, room):
     room_details = Room.objects.get(name=room)
     messages = Message.objects.filter(room=room_details.id)
 
+    # Prepare the messages data to be sent in the AJAX response
     messages_data = []
     for message in messages:
-        profile_details = ProfileDetails.objects.filter(user__username=message.user).first()
+        profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
         if profile_details:
+            user_profile_url = message.get_profile_url()  # Get the user_profile_url for each message
             avatar_url = profile_details.avatar.url
+
         else:
             # Set a default avatar URL or path in case the user doesn't have an avatar
+            user_profile_url = ('/home/' + room + '/?username='+ request.user.username)
             avatar_url = staticfiles_storage.url('css/images/a.jpg')
-
-        message_data = {
+        messages_data.append({
+            'user_profile_url': user_profile_url,
+            'avatar_url': avatar_url,
             'user': message.user,
             'value': message.value,
-            'date': message.date,
-            'avatar_url': avatar_url,
-            'get_profile_url': get_profile_url(message),
-        }
-        messages_data.append(message_data)
+            'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
+        })
 
-    return JsonResponse({"messages": messages_data})
-
-    # consider returning everything, including the avatar, rather than simply the messages themselves
+    return JsonResponse({'messages': messages_data})
 
 
 def supportroom(request):
@@ -1671,6 +1785,7 @@ class PostView(FormMixin, ListView):
             form = Postit(request.POST, request.FILES)
             if form.is_valid():
                 post = form.save(commit=False)
+                form.instance.user = request.user
                 post.save()
                 messages.success(request, 'Form submitted successfully.')
                 return redirect('showcase:share')
@@ -1778,6 +1893,19 @@ class PostingView(FormMixin, ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Profile'] = UpdateProfile.objects.all()
         context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
         return context
 
     @method_decorator(login_required)
@@ -1786,6 +1914,7 @@ class PostingView(FormMixin, ListView):
             form = PostForm(request.POST, request.FILES)
             if form.is_valid():
                 post = form.save(commit=False)
+                form.instance.user = request.user
                 post.save()
                 messages.success(request, 'Form submitted successfully.')
                 return redirect('showcase:showcase')
@@ -1800,6 +1929,10 @@ class PostingView(FormMixin, ListView):
             messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
             return render(request, "post_edit.html", {'form': form})
+
+
+
+
 
 
 class PosteView(FormMixin, ListView):
@@ -1825,6 +1958,7 @@ class PosteView(FormMixin, ListView):
             form = PosteForm(request.POST, request.FILES)
             if form.is_valid():
                 post = form.save(commit=False)
+                form.instance.user = request.user
                 post.save()
                 messages.success(request, 'Form submitted successfully.')
                 return redirect('showcase:voting')
@@ -2024,13 +2158,18 @@ from .models import ProfileDetails
 
 # Edit Profile View
 
-
 class ProfileView(LoginRequiredMixin, UpdateView):
-    model = User
+    model = ProfileDetails
     form_class = ProfileForm
     paginate_by = 10
     success_url = reverse_lazy('home')
     template_name = 'profile.html'
+    context_object_name = 'profile'
+
+    def get_object(self, queryset=None):
+        # Retrieve the ProfileDetails object based on the captured pk from the URL
+        pk = self.kwargs.get('pk')
+        return get_object_or_404(ProfileDetails, pk=pk)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -2041,8 +2180,9 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
+        profile = self.get_object()
+        context['profile'] = profile
         # settings to alter the username & password
         return context
 
@@ -2070,6 +2210,7 @@ class StaffJoine(ListView):
         return StaffApplication.objects.all()
 
 
+
 # @RegularUserRequiredMixin
 class PunishAppsBackgroundView(FormMixin, ListView):
     model = PunishmentAppeal
@@ -2089,20 +2230,26 @@ class PunishAppsBackgroundView(FormMixin, ListView):
         context['PunishApps'] = PunishmentAppeal.objects.all()
         return context
 
-    # @login_required
-    def unpunish(self, request, *args, **kwargs):
-        if (request.method == "POST"):
-            form = PunishmentAppeal(request.POST)
-            if (form.is_valid()):
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST":
+            form = PunishAppeale(request.POST, request.FILES)
+            if form.is_valid():
                 post = form.save(commit=False)
                 post.save()
+                messages.success(request, 'Form submitted successfully.')
                 return redirect('showcase:punishdone')
+            else:
+                print(form.errors)
+                print(form.non_field_errors())
+                print(form.cleaned_data)
+                messages.error(request, "Form submission invalid")
+                return render(request, "punishapps.html", {'form': form})
         else:
-            form = PunishmentAppeal()
-            return render(request, 'punishapps.html', {'form': form})
-            messages.error(
-                request, 'Form submission failed to register, please try again.')
+            form = PunishAppeale()
+            messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
+            return render(request, "punishapps.html", {'form': form})
 
 
 class BanAppealBackgroundView(FormMixin, ListView):
@@ -2126,22 +2273,31 @@ class BanAppealBackgroundView(FormMixin, ListView):
         context['BanAppeal'] = BanAppeal.objects.all()
         return context
 
-    # @login_required
-    def unban(self, request, *args, **kwargs):
-        if (request.method == "POST"):
-            form = BanAppeal(request.POST)
-            if (form.is_valid()):
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST":
+            form = BanAppeale(request.POST, request.FILES)
+            if form.is_valid():
                 post = form.save(commit=False)
                 post.save()
+                messages.success(request, 'Form submitted successfully.')
                 return redirect('showcase:bandone')
-                return super().get(request, *args, **kwargs)
+            else:
+                print(form.errors)
+                print(form.non_field_errors())
+                print(form.cleaned_data)
+                messages.error(request, "Form submission invalid")
+                return render(request, "banappeals.html", {'form': form})
         else:
-            form = BanAppeal()
-            return render(request, 'banappeals.html', {'form': form})
-            messages.error(
-                request, 'Form submission failed to register, please try again.')
+            form = BanAppeale()
+            messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
-            return super().get(request, *args, **kwargs)
+            return render(request, "banappeals.html", {'form': form})
+
+
+
+
+
 
 
 class IssueBackgroundView(FormMixin, ListView):
@@ -2152,30 +2308,38 @@ class IssueBackgroundView(FormMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['IssueBackgroundImage'] = IssueBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        # context['Support'] = Support.objects.all()
+        context['Support'] = Support.objects.all()
         return context
 
-    # @login_required
+    @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
-        if (request.method == "POST"):
-            form = ReportIssues(request.POST)
-            if (form.is_valid()):
+        if request.method == "POST":
+            form = ReportIssues(request.POST, request.FILES)
+            if form.is_valid():
                 post = form.save(commit=False)
+                form.instance.user = request.user
                 post.save()
-                return redirect('issuedone')
+                messages.success(request, 'Form submitted successfully.')
+                return redirect('showcase:issuedone')
+            else:
+                print(form.errors)
+                print(form.non_field_errors())
+                print(form.cleaned_data)
+                messages.error(request, "Form submission invalid")
+                return render(request, "issues.html", {'form': form})
         else:
             form = ReportIssues()
-            return render(request, 'issues.html', {'form': form})
-            messages.error(
-                request, 'Form submission failed to register, please try again.')
+            messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
+            return render(request, "issues.html", {'form': form})
+
+
 
 
 # sendemail/views.py
@@ -3482,18 +3646,42 @@ class DonateView(ListView):
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        context['donation'] = Donate.objects.filter(is_active=1)
         return context
 
     def donate(request):
         return render(request, 'donate.html')
 
+       # Retrieve the author's profile avatar
+        donors = Donate.objects.filter(is_active=1)
+
+        context['Donator'] = donors
+
+        for donors in context['Donator']:
+            image = donors.image
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                donors.donor_profile_picture_url = profile.avatar.url
+                donors.donor_profile_url = donors.get_profile_url()
+
+
+        return context
 
 def charge(request):
     if request.method == 'POST':
         print('Data:', request.POST)
 
         amount = int(request.POST['amount'])
+        nickname = request.POST.get('nickname')
+        anonymous = request.POST.get('anonymous') == 'on'
 
+        donation = Donate.objects.create(
+            amount=amount,
+            donor=request.user,
+            nickname=nickname,
+            anonymous=anonymous,  # You can set this to True if needed based on the donation form
+            is_active=1,  # Set the donation as active
+        )
         customer = stripe.Customer.create(email=request.POST['email'],
                                           name=request.POST['nickname'],
                                           source=request.POST['stripeToken']
@@ -3528,6 +3716,59 @@ class PatreonedView(ListView):
     def successMsg(request, args):
         amount = args
         return render(request, 'patreoned.html', {'amount': amount})
+
+
+class DonateHistoryView(ListView):
+    model = DonorBackgroundImage
+    template_name = "mydonationhistory.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['Change'] = ChangePasswordBackgroundImage.objects.all()
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        context['donations'] = Donate.objects.filter(donor=self.request.user, is_active=1)
+        return context
+
+class DonationsView(ListView):
+    model = DonorBackgroundImage
+    template_name = "donors.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['Change'] = ChangePasswordBackgroundImage.objects.all()
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+
+
+        # Assuming the ProfileDetails model has a ForeignKey named 'user' that links to the User model to represent the user's profile details.
+
+
+        # Retrieve the author's profile avatar
+        donation = Donate.objects.filter(is_active=1).order_by('-timestamp')
+
+        context['donations'] = donation
+
+        for donation in context['donations']:
+            profile = ProfileDetails.objects.filter(user=donation.donor).first()
+            if profile:
+                donation.donor_profile_picture_url = profile.avatar.url
+                donation.donor_profile_url = donation.get_profile_url()
+
+        return context
+
 
 
 @allow_guest_user
@@ -4226,27 +4467,41 @@ def edit_feedback(request, feedback_id):
 
     return render(request, 'create_review.html', {'form': form})
 
-
 class OrderHistory(ListView):
     model = Order
     template_name = "order_history.html"
+    context_object_name = 'order'
 
-    def get_context_data(self, request, *args, **kwargs):
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
+
+    def get_context_data(self, **kwargs):
         user = self.request.user
-        context = super(OrderHistory, self).get_context_data(**kwargs)
-        context['orders'] = Order.objects.filter(user=request.user)
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['items'] = Item.objects.all()
         context['feedback'] = Feedback.objects.all()
         print(user)
-        return context
 
-    def order_history(request):
-        username = request.user.username
-        orderhistory = OrderHistory.objects.get(name=username)
-        return render(request, 'order_history.html', {
-            'username': username,
-            'orderhistory': orderhistory
-        })
+        # Retrieve the author's profile avatar
+        items = Item.objects.filter(is_active=1)
+
+        context['Iteme'] = items
+
+        for items in context['Iteme']:
+            image = items.image
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                items.author_profile_picture_url = profile.avatar.url
+                items.author_profile_url = items.get_profile_url()
+
+
+        return context
 
 def sociallogin(request):
     return render(request, 'registration/sociallogin.html')

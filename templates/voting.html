@@ -1,19 +1,30 @@
-<!--recieves from  vote-->
 {% extends 'memberbase.html' %}
 
 {% load static %}
 
-{% block title %} Home {% endblock title %}
+{% block title %}
+    {% for ShowcaseBackgroundImage in Titles %}
+      {% if ShowcaseBackgroundImage.page == 'showcase.html' %}
+         {{ ShowcaseBackgroundImage.overtitle }}
+      {% endif %}
+    {% endfor %}
+{% endblock title %}
 
 {% block content %}
-    
+
   {% if user.is_authenticated %}
 
-    <head>
-      
-    </head>
-    <body>
-      
+
+
+<div class="poste1">
+
+
+{% for ShowcaseBackgroundImage in Background %}
+    <img class = "backgroundimages" src="{{ShowcaseBackgroundImage.cover.url}}" alt="{{ ShowcaseBackgroundImage.backgroundtitle }}" style="background-position: fixed;">
+
+</div>
+{% endfor %}
+
 <div class = "search">
 
 <br>
@@ -27,13 +38,75 @@
   <input name="q" type="text" placeholder="Search...">
 </form>
 </div>
-<div class="poste1"> 
+<br>
   <br>
-    <h1 class="hello">Hello {{user.username}}!</h1>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>replit</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <style>
+    .boedy{
+  display: flex;
+  justify-content: center;
+    }
+
+/* DEMO-SPECIFIC STYLES */
+.containereatede h1 {
+  color: red;
+  font-family: 'Playfair Display', serif;
+  overflow: hidden; /* Ensures the content is not revealed until the animation */
+  border-right: .15em solid red; /* The typewriter cursor */
+  white-space: nowrap; /* Keeps the content on a single line */
+  margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+  letter-spacing: .0em; /* Adjust as needed */
+  animation:
+    typing 3.5s steps(30, end),
+    blink-caret .5s step-end infinite;
+}
+
+/* The typing effect */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: red }
+}
+  </style>
+</head>
+
+  <div class = "boedy">
+  <div class="containereatede">
+ <h1 class="hello">Hello {{user.username}}!</h1>
+</div>
+  </div>
+
       <br>
         <br>
     <!--saved items here-->
-    {% for Vote in object_list %}
+
+                    <li>
+                                {% for newprofile in Profiles %}
+                                {% if newprofile.newprofile_profile_picture_url %}
+                                  <a href="{{ newprofile.newprofile_profile_url }}">
+                                     <img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
+                                  </a>
+                                {% else %}
+                                   <!-- Placeholder image or default avatar -->
+                                  <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
+                                {% endif %}
+                                {% endfor %}
+                    </li>
+
+        {% for Vote in object_list %}
       <div class = "postop">
         <h1>{{Vote.name}}</h1>
         <br>
@@ -50,18 +123,35 @@
       <br>
       <br>
       <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+
 
    <!--Custom JS-->
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
-</div> <!--recently added-->
-   
+
     {% endfor %}
-  {% else %}
+
+
+  {% load guest_user %}
+
+    {% elif user|is_guest_user %}
+    {# user is a guest instance, link to conversion page #}
+
+  <a href="{% url 'showcase:convert' %}">Sign up and save your work!</a>
+    {% else %}
 <head>
-  <meta http-equiv="refresh" content="0; {% url 'login' %}">
+  <meta http-equiv="refresh" content="0; url=http://{{ request.get_host }}/accounts/login">
   </head>
-  {% endif %}
+<!--{# regular sign up link #}
+  <a href="{% url "form"}">Register now!</a>-->
+    {% endif %}
+
+
 {% endblock content %}

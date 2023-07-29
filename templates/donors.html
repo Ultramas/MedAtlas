@@ -1,10 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'memberbase.html' %}
+{% load static %}
 
-</body>
-</html>
+{% block title %}
+    {# Add the title logic here #}
+{% endblock title %}
+
+{% block content %}
+
+
+    {# Your existing content goes here #}
+
+    {% if user.is_authenticated %}
+        <h2>Welcome, {{ user.username }}!</h2>
+
+        {% if donations %}
+            <h3>Donation History:</h3>
+            <ul>
+                {% for donation in donations %}
+                    <li>
+                        {% if donation.anonymous == False %}
+                        <strong>
+                                {% if donation.donor_profile_picture_url %}
+                                  <a href="{{ donation.donor_profile_url }}">
+                                     <img src="{{ donation.donor_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
+                                  </a>
+                            {% else %}
+                                   <!-- Placeholder image or default avatar -->
+    <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
+                                {% endif %}
+                        User:</strong> {{ donation.donor }}
+                        {% else %}
+                        <strong><img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
+                            User: Anonymous Donor</strong>
+                        {% endif %}
+                        <br>
+                        <strong>Amount:</strong> {{ donation.amount }} USD
+                        <br>
+                        <strong>Date & Time:</strong> {{ donation.timestamp }}
+                        {# Display other donation fields here as needed #}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No donations made yet.</p>
+        {% endif %}
+    {% else %}
+        <p>Hello, guest!</p>
+        <a href="{% url 'showcase:convert' %}">Sign up and save your work!</a>
+    {% endif %}
+
+    {# Your other content goes here #}
+{% endblock content %}

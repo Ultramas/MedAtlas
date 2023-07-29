@@ -142,11 +142,13 @@ class StaffJoin(forms.ModelForm):
         attrs={'placeholder': 'Tell us why you want to be a MegaClan Staff Member. Be descriptive.'}))
     How_do_you_think_you_can_make_MC_better = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Tell us what you will do to make MC better as a staff member.'}))
-    I_confirm_that_I_have_read_all_the_staff_requiernments_and_meet_all_of_them = forms.BooleanField()
+    I_confirm_that_I_have_read_all_the_staff_requirements_and_meet_all_of_them = forms.BooleanField()
 
     class Meta:
         model = StaffApplication
-        fields = '__all__'
+        fields = ('name', 'role', 'I_have_been_in_MC_for_at_least_2_months', 'I_have_been_in_a_previous_role_for_at_least_1_month',
+                  'I_can_attend_at_least_half_of_the_staff_meetings', 'I_have_no_strikes_on_my_account_currently', 'Why_do_you_want_to_apply_for_staff',
+                  'How_do_you_think_you_can_make_MC_better', 'I_confirm_that_I_have_read_all_the_staff_requirements_and_meet_all_of_them')
 
 
 class Server_Partner(forms.ModelForm):
@@ -170,47 +172,26 @@ class SupportForm(forms.ModelForm):
 
 
 class PunishAppeale(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
-    Rule_broken = forms.CharField(widget=forms.TextInput(attrs={
-        'placeholder': 'Tell us the numbers of the rule(s) you broke. Refer to our rules page to see the rules and their corresponding numbers.'}))
-    Why_I_should_have_my_punishment_revoked = forms.CharField(widget=forms.TextInput(attrs={
-        'placeholder': 'Tell us why we should revoke your punishment, and what you can do to fix your mistake. If you think your punishment is a mistake, tell us why.'}),
-                                                              label='Why I should have my punishment revoked: ')
-    Additional_comments = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Put any additional evidence or comments you may have here.'}))
 
     class Meta:
         model = PunishmentAppeal
-        fields = '__all__'
+        fields = ('name', 'Rule_broken', 'Why_I_should_have_my_punishment_revoked', 'Additional_comments',)
+
 
 
 class BanAppeale(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
-    Rule_broken = forms.CharField(widget=forms.TextInput(attrs={
-        'placeholder': 'Tell us the numbers of the rule(s) you broke. Refer to our rules page to see the rules and their corresponding numbers.'}))
-    Why_I_should_have_my_punishment_revoked = forms.CharField(widget=forms.TextInput(attrs={
-        'placeholder': 'Tell us why we should revoke your ban, and what you can do to fix your mistake. If you think your ban is a mistake, tell us why.'}))
-    Additional_comments = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Put any additional evidence or comments you may have here.'}))
 
     class Meta:
         model = BanAppeal
-        fields = '__all__'
+        fields = ('name', 'Rule_broken', 'Why_I_should_have_my_ban_revoked', 'Additional_comments',)
+
 
 
 class ReportIssues(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
-    category = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Please let us know what type of issue this is.'}))
-    issue = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Describe the issue in detail. We will try to get to it as soon as possible.'}))
-    additional_comments = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Put any additional comments you may have here.'}))
-    image = forms.FileField(help_text='Please put a screenshot of the issue.')
 
     class Meta:
         model = ReportIssue
-        fields = '__all__'
+        fields = ('name', 'category', 'issue', 'Additional_comments', 'image',)
 
 
 class News_Feed(forms.ModelForm):

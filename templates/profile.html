@@ -19,14 +19,20 @@
 <br>
 <br>
 <br>
+
 <div class="container">
-    {% for ProfileDetails in Profile %}
-        <img src="{{ ProfileDetails.avatar.url }}">
+    {% if profile %}
+        <img src="{{ profile.avatar.url }}">
         <h1>My Profile</h1>
-        <p style="color: black">Username: {{ user }}</p>
-        <p style="color: black">About Me:   {{ ProfileDetails.about_me }}</p>
-        <p style="color: black">Email:   {{ user.email }}</p>
-    {% endfor %}
+        <p style="color: black">Username: {{ profile.user }}</p>
+        <p style="color: black">About Me: {{ profile.about_me }}</p>
+        <p style="color: black">Email: {{ profile.user.email }}</p>
+    {% else %}
+        <h1>No Profile Found</h1>
+    {% endif %}
+
+
+
 </div>
 <!--could make a profile home page that redirects to your profile based on the url (which in turn is based on your profile)-->
 {% endblock %}

@@ -2,13 +2,14 @@ from PIL import Image
 from django.db import models, migrations
 from django.contrib.auth.models import User
 from uuid import uuid4
-
+import uuid
 
 # from image.utils import render
 
 
 class Idea(models.Model):
     """Model for sharing ideas and getting user feedback"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text='Your name goes here.')
     category = models.CharField(max_length=100,
                                 help_text='Choose a category you want your idea to affect (server layout, event idea, etc).')
@@ -25,8 +26,25 @@ class Idea(models.Model):
         verbose_name_plural = "Ideas"
 
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.user).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
 class UpdateProfile(models.Model):
     """Update user profiles"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text='Your name goes here.')
     description = models.TextField(help_text='Your profile description goes here.')
     image = models.ImageField(help_text='Attach an image for your profile (scales to your picture`s dimensions.)')
@@ -41,8 +59,25 @@ class UpdateProfile(models.Model):
         verbose_name_plural = "User Profile Posts"
 
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.user).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
 class Vote(models.Model):
     """Used for voting on different new ideas"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text='Your name goes here.')
     category = models.CharField(max_length=100,
                                 help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).')
@@ -58,6 +93,23 @@ class Vote(models.Model):
     class Meta:
         verbose_name = "Vote"
         verbose_name_plural = "Votes"
+
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.user).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
 
 
 class Product(models.Model):
@@ -213,13 +265,15 @@ class BanAppeal(models.Model):
 
 
 class ReportIssue(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100,
                             help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
     category = models.CharField(max_length=200, help_text='Please let us know what type of issue this is.')
     issue = models.TextField(help_text='Describe the issue in detail. We will try to get to it as soon as possible.')
     Additional_comments = models.TextField(help_text='Put any additional comments you may have here.',
                                            verbose_name="additional comments")
-    image = models.FileField(help_text='Please put a screenshot of the issue.')
+    image = models.ImageField(help_text='Please put a screenshot of the issue.')
+    anonymous = models.BooleanField(default=False, help_text="Report issue anonymously?")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -238,9 +292,26 @@ class ReportIssue(models.Model):
         verbose_name_plural = "Report Issues"
 
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.user).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+
 class Support(models.Model):
     name = models.CharField(max_length=100,
-                            help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
+                            help_text='Your name and tag go here.')
     category = models.CharField(max_length=200, help_text='Please let us know what type of issue you are dealing with.')
     issue = models.TextField(
         help_text='Describe your issue in detail. We will try to get back to you as soon as possible.')
@@ -258,12 +329,15 @@ class Support(models.Model):
         verbose_name_plural = "Customer Support"
 
 
+
 class NewsFeed(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100,
                             help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
     category = models.CharField(max_length=200, help_text='Please let us know what form of news this is.')
     description = models.TextField(help_text='Write the news here.')
-    image = models.FileField(help_text='Please provide a cover image for the news.')
+    image = models.ImageField(help_text='Please provide a cover image for the news.')
+    anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -275,7 +349,26 @@ class NewsFeed(models.Model):
         verbose_name_plural = "News Feed"
 
 
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.user).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+
 class StaffProfile(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100,
                             help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
     position = models.CharField(max_length=200, help_text='Please let us know what staff position you serve currently.')
@@ -283,7 +376,8 @@ class StaffProfile(models.Model):
     staff_feats = models.TextField(
         help_text='Let us know of your transcendental feats of making MegaClan a better place.',
         verbose_name="staff feats")
-    image = models.FileField(help_text='Please provide a cover image for your profile.')
+    anonymous = models.BooleanField(default=False, help_text="Report issue anonymously?")
+    image = models.ImageField(help_text='Please provide a cover image for your profile.')
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -295,19 +389,54 @@ class StaffProfile(models.Model):
         verbose_name_plural = "Staff Profiles"
 
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.user).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+
 class Event(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text='Event name goes here.')
     category = models.CharField(max_length=200,
                                 help_text='Please let us know what type of event this is (tournament, stage night, etc).')
     description = models.TextField(help_text='Give a brief description of the event.')
     date_and_time = models.DateTimeField(null=True, verbose_name="time and date")
-    image = models.FileField(help_text='Please provide a cover image for your profile.')
+    anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
+    image = models.ImageField(help_text='Please provide a cover image for the event.')
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.user).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
 
 class BusinessMessageBackgroundImage(models.Model):
     title = models.TextField()
@@ -346,12 +475,30 @@ class PatreonBackgroundImage(models.Model):
 
 
 class Partner(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text='Your server name goes here.')
     catagory = models.CharField(max_length=100,
-                                help_text='Pick a catagory you feel your server represents (gaming, community, etc).')
+                                help_text='Pick a category you feel your server represents (gaming, community, etc).')
     description = models.TextField(help_text='Describe your server. Tell potential members why they should join.')
     server_invite = models.URLField(help_text='Post your server invite link here.')
+    anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
 
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.user).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
 
 class Patreon(models.Model):
     patreon_username = models.CharField(max_length=100, verbose_name='Patreon`s Username',
@@ -404,12 +551,19 @@ class Blog(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            author_pk = self.author_id
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.author_id).first()
 
-        super().save(*args, **kwargs)
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
 
     def get_profile_url(self):
-        return f"http://127.0.0.1:8000/profile/{self.author_id}/"
+        profile = ProfileDetails.objects.filter(user=self.author_id).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
 
     def __str__(self):
         return self.title
@@ -617,7 +771,7 @@ class BackgroundImage(models.Model):
         super().save(*args, **kwargs)
 
     def get_profile_url(self):
-        return f"http://127.0.0.1:8000/product/{self.slug}/"
+        return reverse('showcase:profile', args=[str(self.slug)])
 
     class Meta:
         verbose_name = "Background Image"
@@ -726,9 +880,54 @@ class SettingsModel(models.Model):
         verbose_name_plural = "Settings"
 
 
+class Donate(models.Model):
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    nickname=models.CharField(max_length=100, blank=True, null=True)
+
+    # Add more fields if needed
+
+    # ForeignKey to link each donation to a specific user (donor)
+    donor = models.ForeignKey(User, on_delete=models.CASCADE)
+    anonymous = models.BooleanField(default=False, help_text="Donate anonymously?")
+    #position = models.IntegerField(
+    #    default=0,
+    #    help_text="Position for sorting",
+    #    editable=False,  # This makes the field non-editable in forms
+    #)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+
+    def __str__(self):
+        return f"Donation by {self.donor} ({self.amount} USD)"
+
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.donor).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.donor).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
 class DonorBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
+    donor = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
@@ -1347,6 +1546,7 @@ from django.db.models.signals import post_save
 # user_profile = UserProfile(user=user, bio='my bio') #website='http://poketrove.com')
 # user_profile.save()
 # post_save.connect(create_profile, sender=User)
+import random
 
 from django.contrib.auth import get_user_model
 
@@ -1356,6 +1556,12 @@ class ProfileDetails(models.Model):
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True, verbose_name="Profile picture")
     alternate = models.TextField(verbose_name="Alternate text")
     about_me = models.TextField(blank=True, null=True)
+    position = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        help_text="Position for sorting",
+    )
     #link_to_profile = models.URLField(default=1, blank=True, null=True, verbose_name="Link to profile") #possibly consider making this automatically fill with the link to the user's profile
     #consider making a randomized pk that is assigned to each invididual user and can be attached to the end of the default profile url like in this schema: "http://127.0.0.1:8000/profile/pk/
     is_active = models.IntegerField(default=1,
@@ -1367,14 +1573,25 @@ class ProfileDetails(models.Model):
     def __str__(self):
         return str(self.user)
 
+
+
+
     def save(self, *args, **kwargs):
-        if not self.pk:
-            user_pk = self.user.pk
+        if not self.pk and not self.position:
+            # Generate a new UUID and set it as the position
+            self.position = uuid.uuid4()
 
         super().save(*args, **kwargs)
 
-    def get_profile_url(self):
-        return f"http://127.0.0.1:8000/profile/{self.pk}/"
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.user).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
 
     class Meta:
         verbose_name = "Account Profile"
@@ -1396,11 +1613,12 @@ class Room(models.Model):
 
 
 
+
 class Message(models.Model):
     value = models.CharField(max_length=1000000)
     date = models.DateTimeField(default=timezone.now, blank=True)
     user = models.CharField(max_length=1000000, verbose_name="Username")
-    signed_in_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages', verbose_name="User")
+    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='messages', verbose_name="User")
     room = models.CharField(max_length=1000000)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     is_active = models.IntegerField(default=1,
@@ -1411,20 +1629,33 @@ class Message(models.Model):
 
 
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+"""
     def _get_current_user(self):
         # Logic to retrieve the currently signed-in user
         # You can modify this according to your authentication mechanism
         return User.objects.get(username='example_user')
 
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.signed_in_user_id = self.signed_in_user_id
-
-        super().save(*args, **kwargs)
-
     def get_profile_url(self):
-        return f"http://127.0.0.1:8000/profile/{self.signed_in_user_id}/"
-
+        return reverse('showcase:profile', args=[str(self.signed_in_user_id)])
+    #def get_profile_url(self):
+    #    return f"http://127.0.0.1:8000/profile/{self.signed_in_user_id}/"
+"""
 # is_active is new
 
 # Create your models here.
@@ -1548,7 +1779,7 @@ class Item(models.Model):
         super().save(*args, **kwargs)
 
     def get_profile_url(self):
-        return f"http://127.0.0.1:8000/product/{self.slug}/"
+        return reverse('showcase:profile', args=[str(self.slug)])
 
 
 class EBackgroundImage(models.Model):
@@ -1890,8 +2121,8 @@ class Order(models.Model):
                 total -= self.coupon.amount
         return total
 
-    def get_profile_url(self):
-        return f"http://127.0.0.1:8000/product/{self.slug}/"
+        def get_profile_url(self):
+            return reverse('showcase:profile', args=[str(self.slug)])
 
 
 class Address(models.Model):
@@ -2030,7 +2261,7 @@ class ImageCarousel(models.Model):
         verbose_name_plural = "Image Carousel Posts"
 
 
-import uuid
+
 
 from io import BytesIO
 from django.core.files import File

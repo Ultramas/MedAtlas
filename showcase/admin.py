@@ -71,6 +71,7 @@ from .models import Contact
 from .models import BusinessMailingContact
 from .models import Feedback
 from .models import Order
+from .models import Donate
 from .models import AdminRoles
 from .models import AdminTasks
 from .models import AdminPages
@@ -93,7 +94,6 @@ class detailsAdmin(admin.ModelAdmin):
 
 class authorAdmin(admin.ModelAdmin):
     pass
-
 
 # Register your models here.
 admin.site.register(UpdateProfile, categoryAdmin)
@@ -307,4 +307,5 @@ class FeedbackAdmin(admin.ModelAdmin):
 
 admin.site.register(Feedback, FeedbackAdmin)
 
+admin.site.register(Donate)
 

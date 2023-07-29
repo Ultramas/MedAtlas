@@ -89,18 +89,19 @@
             <h4> Order date: {{ order.ordered_date }}</h4>
 
           <!--Grid column-->
+            {% for item in items %}
           <div class="col-lg-3 col-md-6 mb-4">
 
             <!--Card-->
             <div class="card">
               <!--Card image-->
               <div class="view overlay">
-                <a href="{{ Order.get_absolute_url }}">
-                    <img src="{{ order.itemhistory.image.url }}" alt="Product Image">
-      <img class = "hunt" src="{{Order.image.url}}" class="card-img-top"
+                <a href="{{ order.get_absolute_url }}">
+                    <img src="{{ order.itemhistory.image.url }}" alt="Product Image"> <!--the alt="Product Image causes the false image & the alternate text-->
+      <img class = "hunt" src="{{item.image.url}}" class="card-img-top"
                   alt="{{ item.image.url }}">
                   <div class="mask rgba-white-slight"></div>
-                </a>        
+                </a>
               </div>
               <!--Card image-->
               <!--Card content-->
@@ -136,7 +137,7 @@
 
               </div>
               <!--Card content-->
-
+</a>
             </div>
             <!--Card-->
 
@@ -145,7 +146,7 @@
 </a>
           {% endfor %}
          
-
+{% endfor %}
         </div>
         <!--Grid row-->
 

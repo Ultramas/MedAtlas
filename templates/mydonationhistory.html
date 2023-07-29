@@ -1,0 +1,29 @@
+{% extends 'donatebase.html' %}
+{% load static %}
+{% block content %}
+    <!-- Your existing HTML content goes here -->
+
+    {% if user %}
+        <p>Welcome, {{ user.username }}!</p>
+        <!-- Display other user-specific content here for authenticated users -->
+
+        {% if user.donate_set.all %}
+            <p>Here are the details of your donation:</p>
+            {% for donate_instance in user.donate_set.all %}
+                <p><strong>Donor:</strong> {{ donate_instance.donor }}</p>
+                <p><strong>Donation Amount:</strong> {{ donate_instance.amount }}</p>
+                <strong>Date & Time:</strong> {{ donate_instance.timestamp }}
+                <!-- You can display other donor-related information here -->
+            {% endfor %}
+        {% else %}
+            <p>You haven't made any donations yet.</p>
+            <!-- You can display additional content or a donation form here -->
+        {% endif %}
+
+    {% else %}
+        <p>Hello, guest!</p>
+        <!-- You can display content for anonymous users here -->
+    {% endif %}
+
+    <!-- Rest of your HTML content goes here -->
+{% endblock content %}

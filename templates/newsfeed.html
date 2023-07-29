@@ -15,21 +15,34 @@
       <img class = "backgroundimages" src="{{NewsBackgroundImage.cover.url}}" alt="{{ NewsBackgroundImage.title }}">
   {% endfor %}
 
-<div class="poste1"> 
+<div class="poste1">
   <br>
     <h1 class="hello">Hello {{user.username}}!</h1>
       <br>
         <br>
+    <li>
+                                {% for newprofile in Profiles %}
+                                {% if newprofile.newprofile_profile_picture_url %}
+                                  <a href="{{ newprofile.newprofile_profile_url }}">
+                                     <img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
+                                  </a>
+                                {% else %}
+                                   <!-- Placeholder image or default avatar -->
+                                  <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
+                                {% endif %}
+                                {% endfor %}
+                    </li>
+
     <!--saved items here-->
-    {% for News_Feed in object_list %}
+    {% for NewsFeed in News %}
       <div class = "postop">
-        <h1>{{News_Feed.name}}</h1>
-        <br> 
+        <h1>{{NewsFeed.name}}</h1>
+        <br>
         <p class="describe">
-          {{News_Feed.description}}</p> 
+          {{NewsFeed.description}}</p>
         <br>
         <br>
-          <img class = "hunt" src="{{News_Feed.image}}">
+          <img class = "hunt" src="{{NewsFeed.image.url}}">
         <br>
         <br>
         <br>
@@ -38,9 +51,9 @@
       <br>
       <br>
       <br>
-      <br>      
       <br>
-      <br>      
+      <br>
+      <br>
       <br>
       <br>
       <br>

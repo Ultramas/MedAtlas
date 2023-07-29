@@ -242,7 +242,7 @@
 
                   <img class = "backgroundimages" src="{{blog.image.url}}" alt="{{ blog.title }}">
 
-                    <p class="card-text">{{blog.content|slice:":200" }}...</p>
+
 
                     <a class="like" href="#" onClick="document.getElementById('likebutton').submit()">👍</a> {{blog.likes.count}}   |   <a class = "dislike" href="#" onClick="document.getElementById('dislikebutton').submit()">👎</a> {{blog.dislikes.count}}
 
@@ -255,7 +255,6 @@
                     {% csrf_token %}
                     </form>
                     <br>
-                    <a href="{% url 'showcase:post_detail' blog.slug  %}" class="btn btn-primary">Read More &rarr;</a>
 
           {% for comment in comments %}
         <div class="comments" style="padding: 10px;">
@@ -276,7 +275,7 @@
             {% endfor %}
 
         </div>
-    </div>
+
 </div>
                 <img src="./assets/images/blog-1.png" alt="Building microservices with Dropwizard, MongoDB & Docker"
                   width="250" class="blog-banner-img">
@@ -286,27 +285,29 @@
 
                 <button class="blog-topic text-tiny">Database</button>
 
-                <h3>
-                  <a href="#" class="h3">
-                    Building microservices with Dropwizard, MongoDB & Docker
-                  </a>
-                </h3>
+
 
                 <p class="blog-text">
-                  This NoSQL database oriented to documents (by documents like JSON) combines some of the features from
-                  relational
-                  databases, easy to use and the multi-platform is the best option for scale up and have fault
-                  tolerance, load balancing,
-                  map reduce, etc.
-                </p>
+                {% for blog in BlogPosts %}
+                   <p class="card-text">{{blog.content|slice:":200" }}...</p>
+                <br>
+                <a href="{% url 'showcase:post_detail' blog.slug  %}" class="btn btn-primary">Read More &rarr;</a>
 
+                {% endfor %}
+                </p>
+<br>
                 <div class="wrapper-flex">
 
                   <div class="profile-wrapper">
-                    <img src="./assets/images/author.png" alt="Julia Walker" width="50">
-                  </div>
+                     <div class="profile-wrapper">
 
-                  <div class="wrapper">
+                    {% for blog_post in BlogPosts %}
+    {% if blog_post.author_profile_picture_url %}
+
+    <a href="{{ blog_post.author_profile_url }}">
+         <img src="{{ blog_post.author_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
+      </a>
+                      <div class="wrapper">
                     <a href="#" class="h4">Julia Walker</a>
 
                     <p class="text-sm">
@@ -316,11 +317,31 @@
                       <time datetime="PT3M">3 min</time>
                     </p>
                   </div>
+                       <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+    {% else %}
+    <!-- Placeholder image or default avatar -->
+    <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
+ {% endif %}
+{% endfor %}
+                  </div>
+                  </div>
+
+                  <!--<div class="wrapper">
+                    <a href="#" class="h4">Julia Walker</a>
+
+                    <p class="text-sm">
+                      <time datetime="2022-01-17">Jan 17, 2022</time>
+                      <span class="separator"></span>
+                      <ion-icon name="time-outline"></ion-icon>
+                      <time datetime="PT3M">3 min</time>
+                    </p>
+                  </div>-->
 
                 </div>
 
               </div>
-
+</div>
             </div>
 
 
@@ -365,7 +386,7 @@
 
                     <p class="text-sm">
                       <time datetime="2021-12-10">  {% for blog in BlogPosts %}
-
+                      </time><!--might cause an error-->
                         <p class="card-text text-muted h6">{{ blog.author }} | {{ blog.created_on}} </p>
 
                     {% endfor%}</time>
