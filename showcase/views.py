@@ -331,10 +331,6 @@ class BaseView(ListView):
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                context['profile_pk'] = profile.pk
-                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
         return context
 
 
@@ -1527,8 +1523,7 @@ class PerksBackgroundView(BaseView):
 #  model = Background2aImage
 #  paginate_by = 10
 #  template_name = 'index.html'
-#  extra_context = {'Background2aIm
-#  age.url': Background2aImage.objects.all()[0].get_absolute_url()}
+#  extra_context = {'Background2aImage.url': Background2aImage.objects.all()[0].get_absolute_url()}
 
 #  def get_queryset(self):
 #    return Background2aImage.objects.all()
@@ -1563,20 +1558,19 @@ class RoomView(TemplateView):
         context['room_details'] = room_details
         context['profile_details'] = profile_details
 
-        # Retrieve the author's profile avatar and set the attributes for each message
+        # Retrieve the author's profile avatar
         messages = Message.objects.all().order_by('-date')
 
         context['Messaging'] = messages
 
-        for message in context['Messaging']:
-            profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+        for messages in context['Messaging']:
+            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
             if profile:
-                message.avatar_url = profile.avatar.url
-                message.user_profile_url = message.get_profile_url()
+                messages.user_profile_picture_url = profile.avatar.url
+                messages.user_profile_url = messages.get_profile_url()
+
 
         return context
-
-
 
 
 
@@ -1613,36 +1607,17 @@ def checkview(request):
         return redirect('/home/' + room + '/?username=' + username)
 
 
-from django.http import HttpResponse
-
 def send(request):
-    if request.method == 'POST':
-        message = request.POST['message']
-        username = request.POST['username']
-        room_id = request.POST['room_id']
+    message = request.POST['message']
+    username = request.POST['username']
+    room_id = request.POST['room_id']
 
-        # Check if the user is authenticated
-        if request.user.is_authenticated:
-            # User is authenticated, use their user ID for the message user field
-            new_message = Message.objects.create(
-                value=message,
-                user=request.user.id,
-                room=room_id,
-                signed_in_user=request.user  # Set the signed_in_user to the authenticated user
-            )
-        else:
-            # User is not authenticated, use the provided username for the message user field
-            new_message = Message.objects.create(
-                value=message,
-                user=username,
-                room=room_id,
-            )
-
-        # Return a response indicating the message was sent successfully
-        return HttpResponse('Message sent successfully')
-
-    # If the request method is not POST, handle the appropriate response here
-    return HttpResponse('Invalid request method. Please use POST to send a message.')
+    new_message = Message.objects.create(value=message,
+                                         user=username,
+                                         room=room_id)
+    new_message.save()
+    return HttpResponse('Message sent successfully')
+    print('returned')
 
 
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -1682,8 +1657,6 @@ def getMessages(request, room):
         })
 
     return JsonResponse({'messages': messages_data})
-
-
 
 
 def supportroom(request):
@@ -1745,39 +1718,9 @@ def supportsend(request):
     return HttpResponse('Message sent successfully')
 
 
-"""def supportgetMessages(request, **kwargs):
+def supportgetMessages(request, **kwargs):
     messages = SupportMessage.objects.filter(room=request.user.username)
     return JsonResponse({"messages": list(messages.values())})
-"""
-
-def supportgetMessages(request, **kwargs):
-    #room_details = Room.objects.get(name=room)
-    signed_in_user = request.user
-
-    messages = SupportMessage.objects.filter(signed_in_user=signed_in_user)
-
-
-    # Prepare the messages data to be sent in the AJAX response
-    messages_data = []
-    for message in messages:
-        profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
-        if profile:
-            user_profile_url = message.get_profile_url()  # Get the user_profile_url for each message
-            avatar_url = profile.avatar.url
-
-        else:
-            # Set a default avatar URL or path in case the user doesn't have an avatar
-            user_profile_url = ('profile')
-            avatar_url = staticfiles_storage.url('css/images/a.jpg')
-        messages_data.append({
-            'user_profile_url': user_profile_url,
-            'avatar_url': avatar_url,
-            'user': message.user,
-            'value': message.value,
-            'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
-        })
-
-    return JsonResponse({'messages': messages_data})
 
 
 # class post(ListView):
