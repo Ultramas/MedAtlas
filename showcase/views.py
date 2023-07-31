@@ -331,6 +331,10 @@ class BaseView(ListView):
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
         return context
 
 
@@ -1558,19 +1562,19 @@ class RoomView(TemplateView):
         context['room_details'] = room_details
         context['profile_details'] = profile_details
 
-        # Retrieve the author's profile avatar
+        # Retrieve the author's profile avatar and set the attributes for each message
         messages = Message.objects.all().order_by('-date')
 
         context['Messaging'] = messages
 
-        for messages in context['Messaging']:
-            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
+        for message in context['Messaging']:
+            profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
             if profile:
-                messages.user_profile_picture_url = profile.avatar.url
-                messages.user_profile_url = messages.get_profile_url()
-
+                message.avatar_url = profile.avatar.url
+                message.user_profile_url = message.get_profile_url()
 
         return context
+
 
 
 
@@ -1607,17 +1611,36 @@ def checkview(request):
         return redirect('/home/' + room + '/?username=' + username)
 
 
-def send(request):
-    message = request.POST['message']
-    username = request.POST['username']
-    room_id = request.POST['room_id']
+from django.http import HttpResponse
 
-    new_message = Message.objects.create(value=message,
-                                         user=username,
-                                         room=room_id)
-    new_message.save()
-    return HttpResponse('Message sent successfully')
-    print('returned')
+def send(request):
+    if request.method == 'POST':
+        message = request.POST['message']
+        username = request.POST['username']
+        room_id = request.POST['room_id']
+
+        # Check if the user is authenticated
+        if request.user.is_authenticated:
+            # User is authenticated, use their user ID for the message user field
+            new_message = Message.objects.create(
+                value=message,
+                user=request.user.id,
+                room=room_id,
+                signed_in_user=request.user  # Set the signed_in_user to the authenticated user
+            )
+        else:
+            # User is not authenticated, use the provided username for the message user field
+            new_message = Message.objects.create(
+                value=message,
+                user=username,
+                room=room_id,
+            )
+
+        # Return a response indicating the message was sent successfully
+        return HttpResponse('Message sent successfully')
+
+    # If the request method is not POST, handle the appropriate response here
+    return HttpResponse('Invalid request method. Please use POST to send a message.')
 
 
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -1639,10 +1662,10 @@ def getMessages(request, room):
     # Prepare the messages data to be sent in the AJAX response
     messages_data = []
     for message in messages:
-        profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
-        if profile_details:
+        profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+        if profile:
             user_profile_url = message.get_profile_url()  # Get the user_profile_url for each message
-            avatar_url = profile_details.avatar.url
+            avatar_url = profile.avatar.url
 
         else:
             # Set a default avatar URL or path in case the user doesn't have an avatar

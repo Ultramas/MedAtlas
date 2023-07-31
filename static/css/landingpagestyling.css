@@ -114,12 +114,12 @@ padding: 10px;}
   text-align: center;
   padding: 5em 0;
   padding-bottom: 40%;
-  background: #222;
+  /*background: #222;*/
 }
 
 @supports (background-blend-mode: multiply) {
   .heroingitout {
-    background: url(../images/shoe-3.png), radial-gradient(#444, #111);
+    /*background: url(../images/shoe-3.png), radial-gradient(#444, #111);*/
     background-blend-mode: multiply;
     background-attachment: fixed;
     background-repeat: no-repeat;

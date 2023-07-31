@@ -4,6 +4,9 @@ from django.contrib.auth.models import User
 from uuid import uuid4
 import uuid
 
+from django.dispatch import receiver
+
+
 # from image.utils import render
 
 
@@ -1551,7 +1554,7 @@ import random
 from django.contrib.auth import get_user_model
 
 class ProfileDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     # username = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True, verbose_name="Profile picture")
     alternate = models.TextField(verbose_name="Alternate text")
@@ -1573,25 +1576,6 @@ class ProfileDetails(models.Model):
     def __str__(self):
         return str(self.user)
 
-
-
-
-    def save(self, *args, **kwargs):
-        if not self.pk and not self.position:
-            # Generate a new UUID and set it as the position
-            self.position = uuid.uuid4()
-
-        super().save(*args, **kwargs)
-
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            # Get the associated ProfileDetails for the donor
-            profile = ProfileDetails.objects.filter(user=self.user).first()
-
-            # Set the position to the position value from the associated ProfileDetails
-            if profile:
-                self.position = profile.position
 
     class Meta:
         verbose_name = "Account Profile"
@@ -1628,12 +1612,10 @@ class Message(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
 
-
     def save(self, *args, **kwargs):
         if not self.pk:
             # Get the associated ProfileDetails for the donor
             profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
-
             # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
@@ -1644,6 +1626,7 @@ class Message(models.Model):
         profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
 
 """
     def _get_current_user(self):
@@ -1740,8 +1723,6 @@ class UserProfile(models.Model):
       verbose_name_plural = "Settings"
       """
 from django.db.models.signals import pre_save
-from django.dispatch import receiver
-
 
 class Item(models.Model):
     title = models.CharField(max_length=100)

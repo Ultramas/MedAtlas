@@ -15,7 +15,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <title>PokeTrove</title>
+  <title>Accomfort</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="{% static 'css/featuredproductsstyle.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/featuredproductsstyle2.css' %}">
@@ -49,13 +49,31 @@
 
 
 <body>
-
-  <div class="heroingitout">
-    <div class="containereggspacing">
-      <h3 class="primaried-title">PokeTrove</h3>
-      <p class="productual">Pokemon Products</p>
-      <a href="#featuredproducts" class="btntrees">See what we have</a>
+{% for ad in Advertisement %}
+    <!-- Display the advertisement content -->
+    <div>
+        <h3>{{ ad.advertisementtitle }}</h3>
+        <img src="{{ ad.advertisement.url }}" alt="{{ ad.advertisementtitle }}" height="{{ad.length_for_resize}}" width="{{ad.width_for_resize}}">
+        <p>{{ ad.relevance }}</p>
+        <!-- Add other content as needed -->
+        <a href="{{ ad.advertisement_hyperlink }}" target="_blank">Learn More</a>
     </div>
+{% endfor %}
+
+
+  <div class="heroingitout" >
+      {% for image in Image %}
+       {% if image.page == 'index.html' and image.image_position == 1 %}
+<!--        <div class="containereggspacing" style="background-image: url('{{ image.image.url }}'); height: {{ image.length_for_resize }}; width: {{ image.width_for_resize }}; background-repeat: no-repeat;">
+    -->
+      <div class="containereggspacing">
+      <img src="{{ image.image.url }}" alt="{{ image.title }}" height="{{image.length_for_resize}}" width="{{image.width_for_resize}}"style="position: absolute; top: 0; left: 0; z-index: -1;">
+            <h3 class="primaried-title" style="z-index: 2">Accomfort</h3>
+          <p class="productual" style="z-index: 2">Accomfort Products</p>
+          <a href="#featuredproducts" class="btntrees" style="z-index: 2">See what we have</a>
+        </div>
+        {% endif %}
+      {% endfor %}
      <br>
         <br>
         <br>
