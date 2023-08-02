@@ -1527,7 +1527,8 @@ class PerksBackgroundView(BaseView):
 #  model = Background2aImage
 #  paginate_by = 10
 #  template_name = 'index.html'
-#  extra_context = {'Background2aImage.url': Background2aImage.objects.all()[0].get_absolute_url()}
+#  extra_context = {'Background2aIm
+#  age.url': Background2aImage.objects.all()[0].get_absolute_url()}
 
 #  def get_queryset(self):
 #    return Background2aImage.objects.all()
@@ -1574,6 +1575,7 @@ class RoomView(TemplateView):
                 message.user_profile_url = message.get_profile_url()
 
         return context
+
 
 
 
@@ -1662,10 +1664,10 @@ def getMessages(request, room):
     # Prepare the messages data to be sent in the AJAX response
     messages_data = []
     for message in messages:
-        profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
-        if profile:
+        profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+        if profile_details:
             user_profile_url = message.get_profile_url()  # Get the user_profile_url for each message
-            avatar_url = profile.avatar.url
+            avatar_url = profile_details.avatar.url
 
         else:
             # Set a default avatar URL or path in case the user doesn't have an avatar
@@ -1680,6 +1682,8 @@ def getMessages(request, room):
         })
 
     return JsonResponse({'messages': messages_data})
+
+
 
 
 def supportroom(request):
@@ -1741,9 +1745,39 @@ def supportsend(request):
     return HttpResponse('Message sent successfully')
 
 
-def supportgetMessages(request, **kwargs):
+"""def supportgetMessages(request, **kwargs):
     messages = SupportMessage.objects.filter(room=request.user.username)
     return JsonResponse({"messages": list(messages.values())})
+"""
+
+def supportgetMessages(request, **kwargs):
+    #room_details = Room.objects.get(name=room)
+    signed_in_user = request.user
+
+    messages = SupportMessage.objects.filter(signed_in_user=signed_in_user)
+
+
+    # Prepare the messages data to be sent in the AJAX response
+    messages_data = []
+    for message in messages:
+        profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+        if profile:
+            user_profile_url = message.get_profile_url()  # Get the user_profile_url for each message
+            avatar_url = profile.avatar.url
+
+        else:
+            # Set a default avatar URL or path in case the user doesn't have an avatar
+            user_profile_url = ('profile')
+            avatar_url = staticfiles_storage.url('css/images/a.jpg')
+        messages_data.append({
+            'user_profile_url': user_profile_url,
+            'avatar_url': avatar_url,
+            'user': message.user,
+            'value': message.value,
+            'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
+        })
+
+    return JsonResponse({'messages': messages_data})
 
 
 # class post(ListView):

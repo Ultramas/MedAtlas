@@ -56,7 +56,7 @@ body {
 </head>
 <body>
 
-<h2>{{username}} - {{room}}</h2>
+<h2>{{user}} - {{room}}</h2>
 
 <div id="display">
 
@@ -69,27 +69,66 @@ body {
 
 <script>
 $(document).ready(function(){
+  // Preload avatars
+  var avatarUrls = [];
+  $(".message img").each(function() {
+    avatarUrls.push($(this).attr("src"));
+  });
 
-setInterval(function(){
+  preloadImages(avatarUrls);
+
+  setInterval(function(){
+    var room = "{{ room }}"; // Replace with the actual value of the room
+
     $.ajax({
-        type: 'GET',
-        url : "/supportgetMessages/{{room}}/",
-        success: function(response){
-            console.log(response);
-            $("#display").empty();
-            for (var key in response.messages)
-            {
-                var temp="<div class='container darker'><b>"+response.messages[key].user+"</b><p>"+response.messages[key].value+"</p><span class='time-left'>"+response.messages[key].date+"</span></div>";
-                $("#display").append(temp);
-            }
-        },
-        error: function(response){
-            alert('An error occured')
-        }
+      type: 'GET',
+      url : "/supportgetMessages/{{room}}/",
+      success: function(response){
+        console.log(response);
+        $("#display").empty();
+        for (var key in response.messages) {
+  var message = response.messages[key];
+  var user_profile_url = message.user_profile_url;
+  var avatar_url = message.avatar_url; // Store avatar_url in a separate variable
+  var user = message.user; // Store user in a separate variable
+  var value = message.value; // Store value in a separate variable
+  var date = message.date; // Store date in a separate variable
+
+  console.log(user_profile_url);
+  var messageHtml = `
+    <div class="message">
+      <a href="${user_profile_url}">
+        <img src="${avatar_url}" alt="${user}">
+      </a>
+      <div class="message-content">
+        <div class="sender">${user}</div>
+        <div>${value}</div>
+        <div class="time">${date}</div>
+      </div>
+    </div>`;
+  console.log(user_profile_url);
+  $("#display").append(messageHtml);
+}
+
+      },
+      error: function(response){
+        alert('An error occurred');
+      }
     });
-},1000);
-})
+  }, 1000);
+});
+
+// Preload images
+function preloadImages(urls) {
+  for (var i = 0; i < urls.length; i++) {
+    var img = new Image();
+    img.src = urls[i];
+  }
+}
+
+
 </script>
+
 
 
 <div class="container">
@@ -138,26 +177,28 @@ setInterval(function(){
 
 </body>
 
-<script type="text/javascript">
-  $(document).on('submit','#post-form',function(e){
-    e.preventDefault();
 
-    $.ajax({
-      type:'POST',
-      url:'/supportchat/send',
-      data:{
-          username:$('#username').val(),
-          room_id:$('#room_id').val(),
-          room_name:$('#room_name').val(),
-          message:$('#message').val(),
-        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
-      },
-      success: function(data){
-         //alert(data)
-      }
-    });
-    document.getElementById('message').value = ''
+<script type="text/javascript">
+$(document).on('submit','#post-form',function(e){
+  e.preventDefault();
+
+  $.ajax({
+    type:'POST',
+    url:'/supportchat/send',
+    data:{
+      username: $('#username').val(),
+      room_id: $('#room_id').val(),
+      room_name: $('#room_name').val(),
+      message: $('#message').val(),
+      csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+    },
+    success: function(data){
+       //alert(data)
+    }
   });
+  document.getElementById('message').value = '';
+});
 </script>
+
 
 </html>

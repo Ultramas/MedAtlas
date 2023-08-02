@@ -28,7 +28,6 @@ class Idea(models.Model):
         verbose_name = "Idea"
         verbose_name_plural = "Ideas"
 
-
     def save(self, *args, **kwargs):
         if not self.pk:
             # Get the associated ProfileDetails for the donor
@@ -44,6 +43,7 @@ class Idea(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
 
 class UpdateProfile(models.Model):
     """Update user profiles"""
@@ -61,7 +61,6 @@ class UpdateProfile(models.Model):
         verbose_name = "User Profile Post"
         verbose_name_plural = "User Profile Posts"
 
-
     def save(self, *args, **kwargs):
         if not self.pk:
             # Get the associated ProfileDetails for the donor
@@ -77,6 +76,7 @@ class UpdateProfile(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
 
 class Vote(models.Model):
     """Used for voting on different new ideas"""
@@ -96,7 +96,6 @@ class Vote(models.Model):
     class Meta:
         verbose_name = "Vote"
         verbose_name_plural = "Votes"
-
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -294,7 +293,6 @@ class ReportIssue(models.Model):
         verbose_name = "Report Issue"
         verbose_name_plural = "Report Issues"
 
-
     def save(self, *args, **kwargs):
         if not self.pk:
             # Get the associated ProfileDetails for the donor
@@ -332,7 +330,6 @@ class Support(models.Model):
         verbose_name_plural = "Customer Support"
 
 
-
 class NewsFeed(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100,
@@ -350,8 +347,6 @@ class NewsFeed(models.Model):
     class Meta:
         verbose_name = "News Feed"
         verbose_name_plural = "News Feed"
-
-
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -391,7 +386,6 @@ class StaffProfile(models.Model):
         verbose_name = "Staff Profile"
         verbose_name_plural = "Staff Profiles"
 
-
     def save(self, *args, **kwargs):
         if not self.pk:
             # Get the associated ProfileDetails for the donor
@@ -424,7 +418,6 @@ class Event(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
-
     def save(self, *args, **kwargs):
         if not self.pk:
             # Get the associated ProfileDetails for the donor
@@ -440,6 +433,7 @@ class Event(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
 
 class BusinessMessageBackgroundImage(models.Model):
     title = models.TextField()
@@ -486,7 +480,6 @@ class Partner(models.Model):
     server_invite = models.URLField(help_text='Post your server invite link here.')
     anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
 
-
     def save(self, *args, **kwargs):
         if not self.pk:
             # Get the associated ProfileDetails for the donor
@@ -502,6 +495,7 @@ class Partner(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
 
 class Patreon(models.Model):
     patreon_username = models.CharField(max_length=100, verbose_name='Patreon`s Username',
@@ -535,7 +529,7 @@ class Blog(models.Model):
     likes = models.ManyToManyField(User, blank=True, verbose_name='post likes')
     # likes = models.IntegerField(default=0)
     dislikes = models.ManyToManyField(User, blank=True, verbose_name='post dislikes', related_name="post_dislikes")
-    #url = models.SlugField(max_length=200, unique=True, blank=True)
+    # url = models.SlugField(max_length=200, unique=True, blank=True)
     # blogbackgroundimage
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -548,9 +542,9 @@ class Blog(models.Model):
         verbose_name_plural = "Blog Entries"
         ordering = ['-created_on']
 
-#    def save(self, *args, **kwargs):
-#        self.url = slugify(self.title)
-#        super(Blog, self).save(*args, **kwargs)
+    #    def save(self, *args, **kwargs):
+    #        self.url = slugify(self.title)
+    #        super(Blog, self).save(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -561,12 +555,10 @@ class Blog(models.Model):
             if profile:
                 self.position = profile.position
 
-
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.author_id).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
-
 
     def __str__(self):
         return self.title
@@ -575,7 +567,6 @@ class Blog(models.Model):
         from django.urls import reverse
 
         return reverse("showcase:post_detail", kwargs={"slug": str(self.slug)})
-    
 
     def comment_count(self):
         return Comment.objects.filter(post=self).count()
@@ -858,7 +849,9 @@ class NavBarHeader(models.Model):
         verbose_name = "Navigational Bar Header"
         verbose_name_plural = "Navigational Bar Headers"
 
+
 from django.contrib.auth.models import AbstractUser
+
 
 class SettingsModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='settings')
@@ -886,28 +879,26 @@ class SettingsModel(models.Model):
 class Donate(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
-    nickname=models.CharField(max_length=100, blank=True, null=True)
+    nickname = models.CharField(max_length=100, blank=True, null=True)
 
     # Add more fields if needed
 
     # ForeignKey to link each donation to a specific user (donor)
     donor = models.ForeignKey(User, on_delete=models.CASCADE)
     anonymous = models.BooleanField(default=False, help_text="Donate anonymously?")
-    #position = models.IntegerField(
+    # position = models.IntegerField(
     #    default=0,
     #    help_text="Position for sorting",
     #    editable=False,  # This makes the field non-editable in forms
-    #)
+    # )
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
-
     def __str__(self):
         return f"Donation by {self.donor} ({self.amount} USD)"
-
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -920,12 +911,11 @@ class Donate(models.Model):
 
         super().save(*args, **kwargs)
 
-
-
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.donor).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
 
 class DonorBackgroundImage(models.Model):
     title = models.TextField()
@@ -1551,7 +1541,8 @@ from django.db.models.signals import post_save
 # post_save.connect(create_profile, sender=User)
 import random
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, get_user
+
 
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -1565,8 +1556,8 @@ class ProfileDetails(models.Model):
         unique=True,
         help_text="Position for sorting",
     )
-    #link_to_profile = models.URLField(default=1, blank=True, null=True, verbose_name="Link to profile") #possibly consider making this automatically fill with the link to the user's profile
-    #consider making a randomized pk that is assigned to each invididual user and can be attached to the end of the default profile url like in this schema: "http://127.0.0.1:8000/profile/pk/
+    # link_to_profile = models.URLField(default=1, blank=True, null=True, verbose_name="Link to profile") #possibly consider making this automatically fill with the link to the user's profile
+    # consider making a randomized pk that is assigned to each invididual user and can be attached to the end of the default profile url like in this schema: "http://127.0.0.1:8000/profile/pk/
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1575,7 +1566,6 @@ class ProfileDetails(models.Model):
 
     def __str__(self):
         return str(self.user)
-
 
     class Meta:
         verbose_name = "Account Profile"
@@ -1595,6 +1585,17 @@ from datetime import datetime
 class Room(models.Model):
     name = models.CharField(max_length=1000)
 
+    def get_absolute_url(self):
+        # Construct the URL for the room detail page
+        room_url = reverse("showcase:room", kwargs={'room': self.room})
+
+        # Construct the query parameters
+        final_url = f"{room_url}?username={self.signed_in_user.username}"
+
+        return final_url
+
+
+from urllib.parse import urlencode
 
 
 
@@ -1612,10 +1613,12 @@ class Message(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
 
+
     def save(self, *args, **kwargs):
         if not self.pk:
             # Get the associated ProfileDetails for the donor
             profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
+
             # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
@@ -1628,7 +1631,17 @@ class Message(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
 
-"""
+    def get_absolute_url(self):
+
+        # Construct the URL for the room detail page
+        room_url = reverse("showcase:room", kwargs={'room': str(self.room)})
+
+        # Construct the query parameters
+        final_url = f"{room_url}?username={self.signed_in_user.username}"
+
+        return final_url
+
+        """
     def _get_current_user(self):
         # Logic to retrieve the currently signed-in user
         # You can modify this according to your authentication mechanism
@@ -1639,6 +1652,8 @@ class Message(models.Model):
     #def get_profile_url(self):
     #    return f"http://127.0.0.1:8000/profile/{self.signed_in_user_id}/"
 """
+
+
 # is_active is new
 
 # Create your models here.
@@ -1654,13 +1669,32 @@ class SupportMessage(models.Model):
     # now = datetime.datetime.now()
     date = models.DateTimeField(default=timezone.now, blank=True)
     user = models.CharField(max_length=1000000)
-    room = models.CharField(max_length=1000000)
+    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
+                                       related_name='support_messages',
+                                       verbose_name="User")
+    room = models.CharField(max_length=1000000)  # newly added unique=True
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
 
 
 # is_active is new
@@ -1713,7 +1747,6 @@ class UserProfile(models.Model):
         verbose_name_plural = "User Profiles"
 
 
-
 """class Settings(models.Model):
   username = models.OneToOneField(User, on_delete=models.CASCADE)
   #password =
@@ -1724,16 +1757,17 @@ class UserProfile(models.Model):
       """
 from django.db.models.signals import pre_save
 
+
 class Item(models.Model):
     title = models.CharField(max_length=100)
     price = models.FloatField()
     discount_price = models.FloatField(blank=True, null=True)
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
-    label = models.CharField(choices=LABEL_CHOICES, max_length=1000) #can use for cataloging products
-    slug = models.SlugField() #might change to automatically get the slug
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1000)  # can use for cataloging products
+    slug = models.SlugField()  # might change to automatically get the slug
     description = models.TextField()
     image = models.ImageField()
-    #hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
+    # hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
     relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -1787,7 +1821,6 @@ class EBackgroundImage(models.Model):
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from django.contrib import messages
-
 
 
 class ChatBackgroundImage(models.Model):
@@ -1914,13 +1947,13 @@ class IssueBackgroundImage(models.Model):
         verbose_name_plural = "Issue Background Images"
 
 
-
 class OrderItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ordered = models.BooleanField(default=False)
-    #order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    #order_number = models.IntegerField()
-    slug = models.SlugField(max_length=200, blank=True, null=True, help_text="Leave blank to use corresponding product slug.") #apply unique=True parameter after slugs are actually implemented
+    # order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    # order_number = models.IntegerField()
+    slug = models.SlugField(max_length=200, blank=True, null=True,
+                            help_text="Leave blank to use corresponding product slug.")  # apply unique=True parameter after slugs are actually implemented
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     # order_date = models.DateTimeField(auto_now_add=True, verbose_name="order date")
@@ -1949,16 +1982,15 @@ class OrderItem(models.Model):
             return self.get_discount_item_price()
         return self.get_total_item_price()
 
-
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         OrderItemField.objects.create(
             user=self.user,
             ordered=self.ordered,
-            #order_number=self.order_number,
+            # order_number=self.order_number,
             slug=self.slug,
             item=self.item,
-            orderitem_id = self,
+            orderitem_id=self,
             quantity=self.quantity,
             is_active=self.is_active,
         )
@@ -1966,20 +1998,19 @@ class OrderItem(models.Model):
     class Meta:
         verbose_name_plural = 'Order Items'
 
+
 """ def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.item.slug)
         super().save(*args, **kwargs)"""
 
 
-
-
-
 class OrderItemField(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ordered = models.BooleanField(default=False)
-    #order_number = models.IntegerField()
-    slug = models.SlugField(max_length=200, blank=True, null=True, help_text="Leave blank to use corresponding product slug.")
+    # order_number = models.IntegerField()
+    slug = models.SlugField(max_length=200, blank=True, null=True,
+                            help_text="Leave blank to use corresponding product slug.")
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     orderitem_id = models.ForeignKey(OrderItem, on_delete=models.CASCADE, verbose_name="Order item id", null=True)
@@ -1994,7 +2025,6 @@ class OrderItemField(models.Model):
         verbose_name_plural = 'Order Item Fields'
 
 
-
 class AdminRoles(models.Model):
     roles = models.CharField(max_length=30, verbose_name="Administration roles")
     role_description = models.TextField(verbose_name="Role Overview", blank='True', null='True')
@@ -2002,7 +2032,9 @@ class AdminRoles(models.Model):
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this role currently active?")
+                                    choices=((1, 'Active'), (0, 'Inactive')),
+                                    verbose_name="Is this role currently active?")
+
     def __str__(self):
         return self.roles
 
@@ -2012,19 +2044,22 @@ class AdminRoles(models.Model):
 
 class AdminTasks(models.Model):
     task = models.CharField(max_length=30, verbose_name="Administration tasks")
-    hyperlink = models.CharField(max_length=100, verbose_name="Task hyperlink", help_text='Only add if necessary', blank='True', null='True')
+    hyperlink = models.CharField(max_length=100, verbose_name="Task hyperlink", help_text='Only add if necessary',
+                                 blank='True', null='True')
     opennew = models.BooleanField(verbose_name="Open In New Tab?", default=False,
                                   choices=((True, 'Yes'), (False, 'No')),
                                   help_text="Please note all Administration Interface Pages should open in a new tab.")
     section = models.IntegerField(help_text='Position of the page link.', verbose_name='position')
     page_name = models.TextField(verbose_name="Page Name", blank="True", null="True")
-    image = models.ImageField(verbose_name = "Task image")
-    alternate = models.TextField(verbose_name = "Alternate text")
+    image = models.ImageField(verbose_name="Task image")
+    alternate = models.TextField(verbose_name="Alternate text")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this task currently active?")
+                                    choices=((1, 'Active'), (0, 'Inactive')),
+                                    verbose_name="Is this task currently active?")
+
     def __str__(self):
         return self.task
 
@@ -2036,15 +2071,17 @@ class AdminPages(models.Model):
     pages = models.CharField(max_length=30, verbose_name="Administration pages")
     hyperlink = models.CharField(max_length=100, verbose_name="Page hyperlinks")
     opennew = models.BooleanField(verbose_name="Open In New Tab?", default=False,
-                                  choices=((True, 'Yes'), (False, 'No')), help_text="Please note all Administration Interface Pages should open in a new tab.")
+                                  choices=((True, 'Yes'), (False, 'No')),
+                                  help_text="Please note all Administration Interface Pages should open in a new tab.")
     section = models.IntegerField(help_text='Position of the page link.',
-                                           verbose_name='position')
+                                  verbose_name='position')
     page_name = models.TextField(verbose_name="Page Name", blank="True", null="True")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active page?")
+
     def __str__(self):
         return self.pages
 
@@ -2242,8 +2279,6 @@ class ImageCarousel(models.Model):
         verbose_name_plural = "Image Carousel Posts"
 
 
-
-
 from io import BytesIO
 from django.core.files import File
 from django.core.files.base import ContentFile
@@ -2407,18 +2442,20 @@ def create_profile(sender, **kwargs):
 post_save.connect(create_profile, sender=User)
 
 
-
 class Feedback(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True,null=True)  # might want to replace item with order
-    #orderitem = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)  # might want to replace item with order
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True,
+                             null=True)  # might want to replace item with order
+    # orderitem = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)  # might want to replace item with order
     order = models.ForeignKey(OrderItem, on_delete=models.CASCADE, blank=True, null=True)
-    #order = models.OneToOneField(OrderItem, on_delete=models.CASCADE, related_name='feedback', null=True)
+    # order = models.OneToOneField(OrderItem, on_delete=models.CASCADE, related_name='feedback', null=True)
     username = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    hyperlink = models.CharField(max_length=200, help_text="Leave field blank, hyperlink will automatically fill with the link to the associated product.")
+    hyperlink = models.CharField(max_length=200,
+                                 help_text="Leave field blank, hyperlink will automatically fill with the link to the associated product.")
     comment = models.TextField()
     feedbackpage = models.TextField(verbose_name="Page Name", blank=True, null=True)
-    slug = models.SlugField(max_length=200, help_text="Leave blank to use corresponding product slug.") #get the actual item slug
-    #unique=True prevents saving, but does not prevent the IntegrityError at /create_review/1/ UNIQUE constraint failed: showcase_feedback.slug
+    slug = models.SlugField(max_length=200,
+                            help_text="Leave blank to use corresponding product slug.")  # get the actual item slug
+    # unique=True prevents saving, but does not prevent the IntegrityError at /create_review/1/ UNIQUE constraint failed: showcase_feedback.slug
     star_rating = models.IntegerField(verbose_name='Star Rating',
                                       validators=[MinValueValidator(1), MaxValueValidator(5)])
     timestamp = models.DateTimeField(default=timezone.now)
@@ -2434,8 +2471,6 @@ class Feedback(models.Model):
     def get_current_username(self):
         User = get_user_model()
         return User.objects.get(pk=self.request.user.pk).username
-
-
 
 
 @receiver(pre_save, sender=Feedback)
