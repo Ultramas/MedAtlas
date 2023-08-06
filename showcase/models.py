@@ -1696,6 +1696,14 @@ class SupportMessage(models.Model):
        if profile:
            return reverse('showcase:profile', args=[str(profile.pk)])
 
+   def get_absolute_url(self):
+       # Construct the URL for the room detail page
+       room_url = reverse("showcase:room", kwargs={'room': self.room})
+
+       # Construct the query parameters
+       final_url = f"{room_url}?username={self.signed_in_user.username}"
+
+       return final_url
 
 # is_active is new
 

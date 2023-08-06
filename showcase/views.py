@@ -1697,76 +1697,67 @@ def getMessages(request, room):
 
 
 
-
 def supportroom(request):
-   username = request.user.username
-   room_details = SupportChat.objects.get(name=username)
-   return render(request, 'supportroom.html', {
-       'username': username,
-       'room': username,
-       'room_details': room_details
-   })
+    username = request.user.username
+    room_details = SupportChat.objects.get(name=username)
+    return render(request, 'supportroom.html', {
+        'username': username,
+        'room': username,
+        'room_details': room_details
+    })
 
 
 def supportchat(request):
-   return render(request, 'supportchat.html')
+    return render(request, 'supportchat.html')
 
 
 def privateroom(request, room):
-   username = request.user.username
-   room_details = Room.objects.get(name=room)
-   return render(request, 'privateroom.html', {
-       'username': username,
-       'room': room,
-       'room_details': room_details
-   })
+    username = request.user.username
+    room_details = Room.objects.get(name=room)
+    return render(request, 'privateroom.html', {
+        'username': username,
+        'room': room,
+        'room_details': room_details
+    })
 
 
 def supportcheckview(request):
-   help = request.POST['help']
-   username = request.user.username
+    help = request.POST['help']
+    username = request.user.username
 
-   if SupportChat.objects.filter(name=username).exists():
-       new_message = SupportMessage.objects.create(value=help,
-                                                   user=username,
-                                                   room=username)
-       new_message.save()
-       return redirect('/supportchat/room')
-   else:
-       new_room = SupportChat.objects.create(name=username)
-       new_room.save()
+    if SupportChat.objects.filter(name=username).exists():
+        new_message = SupportMessage.objects.create(value=help,
+                                                    user=username,
+                                                    room=username)
+        new_message.save()
+        return redirect('/supportchat/room')
+    else:
+        new_room = SupportChat.objects.create(name=username)
+        new_room.save()
 
-       new_message = SupportMessage.objects.create(value=help,
-                                                   user=username,
-                                                   room=username)
-       new_message.save()
-       return redirect('/supportchat/room')
-       print('message sent')
+        new_message = SupportMessage.objects.create(value=help,
+                                                    user=username,
+                                                    room=username)
+        new_message.save()
+        return redirect('/supportchat/room')
+        print('message sent')
 
 
 def supportsend(request):
-   print(23455)
-   message = request.POST['message']
-   username = request.user.username
-   room_id = request.user.username
+    print(23455)
+    message = request.POST['message']
+    username = request.user.username
+    room_id = request.user.username
 
-   new_message = SupportMessage.objects.create(value=message,
-                                               user=username,
-                                               room=room_id)
-   new_message.save()
-   return HttpResponse('Message sent successfully')
+    new_message = SupportMessage.objects.create(value=message,
+                                                user=username,
+                                                room=room_id)
+    new_message.save()
+    return HttpResponse('Message sent successfully')
 
-
-"""def supportgetMessages(request, **kwargs):
-   messages = SupportMessage.objects.filter(room=request.user.username)
-   return JsonResponse({"messages": list(messages.values())})
-"""
 
 def supportgetMessages(request, **kwargs):
-   #room_details = Room.objects.get(name=room)
-   signed_in_user = request.user
-
-   messages = SupportMessage.objects.filter(signed_in_user=signed_in_user)
+   messages = SupportMessage.objects.filter(room=request.user.username)
 
 
    # Prepare the messages data to be sent in the AJAX response
@@ -1790,6 +1781,15 @@ def supportgetMessages(request, **kwargs):
        })
 
    return JsonResponse({'messages': messages_data})
+
+
+
+
+
+"""def supportgetMessages(request, **kwargs):
+   messages = SupportMessage.objects.filter(room=request.user.username)
+   return JsonResponse({"messages": list(messages.values())})
+"""
 
 
 # class post(ListView):
