@@ -4,6 +4,17 @@
 
 {% block content %}
 
+{% block logos %}
+    {% for EBaseView in Logos %}
+    {% if EBaseView.page == 'checkout.html' %}
+        <a class="logo" href="{{ EBaseView.hyperlink }}">
+            <img class="imageicon" src="media/{{ EBaseView.logocover }}" alt="{{ EBaseView.alternate }}"
+                 width="145vh" height="100vh" style="z-index: 100;">
+        </a>
+    {% endif %}
+    {% endfor %}
+{% endblock %}
+
   <main >
     <div class="container wow fadeIn">
       <h2 class="my-5 h2 text-center">Checkout</h2>

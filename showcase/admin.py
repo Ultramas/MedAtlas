@@ -19,6 +19,7 @@ from .models import PostLikes
 from .models import Idea, Comment
 from .models import Profile
 from .models import Room, Message
+from .models import SupportMessage
 from .models import ProfileDetails
 from .models import UserProfile
 from .models import UserProfile2
@@ -72,6 +73,7 @@ from .models import BusinessMailingContact
 from .models import Feedback
 from .models import Order
 from .models import Donate
+from .models import EmailField
 from .models import AdminRoles
 from .models import AdminTasks
 from .models import AdminPages
@@ -160,6 +162,7 @@ admin.site.register(BusinessMailingContact)
 #admin.site.register(BackgroundImages)
 admin.site.register(Coupon)
 #admin.site.register(Feedback)
+admin.site.register(EmailField)
 admin.site.register(AdminRoles)
 admin.site.register(AdminTasks)
 admin.site.register(AdminPages)
@@ -241,6 +244,7 @@ class CommentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Room)
+admin.site.register(SupportMessage)
 admin.site.register(Message)
 admin.site.register(Item)
 #admin.site.register(OrderItem)

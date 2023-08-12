@@ -113,6 +113,18 @@ class Vote(models.Model):
        if profile:
            return reverse('showcase:profile', args=[str(profile.pk)])
 
+class EmailField(models.Model):
+    email = models.EmailField(help_text="Sign up for our newsletter to get the latest news and gossip! We will never share your personal information with anyone without your explicit permission. Unsubscribe at any time. ")
+    confirmation = models.BooleanField(help_text="By clicking this box, I agree to receive emails, coupons and discounts from PokeTrove. I also understand that I may unsubscribe at any time and PokeTrove will not share my personal information with anyone without my explicit permission.")
+    #username = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+    class Meta:
+        verbose_name = "Email"
+        verbose_name_plural = "Emails"
 
 class Product(models.Model):
    """A product in the storefront"""
@@ -695,7 +707,7 @@ class LogoBase(models.Model):
 
    class Meta:
        verbose_name = "Logo"
-       verbose_name_plural = "Logo"
+       verbose_name_plural = "Logos"
 
 
 class BackgroundImageBase(models.Model):
@@ -1546,6 +1558,7 @@ from django.contrib.auth import get_user_model, get_user
 
 class ProfileDetails(models.Model):
    user = models.OneToOneField(User, on_delete=models.CASCADE)
+   email = models.EmailField(blank=True, null=True)
    # username = models.OneToOneField(User, on_delete=models.CASCADE)
    avatar = models.ImageField(upload_to='profile_image', null=True, blank=True, verbose_name="Profile picture")
    alternate = models.TextField(verbose_name="Alternate text")
@@ -1672,6 +1685,7 @@ class SupportMessage(models.Model):
    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
                                       related_name='support_messages',
                                       verbose_name="User")
+
    room = models.CharField(max_length=1000000)  # newly added unique=True
    avatar = models.ImageField(upload_to='profile_image', null=True, blank=True)
    image = models.ImageField(upload_to='images/', null=True, blank=True)
@@ -1680,6 +1694,7 @@ class SupportMessage(models.Model):
                                    null=True,
                                    help_text='1->Active, 0->Inactive',
                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
 
    def save(self, *args, **kwargs):
        if not self.pk:
@@ -1698,12 +1713,13 @@ class SupportMessage(models.Model):
 
    def get_absolute_url(self):
        # Construct the URL for the room detail page
-       room_url = reverse("showcase:room", kwargs={'room': self.room})
+       room_url = 'http://127.0.0.1:8000/supportchat/room'
 
-       # Construct the query parameters
-       final_url = f"{room_url}?username={self.signed_in_user.username}"
+       return room_url
 
-       return final_url
+   class Meta:
+       verbose_name = "Support Message"
+       verbose_name_plural = "Support Messages"
 
 # is_active is new
 

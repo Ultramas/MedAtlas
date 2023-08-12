@@ -1,7 +1,7 @@
 from django import forms
 
 from mysite import settings
-from .models import Idea, OrderItem
+from .models import Idea, OrderItem, EmailField
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -792,3 +792,19 @@ class FeedbackAdmin(admin.ModelAdmin):
         if not change:  # Only set the username for new feedbacks
             obj.username = request.user.username
         super().save_model(request, obj, form, change)
+
+
+class EmailForm(forms.ModelForm):
+    class Meta:
+        model = EmailField
+        fields = ('email', 'confirmation')
+
+    def clean_confirmation(self):
+        confirmation = self.cleaned_data.get('confirmation')
+        if not confirmation:
+            raise forms.ValidationError("You must agree to the terms to continue.")
+        return confirmation
+        # name = forms.CharField(widget = forms.TextInput(attrs={'placeholder':'Enter your first name'}))
+
+        # description = forms.CharField(widget = forms.EmailInput
+        # (attrs={'placeholder':'Enter your email'}))

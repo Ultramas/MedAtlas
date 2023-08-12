@@ -37,6 +37,15 @@
   <br>
 </div>
 
+{% block logos %}
+    {% for EBaseView in Logos %}
+        <a class="logo" href="{{ EBaseView.hyperlink }}">
+            <img class="imageicon" src="media/{{ EBaseView.logocover }}" alt="{{ EBaseView.alternate }}"
+                 width="145vh" height="100vh" style="z-index: 100;">
+        </a>
+    {% endfor %}
+{% endblock %}
+
       <!--Navbar-->
       <div class="navbarbo">
         

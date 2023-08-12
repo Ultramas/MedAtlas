@@ -19,16 +19,17 @@
    {% if user.is_authenticated %}
 
   <body>
-       <header>
+       <header style="z-index: 100; width: 12.2%;">
 
   <div class="column three mobile-twelve section_header_logo vertical-align-middle">
       {% for BaseView in Logo %}
-
+      {% if BaseView.page == 'base.html' %}
      <a class = "logo" href="{{BaseView.hyperlink}}"><img class = "imageicon"  src="media/{{BaseView.logocover}}" alt = "{{BaseView.alternate}}" width="145vh"
-     height="100vh"></a>
-
+     height="100vh" style="z-index: 100;"></a>
+    {% endif %}
 
       {% endfor %}
+
        {% for ChatBackgroundView in Logo %}
             {% if ChatBackgroundView.page == 'home.html' %}
                 {% if not request.path == '/home.html' %}

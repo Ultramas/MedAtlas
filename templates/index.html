@@ -43,6 +43,15 @@
       opacity: 1;
     }
   </style>
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle">
+      {% for BackgroundView in Logo %}
+      {% if BackgroundView.page == 'index.html' %}
+     <a class = "logo" href="{{BackgroundView.hyperlink}}"><img class = "imageicon"  src="media/{{BackgroundView.logocover}}" alt = "{{BackgroundView.alternate}}" width="145vh"
+     height="100vh" style="z-index: 100;"></a>
+    {% endif %}
+
+      {% endfor %}
+    </div>
 </head>
 
 
@@ -721,17 +730,32 @@
         <b>
         <p class="newsletter">Subscribe to our newsletter!</p>
           </b>
-        <form class="emaile" action="/url" method="GET">
+          <form method="POST"  enctype="multipart/form-data" class="post">
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type="submit">Submit</button>
+           <div class="drops">
+               <!--fix the drop classes in style-->
+        <div class="drop drop-1"></div>
+        <div class="drop drop-2"></div>
+        <div class="drop drop-3"></div>
+        <div class="drop drop-4"></div>
+        <div class="drop drop-5"></div>
+     </div>
+  </form>
+
+          <!--<form class="emaile" action="/url" method="GET">
           <div class="input_group">
             <input class="emailbox" type="text" id="username" name="username" minlength="3" maxlength="30" required placeholder="Enter your email address">
         <button type="submit">Submit</button>
           </div>
-       </form>
+       </form>-->
       </div>
     </section>
 
   </div>
 </div>
+     <br><br><br><br><br><br><br><br><br><br><br><br>
     <div class="stripe"></div>
      +.
      ++++++
