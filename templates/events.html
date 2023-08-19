@@ -5,14 +5,14 @@
 {% block title %} Home {% endblock title %}
 
 {% block content %}
-    
+
   {% if user.is_authenticated %}
 <style>
 .profilepicture {
     border-radius: 50px;
   }
 </style>
-<div class="poste1"> 
+<div class="poste1">
 <div class = "search">
 
 <br>
@@ -25,7 +25,7 @@
     <!--<h2>{{ EventBackgroundImage.title }}</h2>-->
       <img class = "ebackgroundimages" src="{{EventBackgroundImage.cover.url}}" alt="{{ EventBackgroundImage.title }}">
   {% endfor %}
-  
+
 <form action="{% url 'showcase:search_results' %}" method="get">
   <input name="q" type="text" placeholder="Search...">
 </form>
@@ -81,8 +81,8 @@
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
-    
-   
+
+
     {% endfor %}
   {% else %}
 <head>

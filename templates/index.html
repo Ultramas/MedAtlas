@@ -21,6 +21,10 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/featuredproductsstyle2.css' %}">
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/landingpagestyling.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'dynamic_css.css' %}">
+
+
   <style>
     /* Add the following styles to your CSS file */
     .chat-window {
@@ -42,8 +46,13 @@
       transform: translateY(0);
       opacity: 1;
     }
+    .mySlidesesesesfade fade{
+    background-image: url('{{ image.image.url }}')
+    width:
+    height:
+      }
   </style>
-    <div class="column three mobile-twelve section_header_logo vertical-align-middle">
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle" style="position: -webkit-sticky; position: sticky; top: 10px; z-index: 100;">
       {% for BackgroundView in Logo %}
       {% if BackgroundView.page == 'index.html' %}
      <a class = "logo" href="{{BackgroundView.hyperlink}}"><img class = "imageicon"  src="media/{{BackgroundView.logocover}}" alt = "{{BackgroundView.alternate}}" width="145vh"
@@ -52,6 +61,24 @@
 
       {% endfor %}
     </div>
+    <style>
+        .background-image {
+            background-image: url('{% for BackgroundImage in background_objects %}
+                                {% if BackgroundImage.position == 1 %}
+                                    {{ BackgroundImage.cover.url }}
+                                {% endif %}
+                            {% endfor %}');
+            /* Additional background properties */
+            background-size: cover;
+            background-repeat: no-repeat;
+            /* Add other CSS properties as needed */
+        }
+        .backgroundimages{
+             background-size: cover;
+            background-repeat: no-repeat;
+            z-index: -10;
+        }
+    </style>
 </head>
 
 
@@ -75,6 +102,7 @@
        {% if image.page == 'index.html' and image.image_position == 1 %}
 <!--        <div class="containereggspacing" style="background-image: url('{{ image.image.url }}'); height: {{ image.length_for_resize }}; width: {{ image.width_for_resize }}; background-repeat: no-repeat;">
     -->
+
       <div class="containereggspacing">
       <img src="{{ image.image.url }}" alt="{{ image.title }}" height="{{image.length_for_resize}}" width="{{image.width_for_resize}}"style="position: absolute; top: 0; left: 0; z-index: -1;">
             <h3 class="primaried-title" style="z-index: 2">Accomfort</h3>
@@ -88,10 +116,22 @@
         <br>
 
 <!-- Slideshow container -->
-<div class="slideshow-container" id="featuredproducts">
+<div class="slideshow-container" id="featuredproducts" style="z-index:-10;">
+
+
+      <div class="backgroundimages">
+      {% for BackgroundImage in Background %}
+        {% if BackgroundImage.page == "index.html" %}
+          {% if BackgroundImage.position == 1 %}
+
+            <img src=" {{BackgroundImage.cover.url}}" alt="{{BackgroundImage.backgroundtitle}}" style="z-index:-10; position: absolute;"> <!--flex to be behind the carousel code-->
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+          </div>
 
   <!-- Full-width images with number and caption text -->
-  <div class="mySlidesesesesfade fade">
+  <div class="mySlidesesesesfade fade" style="z-index:3;">
     <div class="numbertext">1 / 9</div>
 
     {% for BackgroundImage in Carousel %}
@@ -111,7 +151,7 @@
 
     <div class="text">Caption Text</div>
   </div>
-  <div class="mySlidesesesesfade fade">
+  <div class="mySlidesesesesfade fade" style="z-index:3;">
     <div class="numbertext">2 / 9</div>
      {% for BackgroundImage in Carousel %}
              {% for carouselposition in Carousel %}
@@ -128,7 +168,7 @@
   {% endfor %}
 {% endfor %}
   </div>
-  <div class="mySlidesesesesfade fade">
+  <div class="mySlidesesesesfade fade" style="z-index:3;">
     <div class="numbertext">3 / 9</div>
       {% for BackgroundImage in Carousel %}
              {% for carouselposition in Carousel %}
@@ -146,7 +186,7 @@
 {% endfor %}
   </div>
 
-  <div class="mySlidesesesesfade fade">
+  <div class="mySlidesesesesfade fade" style="z-index:3;">
     <div class="numbertext">4 / 9</div>
       {% for BackgroundImage in Carousel %}
              {% for carouselposition in Carousel %}
@@ -163,7 +203,7 @@
   {% endfor %}
 {% endfor %}
   </div>
-  <div class="mySlidesesesesfade fade">
+  <div class="mySlidesesesesfade fade" style="z-index:3;">
     <div class="numbertext">5 / 9</div>
       {% for BackgroundImage in Carousel %}
              {% for carouselposition in Carousel %}
@@ -180,7 +220,7 @@
   {% endfor %}
 {% endfor %}
   </div>
- <div class="mySlidesesesesfade fade">
+ <div class="mySlidesesesesfade fade" style="z-index:3;">
     <div class="numbertext">6 / 9</div>
      {% for BackgroundImage in Carousel %}
              {% for carouselposition in Carousel %}
@@ -197,7 +237,7 @@
   {% endfor %}
 {% endfor %}
   </div>
-  <div class="mySlidesesesesfade fade">
+  <div class="mySlidesesesesfade fade" style="z-index:3;">
     <div class="numbertext">7 / 9</div>
       {% for BackgroundImage in Carousel %}
              {% for carouselposition in Carousel %}
@@ -214,7 +254,7 @@
   {% endfor %}
 {% endfor %}
   </div>
-  <div class="mySlidesesesesfade fade">
+  <div class="mySlidesesesesfade fade" style="z-index:3;">
     <div class="numbertext">8 / 9</div>
       {% for BackgroundImage in Carousel %}
              {% for carouselposition in Carousel %}
@@ -231,7 +271,7 @@
   {% endfor %}
 {% endfor %}
   </div>
-  <div class="mySlidesesesesfade fade">
+  <div class="mySlidesesesesfade fade" style="z-index:3;">
     <div class="numbertext">9 / 9</div>
       {% for BackgroundImage in Carousel %}
              {% for carouselposition in Carousel %}
@@ -359,33 +399,34 @@
 
     <div class="featuredeee">
        <div class="containertree">
-        <h2 class="sectioninged-title">Featured Products</h2>
+        <h2 class="sectioninged-title">Hot New Products</h2>
         <div class="split">
-          <a href="#feature" class="featured__item">
+            <!--
+          <a href="#feature" class="featured__item">-->
               <!--Section: Products v.3-->
-      <section class="text-center mb-4">
+      <!--<section class="text-center mb-4">-->
 
         <!--Grid row-->
-        <div class="row wow fadeIn">
-          {% for item in items %}
+       <!-- <div class="row wow fadeIn">
+          {% for item in items %}-->
           <!--Grid column-->
-          <div class="col-lg-3 col-md-6 mb-4">
-
+         <!-- <div class="col-lg-3 col-md-6 mb-4">
+-->
             <!--Card-->
-            <div class="card">
+           <!-- <div class="card">-->
               <!--Card image-->
-              <div class="view overlay">
+              <!-- <div class="view overlay">
                 <a href="{{ item.get_absolute_url }}">
       <img class = "hunt" src="{{item.image.url}}" class="card-img-top" alt="{{ item.image.url }}" >
                   <div class="mask rgba-white-slight"></div>
                 </a>
-              </div>
+              </div>-->
               <!--Card image-->
-              <!--Card content-->
+              <!--Card content--><!--
 <a href="{{ item.get_absolute_url }}" class="grey-text">
-              <div class="card-body text-center">
+              <div class="card-body text-center">-->
                 <!--Category & Title-->
-
+<!--
                   <h5 class = "itemtitle">{{item.title}}</h5>
 
                 <h5 class = "itemtitle">
@@ -412,45 +453,49 @@
                   </strong>
                 </h4>
 
-              </div>
+              </div>-->
               <!--Card content-->
 
-            </div>
+          <!--  </div>-->
+
             <!--Card-->
 
-          </div>
-          <!--Grid column-->
+        <!--  </div>-->
+
+          <!--Grid column--><!--
 </a>          {% endfor %}
 
 
-        </div>
+        </div>-->
         <!--Grid row-->
-
+<!--
       </section>
 
 
           </a>
-
-<!--new item additions-->
+-->
+<!--new item additions based on "label" category-->
            {% for product in Products %}
-    {% if product.image_url %}
-          <a href="{{ product.hyperlink }}" class="featured__item">
-         <img src="{{ product.image_url }}" alt="Profile Picture" class="featured__img" style="height: 300px; width: 300px; border-radius: 0px;">
-            <p class="featured__details">
-                <span class="price">
-                  ${% if product.discount_price %}
-                  {{ product.discount_price }}
-                  {% else %}
-                  {{ product.price }}
-              {% endif %}
-                </span>{{product.title}}</p>
 
-          </a>
-            {% else %}
+           {% if product.label == "N" %}
+            {% if product.image_url %}
+                  <a href="{{ product.hyperlink }}" class="featured__item">
+                     <img src="{{ product.image_url }}" alt="Profile Picture" class="featured__img" style="height: 300px; width: 300px; border-radius: 0px;">
+                        <p class="featured__details">
+                            <span class="price">
+                              ${% if product.discount_price %}
+                              {{ product.discount_price }}
+                              {% else %}
+                              {{ product.price }}
+                          {% endif %}
+                            </span>{{product.title}}</p>
+                  </a>
+                    {% else %}
     <!-- Placeholder image or default avatar -->
             <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
-         {% endif %}
-        {% endfor %}
+             {% endif %}
+            {% endif %}
+            {% endfor %}
         </div>
       </div>
     </div>
@@ -458,8 +503,119 @@
      <!--older product item selection-->
     <div class="our-products">
         <div class="container">
-        <h2 class="section-title">Our Products</h2>
+            <b>
+        <h1 class="section-title">Popular Featured Products</h1>
+
 <!--have the products be an extension of the ecommerce posting section--->
+                    {% for product in Products %}
+
+           {% if product.label == "BS" %}
+            {% if product.image_url %}
+
+                    <div class="product shoe-red spacing">
+                        <a href="{{ product.hyperlink }}" class="featured__item">
+           <img src="{{ product.image_url }}" alt="Profile Picture" class="featured__img" style="height: 300px; width: 300px; border-radius: 0px;">
+           <p class="featured__details">
+                            <span class="price">
+                              ${% if product.discount_price %}
+                              {{ product.discount_price }}
+                              {% else %}
+                              {{ product.price }}
+                          {% endif %}
+                            </span>{{product.title}}</p>
+                  </a>
+          <p class="product__description">{{product.description}}</p>
+                        </a>
+          <a href="{{ product.hyperlink }}" class="btntrees">Buy now</a>
+        </div>
+ {% else %}
+    <!-- Placeholder image or default avatar -->
+                <div class="product shoe-red spacing">
+          <img src="static/css/images/h.jpg" alt="" class="product__image">
+          <h3 class="product__title">A really nice shoe</h3>
+          <p class="product__description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa quam
+            perspiciatis facilis beatae laudantium quidem enim sit sequi!</p>
+          <a href="" class="btntrees">Buy now</a>
+        </div>
+
+             {% endif %}
+            {% endif %}
+            {% endfor %}
+
+
+                    <div class="events">
+        <div class="container">
+            <b>
+        <h1 class="section-title">Upcoming Events</h1>
+
+<!--have the products be an extension of the ecommerce posting section--->
+                    {% for events in NewEvents %}
+
+
+            {% if events.image_url %}
+
+                    <div class="product shoe-red spacing">
+                        <a href="{{ events.hyperlink }}" class="featured__item">
+           <img src="{{ events.image_url }}" alt="Profile Picture" class="featured__img" style="height: 300px; width: 300px; border-radius: 0px;">
+           <p class="featured__details">
+                            <span class="price">
+                              {{ events.name }}
+                            </span></p>
+
+          <p class="product__description">{{events.description}}</p>
+                        </a>
+        </div>
+ {% else %}
+    <!-- Placeholder image or default avatar -->
+                <div class="product shoe-red spacing">
+          <img src="static/css/images/h.jpg" alt="" class="product__image">
+          <h3 class="product__title">A really nice shoe</h3>
+          <p class="product__description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa quam
+            perspiciatis facilis beatae laudantium quidem enim sit sequi!</p>
+          <a href="" class="btntrees">Buy now</a>
+        </div>
+
+             {% endif %}
+            {% endfor %}
+
+                 <div class="newsfeed">
+        <div class="container">
+            <b>
+        <h1 class="section-title">News Feed</h1>
+
+<!--have the products be an extension of the ecommerce posting section--->
+                    {% for news in newsfeeds %}
+
+
+            {% if news.image_url %}
+
+                      <p class="blog-text">
+                   <p class="card-text">{{news.content|slice:":200" }}...</p>
+                <br>
+                <a href="{% url 'showcase:newsfeed' news.slug  %}" class="btn btn-primary">Read More &rarr;</a>
+
+
+                </p>
+<br>
+
+          <p class="product__description">{{news.description}}</p>
+                        </a>
+        </div>
+
+ {% else %}
+    <!-- Placeholder image or default avatar -->
+                <div class="product shoe-red spacing">
+          <img src="static/css/images/h.jpg" alt="" class="product__image">
+          <h3 class="product__title">A really nice shoe</h3>
+          <p class="product__description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa quam
+            perspiciatis facilis beatae laudantium quidem enim sit sequi!</p>
+          <a href="" class="btntrees">Buy now</a>
+        </div>
+
+             {% endif %}
+            {% endfor %}
+<!--
+
         <div class="product shoe-red spacing">
           <img src="static/css/images/h.jpg" alt="" class="product__image">
           <h3 class="product__title">A really nice shoe</h3>
@@ -483,12 +639,13 @@
             perspiciatis facilis beatae laudantium quidem enim sit sequi!</p>
           <a href="" class="btntrees">Buy now</a>
         </div>
+-->
+            </b>
 
       </div>
     </div>
 
-
-
+<br><br><br><br><br><br><br><br><br><br><br><br>
 <div class = "about_us">
   <div class = "about">
     <div class=stripelineabout>

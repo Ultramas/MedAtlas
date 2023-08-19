@@ -10,6 +10,34 @@ from django.dispatch import receiver
 # from image.utils import render
 
 
+# from django.db.models.signals import post_save
+from django.conf import settings
+from django.db.models import Sum
+from django.shortcuts import reverse, get_object_or_404, render
+from django_countries.fields import CountryField
+
+CATEGORY_CHOICES = (
+   ('G', 'Gold'),
+   ('P', 'Platinum'),
+   ('E', 'Emerald'),
+   ('D', 'Diamond'),
+)
+
+LABEL_CHOICES = (
+   ('N', 'New'),
+   ('BS', 'Best Seller'),
+   ('BV', 'Best Value'),
+)
+
+TYPE_CHOICES = (('S', 'Singles'), ('BP', 'Booster Pack'),
+               ('BB', 'Booster Box'), ('PP', 'Pokemon Product'), ('O',
+                                                                  'Other'))
+
+ADDRESS_CHOICES = (
+   ('B', 'Billing'),
+   ('S', 'Shipping'),
+)
+
 class Idea(models.Model):
    """Model for sharing ideas and getting user feedback"""
    user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -135,6 +163,7 @@ class Product(models.Model):
                                    help_text='1->Active, 0->Inactive',
                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
    description = models.TextField()
+   #label = models.CharField(choices=LABEL_CHOICES, max_length=1000)  # can use for cataloging products
    mfg_date = models.DateTimeField(auto_now_add=True)
    rating = models.CharField(max_length=1, choices=[('b', 'Bad'), ('a', 'Average'), ('e', 'Excellent')])
 
@@ -346,9 +375,11 @@ class NewsFeed(models.Model):
    user = models.ForeignKey(User, on_delete=models.CASCADE)
    name = models.CharField(max_length=100,
                            help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
+   slug = models.SlugField(max_length=200, unique=True)
    category = models.CharField(max_length=200, help_text='Please let us know what form of news this is.')
    description = models.TextField(help_text='Write the news here.')
    image = models.ImageField(help_text='Please provide a cover image for the news.')
+   date_and_time = models.DateTimeField(null=True, verbose_name="time and date")
    anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
    is_active = models.IntegerField(default=1,
                                    blank=True,
@@ -370,6 +401,11 @@ class NewsFeed(models.Model):
                self.position = profile.position
 
        super().save(*args, **kwargs)
+
+   def get_absolute_url(self):
+       from django.urls import reverse
+
+       return reverse("showcase:news", kwargs={"slug": str(self.slug)})
 
    def get_profile_url(self):
        profile = ProfileDetails.objects.filter(user=self.user).first()
@@ -422,6 +458,7 @@ class Event(models.Model):
                                help_text='Please let us know what type of event this is (tournament, stage night, etc).')
    description = models.TextField(help_text='Give a brief description of the event.')
    date_and_time = models.DateTimeField(null=True, verbose_name="time and date")
+   slug = models.SlugField()
    anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
    image = models.ImageField(help_text='Please provide a cover image for the event.')
    is_active = models.IntegerField(default=1,
@@ -442,6 +479,9 @@ class Event(models.Model):
        super().save(*args, **kwargs)
 
    def get_profile_url(self):
+       return reverse('showcase:eventmore', args=[str(self.slug)])
+
+   def get_profile_url2(self):
        profile = ProfileDetails.objects.filter(user=self.user).first()
        if profile:
            return reverse('showcase:profile', args=[str(profile.pk)])
@@ -486,7 +526,7 @@ class PatreonBackgroundImage(models.Model):
 class Partner(models.Model):
    user = models.ForeignKey(User, on_delete=models.CASCADE)
    name = models.CharField(max_length=100, help_text='Your server name goes here.')
-   catagory = models.CharField(max_length=100,
+   category = models.CharField(max_length=100,
                                help_text='Pick a category you feel your server represents (gaming, community, etc).')
    description = models.TextField(help_text='Describe your server. Tell potential members why they should join.')
    server_invite = models.URLField(help_text='Post your server invite link here.')
@@ -1723,33 +1763,6 @@ class SupportMessage(models.Model):
 
 # is_active is new
 
-# from django.db.models.signals import post_save
-from django.conf import settings
-from django.db.models import Sum
-from django.shortcuts import reverse, get_object_or_404, render
-from django_countries.fields import CountryField
-
-CATEGORY_CHOICES = (
-   ('G', 'Gold'),
-   ('P', 'Platinum'),
-   ('E', 'Emerald'),
-   ('D', 'Diamond'),
-)
-
-LABEL_CHOICES = (
-   ('N', 'New'),
-   ('BS', 'Best Seller'),
-   ('BV', 'Best Value'),
-)
-
-TYPE_CHOICES = (('S', 'Singles'), ('BP', 'Booster Pack'),
-               ('BB', 'Booster Box'), ('PP', 'Pokemon Product'), ('O',
-                                                                  'Other'))
-
-ADDRESS_CHOICES = (
-   ('B', 'Billing'),
-   ('S', 'Shipping'),
-)
 
 
 class UserProfile(models.Model):
@@ -1818,7 +1831,7 @@ class Item(models.Model):
        super().save(*args, **kwargs)
 
    def get_profile_url(self):
-       return reverse('showcase:profile', args=[str(self.slug)])
+       return reverse('showcase:product', args=[str(self.slug)])
 
 
 class EBackgroundImage(models.Model):
