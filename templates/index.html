@@ -581,18 +581,18 @@
                  <div class="newsfeed">
         <div class="container">
             <b>
-        <h1 class="section-title">News Feed</h1>
+                <h1 class="section-title">News Feed</h1></b>
 
 <!--have the products be an extension of the ecommerce posting section--->
                     {% for news in newsfeeds %}
 
 
             {% if news.image_url %}
-
                       <p class="blog-text">
-                   <p class="card-text">{{news.content|slice:":200" }}...</p>
+            <img src="{{news.image_url}}" alt="{{news.category}}">
+                   <p class="card-text" style="color: black">{{news.description|slice:":200" }}...</p>
                 <br>
-                <a href="{% url 'showcase:newsfeed' news.slug  %}" class="btn btn-primary">Read More &rarr;</a>
+                <a href="{% url 'showcase:newsfeed' %}" class="btn btn-primary" style="color: black">Read More &rarr;</a>
 
 
                 </p>

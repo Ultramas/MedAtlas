@@ -569,65 +569,69 @@ from django.template.defaultfilters import slugify
 
 
 class Blog(models.Model):
-   """Each blog post"""
-   title = models.CharField(max_length=200, unique=True)
-   slug = models.SlugField(max_length=200, unique=True)
-   author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
-   updated_on = models.DateTimeField(auto_now=True, verbose_name="updated on: ")
-   content = models.TextField()
-   created_on = models.DateTimeField(auto_now_add=True)
-   status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=0)
-   image = models.ImageField(upload_to='images/')
-   likes = models.ManyToManyField(User, blank=True, verbose_name='post likes')
-   # likes = models.IntegerField(default=0)
-   dislikes = models.ManyToManyField(User, blank=True, verbose_name='post dislikes', related_name="post_dislikes")
-   # url = models.SlugField(max_length=200, unique=True, blank=True)
-   # blogbackgroundimage
-   is_active = models.IntegerField(default=1,
-                                   blank=True,
-                                   null=True,
-                                   help_text='1->Active, 0->Inactive',
-                                   choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+    """Each blog post"""
+    title = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200, unique=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
+    updated_on = models.DateTimeField(auto_now=True, verbose_name="updated on: ")
+    content = models.TextField()
+    created_on = models.DateTimeField(auto_now_add=True)
+    status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=0)
+    image = models.ImageField(upload_to='images/')
+    likes = models.ManyToManyField(User, blank=True, verbose_name='post likes')
+    # likes = models.IntegerField(default=0)
+    dislikes = models.ManyToManyField(User, blank=True, verbose_name='post dislikes', related_name="post_dislikes")
+    # url = models.SlugField(max_length=200, unique=True, blank=True)
+    # blogbackgroundimage
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
-   class Meta:
-       verbose_name = "Blog Entry"
-       verbose_name_plural = "Blog Entries"
-       ordering = ['-created_on']
+    class Meta:
+        verbose_name = "Blog Entry"
+        verbose_name_plural = "Blog Entries"
+        ordering = ['-created_on']
 
-   #    def save(self, *args, **kwargs):
-   #        self.url = slugify(self.title)
-   #        super(Blog, self).save(*args, **kwargs)
+    #    def save(self, *args, **kwargs):
+    #        self.url = slugify(self.title)
+    #        super(Blog, self).save(*args, **kwargs)
 
-   def save(self, *args, **kwargs):
-       if not self.pk:
-           # Get the associated ProfileDetails for the donor
-           profile = ProfileDetails.objects.filter(user=self.author_id).first()
+    def save(self, *args, **kwargs):
+        self.url = slugify(self.title)
 
-           # Set the position to the position value from the associated ProfileDetails
-           if profile:
-               self.position = profile.position
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.author_id).first()
 
-   def get_profile_url(self):
-       profile = ProfileDetails.objects.filter(user=self.author_id).first()
-       if profile:
-           return reverse('showcase:profile', args=[str(profile.pk)])
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
 
-   def __str__(self):
-       return self.title
+        super().save(*args, **kwargs)
 
-   def get_absolute_url(self):
-       from django.urls import reverse
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.author_id).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
 
-       return reverse("showcase:post_detail", kwargs={"slug": str(self.slug)})
+    def __str__(self):
+        return self.title
 
-   def comment_count(self):
-       return Comment.objects.filter(post=self).count()
+    def get_absolute_url(self):
+        from django.urls import reverse
 
-   def view_count(self):
-       return Blog.objects.filter(post=self).count()
+        return reverse("showcase:post_detail", kwargs={"slug": str(self.slug)})
 
-   # def number_of_likes(self):
-   #    return self.likes.count()
+    def comment_count(self):
+        return Comment.objects.filter(post=self).count()
+
+    def view_count(self):
+        return Blog.objects.filter(post=self).count()
+
+    # def number_of_likes(self):
+    #    return self.likes.count()
 
 
 class Preference(models.Model):

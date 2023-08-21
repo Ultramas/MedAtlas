@@ -149,6 +149,7 @@ urlpatterns = [
     # path('staff/', views.staffview.as_view(), name='staff'),
     # path('events/', views.eventview.as_view(), name='events'),
     path('events/', views.EventBackgroundView.as_view(), name='events'),
+    path('event/<slug:slug>/', views.EventBackgroundView.as_view(), name='post_detail'),
     path('eventmore/<slug:slug>/', views.EventBackgroundView.as_view(), name='eventmore'),
     # path('blog/', views.BlogBackgroundView, name='blog'),
     path('featuredproducts/', views.Featured.as_view(), name='featuredproducts'),
