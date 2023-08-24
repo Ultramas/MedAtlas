@@ -137,7 +137,7 @@ from django.views.generic.edit import FormMixin
 
 import pdb
 from django.core.mail import send_mail, BadHeaderError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from .forms import ContactForm
 from .forms import BusinessContactForm
 from .forms import BusinessMailingForm
@@ -897,6 +897,7 @@ class BackgroundView(FormMixin, BaseView):
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['Email'] = EmailField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
         # context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
         print(FaviconBase.objects.all())
         print(213324)
@@ -942,6 +943,20 @@ class BackgroundView(FormMixin, BaseView):
                 news.image_url = newsfeeding.image.url
                 news.hyperlink = newsfeeding.get_profile_url()
                 news.description = newsfeeding.description
+
+        feed = Feedback.objects.filter(is_active=1).order_by('-timestamp')
+
+        context['FeedBacking'] = feed
+
+        for feed in context['FeedBacking']:
+            user = feed.username
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                feed.user_profile_picture_url = profile.avatar.url
+                feed.user_profile_url = feed.get_profile_url()
+
+
+
         return context
 
 def dynamic_css(request):
@@ -967,11 +982,30 @@ class EBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['items'] = Item.objects.filter(is_active=1)
+
+        total_items = Item.objects.filter(is_active=1).count()
+
+        # Get the paginate_by value from the form data or settings
+        paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
+
+        items_query = Item.objects.filter(is_active=1)
+        paginator = Paginator(items_query, paginate_by)
+        page_number = self.request.GET.get('page')
+        paginated_items = paginator.get_page(page_number)
+
+        context['items'] = paginated_items
+
+        #context['items'] = Item.objects.filter(is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        items_query = Item.objects.filter(is_active=1)
+        paginator = Paginator(items_query, paginate_by)
+        page_number = self.request.GET.get('page')
+        paginated_items = paginator.get_page(page_number)
+
+        context['items'] = paginated_items
         return context
 
 
@@ -4059,7 +4093,7 @@ def review(request, slug):
         "form": form,
 
     }
-    return render(request, 'company_reviews.html', context)
+    return render(request, 'reviews.html', context)
 
 
 def index(request):
@@ -4265,7 +4299,7 @@ class FeedbackView(LoginRequiredMixin, FormView):
             context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
             context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
             context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
-            context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
+            context['Feed'] = Feedback.objects.filter(is_active=1).order_by("slug")
             context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
             context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
             context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
@@ -4301,6 +4335,51 @@ class FeedbackView(LoginRequiredMixin, FormView):
 
         messages.success(request, 'Your feedback has been submitted successfully.')
         return redirect('showcase:feedbackfinish')
+
+
+class ReviewView(BaseView):
+    model = ShowcaseBackgroundImage
+    template_name = "reviews.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        #context['Feed'] = Feedback.objects.filter(is_active=1).order_by("slug")
+        # Retrieve the item
+
+        product = Item.objects.filter(is_active=1)
+
+        context['Products'] = product
+
+        for product in context['Products']:
+            image = product.image
+            item = Item.objects.filter(slug=product.slug).first()
+            if product:
+                product.title = item.title
+                product.price = item.price
+                product.discount_price = item.discount_price
+                product.image_url = item.image.url
+                product.hyperlink = item.get_profile_url()
+
+        feeder = Feedback.objects.filter(is_active=1).order_by('-timestamp')
+
+        context['FeedBacking'] = feeder
+
+        for feeder in context['FeedBacking']:
+            user = feeder.username
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                feeder.user_profile_picture_url = profile.avatar.url
+                feeder.user_profile_url = feeder.get_profile_url()
+
+                print('imgsrcimg')
+
+
+
+        return context
 
 
 """
@@ -4603,6 +4682,8 @@ def edit_feedback(request, feedback_id):
 
     return render(request, 'create_review.html', {'form': form})
 
+from django.utils.text import slugify
+from urllib.parse import quote
 
 class OrderHistory(ListView):
     model = Order
@@ -4610,7 +4691,31 @@ class OrderHistory(ListView):
     context_object_name = 'order'
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+        user = self.user  # Assuming you've set the user attribute in the dispatch method
+        return OrderItem.objects.filter(user=user, is_active=1)
+
+    def dispatch(self, request, *args, **kwargs):
+        username = self.kwargs['username']
+        normalized_username = slugify(username)  # Normalize the username to a slug
+        encoded_username = quote(normalized_username)
+
+        # Encode the username before querying the database
+        encoded_db_username = quote(username)
+
+        user = get_object_or_404(User, username__iexact=encoded_db_username)
+
+        if user == request.user or request.user.is_staff:
+            self.user = user
+            return super().dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden("Access denied.")
+        #consider a return redirect to a 404 page-access denied
+
+    @staticmethod
+    def encoded_user(request, username):
+        encoded_username = quote(username)
+        encoded_url = reverse('order_history', args=[encoded_username])
+        return encoded_url
 
     def get_context_data(self, **kwargs):
         user = self.request.user
@@ -4623,6 +4728,7 @@ class OrderHistory(ListView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['items'] = Item.objects.all()
         context['feedback'] = Feedback.objects.all()
+        #context['orders'] = OrderItem.objects.filter(user=self.request.user)
         print(user)
 
         # Retrieve the author's profile avatar
@@ -4637,8 +4743,26 @@ class OrderHistory(ListView):
                 items.author_profile_picture_url = profile.avatar.url
                 items.author_profile_url = items.get_profile_url()
 
-        return context
+        order = OrderItem.objects.filter(is_active=1)
+        context['orders'] = order
 
+        for order in context['orders']:
+            image = order.image
+            itemed = order  # Use the current order instead of querying again
+            user = self.request.user
+            profile = ProfileDetails.objects.filter(user=user).first() # Fetch the profile for the current user
+            if order:
+                order.image_url = order.image.url
+                order.author_profile_url = order.get_profile_url()
+                #order.hyperlink = itemed.get_profile_url()
+                print(order.author_profile_url)
+                print("I have a viable order.")
+            if profile:
+                order.author_profile_picture_url = profile.avatar.url
+                order.profile_url = order.get_profile_url2()
+
+
+        return context
 
 def sociallogin(request):
     return render(request, 'registration/sociallogin.html')

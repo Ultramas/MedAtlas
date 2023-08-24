@@ -85,67 +85,26 @@
         <div class="row wow fadeIn">eee
           {% for order in orders %}
             mml
-            <h3>Product Name: {{ order.items }}</h3>
-            <h4> Order date: {{ order.ordered_date }}</h4>
+            <div class="orderhistory" style="margin-top: 10%; justify-content: center; margin-left: auto; margin-right: auto;">
+    <!--order.author_profile_picture_url does not exist-->
 
-          <!--Grid column-->
-            {% for item in items %}
-          <div class="col-lg-3 col-md-6 mb-4">
+                {% if order.author_profile_picture_url %}
+                <a href="{{order.profile_url}}">
+                    <h2>{{user.username}}</h2>
+                <img src="{{ order.author_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
+                    </a>
+                {% else %}
+                <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
+                {% endif %}
+<a href="{{ order.author_profile_url }}">
 
-            <!--Card-->
-            <div class="card">
-              <!--Card image-->
-              <div class="view overlay">
-                <a href="{{ order.get_absolute_url }}">
-                    <img src="{{ order.itemhistory.image.url }}" alt="Product Image"> <!--the alt="Product Image causes the false image & the alternate text-->
-      <img class = "hunt" src="{{item.image.url}}" class="card-img-top"
-                  alt="{{ item.image.url }}">
-                  <div class="mask rgba-white-slight"></div>
-                </a>
-              </div>
-              <!--Card image-->
-              <!--Card content-->
-<a href="{{ item.get_absolute_url }}" class="grey-text">
-              <div class="card-body text-center">
-                <!--Category & Title-->
-                        
-                  <h5 class = "itemtitle">{{item.title}}</h5>
-                
-                <h5 class = "itemtitle">
-                  <strong>
-                    {{ item.item_name }}
-                      <span class="badge badge-pill {% if item.get_label_display == 'New' %} danger-color {% else %} primary-color {% endif %}">{{ item.get_label_display }}</span>
-                   
-                  </strong>
-                </h5>
-
-                <h4 class="font-weight-bold blue-text">
-                  <strong>$
-                  {% if item.discount_price %}
-                  {{ item.discount_price }}
-                  {% else %}
-                  {{ item.price }}
-                  <br>
-                    <br>
-       
-                    <a href = "{{ item.get_absolute_url }}">Buy Now</a>
+            <h3>Product Name: {{ order.item }}</h3>
             <br>
-                  <br>
-                  {% endif %}
-                  </strong>
-                </h4>
-
-              </div>
-              <!--Card content-->
-</a>
-            </div>
-            <!--Card-->
-
-          </div>
-          <!--Grid column-->
-</a>
-          {% endfor %}
-         
+            <h4>Order Date: {{ order.order_date }}</h4>
+            <img src="{{order.image.url}}" alt="{{order.item}}">
+            <br>
+                    </a>
+                </div>
 {% endfor %}
         </div>
         <!--Grid row-->

@@ -263,4 +263,6 @@ CSRF_TRUSTED_ORIGINS = [
 
 ]
 
+DEFAULT_PAGINATE_BY = 10
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

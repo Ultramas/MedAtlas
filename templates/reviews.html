@@ -48,17 +48,16 @@
 
 
 
-<body>sss
+<body>
 
-
-    {% for feedback in Feed %}
-    kk
-        {% for slug in Feed %}
-ee
-
-                   {% if Feedback.item == Item.item %}jjjj
-                   <a href="{{feed.user_profile_picture_url}}"><!--{{ product.hyperlink }}-->
+m;l
+    {% for feeder in FeedBacking %}
+wefrged
+<div class="reviews" style="margin-top: 15%;" >
+                   <a href="{{feeder.user_profile_picture_url}}"><!--{{ product.hyperlink }}-->
                        {{Feedback.user.username }}
+                       </a>
+    <a href="feeder.user_profile_url">
                        {{Feedback.item.title}}
                        </a>
                        {% if Feedback.star_rating == 1 %}
@@ -81,7 +80,7 @@ ee
                             <!--show a picture of the star rating-->
                        </a>
                         {% endif %}
-    {% endif %}
+
                         {% if Feedback.star_rating == 5 %}
                        <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "{{ Feedback.star_rating }}">
                             <!--show a picture of the star rating-->
@@ -89,8 +88,8 @@ ee
                         {% endif %}
                         <h3>{{ Feedback.star_rating }}</h3>
                     <h3>{{Feedback.comment}} </h3>
+</div>
 
-  {% endfor %}
 {% endfor %}
 </body>
 </html>

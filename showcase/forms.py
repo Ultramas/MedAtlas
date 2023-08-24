@@ -768,10 +768,11 @@ class FeedbackForm(forms.ModelForm):
     star_rating = forms.ChoiceField(choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')])
     comment = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Outstanding!'}))
     order = forms.ModelChoiceField(queryset=None)
+    image = forms.ImageField(required=False)
 
     class Meta:
         model = Feedback
-        fields = ('order', 'star_rating', 'comment', 'slug')
+        fields = ('order', 'star_rating', 'comment', 'slug', 'image')
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)

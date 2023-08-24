@@ -504,7 +504,7 @@
     <div class="our-products">
         <div class="container">
             <b>
-        <h1 class="section-title">Popular Featured Products</h1>
+        <h1 class="section-title" style="width: 200%">Popular Featured Products</h1>
 
 <!--have the products be an extension of the ecommerce posting section--->
                     {% for product in Products %}
@@ -543,10 +543,10 @@
             {% endfor %}
 
 
-                    <div class="events">
-        <div class="container">
+                    <div class="events" style="width: 100%; text-align: center;">
+        <div class="container" style="width: 100%; text-align: center;">
             <b>
-        <h1 class="section-title">Upcoming Events</h1>
+        <h1 class="section-title" style="width: 100%; text-align: center;">Upcoming Events</h1>
 
 <!--have the products be an extension of the ecommerce posting section--->
                     {% for events in NewEvents %}
@@ -579,9 +579,9 @@
             {% endfor %}
 
                  <div class="newsfeed">
-        <div class="container">
+        <!--<div class="container">-->
             <b>
-                <h1 class="section-title">News Feed</h1></b>
+                <h1 class="section-title" style="text-align: center;">News Feed</h1></b>
 
 <!--have the products be an extension of the ecommerce posting section--->
                     {% for news in newsfeeds %}
@@ -606,7 +606,7 @@
     <!-- Placeholder image or default avatar -->
                 <div class="product shoe-red spacing">
           <img src="static/css/images/h.jpg" alt="" class="product__image">
-          <h3 class="product__title">A really nice shoe</h3>
+          <h3 class="product__title" style="text-align: center;">No News</h3>
           <p class="product__description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa quam
             perspiciatis facilis beatae laudantium quidem enim sit sequi!</p>
           <a href="" class="btntrees">Buy now</a>
@@ -614,6 +614,10 @@
 
              {% endif %}
             {% endfor %}
+                    <h1 style="text-align: center;">Want To Become A Member?</h1>
+            <a href="{% url 'showcase:cv-form' %}">
+                <button class="button button1">Sign Up Now!</button>
+            </a>
 <!--
 
         <div class="product shoe-red spacing">
@@ -900,6 +904,26 @@
         <div class="drop drop-5"></div>
      </div>
   </form>
+          <div class="supportsystems" style="margin-top: 50px;">
+              <h3>Contact Us</h3>
+              <div class="supportchat">
+                   <a href="{% url 'showcase:supportchat' %}">
+        <button class="button button1">Chat With Us</button>
+                  </a>
+              </div>
+              <div class="contactemail">
+                  <a href="{% url 'showcase:contact' %}">
+                      <button class="button button1">Email Us</button>
+                  </a>
+              </div>
+              <div class="supportform">
+                  <a href="{% url 'showcase:support' %}">
+                 <button class="button button1">Create Support Ticket</button>
+                      </a>
+              </div>
+
+          </div>
+
 
           <!--<form class="emaile" action="/url" method="GET">
           <div class="input_group">
@@ -910,32 +934,51 @@
       </div>
     </section>
 
-  </div>
+</div></b>
 </div>
-     <br><br><br><br><br><br><br><br><br><br><br><br>
+     <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
     <div class="stripe"></div>
-     +.
-     ++++++
+{% for BackgroundImage in Feedback %}
     <div class="boxe">
       <i class="fas fa-quote-left quote"></i>
       <p>Lorem aliasry ipsum dolor sits ametans, consectetur adipisicing elitits. Expedita reiciendis itaque placeat thuratu, quasi yiuos repellendus repudiandae deleniti ideas fuga molestiae, alias.</p>
       <div class="content">
         <div class="info">
-          <div class="name">Steven Chris</div>
-          <div class="job">YouTuber | Blogger</div>
+          <div class="name">{{BackgroundImage.username}}</div>
+
           <div class="stars">
+              {% if BackgroundImage.star_rating == '1' %}
             <i class="fas fa-star"></i>
+              {% elif BackgroundImage.star_rating == '2' %}
             <i class="fas fa-star"></i>
+              <i class="far fa-star"></i>
+              {% elif BackgroundImage.star_rating == '3' %}
             <i class="fas fa-star"></i>
+              <i class="far fa-star"></i>
+              <i class="far fa-star"></i>
+              {% elif BackgroundImage.star_rating == '4' %}
+              <i class="far fa-star"></i>
             <i class="far fa-star"></i>
+              <i class="far fa-star"></i>
+              <i class="far fa-star"></i>
+              {% else %}
             <i class="far fa-star"></i>
+              <i class="far fa-star"></i>
+              <i class="far fa-star"></i>
+              <i class="far fa-star"></i>
+              <i class="far fa-star"></i>
+              {% endif %}
+              <div class="job">{{BackgroundImage.comment}}</div>
           </div>
         </div>
         <div class="image">
-          <img src="images/profile-2.jpeg" alt="">
+            <a href="{{feed.user_profile_picture_url}}"> <!--create link to feedback-->
+          <img src="{{BackgroundImage.image.url}}" alt="">
+                </a>
         </div>
       </div>
     </div>
+        {% endfor %}
     <div class="boxe">
       <i class="fas fa-quote-left  quote"></i>
       <p>Lorem aliasry ipsum dolor sits ametans, consectetur adipisicing elitits. Expedita reiciendis itaque placeat thuratu, quasi yiuos repellendus repudiandae deleniti ideas fuga molestiae, alias.</p>

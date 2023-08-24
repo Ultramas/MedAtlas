@@ -68,11 +68,17 @@
     </div>
 
 
-    
+                  {% for EBaseView in Logo %}
+      {% if EBaseView.page == 'ebase.html' %}
+     <a class = "logo" href="{{EBaseView.hyperlink}}"><img class = "imageicon"  src="{{EBaseView.logocover.url}}" alt = "{{EBaseView.alternate}}" width="145vh"
+     height="100vh" style="z-index: 100;"></a>
+    {% endif %}
+{% endfor %}
      </header>
     <div class = "navbarx">
 
     <ul>
+
         {% for column in Header %}
         <div class="dropdown">     
           <a href="#{{ column.section }}" class="glass"> {{ column.text }}</a>
