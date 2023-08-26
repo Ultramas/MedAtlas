@@ -31,25 +31,31 @@
     <div class = "navbarx">
 
     <ul>
-      {% for column in Header %}
-        <div class="dropdown">
-          <a href="#{{ column.section }}" class="glass"> {{ column.text }}</a>
-          <div class="dropdown-content">
-          {% for row in DropDown %}
-
-            {% if row.row == column.row %}
-
-                {% if row.opennew == True %}
-                    <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
-                {% else %}
-                    <a href="{{ row.url }}">{{ row.text }}</a>
-                {% endif %}
+{% for column in Header %}
+  <div class="dropdown">
+    <a href="#{{ column.section }}" class="glass">{{ column.text }}</a>
+    <div class="dropdown-content">
+      {% for row in DropDown %}
+        {% if row.row == column.row %}
+          {% if row.url == 'http://127.0.0.1:8000/profile' %}
+             {% if row.opennew %}
+            <a href="{{ profile_url }} " target="_blank">{{ row.text }}</a>
+            {% else %}
+            <a href="{{ profile_url }}">{{ row.text }}</a>
             {% endif %}
+          {% else %}
+            {% if row.opennew %}
+              <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
+            {% else %}
+              <a href="{{ row.url }}">{{ row.text }}</a>
+            {% endif %}
+          {% endif %}
 
-          {% endfor %}
-          </div>
-        </div>
+        {% endif %}
       {% endfor %}
+    </div>
+  </div>
+{% endfor %}
       </div>
 
 

@@ -329,6 +329,7 @@ class BaseView(ListView):
         context['Logo'] = LogoBase.objects.filter(is_active=1)
         context['Favicons'] = FaviconBase.objects.all()
         context['Copyright'] = BaseCopyrightTextField.objects.filter(page=self.template_name, is_active=1)
+
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
@@ -336,7 +337,17 @@ class BaseView(ListView):
             if profile:
                 context['profile_pk'] = profile.pk
                 context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
-        return context
+
+                # Set the encoded_url
+
+                # Set the encoded_url and encoded_username in the context
+                encoded_username = quote(user.username)
+                encoded_url = reverse('showcase:order_history', args=[encoded_username])
+                context['encoded_url'] = encoded_url
+                context['encoded_username'] = encoded_username
+
+        return context  # Return the complete context dictionary
+
 
 
 class EBaseView(ListView):
@@ -993,7 +1004,7 @@ class EBackgroundView(BaseView):
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
 
-        context['items'] = paginated_items
+        #context['items'] = paginated_items
 
         #context['items'] = Item.objects.filter(is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -4699,17 +4710,14 @@ class OrderHistory(ListView):
         normalized_username = slugify(username)  # Normalize the username to a slug
         encoded_username = quote(normalized_username)
 
-        # Encode the username before querying the database
-        encoded_db_username = quote(username)
-
-        user = get_object_or_404(User, username__iexact=encoded_db_username)
+        # Instead of encoding for querying, normalize for querying
+        user = get_object_or_404(User, username__iexact=normalized_username)
 
         if user == request.user or request.user.is_staff:
             self.user = user
             return super().dispatch(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden("Access denied.")
-        #consider a return redirect to a 404 page-access denied
+            raise Http404("Access denied.")
 
     @staticmethod
     def encoded_user(request, username):
@@ -4718,6 +4726,7 @@ class OrderHistory(ListView):
         return encoded_url
 
     def get_context_data(self, **kwargs):
+
         user = self.request.user
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -4743,24 +4752,41 @@ class OrderHistory(ListView):
                 items.author_profile_picture_url = profile.avatar.url
                 items.author_profile_url = items.get_profile_url()
 
+
+
         order = OrderItem.objects.filter(is_active=1)
         context['orders'] = order
+        total_items = OrderItem.objects.filter(is_active=1).count()
 
-        for order in context['orders']:
-            image = order.image
-            itemed = order  # Use the current order instead of querying again
+        # Get the paginate_by value from the form data or settings
+        paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
+
+        items_query = OrderItem.objects.filter(is_active=1)
+        paginator = Paginator(items_query, paginate_by)
+        page_number = self.request.GET.get('page')
+        paginated_items = paginator.get_page(page_number)
+
+        # context['items'] = paginated_items
+
+        # context['items'] = Item.objects.filter(is_active=1)
+
+
+        context['items'] = paginated_items
+        for order_item in context['orders']:
+            # Process each order item individually
+            image = order_item.image  # Assuming OrderItem has an 'image' field
             user = self.request.user
-            profile = ProfileDetails.objects.filter(user=user).first() # Fetch the profile for the current user
-            if order:
-                order.image_url = order.image.url
-                order.author_profile_url = order.get_profile_url()
-                #order.hyperlink = itemed.get_profile_url()
-                print(order.author_profile_url)
-                print("I have a viable order.")
-            if profile:
-                order.author_profile_picture_url = profile.avatar.url
-                order.profile_url = order.get_profile_url2()
+            profile = ProfileDetails.objects.filter(user=user).first()  # Fetch the profile for the current user
 
+            if order_item.image:
+                order_item.image_url = order_item.image.url
+
+            order_item.author_profile_url = order_item.get_profile_url() if order_item.get_profile_url() else None
+            order_item.hyperlink = order_item.get_profile_url()  # Example, adjust this as needed
+
+            if profile:
+                order_item.author_profile_picture_url = profile.avatar.url
+                order_item.profile_url = order_item.get_profile_url2()
 
         return context
 

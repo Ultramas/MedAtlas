@@ -22,8 +22,9 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/landingpagestyling.css' %}">
 
-    <link rel="stylesheet" type="text/css" href="{% static 'dynamic_css.css' %}">
-
+    <link rel="stylesheet" type="text/css" href="{% static 'css/dynamic_css.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/cover.css' %}">
+ <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
 
   <style>
     /* Add the following styles to your CSS file */
@@ -95,6 +96,21 @@
         <a href="{{ ad.advertisement_hyperlink }}" target="_blank">Learn More</a>
     </div>
 {% endfor %}
+
+
+            <!-- Loop through BackgroundImage items and apply conditions -->
+<div class="slidingtheshow">
+            {% for BackgroundImage in Carousel %}
+                {% if BackgroundImage.carouselpage == 'index.html' and BackgroundImage.carouselnumber == 1 %}
+    <div class="mySliding fade">
+                    <div class="cover-container">
+                        <img src="{{ BackgroundImage.carouselimage.url }}" alt="{{BackgroundImage.alternate}}" style="z-index: -10;">
+                        <h1 class="centered-title" data-text="{{BackgroundImage.alternate}}">{{BackgroundImage.alternate}}</h1>
+                    </div>
+        </div>
+                {% endif %}
+            {% endfor %}
+</div>
 
 
   <div class="heroingitout" >
@@ -1053,7 +1069,31 @@
     closeButton.addEventListener("click", () => {
       chatWindow.classList.remove("open");
     });
+
   </script>
+<script>// script.js
+const images = [
+    'image1.jpg',
+    'image2.jpg',
+    'image3.jpg'
+]; // Replace with your image URLs
+
+const coverImage = document.querySelector('.cover-image');
+let currentIndex = 0;
+
+function changeImage() {
+    coverImage.style.opacity = 0;
+
+    setTimeout(() => {
+        currentIndex = (currentIndex + 1) % images.length;
+        coverImage.src = images[currentIndex];
+        coverImage.style.opacity = 1;
+    }, 2000); // 2 seconds for fade transition
+}
+
+changeImage(); // Initialize with the first image
+setInterval(changeImage, 5000); // Change image every 5 seconds
+</script>
 </body>
 
 </html>

@@ -2327,6 +2327,8 @@ class ImageCarousel(models.Model):
     carouselcaption = models.TextField(help_text='Caption for the image.', verbose_name="caption")
     carouselimage = models.ImageField(help_text='Upload an image for the carousel.)',
                                       upload_to='images/', verbose_name='image')
+    carouselnumber = models.IntegerField(help_text='What carousel number is this?.',
+                                           verbose_name='Carousel number')
     carouselposition = models.IntegerField(help_text='Positioning of the image within the carousel.',
                                            verbose_name='position')
     carouseltotal = models.IntegerField(help_text='Total number of images within the carousel.',

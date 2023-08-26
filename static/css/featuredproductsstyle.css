@@ -126,3 +126,10 @@ margin-right: auto;
 justfy-content: center;
 padding: 40px;
 }
+
+.slideshow-container2 {
+  max-width: 1000px;
+  position: relative;
+  margin: auto;
+  background-attachment: fixed;
+}

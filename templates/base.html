@@ -63,6 +63,18 @@
             {% else %}
             <a href="{{ profile_url }}">{{ row.text }}</a>
             {% endif %}
+          {% elif row.url == 'http://127.0.0.1:8000/order_history' %}
+                {% if user.is_authenticated %}
+                    {% if row.opennew %}
+                    <a href="{{ encoded_url }}" target="_blank">{{ row.text }}</a>
+                    {% else %}
+                    <a href="{{ encoded_url }}">{{ row.text }}</a>
+                    {% endif %}
+                {% else %}
+                <a href="http://127.0.0.1:8000/accounts/login">
+                    {{ row.text }}eeee
+                </a>
+                {% endif %}
           {% else %}
             {% if row.opennew %}
               <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
@@ -359,6 +371,7 @@
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
+    <script src="{% static 'css/js/cover.js' %}"></script>
 
        {% endif %}
     {% block content %}
