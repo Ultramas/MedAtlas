@@ -251,7 +251,7 @@ class CommentForm(forms.ModelForm):
 class SettingsForm(forms.ModelForm):
     class Meta:
         model = SettingsModel
-        fields = ('username', 'password', 'coupons', 'news')
+        fields = ('username', 'password', 'email', 'coupons', 'news')
 
     def save(self, commit=True):
         instance = super().save(commit=False)

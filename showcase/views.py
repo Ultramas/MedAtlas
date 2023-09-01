@@ -318,36 +318,25 @@ class ImageView(ListView):
         return context
 
 
+
 class BaseView(ListView):
-    template_name = "base.html"
-    model = LogoBase
+   template_name = "base.html"
+   model = LogoBase
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(is_active=1)
-        context['Favicons'] = FaviconBase.objects.all()
-        context['Copyright'] = BaseCopyrightTextField.objects.filter(page=self.template_name, is_active=1)
-
-        user = self.request.user
-        if user.is_authenticated:
-            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                context['profile_pk'] = profile.pk
-                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
-
-                # Set the encoded_url
-
-                # Set the encoded_url and encoded_username in the context
-                encoded_username = quote(user.username)
-                encoded_url = reverse('showcase:order_history', args=[encoded_username])
-                context['encoded_url'] = encoded_url
-                context['encoded_username'] = encoded_username
-
-        return context  # Return the complete context dictionary
-
+   def get_context_data(self, **kwargs):
+       context = super().get_context_data(**kwargs)
+       context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+       context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+       context['Logo'] = LogoBase.objects.filter(is_active=1)
+       context['Favicons'] = FaviconBase.objects.all()
+       user = self.request.user
+       if user.is_authenticated:
+           context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+           profile = ProfileDetails.objects.filter(user=user).first()
+           if profile:
+               context['profile_pk'] = profile.pk
+               context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+       return context
 
 
 class EBaseView(ListView):
@@ -360,6 +349,14 @@ class EBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logos'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Favicons'] = FaviconBase.objects.all()
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
         return context
 
 
@@ -372,6 +369,13 @@ class BlogBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
         return context
 
 
@@ -489,6 +493,13 @@ class DonateBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
         return context
 
 
@@ -501,6 +512,13 @@ class MemberBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
         return context
 
 
@@ -527,6 +545,7 @@ class PostList(ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['TextFielde'] = TextBase.objects.filter(is_active=1)
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
@@ -783,6 +802,13 @@ class FaviconBaseView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Favicons'] = FaviconBase.objects.filter('faviconpage')
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
         return context
 
 
@@ -794,6 +820,13 @@ class BackgroundBaseView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['BackgroundImages'] = BackgroundImageBase.objects.filter('page').order_by('position')
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
         return context
 
     # def backgrounds(request, showcase, index, blog):
@@ -828,6 +861,13 @@ class TextBaseView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['TextFielde'] = TextBase.objects.filter(is_active=1).order_by("section")
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
         # texts = TextBase.objects.all()
 
         # if texts.exists():
@@ -1856,6 +1896,1816 @@ def supportsend(request):
         message = request.POST.get('message')
         username = request.POST.get('username')
         room_id = request.POST.get('room_id')
+        #profile = request.POST.get('profile')
+        #signed_in_user = request.POST.get('signed_in_user')
+
+        print(f"message: {message}, username: {username}, room_id: {room_id}")
+        #print(f"profile: {profile}")
+        # Check if the user is authenticated
+        if request.user.is_authenticated:
+            # User is authenticated, use their user ID for the message user field
+            new_message = Message.objects.create(
+                value=message,
+                user=username,
+                room=room_id,
+                signed_in_user=request.user  # Set the signed_in_user to the authenticated user
+            )
+            #print(f"signed_in_user: {signed_in_user}")
+            new_message.save()
+        else:
+            # User is not authenticated, use the provided username for the message user field
+            new_message = Message.objects.create(
+                value=message,
+                user=username,
+                room=room_id,
+            )
+            new_message.save()
+
+        # Return a response indicating the message was sent successfully
+        return HttpResponse('Message sent successfully')
+
+    # If the request method is not POST, handle the appropriate response here
+    return HttpResponse('Invalid request method. Please use POST to send a message.')
+
+
+import django
+from django.shortcuts import render, redirect
+from django.views.generic import ListView
+from .models import UpdateProfile, EmailField
+from .models import Idea
+from .models import Vote
+from .models import StaffApplication
+from .models import Contact
+from .models import BusinessMailingContact
+from .models import PartnerApplication
+from .models import PunishmentAppeal
+from .models import BanAppeal
+from .models import ReportIssue
+from .models import NewsFeed
+from .models import StaffProfile
+from .models import Event
+from .models import City, Vote, UpdateProfile, Idea, PartnerApplication
+from .models import Support
+from .models import CheckoutAddress
+from .models import Item
+from .models import FaviconBase
+from .models import BackgroundImage
+from .models import EBackgroundImage
+from .models import ShowcaseBackgroundImage
+from .models import ChatBackgroundImage
+from .models import SupportChatBackgroundImage
+from .models import BilletBackgroundImage
+from .models import PatreonBackgroundImage
+from .models import BusinessMessageBackgroundImage
+from .models import Patreon
+from .models import BlogBackgroundImage
+from .models import PostBackgroundImage
+from .models import PosteBackgroundImage
+from .models import VoteBackgroundImage
+from .models import RuleBackgroundImage
+from .models import AboutBackgroundImage
+from .models import FaqBackgroundImage
+from .models import StaffBackgroundImage
+from .models import InformationBackgroundImage
+from .models import TagBackgroundImage
+from .models import UserBackgroundImage
+from .models import StaffRanksBackgroundImage
+from .models import StaffApplyBackgroundImage
+from .models import MegaBackgroundImage
+from .models import EventBackgroundImage
+from .models import NewsBackgroundImage
+from .models import DonorBackgroundImage
+from .models import ContributorBackgroundImage
+from .models import ContentBackgroundImage
+from .models import PartnerBackgroundImage
+from .models import ShareBackgroundImage
+from .models import WhyBackgroundImage
+from .models import ProductBackgroundImage
+from .models import SettingsModel
+from .models import ImageCarousel
+from .models import PostLikes
+from .models import ConvertBackgroundImage
+from .models import ReasonsBackgroundImage
+from .models import SettingsBackgroundImage
+from .models import PunishAppsBackgroundImage
+from .models import BanAppealBackgroundImage
+from .models import SupportBackgroundImage
+from .models import OrderBackgroundImage
+from .models import CheckoutBackgroundImage
+from .models import SignupBackgroundImage
+from .models import PerksBackgroundImage
+from .models import ChangePasswordBackgroundImage
+from .models import IssueBackgroundImage
+from .models import BackgroundImageBase
+from .models import TextBase
+from .models import LogoBase
+from .models import MemberHomeBackgroundImage
+from .models import NavBar
+from .models import NavBarHeader
+from .models import DonateIcon
+from .models import Donate
+from .models import Titled
+from .models import AdvertisementBase
+from .models import ImageBase
+from .models import SocialMedia
+from .models import AdminRoles
+from .models import AdminTasks
+from .models import AdminPages
+# from .models import Background2aImage
+from .forms import PosteForm, EmailForm
+from .forms import PostForm
+from .forms import Postit
+from .forms import StaffJoin
+from .forms import Server_Partner
+from .forms import SignUpForm
+from .forms import News_Feed
+from .forms import PunishAppeale
+from .forms import ReportIssues
+from .forms import BanAppeale
+from .forms import Staffprofile
+from .forms import Eventform
+from .forms import ProfileDetail
+from .forms import SupportForm
+from .forms import SettingsForm
+from .forms import BackgroundImagery
+from .forms import EBackgroundImagery
+from .forms import ShowcaseBackgroundImagery
+from .forms import ChatBackgroundImagery
+from .forms import BilletBackgroundImagery
+from .forms import BlogBackgroundImagery
+from .forms import PostBackgroundImagery
+from .forms import RuleBackgroundImagery
+from .forms import AboutBackgroundImagery
+from .forms import FaqBackgroundImagery
+from .forms import StaffBackgroundImagery
+from .forms import InformationBackgroundImagery
+from .forms import TagBackgroundImagery
+from .forms import UserBackgroundImagery
+from .forms import StaffRanksBackgroundImagery
+from .forms import MegaBackgroundImagery
+from .forms import EventBackgroundImagery
+from .forms import NewsBackgroundImagery
+from .forms import PaypalPaymentForm
+from .forms import BaseCopyrightTextField
+from .forms import ContactForme
+from .forms import SignUpForm
+# from .forms import OrderItems
+from django.contrib import messages
+from django.contrib.auth import authenticate
+from django.contrib.auth import login
+from django.db.models import Q
+from django.views import generic
+from django.views.generic import TemplateView, ListView
+
+from django.urls import reverse_lazy
+from django.views.generic import UpdateView
+from .forms import ProfileForm
+from django.contrib.auth.models import User
+from .models import Blog
+from .models import UserProfile2
+from django.views.generic.edit import FormMixin
+
+import pdb
+from django.core.mail import send_mail, BadHeaderError
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
+from .forms import ContactForm
+from .forms import BusinessContactForm
+from .forms import BusinessMailingForm
+from .forms import CommentForm
+from django.shortcuts import get_object_or_404
+
+from .models import Room, Message
+from .models import SupportChat, SupportMessage
+from django.http import JsonResponse
+import os
+
+from django.contrib.auth.decorators import login_required
+
+from guest_user.mixins import RegularUserRequiredMixin
+
+from guest_user.decorators import allow_guest_user
+
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ObjectDoesNotExist
+from django.views.generic import ListView, DetailView, View
+from datetime import datetime
+from django.utils import timezone
+from .forms import CheckoutForm
+from .models import (Item, OrderItem, Order, Address, Payment, Coupon, Refund,
+                     UserProfile)
+
+from django.views.generic.edit import FormView
+
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+
+class SignupView(FormMixin, ListView):
+    model = SignupBackgroundImage
+    template_name = "cv-form.html"
+    form_class = SignUpForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['signup'] = SignupBackgroundImage.objects.all()
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Favicons'] = FaviconBase.objects.all()
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        return context
+
+    def post(self, request, *args, **kwargs):
+        print('signup')
+        if request.method == 'POST':
+            print('post')
+            form = SignUpForm(request.POST)
+            if form.is_valid():
+                print('is_valid')
+                user = form.save()
+                user.refresh_from_db()
+                # load the profile instance created by the signal
+                user.save()
+                raw_password = form.cleaned_data.get('password')
+
+                # login user after signing up
+                user = form.save()
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                subject = "Welcome to IntelleX!"
+                message = 'Hello {user.username}, thank you for becoming a member of the IntelleX Community!'
+                email_from = settings.EMAIL_HOST_USER
+                recipent_list = [user.email, ]
+                send_mail(subject, message, email_from, recipent_list)
+
+                # redirect user to home page
+                return redirect('showcase:showcase')
+                messages.info(request, "You have signed up successfully! Welcome!")
+        else:
+            form = SignUpForm()
+        return render(request, 'cv-form.html', {'form': form})
+
+
+class TotalView(ListView):
+    model = BackgroundImageBase
+
+    def _context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Favicons'] = FaviconBase.objects.all()
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['TextFielde'] = TextBase.objects.filter(is_active=1).order_by("section")
+        return context
+
+
+class LogoView(ListView):
+    model = LogoBase
+
+    # ought to span multiple pages, not simply index
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Logo'] = LogoBase.objects.filter('page')
+        return context
+
+
+from io import BytesIO
+from PIL import Image
+from django.core.files.base import ContentFile
+
+from .models import Advertising
+
+
+class AdvertisementView(ListView):
+    model = AdvertisementBase
+
+    def display_advertisement(request, advertisement_id):
+        advertising = Advertising.objects.get(id=advertising_id)
+        context = {'advertising': advertising}
+        return render(request, 'index.html', context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Advertisement'] = AdvertisementBase.objects.filter(page=self.template_name, is_active=1)
+        return context
+
+
+"""    def handle_uploaded_image(i):
+       # resize image
+       imagefile  = StringIO.StringIO(i.read())
+       imageImage = Image
+
+       (width, height) = imageImage.size
+       (width, height) = scale_dimensions(width, height, longest_side=240)
+
+       resizedImage = imageImage.resize((width, height))
+
+       imagefile = StringIO.StringIO()
+       resizedImage.save(imagefile,'JPEG')"""
+
+
+def set_image_position(image_id, xposition, yposition):
+    # Retrieve the Image object from the database
+    image = ImageBase.objects.get(id=image_id)
+    print("Current coordinates: x={image.x}, y={image.y}")
+
+    # Set the x and y positions to the desired values
+    image.x = xposition
+    image.y = yposition
+
+    # Save the updated Image object back to the database
+    image.save()
+
+
+class ImageView(ListView):
+    model = ImageBase
+
+    def post(self, request, *args, **kwargs):
+        # Get the image ID and new position values from the request
+        image_id = request.POST.get('image_id')
+        xposition = request.POST.get('xposition')
+        yposition = request.POST.get('yposition')
+
+        # Update the image position in the database
+        set_image_position(image_id, xposition, yposition)
+
+        # Render a response to the user
+        return HttpResponse('Image position updated.')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1)
+        return context
+
+
+
+class BaseView(ListView):
+   template_name = "base.html"
+   model = LogoBase
+
+   def get_context_data(self, **kwargs):
+       context = super().get_context_data(**kwargs)
+       context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+       context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+       context['Logo'] = LogoBase.objects.filter(is_active=1)
+       context['Favicons'] = FaviconBase.objects.all()
+       user = self.request.user
+       if user.is_authenticated:
+           context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+           profile = ProfileDetails.objects.filter(user=user).first()
+           if profile:
+               context['profile_pk'] = profile.pk
+               context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+       return context
+
+
+class EBaseView(ListView):
+    template_name = "ebase.html"
+    model = NavBar
+
+    def get_context_data(self, **kwargs):
+        # context = super().get_context_data(**kwargs)
+        context = {}
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logos'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Favicons'] = FaviconBase.objects.all()
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        return context
+
+
+class BlogBaseView(ListView):
+    template_name = "blogbase.html"
+    model = LogoBase
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        return context
+
+
+from .models import Preference
+
+
+def detail_post_view(request, id=None):
+    eachpost = get_object_or_404(Post, id=id)
+
+    context = {'eachpost': eachpost}
+
+    return render(request, 'showcase:likes.html', context)
+
+
+@login_required
+def postpreference(request, post_name, like_or_dislike):
+    if request.method == "POST":
+        eachpost = get_object_or_404(Blog, slug=post_name)
+
+        if request.user in eachpost.likes.iterator():
+            eachpost.likes.remove(request.user)
+        if request.user in eachpost.dislikes.iterator():
+            eachpost.dislikes.remove(request.user)
+
+        if int(like_or_dislike) == 1:
+            eachpost.likes.add(request.user)
+        else:
+            eachpost.dislikes.add(request.user)
+
+        context = {'eachpost': eachpost,
+                   'post_name': post_name}
+
+        return render(request, 'likes.html', context)
+
+    else:
+        eachpost = get_object_or_404(Blog, slug=post_name)
+        context = {'eachpost': eachpost,
+                   'post_name': post_name}
+
+        return render(request, 'showcase:likes.html', context)
+
+
+# like is not connected to blog yet is used to filter
+
+# id is used by this model but the blogpost uses slugs
+from django.contrib.admin.views.decorators import staff_member_required
+from django.views import View
+from django.utils.decorators import method_decorator
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class AdminRolesView(ListView):
+    template_name = "administrativeroles.html"
+    model = AdminRoles
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Roles'] = AdminRoles.objects.filter(is_active=1)
+
+        return context
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class AdminTasksView(ListView):
+    template_name = "administrativetasks.html"
+    model = AdminTasks
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Tasks'] = AdminTasks.objects.filter(is_active=1)
+        return context
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class AdminPagesView(ListView):
+    template_name = "administrativepages.html"
+    model = AdminPages
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Pages'] = AdminPages.objects.filter(is_active=1)
+        return context
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class AdministrationView(ListView):
+    template_name = "administration.html"
+    model = AdminPages
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Pages'] = AdminPages.objects.filter(is_active=1)
+        context['Tasks'] = AdminTasks.objects.filter(is_active=1)
+        return context
+
+
+class DonateBaseView(ListView):
+    template_name = "donatebase.html"
+    model = LogoBase
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        return context
+
+
+class MemberBaseView(ListView):
+    template_name = "memberbase.html"
+    model = LogoBase
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        return context
+
+
+class usersview(ListView):
+    paginate_by = 10
+    template_name = 'users.html'
+
+    def get_queryset(self):
+        return Idea.objects.all()
+
+
+class PostList(ListView):
+    model = BlogBackgroundImage
+    # backgroundqueryset = BackgroundImageBase.objects.filter('page').order_by('position')
+    # queryset = Blog.objects.filter(status=1).order_by('-created_on')
+    # normally can only filter once per view
+    paginate_by = 10
+    template_name = 'blog.html'
+
+    def get_context_data(self, **kwargs):
+        print(124)
+        context = super().get_context_data(**kwargs)
+        context['BlogBackgroundImage'] = BlogBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['TextFielde'] = TextBase.objects.filter(is_active=1)
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+
+        # Retrieve the signed-in user's profile and profile picture URL
+
+        # Retrieve the author's profile avatar
+        blog_posts = Blog.objects.filter(status=1).order_by('-created_on')
+
+        context['BlogPosts'] = blog_posts
+
+        for blog_post in context['BlogPosts']:
+            author = blog_post.author
+            profile = ProfileDetails.objects.filter(user=author).first()
+            if profile:
+                blog_post.author_profile_picture_url = profile.avatar.url
+                blog_post.author_profile_url = blog_post.get_profile_url()
+
+                print('imgsrcimg')
+
+        return context
+
+    def get_queryset(self):
+        return Blog.objects.filter(status=1).order_by('-created_on')
+
+
+class votingview(ListView):
+    model = VoteBackgroundImage
+    paginate_by = 10
+    template_name = 'voting.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Vote'] = Vote.objects.all()
+
+        newprofile = Vote.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+        return context
+
+    def get_queryset(self):
+        return Vote.objects.all()
+
+
+class partnerview(ListView):
+    paginate_by = 10
+    template_name = 'partners.html'
+
+    def get_queryset(self):
+        return PartnerApplication.objects.all()
+
+
+class newsfeedview(ListView):
+    paginate_by = 10
+    template_name = 'newsfeed.html'
+
+    def get_queryset(self):
+        return NewsFeed.objects.all()
+
+
+class Issueview(ListView):
+    paginate_by = 10
+    template_name = 'issues.html'
+
+    def get_queryset(self):
+        return ReportIssue.objects.all()
+
+
+class staffview(ListView):
+    paginate_by = 10
+    template_name = 'staff.html'
+
+    def get_queryset(self):
+        return StaffProfile.objects.all()
+
+
+class eventview(ListView):
+    paginate_by = 10
+    template_name = 'events.html'
+
+    def get_queryset(self):
+        return Event.objects.all()
+
+
+class SupportRoomView(TemplateView):
+    model = SupportMessage
+    template_name = 'supportroom.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        room = self.kwargs['room']
+        username = self.request.GET.get('username')
+        room_details = Room.objects.get(name=room)
+        profile_details = ProfileDetails.objects.filter(user__username=username).first()
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        context['username'] = username
+        context['room'] = room
+        context['room_details'] = room_details
+        context['profile_details'] = profile_details
+
+        # Retrieve the author's profile avatar
+        messages = Message.objects.all().order_by('-date')
+
+        context['Messaging'] = messages
+
+        for messages in context['Messaging']:
+            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
+            if profile:
+                messages.user_profile_picture_url = profile.avatar.url
+                messages.user_profile_url = messages.get_profile_url()
+
+        return context
+
+
+class supportview(ListView):
+    paginate_by = 10
+    template_name = 'supportissues.html'
+
+    def get_queryset(self):
+        return Support.objects.all()
+
+
+class MemberHomeBackgroundView(ListView):
+    model = MemberHomeBackgroundImage
+    template_name = "memberhome.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['MemberHomeBackgroundImage'] = MemberHomeBackgroundImage.objects.all()
+        return context
+
+
+class BusinessMessageBackgroundView(ListView):
+    model = BusinessMessageBackgroundImage
+    template_name = "businessemail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BusinessMessageBackgroundImage'] = BusinessMessageBackgroundImage.objects.all()
+        return context
+
+
+class PatreonBackgroundView(ListView):
+    model = Patreon
+    template_name = "patreon.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        # context['Patreon'] = Patreon.objects.all()
+        return context
+
+
+class BlogComment(generic.DetailView):
+    model = Blog
+    paginate_by = 10
+    template_name = 'blog_comment.html'
+
+    def post(self, request, slug, *args, **kwargs):
+        most_recent = Blog.objects.order_by('-created_on')[:3]
+
+        post = get_object_or_404(Blog, slug=slug)
+        category_count = post.likes
+
+        # if request.user.is_authenticated:
+        #    BlogLikeView.objects.get_or_create(user=request.user, post=post)
+
+        form = CommentForm(request.POST or None)
+        if request.method == "POST":
+            if form.is_valid():
+                form.instance.user = request.user
+                form.instance.post = post
+                form.save()
+                return redirect(reverse("blog_comment", kwargs={
+                    'id': post.pk
+                }))
+        context = {
+            'form': form,
+            'post': post,
+            'most_recent': most_recent,
+            'category_count': category_count,
+            'form': form
+        }
+        return render(request, 'blog_comment.html', context)
+
+
+# def BlogPostLike(request, slug):
+#    post = get_object_or_404(Blog, id=request.POST.get('blog_id'))
+#    if post.likes.filter(id=request.user.id).exists():
+#        post.likes.remove(request.user)
+#    else:
+#        post.likes.add(request.user)
+
+#    return HttpResponseRedirect(reverse('showcase:post_detail', args=[str(slug)]))
+
+
+# class BackgroundView(ListView):
+#  paginate_by = 10
+#  template_name = 'index.html'
+
+#  def get_queryset(self):
+#    return BackgroundImage.objects.all()
+
+from django.views.generic import ListView, CreateView
+
+
+# class TextFieldView(ListView):
+#    model = TextField
+#    template_name = "index.html"
+
+
+class FaviconBaseView(ListView):
+    model = FaviconBase
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Favicons'] = FaviconBase.objects.filter('faviconpage')
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        return context
+
+
+class BackgroundBaseView(ListView):
+    model = BackgroundImageBase
+
+    # ought to span multiple pages, not simply index
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BackgroundImages'] = BackgroundImageBase.objects.filter('page').order_by('position')
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        return context
+
+    # def backgrounds(request, showcase, index, blog):
+    #    page = get_object_or_404(BackgroundImageBase,
+    #                             showcase=showcase,
+    #                             index=index,
+    #                             blog=blog)
+
+    # context = {
+    #    'page': page,
+    # }
+
+    # if index == 'index':
+    #    template = 'index.html'
+    #    print(index)
+    # elif index == 'showcase':
+    #    template = 'showcase.html'
+    #    print(index)
+    # else render the one you're already rendering
+    # else:
+    #    template = 'blog.html'
+    #    print(index)
+
+    # return render(request, template, context)
+
+
+class TextBaseView(ListView):
+    model = TextBase
+
+    # ought to span multiple pages, not simply index
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TextFielde'] = TextBase.objects.filter(is_active=1).order_by("section")
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        # texts = TextBase.objects.all()
+
+        # if texts.exists():
+        #    return JsonResponse({})
+        # else:
+        #    return context
+
+        # def backgrounds(request, showcase, index, blog):
+        #    page = get_object_or_404(BackgroundImageBase,
+        #                             showcase=showcase,
+        #                             index=index,
+        #                             blog=blog)
+
+        # context = {
+        #    'page': page,
+        # }
+
+        # if index == 'index':
+        #    template = 'index.html'
+        #    print(index)
+        # elif index == 'showcase':
+        #    template = 'showcase.html'
+        #    print(index)
+        # else render the one you're already rendering
+        # else:
+        #    template = 'blog.html'
+        #    print(index)
+
+        return render(context)
+
+
+class ImageCarouselView(BaseView):
+    model = ImageCarousel
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Carousel'] = ImageCarousel.objects.filter(is_active=1).order_by('position')
+        return context
+
+
+class BackgroundView(FormMixin, BaseView):
+    model = BackgroundImage
+    form_class = EmailForm
+    template_name = "index.html"
+    section = TextBase.section
+
+    def post(self, request, *args, **kwargs):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+
+            return render(request, "emaildone.html", {'form': form})
+            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            return render(request, "index.html", {'form': form})
+            return redirect('showcase:index')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by(
+            "carouselposition")
+        context['Advertisement'] = AdvertisementBase.objects.filter(page=self.template_name, is_active=1).order_by(
+            "advertisement_position")
+        context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by("image_position")
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
+        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
+        context['Email'] = EmailField.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
+        # context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
+        print(FaviconBase.objects.all())
+        print(213324)
+        # Retrieve the signed-in user's profile and profile picture URL
+
+        # Retrieve the items
+        product = Item.objects.filter(is_active=1)
+
+        context['Products'] = product
+
+        for product in context['Products']:
+            image = product.image
+            item = Item.objects.filter(slug=product.slug).first()
+            if product:
+                product.title = item.title
+                product.price = item.price
+                product.discount_price = item.discount_price
+                product.image_url = item.image.url
+                product.label = item.label
+                product.hyperlink = item.get_profile_url()
+                product.description = item.description
+
+        events = Event.objects.filter(is_active=1)
+        context['NewEvents'] = events
+
+        for events in context['NewEvents']:
+            image = events.image
+            eventful = Event.objects.filter(date_and_time=events.date_and_time).first()
+            if events:
+                events.name = eventful.name
+                events.image_url = eventful.image.url
+                events.hyperlink = eventful.get_profile_url()
+                events.description = eventful.description
+
+        news = NewsFeed.objects.filter(is_active=1)
+        context['newsfeeds'] = news
+
+        for news in context['newsfeeds']:
+            image = news.image
+            newsfeeding = NewsFeed.objects.filter(date_and_time=news.date_and_time).first()
+            if news:
+                news.name = newsfeeding.name
+                news.image_url = newsfeeding.image.url
+                news.hyperlink = newsfeeding.get_profile_url()
+                news.description = newsfeeding.description
+
+        feed = Feedback.objects.filter(is_active=1).order_by('-timestamp')
+
+        context['FeedBacking'] = feed
+
+        for feed in context['FeedBacking']:
+            user = feed.username
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                feed.user_profile_picture_url = profile.avatar.url
+                feed.user_profile_url = feed.get_profile_url()
+
+
+
+        return context
+
+def dynamic_css(request):
+    background_objects = BackgroundImageBase.objects.filter(page='index').order_by("position")
+
+    context = {
+        'background_objects': background_objects,
+    }
+
+    return render(request, 'dynamic_css.css', context, content_type='text/css')
+
+
+class CreatePostView(CreateView):
+    model = BackgroundImage
+    form_class = BackgroundImagery
+    template_name = "backgroundimagechange.html"
+    success_url = reverse_lazy("index")
+
+
+class EBackgroundView(BaseView):
+    model = EBackgroundImage
+    template_name = "ehome.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        total_items = Item.objects.filter(is_active=1).count()
+
+        # Get the paginate_by value from the form data or settings
+        paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
+
+        items_query = Item.objects.filter(is_active=1)
+        paginator = Paginator(items_query, paginate_by)
+        page_number = self.request.GET.get('page')
+        paginated_items = paginator.get_page(page_number)
+
+        #context['items'] = paginated_items
+
+        #context['items'] = Item.objects.filter(is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        items_query = Item.objects.filter(is_active=1)
+        paginator = Paginator(items_query, paginate_by)
+        page_number = self.request.GET.get('page')
+        paginated_items = paginator.get_page(page_number)
+
+        context['items'] = paginated_items
+        return context
+
+
+class ECreatePostView(CreateView):
+    model = EBackgroundImage
+    form_class = EBackgroundImagery
+    template_name = "ebackgroundimagechange.html"
+    success_url = reverse_lazy("ehome")
+
+
+class ShowcaseBackgroundView(BaseView):
+    model = ShowcaseBackgroundImage
+    template_name = "showcase.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['UpdateProfile'] = UpdateProfile.objects.all()
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+
+class ShowcaseCreatePostView(CreateView):
+    model = ShowcaseBackgroundImage
+    form_class = ShowcaseBackgroundImagery
+    template_name = "showcasebackgroundimagechange.html"
+    success_url = reverse_lazy("showcase")
+
+
+class ChatBackgroundView(BaseView):
+    model = ChatBackgroundImage
+    template_name = "home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        return context
+
+
+class SupportChatBackgroundView(BaseView):
+    model = SupportChatBackgroundImage
+    template_name = "supportchat.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        return context
+
+
+class ChatCreatePostView(CreateView):
+    model = ChatBackgroundImage
+    form_class = ChatBackgroundImagery
+    template_name = "chatbackgroundimagechange.html"
+    success_url = reverse_lazy("home")
+
+
+class WhyBackgroundView(BaseView):
+    model = WhyBackgroundImage
+    template_name = "whydonate.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        return context
+
+
+class BlogBackgroundView(ListView):
+    model = BlogBackgroundImage
+    template_name = "blog.html"
+
+    queryset = Blog.objects.filter(status=1).order_by('-created_on')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['BlogBackgroundImage'] = BlogBackgroundImage.objects.all()
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        return context
+
+
+class BlogCreatePostView(CreateView):
+    model = BlogBackgroundImage
+    form_class = BlogBackgroundImagery
+    template_name = "blogbackgroundimagechange.html"
+    success_url = reverse_lazy("blog")
+
+
+# @login_required
+# @RegularUserRequiredMixin
+class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
+    model = UpdateProfile
+    template_name = "post_edit.html"
+    form_class = PostForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        return context
+
+    # @login_required
+    def post(self, request, *args, **kwargs):
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            return redirect('showcase:showcase')
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            return render(request, "post_edit.html", {'form': form})
+
+
+class PostCreatePostView(CreateView):
+    model = PostBackgroundImage
+    form_class = PostBackgroundImagery
+    template_name = "postbackgroundimagechange.html"
+    success_url = reverse_lazy("post_edit")
+
+
+class BilletBackgroundView(BaseView):
+    model = BilletBackgroundImage
+    template_name = "billets.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BilletBackgroundImage'] = BilletBackgroundImage.objects.all()
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        return context
+
+
+class BilletCreatePostView(CreateView):
+    model = BilletBackgroundImage
+    form_class = BilletBackgroundImagery
+    template_name = "billetbackgroundimagechange.html"
+    success_url = reverse_lazy("billets")
+
+
+class RuleBackgroundView(BaseView):
+    model = RuleBackgroundImage
+    template_name = "rules.html"
+
+
+def get_context_data(self, **kwargs):
+    context = super().get_context_data(**kwargs)
+    context['RuleBackgroundImage'] = RuleBackgroundImage.objects.all()
+    context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+    context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+    context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+    context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+    return context
+
+
+class RuleCreatePostView(CreateView):
+    model = RuleBackgroundImage
+    form_class = RuleBackgroundImagery
+    template_name = "rulebackgroundimagechange.html"
+    success_url = reverse_lazy("rules")
+
+
+class AboutBackgroundView(BaseView):
+    model = AboutBackgroundImage
+    template_name = "about.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        return context
+
+
+class AboutCreatePostView(CreateView):
+    model = AboutBackgroundImage
+    form_class = AboutBackgroundImagery
+    template_name = "aboutbackgroundimagechange.html"
+    success_url = reverse_lazy("about")
+
+
+class FaqBackgroundView(BaseView):
+    model = FaqBackgroundImage
+    template_name = "faq.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['FaqBackgroundImage'] = FaqBackgroundImage.objects.all()
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        return context
+
+
+class FaqCreatePostView(CreateView):
+    model = FaqBackgroundImage
+    form_class = FaqBackgroundImagery
+    template_name = "faqbackgroundimagechange.html"
+    success_url = reverse_lazy("faq")
+
+
+class StaffBackgroundView(BaseView):
+    model = BackgroundImage
+    template_name = "staff.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        return context
+
+
+class StaffCreatePostView(CreateView):
+    model = StaffBackgroundImage
+    form_class = StaffBackgroundImagery
+    template_name = "staffbackgroundimagechange.html"
+    success_url = reverse_lazy("staff")
+
+
+class StaffApplyBackgroundView(FormMixin, ListView):
+    model = StaffApplyBackgroundImage
+    template_name = "staffapplications.html"
+    form_class = StaffJoin
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['StaffApplyBackgroundImage'] = StaffApplyBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        return context
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST":
+            form = StaffJoin(request.POST, request.FILES)
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.save()
+                messages.success(request, 'Form submitted successfully.')
+                return redirect('showcase:staffdone')
+            else:
+                print(form.errors)
+                print(form.non_field_errors())
+                print(form.cleaned_data)
+                messages.error(request, "Form submission invalid")
+                return render(request, "staffapplications.html", {'form': form})
+        else:
+            form = StaffJoin()
+            messages.error(request, 'Form submission failed to register, please try again.')
+            messages.error(request, form.errors)
+            return render(request, "staffapplications.html", {'form': form})
+
+
+class InformationBackgroundView(BaseView):
+    InformationBackgroundImage
+    template_name = "information.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        return context
+
+
+class InformationCreatePostView(CreateView):
+    model = InformationBackgroundImage
+    form_class = InformationBackgroundImagery
+    template_name = "Informationbackgroundimagechange.html"
+    success_url = reverse_lazy("Information")
+
+
+class TagBackgroundView(BaseView):
+    model = TagBackgroundImage
+    template_name = "tag.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        return context
+
+
+class TagCreatePostView(CreateView):
+    model = TagBackgroundImage
+    form_class = TagBackgroundImagery
+    template_name = "tagbackgroundimagechange.html"
+    success_url = reverse_lazy("tag")
+
+
+class UserBackgroundView(BaseView):
+    model = UserBackgroundImage
+    template_name = "users.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['UserBackgroundImage'] = UserBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        return context
+
+
+class UserCreatePostView(CreateView):
+    model = UserBackgroundImage
+    form_class = UserBackgroundImagery
+    template_name = "userbackgroundimagechange.html"
+    success_url = reverse_lazy("users")
+
+
+class StaffRanksBackgroundView(BaseView):
+    model = StaffRanksBackgroundImage
+    template_name = "staffranks.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['StaffRanksBackgroundImage'] = StaffRanksBackgroundImage.objects.all()
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        return context
+
+
+class StaffRanksCreatePostView(CreateView):
+    model = StaffRanksBackgroundImage
+    form_class = StaffRanksBackgroundImagery
+    template_name = "staffranksbackgroundimagechange.html"
+    success_url = reverse_lazy("staffranks")
+
+
+class MegaBackgroundView(BaseView):
+    model = MegaBackgroundImage
+    template_name = "megacoins.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['MegaCoinsBackgroundImage'] = MegaBackgroundImage.objects.all()
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        return context
+
+
+class MegaCreatePostView(CreateView):
+    model = MegaBackgroundImage
+    form_class = MegaBackgroundImagery
+    template_name = "megacoinsbackgroundimagechange.html"
+    success_url = reverse_lazy("megacoins")
+
+
+class EventBackgroundView(BaseView):
+    model = EventBackgroundImage
+    template_name = "events.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['EventBackgroundImage'] = EventBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Events'] = Event.objects.all()
+
+        newprofile = Event.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+
+class EventCreatePostView(CreateView):
+    model = EventBackgroundImage
+    form_class = EventBackgroundImagery
+    template_name = "eventbackgroundimagechange.html"
+    success_url = reverse_lazy("event")
+
+
+class NewsBackgroundView(BaseView):
+    model = NewsBackgroundImage
+    template_name = "newsfeed.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['NewsBackgroundImage'] = NewsBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['News'] = NewsFeed.objects.all()
+
+        newprofile = NewsFeed.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+
+class NewsCreatePostView(CreateView):
+    model = NewsBackgroundImage
+    form_class = NewsBackgroundImagery
+    template_name = "newsbackgroundimagechange.html"
+    success_url = reverse_lazy("newsfeed")
+
+
+class DonorView(BaseView):
+    model = DonorBackgroundImage
+    template_name = "donors.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        # context['BaseHomeTexted'] = BaseHomeText.objects.all()
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        # Check if there is a signed-in user
+        if request.user.is_authenticated:
+            user = request.user
+            print(user)
+        else:
+            # If no signed-in user, use a default user or None as desired
+            user = None  # Or use default_user if it is previously defined
+
+        # Continue with the regular flow, passing the determined user to the view
+        return super().dispatch(request, *args, user=user, **kwargs)
+
+
+class ContributorBackgroundView(BaseView):
+    model = ContributorBackgroundImage
+    template_name = "contributors.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        return context
+
+
+class ContentBackgroundView(BaseView):
+    model = ContentBackgroundImage
+    template_name = "morecontent.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ContentBackgroundImage'] = ContentBackgroundImage.objects.all()
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        return context
+
+
+class PartnerBackgroundView(BaseView):
+    model = PartnerBackgroundImage
+    template_name = "partners.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['PartnerBackgroundImage'] = PartnerBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Partner'] = PartnerApplication.objects.all()
+
+        newprofile = Partner.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+
+class ShareBackgroundView(BaseView):
+    model = ShareBackgroundImage
+    template_name = "share.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Ideas'] = Idea.objects.all()
+
+        newprofile = Idea.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+
+class ConvertBackgroundView(BaseView):
+    model = ConvertBackgroundImage
+    template_name = "convert.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ConvertBackgroundImage'] = ConvertBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        return context
+
+
+class ReasonsBackgroundView(BaseView):
+    model = ReasonsBackgroundImage
+    template_name = "reasons-to-convert.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ConvertBackgroundImage'] = ConvertBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        return context
+
+
+class PerksBackgroundView(BaseView):
+    model = PerksBackgroundImage
+    template_name = "perks.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
+        return context
+
+
+#  def get_queryset(self):
+#    return BackgroundImage.objects.all()
+
+#  def get_context_data(request):
+#    images = os.listdir("static/css/images") #Can use glob as well
+#    context = {'images': images}
+#    return render(request,'/home/runner/PokeTrove-Attempt-Backedmore/templates',context)
+
+# class Background2aView(ListView):
+#  model = Background2aImage
+#  paginate_by = 10
+#  template_name = 'index.html'
+#  extra_context = {'Background2aIm
+#  age.url': Background2aImage.objects.all()[0].get_absolute_url()}
+
+#  def get_queryset(self):
+#    return Background2aImage.objects.all()
+
+
+def home(request):
+    return render(request, 'home.html')
+
+
+from django.http import HttpRequest, JsonResponse
+from django.views.generic import TemplateView
+
+
+class RoomView(TemplateView):
+    model = Room
+    template_name = 'room.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        room = self.kwargs['room']
+        username = self.request.GET.get('username')
+        room_details = Room.objects.get(name=room)
+        profile_details = ProfileDetails.objects.filter(user__username=username).first()
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        context['username'] = username
+        context['room'] = room
+        context['room_details'] = room_details
+        context['profile_details'] = profile_details
+
+        # Retrieve the author's profile avatar
+        messages = Message.objects.all().order_by('-date')
+
+        context['Messaging'] = messages
+
+        for messages in context['Messaging']:
+            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
+            if profile:
+                messages.user_profile_picture_url = profile.avatar.url
+                messages.user_profile_url = messages.get_profile_url()
+
+        return context
+
+
+def room(request, room):
+    username = request.GET.get('username')
+    room_details = Room.objects.get(name=room)
+    profile_details = ProfileDetails.objects.filter(
+        user__username=username).first()  # Fetch profile details for the specified username
+    Logo = LogoBase.objects.filter(page='room.html', is_active=1)
+    Header = NavBarHeader.objects.filter(is_active=1).order_by("row")
+    DropDown = NavBar.objects.filter(is_active=1).order_by('position')
+
+    return render(request, 'room.html', {
+        'username': username,
+        'room': room,
+        'room_details': room_details,
+        'profile_details': profile_details,
+        'Logo': Logo,
+        'Header': Header,
+        'Dropdown': DropDown,
+    })
+
+
+def checkview(request):
+    room = request.POST['room_name']
+    username = request.POST['username']
+
+    if Room.objects.filter(name=room).exists():
+        return redirect('/home/' + room + '/?username=' + username)
+    else:
+        new_room = Room.objects.create(name=room)
+        new_room.save()
+        return redirect('/home/' + room + '/?username=' + username)
+
+
+def send(request):
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        username = request.POST.get('username')
+        room_id = request.POST.get('room_id')
 
         print(f"message: {message}, username: {username}, room_id: {room_id}")
 
@@ -1885,22 +3735,37 @@ def supportsend(request):
     return HttpResponse('Invalid request method. Please use POST to send a message.')
 
 
+from django.contrib.staticfiles.storage import staticfiles_storage
+from urllib import request
+from django.http import JsonResponse
+from django.views import View
+from django.core import serializers
+
+"""
+def get_profile_url(message):
+   return f"http://127.0.0.1:8000/profile/{message.signed_in_user_id}/"
+"""
+from django.http import JsonResponse
+
 def supportgetMessages(request, **kwargs):
-    messages = SupportMessage.objects.filter(room=request.user.username)
+    messages = SupportMessage.objects.filter(room=request.user)
 
     # Prepare the messages data to be sent in the AJAX response
     messages_data = []
     for message in messages:
-        profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+        profile = ProfileDetails.objects.filter(user=request.user).first() #message.signed_in_user is not filling correctly
+
+        print("Profile:", profile)
         if profile:
             user_profile_url = message.get_profile_url()  # Get the user_profile_url for each message
             avatar_url = profile.avatar.url  # Use the avatar URL from the profile
-            print('profile included')
+            #print('profile included')
+            print(message.get_profile_url())
         else:
             # Set a default avatar URL or path in case the user doesn't have an avatar
             user_profile_url = 'profile'
             avatar_url = staticfiles_storage.url('css/images/a.jpg')
-            print('guest user')
+            print('user has no profile or is guest user')
 
         messages_data.append({
             'user_profile_url': user_profile_url,
@@ -2178,6 +4043,7 @@ class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
 
         context['username'] = self.request.user.username
         context['password'] = SettingsModel.password
+        context['email'] = SettingsModel.email
         context['coupons'] = SettingsModel.coupons
         context['news'] = SettingsModel.news
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -2231,9 +4097,12 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
         # Update the user's username and password based on the SettingsModel
         user.username = new_username
         user.set_password(form.cleaned_data['password'])
+        new_email = form.cleaned_data['email']
+        user.email = new_email
         user.save()
 
         # Update the SettingsModel with the new form data
+        settings_model.email = form.cleaned_data['email']
         settings_model.coupons = form.cleaned_data['coupons']
         settings_model.news = form.cleaned_data['news']
         settings_model.save()
@@ -2624,7 +4493,6 @@ class BusinessSuccessMailingView(TemplateView):
     template_name = 'businessmailingsuccess.html'
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(kwargs)
         context = super().get_context_data(**kwargs)
         # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -2650,32 +4518,66 @@ class businessemailcontact(TemplateView):
     template_name = 'businessemail.html'
 
 
-@login_required
-def post_detail(request, slug):
+class PostDetailView(View):
     template_name = 'post_detail.html'
-    post = get_object_or_404(Blog, slug=slug)
-    comments = post.comments.filter(active=True).order_by("-created_on")
-    new_comment = None
-    # Comment posted
-    if request.method == 'POST':
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        return context
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, slug):
+        post = get_object_or_404(Blog, slug=slug)
+        comments = post.comments.filter(active=True).order_by("-created_on")
+        comment_form = CommentForm()
+        header_data = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        dropdown_data = NavBar.objects.filter(is_active=1).order_by('position')
+
+
+        context = {
+            'post': post,
+            'comments': comments,
+            'comment_form': comment_form,
+            'Header': header_data,  # Adding Header data to context
+            'DropDown': dropdown_data  # Adding DropDown data to context
+        }
+
+        return render(request, self.template_name, context)
+
+    def post(self, request, slug):
+        post = get_object_or_404(Blog, slug=slug)
+        comments = post.comments.filter(active=True).order_by("-created_on")
+        new_comment = None
+        header_data = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        dropdown_data = NavBar.objects.filter(is_active=1).order_by('position')
+
         comment_form = CommentForm(data=request.POST)
         if comment_form.is_valid():
-            # Create Comment object but don't save to database yet
             new_comment = comment_form.save(commit=False)
-            # Assign the current post to the comment
             new_comment.blog = post
-            # Save the comment to the database
             new_comment.save()
-    else:
-        comment_form = CommentForm()
 
-    return render(
-        request, template_name, {
+        context = {
             'post': post,
             'comments': comments,
             'new_comment': new_comment,
-            'comment_form': comment_form
-        })
+            'comment_form': comment_form,
+            'Header': header_data,  # Adding Header data to context
+            'DropDown': dropdown_data  # Adding DropDown data to context
+        }
+
+        return render(request, self.template_name, context)
 
 
 # users/views.py
@@ -4652,6 +6554,9 @@ def submit_feedback(request, item_id):
     user = request.user
     order_item = get_object_or_404(OrderItem, user=user, item=item)
 
+    #
+    order_item = OrderItem.objects.filter(user=user, item=item)
+
     # Check if the user has already left feedback for this order item
     existing_feedback = Feedback.objects.filter(username=user, order=order_item)
 
@@ -4696,34 +6601,17 @@ def edit_feedback(request, feedback_id):
 from django.utils.text import slugify
 from urllib.parse import quote
 
+@login_required
+def my_order_items(request):
+    user = request.user
+    order_items = OrderItem.objects.filter(user=user)
+    context = {'order_items': order_items}
+    return render(request, 'order_history.html', context)
+
 class OrderHistory(ListView):
     model = Order
     template_name = "order_history.html"
     context_object_name = 'order'
-
-    def get_queryset(self):
-        user = self.user  # Assuming you've set the user attribute in the dispatch method
-        return OrderItem.objects.filter(user=user, is_active=1)
-
-    def dispatch(self, request, *args, **kwargs):
-        username = self.kwargs['username']
-        normalized_username = slugify(username)  # Normalize the username to a slug
-        encoded_username = quote(normalized_username)
-
-        # Instead of encoding for querying, normalize for querying
-        user = get_object_or_404(User, username__iexact=normalized_username)
-
-        if user == request.user or request.user.is_staff:
-            self.user = user
-            return super().dispatch(request, *args, **kwargs)
-        else:
-            raise Http404("Access denied.")
-
-    @staticmethod
-    def encoded_user(request, username):
-        encoded_username = quote(username)
-        encoded_url = reverse('order_history', args=[encoded_username])
-        return encoded_url
 
     def get_context_data(self, **kwargs):
 
@@ -4753,8 +6641,7 @@ class OrderHistory(ListView):
                 items.author_profile_url = items.get_profile_url()
 
 
-
-        order = OrderItem.objects.filter(is_active=1)
+        order = OrderItem.objects.filter(is_active=1, user=user)
         context['orders'] = order
         total_items = OrderItem.objects.filter(is_active=1).count()
 

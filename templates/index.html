@@ -145,6 +145,10 @@
         {% endif %}
       {% endfor %}
           </div>
+    </div>
+
+<!-- Slideshow container -->
+<div class="slideshow-container" id="featuredproducts" style="z-index:-10;">
 
   <!-- Full-width images with number and caption text -->
   <div class="mySlidesesesesfade fade" style="z-index:3;">
@@ -363,7 +367,7 @@
 
 
   </div>
-
+</div>
   <!--
   This script places a badge on your repl's full-browser view back to your repl's cover
   page. Try various colors for the theme: dark, light, red, orange, yellow, lime, green,
@@ -669,7 +673,13 @@
 <div class = "about_us">
   <div class = "about">
     <div class=stripelineabout>
-    <h2 class = "aboutPoketrove">Welcome to PokeTrove!</h2>
+    <h2 class = "aboutPoketrove">        {% for BackgroundImage in TextFielde %}
+            {% if BackgroundImage.page == 'index.html' %}
+         {% if BackgroundImage.section == 3 %}
+                {{BackgroundImage.text}}
+                {% endif %}
+        {% endif %}
+        {% endfor %}</h2>
     </div>
     <!-- Slideshow container -->
 <div class="slideshow-container2">
@@ -891,8 +901,14 @@
     <script src="{% static 'css/js/scroll.js' %}"></script>
 
     </div>
-    <p class="abouttext">At PokeTrove Fun Comes First ! We have an amazing community of Pokémon fans both online and near our stores, so whether you want to chat it up on discord or stop by for a trade night.. we are here to share the hobby with you :-)
-
+    <p class="abouttext">
+        {% for BackgroundImage in TextFielde %}
+            {% if BackgroundImage.page == 'index.html' %}
+         {% if BackgroundImage.section == 1 %}
+                {{BackgroundImage.text}}
+                 {% endif %}
+        {% endif %}
+        {% endfor %}
 </p>
     <br>
     <br>
@@ -905,7 +921,27 @@
       <div class="email">
         <img class="newsletterlogo" src="static/css/images/newsletterlogo.png">
         <b>
-        <p class="newsletter">Subscribe to our newsletter!</p>
+
+         {% for BackgroundImage in TextFielde %}
+    {% if BackgroundImage.page == 'index.html' and BackgroundImage.section == 5 %}
+        {% if BackgroundImage.text_size == 1 %}
+            <h1>{{ BackgroundImage.text }}</h1>
+        {% elif BackgroundImage.text_size == 2 %}
+            <h2>{{ BackgroundImage.text }}</h2>
+        {% elif BackgroundImage.text_size == 3 %}
+            <h3>{{ BackgroundImage.text }}</h3>
+        {% elif BackgroundImage.text_size == 4 %}
+            <h4>{{ BackgroundImage.text }}</h4>
+        {% elif BackgroundImage.text_size == 5 %}
+            <h5>{{ BackgroundImage.text }}</h5>
+        {% elif BackgroundImage.text_size == 6 %}
+            <h6>{{ BackgroundImage.text }}</h6>
+        {% else %}
+            <p>{{ BackgroundImage.text }}</p>
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
           </b>
           <form method="POST"  enctype="multipart/form-data" class="post">
     {% csrf_token %}
@@ -974,11 +1010,11 @@
               <i class="far fa-star"></i>
               {% elif BackgroundImage.star_rating == '4' %}
               <i class="far fa-star"></i>
-            <i class="far fa-star"></i>
+              <i class="far fa-star"></i>
               <i class="far fa-star"></i>
               <i class="far fa-star"></i>
               {% else %}
-            <i class="far fa-star"></i>
+              <i class="far fa-star"></i>
               <i class="far fa-star"></i>
               <i class="far fa-star"></i>
               <i class="far fa-star"></i>

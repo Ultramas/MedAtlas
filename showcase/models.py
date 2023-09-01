@@ -662,7 +662,7 @@ class Comment(models.Model):
     email = models.EmailField()
     body = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
-    active = models.BooleanField(default=False)
+    active = models.BooleanField(default=True, verbose_name="Post comment?")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -790,6 +790,8 @@ class TextBase(models.Model):
     exists = models.BooleanField(verbose_name="Section Taken", help_text="Is this section taken?", default=1,
                                  choices=((1, 'Yes'), (0, 'No')))
     hyperlink = models.TextField(blank=True, null=True, verbose_name="Hyperlink")
+    text_size = models.IntegerField(default=0, help_text='6->Body 3, 5->Body 2, 4->Body 1, 3-> Heading 3,2-> Heading 2, 1-> Heading 1,',
+                                    choices=((6, 'H6'), (5, 'H5'), (4, 'H4'), (3, 'H3'), (2, 'H2'), (1, 'H1'), (0, 'p')), verbose_name="Text Size")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -919,6 +921,7 @@ class SettingsModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='settings')
     username = models.CharField(help_text='Your username', max_length=200)
     password = models.CharField(help_text='Your password', max_length=200)
+    email = models.EmailField(help_text='Your password', max_length=200, blank=True, null=True)
     coupons = models.BooleanField(verbose_name="Send me coupons", default=True, blank=True, null=True,
                                   choices=((True, 'Yes'), (False, 'No')))
     news = models.BooleanField(verbose_name="Keep me in the loop", default=True, blank=True, null=True,
@@ -1729,10 +1732,8 @@ class SupportMessage(models.Model):
     # now = datetime.datetime.now()
     date = models.DateTimeField(default=timezone.now, blank=True)
     user = models.CharField(max_length=1000000)
-    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
-                                       related_name='support_messages',
+    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='support_messages',
                                        verbose_name="User")
-
     room = models.CharField(max_length=1000000)  # newly added unique=True
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
@@ -1756,6 +1757,7 @@ class SupportMessage(models.Model):
         profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
 
     def get_absolute_url(self):
         # Construct the URL for the room detail page
@@ -2547,6 +2549,10 @@ class Feedback(models.Model):
     def get_profile_url(self):
         return reverse('showcase:review_detail', args=[str(self.slug)])
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+
+        return reverse("showcase:post_detail", kwargs={"slug": str(self.slug)})
 
 @receiver(pre_save, sender=Feedback)
 def set_slug(sender, instance, *args, **kwargs):

@@ -105,8 +105,12 @@
 
 
 {% if UpdateProfile %}
-                    {% for newprofile in Profiles %}
+                    {% for newprofile in Profiles|slice:":2" %}
+            {% if newprofile.user == Idea.user %}
+
+
                                 {% if newprofile.newprofile_profile_picture_url %}
+
                                   <a href="{{ newprofile.newprofile_profile_url }}">
                                      <img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
                                   </a>
@@ -114,6 +118,7 @@
                                    <!-- Placeholder image or default avatar -->
                                   <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
                                 {% endif %}
+            {% endif %}
                                 {% endfor %}
 
                 {% endif %}{{Idea.name}}</h1>

@@ -1,3 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% for ChatBackgroundImage in Titles %}
+  {% if ChatBackgroundImage.page == 'room.html' %}
+     {{ ChatBackgroundImage.overtitle }}
+  {% endif %}
+{% endfor %}
+
+{% block content %}
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,63 +18,93 @@ body {
   margin: 0 auto;
   max-width: 800px;
   padding: 0 20px;
+  background-color: #f1f1f1;
 }
 
-.container {
+.chat-container {
   border: 2px solid #dedede;
-  background-color: #f1f1f1;
+  background-color: #fff;
   border-radius: 5px;
-  padding: 10px;
+  padding: 20px;
   margin: 10px 0;
 }
 
-.darker {
-  border-color: #ccc;
-  background-color: #ddd;
+.chat-container .message {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
 }
 
-.container::after {
-  content: "";
-  clear: both;
-  display: table;
-}
-
-.container img {
-  float: left;
-  max-width: 60px;
-  width: 100%;
-  margin-right: 20px;
+.chat-container .message img {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
+  margin-right: 10px;
 }
 
-.container img.right {
-  float: right;
-  margin-left: 20px;
-  margin-right:0;
+.chat-container .message .message-content {
+  flex-grow: 1;
+  background-color: #f7f7f7;
+  padding: 10px;
+  border-radius: 5px;
 }
 
-.time-right {
-  float: right;
-  color: #aaa;
+.chat-container .message .message-content .sender {
+  font-weight: bold;
 }
 
-.time-left {
-  float: left;
+.chat-container .message .message-content .time {
+  font-size: 12px;
   color: #999;
 }
+
+.chat-input {
+  background-color: #f7f7f7;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.chat-input input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.chat-input input[type="submit"] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
 </style>
-<script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 </head>
 <body>
 
-<h2>{{user}} - {{room}}</h2>
+{% for ChatBackgroundImage in Background %}
+  <img class="backgroundimages" src="{{BackgroundImage.cover.url}}" alt="{{ BackgroundImage.backgroundtitle }}">
+{% endfor %}
 
-<div id="display">
+<div class="chat-container">
+  <h2>{{username}} - {{room}}</h2>
 
-<!-- <div class="container darker">
-  <b>Tom</b><p>Hello Everyone, How Are You Guys Doing?</p>
-  <span class="time-left">20th, April 2021</span>
-</div> -->
+  <div id="display"></div>
+  <div class="chat-input">
+    <form id="post-form">
+        {% csrf_token %}
+        <input type="hidden" name="username" id="username" value="{{username}}"/>
+        <input type="hidden" name="room_id" id="room_id" value="{{room_details.id}}"/>
+        <input type="text" name="message" id="message" width="100px" />
+        <input type="submit" value="Send">
+    </form>
+</div>
 
 </div>
 
@@ -83,7 +124,7 @@ $(document).ready(function(){
 
     $.ajax({
       type: 'GET',
-      url: "/supportgetMessages/{{room}}/",
+      url: "/supportgetMessages/room/",
       success: function(response){
         console.log(response);
         $("#display").empty();
@@ -94,6 +135,7 @@ $(document).ready(function(){
           var user = message.user;
           var value = message.value;
           var date = message.date;
+          var user = message.user;
 
           var messageHtml = `
             <div class="message">
@@ -126,53 +168,13 @@ function preloadImages(urls) {
 </script>
 
 
-
-<div class="container">
-    <style>
-    input[type=text], select {
-    width: 100%;
-    padding: 12px 20px;
-    margin: 8px 0;
-    display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    }
-
-    input[type=submit] {
-    width: 100%;
-    background-color: #4CAF50;
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    }
-
-    input[type=submit]:hover {
-    background-color: #45a049;
-    }
-
-    div {
-    border-radius: 5px;
-    background-color: #f2f2f2;
-    padding: 20px;
-    }
-    </style>
-
-    <form id="post-form">
-        {% csrf_token %}
-        <input type="hidden" name="username" id="username" value="{{username}}"/>
-        <input type="hidden" name="room_id" id="room_id" value="{{room_details.id}}"/>
-        <input type="text" name="message" id="message" width="100px" />
-        <input type="submit" value="Send">
-    </form>
-</div>
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
 
 
 </body>
-
 
 <script type="text/javascript">
 $(document).on('submit','#post-form',function(e){
@@ -196,5 +198,6 @@ $(document).on('submit','#post-form',function(e){
 });
 </script>
 
-
 </html>
+
+{% endblock content %}

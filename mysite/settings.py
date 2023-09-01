@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'showcase',
     'crispy_forms',
+    'crispy_bootstrap4',
     'django_private_chat2.apps.DjangoPrivateChat2Config',
     "guest_user",
     "social_django",

@@ -59,22 +59,10 @@
         {% if row.row == column.row %}
           {% if row.url == 'http://127.0.0.1:8000/profile' %}
              {% if row.opennew %}
-            <a href="{{ profile_url }} " target="_blank">{{ row.text }}</a>
+            <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a>
             {% else %}
             <a href="{{ profile_url }}">{{ row.text }}</a>
             {% endif %}
-          {% elif row.url == 'http://127.0.0.1:8000/order_history' %}
-                {% if user.is_authenticated %}
-                    {% if row.opennew %}
-                    <a href="{{ encoded_url }}" target="_blank">{{ row.text }}</a>
-                    {% else %}
-                    <a href="{{ encoded_url }}">{{ row.text }}</a>
-                    {% endif %}
-                {% else %}
-                <a href="http://127.0.0.1:8000/accounts/login">
-                    {{ row.text }}eeee
-                </a>
-                {% endif %}
           {% else %}
             {% if row.opennew %}
               <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>

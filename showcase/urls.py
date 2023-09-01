@@ -69,6 +69,7 @@ from .views import (
     MemberBaseView,
     DonateBaseView,
     #SubmitFeedbackView,
+    PostDetailView,
     PostingView,
     DonorView,
     DonationsView,
@@ -102,6 +103,7 @@ from .views import (
     AdminTasksView,
     AdminPagesView,
     AdministrationView,
+    my_order_items,
     SettingsView,
     SettingsBackgroundView,
     ReviewView,
@@ -271,9 +273,11 @@ urlpatterns = [
     path('reviews/', views.ReviewView.as_view(), name='reviews'),
     #path('create_review/<int:orderitem_id>/', views.SubmitFeedbackView.as_view(), name='create_review'),
     path('create_review/<int:item_id>/', views.submit_feedback, name='create_review'),
+    #path('create_review/', views.submit_feedback, name='create_review'),
     #might cause issues due to the implementation of an integer rather than the foreignkey
-
-    path('order_history/<str:username>/', views.OrderHistory.as_view(), name='order_history'),
+    #path('order_history/', my_order_items, name='order_history'),
+    path('order_history/', views.OrderHistory.as_view(), name='order_history'),
+    #path('order_history/<str:username>/', views.OrderHistory.as_view(), name='order_history'),
     #path('create_review/', views.submit_feedback, name='create_review'),
     #path('create_review/<int:item_id>/', views.submit_feedback, name='create_review'),
     #possibly consider making wireframes to see where the create feedback form based on bought products url would look like
@@ -342,12 +346,12 @@ urlpatterns = [
     path('businessmailingsuccess', views.BusinessEmailSuccessView.as_view(), name='businessmailingsuccess'),
     # path('<slug:slug>/', views.BlogComment.as_view(), name='post_detail'),
     # path('blogpost-like/<int:pk>/', views.BlogPostLike, name='blogpost_like'),
-    path('post/<slug:slug>/', views.post_detail, name='post_detail'),
+    #path('post/<slug:slug>/', views.post_detail, name='post_detail'),
+    path('post/<slug:slug>/', views.PostDetailView.as_view(), name='post_detail'),
     path('home/checkview', views.checkview, name='checkview'),
     path('home/send', views.send, name='send'),
     path('getMessages/<str:room>/', views.getMessages, name='getMessages'),
     # path('supportchat/', views.Support, name='supportchat'),
-    path('supportchat/room', views.supportroom, name='supportroom'),
     # path('supportchat/<str:room>/', views.room, name='room'),
     path('user.username/<str:room>/', views.room, name='room'), #causes admistration redirection on messages' "view on site"
     path('home/<str:room>/', views.RoomView.as_view(), name='room'),
@@ -355,6 +359,7 @@ urlpatterns = [
     path('supportchat/send', views.supportsend, name='supportsend'),
     path('supportgetMessages/<str:room>/', views.supportgetMessages, name='supportgetMessages'),
     path('supportchat/<str:supportroom>/', views.supportroom, name='supportroom'),
+    path('supportchat/room', views.supportroom, name='supportroom'),
     # change url <str:room> to use user username for added security
     path('product/<slug>/', views.ProductView.as_view(), name='product'),
     path('order-summary/', views.OrderSummaryView.as_view(), name='order-summary'),
