@@ -133,3 +133,33 @@ padding: 40px;
   margin: auto;
   background-attachment: fixed;
 }
+
+
+
+
+/* Slideshow container */
+.slideshown-container {
+
+  display: flex;
+  overflow: hidden;
+  flex-direction: row;
+  max-width: 3000px;
+  position: relative;
+  margin: 0 10px;
+  box-sizing:border-box;
+}
+
+/* Hide the images by default */
+.mySlidesesesesfaded {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  width: calc(100%);
+  margin-right: 10px;
+}
+
+.mySlidesesesesfaded img {
+  width: 100%;
+  height: 100%;
+}

@@ -318,25 +318,24 @@ class ImageView(ListView):
         return context
 
 
-
 class BaseView(ListView):
-   template_name = "base.html"
-   model = LogoBase
+    template_name = "base.html"
+    model = LogoBase
 
-   def get_context_data(self, **kwargs):
-       context = super().get_context_data(**kwargs)
-       context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-       context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-       context['Logo'] = LogoBase.objects.filter(is_active=1)
-       context['Favicons'] = FaviconBase.objects.all()
-       user = self.request.user
-       if user.is_authenticated:
-           context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
-           profile = ProfileDetails.objects.filter(user=user).first()
-           if profile:
-               context['profile_pk'] = profile.pk
-               context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
-       return context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(is_active=1)
+        context['Favicons'] = FaviconBase.objects.all()
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        return context
 
 
 class EBaseView(ListView):
@@ -1006,9 +1005,23 @@ class BackgroundView(FormMixin, BaseView):
                 feed.user_profile_picture_url = profile.avatar.url
                 feed.user_profile_url = feed.get_profile_url()
 
-
-
         return context
+
+from django.views.generic import TemplateView
+from .models import BackgroundImage
+
+class BackgroundStyleView(TemplateView):
+    template_name = "style.css"
+    content_type = "text/css"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Get the first BackgroundImage object from the database
+        background_image = BackgroundImageBase.objects.first()
+        # Add it to the context with the name 'BackgroundImage'
+        context['Background'] = background_image
+        return context
+
 
 def dynamic_css(request):
     background_objects = BackgroundImageBase.objects.filter(page='index').order_by("position")
@@ -1044,9 +1057,9 @@ class EBackgroundView(BaseView):
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
 
-        #context['items'] = paginated_items
+        # context['items'] = paginated_items
 
-        #context['items'] = Item.objects.filter(is_active=1)
+        # context['items'] = Item.objects.filter(is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
@@ -1845,6 +1858,8 @@ def getMessages(request, room):
     return JsonResponse({'messages': messages_data})
 
 
+
+
 def supportroom(request):
     username = request.user.username
     room_details = SupportChat.objects.get(name=username)
@@ -1891,33 +1906,34 @@ def supportcheckview(request):
         print('message sent')
 
 
+
 def supportsend(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         username = request.POST.get('username')
-        room_id = request.POST.get('room_id')
-        #profile = request.POST.get('profile')
-        #signed_in_user = request.POST.get('signed_in_user')
+        #room_id = request.POST.get('room_id')
+        # profile = request.POST.get('profile')
+        # signed_in_user = request.POST.get('signed_in_user')
 
         print(f"message: {message}, username: {username}, room_id: {room_id}")
-        #print(f"profile: {profile}")
+        # print(f"profile: {profile}")
         # Check if the user is authenticated
         if request.user.is_authenticated:
             # User is authenticated, use their user ID for the message user field
-            new_message = Message.objects.create(
+            new_message = SupportMessage.objects.create(
                 value=message,
                 user=username,
-                room=room_id,
+                #room=room_id,
                 signed_in_user=request.user  # Set the signed_in_user to the authenticated user
             )
-            #print(f"signed_in_user: {signed_in_user}")
+            # print(f"signed_in_user: {signed_in_user}")
             new_message.save()
         else:
             # User is not authenticated, use the provided username for the message user field
-            new_message = Message.objects.create(
+            new_message = SupportMessage.objects.create(
                 value=message,
                 user=username,
-                room=room_id,
+                #room=room_id,
             )
             new_message.save()
 
@@ -2248,25 +2264,24 @@ class ImageView(ListView):
         return context
 
 
-
 class BaseView(ListView):
-   template_name = "base.html"
-   model = LogoBase
+    template_name = "base.html"
+    model = LogoBase
 
-   def get_context_data(self, **kwargs):
-       context = super().get_context_data(**kwargs)
-       context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-       context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-       context['Logo'] = LogoBase.objects.filter(is_active=1)
-       context['Favicons'] = FaviconBase.objects.all()
-       user = self.request.user
-       if user.is_authenticated:
-           context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
-           profile = ProfileDetails.objects.filter(user=user).first()
-           if profile:
-               context['profile_pk'] = profile.pk
-               context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
-       return context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(is_active=1)
+        context['Favicons'] = FaviconBase.objects.all()
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        return context
 
 
 class EBaseView(ListView):
@@ -2584,18 +2599,16 @@ class SupportRoomView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        room = self.kwargs['room']
+        # room = self.kwargs['room']
         username = self.request.GET.get('username')
-        room_details = Room.objects.get(name=room)
+        # room_details = SupportChat.objects.get(name=username)
         profile_details = ProfileDetails.objects.filter(user__username=username).first()
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
 
         context['username'] = username
         context['room'] = room
-        context['room_details'] = room_details
         context['profile_details'] = profile_details
 
         # Retrieve the author's profile avatar
@@ -2607,9 +2620,17 @@ class SupportRoomView(TemplateView):
             profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
             if profile:
                 messages.user_profile_picture_url = profile.avatar.url
-                messages.user_profile_url = messages.get_profile_url()
+                user_profile_url = messages.get_profile_url()
 
         return context
+
+
+class SupportCombinedView(SupportRoomView, ListView):
+    paginate_by = 10
+    template_name = 'supportroom.html'
+
+    def get_queryset(self):
+        return SupportMessage.objects.all()
 
 
 class supportview(ListView):
@@ -2936,9 +2957,8 @@ class BackgroundView(FormMixin, BaseView):
                 feed.user_profile_picture_url = profile.avatar.url
                 feed.user_profile_url = feed.get_profile_url()
 
-
-
         return context
+
 
 def dynamic_css(request):
     background_objects = BackgroundImageBase.objects.filter(page='index').order_by("position")
@@ -2974,9 +2994,9 @@ class EBackgroundView(BaseView):
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
 
-        #context['items'] = paginated_items
+        # context['items'] = paginated_items
 
-        #context['items'] = Item.objects.filter(is_active=1)
+        # context['items'] = Item.objects.filter(is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
@@ -3634,107 +3654,6 @@ def home(request):
 from django.http import HttpRequest, JsonResponse
 from django.views.generic import TemplateView
 
-
-class RoomView(TemplateView):
-    model = Room
-    template_name = 'room.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        room = self.kwargs['room']
-        username = self.request.GET.get('username')
-        room_details = Room.objects.get(name=room)
-        profile_details = ProfileDetails.objects.filter(user__username=username).first()
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-
-        context['username'] = username
-        context['room'] = room
-        context['room_details'] = room_details
-        context['profile_details'] = profile_details
-
-        # Retrieve the author's profile avatar
-        messages = Message.objects.all().order_by('-date')
-
-        context['Messaging'] = messages
-
-        for messages in context['Messaging']:
-            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
-            if profile:
-                messages.user_profile_picture_url = profile.avatar.url
-                messages.user_profile_url = messages.get_profile_url()
-
-        return context
-
-
-def room(request, room):
-    username = request.GET.get('username')
-    room_details = Room.objects.get(name=room)
-    profile_details = ProfileDetails.objects.filter(
-        user__username=username).first()  # Fetch profile details for the specified username
-    Logo = LogoBase.objects.filter(page='room.html', is_active=1)
-    Header = NavBarHeader.objects.filter(is_active=1).order_by("row")
-    DropDown = NavBar.objects.filter(is_active=1).order_by('position')
-
-    return render(request, 'room.html', {
-        'username': username,
-        'room': room,
-        'room_details': room_details,
-        'profile_details': profile_details,
-        'Logo': Logo,
-        'Header': Header,
-        'Dropdown': DropDown,
-    })
-
-
-def checkview(request):
-    room = request.POST['room_name']
-    username = request.POST['username']
-
-    if Room.objects.filter(name=room).exists():
-        return redirect('/home/' + room + '/?username=' + username)
-    else:
-        new_room = Room.objects.create(name=room)
-        new_room.save()
-        return redirect('/home/' + room + '/?username=' + username)
-
-
-def send(request):
-    if request.method == 'POST':
-        message = request.POST.get('message')
-        username = request.POST.get('username')
-        room_id = request.POST.get('room_id')
-
-        print(f"message: {message}, username: {username}, room_id: {room_id}")
-
-        # Check if the user is authenticated
-        if request.user.is_authenticated:
-            # User is authenticated, use their user ID for the message user field
-            new_message = Message.objects.create(
-                value=message,
-                user=username,
-                room=room_id,
-                signed_in_user=request.user  # Set the signed_in_user to the authenticated user
-            )
-            new_message.save()
-        else:
-            # User is not authenticated, use the provided username for the message user field
-            new_message = Message.objects.create(
-                value=message,
-                user=username,
-                room=room_id,
-            )
-            new_message.save()
-
-        # Return a response indicating the message was sent successfully
-        return HttpResponse('Message sent successfully')
-
-    # If the request method is not POST, handle the appropriate response here
-    return HttpResponse('Invalid request method. Please use POST to send a message.')
-
-
 from django.contrib.staticfiles.storage import staticfiles_storage
 from urllib import request
 from django.http import JsonResponse
@@ -3747,19 +3666,21 @@ def get_profile_url(message):
 """
 from django.http import JsonResponse
 
+
 def supportgetMessages(request, **kwargs):
     messages = SupportMessage.objects.filter(room=request.user)
 
     # Prepare the messages data to be sent in the AJAX response
     messages_data = []
     for message in messages:
-        profile = ProfileDetails.objects.filter(user=request.user).first() #message.signed_in_user is not filling correctly
+        profile = ProfileDetails.objects.filter(
+            user=request.user).first()  # message.signed_in_user is not filling correctly
 
         print("Profile:", profile)
         if profile:
             user_profile_url = message.get_profile_url()  # Get the user_profile_url for each message
             avatar_url = profile.avatar.url  # Use the avatar URL from the profile
-            #print('profile included')
+            # print('profile included')
             print(message.get_profile_url())
         else:
             # Set a default avatar URL or path in case the user doesn't have an avatar
@@ -4543,7 +4464,6 @@ class PostDetailView(View):
         comment_form = CommentForm()
         header_data = NavBarHeader.objects.filter(is_active=1).order_by("row")
         dropdown_data = NavBar.objects.filter(is_active=1).order_by('position')
-
 
         context = {
             'post': post,
@@ -6260,7 +6180,7 @@ class ReviewView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        #context['Feed'] = Feedback.objects.filter(is_active=1).order_by("slug")
+        # context['Feed'] = Feedback.objects.filter(is_active=1).order_by("slug")
         # Retrieve the item
 
         product = Item.objects.filter(is_active=1)
@@ -6289,8 +6209,6 @@ class ReviewView(BaseView):
                 feeder.user_profile_url = feeder.get_profile_url()
 
                 print('imgsrcimg')
-
-
 
         return context
 
@@ -6554,8 +6472,7 @@ def submit_feedback(request, item_id):
     user = request.user
     order_item = get_object_or_404(OrderItem, user=user, item=item)
 
-    #
-    order_item = OrderItem.objects.filter(user=user, item=item)
+    #order_item = OrderItem.objects.filter(user=user, item=item)
 
     # Check if the user has already left feedback for this order item
     existing_feedback = Feedback.objects.filter(username=user, order=order_item)
@@ -6598,8 +6515,10 @@ def edit_feedback(request, feedback_id):
 
     return render(request, 'create_review.html', {'form': form})
 
+
 from django.utils.text import slugify
 from urllib.parse import quote
+
 
 @login_required
 def my_order_items(request):
@@ -6607,6 +6526,7 @@ def my_order_items(request):
     order_items = OrderItem.objects.filter(user=user)
     context = {'order_items': order_items}
     return render(request, 'order_history.html', context)
+
 
 class OrderHistory(ListView):
     model = Order
@@ -6625,7 +6545,7 @@ class OrderHistory(ListView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['items'] = Item.objects.all()
         context['feedback'] = Feedback.objects.all()
-        #context['orders'] = OrderItem.objects.filter(user=self.request.user)
+        # context['orders'] = OrderItem.objects.filter(user=self.request.user)
         print(user)
 
         # Retrieve the author's profile avatar
@@ -6639,7 +6559,6 @@ class OrderHistory(ListView):
             if profile:
                 items.author_profile_picture_url = profile.avatar.url
                 items.author_profile_url = items.get_profile_url()
-
 
         order = OrderItem.objects.filter(is_active=1, user=user)
         context['orders'] = order
@@ -6656,7 +6575,6 @@ class OrderHistory(ListView):
         # context['items'] = paginated_items
 
         # context['items'] = Item.objects.filter(is_active=1)
-
 
         context['items'] = paginated_items
         for order_item in context['orders']:
@@ -6676,6 +6594,7 @@ class OrderHistory(ListView):
                 order_item.profile_url = order_item.get_profile_url2()
 
         return context
+
 
 def sociallogin(request):
     return render(request, 'registration/sociallogin.html')

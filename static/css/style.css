@@ -3045,7 +3045,8 @@ body {
     background-image: url("images/chim.jpg");
     background-position: center;
     background-repeat: no-repeat;
-    min-height: 100%;
+    min-height: 10
+    0%;
     width: 100%;
     text-align: center;
     justify-content: center; 
@@ -3062,6 +3063,19 @@ body {
     text-align: center;
     justify-content: center;
 }
+
+.indexingsub{
+    background-attachment: fixed;
+    background-size: cover;
+    background-image: url("images/a.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+    min-height: 100%;
+    text-align: center;
+    justify-content: center;
+}
+
 
 .hunt{
   width: 600px;
@@ -12198,5 +12212,40 @@ formert button:hover {
 border-radius: 30px;
 }
 
+.slidingtheshow {
+  max-width: 1000px;
+  position: relative;
+  margin: auto;
+  position: relative;
+  width: 100%;
+  max-width: 600px; /* Adjust the max width as needed */
+  margin: 0 auto;
+  overflow: hidden;
+}
 
+.mySliding {
+}
 
+.cover-container {
+    position: relative;
+    background-size: cover;
+    height: 300px; /* Adjust the height as needed */
+}
+
+.centered-title {
+    position: absolute;
+    color: white;
+    font-size: 24px; /* Adjust the font size as needed */
+}
+
+.parallaxial {
+  /* The image used */
+  background-image: url("images/{{ STATIC_URL }}");
+  /* Set a specific height */
+  min-height: 500px;
+  /* Create the parallax scrolling effect */
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}

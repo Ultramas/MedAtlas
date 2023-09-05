@@ -20,8 +20,8 @@
 </style>
 </head>
 <body>
-{% for SupportChatBackgroundImage in object_list %}
-   <img class = "ebackgroundimages" src="{{ SupportChatBackgroundImage.cover.url }}" alt="supportchatbackgroundimage">
+{% for SupportChatBackgroundImage in Background %}
+   <img class = "ebackgroundimages" src="{{ SupportChatBackgroundImage.cover.url }}" alt="supportchatbackgroundimage" style="position: absolute">
     {% endfor %}
 <div class = home>
   <br>
@@ -129,6 +129,11 @@
     </div>   
   </div>
 </div>
+
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
 
 </body>
 

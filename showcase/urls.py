@@ -112,6 +112,7 @@ from .views import (
     PatreonedView,
     OrderHistory,
     submit_feedback,
+    SupportRoomView,
     detail_post_view,
     postpreference,
     dynamic_css,
@@ -184,6 +185,10 @@ urlpatterns = [
     path('search/', SearchResultsView.as_view(), name='search_results'),
     # path('', TemplateView.as_view(template_name='index.html'), name = 'index'),
     path('website/', TemplateView.as_view(template_name='website.html'), name='website'),
+    path('css/style.css', TemplateView.as_view(
+    template_name='style.css',
+    content_type='text/css')
+  ),
     path('about/', views.AboutBackgroundView.as_view(), name='about'),
     path('commitment/', TemplateView.as_view(template_name='commitment.html'), name='commitment'),
     path('faq/', views.FaqBackgroundView.as_view(), name='faq'),
@@ -359,7 +364,7 @@ urlpatterns = [
     path('supportchat/send', views.supportsend, name='supportsend'),
     path('supportgetMessages/<str:room>/', views.supportgetMessages, name='supportgetMessages'),
     path('supportchat/<str:supportroom>/', views.supportroom, name='supportroom'),
-    path('supportchat/room', views.supportroom, name='supportroom'),
+    path('supportchat/room', views.SupportRoomView.as_view(), name='supportroom'),
     # change url <str:room> to use user username for added security
     path('product/<slug>/', views.ProductView.as_view(), name='product'),
     path('order-summary/', views.OrderSummaryView.as_view(), name='order-summary'),

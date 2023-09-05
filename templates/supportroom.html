@@ -93,15 +93,14 @@ body {
 {% endfor %}
 
 <div class="chat-container">
-  <h2>{{username}} - {{room}}</h2>
+  <h2>{{user.username}}</h2>
 
   <div id="display"></div>
   <div class="chat-input">
     <form id="post-form">
         {% csrf_token %}
-        <input type="hidden" name="username" id="username" value="{{username}}"/>
-        <input type="hidden" name="room_id" id="room_id" value="{{room_details.id}}"/>
-        <input type="text" name="message" id="message" width="100px" />
+        <input type="hidden" name="username" id="username" value="{{user.username}}"/>
+        <input type="text" name="message" id="message" width="100px" placeholder="Type your message..." />
         <input type="submit" value="Send">
     </form>
 </div>
@@ -185,7 +184,6 @@ $(document).on('submit','#post-form',function(e){
     url:'/supportchat/send',
     data:{
       username: $('#username').val(),
-      room_id: $('#room_id').val(),
       room_name: $('#room_name').val(),
       message: $('#message').val(),
       csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),

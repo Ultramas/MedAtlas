@@ -15,7 +15,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <title>Accomfort</title>
+  <title>Accomfort</title>    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="{% static 'css/featuredproductsstyle.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/featuredproductsstyle2.css' %}">
@@ -24,7 +25,9 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/dynamic_css.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/cover.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/reviews.css' %}">
  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+ <link rel="stylesheet" type="text/css" href="{% static 'css/indexproductstyle.css' %}"> <!--indexproductstyle.css same code as mdb.min.css-->
 
   <style>
     /* Add the following styles to your CSS file */
@@ -97,23 +100,140 @@
     </div>
 {% endfor %}
 
+<script>
+    var slideIndex = 0;
+    carousel();
 
+    function carousel() {
+        var slides = document.getElementsByClassName("mySliding");
+        for (var i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none";
+        }
+        slideIndex++;
+        if (slideIndex > slides.length) {
+            slideIndex = 1;
+        }
+        slides[slideIndex - 1].style.display = "block";
+        setTimeout(carousel, 5000); // Change slide every 2 seconds (adjust as needed)
+    }
+</script>
+
+<!-- Slideshow container -->
+<!--
+<div class="slideshown-container" id="featuredproducts" style="z-index:1;">-->
+
+  <!-- Full-width images with number and caption text -->
+<!--
+  <div class="mySlidesesesesfaded fade" style="z-index:3;">
+    <div class="numbertext">1 / 9</div>
+
+    {% for BackgroundImage in Carousel %}
+             {% for carouselposition in Carousel %}
+          {% if carouselposition.carouselposition == BackgroundImage.carouselposition %}
+         {% if BackgroundImage.carouselpage == 'index.html' %}
+       {% if BackgroundImage.carouselposition == 1 %}
+       <a href="{{BackgroundImage.hyperlink}}">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
+                            </a>
+                        <h3>{{ BackgroundImage.caption }}</h3>
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}
+
+  </div>
+  <div class="mySlidesesesesfaded fade" style="z-index:3;">
+    <div class="numbertext">2 / 9</div>
+     {% for BackgroundImage in Carousel %}
+             {% for carouselposition in Carousel %}
+          {% if carouselposition.carouselposition == BackgroundImage.carouselposition %}
+         {% if BackgroundImage.carouselpage == 'index.html' %}
+       {% if BackgroundImage.carouselposition == 2 %}
+       <a href="{{BackgroundImage.hyperlink}}">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
+                            </a>
+                        <h3>{{ BackgroundImage.caption }}</h3>
+            {% endif %}
+          {% endif %}
+          {% endif %}
+  {% endfor %}
+{% endfor %}
+      </div></div>
+-->
             <!-- Loop through BackgroundImage items and apply conditions -->
-<div class="slidingtheshow">
-            {% for BackgroundImage in Carousel %}
-                {% if BackgroundImage.carouselpage == 'index.html' and BackgroundImage.carouselnumber == 1 %}
-    <div class="mySliding fade">
-                    <div class="cover-container">
-                        <img src="{{ BackgroundImage.carouselimage.url }}" alt="{{BackgroundImage.alternate}}" style="z-index: -10;">
-                        <h1 class="centered-title" data-text="{{BackgroundImage.alternate}}">{{BackgroundImage.alternate}}</h1>
-                    </div>
-        </div>
-                {% endif %}
-            {% endfor %}
+<!--
+<div class="slidingtheshow" style="margin-bottom: 50%;">
+    {% for BackgroundImage in Carousel %}
+        {% if BackgroundImage.carouselpage == 'index.html' and BackgroundImage.carouselnumber == 1 %}nj,bmh nv
+            <div class="mySliding fade">
+                <div class="cover-container" style="background-image: url('{{ BackgroundImage.carouselimage.url }}');">
+                    <h1 class="centered-title" data-text="{{BackgroundImage.alternate}}">{{BackgroundImage.alternate}}</h1>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+-->
+<div class="blackoverflow" style=" background-color: black; position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 120%;  z-index: -5;">
+    </div>
+<div class="parallaxial">
+    {% for BackgroundImage in Background %}
+        {% if BackgroundImage.page == "index.html" %}
+            {% if BackgroundImage.position == 1 %}
+                <img class="parallaxial" src="{{ BackgroundImage.cover.url }}" alt="{{ BackgroundImage.backgroundtitle }}" style="position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 120%;  z-index: -2;">
+            {% endif %}
+        {% endif %}
+
+    {% endfor %}
+    {% for BackgroundImage in Background %}
+        {% if BackgroundImage.page == "index.html" %}
+            {% if BackgroundImage.position == 2 %}
+                <img class="parallaxial" src="{{ BackgroundImage.cover.url }}" alt="{{ BackgroundImage.backgroundtitle }}" style="position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 120%;  z-index: -2;">
+            {% endif %}
+        {% endif %}
+
+    {% endfor %}
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 </div>
 
+    <script>// Get the image element by its class name
+var image = document.getElementsByClassName("parallaxial")[0];
 
-  <div class="heroingitout" >
+// Define a threshold value for hiding the image
+var threshold = 1500;
+
+// Add an event listener for the scroll event on the window object
+window.addEventListener("scroll", function() {
+  // Get the scroll position of the window
+  var scrollPosition = window.pageYOffset;
+
+  // Compare the scroll position with the threshold value
+  if (scrollPosition >= threshold) {
+    // Hide the image element by setting its visibility to hidden
+    image.style.visibility = "hidden";
+  } else {
+    // Show the image element by setting its visibility to visible
+    image.style.visibility = "visible";
+  }
+});
+
+    </script>
+
+  <div class="heroingitout" style="" >
+      <div class="indexingsub">
+<div class="backgroundimages">
+    {% for BackgroundImage in Background %}
+        {% if BackgroundImage.page == "index.html" %}
+            {% if BackgroundImage.position == 3 %}
+                <img src="{{ BackgroundImage.cover.url }}" alt="{{ BackgroundImage.backgroundtitle }}" style="background-size: cover; background-repeat: no-repeat; width: 100%; height: 100%;">
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</div>
+
       {% for image in Image %}
        {% if image.page == 'index.html' and image.image_position == 1 %}
 <!--        <div class="containereggspacing" style="background-image: url('{{ image.image.url }}'); height: {{ image.length_for_resize }}; width: {{ image.width_for_resize }}; background-repeat: no-repeat;">
@@ -130,15 +250,14 @@
      <br>
         <br>
         <br>
-
 <!-- Slideshow container -->
-<div class="slideshow-container" id="featuredproducts" style="z-index:-10;">
+<div class="slideshow-container" id="featuredproducts" style="z-index:1;">
 
 
       <div class="backgroundimages">
       {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-          {% if BackgroundImage.position == 1 %}
+          {% if BackgroundImage.position == 4 %}
 
             <img src=" {{BackgroundImage.cover.url}}" alt="{{BackgroundImage.backgroundtitle}}" style="z-index:-10; position: absolute;"> <!--flex to be behind the carousel code-->
           {% endif %}
@@ -148,7 +267,7 @@
     </div>
 
 <!-- Slideshow container -->
-<div class="slideshow-container" id="featuredproducts" style="z-index:-10;">
+<div class="slideshow-container" id="featuredproducts" style="z-index:1;">
 
   <!-- Full-width images with number and caption text -->
   <div class="mySlidesesesesfade fade" style="z-index:3;">
@@ -160,7 +279,7 @@
          {% if BackgroundImage.carouselpage == 'index.html' %}
        {% if BackgroundImage.carouselposition == 1 %}
        <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -169,7 +288,6 @@
   {% endfor %}
 {% endfor %}
 
-    <div class="text">Caption Text</div>
   </div>
   <div class="mySlidesesesesfade fade" style="z-index:3;">
     <div class="numbertext">2 / 9</div>
@@ -179,7 +297,7 @@
          {% if BackgroundImage.carouselpage == 'index.html' %}
        {% if BackgroundImage.carouselposition == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -196,7 +314,7 @@
          {% if BackgroundImage.carouselpage == 'index.html' %}
        {% if BackgroundImage.carouselposition == 3 %}
        <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -214,7 +332,7 @@
          {% if BackgroundImage.carouselpage == 'index.html' %}
        {% if BackgroundImage.carouselposition == 4 %}
        <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -231,7 +349,7 @@
          {% if BackgroundImage.carouselpage == 'index.html' %}
        {% if BackgroundImage.carouselposition == 5 %}
        <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -248,7 +366,7 @@
          {% if BackgroundImage.carouselpage == 'index.html' %}
        {% if BackgroundImage.carouselposition == 6 %}
        <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -265,7 +383,7 @@
          {% if BackgroundImage.carouselpage == 'index.html' %}
        {% if BackgroundImage.carouselposition == 7 %}
        <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -282,7 +400,7 @@
          {% if BackgroundImage.carouselpage == 'index.html' %}
        {% if BackgroundImage.carouselposition == 8 %}
        <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -299,7 +417,7 @@
          {% if BackgroundImage.carouselpage == 'index.html' %}
        {% if BackgroundImage.carouselposition == 9 %}
        <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -317,7 +435,7 @@
          {% if BackgroundImage.carouselpage == 'index.html' %}
        {% if BackgroundImage.carouselposition == 1 %}
        <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -334,7 +452,7 @@
          {% if BackgroundImage.carouselpage == 'index.html' %}
        {% if BackgroundImage.carouselposition == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -364,9 +482,10 @@
   <span class="dotttted" onclick="currentSlide(7)"></span>
   <span class="dotttted" onclick="currentSlide(8)"></span>
 </div>
-
+<br>
 
   </div>
+</div>
 </div>
   <!--
   This script places a badge on your repl's full-browser view back to your repl's cover
@@ -417,10 +536,32 @@
   }
 </script>
 
-    <div class="featuredeee">
+    <div class="featuredeee" style="position: relative; overflow: hidden;">
+
+      {% for BackgroundImage in Background %}
+        {% if BackgroundImage.page == "index.html" %}
+          {% if BackgroundImage.position == 5 %}
+        {{ BackgroundImage.cover.url }}
+    <img src="{{ BackgroundImage.cover.url }}" alt="{{BackgroundImage.backgroundtitle}}" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; z-index: 0;">
+{% endif %}
+        {% endif %}
+        {% endfor %}
        <div class="containertree">
-        <h2 class="sectioninged-title">Hot New Products</h2>
-        <div class="split">
+<div style="position: relative; text-align: center;">
+
+      {% for BackgroundImage in Image %}
+        {% if BackgroundImage.page == "index.html" %}
+          {% if BackgroundImage.image_position == 1 %}
+e
+            <img src="{{BackgroundImage.image.url}}" alt="{{BackgroundImage.title}}" width="{{BackgroundImage.width_for_resize}}%" height="{{BackgroundImage.height_for_resize}}%" style="z-index:1; position: absolute; top: 0%; left: 50%; transform: translateX(-50%);"> <!--flex to be behind the carousel code-->
+          {% endif %}
+        {% endif %}
+      {% endfor %}<!--consider replacing with an image-->
+
+
+</div>
+
+        <div class="split" style="margin-top: 10%; margin-bottom: 5%">
             <!--
           <a href="#feature" class="featured__item">-->
               <!--Section: Products v.3-->
@@ -495,6 +636,7 @@
           </a>
 -->
 <!--new item additions based on "label" category-->
+
            {% for product in Products %}
 
            {% if product.label == "N" %}
@@ -521,10 +663,18 @@
     </div>
 
      <!--older product item selection-->
-    <div class="our-products">
+    <div class="our-products" style="">
+        {% for BackgroundImage in Background %}
+        {% if BackgroundImage.page == "index.html" %}
+          {% if BackgroundImage.position == 6 %}
+        {{ BackgroundImage.cover.url }}
+    <img src="{{ BackgroundImage.cover.url }}" alt="{{BackgroundImage.backgroundtitle}}" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; z-index: 0;">
+{% endif %}
+        {% endif %}
+        {% endfor %}
         <div class="container">
             <b>
-        <h1 class="section-title" style="width: 200%">Popular Featured Products</h1>
+        <h1 class="section-title" style="width: 200%; position: absolute; left: 50%; transform: translateX(-50%);">Popular Featured Products</h1>
 
 <!--have the products be an extension of the ecommerce posting section--->
                     {% for product in Products %}
@@ -544,6 +694,9 @@
                           {% endif %}
                             </span>{{product.title}}</p>
                   </a>
+                        <span class="badge badge-pill {% if item.get_label_display == 'New' %} danger-color {% else %} primary-color {% endif %}">
+                      {{ product.get_label_display }}
+                    </span>
           <p class="product__description">{{product.description}}</p>
                         </a>
           <a href="{{ product.hyperlink }}" class="btntrees">Buy now</a>
@@ -609,7 +762,7 @@
 
             {% if news.image_url %}
                       <p class="blog-text">
-            <img src="{{news.image_url}}" alt="{{news.category}}">
+            <img src="{{news.image_url}}" alt="{{news.category}}" style="max-width: 100%;">
                    <p class="card-text" style="color: black">{{news.description|slice:":200" }}...</p>
                 <br>
                 <a href="{% url 'showcase:newsfeed' %}" class="btn btn-primary" style="color: black">Read More &rarr;</a>
@@ -634,10 +787,21 @@
 
              {% endif %}
             {% endfor %}
-                    <h1 style="text-align: center;">Want To Become A Member?</h1>
-            <a href="{% url 'showcase:cv-form' %}">
-                <button class="button button1">Sign Up Now!</button>
-            </a>
+
+      {% for BackgroundImage in Background %}
+        {% if BackgroundImage.page == "index.html" %}
+          {% if BackgroundImage.position == 7 %}
+<div style="position: relative; text-align: center;">
+    <img src="{{BackgroundImage.cover.url}}" alt="{{BackgroundImage.backgroundtitle}}">
+    <h1 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2;">Want To Become A Member?</h1>
+    <a href="{% url 'showcase:cv-form' %}" style="position: absolute; top: 70%; left: 50%; transform: translateX(-50%); z-index: 2;">
+        <button class="button button1">Sign Up Now!</button>
+    </a>
+</div>
+
+                {% endif %}
+                {% endif %}
+                {% endfor %}
 <!--
 
         <div class="product shoe-red spacing">
@@ -895,10 +1059,11 @@
   <span class="dot2" onclick="currentSlide2(8)"></span>
 </div>
      <script src="{% static 'css/js/featuredproductscript.js' %}"></script>
-    <script src="{% static 'css/js.featuredproductscript2.js' %}"></script>
-    <script src="{% static 'css/js.darkmode.js' %}"></script>
-          <script src="{% static 'css/js/navbar.js' %}"></script>
-    <script src="{% static 'css/js/scroll.js' %}"></script>
+     <script src="{% static 'css/js.featuredproductscript2.js' %}"></script>
+     <script src="{% static 'css/js.darkmode.js' %}"></script>
+     <script src="{% static 'css/js/navbar.js' %}"></script>
+     <script src="{% static 'css/js/scroll.js' %}"></script>
+     <script src="{% static 'css/js/cover.js' %}"></script>
 
     </div>
     <p class="abouttext">
@@ -957,6 +1122,12 @@
      </div>
   </form>
           <div class="supportsystems" style="margin-top: 50px;">
+                    {% for BackgroundImage in Background %}
+        {% if BackgroundImage.page == "index.html" %}
+          {% if BackgroundImage.position == 8 %}
+
+            <img src=" {{BackgroundImage.cover.url}}" alt="{{BackgroundImage.backgroundtitle}}" style="z-index:-10; position: absolute;"> <!--flex to be behind the carousel code-->
+
               <h3>Contact Us</h3>
               <div class="supportchat">
                    <a href="{% url 'showcase:supportchat' %}">
@@ -975,6 +1146,9 @@
               </div>
 
           </div>
+              {% endif %}
+        {% endif %}
+      {% endfor %}
 
 
           <!--<form class="emaile" action="/url" method="GET">
@@ -990,6 +1164,99 @@
 </div>
      <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
     <div class="stripe"></div>
+
+          <div class="headerlamper">
+      <div class="containedwithinreviews">
+        <div class="containedwithinreviews__left">
+          <h1>Read what our customers love about us</h1>
+          <p>
+            Over 200 companies frim diverse sectors consult us to enhance the
+            user experience of their products and services.
+          </p>
+          <p>
+            We have helped companies increase their customer base and generate
+            multifold revenue with our service.
+          </p>
+              {% for BackgroundImage in TextFielde %}
+            {% if BackgroundImage.page == 'index.html' %}
+         {% if BackgroundImage.section == 6 %}
+            <a href="{{BackgroundImage.text}}">
+                <button>Read our success stories (about.html)</button>
+                </a>
+            {% endif %}
+        {% endif %}
+        {% endfor %}
+
+        </div>
+        <div class="containedwithinreviews__right">
+          <div class="card">
+            <img src="assets/pic-1.jpg" alt="user" />
+            <div class="card__content">
+              <span><i class="ri-double-quotes-l"></i></span>
+              <div class="card__details">
+                <p>
+                  We had a great time collaboraring with the Filament team. They
+                  have my high recommendation!
+                </p>
+                <div class="reviews">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="far fa-star"></i><!--Empty star-->
+                    </div>
+                <h4>- Marnus Stephen</h4>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <img src="assets/pic-2.jpeg" alt="user" />
+            <div class="card__content">
+              <span><i class="ri-double-quotes-l"></i></span>
+              <div class="card__details">
+                <p>
+                  The team drastically improved our product's user experience &
+                  increased our business outreach.
+                </p>
+                              <div class="reviews">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="far fa-star"></i><!--Empty star-->
+                    </div>
+                <h4>- Andrew Jettpace</h4>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <img src="assets/pic-3.jpg" alt="user" />
+            <div class="card__content">
+              <span><i class="ri-double-quotes-l"></i></span>
+              <div class="card__details">
+
+                <p>
+                  I absolutely loved working with the Filament team. Complete
+                  experts at what they do!
+                </p>
+                <div class="reviews">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="far fa-star"></i><!--Empty star-->
+                    </div>
+
+                <h4>- Stacy Stone</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
 {% for BackgroundImage in Feedback %}
     <div class="boxe">
       <i class="fas fa-quote-left quote"></i>
@@ -1031,7 +1298,7 @@
       </div>
     </div>
         {% endfor %}
-    <div class="boxe">
+ <!--   <div class="boxe">
       <i class="fas fa-quote-left  quote"></i>
       <p>Lorem aliasry ipsum dolor sits ametans, consectetur adipisicing elitits. Expedita reiciendis itaque placeat thuratu, quasi yiuos repellendus repudiandae deleniti ideas fuga molestiae, alias.</p>
       <div class="content">
@@ -1051,7 +1318,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </div>-->
 
 <div class="stripe2"></div>
 

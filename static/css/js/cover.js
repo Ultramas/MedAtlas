@@ -1,14 +1,6 @@
-let slideIndex = 0;
-showSlides();
+document.addEventListener("scroll", function () {
+  const scrollTop = window.scrollY;
+  const parallaxElement = document.querySelector(".parallax img");
+  const speed = 0.5; // Adjust this value for the desired parallax effect
 
-function showSlides() {
-  let i;
-  let slides = document.getElementsByClassName("mySliding");
-  for (i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";
-  }
-  slideIndex++;
-  if (slideIndex > slides.length) {slideIndex = 1}
-  slides[slideIndex-1].style.display = "block";
-  setTimeout(showSlides, 2000); // Change image every 2 seconds
-}
+
