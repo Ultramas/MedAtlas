@@ -1007,8 +1007,10 @@ class BackgroundView(FormMixin, BaseView):
 
         return context
 
+
 from django.views.generic import TemplateView
 from .models import BackgroundImage
+
 
 class BackgroundStyleView(TemplateView):
     template_name = "style.css"
@@ -1858,8 +1860,6 @@ def getMessages(request, room):
     return JsonResponse({'messages': messages_data})
 
 
-
-
 def supportroom(request):
     username = request.user.username
     room_details = SupportChat.objects.get(name=username)
@@ -1906,12 +1906,11 @@ def supportcheckview(request):
         print('message sent')
 
 
-
 def supportsend(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         username = request.POST.get('username')
-        #room_id = request.POST.get('room_id')
+        # room_id = request.POST.get('room_id')
         # profile = request.POST.get('profile')
         # signed_in_user = request.POST.get('signed_in_user')
 
@@ -1923,7 +1922,7 @@ def supportsend(request):
             new_message = SupportMessage.objects.create(
                 value=message,
                 user=username,
-                #room=room_id,
+                # room=room_id,
                 signed_in_user=request.user  # Set the signed_in_user to the authenticated user
             )
             # print(f"signed_in_user: {signed_in_user}")
@@ -1933,7 +1932,7 @@ def supportsend(request):
             new_message = SupportMessage.objects.create(
                 value=message,
                 user=username,
-                #room=room_id,
+                # room=room_id,
             )
             new_message.save()
 
@@ -6466,37 +6465,36 @@ def submit_feedback(request, item_id):
    return render(request, 'create_review.html', {'form': form})
 """
 
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import OrderItem, Feedback
+from .forms import FeedbackForm  # Assuming you have a feedback form defined
 
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Feedback, Item, OrderItem
+from .forms import FeedbackForm
+@login_required(login_url='/accounts/login/')
 def submit_feedback(request, item_id):
-    item = get_object_or_404(Item, id=item_id)
     user = request.user
-    order_item = get_object_or_404(OrderItem, user=user, item=item)
 
-    #order_item = OrderItem.objects.filter(user=user, item=item)
-
-    # Check if the user has already left feedback for this order item
-    existing_feedback = Feedback.objects.filter(username=user, order=order_item)
+    print(f"item_id: {item_id}")
+    feedback_instance = get_object_or_404(Feedback, username=user.username, id=item_id)
 
     if request.method == 'POST':
-        form = FeedbackForm(request.POST, request=request)
+        form = FeedbackForm(request=request, data=request.POST)
         if form.is_valid():
-            if existing_feedback:
-                messages.error(request, 'You have already left feedback for this order item.')
-            else:
-                feedback = form.save(commit=False)
-                feedback.user = user
-                feedback.username = request.user
-                feedback.slug = order_item.slug
-                feedback.item = item
-                feedback.order_item = order_item
-                feedback.order = order_item
-                print(order_item)
-                feedback.save()
-                messages.success(request, 'Your feedback has been submitted successfully.')
-                return redirect('showcase:feedbackfinish')
-        else:
-            messages.error(request, "Invalid form data.")
+            rating = form.cleaned_data['rating']
+            comment = form.cleaned_data['comment']
+
+            # Update or create feedback
+            Feedback.objects.update_or_create(username=user.username, defaults={'rating': rating, 'comment': comment})
+
+            # Redirect to a thank you page or some other appropriate view
+            return redirect(reverse('showcase:feedbackfinish'))
+
     else:
+        # If the request method is GET, create a new feedback form
         form = FeedbackForm(request=request)
 
     return render(request, 'create_review.html', {'form': form})

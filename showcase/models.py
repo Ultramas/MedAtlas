@@ -1991,10 +1991,12 @@ class IssueBackgroundImage(models.Model):
         verbose_name = "Issue Background Image"
         verbose_name_plural = "Issue Background Images"
 
+import uuid  
 
 class OrderItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ordered = models.BooleanField(default=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # order = models.ForeignKey(Order, on_delete=models.CASCADE)
     # order_number = models.IntegerField()
     slug = models.SlugField(max_length=200, blank=True, null=True,
@@ -2515,7 +2517,7 @@ class Feedback(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True,
                              null=True)  # might want to replace item with order
     # orderitem = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)  # might want to replace item with order
-    order = models.ForeignKey(OrderItem, on_delete=models.CASCADE, blank=True, null=True)
+    order = models.OneToOneField(OrderItem, on_delete=models.CASCADE, blank=True, null=True)
     # order = models.OneToOneField(OrderItem, on_delete=models.CASCADE, related_name='feedback', null=True)
     username = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     # hyperlink = models.CharField(max_length=200,

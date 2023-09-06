@@ -277,8 +277,8 @@ urlpatterns = [
     path('review_detail/<slug>/', views.FeedbackView.as_view(), name='review_detail'),
     path('reviews/', views.ReviewView.as_view(), name='reviews'),
     #path('create_review/<int:orderitem_id>/', views.SubmitFeedbackView.as_view(), name='create_review'),
-    path('create_review/<int:item_id>/', views.submit_feedback, name='create_review'),
-    #path('create_review/', views.submit_feedback, name='create_review'),
+    #path('create_review/<int:item_id>/', submit_feedback, name='create_review'),
+    path('create_review/', views.submit_feedback, name='create_review'),
     #might cause issues due to the implementation of an integer rather than the foreignkey
     #path('order_history/', my_order_items, name='order_history'),
     path('order_history/', views.OrderHistory.as_view(), name='order_history'),
