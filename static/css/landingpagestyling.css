@@ -233,7 +233,7 @@ padding: 10px;}
 
 .shoe-red {
   --clr-inner: #faa700;
-  --clr-outer: #e48d00;
+  /*--clr-outer: #e48d00;*/
   --clr-accent: #a1173c;
 }
 

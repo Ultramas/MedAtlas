@@ -1,7 +1,7 @@
 from django import forms
 
 from mysite import settings
-from .models import Idea, OrderItem, EmailField
+from .models import Idea, OrderItem, EmailField, Item
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -764,7 +764,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from .models import Feedback
 
-class FeedbackForm(forms.ModelForm):
+"""class FeedbackForm(forms.ModelForm):
     star_rating = forms.ChoiceField(choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')])
     comment = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Outstanding!'}))
     order = forms.ModelChoiceField(queryset=None)
@@ -781,18 +781,71 @@ class FeedbackForm(forms.ModelForm):
         self.fields['username'].widget.attrs['readonly'] = True
         self.fields['order'].queryset = OrderItem.objects.filter(user=self.request.user)
 
+"""
+
+from django import forms
+from .models import Feedback
+from .models import OrderItem
+
+from django import forms
+from django.utils.text import slugify
+class FeedbackForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+        # Set the initial value for the 'username' field
+        if self.request.user.is_authenticated:
+            self.fields['username'] = forms.CharField(initial=self.request.user.username)
+            self.fields['username'].widget.attrs['readonly'] = True
+        else:
+            self.fields['username'] = forms.CharField(required=False)
+
+        # Set the initial value for the 'order' field if it exists
+        initial_order = None
+        if self.instance and hasattr(self.instance, 'order') and self.instance.order:
+            initial_order = self.instance.order.item
+        self.fields['order'].initial = initial_order
+
+        # Filter the choices for the 'order' field based on the logged-in user
+        if self.request.user.is_authenticated:
+            self.fields['order'].queryset = OrderItem.objects.filter(user=self.request.user)
+        else:
+            self.fields['order'].queryset = OrderItem.objects.none()
+
+    class Meta:
+        model = Feedback
+        fields = ('order', 'star_rating', 'comment', 'slug', 'image')
 
 
 
 
-class FeedbackAdmin(admin.ModelAdmin):
-    form = FeedbackForm
-    readonly_fields = ('hyperlink', 'slug', 'username')
 
-    def save_model(self, request, obj, form, change):
-        if not change:  # Only set the username for new feedbacks
-            obj.username = request.user.username
-        super().save_model(request, obj, form, change)
+    def save(self, commit=True):
+        # Get the user who created the feedback
+        user = self.request.user if self.request.user.is_authenticated else None
+
+        # Create an instance of the Feedback model
+        feedback = super().save(commit=False)
+
+        # Set the user, star rating, and slug if available
+        if user and isinstance(user, User):  # Check if user is a User instance
+            feedback.username = user
+        else:
+            feedback.username = None  # Set to None if user is not a valid User instance
+
+        if 'star_rating' in self.cleaned_data:
+            feedback.star_rating = self.cleaned_data['star_rating']
+        if 'slug' in self.cleaned_data:
+            feedback.slug = self.cleaned_data['slug']
+
+        if commit:
+            feedback.save()
+        return feedback
+
+
+
+
 
 
 class EmailForm(forms.ModelForm):

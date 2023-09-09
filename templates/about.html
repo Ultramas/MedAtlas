@@ -21,7 +21,7 @@
     </div>
    
     
-    <div class="subscripteds"><h2 class = "opening">
+    <div class="subscripteds" id="cover-image"><h2 class = "opening">
                {% for AboutBackgroundImage in TextFielde %}
              {% for section in TextFielde %}
           {% if section.section == AboutBackgroundImage.section %}
@@ -34,7 +34,7 @@
   {% endfor %}
 {% endfor %}  </h2></div>  
 
-    <div class="parallaxc2">
+    <div class="parallaxc2" id="image-carousel">
           {% for AboutBackgroundImage in object_list %}
     <!--<h2>{{ AboutBackgroundImage.title }}</h2>-->
       <img class = "backgroundimages" src="{{AboutBackgroundImage.cover.url}}" alt="{{ AboutBackgroundImage.backgroundtitle  }}">
@@ -64,7 +64,7 @@
   {% endfor %}
 {% endfor %}</h2></div>  
 
-    <div class="parallaxc3"><h2 class="opening3">
+    <div class="parallaxc3" id="featuredproducts1"><h2 class="opening3">
       {% for AboutBackgroundImage in TextFielde %}
              {% for section in TextFielde %}
           {% if section.section == AboutBackgroundImage.section %}
@@ -91,7 +91,7 @@
     <div class = "qgp"><img src = "{% static 'css/images/qgp.png' %}"></div>
     </div>
     
-    <div class="parallaxc4"><h2 class="opening3">
+    <div class="parallaxc4" id="hot_new_products"><h2 class="opening3">
       {% for AboutBackgroundImage in TextFielde %}
              {% for section in TextFielde %}
           {% if section.section == AboutBackgroundImage.section %}

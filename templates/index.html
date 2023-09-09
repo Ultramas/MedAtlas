@@ -177,7 +177,7 @@
 -->
 <div class="blackoverflow" style=" background-color: black; position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 120%;  z-index: -5;">
     </div>
-<div class="parallaxial">
+<div class="parallaxial" id="cover-image">
     {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
             {% if BackgroundImage.position == 1 %}
@@ -222,7 +222,7 @@ window.addEventListener("scroll", function() {
 
     </script>
 
-  <div class="heroingitout" style="" >
+  <div class="heroingitout" id="image-carousel" style="">
       <div class="indexingsub">
 <div class="backgroundimages">
     {% for BackgroundImage in Background %}
@@ -251,7 +251,7 @@ window.addEventListener("scroll", function() {
         <br>
         <br>
 <!-- Slideshow container -->
-<div class="slideshow-container" id="featuredproducts" style="z-index:1;">
+<div class="slideshow-container" id="featuredproducts1" style="z-index:1;">
 
 
       <div class="backgroundimages">
@@ -267,7 +267,7 @@ window.addEventListener("scroll", function() {
     </div>
 
 <!-- Slideshow container -->
-<div class="slideshow-container" id="featuredproducts" style="z-index:1;">
+<div class="slideshow-container" id="featuredproducts2" style="z-index:1;">
 
   <!-- Full-width images with number and caption text -->
   <div class="mySlidesesesesfade fade" style="z-index:3;">
@@ -536,8 +536,8 @@ window.addEventListener("scroll", function() {
   }
 </script>
 
-    <div class="featuredeee" style="position: relative; overflow: hidden;">
-
+    <div class="featuredeee" id='hot_new_products' style="position: relative; overflow: hidden;">
+<h1> Hot New Products </h1>
       {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
           {% if BackgroundImage.position == 5 %}
@@ -674,7 +674,7 @@ e
         {% endfor %}
         <div class="container">
             <b>
-        <h1 class="section-title" style="width: 200%; position: absolute; left: 50%; transform: translateX(-50%);">Popular Featured Products</h1>
+        <h1 class="section-title" id='popular_featured_products' style="width: 200%; position: absolute; left: 50%; transform: translateX(-50%);">Popular Featured Products</h1>
 
 <!--have the products be an extension of the ecommerce posting section--->
                     {% for product in Products %}
@@ -1079,7 +1079,7 @@ e
     <br>
     <br>
 
-    <section class="new_email">
+    <section class="new_email" id="email">
       <div class="poketrove_email_header">
 
       </div>
@@ -1165,7 +1165,7 @@ e
      <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
     <div class="stripe"></div>
 
-          <div class="headerlamper">
+          <div class="headerlamper" id="customer_reviews">
       <div class="containedwithinreviews">
         <div class="containedwithinreviews__left">
           <h1>Read what our customers love about us</h1>

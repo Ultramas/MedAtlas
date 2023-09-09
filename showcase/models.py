@@ -1991,7 +1991,7 @@ class IssueBackgroundImage(models.Model):
         verbose_name = "Issue Background Image"
         verbose_name_plural = "Issue Background Images"
 
-import uuid  
+import uuid
 
 class OrderItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -2514,10 +2514,9 @@ post_save.connect(create_profile, sender=User)
 
 
 class Feedback(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True,
-                             null=True)  # might want to replace item with order
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True, null=True)  # might want to replace item with order
     # orderitem = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)  # might want to replace item with order
-    order = models.OneToOneField(OrderItem, on_delete=models.CASCADE, blank=True, null=True)
+    order = models.OneToOneField(OrderItem, on_delete=models.CASCADE)
     # order = models.OneToOneField(OrderItem, on_delete=models.CASCADE, related_name='feedback', null=True)
     username = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     # hyperlink = models.CharField(max_length=200,
@@ -2525,7 +2524,7 @@ class Feedback(models.Model):
 
     comment = models.TextField()
     feedbackpage = models.TextField(verbose_name="Page Name", blank=True, null=True)
-    slug = models.SlugField(max_length=200,
+    slug = models.SlugField(max_length=200, blank=False,
                             help_text="Leave blank to use corresponding product slug.")  # get the actual item slug
     # unique=True prevents saving, but does not prevent the IntegrityError at /create_review/1/ UNIQUE constraint failed: showcase_feedback.slug
     star_rating = models.IntegerField(verbose_name='Star Rating',
@@ -2533,7 +2532,7 @@ class Feedback(models.Model):
     showcase = models.IntegerField(default=0, blank=True,
                                    null=True, verbose_name='Showcase on Cover Page?', help_text='1->Yes, 0->No',
                                    choices=((1, 'Yes'), (0, 'No')))
-    image = models.ImageField(verbose_name="Images", help_text='Please upload any product images')
+    image = models.ImageField(verbose_name="Images", help_text='Please upload any product images', blank=True, null=True)
     timestamp = models.DateTimeField(default=timezone.now)
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -2555,8 +2554,25 @@ class Feedback(models.Model):
         from django.urls import reverse
 
         return reverse("showcase:post_detail", kwargs={"slug": str(self.slug)})
+    @property
+    def item_name(self):
+        if self.item:
+            return self.item.name
+        elif self.order and self.order.item:
+            return self.order.item.name
+        return ""
+
+    # Define a property to get the related item's slug
+    @property
+    def item_slug(self):
+        if self.item:
+            return self.item.slug
+        elif self.order and self.order.item:
+            return self.order.item.slug
+        return ""
 
 @receiver(pre_save, sender=Feedback)
 def set_slug(sender, instance, *args, **kwargs):
-    if not instance.slug:
+    # Check if instance.slug is not already set before updating it
+    if not instance.slug and instance.item:
         instance.slug = instance.item.slug

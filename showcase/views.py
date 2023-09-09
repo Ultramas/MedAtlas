@@ -6469,29 +6469,109 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import OrderItem, Feedback
 from .forms import FeedbackForm  # Assuming you have a feedback form defined
 
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Feedback, Item, OrderItem
 from .forms import FeedbackForm
+
+from django.shortcuts import render, redirect
+from .forms import FeedbackForm
+
+from django.shortcuts import render, redirect
+from .forms import FeedbackForm
+from .models import OrderItem, Feedback
+
+
+class CreateReviewView(ListView):
+    template_name = 'create_review.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['Change'] = ChangePasswordBackgroundImage.objects.all()
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        return context
+
+    def get(self, request, *args, **kwargs):
+        item_slug = request.GET.get('item_slug')
+        orderitem_id = request.GET.get('orderitem_id')
+
+        try:
+            orderitem = OrderItem.objects.get(id=orderitem_id)
+        except OrderItem.DoesNotExist:
+            return HttpResponse('Sorry, order does not exist.')
+            return redirect('showcase:ehome')
+
+        try:
+            existing_feedback = Feedback.objects.get(order=orderitem)
+        except Feedback.DoesNotExist:
+            existing_feedback = None
+
+        form = FeedbackForm(request=request, instance=existing_feedback)
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        item_slug = request.GET.get('item_slug')
+        orderitem_id = request.GET.get('orderitem_id')
+
+        try:
+            orderitem = OrderItem.objects.get(id=orderitem_id)
+        except OrderItem.DoesNotExist:
+            return redirect('showcase:ehome')
+
+        try:
+            existing_feedback = Feedback.objects.get(order=orderitem)
+        except Feedback.DoesNotExist:
+            existing_feedback = None
+
+        form = FeedbackForm(request.POST, request=request, instance=existing_feedback)
+
+        if form.is_valid():
+            # Save the feedback instance
+            feedback = form.save(commit=False)
+
+            # Set the 'username' field to the logged-in user instance
+            feedback.username = request.user if request.user.is_authenticated else None
+
+            feedback.order = orderitem  # Set the 'order' field to the current order item
+            feedback.slug = orderitem.slug
+            feedback.save()
+
+            # Delete only the existing feedback associated with this order item
+            if existing_feedback and existing_feedback != feedback:
+                existing_feedback.delete()
+
+            return redirect('showcase:feedbackfinish')  # Redirect to the success page
+        else:
+            # Form is not valid, render the template with validation errors
+            return render(request, self.template_name, {'form': form})
+
+
 @login_required(login_url='/accounts/login/')
-def submit_feedback(request, item_id):
+def submit_feedback(request):
     user = request.user
 
-    print(f"item_id: {item_id}")
-    feedback_instance = get_object_or_404(Feedback, username=user.username, id=item_id)
-
     if request.method == 'POST':
-        form = FeedbackForm(request=request, data=request.POST)
+        form = FeedbackForm(request.POST, request=request)
         if form.is_valid():
-            rating = form.cleaned_data['rating']
+            star_rating = form.cleaned_data['star_rating']
             comment = form.cleaned_data['comment']
 
             # Update or create feedback
-            Feedback.objects.update_or_create(username=user.username, defaults={'rating': rating, 'comment': comment})
+            feedback, created = Feedback.objects.update_or_create(
+                username=request.user,
+                # Use request.user.username to get the currently logged-in user's username
+                defaults={'star_rating': star_rating, 'comment': comment}
+            )
 
-            # Redirect to a thank you page or some other appropriate view
-            return redirect(reverse('showcase:feedbackfinish'))
+            # Redirect to a thank-you page or some other appropriate view
+            return redirect('showcase:feedbackfinish')  # Change this to your desired URL
 
     else:
         # If the request method is GET, create a new feedback form

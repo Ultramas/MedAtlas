@@ -1,78 +1,157 @@
+<!--posts to users-->
+{% extends 'memberbase.html' %}
+
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
+
+{% block title %}
+    {% for PostingView in Titles %}
+      {% if PostingView.page == 'post_edit.html' %}
+         {{ PostingView.overtitle }}
+      {% endif %}
+    {% endfor %}
+{% endblock title %}
+
+{% block content %}
+
 <head>
+   <style>
+        /* Apply CSS to hide the table outline */
+        table.popupTable {
+            border: none;
+        background: none;
+        margin-bottom: -5%;
+        }
+        td{
+        border: none;
+        background: none;
+        }
+        th{
+        border: none;
+        background: none;
+        }
+        .advertisement-image {
+            position: absolute;
+            left: {{ advertising.x_position }}px;
+            top: {{ advertising.y_position }}px;
+        }
+        .boedy{
+      display: flex;
+      justify-content: center;
+        }
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    /* DEMO-SPECIFIC STYLES */
+    .containereatede h1 {
+      font-family: 'Playfair Display', serif;
+      overflow: hidden; /* Ensures the content is not revealed until the animation */
+      border-right: .15em solid red; /* The typewriter cursor */
+      white-space: nowrap; /* Keeps the content on a single line */
+      margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+      letter-spacing: .0em; /* Adjust as needed */
+      animation:
+        typing 3.5s steps(30, end),
+        blink-caret .5s step-end infinite;
+    }
 
-    <script type="application/x-javascript"> addEventListener("load", function () {
-        setTimeout(hideURLbar, 0);
-    }, false);
+    /* The typing effect */
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
 
-    function hideURLbar() {
-        window.scrollTo(0, 1);
-    } </script>
-
-    <title>{% block head_title %}Customer Feedback{% endblock head_title %}</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="{% static 'feedback/css/bootstrap.css' %}" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'feedback/css/font-awesome.css' %}">
-
-    <!-- Custom styles for this template -->
-    <link href="{% static 'feedback/css/shop-homepage.css' %}" rel="stylesheet">
-    <link href="{% static 'feedback/js/jquery.bxslider/jquery.bxslider.css' %}" rel="stylesheet">
-    <link href="{% static 'feedback/css/colorbox.css' %}" rel="stylesheet">
-
-    <link href="{% static 'feedback/css/style.css' %}" rel="stylesheet">
-
-    <link rel="stylesheet" type="text/css" href="{% static 'feedback/css/bootstrap.css' %}">
-    <link href="//fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i&amp;subset=cyrillic,cyrillic-ext,greek,greek-ext,latin-ext,vietnamese"
-          rel="stylesheet">
-    <link href="//fonts.googleapis.com/css?family=Dosis:200,300,400,500,600,700,800&amp;subset=latin-ext"
-          rel="stylesheet">
+    /* The typewriter cursor effect */
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      35% { border-color: rgba(255, 255, 255, 0.637)}
+    }
+        </style>
 
 </head>
 <body>
 
-<div class="row">
-    <div class="padding-30 popup">
-        <h4 style="color: #007bff">Add a Review</h4>
+     {% for PostingView in Background %}
+    <img class = "backgroundimages" src="{{PostingView.cover.url}}" alt="{{ PostingView.backgroundtitle }}">
+       <div class="view overlay">
+                  <div class="mask rgba-white-slight"></div>
+              </div>
+  {% endfor %}
+    <div class = "navbarx">
+
+    <ul>
+      {% for column in Header %}
+        <div class="dropdown">
+          <a href="#{{ column.section }}" class="glass"> {{ column.text }}</a>
+          <div class="dropdown-content">
+          {% for row in DropDown %}
+
+            {% if row.row == column.row %}
+
+                {% if row.opennew == True %}
+                    <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
+                {% else %}
+                    <a href="{{ row.url }}">{{ row.text }}</a>
+                {% endif %}
+            {% endif %}
+
+          {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+     </ul>
+    </div>
+<div class="postww">
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+<div class="post2v">
+
+            <div class = "boedy">
+  <div class="containereatede"><h1 class="banh1f">Add A Review</h1>
         {% for items in Item %}
         <p>Please provide some feedback on your experience working with {{ item }}. Help us provide better services.</p>
-        {% endfor %}
-        <table class="popupTable" border="0" cellpadding="0" cellspacing="0" width="100%" height="100%"
-               style="background: white">
-            <form id="SubmitReviewForm" action="" method="POST">
+        {% endfor %}<form id="SubmitReviewForm" action="" method="POST">
+    {% csrf_token %}
+    <table class="popupTable" border="0" cellpadding="0" cellspacing="0" width="100%" height="100%">
+        <tr>
+            <td>
+                {{ form }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input id="SubmitReviewButton" data-id="{{ company.id }}" type="submit" class="btn btn-primary" value="Submit" />
 
-                <tr>
-                    <td>
+            </td>
+        </tr>
+    </table>
+</form>
 
 
-
-                        {% csrf_token %}
-                        {{ form }}
-
-
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <input id="SubmitReviewButton" data-id="{{ company.id }}" type="submit" class="btn btn-primary" value="Submit"/></td>
-                </tr>
-            </form>
-        </table>
-    </div>
+           <div class="drops">
+               <!--fix the drop classes in style-->
+        <div class="drop drop-1"></div>
+        <div class="drop drop-2"></div>
+        <div class="drop drop-3"></div>
+        <div class="drop drop-4"></div>
+        <div class="drop drop-5"></div>
+     </div>
+  </form>
 </div>
-<!-- Bootstrap core JavaScript -->
-<script src="{% static 'feedback/js/jquery.min.js' %}"></script>
-<script src="{% static 'feedback/js/popper.min.js' %}"></script>
-<script src="{% static 'feedback/js/bootstrap.min.js' %}"></script>
-<script src="{% static 'feedback/js/jquery.bxslider/jquery.bxslider.min.js' %}"></script>
-<script src="{% static 'feedback/js/jackmoore-colorbox-0662982/jquery.colorbox-min.js' %}"></script>
-<script src="{% static 'feedback/js/app.js' %}"></script>
-</body>
-</html>
+</div>
+
+
+  {% if img_obj %}
+  <h3>Succesfully uploaded : {{img_obj.title}}</h3>
+  <img src="{{ img_obj.image}}" alt="connect" style="max-height:300px">
+{% endif %}
+
+
+
+</div>
+ </body>
+
+{% endblock content %}
