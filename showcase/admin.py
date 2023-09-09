@@ -115,7 +115,6 @@ admin.site.register(SettingsBackgroundImage)
 admin.site.register(ConvertBackgroundImage)
 admin.site.register(NavBar)
 admin.site.register(NavBarHeader)
-admin.site.register(ProfileDetails)
 admin.site.register(UserProfile)
 admin.site.register(UserProfile2)
 admin.site.register(Support)
@@ -306,36 +305,29 @@ admin.site.register(Group, GroupAdmin)
 from .models import Feedback
 from .forms import FeedbackForm
 
-
 class FeedbackAdmin(admin.ModelAdmin):
-    form = FeedbackForm
 
     fieldsets = (
         ('Feedback Information', {
-            'fields': ('order', 'star_rating', 'comment', 'image')
+            'fields': ('item', 'order', 'star_rating', 'comment', 'image')
         }),
-        ('Read-only Fields', {
+        ('Feedback Information - Read-only Fields', {
             'fields': ('slug', 'username'),
             'classes': ('collapse',),
         }),
     )
 
-    def save_form(self, request, form, change):
-        # Set the 'username' field based on the logged-in user if available
-        if not change and hasattr(request, 'user') and request.user.is_authenticated:
-            form.instance.username = request.user.username
-        # Set the 'star_rating' field
-        form.instance.star_rating = form.cleaned_data.get('star_rating', None)
-        return super().save_form(request, form, change)
-
-    def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super().get_readonly_fields(request, obj)
-        if not hasattr(request, 'user') or not request.user.is_authenticated:
-            # Make 'username' read-only for anonymous users
-            readonly_fields += ('username',)
-        return readonly_fields
-
 admin.site.register(Feedback, FeedbackAdmin)
 
+class ProfileDetailsAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Profile Information', {
+            'fields': ('user', 'email', 'avatar', 'alternate', 'about_me', 'is_active')
+        }),
+    )
+    readonly_fields = ('position',)
+
+admin.site.register(ProfileDetails, ProfileDetailsAdmin)
 admin.site.register(Donate)
 

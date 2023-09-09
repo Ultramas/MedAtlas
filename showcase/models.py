@@ -1633,6 +1633,11 @@ class ProfileDetails(models.Model):
     def __str__(self):
         return str(self.user)
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+
+        return reverse('showcase:profile', kwargs={'pk': self.pk})
+
     class Meta:
         verbose_name = "Account Profile"
         verbose_name_plural = "Account Profiles"
@@ -1761,7 +1766,7 @@ class SupportMessage(models.Model):
 
     def get_absolute_url(self):
         # Construct the URL for the room detail page
-        room_url = 'http://127.0.0.1:8000/supportchat/room'
+        room_url = 'showcase:supportchat/room'
 
         return room_url
 
@@ -2552,8 +2557,7 @@ class Feedback(models.Model):
 
     def get_absolute_url(self):
         from django.urls import reverse
-
-        return reverse("showcase:post_detail", kwargs={"slug": str(self.slug)})
+        return reverse("showcase:reviews")
     @property
     def item_name(self):
         if self.item:

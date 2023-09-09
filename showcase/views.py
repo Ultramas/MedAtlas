@@ -6531,7 +6531,6 @@ class CreateReviewView(ListView):
             existing_feedback = None
 
         form = FeedbackForm(request.POST, request=request, instance=existing_feedback)
-
         if form.is_valid():
             # Save the feedback instance
             feedback = form.save(commit=False)
@@ -6539,7 +6538,8 @@ class CreateReviewView(ListView):
             # Set the 'username' field to the logged-in user instance
             feedback.username = request.user if request.user.is_authenticated else None
 
-            feedback.order = orderitem  # Set the 'order' field to the current order item
+            # Set the 'order' field to the current orderitem
+            feedback.order = orderitem
             feedback.slug = orderitem.slug
             feedback.save()
 
@@ -6547,10 +6547,9 @@ class CreateReviewView(ListView):
             if existing_feedback and existing_feedback != feedback:
                 existing_feedback.delete()
 
-            return redirect('showcase:feedbackfinish')  # Redirect to the success page
-        else:
-            # Form is not valid, render the template with validation errors
-            return render(request, self.template_name, {'form': form})
+            return redirect('showcase:feedbackfinish')
+
+        return render(request, self.template_name, {'form': form})
 
 
 @login_required(login_url='/accounts/login/')
