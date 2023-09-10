@@ -1,0 +1,9 @@
+<!-- create_questions.html -->
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    {% for form in formset %}
+        {{ form.as_p }}
+    {% endfor %}
+    <button type="submit">Submit</button>
+</form>

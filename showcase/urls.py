@@ -116,6 +116,7 @@ from .views import (
     SupportRoomView,
     detail_post_view,
     postpreference,
+    submit_answer,
     dynamic_css,
     getMessages,
     AdvertisementView,
@@ -288,6 +289,10 @@ urlpatterns = [
     #possibly consider making wireframes to see where the create feedback form based on bought products url would look like
     path('feedbackfinish/', TemplateView.as_view(template_name='feedbackfinish.html'), name='feedbackfinish'),
     path('feedbackfinish/<slug:slug>/', views.FeedbackView.as_view(), name='feedbackfinish'),
+    path('get_num_questions/<int:question_id>/', views.get_num_questions, name='get_num_questions'),
+    path('create_questions/<int:num_questions>/', views.create_questions, name='create_questions'),
+    path('answer/<int:question_id>/', views.submit_answer, name='answer'),
+
     # path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='main/password/password_reset_done.html'), name='password_reset_done'),
 
     # path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name="main/password/password_reset_confirm.html"), name='password_reset_confirm'),

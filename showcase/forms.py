@@ -1,7 +1,7 @@
 from django import forms
 
 from mysite import settings
-from .models import Idea, OrderItem, EmailField, Item
+from .models import Idea, OrderItem, EmailField, Item, Questionaire
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -862,3 +862,45 @@ class EmailForm(forms.ModelForm):
 
         # description = forms.CharField(widget = forms.EmailInput
         # (attrs={'placeholder':'Enter your email'}))
+
+
+
+class QuestionForm(forms.Form):
+    text = forms.CharField(max_length=255)
+
+class QuestionCountForm(forms.Form):
+    RADIO_CHOICES = (
+        ('option1', 'Multiple Choice'),
+        ('option2', 'Short Answer'),
+        ('option3', 'True or False'),
+        ('option4', 'Free Response'),
+        ('option5', 'Image Field'),
+        ('option6', 'Integer Field'),
+        ('option7', 'Decimal Field'),
+    )
+    num_questions = forms.IntegerField(label="Number of Questions",)
+    form_name = forms.CharField()
+    form_text = forms.ChoiceField(
+        choices=RADIO_CHOICES,
+        widget=forms.RadioSelect,
+        initial='option1'  # Set the initial selected option if needed
+    )
+    class Meta:
+        model = Questionaire
+        fields = {"form_name", "form_text", "text"}
+
+from .models import Answer
+
+class AnswerForm(forms.ModelForm):
+    class Meta:
+        model = Answer
+        fields = [
+            'multiple_choice_response',
+            'short_answer_response',
+            'true_or_false_response',
+            'free_response_response',
+            'image_field_response',
+            'integer_field_response',
+            'decimal_field_response',
+            'other_response',
+        ]

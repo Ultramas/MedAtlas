@@ -1,7 +1,7 @@
 import django
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
-from .models import UpdateProfile, EmailField
+from .models import UpdateProfile, EmailField, Answer
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -82,7 +82,7 @@ from .models import AdminRoles
 from .models import AdminTasks
 from .models import AdminPages
 # from .models import Background2aImage
-from .forms import PosteForm, EmailForm
+from .forms import PosteForm, EmailForm, AnswerForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -6679,6 +6679,89 @@ class OrderHistory(ListView):
                 order_item.profile_url = order_item.get_profile_url2()
 
         return context
+
+
+from django.forms import formset_factory
+from .models import Questionaire
+from .forms import QuestionCountForm, QuestionForm
+
+def get_num_questions(request, question_id):
+    if request.method == 'POST':
+        form = QuestionCountForm(request.POST)
+        if form.is_valid():
+            num_questions = form.cleaned_data['num_questions']
+            # Redirect to a view to create questions based on num_questions
+            return HttpResponseRedirect(reverse('showcase:create_questions', args=[num_questions]))
+    else:
+        form = QuestionCountForm()
+    return render(request, 'get_num_questions.html', {'form': form})
+
+
+
+@login_required  # Decorate the view to ensure the user is logged in
+def create_questions(request, num_questions):
+
+    QuestionFormSet = formset_factory(QuestionForm, extra=num_questions)
+
+    if request.method == 'POST':
+        formset = QuestionFormSet(request.POST, prefix='question')
+        if formset.is_valid():
+            user = request.user  # Get the currently logged-in user
+            for form in formset:
+                text = form.cleaned_data['text']
+                Questionaire.objects.create(user=user, text=text)  # Associate the user with the question
+            return HttpResponseRedirect(reverse('showcase:index'))
+    else:
+        formset = QuestionFormSet(prefix='question')
+
+    return render(request, 'create_questions.html', {'formset': formset})
+
+
+@login_required
+def submit_answer(request, question_id):
+    question = Questionaire.objects.get(pk=question_id)
+
+    if request.method == 'POST':
+        form = AnswerForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = request.user
+
+            # Determine the question type
+            form_type = question.form_type
+
+            # Extract and save the response based on the question type
+            if form_type == 'option1':  # Multiple Choice
+                response = form.cleaned_data['multiple_choice_response']
+            elif form_type == 'option2':  # Short Answer
+                response = form.cleaned_data['short_answer_response']
+            elif form_type == 'option3':  # True or False
+                response = form.cleaned_data['true_or_false_response']
+            elif form_type == 'option4':  # Free Response
+                response = form.cleaned_data['free_response_response']
+            elif form_type == 'option5':  # Image Field
+                response = form.cleaned_data['image_field_response']
+            elif form_type == 'option6':  # Integer Field
+                response = form.cleaned_data['integer_field_response']
+            elif form_type == 'option7':  # Decimal Field
+                response = form.cleaned_data['decimal_field_response']
+            elif form_type == 'option8':  # Other
+                response = form.cleaned_data['other_response']
+            else:
+                response = None
+
+            # Save the response
+            Answer.objects.create(
+                user=user,
+                question=question,
+                response=response
+            )
+
+            return redirect('showcase:index')  # Redirect to the home page or another appropriate page
+
+    else:
+        form = AnswerForm()
+
+    return render(request, 'answer.html', {'form': form, 'question': question})
 
 
 def sociallogin(request):

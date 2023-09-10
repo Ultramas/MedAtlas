@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UpdateProfile
+from .models import UpdateProfile, Questionaire
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -245,6 +245,7 @@ admin.site.register(OrderItemField)
 admin.site.register(Order)
 admin.site.register(CheckoutAddress)
 admin.site.register(Payment)
+admin.site.register(Questionaire)
 
 from django.contrib import messages
 from .models import State
@@ -431,7 +432,7 @@ class EventAdmin(admin.ModelAdmin):
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Event  Information - Attributes', {
-            'fields': ('date_and_time','slug', 'correlating_product', 'anonymous', 'is_active',),
+            'fields': ('date_and_time','slug', 'anonymous', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
     )

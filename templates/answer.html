@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Answer Form</title>
+</head>
+<body>
+    <h1>Answer the Question</h1>
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Render fields based on the question type -->
+        {% if question.form_type == 'option1' %}
+            <label for="multiple_choice_response">Multiple Choice Response:</label>
+            <select name="multiple_choice_response" id="multiple_choice_response">
+                <option value="option1">Option 1</option>
+                <option value="option2">Option 2</option>
+                <!-- Add more options as needed -->
+            </select>
+        {% elif question.form_type == 'option2' %}
+            <label for="short_answer_response">Short Answer Response:</label>
+            <input type="text" name="short_answer_response" id="short_answer_response">
+        {% elif question.form_type == 'option3' %}
+            <label for="true_or_false_response">True or False Response:</label>
+            <input type="radio" name="true_or_false_response" value="True"> True
+            <input type="radio" name="true_or_false_response" value="False"> False
+        {% elif question.form_type == 'option4' %}
+            <label for="free_response_response">Free Response:</label>
+            <textarea name="free_response_response" id="free_response_response" rows="4"></textarea>
+        {% elif question.form_type == 'option5' %}
+            <label for="image_field_response">Image Response:</label>
+            <input type="file" name="image_field_response" id="image_field_response">
+        {% elif question.form_type == 'option6' %}
+            <label for="integer_field_response">Integer Response:</label>
+            <input type="number" name="integer_field_response" id="integer_field_response">
+        {% elif question.form_type == 'option7' %}
+            <label for="decimal_field_response">Decimal Response:</label>
+            <input type="number" step="0.01" name="decimal_field_response" id="decimal_field_response">
+        {% elif question.form_type == 'option8' %}
+            <label for="other_response">Other Response:</label>
+            <textarea name="other_response" id="other_response" rows="4"></textarea>
+        {% endif %}
+
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

@@ -2265,6 +2265,48 @@ class AdminPages(models.Model):
         verbose_name_plural = 'Administrative Pages'
 
 
+
+class Questionaire(models.Model):
+    RADIO_CHOICES = (
+        ('option1', 'Multiple Choice'),
+        ('option2', 'Short Answer'),
+        ('option3', 'True or False'),
+        ('option4', 'Free Response'),
+        ('option5', 'Image Field'),
+        ('option6', 'Integer Field'),
+        ('option7', 'Decimal Field'),
+        ('option8', 'Other'),
+    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    form_name = models.TextField(verbose_name="Form Name")
+    form_type = models.CharField(max_length=10, choices=RADIO_CHOICES, default='option1')
+    text = models.TextField(verbose_name="Question")
+
+
+    def __str__(self):
+        return self.text
+
+    class Meta:
+        verbose_name_plural = 'Question Form'
+
+
+class Answer(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    question = models.ForeignKey(Questionaire, on_delete=models.CASCADE)
+
+    # Fields for different response types
+    multiple_choice_response = models.CharField(max_length=100, null=True, blank=True)
+    short_answer_response = models.TextField(null=True, blank=True)
+    true_or_false_response = models.BooleanField(null=True, blank=True)
+    free_response_response = models.TextField(null=True, blank=True)
+    image_field_response = models.ImageField(upload_to='responses/', null=True, blank=True)
+    integer_field_response = models.IntegerField(null=True, blank=True)
+    decimal_field_response = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    other_response = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s answer to '{self.question.text}'"
+
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
