@@ -110,7 +110,7 @@ class PosteForm(forms.ModelForm):
 
     class Meta:
         model = Vote
-        fields = ('name', 'category', 'description', 'image')
+        fields = ('name', 'category')
 
 
 # Profile Form

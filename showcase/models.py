@@ -47,6 +47,12 @@ class Idea(models.Model):
                                 help_text='Choose a category you want your idea to affect (server layout, event idea, etc).')
     description = models.TextField(help_text='Please share any ideas you may have.')
     image = models.ImageField(help_text='Attach an image for your idea (scales to your picture`s dimensions).')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -80,6 +86,12 @@ class UpdateProfile(models.Model):
     name = models.CharField(max_length=100, help_text='Your name goes here.')
     description = models.TextField(help_text='Your profile description goes here.')
     image = models.ImageField(help_text='Attach an image for your profile (scales to your picture`s dimensions.)')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -113,8 +125,6 @@ class Vote(models.Model):
     name = models.CharField(max_length=100, help_text='Your name goes here.')
     category = models.CharField(max_length=100,
                                 help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).')
-    description = models.TextField(help_text='Please share any ideas you may have.')
-    image = models.ImageField(help_text='Attach an image for your profile (scales to your picture`s dimensions.)')
     mfg_date = models.DateTimeField(auto_now_add=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -322,6 +332,12 @@ class ReportIssue(models.Model):
     Additional_comments = models.TextField(help_text='Put any additional comments you may have here.',
                                            verbose_name="additional comments")
     image = models.ImageField(help_text='Please put a screenshot of the issue.')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
     anonymous = models.BooleanField(default=False, help_text="Report issue anonymously?")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -358,6 +374,7 @@ class ReportIssue(models.Model):
 
 
 class Support(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100,
                             help_text='Your name and tag go here.')
     category = models.CharField(max_length=200, help_text='Please let us know what type of issue you are dealing with.')
@@ -366,6 +383,12 @@ class Support(models.Model):
     Additional_comments = models.TextField(help_text='Put any additional comments you may have here.',
                                            verbose_name="additional comments")
     image = models.ImageField(help_text='Please attach a screenshot of your issue.', null=True, blank=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -584,6 +607,12 @@ class Blog(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=0)
     image = models.ImageField(upload_to='images/')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
     likes = models.ManyToManyField(User, blank=True, verbose_name='post likes')
     # likes = models.IntegerField(default=0)
     dislikes = models.ManyToManyField(User, blank=True, verbose_name='post dislikes', related_name="post_dislikes")
@@ -759,6 +788,39 @@ class LogoBase(models.Model):
         verbose_name = "Logo"
         verbose_name_plural = "Logos"
 
+
+class HyperlinkBase(models.Model):
+    display_text = models.TextField(verbose_name="Text Display", blank=True, null=True, help_text="Display text")
+    display_image = models.ImageField(upload_to='images/', verbose_name="Image Display", blank=True, null=True, help_text="Display an image")
+    hyperlink = models.TextField(verbose_name="Hyperlink")
+    section = models.IntegerField(verbose_name="Page Section")
+    page = models.TextField(verbose_name="Page Name")
+    alternate = models.TextField(verbose_name="Alternate Text", blank=True, null=True, help_text="Alternate text for Display Image")
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
+    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
+    hyperlink_type = models.IntegerField(default=4,
+                                    blank=True,
+                                    null=True,
+                                    help_text='Pick the type of hyperlink (optional)',
+                                    choices=((4, 'Home Hyperlink'), (3, 'Member Hyperlink'), (2, 'Administration Hyperlink'), (2, 'Form Hyperlink'), (1, 'Store Hyperlink'), (0, 'Other')), verbose_name="Hyperlink Type")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.hyperlink
+
+    class Meta:
+        verbose_name = "Hyperlink Base"
+        verbose_name_plural = "Hyperlink Base"
 
 class BackgroundImageBase(models.Model):
     backgroundtitle = models.TextField(verbose_name="Background Title")
@@ -1677,6 +1739,12 @@ class Message(models.Model):
                                        verbose_name="User")
     room = models.CharField(max_length=1000000)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1742,6 +1810,12 @@ class SupportMessage(models.Model):
     room = models.CharField(max_length=1000000)  # newly added unique=True
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1817,6 +1891,14 @@ class Item(models.Model):
     slug = models.SlugField()  # might change to automatically get the slug
     description = models.TextField()
     image = models.ImageField()
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
+    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
     # hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
     relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
     is_active = models.IntegerField(default=1,
@@ -2008,6 +2090,12 @@ class OrderItem(models.Model):
                             help_text="Leave blank to use corresponding product slug.")  # apply unique=True parameter after slugs are actually implemented
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     image = models.ImageField()
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
     quantity = models.IntegerField(default=1)
     order_date = models.DateTimeField(auto_now_add=True, verbose_name="Order date")
     is_active = models.IntegerField(default=1,
@@ -2086,6 +2174,12 @@ class OrderItemField(models.Model):
                             help_text="Leave blank to use corresponding product slug.")
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     image = models.ImageField()
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
     quantity = models.IntegerField(default=1)
     orderitem_id = models.ForeignKey(OrderItem, on_delete=models.CASCADE, verbose_name="Order item id", null=True)
     is_active = models.IntegerField(default=1, blank=True, null=True,
@@ -2126,6 +2220,14 @@ class AdminTasks(models.Model):
     section = models.IntegerField(help_text='Position of the page link.', verbose_name='position')
     page_name = models.TextField(verbose_name="Page Name", blank="True", null="True")
     image = models.ImageField(verbose_name="Task image")
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
+    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
     alternate = models.TextField(verbose_name="Alternate text")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -2336,6 +2438,14 @@ class ImageCarousel(models.Model):
     carouselcaption = models.TextField(help_text='Caption for the image.', verbose_name="caption")
     carouselimage = models.ImageField(help_text='Upload an image for the carousel.)',
                                       upload_to='images/', verbose_name='image')
+    carouselimage_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement length")
+    carouselimage_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the advertisement (use for original ratio).',
+                                             verbose_name="advertisement width")
+    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
     carouselnumber = models.IntegerField(help_text='What carousel number is this?.',
                                            verbose_name='Carousel number')
     carouselposition = models.IntegerField(help_text='Positioning of the image within the carousel.',
@@ -2538,6 +2648,12 @@ class Feedback(models.Model):
                                    null=True, verbose_name='Showcase on Cover Page?', help_text='1->Yes, 0->No',
                                    choices=((1, 'Yes'), (0, 'No')))
     image = models.ImageField(verbose_name="Images", help_text='Please upload any product images', blank=True, null=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original length of the image (use for original ratio).',
+                                              verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                             help_text='Original width of the image (use for original ratio).',
+                                             verbose_name="advertisement width")
     timestamp = models.DateTimeField(default=timezone.now)
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -2546,7 +2662,7 @@ class Feedback(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return "%s %s" % (self.username, self.item)
+        return "%s %s" % (self.username, self.order)
 
     def get_current_username(self):
         User = get_user_model()

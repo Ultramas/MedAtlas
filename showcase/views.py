@@ -4291,6 +4291,16 @@ class IssueBackgroundView(FormMixin, ListView):
         context['Support'] = Support.objects.all()
         return context
 
+    def usercheck(request):
+        try:
+            report_issue = ReportIssues.objects.get(user=request.user)
+            if report_issue.name.lower() != "anonymous":
+                user = request.user
+            else:
+                user = None
+        except ReportIssues.DoesNotExist:
+            user = None
+
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         if request.method == "POST":
@@ -6481,9 +6491,10 @@ from django.shortcuts import render, redirect
 from .forms import FeedbackForm
 from .models import OrderItem, Feedback
 
-
-class CreateReviewView(ListView):
-    template_name = 'create_review.html'
+class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
+    model = Feedback
+    template_name = "create_review.html"
+    form_class = FeedbackForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -6491,8 +6502,6 @@ class CreateReviewView(ListView):
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
@@ -6506,7 +6515,6 @@ class CreateReviewView(ListView):
             orderitem = OrderItem.objects.get(id=orderitem_id)
         except OrderItem.DoesNotExist:
             return HttpResponse('Sorry, order does not exist.')
-            return redirect('showcase:ehome')
 
         try:
             existing_feedback = Feedback.objects.get(order=orderitem)
@@ -6514,7 +6522,7 @@ class CreateReviewView(ListView):
             existing_feedback = None
 
         form = FeedbackForm(request=request, instance=existing_feedback)
-        return render(request, self.template_name, {'form': form})
+        return render(request, 'create_review.html', {'form': form})
 
     def post(self, request, *args, **kwargs):
         item_slug = request.GET.get('item_slug')
@@ -6549,7 +6557,7 @@ class CreateReviewView(ListView):
 
             return redirect('showcase:feedbackfinish')
 
-        return render(request, self.template_name, {'form': form})
+        return render(request, 'create_review.html', {'form': form})
 
 
 @login_required(login_url='/accounts/login/')

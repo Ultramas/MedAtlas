@@ -18,6 +18,7 @@ from .models import Preference
 from .models import PostLikes
 from .models import Idea, Comment
 from .models import Profile
+from .models import HyperlinkBase
 from .models import Room, Message
 from .models import SupportMessage
 from .models import ProfileDetails
@@ -25,8 +26,8 @@ from .models import UserProfile
 from .models import UserProfile2
 from .models import SettingsModel
 from .models import Support
-from .models import ConvertBackgroundImage
-from .models import BackgroundImage
+#from .models import ConvertBackgroundImage
+#from .models import BackgroundImage
 #from .models import BackgroundImage2a
 from .models import EBackgroundImage
 from .models import ShowcaseBackgroundImage
@@ -108,11 +109,10 @@ admin.site.register(BanAppeal)
 admin.site.register(ReportIssue)
 admin.site.register(NewsFeed)
 admin.site.register(StaffProfile)
-admin.site.register(Event)
 admin.site.register(Profile)
 admin.site.register(SettingsModel)
-admin.site.register(SettingsBackgroundImage)
-admin.site.register(ConvertBackgroundImage)
+#admin.site.register(SettingsBackgroundImage)
+#admin.site.register(ConvertBackgroundImage)
 admin.site.register(NavBar)
 admin.site.register(NavBarHeader)
 admin.site.register(UserProfile)
@@ -120,39 +120,35 @@ admin.site.register(UserProfile2)
 admin.site.register(Support)
 admin.site.register(Preference)
 admin.site.register(PostLikes)
-admin.site.register(BackgroundImage)
+#admin.site.register(BackgroundImage)
 #admin.site.register(BackgroundImage2a)
-admin.site.register(EBackgroundImage)
-admin.site.register(ShowcaseBackgroundImage)
-admin.site.register(ChatBackgroundImage)
-admin.site.register(SupportChatBackgroundImage)
-admin.site.register(BilletBackgroundImage)
-admin.site.register(BlogBackgroundImage)
-admin.site.register(PostBackgroundImage)
-admin.site.register(RuleBackgroundImage)
-admin.site.register(AboutBackgroundImage)
-admin.site.register(FaqBackgroundImage)
-admin.site.register(StaffBackgroundImage)
-admin.site.register(InformationBackgroundImage)
-admin.site.register(TagBackgroundImage)
-admin.site.register(StaffRanksBackgroundImage)
-admin.site.register(MegaBackgroundImage)
-admin.site.register(UserBackgroundImage)
-admin.site.register(EventBackgroundImage)
-admin.site.register(NewsBackgroundImage)
-admin.site.register(DonorBackgroundImage)
-admin.site.register(ContentBackgroundImage)
-admin.site.register(PartnerBackgroundImage)
-admin.site.register(WhyBackgroundImage)
-admin.site.register(PerksBackgroundImage)
+#admin.site.register(EBackgroundImage)
+#admin.site.register(ShowcaseBackgroundImage)
+#admin.site.register(ChatBackgroundImage)
+#admin.site.register(SupportChatBackgroundImage)
+#admin.site.register(BilletBackgroundImage)
+#admin.site.register(PostBackgroundImage)
+#admin.site.register(RuleBackgroundImage)
+#admin.site.register(AboutBackgroundImage)
+#admin.site.register(FaqBackgroundImage)
+#admin.site.register(StaffBackgroundImage)
+#admin.site.register(InformationBackgroundImage)
+#admin.site.register(TagBackgroundImage)
+#admin.site.register(StaffRanksBackgroundImage)
+#admin.site.register(MegaBackgroundImage)
+#admin.site.register(UserBackgroundImage)
+#admin.site.register(EventBackgroundImage)
+#admin.site.register(NewsBackgroundImage)
+#admin.site.register(DonorBackgroundImage)
+#admin.site.register(ContentBackgroundImage)
+#admin.site.register(PartnerBackgroundImage)
+#admin.site.register(WhyBackgroundImage)
+#admin.site.register(PerksBackgroundImage)
 admin.site.register(FaviconBase)
-admin.site.register(LogoBase)
 admin.site.register(BackgroundImageBase)
-admin.site.register(TextBase)
 admin.site.register(ImageCarousel)
 admin.site.register(Titled)
 admin.site.register(BaseCopyrightTextField)
-admin.site.register(AdvertisementBase)
 #admin.site.register(ResizeImageMixin)
 admin.site.register(ImageBase)
 admin.site.register(DonateIcon)
@@ -164,7 +160,6 @@ admin.site.register(Coupon)
 admin.site.register(EmailField)
 admin.site.register(AdminRoles)
 admin.site.register(AdminTasks)
-admin.site.register(AdminPages)
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
@@ -228,7 +223,7 @@ class PostAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title', )}
 
 
-admin.site.register(Blog, PostAdmin)
+#admin.site.register(Blog, PostAdmin)
 
 
 @admin.register(Comment)
@@ -245,7 +240,6 @@ class CommentAdmin(admin.ModelAdmin):
 admin.site.register(Room)
 admin.site.register(SupportMessage)
 admin.site.register(Message)
-admin.site.register(Item)
 #admin.site.register(OrderItem)
 admin.site.register(OrderItemField)
 admin.site.register(Order)
@@ -319,6 +313,160 @@ class FeedbackAdmin(admin.ModelAdmin):
 
 admin.site.register(Feedback, FeedbackAdmin)
 
+class HyperlinkBaseAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Hyperlink Information - Text Display', {
+            'fields': ('display_text',),
+            'classes': ('collapse',),
+        }),
+        ('Hyperlink Information - Image Display', {
+            'fields': ('display_image', 'alternate', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize',),
+            'classes': ('collapse',),
+        }),
+        ('Hyperlink Information', {
+            'fields': ('hyperlink', 'section', 'page', 'hyperlink_type', 'is_active'),
+        }),
+    )
+
+admin.site.register(HyperlinkBase, HyperlinkBaseAdmin)
+
+class ItemAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Item Information - Categorical Descriptions', {
+            'fields': ('title', 'category', 'label', 'slug', 'description', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Item Information - Prices', {
+            'fields': ('price', 'discount_price',),
+            'classes': ('collapse',),  # Open by default
+        }),
+        ('Item Information - Image', {
+            'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Item Information - Related Items', {
+            'fields': ('relateditems',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+    class Media:
+        js = ('admin-collapse-default.js',)
+        css = {
+            'all': ('admin-collapse-default.css',)
+        }
+
+admin.site.register(Item, ItemAdmin)
+class LogoBaseAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Logo Information - Categorical Descriptions', {
+            'fields': ('title', 'hyperlink', 'section', 'page', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Logo Information - Image', {
+            'fields': ('logocover', 'logo_length', 'logo_width', 'length_for_resize', 'width_for_resize',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+    class Media:
+        js = ('admin-collapse-default.js',)  # Include the custom JavaScript file
+        css = {
+            'all': ('admin-collapse-default.css',)
+        }
+
+admin.site.register(LogoBase, LogoBaseAdmin)
+
+class BlogAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Blog Information - Categorical Descriptions', {
+            'fields': ('title', 'slug', 'author', 'content', 'status', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Blog Information - Image', {
+            'fields': ('image', 'image_length', 'image_width',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+
+        ('Blog Information - Likes/Dislikes', {
+            'fields': ('likes', 'dislikes',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+    class Media:
+        js = ('admin-collapse-default.js',)  # Include the custom JavaScript file
+        css = {
+            'all': ('admin-collapse-default.css',)
+        }
+
+admin.site.register(Blog, BlogAdmin)
+
+
+class TextBaseAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Text Base Information - Categorical Descriptions', {
+            'fields': ('text', 'page', 'url', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Text Base  Information - Attributes', {
+            'fields': ('header_or_textfield', 'section', 'text_size', 'hyperlink'),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+    class Media:
+        js = ('admin-collapse-default.js',)  # Include the custom JavaScript file
+        css = {
+            'all': ('admin-collapse-default.css',)
+        }
+
+admin.site.register(TextBase, TextBaseAdmin)
+
+class EventAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Event Information - Categorical Descriptions', {
+            'fields': ('user', 'name', 'category', 'description', 'image',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Event  Information - Attributes', {
+            'fields': ('date_and_time','slug', 'correlating_product', 'anonymous', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+    class Media:
+        js = ('admin-collapse-default.js',)  # Include the custom JavaScript file
+        css = {
+            'all': ('admin-collapse-default.css',)
+        }
+
+admin.site.register(Event, EventAdmin)
+
+class AdvertisementBaseAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Advertisement Base Information - Categorical Descriptions', {
+            'fields': ('advertisementtitle', 'page', 'type',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Advertisement Base Information - Advertisement', {
+            'fields': ('advertisement', 'advertisement_length', 'advertisement_width', 'length_for_resize', 'width_for_resize', 'xposition', 'yposition',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Advertisement Base  Information - Attributes', {
+            'fields': ('advertisement_position','relevance', 'correlating_product', 'advertisement_hyperlink', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+    class Media:
+        js = ('admin-collapse-default.js',)  # Include the custom JavaScript file
+        css = {
+            'all': ('admin-collapse-default.css',)
+        }
+
+admin.site.register(AdvertisementBase, AdvertisementBaseAdmin)
+
 class ProfileDetailsAdmin(admin.ModelAdmin):
 
     fieldsets = (
@@ -329,5 +477,19 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
     readonly_fields = ('position',)
 
 admin.site.register(ProfileDetails, ProfileDetailsAdmin)
+
+class AdministrationPagesAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Administration Pages Information', {
+            'fields': ('pages', 'hyperlink', 'opennew',)
+        }),
+        ('Administration Pages Information - Attributes', {
+            'fields': ('section', 'page_name', 'is_active',)
+        }),
+    )
+
+admin.site.register(AdminPages, AdministrationPagesAdmin)
+
 admin.site.register(Donate)
 
