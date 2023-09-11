@@ -817,10 +817,6 @@ class FeedbackForm(forms.ModelForm):
         model = Feedback
         fields = ('order', 'star_rating', 'comment', 'slug', 'image')
 
-
-
-
-
     def save(self, commit=True):
         # Get the user who created the feedback
         user = self.request.user if self.request.user.is_authenticated else None
@@ -839,9 +835,14 @@ class FeedbackForm(forms.ModelForm):
         if 'slug' in self.cleaned_data:
             feedback.slug = self.cleaned_data['slug']
 
+        # Set the 'image' field if an image file is provided
+        if 'image' in self.cleaned_data:
+            feedback.image = self.cleaned_data['image']
+
         if commit:
             feedback.save()
         return feedback
+
 
 
 

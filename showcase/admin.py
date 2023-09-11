@@ -100,7 +100,7 @@ class categoryAdmin(admin.ModelAdmin):
         ('Update Profile" Information - Categorial Descriptions', {
             'fields': ('user', 'name', 'description',)
         }),
-        ('Update Profile" Image Information - Image', {
+        ('Update Profile" Image Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',)
         }),
         ('Update Profile" Image Information - Attributes', {
@@ -129,7 +129,6 @@ admin.site.register(StaffApplication, authorAdmin)
 admin.site.register(PartnerApplication)
 admin.site.register(PunishmentAppeal)
 admin.site.register(ReportIssue)
-admin.site.register(NewsFeed)
 admin.site.register(StaffProfile)
 admin.site.register(Profile)
 admin.site.register(SettingsModel)
@@ -249,8 +248,6 @@ class CommentAdmin(admin.ModelAdmin):
         queryset.update(active=True)
 """
 
-#admin.site.register(OrderItem)
-admin.site.register(OrderItemField)
 admin.site.register(Order)
 admin.site.register(Payment)
 
@@ -338,12 +335,52 @@ class HyperlinkBaseAdmin(admin.ModelAdmin):
             'fields': ('display_image', 'alternate', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize',),
             'classes': ('collapse',),
         }),
-        ('Hyperlink Information', {
+        ('Hyperlink Information - Attributes', {
             'fields': ('hyperlink', 'section', 'page', 'hyperlink_type', 'is_active'),
         }),
     )
 
 admin.site.register(HyperlinkBase, HyperlinkBaseAdmin)
+
+admin.site.unregister(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Order Item Information - Categorial Description', {
+            'fields': ('user', 'ordered', 'quantity', 'item',),
+            'classes': ('collapse',),
+        }),
+        ('Order Item Information - Image Display', {
+            'fields': ('image', 'image_length', 'image_width',),
+            'classes': ('collapse',),
+        }),
+        ('Order Item Information - Attributes', {
+            'fields': ('slug', 'is_active'),
+        }),
+    )
+    readonly_fields = ('order_date', 'id',)
+
+admin.site.register(OrderItem, OrderItemAdmin)
+
+
+class OrderItemFieldAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Order Item Field Information - Categorial Description', {
+            'fields': ('user', 'ordered', 'quantity', 'item',),
+            'classes': ('collapse',),
+        }),
+        ('Order Item Field Information - Image Display', {
+            'fields': ('image', 'image_length', 'image_width',),
+            'classes': ('collapse',),
+        }),
+        ('Order Item Field Information - Attributes', {
+            'fields': ('slug', 'is_active'),
+        }),
+    )
+    readonly_fields = ('orderitem_id',)
+
+admin.site.register(OrderItemField, OrderItemFieldAdmin)
 
 class RoomAdmin(admin.ModelAdmin):
 
@@ -366,7 +403,7 @@ class ItemAdmin(admin.ModelAdmin):
             'fields': ('price', 'discount_price',),
             'classes': ('collapse',),  # Open by default
         }),
-        ('Item Information - Image', {
+        ('Item Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize',),
             'classes': ('collapse-open',),  # Open by default
         }),
@@ -390,7 +427,7 @@ class LogoBaseAdmin(admin.ModelAdmin):
             'fields': ('title', 'hyperlink', 'section', 'page', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
-        ('Logo Information - Logo Image', {
+        ('Logo Information - Logo Image Display', {
             'fields': ('logocover', 'logo_length', 'logo_width', 'length_for_resize', 'width_for_resize',),
             'classes': ('collapse-open',),  # Open by default
         }),
@@ -410,7 +447,7 @@ class BlogAdmin(admin.ModelAdmin):
             'fields': ('title', 'slug', 'author', 'content', 'status', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
-        ('Blog Information - Image', {
+        ('Blog Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',),
             'classes': ('collapse-open',),  # Open by default
         }),
@@ -453,7 +490,11 @@ admin.site.register(TextBase, TextBaseAdmin)
 class EventAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Event Information - Categorial Descriptions', {
-            'fields': ('user', 'name', 'category', 'description', 'image',),
+            'fields': ('user', 'name', 'category', 'description',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Event Information - Image Display', {
+            'fields': ('image', 'image_length', 'image_width',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Event  Information - Attributes', {
@@ -476,7 +517,7 @@ class FaviconBaseAdmin(admin.ModelAdmin):
             'classes': ('collapse-open',),  # Open by default
         }),
 
-        ('Event  Information - Image', {
+        ('Event  Information - Image Display', {
             'fields': ('faviconcover', 'favicon_length', 'favicon_width', 'length_for_resize', 'width_for_resize',),
             'classes': ('collapse-open',),  # Open by default
         }),
@@ -517,6 +558,31 @@ class AdvertisementBaseAdmin(admin.ModelAdmin):
 
 admin.site.register(AdvertisementBase, AdvertisementBaseAdmin)
 
+class NewsFeedAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Advertisement Base Information - Categorial Descriptions', {
+            'fields': ('user', 'name', 'category', 'description', 'anonymous',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Advertisement Base Information - Advertisement', {
+            'fields': ('image', 'image_length', 'image_width',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Advertisement Base  Information - Attributes', {
+            'fields': ('slug', 'date_and_time', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+    class Media:
+        js = ('admin-collapse-default.js',)  # Include the custom JavaScript file
+        css = {
+            'all': ('admin-collapse-default.css',)
+        }
+
+
+admin.site.register(NewsFeed, NewsFeedAdmin)
+
 class AdministrationRoleAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Administration Role Information', {
@@ -537,7 +603,7 @@ class AdministrationTaskAdmin(admin.ModelAdmin):
             'fields': ('opennew', 'section', 'page_name',),
             'classes': ('collapse-open',),  # Open by default
         }),
-        ('Administration Task Information - Image', {
+        ('Administration Task Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize', 'alternate',),
             'classes': ('collapse-open',),  # Open by default
         }),
@@ -564,7 +630,7 @@ class ImageBaseAdmin(admin.ModelAdmin):
         ('Image Base Information - Categorial Descriptions', {
             'fields': ('title', 'hyperlink', 'type')
         }),
-        ('Image Base Information - Image', {
+        ('Image Base Information - Image Display', {
             'fields': ('image', 'image_width', 'image_length', 'width_for_resize', 'height_for_resize', 'image_position', 'alternate', 'xposition', 'yposition',)
         }),
         ('Image Base Information - Attributes', {
@@ -580,7 +646,7 @@ class ImageCarouselAdmin(admin.ModelAdmin):
         ('ImageCarousel Information - Categorial Descriptions', {
             'fields': ('carouseltitle', 'carouselcaption', 'carouselnumber', 'carouselposition',)
         }),
-        ('ImageCarousel Information - Carousel Image', {
+        ('ImageCarousel Information - Carousel Image Display', {
             'fields': ('carouselimage', 'carouselimage_length', 'carouselimage_width', 'length_for_resize', 'width_for_resize', 'carouselpage', 'hyperlink',)
         }),
         ('ImageCarousel Information - Carousel Attributes', {
@@ -596,7 +662,7 @@ class MessageAdmin(admin.ModelAdmin):
         ('Message Information - Categorial Descriptions', {
             'fields': ('value', 'user', 'signed_in_user', 'room',)
         }),
-        ('Message Information - Image', {
+        ('Message Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',)
         }),
         ('Message Information - Attributes', {
@@ -613,7 +679,7 @@ class SupportMessageAdmin(admin.ModelAdmin):
         ('Support Message Information - Categorial Descriptions', {
             'fields': ('value', 'user', 'signed_in_user', 'room',)
         }),
-        ('Support Message Information - Image', {
+        ('Support Message Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',)
         }),
         ('Support Message Information - Attributes', {
@@ -770,7 +836,7 @@ class CustomerSupportAdmin(admin.ModelAdmin):
         ('Contact Message Information-Categorial Descriptions', {
             'fields': ('user', 'name', 'category', 'issue', 'Additional_comments',)
         }),
-        ('Contact Message Information-Image', {
+        ('Contact Message Information-Image Display', {
             'fields': ('image', 'image_length', 'image_width',)
         }),
         ('Contact Message Information-Attributes', {
@@ -806,7 +872,7 @@ class FormBaseAdmin(admin.ModelAdmin):
             'fields': ('correct_answer_true_false',),
             'classes': ('collapse',),  # Open by default
         }),
-        ('Form Base Information - Image', {
+        ('Form Base Information - Image Display', {
             'fields': ('correct_answer_image_field',),
             'classes': ('collapse',),  # Open by default
             #answers may vary

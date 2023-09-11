@@ -277,6 +277,7 @@ urlpatterns = [
     # path('product/<slug>/', views.ProductView.as_view(), name='product'),
     re_path(r'^thanks/$', views.thanks),
     path('review_detail/<slug>/', views.FeedbackView.as_view(), name='review_detail'),
+    #path('review_detail/<uuid:orderitem_id>/', views.FeedbackView.as_view(), name='review_detail'),
     path('reviews/', views.ReviewView.as_view(), name='reviews'),
     #path('create_review/<int:orderitem_id>/', views.SubmitFeedbackView.as_view(), name='create_review'),
     #path('create_review/<int:item_id>/', submit_feedback, name='create_review'),

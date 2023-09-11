@@ -1,7 +1,7 @@
 import django
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
-from .models import UpdateProfile, EmailField, Answer
+from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -6130,8 +6130,53 @@ def create_feedback(request, order_id):
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib import messages
 
+from django.shortcuts import get_object_or_404
 
+class FeedbackView(LoginRequiredMixin, UpdateView):
+    model = FeedbackBackgroundImage
+    form_class = FeedbackForm
+    paginate_by = 10
+    success_url = '/feedbackfinish'
+    template_name = 'review_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        # settings to alter the username & password
+        return context
+
+    def get_object(self, queryset=None):
+        orderitem_id = self.kwargs.get('orderitem_id')
+        print('your orderitem_id is: ' + orderitem_id)
+        try:
+            feedback = Feedback.objects.get(order__id=orderitem_id)
+            return feedback
+        except Feedback.DoesNotExist:
+            raise Http404("Feedback does not exist")
+
+
+    # Retrieve the ProfileDetails object based on the captured slug from the URL
+"""        slug = self.kwargs.get('slug')
+        return get_object_or_404(Feedback, slug=slug)"""
+
+"""
 class FeedbackView(LoginRequiredMixin, FormView):
+    model = FeedbackBackgroundImage
     template_name = "review_detail.html"
     form_class = FeedbackForm
     success_url = '/feedbackfinish'
@@ -6173,11 +6218,30 @@ class FeedbackView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
     def post(self, request, *args, **kwargs):
-        # Process the submitted feedback form data
+        cleaned_data = self.form.cleaned_data
+
+        # Process the data (assuming Feedback is your model)
+        feedback = Feedback()
+        feedback.item = cleaned_data['item']
+        feedback.order = cleaned_data['order']
+        feedback.username = cleaned_data['username']
+        feedback.comment = cleaned_data['comment']
+        feedback.feedbackpage = cleaned_data['feedbackpage']
+        feedback.slug = cleaned_data['slug']
+        feedback.star_rating = cleaned_data['star_rating']
+        feedback.showcase = cleaned_data['showcase']
+        feedback.image = cleaned_data['image']
+        feedback.image_length = cleaned_data['image_length']
+        feedback.feedbackpage = cleaned_data['feedbackpage']
+        feedback.image_width = cleaned_data['image_width']
+        feedback.timestamp = cleaned_data['timestamp']
+        feedback.is_active = cleaned_data['is_active']
         # ...
 
+        feedback.save()
+
         messages.success(request, 'Your feedback has been submitted successfully.')
-        return redirect('showcase:feedbackfinish')
+        return redirect('showcase:feedbackfinish')"""
 
 
 class ReviewView(BaseView):
@@ -6504,6 +6568,8 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         return context
@@ -6515,7 +6581,7 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
         try:
             orderitem = OrderItem.objects.get(id=orderitem_id)
         except OrderItem.DoesNotExist:
-            return HttpResponse('Sorry, order does not exist.')
+            return HttpResponse('Sorry, this order does not exist.')
 
         try:
             existing_feedback = Feedback.objects.get(order=orderitem)
@@ -6540,7 +6606,8 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
             existing_feedback = None
 
         # Create or update the feedback instance
-        form = FeedbackForm(request.POST, request=request, instance=existing_feedback)
+        form = FeedbackForm(request.POST, request.FILES, request=request, instance=existing_feedback)
+
         if form.is_valid():
             feedback = form.save(commit=False)
 
@@ -6553,11 +6620,14 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
             feedback.slug = orderitem.slug
             feedback.save()
 
-            # Delete only the existing feedback associated with this order item
             if existing_feedback and existing_feedback != feedback:
                 existing_feedback.delete()
-
-            return redirect('showcase:feedbackfinish')
+                slug = str(existing_feedback.slug)  # Use the existing_feedback object's slug
+            else:
+                slug = str(feedback.slug)  # Use the feedback object's slug
+                #not the same as the user-inputted slug, it would be the slug from the item
+            url = reverse('showcase:review_detail', args=[slug])
+            return redirect(url)
 
         return render(request, 'create_review.html', {'form': form})
 

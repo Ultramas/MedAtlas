@@ -408,6 +408,12 @@ class NewsFeed(models.Model):
     category = models.CharField(max_length=200, help_text='Please let us know what form of news this is.')
     description = models.TextField(help_text='Write the news here.')
     image = models.ImageField(help_text='Please provide a cover image for the news.')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement width")
     date_and_time = models.DateTimeField(null=True, verbose_name="time and date")
     anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
     is_active = models.IntegerField(default=1,
@@ -490,6 +496,12 @@ class Event(models.Model):
     slug = models.SlugField()
     anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
     image = models.ImageField(help_text='Please provide a cover image for the event.')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="advertisement length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="advertisement width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2072,6 +2084,17 @@ class ChangePasswordBackgroundImage(models.Model):
         verbose_name_plural = "Change Password Background Images"
 
 
+class FeedbackBackgroundImage(models.Model):
+    title = models.TextField()
+    cover = models.ImageField(upload_to='images/')
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Feedback Background Image"
+        verbose_name_plural = "Feedback Background Images"
+
 class IssueBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -2710,9 +2733,10 @@ post_save.connect(create_profile, sender=User)
 
 class Feedback(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True, null=True)  # might want to replace item with order
-    # orderitem = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)  # might want to replace item with order
+    """orderitem = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)"""  # might want to replace item with order
     order = models.OneToOneField(OrderItem, on_delete=models.CASCADE)
-    # order = models.OneToOneField(OrderItem, on_delete=models.CASCADE, related_name='feedback', null=True)
+    #order = models.ForeignKey(OrderItem, on_delete=models.CASCADE)
+    """order = models.OneToOneField(OrderItem, on_delete=models.CASCADE, related_name='feedback', null=True)"""
     username = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     # hyperlink = models.CharField(max_length=200,
     #                            help_text="Leave field blank, hyperlink will automatically fill with the link to the associated product.")
@@ -2727,7 +2751,7 @@ class Feedback(models.Model):
     showcase = models.IntegerField(default=0, blank=True,
                                    null=True, verbose_name='Showcase on Cover Page?', help_text='1->Yes, 0->No',
                                    choices=((1, 'Yes'), (0, 'No')))
-    image = models.ImageField(verbose_name="Images", help_text='Please upload any product images', blank=True, null=True)
+    image = models.ImageField(verbose_name="Images", upload_to='images/', help_text='Please upload any product images', blank=True, null=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
                                               help_text='Original length of the image (use for original ratio).',
                                               verbose_name="advertisement length")
@@ -2752,8 +2776,8 @@ class Feedback(models.Model):
         return reverse('showcase:review_detail', args=[str(self.slug)])
 
     def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse("showcase:reviews")
+
+        return reverse('showcase:review_detail', args=[str(self.slug)])
     @property
     def item_name(self):
         if self.item:

@@ -1,5 +1,5 @@
 
-{% extends 'base.html' %}
+{% extends 'ebase.html' %}
 {% load static %}
 
 {% block content %}
@@ -51,47 +51,26 @@
 <body>sss
 
 
-    {% for feedback in Feed %}
-    kk
-        {% for slug in Feed %}
-ee
+  {% for feedback_item in Feed %}
+    <!-- Display user profile picture and username -->
+    <a href="{{ feedback_item.user_profile_picture_url }}">
+        {{ feedback_item.user.username }}
+    </a>
 
-                   {% if Feedback.item == Item.item %}jjjj
-                   <a href="{{feed.user_profile_picture_url}}"><!--{{ product.hyperlink }}-->
-                       {{Feedback.user.username }}
-                       {{Feedback.item.title}}
-                       </a>
-                       {% if Feedback.star_rating == 1 %}
-                       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "{{ Feedback.star_rating }}">
-                            <!--show a picture of the star rating-->
-                       </a>
-                        {% endif %}
-                        {% if Feedback.star_rating == 2 %}
-                       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "{{ Feedback.star_rating }}">
-                            <!--show a picture of the star rating-->
-                       </a>
-                        {% endif %}
-                           {% if Feedback.star_rating == 3 %}
-                       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "{{ Feedback.star_rating }}">
-                            <!--show a picture of the star rating-->
-                       </a>
-                        {% endif %}
-                        {% if Feedback.star_rating == 4 %}
-                       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "{{ Feedback.star_rating }}">
-                            <!--show a picture of the star rating-->
-                       </a>
-                        {% endif %}
-    {% endif %}
-                        {% if Feedback.star_rating == 5 %}
-                       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "{{ Feedback.star_rating }}">
-                            <!--show a picture of the star rating-->
-                       </a>
-                        {% endif %}
-                        <h3>{{ Feedback.star_rating }}</h3>
-                    <h3>{{Feedback.comment}} </h3>
+    <!-- Display star rating image based on feedback.star_rating -->
+    {% with star_rating=feedback_item.star_rating %}
+        {% if star_rating >= 1 and star_rating <= 5 %}
+            <img class="slide-img" src="{{ BackgroundImage.carouselimage.url }}" alt="{{ star_rating }}">
+        {% endif %}
+    {% endwith %}
 
-  {% endfor %}
+    <!-- Display star rating as text -->
+    <h3>{{ feedback_item.star_rating }}</h3>
+
+    <!-- Display feedback comment -->
+    <h3>{{ feedback_item.comment }}</h3>
 {% endfor %}
+
 </body>
 </html>
 {% endblock content %}
