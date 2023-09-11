@@ -682,7 +682,7 @@ class Preference(models.Model):
     class Meta:
         unique_together = ("user", "post", "value")
         verbose_name = "Blog Like"
-        verbose_name_plural = "Blog Like"
+        verbose_name_plural = "Blog Likes"
 
 
 class Comment(models.Model):
@@ -825,6 +825,7 @@ class HyperlinkBase(models.Model):
 class BackgroundImageBase(models.Model):
     backgroundtitle = models.TextField(verbose_name="Background Title")
     cover = models.ImageField(upload_to='images/')
+    alternate = models.TextField(verbose_name="Alternate Text")
     page = models.TextField(verbose_name="Page Name")
     url = models.URLField(verbose_name="Page URL")
     position = models.IntegerField(verbose_name="Image Position")
@@ -1043,6 +1044,10 @@ class Donate(models.Model):
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
 
+
+    class Meta:
+        verbose_name = "Donation"
+        verbose_name_plural = "Donations"
 
 class DonorBackgroundImage(models.Model):
     title = models.TextField()
@@ -2279,15 +2284,36 @@ class Questionaire(models.Model):
     )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     form_name = models.TextField(verbose_name="Form Name")
-    form_type = models.CharField(max_length=10, choices=RADIO_CHOICES, default='option1')
+    form_type = models.CharField(max_length=10, choices=RADIO_CHOICES)
     text = models.TextField(verbose_name="Question")
+    image = models.TextField(verbose_name="Image", blank=True, null=True)
+
+    #answer_choices = models.JSONField(default=list, blank=True)
+    answer_choices = models.CharField(max_length=255, blank=True, null=True)
+
+    # Add fields to store correct answers for different question types
+    correct_answer_multiple_choice = models.CharField(max_length=255, blank=True, null=True)
+    correct_answer_short_answer = models.CharField(max_length=255, blank=True, null=True)
+    correct_answer_true_false = models.BooleanField(blank=True, null=True)
+    correct_answer_free_response = models.TextField(blank=True, null=True)
+    correct_answer_image_field = models.ImageField(upload_to='correct_answers/', blank=True, null=True)
+    correct_answer_integer_field = models.IntegerField(blank=True, null=True)
+    correct_answer_decimal_field = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    correct_answer_infinite_decimal_field = models.FloatField(blank=True, null=True)
+    correct_answer_other = models.CharField(max_length=255, blank=True, null=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active order?")
+
 
 
     def __str__(self):
         return self.text
 
     class Meta:
-        verbose_name_plural = 'Question Form'
+        verbose_name_plural = 'Question Form Base'
 
 
 class Answer(models.Model):
@@ -2303,6 +2329,12 @@ class Answer(models.Model):
     integer_field_response = models.IntegerField(null=True, blank=True)
     decimal_field_response = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     other_response = models.TextField(null=True, blank=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active order?")
+
 
     def __str__(self):
         return f"{self.user.username}'s answer to '{self.question.text}'"
@@ -2400,7 +2432,7 @@ class Payment(models.Model):
 class Coupon(models.Model):
     code = models.CharField(max_length=150)
     amount = models.FloatField()
-    percentDollars = models.BooleanField(default=False)
+    percentDollars = models.BooleanField(default=False, verbose_name="Percent-off Coupon")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2656,6 +2688,12 @@ class UserProfile2(models.Model):
     country = models.CharField(max_length=100, default='')
     phone = models.IntegerField(default=0)
     profile_picture = models.ImageField(upload_to='profile_image', null=True, blank=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
 
     class Meta:
         verbose_name = "Edit Profile"

@@ -5659,6 +5659,7 @@ class DonateView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
+        context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['donation'] = Donate.objects.filter(is_active=1)
@@ -6538,15 +6539,16 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
         except Feedback.DoesNotExist:
             existing_feedback = None
 
+        # Create or update the feedback instance
         form = FeedbackForm(request.POST, request=request, instance=existing_feedback)
         if form.is_valid():
-            # Save the feedback instance
             feedback = form.save(commit=False)
 
-            # Set the 'username' field to the logged-in user instance
-            feedback.username = request.user if request.user.is_authenticated else None
+            # Set the 'item' field based on the order item
+            feedback.item = orderitem.item  # Assuming 'item' is a ForeignKey in Feedback
 
-            # Set the 'order' field to the current orderitem
+            # Set other fields and save the feedback instance
+            feedback.username = request.user if request.user.is_authenticated else None
             feedback.order = orderitem
             feedback.slug = orderitem.slug
             feedback.save()
@@ -6696,10 +6698,10 @@ def get_num_questions(request, question_id):
         form = QuestionCountForm()
     return render(request, 'get_num_questions.html', {'form': form})
 
+from django.forms import formset_factory, modelformset_factory
 
-
-@login_required  # Decorate the view to ensure the user is logged in
-def create_questions(request, num_questions):
+@login_required  # previous
+def create_questioned(request, num_questions):
 
     QuestionFormSet = formset_factory(QuestionForm, extra=num_questions)
 
@@ -6716,52 +6718,98 @@ def create_questions(request, num_questions):
 
     return render(request, 'create_questions.html', {'formset': formset})
 
-
 @login_required
-def submit_answer(request, question_id):
-    question = Questionaire.objects.get(pk=question_id)
+def create_questions(request, num_questions):
+    if request.method == 'POST':
+        FormSet = modelformset_factory(
+            Questionaire,
+            fields=('text', 'form_type', 'answer_choices'),  # Include answer_choices
+            extra=num_questions,
+        )
+        formset = FormSet(request.POST, prefix='question')
+
+        if formset.is_valid():
+            user = request.user
+            instances = formset.save(commit=False)
+
+            # Process answer_choices for multiple-choice questions
+            for form, instance in zip(formset, instances):
+                if instance.form_type == 'option1':
+                    answer_choices = form.cleaned_data.get('answer_choices', '').split(',')
+                    instance.answer_choices = answer_choices
+                instance.user = user
+                instance.save()
+
+            return HttpResponseRedirect(reverse('showcase:index'))
+    else:
+        FormSet = modelformset_factory(
+            Questionaire,
+            fields=('text', 'form_type', 'answer_choices'),  # Include answer_choices
+            extra=num_questions,
+        )
+        formset = FormSet(queryset=Questionaire.objects.none(), prefix='question')
+
+    return render(request, 'create_questions.html', {'formset': formset})
+
+
+def add_question(request):
+    QuestionAnswerFormSet = formset_factory(AnswerForm, extra=2, can_delete=True)
 
     if request.method == 'POST':
-        form = AnswerForm(request.POST, request.FILES)
-        if form.is_valid():
-            user = request.user
+        question_form = QuestionForm(request.POST)
+        formset = QuestionAnswerFormSet(request.POST, prefix='answer')
 
-            # Determine the question type
-            form_type = question.form_type
+        if question_form.is_valid() and formset.is_valid():
+            # Handle saving question and answers here
+            # You can access question_form.cleaned_data['question']
+            # and iterate through formset.cleaned_data to get answer choices
+            # Save the question and its answer choices to the database
 
-            # Extract and save the response based on the question type
-            if form_type == 'option1':  # Multiple Choice
-                response = form.cleaned_data['multiple_choice_response']
-            elif form_type == 'option2':  # Short Answer
-                response = form.cleaned_data['short_answer_response']
-            elif form_type == 'option3':  # True or False
-                response = form.cleaned_data['true_or_false_response']
-            elif form_type == 'option4':  # Free Response
-                response = form.cleaned_data['free_response_response']
-            elif form_type == 'option5':  # Image Field
-                response = form.cleaned_data['image_field_response']
-            elif form_type == 'option6':  # Integer Field
-                response = form.cleaned_data['integer_field_response']
-            elif form_type == 'option7':  # Decimal Field
-                response = form.cleaned_data['decimal_field_response']
-            elif form_type == 'option8':  # Other
-                response = form.cleaned_data['other_response']
-            else:
-                response = None
-
-            # Save the response
-            Answer.objects.create(
-                user=user,
-                question=question,
-                response=response
-            )
-
-            return redirect('showcase:index')  # Redirect to the home page or another appropriate page
-
+            return redirect('showcase:index')
     else:
-        form = AnswerForm()
+        question_form = QuestionForm()
+        formset = QuestionAnswerFormSet(prefix='answer')
 
-    return render(request, 'answer.html', {'form': form, 'question': question})
+    return render(request, 'add_question.html', {'question_form': question_form, 'formset': formset})
+
+"""
+def create_questionaire(request, num_questions):
+    if request.method == 'POST':
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            # Save the question with answer choices
+            questionaire = form.save(commit=False)
+            answer_choices = request.POST.getlist('answer_choices')
+            questionaire.answer_choices = answer_choices
+            questionaire.save()
+            return redirect('showcase:index')
+    else:
+        form = QuestionForm()
+    return render(request, 'create_questions.html', {'form': form})
+"""
+
+def submit_answer(request, question_id):
+    questionaire = get_object_or_404(Questionaire, pk=question_id)
+    questions = questionaire.question_set.all()
+
+    if request.method == 'POST':
+        form = AnswerForm(request.POST, questions=questions)
+
+        if form.is_valid():
+            # Handle the submitted answers here
+            for question in questions:
+                answer_text = form.cleaned_data[f'answer_{question.id}']
+                correct_answer = getattr(questionaire, f'correct_answer_{question.form_type}')
+                is_correct = answer_text == correct_answer
+                # Save the answer and correctness status to the database or perform any necessary processing
+
+            # Redirect or render a success page
+            return HttpResponseRedirect(reverse('showcase:index'))
+    else:
+        form = AnswerForm(questions=questions)
+
+    return render(request, 'showcase/answer_questions.html', {'form': form})
+
 
 
 def sociallogin(request):

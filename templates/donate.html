@@ -111,9 +111,46 @@
 				<img class="coffee-cup" src="{% static 'images/sc.jpg' %}">
 				<img class="coffee-cup2" src="{% static 'images/sc2.jpg' %}">
 				<img class="coffee-cup3" src="{% static 'images/sc3.jpg' %}">
-				<h3>If I've provided you with value please consider supporting our efforts ;)</h3>
+				{% for DonorBackgroundImage in TextFielde %}
+					{% if DonorBackgroundImage.page == 'donate.html' and DonorBackgroundImage.section == 1 %}
+							{% if DonorBackgroundImage.hyperlink %}
+									<a href="{{DonorBackgroundImage.hyperlink}}">
+										{% if DonorBackgroundImage.text_size == 1 %}
+											<h1>{{ DonorBackgroundImage.text }}</h1>
+										{% elif DonorBackgroundImage.text_size == 2 %}
+											<h2>{{ DonorBackgroundImage.text }}</h2>
+										{% elif DonorBackgroundImage.text_size == 3 %}
+											<h3>{{ DonorBackgroundImage.text }}</h3>
+										{% elif DonorBackgroundImage.text_size == 4 %}
+											<h4>{{ DonorBackgroundImage.text }}</h4>
+										{% elif DonorBackgroundImage.text_size == 5 %}
+											<h5>{{ DonorBackgroundImage.text }}</h5>
+										{% elif DonorBackgroundImage.text_size == 6 %}
+											<h6>{{ DonorBackgroundImage.text }}</h6>
+										{% else %}
+											<p>{{ DonorBackgroundImage.text }}</p>
+										{% endif %}
+									</a>
+								{% else %}
+									{% if DonorBackgroundImage.text_size == 1 %}
+										<h1>{{ DonorBackgroundImage.text }}</h1>
+									{% elif DonorBackgroundImage.text_size == 2 %}
+										<h2>{{ DonorBackgroundImage.text }}</h2>
+									{% elif DonorBackgroundImage.text_size == 3 %}
+										<h3>{{ DonorBackgroundImage.text }}</h3>
+									{% elif DonorBackgroundImage.text_size == 4 %}
+										<h4>{{ DonorBackgroundImage.text }}</h4>
+									{% elif DonorBackgroundImage.text_size == 5 %}
+										<h5>{{ DonorBackgroundImage.text }}</h5>
+									{% elif DonorBackgroundImage.text_size == 6 %}
+										<h6>{{ DonorBackgroundImage.text }}</h6>
+									{% else %}
+										<p>{{ DonorBackgroundImage.text }}</p>
+									{% endif %}
+								{% endif %}
 
-				<p>Quantumism . Source code and videos are free to download, use as you wish :) At no point should you feel obligated to donate but if you have the means consider the time and effort I put into each project/video. Thank you!</p>
+								{% endif %}
+				{% endfor %}
 				<hr>
 				<a href="{% url 'showcase:whydonate'%}" class="myButton">Back To Donation Home</a>
 			</div>

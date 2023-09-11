@@ -7,3 +7,21 @@
     {% endfor %}
     <button type="submit">Submit</button>
 </form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    const addButton = $('<button type="button">Add Answer Choice</button>');
+    const choicesDiv = $('.dynamic-choices');
+    addButton.click(function() {
+      const input = $('<input type="text" class="dynamic-input" name="answer_choices" required>');
+      choicesDiv.append(input);
+    });
+    $('.dynamic-input').change(function() {
+      if (!this.value) {
+        $(this).remove();
+      }
+    });
+    choicesDiv.append(addButton);
+  });
+</script>

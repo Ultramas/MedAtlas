@@ -82,8 +82,31 @@ from django.contrib.auth.models import Group
 from django.contrib.admin import AdminSite
 from django.utils.translation import gettext_lazy
 
+class UserProfile2Admin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Edit Profile Information - Personal Information', {
+            'fields': ('user', 'first_name', 'last_name')
+        }),
+        ('Edit Profile Image Information - Attributes', {
+            'fields': ('description', 'city', 'country', 'phone', 'profile_picture', 'is_active',)
+        }),
+    )
+    pass
 
 class categoryAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Update Profile" Information - Categorial Descriptions', {
+            'fields': ('user', 'name', 'description',)
+        }),
+        ('Update Profile" Image Information - Image', {
+            'fields': ('image', 'image_length', 'image_width',)
+        }),
+        ('Update Profile" Image Information - Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
     pass
 
 
@@ -105,7 +128,6 @@ admin.site.register(Vote, authorAdmin)
 admin.site.register(StaffApplication, authorAdmin)
 admin.site.register(PartnerApplication)
 admin.site.register(PunishmentAppeal)
-admin.site.register(BanAppeal)
 admin.site.register(ReportIssue)
 admin.site.register(NewsFeed)
 admin.site.register(StaffProfile)
@@ -113,12 +135,8 @@ admin.site.register(Profile)
 admin.site.register(SettingsModel)
 #admin.site.register(SettingsBackgroundImage)
 #admin.site.register(ConvertBackgroundImage)
-admin.site.register(NavBar)
-admin.site.register(NavBarHeader)
 admin.site.register(UserProfile)
-admin.site.register(UserProfile2)
-admin.site.register(Support)
-admin.site.register(Preference)
+admin.site.register(UserProfile2, UserProfile2Admin)
 admin.site.register(PostLikes)
 #admin.site.register(BackgroundImage)
 #admin.site.register(BackgroundImage2a)
@@ -144,22 +162,10 @@ admin.site.register(PostLikes)
 #admin.site.register(PartnerBackgroundImage)
 #admin.site.register(WhyBackgroundImage)
 #admin.site.register(PerksBackgroundImage)
-admin.site.register(FaviconBase)
-admin.site.register(BackgroundImageBase)
-admin.site.register(ImageCarousel)
 admin.site.register(Titled)
-admin.site.register(BaseCopyrightTextField)
 #admin.site.register(ResizeImageMixin)
-admin.site.register(ImageBase)
-admin.site.register(DonateIcon)
-admin.site.register(Contact)
-admin.site.register(BusinessMailingContact)
 #admin.site.register(BackgroundImages)
-admin.site.register(Coupon)
 #admin.site.register(Feedback)
-admin.site.register(EmailField)
-admin.site.register(AdminRoles)
-admin.site.register(AdminTasks)
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
@@ -207,6 +213,12 @@ admin.site.register(Product, ProductA)
 
 
 class CityAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Item Information - Categorial Descriptions', {
+            'fields': ('name', 'state',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
     list_display = (
         "name",
         "state",
@@ -226,7 +238,7 @@ class PostAdmin(admin.ModelAdmin):
 #admin.site.register(Blog, PostAdmin)
 
 
-@admin.register(Comment)
+"""@admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('name', 'body', 'post', 'created_on', 'active')
     list_filter = ('active', 'created_on')
@@ -235,23 +247,24 @@ class CommentAdmin(admin.ModelAdmin):
 
     def approve_comments(self, request, queryset):
         queryset.update(active=True)
+"""
 
-
-admin.site.register(Room)
-admin.site.register(SupportMessage)
-admin.site.register(Message)
 #admin.site.register(OrderItem)
 admin.site.register(OrderItemField)
 admin.site.register(Order)
-admin.site.register(CheckoutAddress)
 admin.site.register(Payment)
-admin.site.register(Questionaire)
 
 from django.contrib import messages
 from .models import State
 
 
 class StateAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Feedback Information', {
+            'fields': ('name', 'is_active', 'created_on', 'updated_on',)
+        }),
+    )
     list_display = ('name', 'active', 'created_on')
 
     def active(self, obj):
@@ -332,9 +345,20 @@ class HyperlinkBaseAdmin(admin.ModelAdmin):
 
 admin.site.register(HyperlinkBase, HyperlinkBaseAdmin)
 
+class RoomAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Room Information', {
+            'fields': ('name',),
+            'classes': ('collapse-open',),
+        }),
+    )
+
+admin.site.register(Room, RoomAdmin)
+
 class ItemAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Item Information - Categorical Descriptions', {
+        ('Item Information - Categorial Descriptions', {
             'fields': ('title', 'category', 'label', 'slug', 'description', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
@@ -359,13 +383,14 @@ class ItemAdmin(admin.ModelAdmin):
         }
 
 admin.site.register(Item, ItemAdmin)
+
 class LogoBaseAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Logo Information - Categorical Descriptions', {
+        ('Logo Information - Categorial Descriptions', {
             'fields': ('title', 'hyperlink', 'section', 'page', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
-        ('Logo Information - Image', {
+        ('Logo Information - Logo Image', {
             'fields': ('logocover', 'logo_length', 'logo_width', 'length_for_resize', 'width_for_resize',),
             'classes': ('collapse-open',),  # Open by default
         }),
@@ -381,7 +406,7 @@ admin.site.register(LogoBase, LogoBaseAdmin)
 
 class BlogAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Blog Information - Categorical Descriptions', {
+        ('Blog Information - Categorial Descriptions', {
             'fields': ('title', 'slug', 'author', 'content', 'status', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
@@ -407,7 +432,7 @@ admin.site.register(Blog, BlogAdmin)
 
 class TextBaseAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Text Base Information - Categorical Descriptions', {
+        ('Text Base Information - Categorial Descriptions', {
             'fields': ('text', 'page', 'url', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
@@ -427,7 +452,7 @@ admin.site.register(TextBase, TextBaseAdmin)
 
 class EventAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Event Information - Categorical Descriptions', {
+        ('Event Information - Categorial Descriptions', {
             'fields': ('user', 'name', 'category', 'description', 'image',),
             'classes': ('collapse-open',),  # Open by default
         }),
@@ -444,9 +469,33 @@ class EventAdmin(admin.ModelAdmin):
 
 admin.site.register(Event, EventAdmin)
 
+class FaviconBaseAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Event Information - Categorial Descriptions', {
+            'fields': ('favicontitle', 'faviconlink',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+
+        ('Event  Information - Image', {
+            'fields': ('faviconcover', 'favicon_length', 'favicon_width', 'length_for_resize', 'width_for_resize',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Event  Information - Attributes', {
+            'fields': ('faviconpage', 'faviconurl', 'faviconsizes', 'faviconrelationship', 'favicontype', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+    class Media:
+        js = ('admin-collapse-default.js',)  # Include the custom JavaScript file
+        css = {
+            'all': ('admin-collapse-default.css',)
+        }
+
+admin.site.register(FaviconBase, FaviconBaseAdmin)
+
 class AdvertisementBaseAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Advertisement Base Information - Categorical Descriptions', {
+        ('Advertisement Base Information - Categorial Descriptions', {
             'fields': ('advertisementtitle', 'page', 'type',),
             'classes': ('collapse-open',),  # Open by default
         }),
@@ -467,6 +516,320 @@ class AdvertisementBaseAdmin(admin.ModelAdmin):
         }
 
 admin.site.register(AdvertisementBase, AdvertisementBaseAdmin)
+
+class AdministrationRoleAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Administration Role Information', {
+            'fields': ('roles', 'role_description', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+admin.site.register(AdminRoles, AdministrationRoleAdmin)
+
+class AdministrationTaskAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Administration Task Information - Categorial Descriptions', {
+            'fields': ('task', 'hyperlink',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Administration Task Information - Attributes', {
+            'fields': ('opennew', 'section', 'page_name',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Administration Task Information - Image', {
+            'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize', 'alternate',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+admin.site.register(AdminTasks, AdministrationTaskAdmin)
+
+class BackgroundImageBaseAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Background Image Base Information - Categorial Descriptions', {
+            'fields': ('backgroundtitle', 'cover', 'alternate')
+        }),
+        ('Background Image Base Information - Attributes', {
+            'fields': ('page', 'url', 'position', 'is_active',)
+        }),
+    )
+
+admin.site.register(BackgroundImageBase, BackgroundImageBaseAdmin)
+
+class ImageBaseAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Image Base Information - Categorial Descriptions', {
+            'fields': ('title', 'hyperlink', 'type')
+        }),
+        ('Image Base Information - Image', {
+            'fields': ('image', 'image_width', 'image_length', 'width_for_resize', 'height_for_resize', 'image_position', 'alternate', 'xposition', 'yposition',)
+        }),
+        ('Image Base Information - Attributes', {
+            'fields': ('page', 'relevance', 'correlating_product', 'is_active',)
+        }),
+    )
+
+admin.site.register(ImageBase, ImageBaseAdmin)
+
+class ImageCarouselAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('ImageCarousel Information - Categorial Descriptions', {
+            'fields': ('carouseltitle', 'carouselcaption', 'carouselnumber', 'carouselposition',)
+        }),
+        ('ImageCarousel Information - Carousel Image', {
+            'fields': ('carouselimage', 'carouselimage_length', 'carouselimage_width', 'length_for_resize', 'width_for_resize', 'carouselpage', 'hyperlink',)
+        }),
+        ('ImageCarousel Information - Carousel Attributes', {
+            'fields': ('carouseltotal', 'is_active',)
+        }),
+    )
+
+admin.site.register(ImageCarousel, ImageCarouselAdmin)
+
+class MessageAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Message Information - Categorial Descriptions', {
+            'fields': ('value', 'user', 'signed_in_user', 'room',)
+        }),
+        ('Message Information - Image', {
+            'fields': ('image', 'image_length', 'image_width',)
+        }),
+        ('Message Information - Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+
+admin.site.register(Message, MessageAdmin)
+
+
+class SupportMessageAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Support Message Information - Categorial Descriptions', {
+            'fields': ('value', 'user', 'signed_in_user', 'room',)
+        }),
+        ('Support Message Information - Image', {
+            'fields': ('image', 'image_length', 'image_width',)
+        }),
+        ('Support Message Information - Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+    readonly_fields = ('date',)
+
+admin.site.register(SupportMessage, SupportMessageAdmin)
+
+class BanAppealAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Ban Appeals Information - Categorial Descriptions', {
+            'fields': ('name', 'Rule_broken', 'Why_I_should_have_my_ban_revoked', 'Additional_comments',)
+        }),
+        ('Ban Appeals Information - Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+
+admin.site.register(BanAppeal, BanAppealAdmin)
+
+class BaseCopyrightTextFieldAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Ban Appeals Information', {
+            'fields': ('copyright', 'page', 'hyperlink', 'is_active',)
+        }),
+    )
+
+admin.site.register(BaseCopyrightTextField, BaseCopyrightTextFieldAdmin)
+
+
+class PreferenceAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Blog Like Information', {
+            'fields': ('user', 'post', 'value',)
+        }),
+    )
+    readonly_fields = ('date',)
+
+admin.site.register(Preference, PreferenceAdmin)
+
+
+class CheckoutAddressAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Checkout Address Information-Personal Information', {
+            'fields': ('user', 'street_address', 'apartment_address','country', 'zip')
+        }),
+        ('Checkout Address Information-Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+
+admin.site.register(CheckoutAddress, CheckoutAddressAdmin)
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'body', 'post', 'created_on', 'active')
+    list_filter = ('active', 'created_on')
+    search_fields = ('name', 'email', 'body')
+    actions = ['approve_comments']
+
+    def approve_comments(self, request, queryset):
+        queryset.update(active=True)
+
+    # Define your custom fieldsets below
+    fieldsets = (
+        ('Ban Appeals Information - Categorial Description', {
+            'fields': ('post', 'name', 'email', 'body',)
+        }),
+        ('Ban Appeals Information - Moderation', {
+            'fields': ('active',)
+        })
+    )
+    readonly_fields = ('created_on',)
+
+class ContactAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Contact Message Information', {
+            'fields': ('name', 'email', 'inquiry', 'message',)
+        }),
+    )
+
+admin.site.register(Contact, ContactAdmin)
+
+class BusinessMailingContactAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Business Mailing Message Information', {
+            'fields': ('name', 'email', 'inquiry', 'message',)
+        }),
+    )
+
+
+admin.site.register(BusinessMailingContact, BusinessMailingContactAdmin)
+
+class EmailFieldAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Email Information', {
+            'fields': ('email', 'confirmation', 'is_active',)
+        }),
+    )
+
+
+admin.site.register(EmailField, EmailFieldAdmin)
+
+class NavBarAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Navigational Bar Dropdown Information - Categorial Descriptions', {
+            'fields': ('text', 'url',)
+        }),
+        ('Navigational Bar Dropdown Information', {
+            'fields': ('row', 'position', 'opennew', 'is_active',)
+        }),
+    )
+
+
+admin.site.register(NavBar, NavBarAdmin)
+
+class NavBarHeaderAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Navigational Bar Header Information - Categorial Descriptions', {
+            'fields': ('text',)
+        }),
+        ('Navigational Bar Header Information', {
+            'fields': ('section', 'row', 'is_active',)
+        }),
+    )
+
+
+admin.site.register(NavBarHeader, NavBarHeaderAdmin)
+
+class CouponAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Coupon Information', {
+            'fields': ('code', 'amount', 'percentDollars', 'is_active',)
+        }),
+    )
+
+admin.site.register(Coupon, CouponAdmin)
+
+class CustomerSupportAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Contact Message Information-Categorial Descriptions', {
+            'fields': ('user', 'name', 'category', 'issue', 'Additional_comments',)
+        }),
+        ('Contact Message Information-Image', {
+            'fields': ('image', 'image_length', 'image_width',)
+        }),
+        ('Contact Message Information-Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+
+admin.site.register(Support, CustomerSupportAdmin)
+
+class FormBaseAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Form Base Information - Categorial Descriptions', {
+            'fields': ('user', 'form_name', 'form_type', 'text', 'image', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Form Base Information - Multiple Choice', {
+            'fields': ('correct_answer_multiple_choice',),
+            'classes': ('collapse',),  # Open by default
+        }),
+
+        ('Form Base Information - Short Answer', {
+            'fields': ('correct_answer_short_answer',),
+            'classes': ('collapse',),  # Open by default
+            # answers may vary
+        }),
+        ('Form Base Information - Free Response', {
+            'fields': ('correct_answer_free_response',),
+            'classes': ('collapse',),  # Open by default
+            # answers may vary
+        }),
+
+        ('Form Base Information - True or False', {
+            'fields': ('correct_answer_true_false',),
+            'classes': ('collapse',),  # Open by default
+        }),
+        ('Form Base Information - Image', {
+            'fields': ('correct_answer_image_field',),
+            'classes': ('collapse',),  # Open by default
+            #answers may vary
+        }),
+        ('Form Base Information - Decimal Field', {
+            'fields': ('correct_answer_decimal_field',),
+            'classes': ('collapse',),  # Open by default
+            # answers may vary
+        }),
+        ('Form Base Information - Infinite Decimal Field', {
+            'fields': ('correct_answer_infinite_decimal_field',),
+            'classes': ('collapse',),  # Open by default
+            # answers may vary
+        }),
+    )
+
+    class Media:
+        js = ('admin-collapse-default.js',)  # Include the custom JavaScript file
+        css = {
+            'all': ('admin-collapse-default.css',)
+        }
+
+admin.site.register(Questionaire, FormBaseAdmin)
 
 class ProfileDetailsAdmin(admin.ModelAdmin):
 
@@ -492,5 +855,28 @@ class AdministrationPagesAdmin(admin.ModelAdmin):
 
 admin.site.register(AdminPages, AdministrationPagesAdmin)
 
-admin.site.register(Donate)
 
+class DonateAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Donation Information - Categorial Descriotions', {
+            'fields': ('amount', 'nickname', 'donor',)
+        }),
+        ('Donation Pages Information - Attributes', {
+            'fields': ('anonymous', 'is_active',)
+        }),
+    )
+    readonly_fields = ('timestamp',)
+
+admin.site.register(Donate, DonateAdmin)
+
+
+class DonateIconAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Donation Information', {
+            'fields': ('row', 'cover',)
+        }),
+    )
+
+
+admin.site.register(DonateIcon, DonateIconAdmin)

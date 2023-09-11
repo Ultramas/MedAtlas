@@ -868,39 +868,40 @@ class EmailForm(forms.ModelForm):
 class QuestionForm(forms.Form):
     text = forms.CharField(max_length=255)
 
-class QuestionCountForm(forms.Form):
-    RADIO_CHOICES = (
-        ('option1', 'Multiple Choice'),
-        ('option2', 'Short Answer'),
-        ('option3', 'True or False'),
-        ('option4', 'Free Response'),
-        ('option5', 'Image Field'),
-        ('option6', 'Integer Field'),
-        ('option7', 'Decimal Field'),
+    answer_choices = forms.MultipleChoiceField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'dynamic-input'}),
+        choices=[],
     )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add a field for answer choices when the question type is 'Multiple Choice'
+        if self.instance.form_type == 'option1':
+            self.fields['answer_choices'] = forms.CharField(
+                label='Answer Choices (comma-separated)',
+                required=True,
+                widget=forms.TextInput(attrs={'placeholder': 'Choice 1, Choice 2, ...'}),
+            )
+
+class QuestionCountForm(forms.Form):
     num_questions = forms.IntegerField(label="Number of Questions",)
     form_name = forms.CharField()
-    form_text = forms.ChoiceField(
-        choices=RADIO_CHOICES,
-        widget=forms.RadioSelect,
-        initial='option1'  # Set the initial selected option if needed
-    )
     class Meta:
         model = Questionaire
         fields = {"form_name", "form_text", "text"}
 
 from .models import Answer
 
-class AnswerForm(forms.ModelForm):
-    class Meta:
-        model = Answer
-        fields = [
-            'multiple_choice_response',
-            'short_answer_response',
-            'true_or_false_response',
-            'free_response_response',
-            'image_field_response',
-            'integer_field_response',
-            'decimal_field_response',
-            'other_response',
-        ]
+
+class AnswerForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        questions = kwargs.pop('questions', [])
+        super(AnswerForm, self).__init__(*args, **kwargs)
+
+        for question in questions:
+            field_name = f'answer_{question.id}'
+            self.fields[field_name] = forms.CharField(
+                label=question.text,
+                required=True,
+                widget=forms.TextInput(attrs={'class': 'form-control'})
+            )

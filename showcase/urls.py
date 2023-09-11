@@ -117,6 +117,7 @@ from .views import (
     detail_post_view,
     postpreference,
     submit_answer,
+    add_question,
     dynamic_css,
     getMessages,
     AdvertisementView,
@@ -292,6 +293,7 @@ urlpatterns = [
     path('get_num_questions/<int:question_id>/', views.get_num_questions, name='get_num_questions'),
     path('create_questions/<int:num_questions>/', views.create_questions, name='create_questions'),
     path('answer/<int:question_id>/', views.submit_answer, name='answer'),
+    path('add_question/', views.add_question, name='answer'),
 
     # path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='main/password/password_reset_done.html'), name='password_reset_done'),
 
