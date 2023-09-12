@@ -2775,6 +2775,11 @@ class Feedback(models.Model):
     def get_profile_url(self):
         return reverse('showcase:review_detail', args=[str(self.slug)])
 
+    def get_profile_url2(self):
+        profile = ProfileDetails.objects.filter(user=self.username).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
     def get_absolute_url(self):
 
         return reverse('showcase:review_detail', args=[str(self.slug)])

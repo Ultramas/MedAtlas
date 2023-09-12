@@ -6129,19 +6129,31 @@ def create_feedback(request, order_id):
 
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib import messages
-
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.views.generic import UpdateView
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.urls import reverse
+from django.utils.decorators import method_decorator
+from django.views.generic import UpdateView
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Feedback  # Import your Feedback model here
 
-class FeedbackView(LoginRequiredMixin, UpdateView):
-    model = FeedbackBackgroundImage
+
+class FeedbackView(BaseView):
+    model = Feedback
     form_class = FeedbackForm
     paginate_by = 10
-    success_url = '/feedbackfinish'
     template_name = 'review_detail.html'
+    context_object_name = 'feedback'
+
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.request.user
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -6149,6 +6161,59 @@ class FeedbackView(LoginRequiredMixin, UpdateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
+        context['Items'] = Item.objects.filter(is_active=1)
+        context['Image'] = ImageBase.objects.filter(is_active=1, page=self.template_name)
+        # Retrieve the author's profile avatar
+
+        slug = self.kwargs.get('slug')
+
+        # Check if a valid slug is provided
+        if slug:
+            # Retrieve all feedback objects with the same slug
+            feedback_objects = Feedback.objects.filter(slug=slug)
+
+            # Add the feedback_objects to the context
+            context['Feed'] = feedback_objects
+
+        for feedback_objects in context['Feed']:
+            user = feedback_objects.username
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                feedback_objects.newprofile_profile_picture_url = profile.avatar.url
+                feedback_objects.newprofile_profile_url = feedback_objects.get_profile_url2()
+
+        return context
+
+"""@method_decorator(login_required, name='dispatch')
+class FeedbackView(UpdateView):
+    model = Feedback
+    form_class = FeedbackForm
+    paginate_by = 10
+    template_name = 'review_detail.html'
+    context_object_name = 'feedback'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
+        context['Items'] = Item.objects.filter(is_active=1)
+
+        # Get the slug from the URL
+        slug = self.kwargs.get('slug')
+
+        # Check if a valid slug is provided
+        if slug:
+            # Retrieve all feedback objects with the same slug
+            feedback_objects = Feedback.objects.filter(slug=slug)
+
+            # Add the feedback_objects to the context
+            context['feedback_objects'] = feedback_objects
 
         user = self.request.user
         if user.is_authenticated:
@@ -6157,22 +6222,14 @@ class FeedbackView(LoginRequiredMixin, UpdateView):
             if profile:
                 context['profile_pk'] = profile.pk
                 context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         # settings to alter the username & password
+        # Dynamically generate the success URL
+        context['success_url'] = reverse('feedbackfinish')
+
         return context
 
-    def get_object(self, queryset=None):
-        orderitem_id = self.kwargs.get('orderitem_id')
-        print('your orderitem_id is: ' + orderitem_id)
-        try:
-            feedback = Feedback.objects.get(order__id=orderitem_id)
-            return feedback
-        except Feedback.DoesNotExist:
-            raise Http404("Feedback does not exist")
-
-
-    # Retrieve the ProfileDetails object based on the captured slug from the URL
-"""        slug = self.kwargs.get('slug')
-        return get_object_or_404(Feedback, slug=slug)"""
+"""
 
 """
 class FeedbackView(LoginRequiredMixin, FormView):

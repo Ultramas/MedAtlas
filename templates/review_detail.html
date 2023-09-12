@@ -51,26 +51,77 @@
 <body>sss
 
 
-  {% for feedback_item in Feed %}
+  {% for feedback_objects in Feed %}
+eee
+                    {% for feedback_objects in Feed %}
+
+                                {% if feedback_objects.newprofile_profile_picture_url %}
+
+                                  <a href="{{ feedback_objects.newprofile_profile_url }}">
+                                     <img src="{{ feedback_objects.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
+                                  </a>
+                                {% else %}
+                                   <!-- Placeholder image or default avatar -->
+                                  <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
+                                {% endif %}
+            {% endfor %}
+
     <!-- Display user profile picture and username -->
-    <a href="{{ feedback_item.user_profile_picture_url }}">
-        {{ feedback_item.user.username }}
+    <a href="{{ feedback_objects.user_profile_picture_url }}">
+       <h2>{{ feedback_objects.user.username }}</h2>
     </a>
 
+
+{% if feedback_objects.image %}
+<img src="{{feedback_objects.image.url }}">
+{% endif %}
+
     <!-- Display star rating image based on feedback.star_rating -->
-    {% with star_rating=feedback_item.star_rating %}
+<!--    {% with star_rating=feedback_objects.star_rating %}
         {% if star_rating >= 1 and star_rating <= 5 %}
             <img class="slide-img" src="{{ BackgroundImage.carouselimage.url }}" alt="{{ star_rating }}">
         {% endif %}
     {% endwith %}
-
-    <!-- Display star rating as text -->
-    <h3>{{ feedback_item.star_rating }}</h3>
+-->
+    <!-- Display star rating as text --><!--consider displaying star picture-->
+{% if feedback_objects.star_rating == 1 %}
+{% for feedback_objects in Image %}
+<ul><img src={{feedback_objects.image}}" alt="{{ feedback_objects.star_rating }}">
+<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}">
+<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}">
+<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}">
+<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}"></ul>
+{% endfor %}
+{% elif feedback_objects.star_rating == 2 %}
+<ul><img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}">
+<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}">
+<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}"></ul>
+{% elif feedback_objects.star_rating == 3 %}
+<ul><img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}">
+<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}"></ul>
+{% elif feedback_objects.star_rating == 4 %}
+<ul><img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}"></ul>
+{% else %}
+<ul><img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
+<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}"></ul>
+{% endif %}
 
     <!-- Display feedback comment -->
-    <h3>{{ feedback_item.comment }}</h3>
-{% endfor %}
+    <h3>{{ feedback_objects.comment }}</h3>
 
+                                {% endfor %}
 </body>
 </html>
 {% endblock content %}

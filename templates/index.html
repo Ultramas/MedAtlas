@@ -177,16 +177,26 @@
 -->
 <div class="blackoverflow" style=" background-color: black; position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 120%;  z-index: -5;">
     </div>
-<div class="parallaxial" id="cover-image">
     {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
             {% if BackgroundImage.position == 1 %}
+<div class="parallaxial" id="cover-image" style="background-image: url('{{ BackgroundImage.cover.url }}'); height: 100%; background-attachment: fixed;  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;">
                 <img class="parallaxial" src="{{ BackgroundImage.cover.url }}" alt="{{ BackgroundImage.backgroundtitle }}" style="position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 120%;  z-index: -2;">
             {% endif %}
         {% endif %}
 
     {% endfor %}
-    {% for BackgroundImage in Background %}
+
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
             {% if BackgroundImage.position == 2 %}
                 <img class="parallaxial" src="{{ BackgroundImage.cover.url }}" alt="{{ BackgroundImage.backgroundtitle }}" style="position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 120%;  z-index: -2;">
@@ -194,9 +204,6 @@
         {% endif %}
 
     {% endfor %}
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 </div>
 
     <script>// Get the image element by its class name
