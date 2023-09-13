@@ -2621,8 +2621,17 @@ class Advertising(AdvertisementBase):
 
 
 class ImageBase(models.Model):
-    title = models.CharField(max_length=100, help_text='Advertisement title.',
-                             verbose_name="advertisement title")
+    IMAGE_MEASUREMENT_CHOICES = (
+        ('px', 'Pixels'),
+        ('%', 'Percent'),
+        ('vh', 'View Height'),
+        ('em', 'em'),
+        ('rem', 'Root em'),
+        ('pt', 'Points'),
+        ('pc', 'Picas'),
+    )
+    title = models.CharField(max_length=100, help_text='title.',
+                             verbose_name="title")
     image = models.ImageField(help_text='Image of the advertisement.', upload_to='images/',
                               height_field="image_length",
                               width_field="image_width")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
@@ -2632,6 +2641,10 @@ class ImageBase(models.Model):
     image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
                                                help_text='Length of the image (in percent relative).',
                                                verbose_name="image length")
+    image_ratio = models.FloatField(blank=True, null=True, default=1.0,
+                                               help_text='Length to Width Ratio of the Image (Length/Width).',
+                                               verbose_name="image ratio")
+    image_measurement = models.CharField(blank=True, null=True,choices=IMAGE_MEASUREMENT_CHOICES, max_length=3)
     width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resize Width")
     height_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resize Height")
     image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position')
@@ -2639,7 +2652,7 @@ class ImageBase(models.Model):
     page = models.TextField(verbose_name="Page Name")
     xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position", default="0")
     yposition = models.IntegerField(help_text='x-position.', verbose_name="y-position", default="0")
-    relevance = models.TextField(help_text='Relevance of advertisement')
+    relevance = models.TextField(help_text='Relevance of image')
     correlating_product = models.OneToOneField(Item, blank=True, null=True, on_delete=models.CASCADE)
     # try incorporating other models in addition to Item
     type = models.CharField(max_length=200, help_text='Type of image.')
@@ -2656,18 +2669,22 @@ class ImageBase(models.Model):
         verbose_name_plural = 'Image Base'
 
     def image_save(self, *args, **kwargs):
-        if not self.id:  # object is being created for the first time
+        if not self.id:  # Object is being created for the first time
             super().save(*args, **kwargs)
+        else:  # Object already exists and is being updated
+            # Retrieve the image
             img = Image.open(self.image.path)
-            img = img.resize((self.width_for_resize, self.height_for_resize), Image.ANTIALIAS)
-            self.image_length, self.image_width = img.size
-            super().save(*args, **kwargs)
-        else:  # object already exists and is being updated
-            img = Image.open(self.advertisement.path)
-            img = img.resize((self.width_for_resize, self.height_for_resize), Image.ANTIALIAS)
-            self.image_width, self.image_length = img.size
-            super().save(*args, **kwargs)
 
+            # Resize the image
+            img = img.resize((self.width_for_resize, self.height_for_resize), Image.ANTIALIAS)
+
+            # Update image dimensions and ratio
+            self.image_length, self.image_width = img.size
+            if self.image_width and self.image_length:
+                self.image_ratio = self.image_length / self.image_width
+                print("the ratio is: " + str(self.image_ratio))
+
+            super().save(*args, **kwargs)
     def set_image_position(image_id, xposition, yposition):
         # Retrieve the Image object from the database
         image = ImageBase.objects.get(id=image_id)
@@ -2700,6 +2717,9 @@ class State(models.Model):
         db_table = 'state'
         # Add verbose name
         verbose_name = 'Website'
+
+class FileBase(models.Model):
+    file_field = models.FileField(blank=True, null=True, verbose_name="File Field")
 
 
 class UserProfile2(models.Model):

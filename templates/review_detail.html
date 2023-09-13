@@ -48,11 +48,9 @@
 
 
 
-<body>sss
-
+<body>
 
   {% for feedback_objects in Feed %}
-eee
                     {% for feedback_objects in Feed %}
 
                                 {% if feedback_objects.newprofile_profile_picture_url %}
@@ -66,14 +64,15 @@ eee
                                 {% endif %}
             {% endfor %}
 
+<h1>{{feedback_objects.username}}</h1>
+
     <!-- Display user profile picture and username -->
     <a href="{{ feedback_objects.user_profile_picture_url }}">
        <h2>{{ feedback_objects.user.username }}</h2>
     </a>
 
-
 {% if feedback_objects.image %}
-<img src="{{feedback_objects.image.url }}">
+<img src="{{ feedback_objects.image.url }}">
 {% endif %}
 
     <!-- Display star rating image based on feedback.star_rating -->
@@ -86,36 +85,109 @@ eee
     <!-- Display star rating as text --><!--consider displaying star picture-->
 {% if feedback_objects.star_rating == 1 %}
 {% for feedback_objects in Image %}
-<ul><img src={{feedback_objects.image}}" alt="{{ feedback_objects.star_rating }}">
-<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}">
-<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}">
-<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}">
-<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}"></ul>
+
+<ul class="star" style="margin-left: 5%;">
+{% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+    {% endif %}
+{% if feedback_objects.alternate == 'star-empty' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    {% if feedback_objects.alternate == 'star-empty' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    {% if feedback_objects.alternate == 'star-empty' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    {% if feedback_objects.alternate == 'star-empty' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+</ul>
 {% endfor %}
 {% elif feedback_objects.star_rating == 2 %}
-<ul><img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}">
-<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}">
-<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}"></ul>
+{% for feedback_objects in Image %}
+
+<ul class="star" style="margin-left: 5%;">
+{% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+    {% endif %}
+{% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    {% if feedback_objects.alternate == 'star-empty' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    {% if feedback_objects.alternate == 'star-empty' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    {% if feedback_objects.alternate == 'star-empty' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+</ul>
+{% endfor %}
 {% elif feedback_objects.star_rating == 3 %}
-<ul><img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}">
-<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}"></ul>
+{% for feedback_objects in Image %}
+<ul class="star" style="margin-left: 5%;">
+    {% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+    {% endif %}
+    {% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    {% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    {% if feedback_objects.alternate == 'star-empty' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    {% if feedback_objects.alternate == 'star-empty' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+</ul>
+{% endfor %}
 {% elif feedback_objects.star_rating == 4 %}
-<ul><img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="star-regular.svg" alt="{{ feedback_objects.star_rating }}"></ul>
+{% for feedback_objects in Image %}
+
+    {% if feedback_objects.alternate == 'star-empty' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}{{feedback_objects.image_measurement}}; height: {{feedback_objects.height_for_resize}}{{feedback_objects.image_measurement}}; margin-left: {{feedback_objects.xposition}}{{feedback_objects.image_measurement}}; margin-top: {{feedback_objects.yposition}}{{feedback_objects.image_measurement}};">
+    {% endif %}
+
+<ul class="star" style="margin-left: 5%;">
+    {% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+    {% endif %}
+    {% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+    {% endif %}
+    {% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+    {% endif %}
+    {% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+    {% endif %}
+</ul>
+{% endfor %}
 {% else %}
-<ul><img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}">
-<img src="url('star-solid.svg')" alt="{{ feedback_objects.star_rating }}"></ul>
+{% for feedback_objects in Image %}
+<ul class="star" style="margin-left: 5%;">
+{% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+    {% endif %}
+{% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    {% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    {% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    </ul>
+    {% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+
+{% endfor %}
 {% endif %}
 
     <!-- Display feedback comment -->

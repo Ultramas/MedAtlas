@@ -1,240 +1,186 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
-{% block content %}
+        {% block content %}
 <!DOCTYPE html>
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <link href="style.css" rel="stylesheet" type="text/css" />
-  <link href="style2.css" rel="stylesheet" type="text/css" />
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <title>Accomfort</title>    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="{% static 'css/featuredproductsstyle.css' %}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Accomfort</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <link href="style2.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/featuredproductsstyle.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/featuredproductsstyle2.css' %}">
-
     <link rel="stylesheet" type="text/css" href="{% static 'css/landingpagestyling.css' %}">
-
     <link rel="stylesheet" type="text/css" href="{% static 'css/dynamic_css.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/cover.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/reviews.css' %}">
- <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
- <link rel="stylesheet" type="text/css" href="{% static 'css/indexproductstyle.css' %}"> <!--indexproductstyle.css same code as mdb.min.css-->
-
-  <style>
-    /* Add the following styles to your CSS file */
-    .chat-window {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 300px;
-      max-height: 400px;
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-      transform: translateY(100%);
-      opacity: 0;
-      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-      z-index: 2;
-    }
-
-    .chat-window.open {
-      transform: translateY(0);
-      opacity: 1;
-    }
-    .mySlidesesesesfade fade{
-    background-image: url('{{ image.image.url }}')
-    width:
-    height:
-      }
-  </style>
-    <div class="column three mobile-twelve section_header_logo vertical-align-middle" style="position: -webkit-sticky; position: sticky; top: 10px; z-index: 100;">
-      {% for BackgroundView in Logo %}
-      {% if BackgroundView.page == 'index.html' %}
-     <a class = "logo" href="{{BackgroundView.hyperlink}}"><img class = "imageicon"  src="media/{{BackgroundView.logocover}}" alt = "{{BackgroundView.alternate}}" width="145vh"
-     height="100vh" style="z-index: 100;"></a>
-    {% endif %}
-
-      {% endfor %}
-    </div>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/coverimage.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/indexproductstyle.css' %}">
     <style>
-        .background-image {
-            background-image: url('{% for BackgroundImage in background_objects %}
-                                {% if BackgroundImage.position == 1 %}
-                                    {{ BackgroundImage.cover.url }}
-                                {% endif %}
-                            {% endfor %}');
-            /* Additional background properties */
-            background-size: cover;
-            background-repeat: no-repeat;
-            /* Add other CSS properties as needed */
+        /* Add the following styles to your CSS file */
+        .chat-window {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            max-height: 400px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            z-index: 2;
         }
-        .backgroundimages{
-             background-size: cover;
-            background-repeat: no-repeat;
-            z-index: -10;
+
+        .chat-window.open {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .mySlidesesesesfade fade {
+            background-image: url('{{ image.image.url }}');
+            width: /* add width here */;
+            height: /* add height here */;
         }
     </style>
 </head>
 
-
-
-
 <body>
-{% for ad in Advertisement %}
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; z-index: 100;">
+        {% for BackgroundView in Logo %}
+        {% if BackgroundView.page == 'index.html' %}
+        <a class="logo" href="{{BackgroundView.hyperlink}}"><img class="imageicon" src="media/{{BackgroundView.logocover}}"
+                alt="{{BackgroundView.alternate}}" width="145vh" height="100vh" style="z-index: 100;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    {% for ad in Advertisement %}
     <!-- Display the advertisement content -->
     <div>
         <h3>{{ ad.advertisementtitle }}</h3>
-        <img src="{{ ad.advertisement.url }}" alt="{{ ad.advertisementtitle }}" height="{{ad.length_for_resize}}" width="{{ad.width_for_resize}}">
+        <img src="{{ ad.advertisement.url }}" alt="{{ ad.advertisementtitle }}" height="{{ad.length_for_resize}}"
+            width="{{ad.width_for_resize}}">
         <p>{{ ad.relevance }}</p>
         <!-- Add other content as needed -->
         <a href="{{ ad.advertisement_hyperlink }}" target="_blank">Learn More</a>
     </div>
-{% endfor %}
-
-<script>
-    var slideIndex = 0;
-    carousel();
-
-    function carousel() {
-        var slides = document.getElementsByClassName("mySliding");
-        for (var i = 0; i < slides.length; i++) {
-            slides[i].style.display = "none";
-        }
-        slideIndex++;
-        if (slideIndex > slides.length) {
-            slideIndex = 1;
-        }
-        slides[slideIndex - 1].style.display = "block";
-        setTimeout(carousel, 5000); // Change slide every 2 seconds (adjust as needed)
-    }
-</script>
-
-<!-- Slideshow container -->
-<!--
-<div class="slideshown-container" id="featuredproducts" style="z-index:1;">-->
-
-  <!-- Full-width images with number and caption text -->
-<!--
-  <div class="mySlidesesesesfaded fade" style="z-index:3;">
-    <div class="numbertext">1 / 9</div>
-
-    {% for BackgroundImage in Carousel %}
-             {% for carouselposition in Carousel %}
-          {% if carouselposition.carouselposition == BackgroundImage.carouselposition %}
-         {% if BackgroundImage.carouselpage == 'index.html' %}
-       {% if BackgroundImage.carouselposition == 1 %}
-       <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
-                            </a>
-                        <h3>{{ BackgroundImage.caption }}</h3>
-            {% endif %}
-          {% endif %}
-          {% endif %}
-  {% endfor %}
-{% endfor %}
-
-  </div>
-  <div class="mySlidesesesesfaded fade" style="z-index:3;">
-    <div class="numbertext">2 / 9</div>
-     {% for BackgroundImage in Carousel %}
-             {% for carouselposition in Carousel %}
-          {% if carouselposition.carouselposition == BackgroundImage.carouselposition %}
-         {% if BackgroundImage.carouselpage == 'index.html' %}
-       {% if BackgroundImage.carouselposition == 2 %}
-       <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="width: 100%; height: 100%;">
-                            </a>
-                        <h3>{{ BackgroundImage.caption }}</h3>
-            {% endif %}
-          {% endif %}
-          {% endif %}
-  {% endfor %}
-{% endfor %}
-      </div></div>
--->
-            <!-- Loop through BackgroundImage items and apply conditions -->
-<!--
-<div class="slidingtheshow" style="margin-bottom: 50%;">
-    {% for BackgroundImage in Carousel %}
-        {% if BackgroundImage.carouselpage == 'index.html' and BackgroundImage.carouselnumber == 1 %}nj,bmh nv
-            <div class="mySliding fade">
-                <div class="cover-container" style="background-image: url('{{ BackgroundImage.carouselimage.url }}');">
-                    <h1 class="centered-title" data-text="{{BackgroundImage.alternate}}">{{BackgroundImage.alternate}}</h1>
-                </div>
-            </div>
-        {% endif %}
-    {% endfor %}
-</div>
--->
-<div class="blackoverflow" style=" background-color: black; position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 120%;  z-index: -5;">
-    </div>
-    {% for BackgroundImage in Background %}
-        {% if BackgroundImage.page == "index.html" %}
-            {% if BackgroundImage.position == 1 %}
-<div class="parallaxial" id="cover-image" style="background-image: url('{{ BackgroundImage.cover.url }}'); height: 100%; background-attachment: fixed;  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;">
-                <img class="parallaxial" src="{{ BackgroundImage.cover.url }}" alt="{{ BackgroundImage.backgroundtitle }}" style="position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 120%;  z-index: -2;">
-            {% endif %}
-        {% endif %}
-
     {% endfor %}
 
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <div class="showcase" style="height: 100%;  margin-bottom: 100%;">
+        <!--Background Image Field 1-Cover Image-->
         {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-            {% if BackgroundImage.position == 2 %}
-                <img class="parallaxial" src="{{ BackgroundImage.cover.url }}" alt="{{ BackgroundImage.backgroundtitle }}" style="position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 120%;  z-index: -2;">
+        {% if BackgroundImage.position == 7 %}
+        <video src="{{BackgroundImage.image.url}}" muted loop autoplay></video>
+            <div class="overlayformatindex" style="height: 100%;"></div>
+        {% for BackgroundImage in TextFielde %}
+    <div class="text" style="z-index: 1; position: relative;">
+    {% if BackgroundImage.section == 1 %}
+        {% if BackgroundImage.text_size == 1 %}
+            <h1 style="margin-top: 3%; text-align: left; margin-left: 40px; font-size: 5em; font-weight: 800; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</h1>
+        {% elif BackgroundImage.text_size == 2 %}
+            <h2 style="margin-top: 3%; text-align: left; margin-left: 40px; font-size: 5em; font-weight: 800; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</h2>
+        {% elif BackgroundImage.text_size == 3 %}
+            <h3 style="margin-top: 3%; text-align: left; margin-left: 40px; font-size: 5em; font-weight: 800; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</h3>
+        {% elif BackgroundImage.text_size == 4 %}
+            <h4 style="margin-top: 3%; text-align: left; margin-left: 40px; font-size: 5em; font-weight: 800; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</h4>
+        {% elif BackgroundImage.text_size == 5 %}
+            <h5 style="margin-top: 3%; text-align: left; margin-left: 40px; font-size: 5em; font-weight: 800; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</h5>
+        {% elif BackgroundImage.text_size == 6 %}
+            <h6 style="margin-top: 3%; text-align: left; margin-left: 40px; font-size: 5em; font-weight: 800; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</h6>
+        {% else %}
+            <p style="margin-top: 3%; text-align: left; margin-left: 40px; font-size: 5em; font-weight: 800; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</p>
+        {% endif %}
+    {% endif %}
+
+    {% if BackgroundImage.section == 2 %}
+        {% if BackgroundImage.text_size == 1 %}
+            <h1 style="text-align: left; margin-top: 3%;  margin-left: 40px; font-size: 3.5em; font-weight: 700; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</h1>
+        {% elif BackgroundImage.text_size == 2 %}
+            <h2 style="text-align: left; margin-top: 3%;  margin-left: 40px; font-size: 3.5em; font-weight: 700; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</h2>
+        {% elif BackgroundImage.text_size == 3 %}
+            <h3 style="text-align: left; margin-top: 3%;  margin-left: 40px; font-size: 3.5em; font-weight: 700; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</h3>
+        {% elif BackgroundImage.text_size == 4 %}
+            <h4 style="text-align: left; margin-top: 3%;  margin-left: 40px; font-size: 3.5em; font-weight: 700; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</h4>
+        {% elif BackgroundImage.text_size == 5 %}
+            <h5 style="text-align: left; margin-top: 3%;  margin-left: 40px; font-size: 3.5em; font-weight: 700; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</h5>
+        {% elif BackgroundImage.text_size == 6 %}
+            <h6 style="text-align: left; margin-top: 3%;  margin-left: 40px; font-size: 3.5em; font-weight: 700; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</h6>
+        {% else %}
+            <p style="text-align: left; margin-top: 3%; margin-left: 40px; font-size: 5em; font-weight: 800; color: #fff; line-height: 1em; text-transform: uppercase;">{{ BackgroundImage.text }}</p>
+    {% endif %}
+             {% endif %}
+    {% if BackgroundImage.section == 3 %}
+        {% if BackgroundImage.text_size == 1 %}
+            <h1 style="text-align: left; margin: 40 40; font-size: 1.1em; color: #fff; font-weight: 400; max-width: 700px;">{{ BackgroundImage.text }}</h1>
+        {% elif BackgroundImage.text_size == 2 %}
+            <h2 style="text-align: left; margin: 40 40; font-size: 1.1em; color: #fff; font-weight: 400; max-width: 700px;">{{ BackgroundImage.text }}</h2>
+        {% elif BackgroundImage.text_size == 3 %}
+            <h3 style="text-align: left; margin: 40 40; font-size: 1.1em; color: #fff; font-weight: 400; max-width: 700px;">{{ BackgroundImage.text }}</h3>
+        {% elif BackgroundImage.text_size == 4 %}
+            <h4 style="text-align: left; margin: 40 40; font-size: 1.1em; color: #fff; font-weight: 400; max-width: 700px;">{{ BackgroundImage.text }}</h4>
+        {% elif BackgroundImage.text_size == 5 %}
+            <h5 style="text-align: left; margin: 40 40; font-size: 1.1em; color: #fff; font-weight: 400; max-width: 700px;">{{ BackgroundImage.text }}</h5>
+        {% elif BackgroundImage.text_size == 6 %}
+            <h6 style="text-align: left; margin: 40 40; font-size: 1.1em; color: #fff; font-weight: 400; max-width: 700px;">{{ BackgroundImage.text }}</h6>
+        {% else %}
+            <p style="text-align: left; margin: 40 40; font-size: 1.1em; color: #fff; font-weight: 400; max-width: 700px;">{{ BackgroundImage.text }}</p>
+        {% endif %}
+    {% endif %}
+
+{% endfor %}
+
+    </div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+</div>
+
+
+</div>
+<!--<div class="blackoverflow"
+    style="background-color: black; position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 20%; z-index: -15;">
+</div>-->
+{% for BackgroundImage in Background %}
+{% if BackgroundImage.page == "index.html" %}
+{% if BackgroundImage.position == 2 %}
+<div class="parallaxial" id="cover-image"
+    style="background-image: url('{{ BackgroundImage.cover.url }}'); height: 100%; background-attachment: fixed; background-position: center; background-repeat: no-repeat; background-size: cover; position: absolute; top: 100%; left: 0; width: 100%;">
+    <img class="parallaxial" src="{{ BackgroundImage.cover.url }}" alt="{{ BackgroundImage.backgroundtitle }}"
+        style="position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 120%; z-index: -2;">
+    {% endif %}
+    {% endif %}
+    {% endfor %}
+
+
+        {% for BackgroundImage in Background %}
+        {% if BackgroundImage.page == "index.html" %}
+            {% if BackgroundImage.position == 3 %}
+                <img class="parallaxial" src="{{ BackgroundImage.cover.url }}" style="background-image: url('mounts.png'); height: 100%; background-attachment: fixed; background-position: center; background-repeat: no-repeat; background-size: cover; position: absolute; top: 200%; left: 0; width: 100%;">
             {% endif %}
         {% endif %}
 
     {% endfor %}
 </div>
-
-    <script>// Get the image element by its class name
-var image = document.getElementsByClassName("parallaxial")[0];
-
-// Define a threshold value for hiding the image
-var threshold = 1500;
-
-// Add an event listener for the scroll event on the window object
-window.addEventListener("scroll", function() {
-  // Get the scroll position of the window
-  var scrollPosition = window.pageYOffset;
-
-  // Compare the scroll position with the threshold value
-  if (scrollPosition >= threshold) {
-    // Hide the image element by setting its visibility to hidden
-    image.style.visibility = "hidden";
-  } else {
-    // Show the image element by setting its visibility to visible
-    image.style.visibility = "visible";
-  }
-});
-
-    </script>
 
   <div class="heroingitout" id="image-carousel" style="">
       <div class="indexingsub">
 <div class="backgroundimages">
     {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-            {% if BackgroundImage.position == 3 %}
+            {% if BackgroundImage.position == 4 %}
                 <img src="{{ BackgroundImage.cover.url }}" alt="{{ BackgroundImage.backgroundtitle }}" style="background-size: cover; background-repeat: no-repeat; width: 100%; height: 100%;">
             {% endif %}
         {% endif %}
@@ -264,7 +210,7 @@ window.addEventListener("scroll", function() {
       <div class="backgroundimages">
       {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-          {% if BackgroundImage.position == 4 %}
+          {% if BackgroundImage.position == 5 %}
 
             <img src=" {{BackgroundImage.cover.url}}" alt="{{BackgroundImage.backgroundtitle}}" style="z-index:-10; position: absolute;"> <!--flex to be behind the carousel code-->
           {% endif %}
@@ -547,7 +493,7 @@ window.addEventListener("scroll", function() {
 <h1> Hot New Products </h1>
       {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-          {% if BackgroundImage.position == 5 %}
+          {% if BackgroundImage.position == 6 %}
         {{ BackgroundImage.cover.url }}
     <img src="{{ BackgroundImage.cover.url }}" alt="{{BackgroundImage.backgroundtitle}}" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; z-index: 0;">
 {% endif %}
@@ -558,7 +504,7 @@ window.addEventListener("scroll", function() {
 
       {% for BackgroundImage in Image %}
         {% if BackgroundImage.page == "index.html" %}
-          {% if BackgroundImage.image_position == 1 %}
+          {% if BackgroundImage.image_position == 7 %}
 e
             <img src="{{BackgroundImage.image.url}}" alt="{{BackgroundImage.title}}" width="{{BackgroundImage.width_for_resize}}%" height="{{BackgroundImage.height_for_resize}}%" style="z-index:1; position: absolute; top: 0%; left: 50%; transform: translateX(-50%);"> <!--flex to be behind the carousel code-->
           {% endif %}
@@ -569,79 +515,7 @@ e
 </div>
 
         <div class="split" style="margin-top: 10%; margin-bottom: 5%">
-            <!--
-          <a href="#feature" class="featured__item">-->
-              <!--Section: Products v.3-->
-      <!--<section class="text-center mb-4">-->
 
-        <!--Grid row-->
-       <!-- <div class="row wow fadeIn">
-          {% for item in items %}-->
-          <!--Grid column-->
-         <!-- <div class="col-lg-3 col-md-6 mb-4">
--->
-            <!--Card-->
-           <!-- <div class="card">-->
-              <!--Card image-->
-              <!-- <div class="view overlay">
-                <a href="{{ item.get_absolute_url }}">
-      <img class = "hunt" src="{{item.image.url}}" class="card-img-top" alt="{{ item.image.url }}" >
-                  <div class="mask rgba-white-slight"></div>
-                </a>
-              </div>-->
-              <!--Card image-->
-              <!--Card content--><!--
-<a href="{{ item.get_absolute_url }}" class="grey-text">
-              <div class="card-body text-center">-->
-                <!--Category & Title-->
-<!--
-                  <h5 class = "itemtitle">{{item.title}}</h5>
-
-                <h5 class = "itemtitle">
-                  <strong>
-                    {{ item.item_name }}
-                      <span class="badge badge-pill {% if item.get_label_display == 'New' %} danger-color {% else %} primary-color {% endif %}">{{ item.get_label_display }}</span>
-
-                  </strong>
-                </h5>
-
-                <h4 class="font-weight-bold blue-text">
-                  <strong>$
-                  {% if item.discount_price %}
-                  {{ item.discount_price }}
-                  {% else %}
-                  {{ item.price }}
-                  <br>
-                    <br>
-
-                    <a href = "{{ item.get_absolute_url }}">Buy Now</a>
-            <br>
-                  <br>
-                  {% endif %}
-                  </strong>
-                </h4>
-
-              </div>-->
-              <!--Card content-->
-
-          <!--  </div>-->
-
-            <!--Card-->
-
-        <!--  </div>-->
-
-          <!--Grid column--><!--
-</a>          {% endfor %}
-
-
-        </div>-->
-        <!--Grid row-->
-<!--
-      </section>
-
-
-          </a>
--->
 <!--new item additions based on "label" category-->
 
            {% for product in Products %}
@@ -673,7 +547,7 @@ e
     <div class="our-products" style="">
         {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-          {% if BackgroundImage.position == 6 %}
+          {% if BackgroundImage.position == 1 %}
         {{ BackgroundImage.cover.url }}
     <img src="{{ BackgroundImage.cover.url }}" alt="{{BackgroundImage.backgroundtitle}}" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; z-index: 0;">
 {% endif %}
@@ -797,7 +671,7 @@ e
 
       {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-          {% if BackgroundImage.position == 7 %}
+          {% if BackgroundImage.position == 8 %}
 <div style="position: relative; text-align: center;">
     <img src="{{BackgroundImage.cover.url}}" alt="{{BackgroundImage.backgroundtitle}}">
     <h1 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2;">Want To Become A Member?</h1>
@@ -809,32 +683,7 @@ e
                 {% endif %}
                 {% endif %}
                 {% endfor %}
-<!--
 
-        <div class="product shoe-red spacing">
-          <img src="static/css/images/h.jpg" alt="" class="product__image">
-          <h3 class="product__title">A really nice shoe</h3>
-          <p class="product__description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa quam
-            perspiciatis facilis beatae laudantium quidem enim sit sequi!</p>
-          <a href="" class="btntrees">Buy now</a>
-        </div>
-
-        <div class="product shoe-white shoe-left spacing">
-          <img src="static/css/images/MC.png" alt="" class="product__image">
-          <h3 class="product__title">A really nice shoe</h3>
-          <p class="product__description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa quam
-            perspiciatis facilis beatae laudantium quidem enim sit sequi!</p>
-          <a href="" class="btntrees">Buy now</a>
-        </div>
-
-        <div class="product shoe-blue spacing">
-          <img src="static/css/images/mol.png" alt="" class="product__image">
-          <h3 class="product__title">A really nice shoe</h3>
-          <p class="product__description">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa quam
-            perspiciatis facilis beatae laudantium quidem enim sit sequi!</p>
-          <a href="" class="btntrees">Buy now</a>
-        </div>
--->
             </b>
 
       </div>
@@ -844,13 +693,26 @@ e
 <div class = "about_us">
   <div class = "about">
     <div class=stripelineabout>
-    <h2 class = "aboutPoketrove">        {% for BackgroundImage in TextFielde %}
-            {% if BackgroundImage.page == 'index.html' %}
-         {% if BackgroundImage.section == 3 %}
-                {{BackgroundImage.text}}
-                {% endif %}
+    <h2 class = "aboutPoketrove">
+         {% for BackgroundImage in TextFielde %}
+    {% if BackgroundImage.page == 'index.html' and BackgroundImage.section == 4 %}
+        {% if BackgroundImage.text_size == 1 %}
+            <h1>{{ BackgroundImage.text }}</h1>
+        {% elif BackgroundImage.text_size == 2 %}
+            <h2>{{ BackgroundImage.text }}</h2>
+        {% elif BackgroundImage.text_size == 3 %}
+            <h3>{{ BackgroundImage.text }}</h3>
+        {% elif BackgroundImage.text_size == 4 %}
+            <h4>{{ BackgroundImage.text }}</h4>
+        {% elif BackgroundImage.text_size == 5 %}
+            <h5>{{ BackgroundImage.text }}</h5>
+        {% elif BackgroundImage.text_size == 6 %}
+            <h6>{{ BackgroundImage.text }}</h6>
+        {% else %}
+            <p>{{ BackgroundImage.text }}</p>
         {% endif %}
-        {% endfor %}</h2>
+    {% endif %}
+{% endfor %}</h2>
     </div>
     <!-- Slideshow container -->
 <div class="slideshow-container2">
@@ -1074,13 +936,25 @@ e
 
     </div>
     <p class="abouttext">
-        {% for BackgroundImage in TextFielde %}
-            {% if BackgroundImage.page == 'index.html' %}
-         {% if BackgroundImage.section == 1 %}
-                {{BackgroundImage.text}}
-                 {% endif %}
+   {% for BackgroundImage in TextFielde %}
+    {% if BackgroundImage.page == 'index.html' and BackgroundImage.section == 5 %}
+        {% if BackgroundImage.text_size == 1 %}
+            <h1>{{ BackgroundImage.text }}</h1>
+        {% elif BackgroundImage.text_size == 2 %}
+            <h2>{{ BackgroundImage.text }}</h2>
+        {% elif BackgroundImage.text_size == 3 %}
+            <h3>{{ BackgroundImage.text }}</h3>
+        {% elif BackgroundImage.text_size == 4 %}
+            <h4>{{ BackgroundImage.text }}</h4>
+        {% elif BackgroundImage.text_size == 5 %}
+            <h5>{{ BackgroundImage.text }}</h5>
+        {% elif BackgroundImage.text_size == 6 %}
+            <h6>{{ BackgroundImage.text }}</h6>
+        {% else %}
+            <p>{{ BackgroundImage.text }}</p>
         {% endif %}
-        {% endfor %}
+    {% endif %}
+{% endfor %}
 </p>
     <br>
     <br>
@@ -1095,7 +969,7 @@ e
         <b>
 
          {% for BackgroundImage in TextFielde %}
-    {% if BackgroundImage.page == 'index.html' and BackgroundImage.section == 5 %}
+    {% if BackgroundImage.page == 'index.html' and BackgroundImage.section == 6 %}
         {% if BackgroundImage.text_size == 1 %}
             <h1>{{ BackgroundImage.text }}</h1>
         {% elif BackgroundImage.text_size == 2 %}
@@ -1131,7 +1005,7 @@ e
           <div class="supportsystems" style="margin-top: 50px;">
                     {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-          {% if BackgroundImage.position == 8 %}
+          {% if BackgroundImage.position == 9 %}
 
             <img src=" {{BackgroundImage.cover.url}}" alt="{{BackgroundImage.backgroundtitle}}" style="z-index:-10; position: absolute;"> <!--flex to be behind the carousel code-->
 
@@ -1184,15 +1058,25 @@ e
             We have helped companies increase their customer base and generate
             multifold revenue with our service.
           </p>
-              {% for BackgroundImage in TextFielde %}
-            {% if BackgroundImage.page == 'index.html' %}
-         {% if BackgroundImage.section == 6 %}
-            <a href="{{BackgroundImage.text}}">
-                <button>Read our success stories (about.html)</button>
-                </a>
-            {% endif %}
+   {% for BackgroundImage in TextFielde %}
+    {% if BackgroundImage.page == 'index.html' and BackgroundImage.section == 7 %}
+        {% if BackgroundImage.text_size == 1 %}
+            <h1>{{ BackgroundImage.text }}</h1>
+        {% elif BackgroundImage.text_size == 2 %}
+            <h2>{{ BackgroundImage.text }}</h2>
+        {% elif BackgroundImage.text_size == 3 %}
+            <h3>{{ BackgroundImage.text }}</h3>
+        {% elif BackgroundImage.text_size == 4 %}
+            <h4>{{ BackgroundImage.text }}</h4>
+        {% elif BackgroundImage.text_size == 5 %}
+            <h5>{{ BackgroundImage.text }}</h5>
+        {% elif BackgroundImage.text_size == 6 %}
+            <h6>{{ BackgroundImage.text }}</h6>
+        {% else %}
+            <p>{{ BackgroundImage.text }}</p>
         {% endif %}
-        {% endfor %}
+    {% endif %}
+{% endfor %}
 
         </div>
         <div class="containedwithinreviews__right">
@@ -1262,7 +1146,7 @@ e
       </div>
     </div>
 
-
+    </div>
 
 {% for BackgroundImage in Feedback %}
     <div class="boxe">
@@ -1305,28 +1189,6 @@ e
       </div>
     </div>
         {% endfor %}
- <!--   <div class="boxe">
-      <i class="fas fa-quote-left  quote"></i>
-      <p>Lorem aliasry ipsum dolor sits ametans, consectetur adipisicing elitits. Expedita reiciendis itaque placeat thuratu, quasi yiuos repellendus repudiandae deleniti ideas fuga molestiae, alias.</p>
-      <div class="content">
-        <div class="info">
-          <div class="name">Kristina Bellis</div>
-          <div class="job">Freelancer | Advertiser</div>
-          <div class="stars">
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="far fa-star"></i>
-          </div>
-        </div>
-        <div class="image">
-          <img src="static/css/images/profile-3.jpeg" alt="">
-        </div>
-      </div>
-    </div>
-  </div>-->
-
 <div class="stripe2"></div>
 
 <br>
@@ -1404,6 +1266,47 @@ function changeImage() {
 changeImage(); // Initialize with the first image
 setInterval(changeImage, 5000); // Change image every 5 seconds
 </script>
+
+<script>
+    var slideIndex = 0;
+    carousel();
+
+    function carousel() {
+        var slides = document.getElementsByClassName("mySliding");
+        for (var i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none";
+        }
+        slideIndex++;
+        if (slideIndex > slides.length) {
+            slideIndex = 1;
+        }
+        slides[slideIndex - 1].style.display = "block";
+        setTimeout(carousel, 5000); // Change slide every 2 seconds (adjust as needed)
+    }
+</script>
+
+    <script>// Get the image element by its class name
+var image = document.getElementsByClassName("parallaxial")[0];
+
+// Define a threshold value for hiding the image
+var threshold = 1500;
+
+// Add an event listener for the scroll event on the window object
+window.addEventListener("scroll", function() {
+  // Get the scroll position of the window
+  var scrollPosition = window.pageYOffset;
+
+  // Compare the scroll position with the threshold value
+  if (scrollPosition >= threshold) {
+    // Hide the image element by setting its visibility to hidden
+    image.style.visibility = "hidden";
+  } else {
+    // Show the image element by setting its visibility to visible
+    image.style.visibility = "visible";
+  }
+});
+
+    </script>
 </body>
 
 </html>

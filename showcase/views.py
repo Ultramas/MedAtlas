@@ -647,39 +647,6 @@ class eventview(ListView):
         return Event.objects.all()
 
 
-class SupportRoomView(TemplateView):
-    model = SupportMessage
-    template_name = 'supportroom.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        room = self.kwargs['room']
-        username = self.request.GET.get('username')
-        room_details = Room.objects.get(name=room)
-        profile_details = ProfileDetails.objects.filter(user__username=username).first()
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-
-        context['username'] = username
-        context['room'] = room
-        context['room_details'] = room_details
-        context['profile_details'] = profile_details
-
-        # Retrieve the author's profile avatar
-        messages = Message.objects.all().order_by('-date')
-
-        context['Messaging'] = messages
-
-        for messages in context['Messaging']:
-            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
-            if profile:
-                messages.user_profile_picture_url = profile.avatar.url
-                messages.user_profile_url = messages.get_profile_url()
-
-        return context
-
 
 class supportview(ListView):
     paginate_by = 10
@@ -1914,7 +1881,7 @@ def supportsend(request):
         # profile = request.POST.get('profile')
         # signed_in_user = request.POST.get('signed_in_user')
 
-        print(f"message: {message}, username: {username}, room_id: {room_id}")
+        print(f"message: {message}, username: {username}")
         # print(f"profile: {profile}")
         # Check if the user is authenticated
         if request.user.is_authenticated:
@@ -2592,6 +2559,39 @@ class eventview(ListView):
         return Event.objects.all()
 
 
+"""class SupportRoomView(TemplateView):
+    model = SupportMessage
+    template_name = 'supportroom.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        room = self.kwargs['room']
+        username = self.request.GET.get('username')
+        room_details = Room.objects.get(name=room)
+        profile_details = ProfileDetails.objects.filter(user__username=username).first()
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        context['username'] = username
+        context['room'] = room
+        context['room_details'] = room_details
+        context['profile_details'] = profile_details
+
+        # Retrieve the author's profile avatar
+        messages = Message.objects.all().order_by('-date')
+
+        context['Messaging'] = messages
+
+        for messages in context['Messaging']:
+            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
+            if profile:
+                messages.user_profile_picture_url = profile.avatar.url
+                messages.user_profile_url = messages.get_profile_url()
+
+        return context"""
+
 class SupportRoomView(TemplateView):
     model = SupportMessage
     template_name = 'supportroom.html'
@@ -2611,7 +2611,7 @@ class SupportRoomView(TemplateView):
         context['profile_details'] = profile_details
 
         # Retrieve the author's profile avatar
-        messages = Message.objects.all().order_by('-date')
+        messages = SupportMessage.objects.all().order_by('-date')
 
         context['Messaging'] = messages
 
@@ -3672,8 +3672,7 @@ def supportgetMessages(request, **kwargs):
     # Prepare the messages data to be sent in the AJAX response
     messages_data = []
     for message in messages:
-        profile = ProfileDetails.objects.filter(
-            user=request.user).first()  # message.signed_in_user is not filling correctly
+        profile = ProfileDetails.objects.filter(user=request.user).first()  # message.signed_in_user is not filling correctly
 
         print("Profile:", profile)
         if profile:

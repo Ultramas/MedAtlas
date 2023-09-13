@@ -631,7 +631,7 @@ class ImageBaseAdmin(admin.ModelAdmin):
             'fields': ('title', 'hyperlink', 'type')
         }),
         ('Image Base Information - Image Display', {
-            'fields': ('image', 'image_width', 'image_length', 'width_for_resize', 'height_for_resize', 'image_position', 'alternate', 'xposition', 'yposition',)
+            'fields': ('image', 'image_width', 'image_length', 'image_ratio', 'image_measurement', 'width_for_resize', 'height_for_resize', 'image_position', 'alternate', 'xposition', 'yposition',)
         }),
         ('Image Base Information - Attributes', {
             'fields': ('page', 'relevance', 'correlating_product', 'is_active',)
