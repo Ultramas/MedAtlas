@@ -61,6 +61,7 @@ from .models import Titled
 from .models import NavBar
 from .models import NavBarHeader
 from .models import ImageCarousel
+from .models import SupportChat
 from .models import BaseCopyrightTextField
 from .models import AdvertisementBase
 #from .models import ResizeImageMixin
@@ -845,6 +846,17 @@ class CustomerSupportAdmin(admin.ModelAdmin):
     )
 
 admin.site.register(Support, CustomerSupportAdmin)
+
+class SupportChatAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Support Room  Information-Categorial Descriptions', {
+            'fields': ('name', 'signed_in_user', 'is_active',)
+        }),
+    )
+
+admin.site.register(SupportChat, SupportChatAdmin)
+
 
 class FormBaseAdmin(admin.ModelAdmin):
     fieldsets = (

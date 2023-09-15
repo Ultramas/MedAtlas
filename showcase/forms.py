@@ -505,11 +505,10 @@ class PaypalPaymentForm(forms.Form):
     use_default = forms.BooleanField(required=False)
 
 
-class ProfileDetail(forms.Form):
+class ProfileDetail(forms.ModelForm):
     class Meta:
         model = ProfileDetails
-        fields = '__all__'
-
+        fields = ('email', 'avatar', 'alternate', 'about_me')
 
 # class PublicForm(forms.ModelForm):
 # class Meta:
@@ -523,7 +522,7 @@ class ProfileDetail(forms.Form):
 # class UserForm(forms.ModelForm):
 # ...
 
-# class ProfileFormv(forms.ModelForm):
+# class ProfileForm(forms.ModelForm):
 # class Meta:
 # model = ProfileTwo
 # fields = ('products',)

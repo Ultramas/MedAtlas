@@ -137,7 +137,7 @@ from django.views.generic.edit import FormMixin
 
 import pdb
 from django.core.mail import send_mail, BadHeaderError
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound
 from .forms import ContactForm
 from .forms import BusinessContactForm
 from .forms import BusinessMailingForm
@@ -1830,10 +1830,13 @@ def getMessages(request, room):
 def supportroom(request):
     username = request.user.username
     room_details = SupportChat.objects.get(name=username)
+    profile_details = ProfileDetails.objects.filter(
+        user__username=username).first()
     return render(request, 'supportroom.html', {
         'username': username,
-        'room': username,
-        'room_details': room_details
+        'room': room_details,
+        'room_details': room_details,
+        'profile_details': profile_details,
     })
 
 
@@ -1853,6 +1856,7 @@ def privateroom(request, room):
 
 def supportcheckview(request):
     help = request.POST['help']
+    #user = request.POST['username'] #based off def checkview
     username = request.user.username
 
     if SupportChat.objects.filter(name=username).exists():
@@ -1860,7 +1864,8 @@ def supportcheckview(request):
                                                     user=username,
                                                     room=username)
         new_message.save()
-        return redirect('/supportchat/room')
+        #return redirect('/supportchat/room')
+        return redirect('/supportchat/room/' + username)
     else:
         new_room = SupportChat.objects.create(name=username)
         new_room.save()
@@ -1869,19 +1874,22 @@ def supportcheckview(request):
                                                     user=username,
                                                     room=username)
         new_message.save()
-        return redirect('/supportchat/room')
-        print('message sent')
+
+        #return redirect('/supportchat/room')
+        return redirect('/supportchat/room/' + username)
+        print('support message sent')
 
 
 def supportsend(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         username = request.POST.get('username')
+        room = request.POST.get('username')
         # room_id = request.POST.get('room_id')
         # profile = request.POST.get('profile')
         # signed_in_user = request.POST.get('signed_in_user')
 
-        print(f"message: {message}, username: {username}")
+        print(f"message: {message}, username: {username}, room_name: {username}")
         # print(f"profile: {profile}")
         # Check if the user is authenticated
         if request.user.is_authenticated:
@@ -1889,6 +1897,7 @@ def supportsend(request):
             new_message = SupportMessage.objects.create(
                 value=message,
                 user=username,
+                room=username,
                 # room=room_id,
                 signed_in_user=request.user  # Set the signed_in_user to the authenticated user
             )
@@ -1899,7 +1908,7 @@ def supportsend(request):
             new_message = SupportMessage.objects.create(
                 value=message,
                 user=username,
-                # room=room_id,
+                room=username,
             )
             new_message.save()
 
@@ -2598,31 +2607,44 @@ class SupportRoomView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        signed_in_user = self.kwargs['signed_in_user']
+        context['username'] = signed_in_user  # Set 'username' to the extracted 'signed_in_user'
+
         # room = self.kwargs['room']
-        username = self.request.GET.get('username')
-        # room_details = SupportChat.objects.get(name=username)
-        profile_details = ProfileDetails.objects.filter(user__username=username).first()
+        # room_details = SupportChat.objects.get(name=signed_in_user)  # Use 'signed_in_user' here
+        profile_details = ProfileDetails.objects.filter(user__username=signed_in_user).first()
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
 
-        context['username'] = username
         context['room'] = room
         context['profile_details'] = profile_details
 
         # Retrieve the author's profile avatar
+        # Retrieve the messages
         messages = SupportMessage.objects.all().order_by('-date')
 
-        context['Messaging'] = messages
+        # Create a list to store formatted message data
+        messages_data = []
 
-        for messages in context['Messaging']:
-            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
-            if profile:
-                messages.user_profile_picture_url = profile.avatar.url
-                user_profile_url = messages.get_profile_url()
+        for message in messages:
+            profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+
+            # Create a dictionary to store message data including profile information
+            message_data = {
+                'user_profile_picture_url': profile.avatar.url if profile else '',
+                'user_profile_url': message.get_profile_url(),
+                'user': message.signed_in_user,
+                'value': message.value,
+                'date': message.date,
+            }
+
+            messages_data.append(message_data)
+
+        # Assign the list of formatted message data to the context
+        context['Messaging'] = messages_data
 
         return context
-
 
 class SupportCombinedView(SupportRoomView, ListView):
     paginate_by = 10
@@ -3665,36 +3687,33 @@ def get_profile_url(message):
 """
 from django.http import JsonResponse
 
-
-def supportgetMessages(request, **kwargs):
-    messages = SupportMessage.objects.filter(room=request.user)
+def supportgetMessages(request, signed_in_user, **kwargs):
 
     # Prepare the messages data to be sent in the AJAX response
-    messages_data = []
-    for message in messages:
-        profile = ProfileDetails.objects.filter(user=request.user).first()  # message.signed_in_user is not filling correctly
 
-        print("Profile:", profile)
-        if profile:
-            user_profile_url = message.get_profile_url()  # Get the user_profile_url for each message
-            avatar_url = profile.avatar.url  # Use the avatar URL from the profile
-            # print('profile included')
-            print(message.get_profile_url())
-        else:
-            # Set a default avatar URL or path in case the user doesn't have an avatar
-            user_profile_url = 'profile'
-            avatar_url = staticfiles_storage.url('css/images/a.jpg')
-            print('user has no profile or is guest user')
+    try:
+        chat_room = SupportChat.objects.get(signed_in_user__username=signed_in_user)
+    except SupportChat.DoesNotExist:
+        # Handle the case where the chat room doesn't exist
+        # You might want to return a 404 or display an error message
+        chat_room = SupportChat(signed_in_user=request.user)
+        chat_room.save()
 
-        messages_data.append({
-            'user_profile_url': user_profile_url,
-            'avatar_url': avatar_url,
-            'user': message.user,
-            'value': message.value,
-            'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
-        })
+    # Check if the requesting user is the creator of the room or an administrator
+    if request.user == chat_room.signed_in_user or request.user.is_staff:
+        messages = SupportMessage.objects.filter(room=chat_room)  # Filter messages for the chat room
+        messages_data = []
 
-    return JsonResponse({'messages': messages_data})
+        for message in messages:
+            profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+
+            # Rest of your code for preparing messages goes here...
+
+        return JsonResponse({'messages': messages_data})
+    else:
+        # Handle unauthorized access (e.g., return a 403 Forbidden response)
+        return HttpResponseForbidden("You do not have permission to access this chat room")
+
 
 
 """def supportgetMessages(request, **kwargs):
@@ -4174,12 +4193,25 @@ def profile_edit(request, pk):
         form = ProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect('profile_detail', pk=pk)  # Redirect to profile detail page
+            return redirect('showcase:profile_detail', pk=pk)
+
     else:
         form = ProfileForm(instance=profile)
 
     return render(request, 'profile_edit.html', {'form': form, 'profile': profile})
 
+def edit_profile(request):
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, instance=request.user)
+
+        if form.is_valid():
+            form.save()
+            return redirect('showcase:profile')
+
+    else:
+        form = EditProfileForm(instance=request.user)
+        args = {'form': form}
+        return render(request, 'edit_profile.html', args)
 
 class StaffJoine(ListView):
     paginate_by = 10
@@ -5437,19 +5469,54 @@ def profile(request, user):
     return render(request, 'profile.html', args)
 
 
-def edit_profile(request):
+# views.py
+def edit_profile(request, pk):
+    # Your view logic here
+    # The 'pk' parameter will now be passed from the URL
+
     if request.method == 'POST':
         form = EditProfileForm(request.POST, instance=request.user)
 
-        if form.is_valid:
+        if form.is_valid():
             form.save()
-            return redirect('showcase:profile')
+            return redirect('showcase:profile', pk=pk)
 
     else:
         form = EditProfileForm(instance=request.user)
         args = {'form': form}
         return render(request, 'edit_profile.html', args)
 
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import ProfileDetail
+from .models import ProfileDetails
+class ProfileEditView(View):
+    template_name = 'profile_edit.html'
+    form_class = ProfileDetail
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        return context
+
+    def get(self, request, pk):
+        profile = get_object_or_404(ProfileDetails, pk=pk)
+        form = self.form_class(instance=profile)
+        return render(request, self.template_name, {'form': form, 'profile': profile})
+
+    def post(self, request, pk):
+        profile = get_object_or_404(ProfileDetails, pk=pk)
+        form = self.form_class(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('showcase:profile', pk=pk)
+        return render(request, self.template_name, {'form': form, 'profile': profile})
 
 class SignupView(FormMixin, ListView):
     model = SignupBackgroundImage
@@ -6144,7 +6211,6 @@ from .models import Feedback  # Import your Feedback model here
 class FeedbackView(BaseView):
     model = Feedback
     form_class = FeedbackForm
-    paginate_by = 10
     template_name = 'review_detail.html'
     context_object_name = 'feedback'
 
@@ -6173,6 +6239,7 @@ class FeedbackView(BaseView):
 
             # Add the feedback_objects to the context
             context['Feed'] = feedback_objects
+
 
         for feedback_objects in context['Feed']:
             user = feedback_objects.username
@@ -6611,6 +6678,8 @@ from .forms import FeedbackForm
 from django.shortcuts import render, redirect
 from .forms import FeedbackForm
 from .models import OrderItem, Feedback
+
+
 
 class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
     model = Feedback

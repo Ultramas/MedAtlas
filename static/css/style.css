@@ -3067,7 +3067,6 @@ body {
 .indexingsub{
     background-attachment: fixed;
     background-size: cover;
-    background-image: url("images/a.jpg");
     background-position: center;
     background-repeat: no-repeat;
     width: 100%;

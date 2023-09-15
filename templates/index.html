@@ -78,7 +78,7 @@
     </div>
     {% endfor %}
 
-    <div class="showcase" style="height: 100%;  margin-bottom: 100%;">
+    <div class="showcase" style="height: 100%;">
         <!--Background Image Field 1-Cover Image-->
         {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
@@ -149,18 +149,22 @@
 </div>
 
 
-</div>
 <!--<div class="blackoverflow"
     style="background-color: black; position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 20%; z-index: -15;">
 </div>-->
+
 {% for BackgroundImage in Background %}
 {% if BackgroundImage.page == "index.html" %}
 {% if BackgroundImage.position == 2 %}
-<div class="parallaxial" id="cover-image"
-    style="background-image: url('{{ BackgroundImage.cover.url }}'); height: 100%; background-attachment: fixed; background-position: center; background-repeat: no-repeat; background-size: cover; position: absolute; top: 100%; left: 0; width: 100%;">
-    <img class="parallaxial" src="{{ BackgroundImage.cover.url }}" alt="{{ BackgroundImage.backgroundtitle }}"
-        style="position: fixed; overflow: hidden; background-size: cover; background-repeat: no-repeat; width: 100%; height: 120%; z-index: -2;">
-    {% endif %}
+    <!--second background image-->
+<div class="parallaxed2" id="cover-image" style="background-image: url('{{BackgroundImage.cover.url}}'); background-size: cover; position: absolute;
+    top: 695px;
+    left: 0;
+    width: 100%;
+    height: 20%;
+  background-attachment: fixed;">
+</div>
+     {% endif %}
     {% endif %}
     {% endfor %}
 
@@ -168,24 +172,24 @@
         {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
             {% if BackgroundImage.position == 3 %}
-                <img class="parallaxial" src="{{ BackgroundImage.cover.url }}" style="background-image: url('mounts.png'); height: 100%; background-attachment: fixed; background-position: center; background-repeat: no-repeat; background-size: cover; position: absolute; top: 200%; left: 0; width: 100%;">
+               <div class="parallaxed3" style="background-image: url('{{BackgroundImage.cover.url}}');">
+
+               </div>
             {% endif %}
         {% endif %}
 
     {% endfor %}
-</div>
 
-  <div class="heroingitout" id="image-carousel" style="">
-      <div class="indexingsub">
-<div class="backgroundimages">
     {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
             {% if BackgroundImage.position == 4 %}
-                <img src="{{ BackgroundImage.cover.url }}" alt="{{ BackgroundImage.backgroundtitle }}" style="background-size: cover; background-repeat: no-repeat; width: 100%; height: 100%;">
+
+      <div class="indexingsub" style="background-image: url('{{BackgroundImage.cover.url}}');">
+          </div>
             {% endif %}
         {% endif %}
     {% endfor %}
-</div>
+
 
       {% for image in Image %}
        {% if image.page == 'index.html' and image.image_position == 1 %}
@@ -204,15 +208,24 @@
         <br>
         <br>
 <!-- Slideshow container -->
-<div class="slideshow-container" id="featuredproducts1" style="z-index:1;">
 
-
-      <div class="backgroundimages">
       {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
           {% if BackgroundImage.position == 5 %}
+  <div class="heroingitout" id="image-carousel" style="background-image: url('{{BackgroundImage.cover.url}}'); background-size: cover; height: 100%; ">
+                {% endif %}
+        {% endif %}
+      {% endfor %}
 
-            <img src=" {{BackgroundImage.cover.url}}" alt="{{BackgroundImage.backgroundtitle}}" style="z-index:-10; position: absolute;"> <!--flex to be behind the carousel code-->
+<div class="slideshow-container" id="featuredproducts1" style="z-index:1;">
+
+
+       {% for BackgroundImage in Background %}
+        {% if BackgroundImage.page == "index.html" %}
+          {% if BackgroundImage.position == 6 %}
+
+            <div class="backgroundimages"style="background-image: url('{{BackgroundImage.cover.url}}'); alt="{{BackgroundImage.backgroundtitle}}" style="z-index:-10; position: absolute;">
+     <!--flex to be behind the carousel code-->
           {% endif %}
         {% endif %}
       {% endfor %}
@@ -489,24 +502,22 @@
   }
 </script>
 
-    <div class="featuredeee" id='hot_new_products' style="position: relative; overflow: hidden;">
 <h1> Hot New Products </h1>
       {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-          {% if BackgroundImage.position == 6 %}
+          {% if BackgroundImage.position == 7 %}
         {{ BackgroundImage.cover.url }}
-    <img src="{{ BackgroundImage.cover.url }}" alt="{{BackgroundImage.backgroundtitle}}" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; z-index: 0;">
+     <div class="featuredeee" id='hot_new_products' style="background-image: url('{{ BackgroundImage.cover.url }})'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; z-index: 0;">
 {% endif %}
         {% endif %}
         {% endfor %}
        <div class="containertree">
-<div style="position: relative; text-align: center;">
 
       {% for BackgroundImage in Image %}
         {% if BackgroundImage.page == "index.html" %}
-          {% if BackgroundImage.image_position == 7 %}
+          {% if BackgroundImage.image_position == 8 %}
 e
-            <img src="{{BackgroundImage.image.url}}" alt="{{BackgroundImage.title}}" width="{{BackgroundImage.width_for_resize}}%" height="{{BackgroundImage.height_for_resize}}%" style="z-index:1; position: absolute; top: 0%; left: 50%; transform: translateX(-50%);"> <!--flex to be behind the carousel code-->
+            <div style="background-image: url('{{ BackgroundImage.cover.url }})' z-index:1; position: absolute; top: 0%; left: 50%; transform: translateX(-50%);"> <!--flex to be behind the carousel code-->
           {% endif %}
         {% endif %}
       {% endfor %}<!--consider replacing with an image-->
@@ -671,7 +682,7 @@ e
 
       {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-          {% if BackgroundImage.position == 8 %}
+          {% if BackgroundImage.position == 9 %}
 <div style="position: relative; text-align: center;">
     <img src="{{BackgroundImage.cover.url}}" alt="{{BackgroundImage.backgroundtitle}}">
     <h1 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2;">Want To Become A Member?</h1>
@@ -1005,7 +1016,7 @@ e
           <div class="supportsystems" style="margin-top: 50px;">
                     {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-          {% if BackgroundImage.position == 9 %}
+          {% if BackgroundImage.position == 10 %}
 
             <img src=" {{BackgroundImage.cover.url}}" alt="{{BackgroundImage.backgroundtitle}}" style="z-index:-10; position: absolute;"> <!--flex to be behind the carousel code-->
 

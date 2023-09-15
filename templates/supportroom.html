@@ -2,7 +2,7 @@
 {% load static %}
 
 {% for ChatBackgroundImage in Titles %}
-  {% if ChatBackgroundImage.page == 'room.html' %}
+  {% if ChatBackgroundImage.page == 'supportroom.html' %}
      {{ ChatBackgroundImage.overtitle }}
   {% endif %}
 {% endfor %}
@@ -14,20 +14,19 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body {
-  margin: 0 auto;
-  max-width: 800px;
-  padding: 0 20px;
-  background-color: #f1f1f1;
-}
+
 
 .chat-container {
   border: 2px solid #dedede;
   background-color: #fff;
   border-radius: 5px;
   padding: 20px;
-  margin: 10px 0;
+  max-width: 800px;
+  padding: 0 20px;
+  margin: 0 auto; /* This centers the element horizontally */
+  background-color: #f1f1f1;
 }
+
 
 .chat-container .message {
   display: flex;
@@ -88,24 +87,44 @@ body {
 </head>
 <body>
 
-{% for ChatBackgroundImage in Background %}
+{% for messages in Background %}
   <img class="backgroundimages" src="{{BackgroundImage.cover.url}}" alt="{{ BackgroundImage.backgroundtitle }}">
 {% endfor %}
-
+<br>
+<br>
+<br>
 <div class="chat-container">
-  <h2>{{user.username}}</h2>
+<br>
+  <h2>{{ username }}</h2>
 
-  <div id="display"></div>
+  <!--not ajax, has to refresh to render-->
+  <div id="display">
+    {% for messages in Messaging %}
+      <div class="message">
+        <a href="{{ messages.user_profile_url }}">
+          <img src="{{ messages.user_profile_picture_url }}" alt="{{ messages.user }}">
+        </a>
+        <div class="message-content">
+          <div class="sender">{{ messages.user }}</div>
+          <div>{{ messages.value }}</div>
+          <div class="time">{{ messages.date }}</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+
   <div class="chat-input">
     <form id="post-form">
-        {% csrf_token %}
-        <input type="hidden" name="username" id="username" value="{{user.username}}"/>
-        <input type="text" name="message" id="message" width="100px" placeholder="Type your message..." />
-        <input type="submit" value="Send">
+      {% csrf_token %}
+      <input type="hidden" name="username" id="username" value="{{ username }}">
+      <input type="hidden" name="room_name" id="room_name" value="{{room}}" />
+      <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
+      <input type="submit" value="Send">
     </form>
+  </div>
 </div>
 
-</div>
 
 
 <script>
@@ -118,23 +137,22 @@ $(document).ready(function(){
 
   preloadImages(avatarUrls);
 
-  setInterval(function(){
-
-    $.ajax({
-      type: 'GET',
-      url: "/supportgetMessages/room/",
-      success: function(response){
-        console.log(response);
-        $("#display").empty();
-        for (var key in response.messages) {
+setInterval(function() {
+  $.ajax({
+    type: 'GET',
+    url: `/supportgetMessages/room/${user.username}`,
+    success: function(response){
+      console.log(response);
+      $("#display").empty();
+      for (var key in response.messages) {
           var message = response.messages[key];
           var user_profile_url = message.user_profile_url;
           var avatar_url = message.avatar_url;
           var user = message.user;
           var value = message.value;
           var date = message.date;
-          var user = message.user;
 
+          console.log(user_profile_url);
           var messageHtml = `
             <div class="message">
               <a href="${user_profile_url}">
@@ -172,7 +190,6 @@ function preloadImages(urls) {
     <script src="{% static 'css/js/scroll.js' %}"></script>
 
 
-</body>
 
 <script type="text/javascript">
 $(document).on('submit','#post-form',function(e){
@@ -183,7 +200,7 @@ $(document).on('submit','#post-form',function(e){
     url:'/supportchat/send',
     data:{
       username: $('#username').val(),
-      room_name: $('#room_name').val(),
+      room_name: $('#username').val(),
       message: $('#message').val(),
       csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
     },
@@ -194,6 +211,7 @@ $(document).on('submit','#post-form',function(e){
   document.getElementById('message').value = '';
 });
 </script>
+</body>
 
 </html>
 

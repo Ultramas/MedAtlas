@@ -12,7 +12,7 @@
 {% endblock title %}
 
 {% block content %}
-  
+
 <head>
    <style>
         .advertisement-image {
@@ -64,25 +64,25 @@
 
     <ul>
       {% for column in Header %}
-        <div class="dropdown">     
+        <div class="dropdown">
           <a href="#{{ column.section }}" class="glass"> {{ column.text }}</a>
           <div class="dropdown-content">
           {% for row in DropDown %}
-        
+
             {% if row.row == column.row %}
-                                                
+
                 {% if row.opennew == True %}
                     <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
                 {% else %}
                     <a href="{{ row.url }}">{{ row.text }}</a>
                 {% endif %}
             {% endif %}
-          
+
           {% endfor %}
-          </div>        
+          </div>
         </div>
       {% endfor %}
-     </ul> 
+     </ul>
     </div>
 <div class="postww">
   <br>
@@ -97,7 +97,7 @@
 
             <div class = "boedy">
   <div class="containereatede">
-     <h1 class = "banh1">Make Your Profile</h1>
+     <h1 class = "banh1">Make Your Showcase Profile</h1>
       </div>
                 </div>
      <br>
@@ -115,7 +115,7 @@
         <div class="drop drop-5"></div>
      </div>
   </form>
-</div> 
+</div>
 </div>
 
 
@@ -125,8 +125,8 @@
 {% endif %}
 
 
-    
+
 </div>
- </body> 
- 
+ </body>
+
 {% endblock content %}

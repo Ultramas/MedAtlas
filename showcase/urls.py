@@ -96,6 +96,7 @@ from .views import (
     ContactSuccessView,
     BusinessSuccessMailingView,
     SignupView,
+    ProfileEditView,
     ChangePasswordView,
     PerksBackgroundView,
     IssueBackgroundView,
@@ -235,7 +236,10 @@ urlpatterns = [
     path('profilehome/', TemplateView.as_view(template_name='profilehome.html'), name='home'),
     path('profile/<int:pk>/', views.ProfileView.as_view(), name='profile'),
     #path('blog/<int:pk>/', views.ProfileDetails.as_view(), name='profile'),
+
     path('profile/edit/<int:pk>', views.edit_profile, name="edit_profile"),
+
+    path('profile_edit/<int:pk>', views.ProfileEditView.as_view(), name="profile_edit"),
     #path('profile/', views.profile, name="profile"),
     path('like/<username>/', profile, name='like'), #consider making it views.profile
     path('administration/', AdministrationView.as_view(), name='administration'),
@@ -370,9 +374,12 @@ urlpatterns = [
     path('home/<str:room>/', views.RoomView.as_view(), name='room'),
     path('supportchat/checkview', views.supportcheckview, name='supportcheckview'),
     path('supportchat/send', views.supportsend, name='supportsend'),
-    path('supportgetMessages/<str:room>/', views.supportgetMessages, name='supportgetMessages'),
-    path('supportchat/<str:supportroom>/', views.supportroom, name='supportroom'),
-    path('supportchat/room', views.SupportRoomView.as_view(), name='supportroom'),
+    #path('supportgetMessages/room/', views.supportgetMessages, name='supportgetMessages'),
+    path('supportgetMessages/room/<str:signed_in_user>/', views.supportgetMessages, name='support_get_messages'),
+    #path('supportchat/', views.supportroom, name='supportroom'),
+    #path('supportchat/room', views.SupportRoomView.as_view(), name='supportroom'),
+    path('supportchat/room/<str:signed_in_user>/', views.SupportRoomView.as_view(), name='supportroom'),
+
     # change url <str:room> to use user username for added security
     path('product/<slug>/', views.ProductView.as_view(), name='product'),
     path('order-summary/', views.OrderSummaryView.as_view(), name='order-summary'),

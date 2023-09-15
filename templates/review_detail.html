@@ -170,23 +170,23 @@
 {% else %}
 {% for feedback_objects in Image %}
 <ul class="star" style="margin-left: 5%;">
-{% if feedback_objects.alternate == 'star-solid' %}
+    {% if feedback_objects.alternate == 'star-solid' %}
     <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
     {% endif %}
-{% if feedback_objects.alternate == 'star-solid' %}
-    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
-        {% endif %}
     {% if feedback_objects.alternate == 'star-solid' %}
     <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
         {% endif %}
     {% if feedback_objects.alternate == 'star-solid' %}
     <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
         {% endif %}
-    </ul>
     {% if feedback_objects.alternate == 'star-solid' %}
     <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
         {% endif %}
 
+    {% if feedback_objects.alternate == 'star-solid' %}
+    <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
+        {% endif %}
+    </ul>
 {% endfor %}
 {% endif %}
 

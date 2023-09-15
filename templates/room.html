@@ -14,19 +14,16 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body {
-  margin: 0 auto;
-  max-width: 800px;
-  padding: 0 20px;
-  background-color: #f1f1f1;
-}
 
 .chat-container {
   border: 2px solid #dedede;
   background-color: #fff;
   border-radius: 5px;
   padding: 20px;
-  margin: 10px 0;
+  max-width: 800px;
+  padding: 0 20px;
+  margin: 0 auto; /* This centers the element horizontally */
+  background-color: #f1f1f1;
 }
 
 .chat-container .message {
@@ -92,7 +89,12 @@ body {
   <img class="backgroundimages" src="{{BackgroundImage.cover.url}}" alt="{{ BackgroundImage.backgroundtitle }}">
 {% endfor %}
 
+<br>
+<br>
+<br>
+<br>
 <div class="chat-container">
+<br>
   <h2>{{username}} - {{room}}</h2>
 
   <div id="display"></div>

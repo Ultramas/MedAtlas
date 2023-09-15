@@ -74,31 +74,6 @@
                   <div class="mask rgba-white-slight"></div>
               </div>
   {% endfor %}
-    <div class = "navbarx">
-
-    <ul>
-      {% for column in Header %}
-        ererereeet
-        <div class="dropdown">
-          <a href="#{{ column.section }}" class="glass"> {{ column.text }}</a>
-          <div class="dropdown-content">
-          {% for row in DropDown %}
-ererereee
-            {% if row.row == column.row %}
-
-                {% if row.opennew == True %}
-                    <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
-                {% else %}
-                    <a href="{{ row.url }}">{{ row.text }}</a>
-                {% endif %}
-            {% endif %}
-
-          {% endfor %}
-          </div>
-        </div>
-      {% endfor %}
-     </ul>
-    </div>
 <div class="postww">
   <br>
   <br>
@@ -112,9 +87,7 @@ ererereee
 
             <div class = "boedy">
   <div class="containereatede"><h1 class="banh1f">Add A Review</h1>
-        {% for items in Item %}
-        <p>Please provide some feedback on your experience working with {{ item }}. Help us provide better services.</p>
-        {% endfor %}
+
       <form id="SubmitReviewForm" action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <table class="popupTable" border="0" cellpadding="0" cellspacing="0" width="100%" height="100%">
@@ -148,7 +121,7 @@ ererereee
 
   {% if img_obj %}
   <h3>Succesfully uploaded : {{img_obj.title}}</h3>
-  <img src="{{ img_obj.image}}" alt="connect" style="max-height:300px">
+  <img src="{{ img_obj.avatar}}" alt="connect" style="max-height:300px">
 {% endif %}
 
 

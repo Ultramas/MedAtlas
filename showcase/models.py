@@ -1812,10 +1812,36 @@ class Message(models.Model):
 # Create your models here.
 class SupportChat(models.Model):
     name = models.CharField(max_length=1000)
+    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
+                                       verbose_name="User")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     # datetime.now()
     # api_time = models.DateTimeField()
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+
+    class Meta:
+        verbose_name = "Support Chat"
+        verbose_name_plural = "Support Chat"
 
 class SupportMessage(models.Model):
     value = models.CharField(max_length=1000000)
@@ -1857,8 +1883,7 @@ class SupportMessage(models.Model):
 
     def get_absolute_url(self):
         # Construct the URL for the room detail page
-        room_url = 'showcase:supportchat/room'
-
+        room_url = reverse('showcase:supportroom', args=[str(self.signed_in_user)])
         return room_url
 
     class Meta:
