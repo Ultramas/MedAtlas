@@ -961,16 +961,18 @@ class BackgroundView(FormMixin, BaseView):
                 news.hyperlink = newsfeeding.get_profile_url()
                 news.description = newsfeeding.description
 
-        feed = Feedback.objects.filter(is_active=1).order_by('-timestamp')
+            feedback_objects = Feedback.objects.filter(slug=slug)
 
-        context['FeedBacking'] = feed
+            # Add the feedback_objects to the context
+            context['Feed'] = feedback_objects
 
-        for feed in context['FeedBacking']:
-            user = feed.username
+
+        for feedback_objects in context['Feed']:
+            user = feedback_objects.username
             profile = ProfileDetails.objects.filter(user=user).first()
             if profile:
-                feed.user_profile_picture_url = profile.avatar.url
-                feed.user_profile_url = feed.get_profile_url()
+                feedback_objects.newprofile_profile_picture_url = profile.avatar.url
+                feedback_objects.newprofile_profile_url = feedback_objects.get_profile_url2()
 
         return context
 
@@ -2967,6 +2969,7 @@ class BackgroundView(FormMixin, BaseView):
                 news.hyperlink = newsfeeding.get_profile_url()
                 news.description = newsfeeding.description
 
+
         feed = Feedback.objects.filter(is_active=1).order_by('-timestamp')
 
         context['FeedBacking'] = feed
@@ -2977,6 +2980,7 @@ class BackgroundView(FormMixin, BaseView):
             if profile:
                 feed.user_profile_picture_url = profile.avatar.url
                 feed.user_profile_url = feed.get_profile_url()
+                print(user)
 
         return context
 
@@ -6697,6 +6701,7 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        print(context)
         return context
 
     def get(self, request, *args, **kwargs):
@@ -6858,7 +6863,7 @@ class OrderHistory(ListView):
 
         # context['items'] = Item.objects.filter(is_active=1)
 
-        context['items'] = paginated_items
+        context['orders'] = paginated_items
         for order_item in context['orders']:
             # Process each order item individually
             image = order_item.image  # Assuming OrderItem has an 'image' field

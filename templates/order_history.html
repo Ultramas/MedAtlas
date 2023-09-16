@@ -135,9 +135,9 @@
          <!--pagination change station-->
 <form method="GET">
     <label for="paginate-by" style="margin-right: 1%;">
-        <h1>Items per page: </h1>
+        <h1>Orders per page: </h1>
     </label>
-    <input type="number" name="paginate_by" id="paginate-by" value="{{ items.paginator.per_page }}">
+    <input type="number" name="paginate_by" id="paginate-by" value="{{ orders.paginator.per_page }}">
 
 <button class="button-64" role="button" type="submit"><span class="text">Submit</span></button>
 </form>
@@ -184,9 +184,9 @@
       <!--Pagination-->
       <div class="d-flex justify-content-center wow fadeIn">
         <ul class="pagination pg-blue">
-<li class="page-item {% if not items.has_previous %}disabled{% endif %}">
-    {% if items.has_previous %}
-        <a class="page-link" href="?page={{ items.previous_page_number }}&paginate_by={{ items.paginator.per_page }}" aria-label="Previous">
+<li class="page-item {% if not orders.has_previous %}disabled{% endif %}">
+    {% if orders.has_previous %}
+        <a class="page-link" href="?page={{ orders.previous_page_number }}&paginate_by={{ orders.paginator.per_page }}" aria-label="Previous">
             <span aria-hidden="true">&laquo;</span>
             <span class="sr-only">Previous</span>
         </a>
@@ -194,16 +194,16 @@
 </li>
 
 <!-- Page numbers -->
-{% for page in items.paginator.page_range %}
-    <li class="page-item {% if page == items.number %}active{% endif %}">
-        <a class="page-link" href="?page={{ page }}&paginate_by={{ items.paginator.per_page }}">{{ page }}</a>
+{% for page in orders.paginator.page_range %}
+    <li class="page-item {% if page == orders.number %}active{% endif %}">
+        <a class="page-link" href="?page={{ page }}&paginate_by={{ orders.paginator.per_page }}">{{ page }}</a>
     </li>
 {% endfor %}
 
 <!-- Arrow right -->
-<li class="page-item {% if not items.has_next %}disabled{% endif %}">
-    {% if items.has_next %}
-        <a class="page-link" href="?page={{ items.next_page_number }}&paginate_by={{ items.paginator.per_page }}" aria-label="Next">
+<li class="page-item {% if not orders.has_next %}disabled{% endif %}">
+    {% if orders.has_next %}
+        <a class="page-link" href="?page={{ orders.next_page_number }}&paginate_by={{ orders.paginator.per_page }}" aria-label="Next">
             <span aria-hidden="true">&raquo;</span>
             <span class="sr-only">Next</span>
         </a>

@@ -12248,3 +12248,48 @@ border-radius: 30px;
   background-repeat: no-repeat;
   background-size: cover;
 }
+
+.indexsubscripteds{
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+    min-height: 100%;
+    text-align: center;
+    justify-content: center;
+}
+
+
+.indexparallaxc1{
+    background-attachment: fixed;
+    background-size: cover;
+    background-image: url("images/R8.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100%;
+    text-align: center;
+    justify-content: center;
+}
+
+.indexparallaxc2{
+    background-attachment: fixed;
+    background-size: cover;
+    background-image: url("images/lm.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100%;
+    text-align: center;
+    justify-content: center;
+}
+
+.indexparallaxc3{
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    justify-content: center;
+    min-height: 100%;
+    text-align: center;
+}
+

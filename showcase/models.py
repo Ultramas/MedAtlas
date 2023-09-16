@@ -281,17 +281,22 @@ class PartnerApplication(models.Model):
         verbose_name="Set active?"
     )
 
+    class Meta:
+        verbose_name = "Partner Application"
+        verbose_name_plural = "Partner Applications"
+
+
 
 class PunishmentAppeal(models.Model):
     name = models.CharField(max_length=100, help_text='Your name and tag go here.')
     Rule_broken = models.CharField(max_length=200,
                                    help_text='Tell us the numbers of the rule(s) you broke. Refer to our rules page to see the rules and their corresponding numbers.',
-                                   verbose_name="rule broken: ")
+                                   verbose_name="rule broken")
     Why_I_should_have_my_punishment_revoked = models.TextField(
         help_text='Tell us why we should revoke your punishment, and what you can do to fix your mistake. If you think your punishment is a mistake, tell us why.',
-        verbose_name="Why I should have my punishment revoked: ")
+        verbose_name="Why I should have my punishment revoked")
     Additional_comments = models.TextField(help_text='Put any additional evidence or comments you may have here.',
-                                           verbose_name="additional comments ")
+                                           verbose_name="additional comments")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -736,6 +741,11 @@ class Profile(models.Model):
     about_me = models.TextField()
     image = models.ImageField(upload_to='profile_image', null=True, blank=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
         return str(self.user)
@@ -836,7 +846,14 @@ class HyperlinkBase(models.Model):
 
 class BackgroundImageBase(models.Model):
     backgroundtitle = models.TextField(verbose_name="Background Title")
-    cover = models.ImageField(upload_to='images/')
+    cover = models.ImageField(blank=True, null=True, upload_to='images/')
+    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              help_text='Width of the image (in percent relative).',
+                                              verbose_name="image width")
+    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                               help_text='Length of the image (in percent relative).',
+                                               verbose_name="image length")
+    file = models.FileField(blank=True, null=True,  upload_to='images/', verbose_name="Non-image File")
     alternate = models.TextField(verbose_name="Alternate Text")
     page = models.TextField(verbose_name="Page Name")
     url = models.URLField(verbose_name="Page URL")
@@ -2598,6 +2615,7 @@ class AdvertisementBase(models.Model):
     advertisement = models.ImageField(help_text='Image of the advertisement.', upload_to='images/',
                                       height_field="advertisement_width",
                                       width_field="advertisement_length")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
+    advertisement_file = models.FileField(blank=True, null=True,  upload_to='images/', verbose_name="Non-image File")
     advertisement_length = models.PositiveIntegerField(blank=True, null=True, default="100",
                                                        help_text='Original length of the advertisement (use for original ratio).',
                                                        verbose_name="advertisement length")
@@ -2657,7 +2675,7 @@ class ImageBase(models.Model):
     )
     title = models.CharField(max_length=100, help_text='title.',
                              verbose_name="title")
-    image = models.ImageField(help_text='Image of the advertisement.', upload_to='images/',
+    image = models.ImageField(blank=True, null=True, help_text='Image of the advertisement.', upload_to='images/',
                               height_field="image_length",
                               width_field="image_width")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
     image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
@@ -2669,6 +2687,8 @@ class ImageBase(models.Model):
     image_ratio = models.FloatField(blank=True, null=True, default=1.0,
                                                help_text='Length to Width Ratio of the Image (Length/Width).',
                                                verbose_name="image ratio")
+
+    file = models.FileField(blank=True, null=True,  upload_to='images/', verbose_name="Non-image File")
     image_measurement = models.CharField(blank=True, null=True,choices=IMAGE_MEASUREMENT_CHOICES, max_length=3)
     width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resize Width")
     height_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resize Height")

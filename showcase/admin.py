@@ -127,17 +127,81 @@ admin.site.register(UpdateProfile, categoryAdmin)
 admin.site.register(Idea, categoryAdmin)
 admin.site.register(Vote, authorAdmin)
 admin.site.register(StaffApplication, authorAdmin)
-admin.site.register(PartnerApplication)
-admin.site.register(PunishmentAppeal)
-admin.site.register(ReportIssue)
+
+
+class PartnerApplicationAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Partner Application Information - Categorial Description', {
+            'fields': ('name', 'category', 'description', 'server_invite', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+admin.site.register(PartnerApplication, PartnerApplicationAdmin)
+
+class PunishmentAppealAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Punishment Appeal Information - Categorial Description', {
+            'fields': ('name', 'Rule_broken', 'Why_I_should_have_my_punishment_revoked', 'Additional_comments', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+admin.site.register(PunishmentAppeal, PunishmentAppealAdmin)
+
+class ReportIssueAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Report Issue Information - Categorial Description', {
+            'fields': ('user', 'name', 'category', 'issue', 'Additional_comments', 'anonymous', 'is_active',),
+            'classes': ('collapse',),
+        }),
+        ('Report Issue Information - Image Description', {
+            'fields': ('image', 'image_length', 'image_width',),
+            'classes': ('collapse',),
+        }),
+    )
+admin.site.register(ReportIssue, ReportIssueAdmin)
 admin.site.register(StaffProfile)
-admin.site.register(Profile)
-admin.site.register(SettingsModel)
+class ProfileAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Profile Information', {
+            'fields': ('about_me', 'image', 'user', 'is_active',)
+        }),
+    )
+
+admin.site.register(Profile, ProfileAdmin)
+
+class SettingsAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Settings Information - Personal Information', {
+            'fields': ('user', 'username', 'password', 'email',)
+        }),
+        ('Settings Information - Personal Preferences', {
+            'fields': ('coupons', 'news',)
+        }),
+        ('Settings Information - Active Settings', {
+            'fields': ('is_active',)
+        }),
+    )
+
+admin.site.register(SettingsModel, SettingsAdmin)
 #admin.site.register(SettingsBackgroundImage)
 #admin.site.register(ConvertBackgroundImage)
 admin.site.register(UserProfile)
 admin.site.register(UserProfile2, UserProfile2Admin)
-admin.site.register(PostLikes)
+class PostLikesAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Partner Application Information - Categorial Description', {
+            'fields': ('user', 'post',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('created',)
+admin.site.register(PostLikes, PostLikesAdmin)
 #admin.site.register(BackgroundImage)
 #admin.site.register(BackgroundImage2a)
 #admin.site.register(EBackgroundImage)
@@ -162,7 +226,20 @@ admin.site.register(PostLikes)
 #admin.site.register(PartnerBackgroundImage)
 #admin.site.register(WhyBackgroundImage)
 #admin.site.register(PerksBackgroundImage)
-admin.site.register(Titled)
+
+class TitledAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Page Title Information - Categorial Descriptions', {
+            'fields': ('overtitle', 'page',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Page Title Information - Categorial Descriptions', {
+            'fields': ('url', 'position', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+admin.site.register(Titled, TitledAdmin)
 #admin.site.register(ResizeImageMixin)
 #admin.site.register(BackgroundImages)
 #admin.site.register(Feedback)
@@ -197,9 +274,15 @@ def change_rating(modeladmin, request, queryset):
 # Action description
 change_rating.short_description = "Mark Selected Products as Excellent"
 
-
 # ModelAdmin Class
 class ProductA(admin.ModelAdmin):
+    fieldsets = (
+        ('Item Information - Categorial Descriptions', {
+            'fields': ('name', 'description', 'rating', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+    readonly_fields = ('mfg_date',)
     list_display = ('name', 'description', 'mfg_date', 'rating')
     list_filter = (
         'name',
@@ -248,9 +331,39 @@ class CommentAdmin(admin.ModelAdmin):
     def approve_comments(self, request, queryset):
         queryset.update(active=True)
 """
+class OrderAdmin(admin.ModelAdmin):
 
-admin.site.register(Order)
-admin.site.register(Payment)
+    fieldsets = (
+        ('Order Item Information - Order Outline', {
+            'fields': ('user', 'items', 'itemhistory', 'coupon',),
+            'classes': ('collapse',),
+        }),
+        ('Order Item Information - Personal Information', {
+            'fields': ('shipping_address', 'billing_address', 'payment',),
+            'classes': ('collapse',),
+        }),
+        ('Order Item Information - Attributes', {
+            'fields': ('ref_code', 'feedback_url', 'ordered_date', 'is_active'),
+        }),
+        ('Order Item Information - Logistics', {
+            'fields': ('ordered', 'being_delivered', 'received', 'refund_requested', 'refund_granted'),
+        }),
+    )
+    readonly_fields = ('start_date', 'id',)
+
+admin.site.register(Order, OrderAdmin)
+
+
+class PaymentAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Order Item Information - Categorial Description', {
+            'fields': ('user', 'amount', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('stripe_charge_id', 'timestamp',)
+admin.site.register(Payment, PaymentAdmin)
 
 from django.contrib import messages
 from .models import State
@@ -315,7 +428,7 @@ class FeedbackAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Feedback Information', {
-            'fields': ('item', 'order', 'star_rating', 'comment', 'image')
+            'fields': ('item', 'order', 'star_rating', 'comment', 'image', 'showcase')
         }),
         ('Feedback Information - Read-only Fields', {
             'fields': ('slug', 'username'),
@@ -542,7 +655,7 @@ class AdvertisementBaseAdmin(admin.ModelAdmin):
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Advertisement Base Information - Advertisement', {
-            'fields': ('advertisement', 'advertisement_length', 'advertisement_width', 'length_for_resize', 'width_for_resize', 'xposition', 'yposition',),
+            'fields': ('advertisement', 'advertisement_length', 'advertisement_width', 'length_for_resize', 'width_for_resize', 'file', 'xposition', 'yposition',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Advertisement Base  Information - Attributes', {
@@ -616,7 +729,7 @@ class BackgroundImageBaseAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Background Image Base Information - Categorial Descriptions', {
-            'fields': ('backgroundtitle', 'cover', 'alternate')
+            'fields': ('backgroundtitle', 'cover', 'alternate', 'file')
         }),
         ('Background Image Base Information - Attributes', {
             'fields': ('page', 'url', 'position', 'is_active',)
@@ -632,7 +745,7 @@ class ImageBaseAdmin(admin.ModelAdmin):
             'fields': ('title', 'hyperlink', 'type')
         }),
         ('Image Base Information - Image Display', {
-            'fields': ('image', 'image_width', 'image_length', 'image_ratio', 'image_measurement', 'width_for_resize', 'height_for_resize', 'image_position', 'alternate', 'xposition', 'yposition',)
+            'fields': ('image', 'image_width', 'image_length', 'image_ratio', 'image_measurement', 'width_for_resize', 'height_for_resize', 'file', 'image_position', 'alternate', 'xposition', 'yposition',)
         }),
         ('Image Base Information - Attributes', {
             'fields': ('page', 'relevance', 'correlating_product', 'is_active',)

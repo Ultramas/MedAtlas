@@ -3,7 +3,7 @@
 
     {% for AboutBackgroundImage in Titles %}
       {% if AboutBackgroundImage.page == 'about.html' %}
-         {{ AboutBackgroundImage.overtitle }} 
+         {{ AboutBackgroundImage.overtitle }}
       {% endif %}
     {% endfor %}
 
@@ -14,13 +14,13 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
     <title>Gluons & Leptons</title>
   </head>
-  <body>        
-       
+  <body>
+
  <div id="overlay">  
     <img src = "{% static 'css/images/76.gif' %}">
     </div>
    
-    
+
     <div class="subscripteds" id="cover-image"><h2 class = "opening">
                {% for AboutBackgroundImage in TextFielde %}
              {% for section in TextFielde %}
@@ -32,7 +32,7 @@
           {% endif %}
           {% endif %}
   {% endfor %}
-{% endfor %}  </h2></div>  
+{% endfor %}  </h2></div>
 
     <div class="parallaxc2" id="image-carousel">
           {% for AboutBackgroundImage in object_list %}
@@ -104,8 +104,9 @@
   {% endfor %}
 {% endfor %}</h2>
 
-   
-   
+
+    </div>
+
      <!--Custom JS-->
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js.darkmode.js' %}"></script>
