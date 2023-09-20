@@ -4637,6 +4637,18 @@ input[type=submite]:hover
   padding-top: 12%;
 }
 
+/* Add a background color and some padding around the form */
+.containereds
+{
+  border-radius: 5px;
+  text-align: center;
+  justify-content: center;
+  padding: 20px;
+  padding-left: 16%;
+  padding-right: 16%;
+  padding-top: 12%;
+}
+
 /* Slideshow container */
 .slideshow-container {
   max-width: 1000px;
@@ -12293,3 +12305,13 @@ border-radius: 30px;
     text-align: center;
 }
 
+.infoe{
+    font-size: 16px;
+    padding: 10px 14px;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
+    /* position: absolute; */
+    font-weight: 500;
+    color: #17a2b8;
+    }

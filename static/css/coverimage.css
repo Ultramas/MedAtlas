@@ -34,10 +34,10 @@
     transform: translateZ(0); /* Ensure GPU acceleration for smooth scrolling */
 }
 
-img {
+/*img {
     width: 100%;
     height: auto;
-}
+}*/
 
 .parallaxed3
 {

@@ -2923,7 +2923,7 @@ class BackgroundView(FormMixin, BaseView):
         context['Email'] = EmailField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
-        # context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
+        context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
         print(FaviconBase.objects.all())
         print(213324)
         # Retrieve the signed-in user's profile and profile picture URL
@@ -6690,20 +6690,6 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
     template_name = "create_review.html"
     form_class = FeedbackForm
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # context['Change'] = ChangePasswordBackgroundImage.objects.all()
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
-        print(context)
-        return context
-
     def get(self, request, *args, **kwargs):
         item_slug = request.GET.get('item_slug')
         orderitem_id = request.GET.get('orderitem_id')
@@ -6718,7 +6704,9 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
         except Feedback.DoesNotExist:
             existing_feedback = None
 
+        # Create an instance of the FeedbackForm and pass the request object
         form = FeedbackForm(request=request, instance=existing_feedback)
+
         return render(request, 'create_review.html', {'form': form})
 
     def post(self, request, *args, **kwargs):
@@ -6755,12 +6743,22 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
                 slug = str(existing_feedback.slug)  # Use the existing_feedback object's slug
             else:
                 slug = str(feedback.slug)  # Use the feedback object's slug
-                #not the same as the user-inputted slug, it would be the slug from the item
+
             url = reverse('showcase:review_detail', args=[slug])
             return redirect(url)
 
         return render(request, 'create_review.html', {'form': form})
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        return context
 
 @login_required(login_url='/accounts/login/')
 def submit_feedback(request):

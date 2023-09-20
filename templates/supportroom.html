@@ -9,7 +9,6 @@
 
 {% block content %}
 
-<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -125,67 +124,51 @@
   </div>
 </div>
 
+<script type="text/javascript">
+$(document).ready(function() {
+  var user = "{{ username }}";
 
-
-<script>
-$(document).ready(function(){
-  // Preload avatars
-  var avatarUrls = [];
-  $(".message img").each(function() {
-    avatarUrls.push($(this).attr("src"));
-  });
-
-  preloadImages(avatarUrls);
-
-setInterval(function() {
-  $.ajax({
-    type: 'GET',
-    url: `/supportgetMessages/room/${user.username}`,
-    success: function(response){
-      console.log(response);
-      $("#display").empty();
-      for (var key in response.messages) {
-          var message = response.messages[key];
-          var user_profile_url = message.user_profile_url;
-          var avatar_url = message.avatar_url;
-          var user = message.user;
-          var value = message.value;
-          var date = message.date;
-
-          console.log(user_profile_url);
+  function fetchAndDisplayMessages() {
+    $.ajax({
+      type: 'GET',
+      url: `/supportgetMessages/room/${user}`,
+      success: function(response) {
+        $("#display").empty();
+        response.messages.forEach(function(message) {
           var messageHtml = `
             <div class="message">
-              <a href="${user_profile_url}">
-                <img src="${avatar_url}" alt="${user}">
+              <a href="${message.user_profile_url}">
+                <img src="${message.user_profile_picture_url}" alt="${message.user}">
               </a>
               <div class="message-content">
-                <div class="sender">${user}</div>
-                <div>${value}</div>
-                <div class="time">${date}</div>
+                <div class="sender">${message.user}</div>
+                <div>${message.value}</div>
+                <div class="time">${message.date}</div>
               </div>
             </div>`;
           $("#display").append(messageHtml);
-        }
+        });
       },
-      error: function(response){
-        alert('An error occurred');
+      error: function() {
+        console.error('An error occurred while fetching messages.');
       }
     });
+  }
+
+  // Fetch and display messages initially
+  fetchAndDisplayMessages();
+
+  // Fetch new messages every 5 seconds
+  setInterval(function() {
+    fetchAndDisplayMessages();
   }, 1000);
 });
 
-// Preload images
-function preloadImages(urls) {
-  for (var i = 0; i < urls.length; i++) {
-    var img = new Image();
-    img.src = urls[i];
-  }
-}
+
 </script>
 
-
     <script src="{% static 'css/js/script.js' %}"></script>
-    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
 

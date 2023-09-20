@@ -23,6 +23,14 @@ CATEGORY_CHOICES = (
     ('D', 'Diamond'),
 )
 
+SPECIAL_CHOICES = (
+    ('F', 'Featured'),
+    ('P', 'Popular'),
+    ('PR', 'Premium'),
+    ('LE', 'Limited Edition'),
+)
+
+
 LABEL_CHOICES = (
     ('N', 'New'),
     ('BS', 'Best Seller'),
@@ -47,12 +55,12 @@ class Idea(models.Model):
                                 help_text='Choose a category you want your idea to affect (server layout, event idea, etc).')
     description = models.TextField(help_text='Please share any ideas you may have.')
     image = models.ImageField(help_text='Attach an image for your idea (scales to your picture`s dimensions).')
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
+                                             verbose_name="image width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -86,12 +94,12 @@ class UpdateProfile(models.Model):
     name = models.CharField(max_length=100, help_text='Your name goes here.')
     description = models.TextField(help_text='Your profile description goes here.')
     image = models.ImageField(help_text='Attach an image for your profile (scales to your picture`s dimensions.)')
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
+                                             verbose_name="image width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -337,12 +345,12 @@ class ReportIssue(models.Model):
     Additional_comments = models.TextField(help_text='Put any additional comments you may have here.',
                                            verbose_name="additional comments")
     image = models.ImageField(help_text='Please put a screenshot of the issue.')
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
+                                             verbose_name="image width")
     anonymous = models.BooleanField(default=False, help_text="Report issue anonymously?")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -388,12 +396,12 @@ class Support(models.Model):
     Additional_comments = models.TextField(help_text='Put any additional comments you may have here.',
                                            verbose_name="additional comments")
     image = models.ImageField(help_text='Please attach a screenshot of your issue.', null=True, blank=True)
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
+                                             verbose_name="image width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -405,21 +413,25 @@ class Support(models.Model):
         verbose_name_plural = "Customer Support"
 
 
+
 class NewsFeed(models.Model):
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100,
                             help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
+    title = models.TextField(help_text='Write the news headline here.', verbose_name="News Headline")
     slug = models.SlugField(max_length=200, unique=True)
     category = models.CharField(max_length=200, help_text='Please let us know what form of news this is.')
     description = models.TextField(help_text='Write the news here.')
     image = models.ImageField(help_text='Please provide a cover image for the news.')
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
-                                               verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original width of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement width")
+                                              verbose_name="image width")
     date_and_time = models.DateTimeField(null=True, verbose_name="time and date")
+    position = models.IntegerField(blank=True, null=True, verbose_name="News Position")
     anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -451,6 +463,7 @@ class NewsFeed(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
 
 
 class StaffProfile(models.Model):
@@ -497,16 +510,20 @@ class Event(models.Model):
     category = models.CharField(max_length=200,
                                 help_text='Please let us know what type of event this is (tournament, stage night, etc).')
     description = models.TextField(help_text='Give a brief description of the event.')
-    date_and_time = models.DateTimeField(null=True, verbose_name="time and date")
+    date = models.DateField(null=True, help_text='Event date (day, date, and month)')
+    time = models.TimeField(null=True, help_text='Event time (hour/minute)')
+    date_and_time = models.DateTimeField(null=True, verbose_name="Time and date of Event Creation")
+    section = models.IntegerField(verbose_name="Page Section")
+    page = models.TextField(verbose_name="Page Name")
     slug = models.SlugField()
     anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
-    image = models.ImageField(help_text='Please provide a cover image for the event.')
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image = models.ImageField(help_text='Please provide a cover image for the event.', upload_to='images/')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
-                                               verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original width of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement width")
+                                              verbose_name="image width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -624,12 +641,12 @@ class Blog(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=0)
     image = models.ImageField(upload_to='images/')
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
+                                             verbose_name="image width")
     likes = models.ManyToManyField(User, blank=True, verbose_name='post likes')
     # likes = models.IntegerField(default=0)
     dislikes = models.ManyToManyField(User, blank=True, verbose_name='post dislikes', related_name="post_dislikes")
@@ -756,15 +773,15 @@ class FaviconBase(models.Model):
     faviconcover = models.ImageField(upload_to='images/', verbose_name="Favicon")
     favicon_length = models.PositiveIntegerField(blank=True, null=True, default="100",
                                                  help_text='Original length of the favicon (use for original ratio).',
-                                                 verbose_name="advertisement length")
+                                                 verbose_name="favicon length")
     favicon_width = models.PositiveIntegerField(blank=True, null=True, default="100",
                                                 help_text='Original width of the favicon (use for original ratio).',
-                                                verbose_name="advertisement width")
-    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
-    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
+                                                verbose_name="favicon width")
+    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
     faviconpage = models.TextField(verbose_name="Page Name")
     faviconurl = models.URLField(verbose_name="Page URL")
-    faviconlink = models.TextField(verbose_name="Favicon Link")
+    faviconlink = models.URLField(verbose_name="Favicon Link")
     faviconsizes = models.TextField(verbose_name="Favicon Sizes", help_text="example: 180x180")
     faviconrelationship = models.TextField(verbose_name="Favicon Relationship", help_text="example: icon")
     favicontype = models.TextField(verbose_name="Favicon Type", help_text="example: ico")
@@ -791,12 +808,12 @@ class LogoBase(models.Model):
     alternate = models.TextField(verbose_name="Alternate Text")
     logo_length = models.PositiveIntegerField(blank=True, null=True, default="100",
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
+                                              verbose_name="logo length")
     logo_width = models.PositiveIntegerField(blank=True, null=True, default="100",
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
-    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
-    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
+                                             verbose_name="logo width")
+    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -818,14 +835,14 @@ class HyperlinkBase(models.Model):
     section = models.IntegerField(verbose_name="Page Section")
     page = models.TextField(verbose_name="Page Name")
     alternate = models.TextField(verbose_name="Alternate Text", blank=True, null=True, help_text="Alternate text for Display Image")
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
-    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
-    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
+                                             verbose_name="image width")
+    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
     hyperlink_type = models.IntegerField(default=4,
                                     blank=True,
                                     null=True,
@@ -847,10 +864,10 @@ class HyperlinkBase(models.Model):
 class BackgroundImageBase(models.Model):
     backgroundtitle = models.TextField(verbose_name="Background Title")
     cover = models.ImageField(blank=True, null=True, upload_to='images/')
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Width of the image (in percent relative).',
                                               verbose_name="image width")
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Length of the image (in percent relative).',
                                                verbose_name="image length")
     file = models.FileField(blank=True, null=True,  upload_to='images/', verbose_name="Non-image File")
@@ -876,6 +893,7 @@ class TextBase(models.Model):
     text = models.TextField(verbose_name="Text")
     page = models.TextField(verbose_name="Page Name")
     url = models.URLField(verbose_name="Page URL")
+    text_color = models.CharField(blank=True, null=True, default="white", verbose_name="Text Color", help_text="Color of the text (accepts color names, hex codes or RGBA values in format (R, G, B, A))", max_length=200)
     header_or_textfield = models.BooleanField(verbose_name="Header or Body Text", default=1,
                                               choices=((1, 'Header'), (0, 'Body')))
     section = models.IntegerField(verbose_name="Text Section", help_text="Section Number of Text")
@@ -1149,14 +1167,14 @@ class Titled(models.Model):
 class SocialMedia(models.Model):
     social = models.TextField(verbose_name="Social Media Platform")
     image = models.ImageField(verbose_name="Social Media Logo")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Width of the image (in percent relative).',
                                               verbose_name="image width")
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Length of the image (in percent relative).',
                                                verbose_name="image length")
-    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resize Width")
-    height_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resize Height")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Width")
+    height_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Height")
     image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position')
     alternate = models.TextField(verbose_name="Alternate Text")
     page = models.TextField(verbose_name="Page Name")
@@ -1773,12 +1791,12 @@ class Message(models.Model):
                                        verbose_name="User")
     room = models.CharField(max_length=1000000)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
+                                             verbose_name="image width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1870,12 +1888,12 @@ class SupportMessage(models.Model):
     room = models.CharField(max_length=1000000)  # newly added unique=True
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
+                                             verbose_name="image width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1946,18 +1964,19 @@ class Item(models.Model):
     price = models.FloatField()
     discount_price = models.FloatField(blank=True, null=True)
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
+    specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
     label = models.CharField(choices=LABEL_CHOICES, max_length=1000)  # can use for cataloging products
     slug = models.SlugField()  # might change to automatically get the slug
     description = models.TextField()
     image = models.ImageField()
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
-    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
-    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
+                                             verbose_name="image width")
+    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
     # hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
     relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
     is_active = models.IntegerField(default=1,
@@ -1981,7 +2000,6 @@ class Item(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             slug = self.slug
-
         super().save(*args, **kwargs)
 
     def get_profile_url(self):
@@ -2160,12 +2178,12 @@ class OrderItem(models.Model):
                             help_text="Leave blank to use corresponding product slug.")  # apply unique=True parameter after slugs are actually implemented
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     image = models.ImageField()
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
+                                             verbose_name="image width")
     quantity = models.IntegerField(default=1)
     order_date = models.DateTimeField(auto_now_add=True, verbose_name="Order date")
     is_active = models.IntegerField(default=1,
@@ -2244,12 +2262,12 @@ class OrderItemField(models.Model):
                             help_text="Leave blank to use corresponding product slug.")
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     image = models.ImageField()
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
+                                             verbose_name="image width")
     quantity = models.IntegerField(default=1)
     orderitem_id = models.ForeignKey(OrderItem, on_delete=models.CASCADE, verbose_name="Order item id", null=True)
     is_active = models.IntegerField(default=1, blank=True, null=True,
@@ -2290,14 +2308,14 @@ class AdminTasks(models.Model):
     section = models.IntegerField(help_text='Position of the page link.', verbose_name='position')
     page_name = models.TextField(verbose_name="Page Name", blank="True", null="True")
     image = models.ImageField(verbose_name="Task image")
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
-    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
-    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
+                                             verbose_name="image width")
+    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
     alternate = models.TextField(verbose_name="Alternate text")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -2571,20 +2589,23 @@ class CheckoutAddress(models.Model):
     class Meta:
         verbose_name_plural = 'Checkout Addresses'
 
+from django.db import IntegrityError
 
 class ImageCarousel(models.Model):
     carouseltitle = models.CharField(max_length=100, help_text='Title of the image.', verbose_name="title")
     carouselcaption = models.TextField(help_text='Caption for the image.', verbose_name="caption")
     carouselimage = models.ImageField(help_text='Upload an image for the carousel.)',
                                       upload_to='images/', verbose_name='image')
-    carouselimage_length = models.PositiveIntegerField(blank=True, null=True, default="100",
-                                              help_text='Original length of the advertisement (use for original ratio).',
-                                              verbose_name="advertisement length")
-    carouselimage_width = models.PositiveIntegerField(blank=True, null=True, default="100",
-                                             help_text='Original width of the advertisement (use for original ratio).',
-                                             verbose_name="advertisement width")
-    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
-    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
+    carouselimage_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original length of the image (use for original ratio).',
+                                              verbose_name="image length")
+    carouselimage_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                             help_text='Original width of the image (use for original ratio).',
+                                             verbose_name="image width")
+    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
+    associated_product = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Associated Product")
+    specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
     carouselnumber = models.IntegerField(help_text='What carousel number is this?.',
                                            verbose_name='Carousel number')
     carouselposition = models.IntegerField(help_text='Positioning of the image within the carousel.',
@@ -2600,8 +2621,19 @@ class ImageCarousel(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     class Meta:
-        verbose_name = "Image Carousel Idea"
+        verbose_name = "Image Carousel Post"
         verbose_name_plural = "Image Carousel Posts"
+
+    def save(self, *args, **kwargs):
+        # Set the specialty based on the associated product
+        if self.associated_product and self.associated_product.specialty:
+            self.specialty = self.associated_product.specialty
+        try:
+            super().save(*args, **kwargs)
+        except IntegrityError as e:
+            # Handle any IntegrityError exceptions that may occur during save
+            # Print or log the error for debugging
+            print(f"IntegrityError during save: {e}")
 
 
 from io import BytesIO
@@ -2622,8 +2654,8 @@ class AdvertisementBase(models.Model):
     advertisement_width = models.PositiveIntegerField(blank=True, null=True, default="100",
                                                       help_text='Original width of the advertisement (use for original ratio).',
                                                       verbose_name="advertisement width")
-    length_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resized Length")
-    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resized Width")
+    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
     advertisement_position = models.IntegerField(help_text='Positioning of the advertisement.', verbose_name='Position')
     page = models.TextField(verbose_name="Page Name")
     xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position")
@@ -2678,10 +2710,10 @@ class ImageBase(models.Model):
     image = models.ImageField(blank=True, null=True, help_text='Image of the advertisement.', upload_to='images/',
                               height_field="image_length",
                               width_field="image_width")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Width of the image (in percent relative).',
                                               verbose_name="image width")
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Length of the image (in percent relative).',
                                                verbose_name="image length")
     image_ratio = models.FloatField(blank=True, null=True, default=1.0,
@@ -2690,8 +2722,8 @@ class ImageBase(models.Model):
 
     file = models.FileField(blank=True, null=True,  upload_to='images/', verbose_name="Non-image File")
     image_measurement = models.CharField(blank=True, null=True,choices=IMAGE_MEASUREMENT_CHOICES, max_length=3)
-    width_for_resize = models.PositiveIntegerField(default=600, verbose_name="Resize Width")
-    height_for_resize = models.PositiveIntegerField(default=40, verbose_name="Resize Height")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Width")
+    height_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Height")
     image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position')
     alternate = models.TextField(verbose_name="Alternate Text")
     page = models.TextField(verbose_name="Page Name")
@@ -2817,12 +2849,12 @@ class Feedback(models.Model):
                                    null=True, verbose_name='Showcase on Cover Page?', help_text='1->Yes, 0->No',
                                    choices=((1, 'Yes'), (0, 'No')))
     image = models.ImageField(verbose_name="Images", upload_to='images/', help_text='Please upload any product images', blank=True, null=True)
-    image_length = models.PositiveIntegerField(blank=True, null=True, default="100",
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original length of the image (use for original ratio).',
-                                              verbose_name="advertisement length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default="100",
+                                              verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                              help_text='Original width of the image (use for original ratio).',
-                                             verbose_name="advertisement width")
+                                             verbose_name="image width")
     timestamp = models.DateTimeField(default=timezone.now)
     is_active = models.IntegerField(default=1,
                                     blank=True,

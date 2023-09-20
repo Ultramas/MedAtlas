@@ -84,7 +84,6 @@ class BusinessContactForm(forms.ModelForm):
         fields = '__all__'
 
 
-
 class PostForm(forms.ModelForm):
     class Meta:
         model = UpdateProfile
@@ -124,12 +123,14 @@ class ProfileForm(forms.ModelForm):
             'email',
         ]
 
+
 """class ReviewForm(forms.ModelForm):
     review = forms.CharField(widget=forms.Textarea(attrs={'placeholder': "Write Your Review Here"}))
 
     class Meta:
         model = ProductReview
         fields = '__all__'"""
+
 
 class StaffJoin(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Lime#6510'}))
@@ -146,9 +147,12 @@ class StaffJoin(forms.ModelForm):
 
     class Meta:
         model = StaffApplication
-        fields = ('name', 'role', 'I_have_been_in_MC_for_at_least_2_months', 'I_have_been_in_a_previous_role_for_at_least_1_month',
-                  'I_can_attend_at_least_half_of_the_staff_meetings', 'I_have_no_strikes_on_my_account_currently', 'Why_do_you_want_to_apply_for_staff',
-                  'How_do_you_think_you_can_make_MC_better', 'I_confirm_that_I_have_read_all_the_staff_requirements_and_meet_all_of_them')
+        fields = ('name', 'role', 'I_have_been_in_MC_for_at_least_2_months',
+                  'I_have_been_in_a_previous_role_for_at_least_1_month',
+                  'I_can_attend_at_least_half_of_the_staff_meetings', 'I_have_no_strikes_on_my_account_currently',
+                  'Why_do_you_want_to_apply_for_staff',
+                  'How_do_you_think_you_can_make_MC_better',
+                  'I_confirm_that_I_have_read_all_the_staff_requirements_and_meet_all_of_them')
 
 
 class Server_Partner(forms.ModelForm):
@@ -169,26 +173,19 @@ class SupportForm(forms.ModelForm):
         fields = ('name', 'category', 'issue', 'Additional_comments', 'image',)
 
 
-
-
 class PunishAppeale(forms.ModelForm):
-
     class Meta:
         model = PunishmentAppeal
         fields = ('name', 'Rule_broken', 'Why_I_should_have_my_punishment_revoked', 'Additional_comments',)
 
 
-
 class BanAppeale(forms.ModelForm):
-
     class Meta:
         model = BanAppeal
         fields = ('name', 'Rule_broken', 'Why_I_should_have_my_ban_revoked', 'Additional_comments',)
 
 
-
 class ReportIssues(forms.ModelForm):
-
     class Meta:
         model = ReportIssue
         fields = ('name', 'category', 'issue', 'Additional_comments', 'image',)
@@ -467,7 +464,6 @@ class CheckoutForm(forms.Form):
         widget=forms.RadioSelect, choices=PAYMENT_CHOICES)
 
 
-
 class CouponForm(forms.Form):
     code = forms.CharField(widget=forms.TextInput(attrs={
         'class': 'form-control',
@@ -483,7 +479,6 @@ class RefundForm(forms.Form):
     email = forms.EmailField()
 
 
-
 class PaymentForm(forms.Form):
     number = forms.IntegerField(required=False)
     exp_month = forms.IntegerField(required=False)
@@ -495,7 +490,7 @@ class PaymentForm(forms.Form):
 
 
 class PaypalPaymentForm(forms.Form):
-    #number = forms.IntegerField(required=True)
+    # number = forms.IntegerField(required=True)
     number = forms.CharField(required=True)
     exp_month = forms.IntegerField(required=True)
     expiry = forms.CharField(required=True)
@@ -509,6 +504,7 @@ class ProfileDetail(forms.ModelForm):
     class Meta:
         model = ProfileDetails
         fields = ('email', 'avatar', 'alternate', 'about_me')
+
 
 # class PublicForm(forms.ModelForm):
 # class Meta:
@@ -700,7 +696,8 @@ class BusinessMailingForm(forms.ModelForm):
         fields = {"name", "email", "inquiry", "message"}
 
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'e.g. Liam Mannara'}), #get this instead of Contact.name in views
+            "name": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'e.g. Liam Mannara'}),
+            # get this instead of Contact.name in views
             "email": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'e.g. Intellex@gmail.com'}),
             "inquiry": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'Your inquiry goes here.'}),
             "message": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'Your message goes here.'})
@@ -733,30 +730,30 @@ class BusinessMailingForm(forms.ModelForm):
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[to_email]
         )
-from .models import Feedback
 
+
+from .models import Feedback
 
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-class OrderItemForm(forms.ModelForm):
 
+class OrderItemForm(forms.ModelForm):
     class Meta:
         model = OrderItem
-        fields = ('user', 'item','quantity', 'slug')
-        #might want to replace item with order (check models)
+        fields = ('user', 'item', 'quantity', 'slug')
+        # might want to replace item with order (check models)
         widgets = {
-            #'slug': forms.TextInput(attrs={'readonly': 'readonly'})
+            # 'slug': forms.TextInput(attrs={'readonly': 'readonly'})
         }
 
 
 class OrderItemAdmin(admin.ModelAdmin):
     form = OrderItemForm
-    #readonly_fields = ('user', 'slug', 'item', 'quantity')
+    # readonly_fields = ('user', 'slug', 'item', 'quantity')
 
 
 admin.site.register(OrderItem, OrderItemAdmin)
-
 
 from django.contrib.auth import get_user_model
 from django import forms
@@ -788,29 +785,12 @@ from .models import OrderItem
 
 from django import forms
 from django.utils.text import slugify
+
+
 class FeedbackForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-
-        # Set the initial value for the 'username' field
-        if self.request.user.is_authenticated:
-            self.fields['username'] = forms.CharField(initial=self.request.user.username)
-            self.fields['username'].widget.attrs['readonly'] = True
-        else:
-            self.fields['username'] = forms.CharField(required=False)
-
-        # Set the initial value for the 'order' field if it exists
-        initial_order = None
-        if self.instance and hasattr(self.instance, 'order') and self.instance.order:
-            initial_order = self.instance.order.item
-        self.fields['order'].initial = initial_order
-
-        # Filter the choices for the 'order' field based on the logged-in user
-        if self.request.user.is_authenticated:
-            self.fields['order'].queryset = OrderItem.objects.filter(user=self.request.user)
-        else:
-            self.fields['order'].queryset = OrderItem.objects.none()
 
     class Meta:
         model = Feedback
@@ -843,11 +823,6 @@ class FeedbackForm(forms.ModelForm):
         return feedback
 
 
-
-
-
-
-
 class EmailForm(forms.ModelForm):
     class Meta:
         model = EmailField
@@ -864,7 +839,6 @@ class EmailForm(forms.ModelForm):
         # (attrs={'placeholder':'Enter your email'}))
 
 
-
 class QuestionForm(forms.Form):
     text = forms.CharField(max_length=255)
 
@@ -873,6 +847,7 @@ class QuestionForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'dynamic-input'}),
         choices=[],
     )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Add a field for answer choices when the question type is 'Multiple Choice'
@@ -883,12 +858,15 @@ class QuestionForm(forms.Form):
                 widget=forms.TextInput(attrs={'placeholder': 'Choice 1, Choice 2, ...'}),
             )
 
+
 class QuestionCountForm(forms.Form):
-    num_questions = forms.IntegerField(label="Number of Questions",)
+    num_questions = forms.IntegerField(label="Number of Questions", )
     form_name = forms.CharField()
+
     class Meta:
         model = Questionaire
         fields = {"form_name", "form_text", "text"}
+
 
 from .models import Answer
 

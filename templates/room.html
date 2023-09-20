@@ -9,7 +9,6 @@
 
 {% block content %}
 
-<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -93,7 +92,7 @@
 <br>
 <br>
 <br>
-<div class="chat-container">
+<div class="chat-container" id="chat-container">
 <br>
   <h2>{{username}} - {{room}}</h2>
 
@@ -176,7 +175,7 @@ function preloadImages(urls) {
 
 
     <script src="{% static 'css/js/script.js' %}"></script>
-    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
 
@@ -204,6 +203,19 @@ $(document).on('submit','#post-form',function(e){
   document.getElementById('message').value = '';
 });
 </script>
+<script>
+  // Scroll to the bottom of the chat container
+  function scrollToBottom() {
+    var chatContainer = document.querySelector('.chat-container');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+
+  // Scroll to the bottom after page refresh
+  window.onload = function () {
+    scrollToBottom();
+  };
+</script>
+
 
 </html>
 

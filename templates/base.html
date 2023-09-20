@@ -4,9 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
+
+
     {% for BaseView in Favicons %}
       {% if BaseView.faviconpage == 'base.html' %}
-        <link rel="shortcut icon" type="image/{{ BaseView.favicontype }}" href="{% static 'css/images/' %}{{ BaseView.faviconlink }}"/>
+       <link rel="icon" type="image/x-icon" href="{{ BaseView.faviconcover.url }}">
+
+
       {% endif %}
     {% endfor %}
     <link rel="manifest" href="/site.webmanifest">
@@ -19,12 +24,13 @@
    {% if user.is_authenticated %}
 
   <body>
+
        <header style="z-index: 100; width: 12.2%;">
 
   <div class="column three mobile-twelve section_header_logo vertical-align-middle">
       {% for BaseView in Logo %}
       {% if BaseView.page == 'base.html' %}
-     <a class = "logo" href="{{BaseView.hyperlink}}"><img class = "imageicon"  src="media/{{BaseView.logocover}}" alt = "{{BaseView.alternate}}" width="145vh"
+     <a class = "logo" href="{{BaseView.hyperlink}}"><img class = "imageicon"  src="{{BaseView.logocover.url}}" alt = "{{BaseView.alternate}}" width="145vh"
      height="100vh" style="z-index: 100;"></a>
     {% endif %}
 
@@ -355,7 +361,7 @@
 
   {% block javascript %}
     <script src="{% static 'css/js/script.js' %}"></script>
-    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
     <script src="{% static 'css/js/cover.js' %}"></script>
