@@ -88,25 +88,39 @@
 
             <div class = "boedy">
   <div class="containereatede"><h1 class="banh1f">Add A Review</h1>
-        {% for items in Item %}
-        <p>Please provide some feedback on your experience working with {{ item }}. Help us provide better services.</p>
-        {% endfor %}
-      <form id="SubmitReviewForm" action="" method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    <table class="popupTable" border="0" cellpadding="0" cellspacing="0" width="100%" height="100%">
-        <tr>
-            <td>
-                {{ form }}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <input id="SubmitReviewButton" data-id="{{ company.id }}" type="submit" class="btn btn-primary" value="Submit" />
 
-            </td>
-        </tr>
-    </table>
+  <form id="SubmitReviewForm" action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Form fields -->
+                {{ form.star_rating.label_tag }} {{ form.star_rating }}
+                {{ form.comment.label_tag }} {{ form.comment }}
+                {{ form.slug.label_tag }} {{ form.slug }}
+                {{ form.image.label_tag }} {{ form.image }}
+            </div>
+            <div class="col-md-6">
+                <!-- Additional fields -->
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input id="username" type="text" class="form-control" value="{{ form.username.value }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="order">Order:</label>
+                    <input id="order" type="text" class="form-control" value="{{ form.order.value }}" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Submit button -->
+                <input id="SubmitReviewButton" data-id="{{ company.id }}" type="submit" class="btn btn-primary" value="Submit">
+            </div>
+        </div>
+    </div>
 </form>
+
 </div>
 
            <div class="drops">

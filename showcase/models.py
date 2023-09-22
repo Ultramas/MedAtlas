@@ -133,7 +133,7 @@ class Vote(models.Model):
     name = models.CharField(max_length=100, help_text='Your name goes here.')
     category = models.CharField(max_length=100,
                                 help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).')
-    mfg_date = models.DateTimeField(auto_now_add=True)
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -247,6 +247,7 @@ class StaffApplication(models.Model):
         choices=((True, 'Yes'), (False, 'No'))
     )
     role = models.TextField(help_text='What role are you applying for?', verbose_name="Roles")
+    resume = models.FileField(help_text='Your Resume', verbose_name="Resume")
     why = models.TextField(
         help_text='Tell us why you want to be a MegaClan Staff Member. Be descriptive.',
         verbose_name="Why do you want to apply for staff?"
@@ -475,8 +476,13 @@ class StaffProfile(models.Model):
     staff_feats = models.TextField(
         help_text='Let us know of your transcendental feats of making MegaClan a better place.',
         verbose_name="staff feats")
-    anonymous = models.BooleanField(default=False, help_text="Report issue anonymously?")
     image = models.ImageField(help_text='Please provide a cover image for your profile.')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2821,7 +2827,7 @@ class UserProfile2(models.Model):
 
 
 def create_profile(sender, **kwargs):
-    if (kwargs['created']):
+    if kwargs['created']:
         user_profile = UserProfile2.objects.create(user=kwargs['instance'])
 
 

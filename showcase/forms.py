@@ -785,6 +785,9 @@ from .models import OrderItem
 
 from django import forms
 from django.utils.text import slugify
+from django import forms
+from .models import Feedback
+from django import forms
 
 
 class FeedbackForm(forms.ModelForm):
@@ -792,36 +795,44 @@ class FeedbackForm(forms.ModelForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
+        # Set the initial value for the 'username' field
+        if self.request.user.is_authenticated:
+            self.fields['username'] = forms.CharField(initial=self.request.user.username)
+            self.fields['username'].widget.attrs['readonly'] = True
+        else:
+            self.fields['username'] = forms.CharField(required=False)
+
+        # Set the initial value for the 'order' field if it exists
+        initial_order = None
+        if self.instance and hasattr(self.instance, 'order') and self.instance.order:
+            initial_order = self.instance.order.item
+        self.fields['order'].initial = initial_order
+
+        # Filter the choices for the 'order' field based on the logged-in user
+        if self.request.user.is_authenticated:
+            self.fields['order'].queryset = OrderItem.objects.filter(user=self.request.user)
+        else:
+            self.fields['order'].queryset = OrderItem.objects.none()
+
     class Meta:
         model = Feedback
         fields = ('order', 'star_rating', 'comment', 'slug', 'image')
 
-    def save(self, commit=True):
-        # Get the user who created the feedback
-        user = self.request.user if self.request.user.is_authenticated else None
-
-        # Create an instance of the Feedback model
+    def save(self, commit=True, user=None):
         feedback = super().save(commit=False)
 
-        # Set the user, star rating, and slug if available
-        if user and isinstance(user, User):  # Check if user is a User instance
+        if user and user.is_authenticated:
             feedback.username = user
         else:
-            feedback.username = None  # Set to None if user is not a valid User instance
+            feedback.username = self.cleaned_data.get('username')
 
-        if 'star_rating' in self.cleaned_data:
-            feedback.star_rating = self.cleaned_data['star_rating']
-        if 'slug' in self.cleaned_data:
-            feedback.slug = self.cleaned_data['slug']
-
-        # Set the 'image' field if an image file is provided
-        if 'image' in self.cleaned_data:
-            feedback.image = self.cleaned_data['image']
+        feedback.star_rating = self.cleaned_data.get('star_rating')
+        feedback.slug = self.cleaned_data.get('slug')
+        feedback.image = self.cleaned_data.get('image')
 
         if commit:
             feedback.save()
         return feedback
-
 
 class EmailForm(forms.ModelForm):
     class Meta:

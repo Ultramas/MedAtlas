@@ -5150,7 +5150,7 @@ footer a:active {
 .navbarx{
   position: fixed;
 	display: inline-block;
-	background: linear-gradient(25deg, rgba(255, 191, 0, 0.486), rgba(139, 141, 163, 0.486));
+	background: linear-gradient(25deg, rgba(0, 203, 55, 0.8), rgba(139, 141, 163, 0.486));
 	  /* text styles */
 	text-decoration: none;
 	font-size: 25px;

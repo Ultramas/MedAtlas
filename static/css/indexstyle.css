@@ -150,7 +150,7 @@ section {
   position: absolute;
   top: 10%;
   left: 10%;
-  padding: 75% 75% 0 0;
+  padding: 40% 40% 0 0;
   border-radius: 50%;
   background: #2193b0;
   z-index: -1;
@@ -595,7 +595,7 @@ padding-bottom: 2%;
   /*height: 100%;*/
   place-items: center;
   background:linear-gradient(var(--clr-inner, #070727), var(--clr-outer, #17a2b8));
-  max-width: 1200px;
+  /*max-width: 1200px;*/
   margin: auto;
   padding: 20px 20px;
   display: flex;
@@ -684,6 +684,8 @@ padding-bottom: 2%;
   margin-bottom: 5%;
 }
 
+
+
 .guesttomember {
     display: flex;
     justify-content: space-between;
@@ -697,10 +699,97 @@ padding-bottom: 2%;
     flex: 1;
 }
 
+.contactusmethods2 {
+    display: flex;
+    justify-content: space-between; /* To evenly distribute the columns */
+    align-items: center; /* Align items vertically in each column */
+}
+
+.left2-content, .middle2-content, .right2-content {
+    flex: 1; /* Allow each column to grow and occupy equal space */
+    padding: 20px;
+    margin: 5px; /* Adjust margin to create space between columns */
+}
+
+.left2-content p, .middle2-content p, .right2-content p {
+    color: white; /* Adjust text color for better visibility on the background */
+}
+
+/* Add any other styles you may need for the buttons, etc. */
+
 .memberperks {
     /* Add styling for memberperks */
 }
 
 .becomeamember {
     /* Add styling for becomeamember */
+}
+
+
+/* CSS */
+.button-85 {
+  padding: 0.6em 2em;
+  border: none;
+  outline: none;
+  color: rgb(255, 255, 255);
+  background: #111;
+  cursor: pointer;
+  position: relative;
+  z-index: 0;
+  border-radius: 10px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-85:before {
+  content: "";
+  background: linear-gradient(
+    45deg,
+    #ff0000,
+    #ff7300,
+    #fffb00,
+    #48ff00,
+    #00ffd5,
+    #002bff,
+    #7a00ff,
+    #ff00c8,
+    #ff0000
+  );
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  background-size: 400%;
+  z-index: -1;
+  filter: blur(5px);
+  -webkit-filter: blur(5px);
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  animation: glowing-button-85 20s linear infinite;
+  transition: opacity 0.3s ease-in-out;
+  border-radius: 10px;
+}
+
+@keyframes glowing-button-85 {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+.button-85:after {
+  z-index: -1;
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #222;
+  left: 0;
+  top: 0;
+  border-radius: 10px;
 }

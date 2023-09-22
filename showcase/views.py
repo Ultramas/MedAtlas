@@ -2609,30 +2609,38 @@ class SupportRoomView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        signed_in_user = self.kwargs['signed_in_user']
-        context['username'] = signed_in_user  # Set 'username' to the extracted 'signed_in_user'
+        signed_in_user = self.kwargs.get('signed_in_user')
 
-        # room = self.kwargs['room']
-        # room_details = SupportChat.objects.get(name=signed_in_user)  # Use 'signed_in_user' here
-        profile_details = ProfileDetails.objects.filter(user__username=signed_in_user).first()
+        # Fetch the associated SupportChat
+        support_chat = get_object_or_404(SupportChat, name=signed_in_user)
+        try:
+            support_chat = SupportChat.objects.filter(signed_in_user__username=signed_in_user).first()
+        except SupportChat.DoesNotExist:
+            raise Http404("SupportChat does not exist for this user.")
+        except SupportChat.MultipleObjectsReturned:
+            support_chat = SupportChat.objects.filter(signed_in_user__username=signed_in_user).first()
+            # Handle multiple SupportChat instances for the same user here
+
+        if not support_chat:
+            raise Http404("SupportChat does not exist for this user.")
+
+        # Fetch the associated ProfileDetails
+        profile_details = get_object_or_404(ProfileDetails, user__username=signed_in_user)
+
+        context['username'] = signed_in_user
+        context['room'] = support_chat  # Assign the SupportChat instance
+        context['profile_details'] = profile_details
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
 
-        context['room'] = room
-        context['profile_details'] = profile_details
+        # Retrieve messages for the specific room (which is the username in this case) and signed-in user
+        messages = SupportMessage.objects.filter(signed_in_user__username=signed_in_user).order_by('date')
 
-        # Retrieve the author's profile avatar
-        # Retrieve the messages
-        messages = SupportMessage.objects.all().order_by('-date')
-
-        # Create a list to store formatted message data
         messages_data = []
 
         for message in messages:
             profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
-
-            # Create a dictionary to store message data including profile information
             message_data = {
                 'user_profile_picture_url': profile.avatar.url if profile else '',
                 'user_profile_url': message.get_profile_url(),
@@ -2640,13 +2648,13 @@ class SupportRoomView(TemplateView):
                 'value': message.value,
                 'date': message.date,
             }
-
             messages_data.append(message_data)
 
-        # Assign the list of formatted message data to the context
         context['Messaging'] = messages_data
 
         return context
+
+
 
 class SupportCombinedView(SupportRoomView, ListView):
     paginate_by = 10
@@ -2979,7 +2987,8 @@ class BackgroundView(FormMixin, BaseView):
             profile = ProfileDetails.objects.filter(user=user).first()
             if profile:
                 feed.user_profile_picture_url = profile.avatar.url
-                feed.user_profile_url = feed.get_profile_url()
+                feed.user_profile_url = feed.get_profile_url2()
+                feed.feedback_profile_url = feed.get_profile_url()
                 print(user)
 
         return context
@@ -6685,10 +6694,12 @@ from .models import OrderItem, Feedback
 
 
 
+
 class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
     model = Feedback
     template_name = "create_review.html"
     form_class = FeedbackForm
+    # Your view code
 
     def get(self, request, *args, **kwargs):
         item_slug = request.GET.get('item_slug')
@@ -6704,10 +6715,29 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
         except Feedback.DoesNotExist:
             existing_feedback = None
 
-        # Create an instance of the FeedbackForm and pass the request object
-        form = FeedbackForm(request=request, instance=existing_feedback)
+        # Set 'user' based on the authenticated user
+        user = request.user if request.user.is_authenticated else None
 
-        return render(request, 'create_review.html', {'form': form})
+        form = FeedbackForm(request=request)  # No need to pass user here
+
+        context = self.get_context_data(form=form)
+        context.update({'form': form})  # Add form to the context
+
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        print("get_context_data is being called")
+        context = super().get_context_data(**kwargs)
+        # context['Change'] = ChangePasswordBackgroundImage.objects.all()
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        return context
 
     def post(self, request, *args, **kwargs):
         item_slug = request.GET.get('item_slug')
@@ -6723,42 +6753,34 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, ListView):
         except Feedback.DoesNotExist:
             existing_feedback = None
 
-        # Create or update the feedback instance
-        form = FeedbackForm(request.POST, request.FILES, request=request, instance=existing_feedback)
+        # Set 'user' based on the authenticated user
+        user = request.user if request.user.is_authenticated else None
+
+        # Create the form with the 'request' and 'user' keyword arguments
+        form = FeedbackForm(request.POST, request=request)
 
         if form.is_valid():
-            feedback = form.save(commit=False)
-
-            # Set the 'item' field based on the order item
-            feedback.item = orderitem.item  # Assuming 'item' is a ForeignKey in Feedback
-
-            # Set other fields and save the feedback instance
-            feedback.username = request.user if request.user.is_authenticated else None
-            feedback.order = orderitem
-            feedback.slug = orderitem.slug
-            feedback.save()
-
-            if existing_feedback and existing_feedback != feedback:
-                existing_feedback.delete()
-                slug = str(existing_feedback.slug)  # Use the existing_feedback object's slug
+            if existing_feedback:
+                # Update existing feedback
+                existing_feedback.star_rating = form.cleaned_data.get('star_rating')
+                existing_feedback.comment = form.cleaned_data.get('comment')
+                existing_feedback.slug = form.cleaned_data.get('slug')
+                existing_feedback.image = form.cleaned_data.get('image')
+                existing_feedback.save()
+                slug = str(existing_feedback.slug)
             else:
-                slug = str(feedback.slug)  # Use the feedback object's slug
+                # Create a new feedback
+                feedback = form.save(commit=False)
+                feedback.item = orderitem.item
+                feedback.order = orderitem
+                feedback.save()
+                slug = str(feedback.slug)
 
             url = reverse('showcase:review_detail', args=[slug])
             return redirect(url)
 
         return render(request, 'create_review.html', {'form': form})
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
-        return context
 
 @login_required(login_url='/accounts/login/')
 def submit_feedback(request):

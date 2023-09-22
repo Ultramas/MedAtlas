@@ -98,13 +98,13 @@ class UserProfile2Admin(admin.ModelAdmin):
 
 class categoryAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Update Profile" Information - Categorial Descriptions', {
+        ('Update Profile Information - Categorial Descriptions', {
             'fields': ('user', 'name', 'description',)
         }),
-        ('Update Profile" Image Information - Image Display', {
+        ('Update Profile Image Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',)
         }),
-        ('Update Profile" Image Information - Attributes', {
+        ('Update Profile Image Information - Attributes', {
             'fields': ('is_active',)
         }),
     )
@@ -120,14 +120,32 @@ class detailsAdmin(admin.ModelAdmin):
 
 
 class authorAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Vote Information - Categorial Descriptions', {
+            'fields': ('user', 'name', 'category', 'is_active')
+        }),
+    )
+    readonly_fields = ('mfg_date',)
     pass
 
 
 # Register your models here.
 admin.site.register(UpdateProfile, categoryAdmin)
 admin.site.register(Idea, categoryAdmin)
+
 admin.site.register(Vote, authorAdmin)
-admin.site.register(StaffApplication, authorAdmin)
+class StaffApplicationAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Staff Application Information - Staff Background Check', {
+            'fields': ('name', 'overall_time_check', 'previous_role_time_check', 'strikes_check', 'read_requirements'),
+            'classes': ('collapse',),
+        }),
+        ('Staff Application Information - Staff Candidate Input', {
+            'fields': ('role', 'resume', 'why', 'how_better', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+admin.site.register(StaffApplication, StaffApplicationAdmin)
 
 
 class PartnerApplicationAdmin(admin.ModelAdmin):
@@ -169,7 +187,19 @@ class ReportIssueAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ReportIssue, ReportIssueAdmin)
-admin.site.register(StaffProfile)
+
+class StaffProfileAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Staff Profile Information - Categorial Description', {
+            'fields': ('user', 'name', 'position', 'description', 'staff_feats', 'is_active',),
+            'classes': ('collapse',),
+        }),
+        ('Staff Profile Information - Image Description', {
+            'fields': ('image', 'image_length', 'image_width',),
+            'classes': ('collapse',),
+        }),
+    )
+admin.site.register(StaffProfile, StaffProfileAdmin)
 
 
 class ProfileAdmin(admin.ModelAdmin):
@@ -200,7 +230,15 @@ class SettingsAdmin(admin.ModelAdmin):
 admin.site.register(SettingsModel, SettingsAdmin)
 # admin.site.register(SettingsBackgroundImage)
 # admin.site.register(ConvertBackgroundImage)
-admin.site.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Partner Application Information - Categorial Description', {
+            'fields': ('user', 'stripe_customer_id', 'one_click_purchasing', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+
+admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(UserProfile2, UserProfile2Admin)
 
 
@@ -1042,7 +1080,7 @@ admin.site.register(Support, CustomerSupportAdmin)
 
 class SupportChatAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Support Room  Information-Categorial Descriptions', {
+        ('Support Room  Information - Categorial Descriptions', {
             'fields': ('name', 'signed_in_user', 'is_active',)
         }),
     )
