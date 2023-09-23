@@ -88,35 +88,33 @@
 
             <div class = "boedy">
   <div class="containereatede"><h1 class="banh1f">Add A Review</h1>
-
-  <form id="SubmitReviewForm" action="" method="POST" enctype="multipart/form-data">
+{% if form.errors %}
+  <div class="alert alert-danger">
+    <strong>Form errors:</strong>
+    <ul>
+      {% for field, errors in form.errors.items %}
+        {% for error in errors %}
+          <li>{{ field }}: {{ error }}</li>
+        {% endfor %}
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}<form id="SubmitReviewForm" action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <!-- Form fields -->
-                {{ form.star_rating.label_tag }} {{ form.star_rating }}
-                {{ form.comment.label_tag }} {{ form.comment }}
-                {{ form.slug.label_tag }} {{ form.slug }}
-                {{ form.image.label_tag }} {{ form.image }}
-            </div>
-            <div class="col-md-6">
-                <!-- Additional fields -->
-                <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input id="username" type="text" class="form-control" value="{{ form.username.value }}" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="order">Order:</label>
-                    <input id="order" type="text" class="form-control" value="{{ form.order.value }}" readonly>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <!-- Submit button -->
-                <input id="SubmitReviewButton" data-id="{{ company.id }}" type="submit" class="btn btn-primary" value="Submit">
-            </div>
+    <!-- Form fields -->
+    {{ form.star_rating.label_tag }} {{ form.star_rating }}
+    {{ form.comment.label_tag }} {{ form.comment }}
+    {{ form.slug.label_tag }} {{ form.slug }}
+    {{ form.image.label_tag }} {{ form.image }}
+
+    <!-- Hidden fields -->
+    <input type="hidden" id="username" name="username" value="{{ user.username }}">
+    <input type="hidden" id="order" name="order" value="{{ orderitem_id }}">
+
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Submit button -->
+            <input id="SubmitReviewButton" data-id="{{ company.id }}" type="submit" class="btn btn-primary" value="Submit">
         </div>
     </div>
 </form>
