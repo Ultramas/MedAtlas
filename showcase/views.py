@@ -4015,8 +4015,7 @@ def pollresults(request, question_id):
 
 # Vote for a question choice
 
-
-class PollingView(BaseView):
+class PollingView(View):
     model = Choice
     template_name = "pollvote.html"
 
@@ -4027,30 +4026,22 @@ class PollingView(BaseView):
         try:
             selected_choice = question.choice_set.get(pk=request.POST['choice'])
         except (KeyError, Choice.DoesNotExist):
-            return render(request, self.template_name, {
+            error_message = "You did not select a choice."
+            context = {
                 'question': question,
-                'error_message': "You did not select a choice.",
-            })
+                'error_message': error_message,
+                'Background': BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+                'PostBackgroundImage': PostBackgroundImage.objects.all(),
+                'BaseCopyrightTextFielded': BaseCopyrightTextField.objects.filter(is_active=1),
+                'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+                'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
+                'DropDown': NavBar.objects.filter(is_active=1).order_by('position')
+            }
+            return render(request, self.template_name, context)
         else:
             selected_choice.votes += 1
             selected_choice.save()
-            return HttpResponseRedirect(reverse('showcase:pollresults', args=(question.id, )))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        question_id = self.kwargs.get('question_id')
-        question = get_object_or_404(PollQuestion, pk=question_id)
-
-        context['question'] = question
-        context['Background'] = BackgroundImageBase.objects.filter(
-            is_active=1, page=self.template_name).order_by("position")
-        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        print("Context:", context)
-        return context
+            return HttpResponseRedirect(reverse('showcase:pollresults', args=(question.id,)))
 
 class PosteView(FormMixin, ListView):
     model = VoteBackgroundImage
@@ -6803,108 +6794,95 @@ from .forms import FeedbackForm
 from .models import OrderItem, Feedback
 
 
-
-
-class CreateReviewView(FormMixin, LoginRequiredMixin, DetailView):
-    model = Feedback
+class CreateReviewView(FormMixin, LoginRequiredMixin, View):
     template_name = "create_review.html"
     form_class = FeedbackForm
-    # Your view code
 
-    class CreateReviewView(FormMixin, LoginRequiredMixin, DetailView):
-        model = Feedback
-        template_name = "create_review.html"
-        form_class = FeedbackForm
-
-        def get(self, request, *args, **kwargs):
-            # Extract item_slug and orderitem_id from the request
-            item_slug = request.GET.get('item_slug')
-            orderitem_id = request.GET.get('orderitem_id')
-
-            try:
-                orderitem = OrderItem.objects.get(id=orderitem_id)
-            except OrderItem.DoesNotExist:
-                return HttpResponse('Sorry, this order does not exist.')
-
-            try:
-                existing_feedback = Feedback.objects.get(order=orderitem)
-            except Feedback.DoesNotExist:
-                existing_feedback = None
-
-            # Ensure the user is authenticated before accessing user properties
-            if request.user.is_authenticated:
-                username = request.user.username
-            else:
-                username = None
-
-            # Create an instance of the FeedbackForm and pass the request object
-            form = FeedbackForm(request=request, instance=existing_feedback)
-
-            context = self.get_context_data()  # Call get_context_data to get the initial context
-
-            # Add form and other context variables to the context dictionary
-            context.update({'form': form, 'item_slug': item_slug, 'orderitem_id': orderitem_id, 'username': username})
-
-            return self.render_to_response(context)
-
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         item_slug = request.GET.get('item_slug')
         orderitem_id = request.GET.get('orderitem_id')
 
         try:
             orderitem = OrderItem.objects.get(id=orderitem_id)
         except OrderItem.DoesNotExist:
-            return redirect('showcase:ehome')
+            return HttpResponse('Sorry, this order does not exist.')
 
         try:
             existing_feedback = Feedback.objects.get(order=orderitem)
         except Feedback.DoesNotExist:
             existing_feedback = None
 
-        # Ensure the user is authenticated before accessing user properties
-        if request.user.is_authenticated:
-            username = request.user.username
-        else:
-            username = None
+        user = request.user if request.user.is_authenticated else None
 
-        # Create or update the feedback instance
-        form = FeedbackForm(request.POST, request.FILES, request=request, instance=existing_feedback)
+        # Pass the orderitem to the form
+        form = FeedbackForm(request=request, orderitem=orderitem)
+
+        context = self.get_context_data(form=form)
+        context.update({'form': form})  # Add form to the context
+
+        return render(request, self.template_name, context)
+
+    def get_context_data(self, **kwargs):
+        print("get_context_data is being called")
+        context = {
+            'Logo': LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section"),
+            'BaseCopyrightTextFielded': BaseCopyrightTextField.objects.filter(is_active=1),
+            'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+            'Favicons': FaviconBase.objects.filter(is_active=1),
+            'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
+            'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
+            'Background': BackgroundImageBase.objects.filter(is_active=1)
+        }
+        return context
+
+    # ... Your existing code ...
+
+    def post(self, request, *args, **kwargs):
+        orderitem_id = request.POST.get('orderitem_id')  # Retrieve orderitem_id from POST data
+        print("Received orderitem_id:", orderitem_id)  # Debug print
+
+        try:
+            orderitem = OrderItem.objects.get(id=orderitem_id)
+        except OrderItem.DoesNotExist:
+            print("Order not found-maybe it does not exist?")
+            return redirect('showcase:ehome')
+
+        # Rest of your code for handling existing feedback, form creation, and form validation
+
+        try:
+            existing_feedback = Feedback.objects.get(order=orderitem)
+        except Feedback.DoesNotExist:
+            existing_feedback = None
+
+        user = request.user if request.user.is_authenticated else None
+
+        form = FeedbackForm(request.POST, request=request, orderitem=orderitem)
+        form.instance.order = orderitem  # Set the order for the form instance
 
         if form.is_valid():
-            feedback = form.save(commit=False)
+            # Ensure the 'order' field is set correctly
+            form.instance.order = orderitem
 
-            # Set the 'item' field based on the order item
-            feedback.item = orderitem.item  # Assuming 'item' is a ForeignKey in Feedback
-
-            # Set other fields and save the feedback instance
-            feedback.username = username  # Use the username variable
-            feedback.order = orderitem
-            feedback.slug = orderitem.slug
-            feedback.save()
-
-            if existing_feedback and existing_feedback != feedback:
-                existing_feedback.delete()
-                slug = str(existing_feedback.slug)  # Use the existing_feedback object's slug
+            if existing_feedback:
+                existing_feedback.star_rating = form.cleaned_data.get('star_rating')
+                existing_feedback.comment = form.cleaned_data.get('comment')
+                existing_feedback.slug = form.cleaned_data.get('slug')
+                existing_feedback.image = form.cleaned_data.get('image')
+                existing_feedback.save()
+                slug = str(existing_feedback.slug)
             else:
-                slug = str(feedback.slug)  # Use the feedback object's slug
+                feedback = form.save(commit=False)
+                feedback.item = orderitem.item
+                feedback.order = orderitem
+                feedback.save()
+                slug = str(feedback.slug)
 
             url = reverse('showcase:review_detail', args=[slug])
             return redirect(url)
 
-        return render(request, 'create_review.html', {'form': form})
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
-        return context
-
-
+        context = self.get_context_data(form=form)
+        context['form'] = form
+        return render(request, self.template_name, context)
 
 
 @login_required(login_url='/accounts/login/')

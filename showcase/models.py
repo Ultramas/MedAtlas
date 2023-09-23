@@ -143,6 +143,7 @@ class Choice(models.Model):
     #name = models.CharField(max_length=100, help_text='Your name goes here.')
     question = models.ForeignKey(PollQuestion, on_delete=models.CASCADE)
     choice_text = models.CharField(max_length=200)
+    file = models.FileField(null=True, verbose_name='File')
     votes = models.IntegerField(default=0)
     category = models.CharField(max_length=100,
                                 help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).')

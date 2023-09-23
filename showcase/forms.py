@@ -790,26 +790,29 @@ from .models import Feedback
 from django import forms
 
 
+
+
 class FeedbackForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
+        orderitem = kwargs.pop('orderitem', None)  # Get the orderitem
+
         super().__init__(*args, **kwargs)
 
+        # Set the initial value and queryset for the 'order' field
+        self.fields['order'].initial = orderitem.id if orderitem else None
+        self.fields['order'].queryset = OrderItem.objects.filter(
+            id=orderitem.id) if orderitem else OrderItem.objects.none()
+
         # Set the initial value for the 'username' field
-        if self.request.user.is_authenticated:
+        if self.request and self.request.user.is_authenticated:
             self.fields['username'] = forms.CharField(initial=self.request.user.username)
             self.fields['username'].widget.attrs['readonly'] = True
         else:
             self.fields['username'] = forms.CharField(required=False)
 
-        # Set the initial value for the 'order' field if it exists
-        initial_order = None
-        if self.instance and hasattr(self.instance, 'order') and self.instance.order:
-            initial_order = self.instance.order.item
-        self.fields['order'].initial = initial_order
-
         # Filter the choices for the 'order' field based on the logged-in user
-        if self.request.user.is_authenticated:
+        if self.request and self.request.user.is_authenticated:
             self.fields['order'].queryset = OrderItem.objects.filter(user=self.request.user)
         else:
             self.fields['order'].queryset = OrderItem.objects.none()
@@ -826,6 +829,9 @@ class FeedbackForm(forms.ModelForm):
         else:
             feedback.username = self.cleaned_data.get('username')
 
+        # Ensure the 'order' field is set correctly
+        feedback.order = self.cleaned_data.get('order')
+
         feedback.star_rating = self.cleaned_data.get('star_rating')
         feedback.slug = self.cleaned_data.get('slug')
         feedback.image = self.cleaned_data.get('image')
@@ -833,6 +839,9 @@ class FeedbackForm(forms.ModelForm):
         if commit:
             feedback.save()
         return feedback
+
+
+
 
 class EmailForm(forms.ModelForm):
     class Meta:
