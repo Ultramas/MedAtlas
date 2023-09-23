@@ -151,6 +151,10 @@ urlpatterns = [
     path('blog/', views.PostList.as_view(), name='blog'),
     # works at the cost of the blog display
     path('users/', views.UserBackgroundView.as_view(), name='users'),
+    path('pollquestions/', views.PollQuestionsView.as_view(), name='pollquestions'),
+    path('<int:question_id>/polldetail', views.PollDetailView.as_view(), name='polldetail'),
+    path('<int:question_id>/pollresults/', views.pollresults, name='pollresults'),
+    path('<int:question_id>/pollvote/', views.PollingView.as_view(), name='pollvote'),
     path('voting/', views.votingview.as_view(), name='voting'),
     path('partners/', views.PartnerBackgroundView.as_view(), name='partners'),
     # path('newsfeed/', views.newsfeedview.as_view(), name='newsfeed'),
@@ -285,7 +289,8 @@ urlpatterns = [
     path('reviews/', views.ReviewView.as_view(), name='reviews'),
     #path('create_review/<int:orderitem_id>/', views.SubmitFeedbackView.as_view(), name='create_review'),
     #path('create_review/<int:item_id>/', submit_feedback, name='create_review'),
-    path('create_review/', views.CreateReviewView.as_view(), name='create_review'),
+    re_path(r'^create_review/(?P<item_slug>[\w-]+)/(?P<orderitem_id>[\w-]+)/$', views.CreateReviewView.as_view(),
+            name='create_review'),
     #might cause issues due to the implementation of an integer rather than the foreignkey
     #path('order_history/', my_order_items, name='order_history'),
     path('order_history/', views.OrderHistory.as_view(), name='order_history'),

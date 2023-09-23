@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UpdateProfile, Questionaire
+from .models import UpdateProfile, Questionaire, PollQuestion, Choice
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -118,6 +118,19 @@ class publisherAdmin(admin.ModelAdmin):
 class detailsAdmin(admin.ModelAdmin):
     pass
 
+
+class ChoiceInLine(admin.TabularInline):
+    model = Choice
+    extra = 1
+
+
+class PollQuestionAdmin(admin.ModelAdmin):
+    fieldsets = [(None, {'fields': ['question_text']})]
+    inlines = [ChoiceInLine]
+    readonly_fields = ('pub_date',)
+
+
+admin.site.register(PollQuestion, PollQuestionAdmin)
 
 class authorAdmin(admin.ModelAdmin):
     fieldsets = (

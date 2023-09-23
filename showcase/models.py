@@ -127,10 +127,41 @@ class UpdateProfile(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
 
+class PollQuestion(models.Model):
+    question_text = models.CharField(max_length=200, verbose_name="Question")
+    pub_date = models.DateTimeField('date published', auto_now_add=True)
+
+    def __str__(self):
+        return self.question_text
+    class Meta:
+        verbose_name = "Poll Question"
+        verbose_name_plural = "Poll Questions"
+
+class Choice(models.Model):
+    """Used for voting on different new ideas"""
+    #user = models.ForeignKey(User, on_delete=models.CASCADE)
+    #name = models.CharField(max_length=100, help_text='Your name goes here.')
+    question = models.ForeignKey(PollQuestion, on_delete=models.CASCADE)
+    choice_text = models.CharField(max_length=200)
+    votes = models.IntegerField(default=0)
+    category = models.CharField(max_length=100,
+                                help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).')
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    class Meta:
+        verbose_name = "Choice"
+        verbose_name_plural = "Choices"
+
 class Vote(models.Model):
     """Used for voting on different new ideas"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text='Your name goes here.')
+    question = models.ForeignKey(PollQuestion, on_delete=models.CASCADE, null="True")
     category = models.CharField(max_length=100,
                                 help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).')
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
@@ -2217,7 +2248,6 @@ class OrderItem(models.Model):
             return self.get_discount_item_price()
         return self.get_total_item_price()
 
-#new
 
 
 #used to get the url of the item
@@ -2478,8 +2508,11 @@ class Order(models.Model):
                 total -= self.coupon.amount
         return total
 
-        def get_profile_url(self):
-            return reverse('showcase:profile', args=[str(self.slug)])
+    def get_profile_url(self):
+        return reverse('showcase:profile', args=[str(self.slug)])
+    def get_profile_url2(self):
+        return reverse('showcase:products', args=[str(self.slug)])
+
 
 
 class Address(models.Model):
