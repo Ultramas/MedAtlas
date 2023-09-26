@@ -7,7 +7,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-    <title>Django Email Send</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet"
       integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous" />
   </head>
@@ -15,16 +14,27 @@
   <body>
 
   <div class="column three mobile-twelve section_header_logo vertical-align-middle">
-      {% for BaseView in Logo %}
+      <!--{% for BaseView in Logo %}
  <a class = "logo" href="/"><img class = "imageicon"  src="media/{{BaseView.logocover}}" alt = "{{BaseView.alternate}}" width="145vh"
      height="100vh"></a>
-      {% endfor %}
+      {% endfor %}-->
  </div>
 
 
      </header>
 
-<section class="gt_section-77035 gt_animation-zoom-out-left gt_animated" data-name="Header" style="height: auto;"> <div class="gt_header"> <div class="gt_flex gt_logo"> <div class="icon_when_scroll"> <div class="icon_when_scroll_content"> <span> </span> <span> </span> <span> </span> </div> </div> <div class="logo_header">
+<section class="gt_section-77035 gt_animation-zoom-out-left gt_animated" data-name="Header" style="height: auto;">
+    <div class="gt_header">
+        <div class="gt_flex gt_logo">
+        <div class="icon_when_scroll">
+            <div class="icon_when_scroll_content">
+        <span> </span>
+                </div>
+        </div>
+        </div>
+    </div>
+</section>
+    <div class="logo_header">
 
 
 
@@ -56,6 +66,7 @@
     </div>
   </div>
 {% endfor %}
+    </ul>
       </div>
 
 

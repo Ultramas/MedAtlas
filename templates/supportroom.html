@@ -125,10 +125,10 @@
 </div>
 
 <script type="text/javascript">
-$(document).ready(function() {
-  var user = "{{ username }}";
-
+  // Function to fetch and display messages
   function fetchAndDisplayMessages() {
+    var user = "{{ username }}";
+
     $.ajax({
       type: 'GET',
       url: `/supportgetMessages/room/${user}`,
@@ -158,14 +158,12 @@ $(document).ready(function() {
   // Fetch and display messages initially
   fetchAndDisplayMessages();
 
-  // Fetch new messages every 5 seconds
+  // Fetch new messages every second
   setInterval(function() {
     fetchAndDisplayMessages();
   }, 1000);
-});
-
-
 </script>
+
 
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js/darkmode.js' %}"></script>

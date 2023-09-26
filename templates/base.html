@@ -56,34 +56,33 @@
 
     <div class = "navbarx">
 
-    <ul>
-{% for column in Header %}
-  <div class="dropdown">
-    <a href="#{{ column.section }}" class="glass">{{ column.text }}</a>
-    <div class="dropdown-content">
-      {% for row in DropDown %}
-        {% if row.row == column.row %}
-          {% if row.url == 'http://127.0.0.1:8000/profile' %}
-             {% if row.opennew %}
-            <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a>
+   <ul>
+  {% for column in Header %}
+    <div class="dropdown">
+      <a href="#{{ column.section }}" class="glass">{{ column.text }}</a>
+      <div class="dropdown-content">
+        {% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+                <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a>
+              {% else %}
+                <a href="{{ profile_url }}">{{ row.text }}</a>
+              {% endif %}
             {% else %}
-            <a href="{{ profile_url }}">{{ row.text }}</a>
-            {% endif %}
-          {% else %}
-            {% if row.opennew %}
-              <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
-            {% else %}
-              <a href="{{ row.url }}">{{ row.text }}</a>
+              {% if row.opennew %}
+                <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
+              {% else %}
+                <a href="{{ row.url }}">{{ row.text }}</a>
+              {% endif %}
             {% endif %}
           {% endif %}
-
-        {% endif %}
-      {% endfor %}
+        {% endfor %}
+      </div>
     </div>
-  </div>
-{% endfor %}
+  {% endfor %}
+</ul>
 
-    </ul>
     </div>
 
 
@@ -189,7 +188,7 @@
         {% for BaseDropdown204 in Texts204 %}
     {{ BaseDropdown204.text }}
   {% endfor %}</a>
-      <!--<a href="{% url 'showcase:originalmembers'%}">Original Members</a> --
+      <a href="{% url 'showcase:originalmembers'%}">Original Members</a> --
       <a href="{% url 'showcase:information'%}">
         {% for BaseDropdown205 in Texts205 %}
     {{ BaseDropdown205.text }}
@@ -207,7 +206,7 @@
     {{ BaseHomeText301.text }}
   {% endfor %}</a>
           <div class="dropdown-content">
-      <!--<a href="{% url 'showcase:perks'%}">Member Profiles</a>--
+      <a href="{% url 'showcase:perks'%}">Member Profiles</a>--
       <a href="{% url 'showcase:post_edit'%}">
         {% for BaseDropdown301 in Texts301 %}
     {{ BaseDropdown301.text }}
@@ -283,7 +282,7 @@
     {{ BaseHomeText501.text }}
   {% endfor %}</a>
         <div class="dropdown-content">
-      <!--<a href="{% url 'showcase:email'%}">Contact Us</a>--
+     <a href="{% url 'showcase:email'%}">Contact Us</a>--
       <a href="{% url 'showcase:tag'%}">
         {% for BaseDropdown501 in Texts501 %}
     {{ BaseDropdown501.text }}
@@ -328,12 +327,12 @@
   {% endfor %}</a>
         <div class="dropdown-content">
 
-            <!--<a href="{% url 'showcase:boosts'%}">〖𐌑𐌂〗Boosts</a>--
+            <a href="{% url 'showcase:boosts'%}">〖𐌑𐌂〗Boosts</a>--
       <a href="{% url 'showcase:whydonate'%}">
         {% for BaseDropdown601 in Texts601 %}
     {{ BaseDropdown601.text }}
   {% endfor %}</a>
-      <!--<a href="{% url 'showcase:invite'%}">〖𐌑𐌂〗Invites Leaderboard</a>--
+      <a href="{% url 'showcase:invite'%}">〖𐌑𐌂〗Invites Leaderboard</a>--
       <a href="{% url 'showcase:donate' %}" target="_blank">
         {% for BaseDropdown602 in Texts602 %}
     {{ BaseDropdown602.text }}

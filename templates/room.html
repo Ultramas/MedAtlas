@@ -1,16 +1,17 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% for ChatBackgroundImage in Titles %}
-  {% if ChatBackgroundImage.page == 'room.html' %}
-     {{ ChatBackgroundImage.overtitle }}
-  {% endif %}
-{% endfor %}
-
 {% block content %}
 
 <html>
 <head>
+
+{% for Room in Titles %}
+  {% if Room.page == 'room.html' %}
+    <title>{{ Room.overtitle }}</title>
+  {% endif %}
+{% endfor %}
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 
@@ -84,8 +85,11 @@
 </head>
 <body>
 
-{% for ChatBackgroundImage in Background %}
-  <img class="backgroundimages" src="{{BackgroundImage.cover.url}}" alt="{{ BackgroundImage.backgroundtitle }}">
+{% for Room in Background %}
+{% if Room.page == 'room.html' %}
+QWTYZERUXtjykd7jxrhefwDA
+  <div class="backgroundimages" style="background: url('{{Room.cover.url}}'); background-size: cover;">
+      {% endif %}
 {% endfor %}
 
 <br>
@@ -179,7 +183,7 @@ function preloadImages(urls) {
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
 
-
+  </div>
 </body>
 
 <script type="text/javascript">
@@ -216,7 +220,6 @@ $(document).on('submit','#post-form',function(e){
   };
 </script>
 
-
 </html>
 
 {% endblock content %}
@@ -227,9 +230,9 @@ $(document).on('submit','#post-form',function(e){
 <!--the backup code-->
 
 <!--
-    {% for ChatBackgroundImage in Titles %}
-      {% if ChatBackgroundImage.page == 'room.html' %}
-         {{ ChatBackgroundImage.overtitle }}
+    {% for Room in Titles %}
+      {% if Room.page == 'room.html' %}
+         {{ Room.overtitle }}
       {% endif %}
     {% endfor %}
 
@@ -290,8 +293,8 @@ body {
 <script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
 </head>
 <body>
-  {% for ChatBackgroundImage in Background %}
-      <img class = "backgroundimages" src="{{ChatBackgroundImage.cover.url}}" alt="{{ ChatBackgroundImage.backgroundtitle }}">
+  {% for Room in Background %}
+      <img class = "backgroundimages" src="{{Room.cover.url}}" alt="{{ Room.backgroundtitle }}">
   {% endfor %}
 
 <h2>{{username}} - {{room}}</h2>

@@ -324,11 +324,28 @@ class BaseView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(is_active=1)
         context['Favicons'] = FaviconBase.objects.all()
         user = self.request.user
+        print(f'User: {user.username}, is_authenticated: {user.is_authenticated}, is_staff: {user.is_staff}')
+
+        # Check if the user is an administrator and filter NavBarHeader accordingly
+        if user.is_authenticated and user.is_staff:
+            print('Staff is presently present')
+            context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        else:
+            # Filter NavBarHeader to exclude "admin" items
+            print('User is not staff')
+            context['Header'] = NavBarHeader.objects.filter(is_active=1).exclude(
+                text__icontains="Admin"
+            ).order_by("row")
+
+            # Print the headers for debugging
+            print('Headers:')
+            for header in context['Header']:
+                print(header.text)
+
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
             profile = ProfileDetails.objects.filter(user=user).first()
@@ -426,17 +443,17 @@ from django.utils.decorators import method_decorator
 
 
 @method_decorator(staff_member_required, name='dispatch')
-class AdminRolesView(ListView):
+class AdminRolesView(BaseView):
     template_name = "administrativeroles.html"
     model = AdminRoles
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Roles'] = AdminRoles.objects.filter(is_active=1)
-
         return context
 
 
@@ -447,6 +464,7 @@ class AdminTasksView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
@@ -461,6 +479,7 @@ class AdminPagesView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
@@ -475,6 +494,7 @@ class AdministrationView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
@@ -489,6 +509,7 @@ class DonateBaseView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
@@ -508,6 +529,7 @@ class MemberBaseView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
@@ -680,6 +702,7 @@ class BusinessMessageBackgroundView(ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BusinessMessageBackgroundImage'] = BusinessMessageBackgroundImage.objects.all()
@@ -1220,15 +1243,14 @@ class RuleBackgroundView(BaseView):
     model = RuleBackgroundImage
     template_name = "rules.html"
 
-
-def get_context_data(self, **kwargs):
-    context = super().get_context_data(**kwargs)
-    context['RuleBackgroundImage'] = RuleBackgroundImage.objects.all()
-    context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-    context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-    context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-    context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-    return context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Rules'] = RuleBackgroundImage.objects.all()
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        return context
 
 
 class RuleCreatePostView(CreateView):
@@ -1701,7 +1723,8 @@ class RoomView(TemplateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
         context['username'] = username
         context['room'] = room
         context['room_details'] = room_details
@@ -2348,7 +2371,7 @@ from django.utils.decorators import method_decorator
 
 
 @method_decorator(staff_member_required, name='dispatch')
-class AdminRolesView(ListView):
+class AdminRolesView(BaseView):
     template_name = "administrativeroles.html"
     model = AdminRoles
 
@@ -2363,7 +2386,7 @@ class AdminRolesView(ListView):
 
 
 @method_decorator(staff_member_required, name='dispatch')
-class AdminTasksView(ListView):
+class AdminTasksView(BaseView):
     template_name = "administrativetasks.html"
     model = AdminTasks
 
@@ -2377,7 +2400,7 @@ class AdminTasksView(ListView):
 
 
 @method_decorator(staff_member_required, name='dispatch')
-class AdminPagesView(ListView):
+class AdminPagesView(BaseView):
     template_name = "administrativepages.html"
     model = AdminPages
 
@@ -2414,6 +2437,7 @@ class DonateBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
@@ -2433,6 +2457,7 @@ class MemberBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
@@ -2615,13 +2640,13 @@ class SupportRoomView(TemplateView):
         try:
             support_chat = SupportChat.objects.filter(signed_in_user__username=signed_in_user).first()
         except SupportChat.DoesNotExist:
-            raise Http404("SupportChat does not exist for this user.")
+            support_chat = SupportChat.objects.create(name=signed_in_user)
         except SupportChat.MultipleObjectsReturned:
             support_chat = SupportChat.objects.filter(signed_in_user__username=signed_in_user).first()
             # Handle multiple SupportChat instances for the same user here
 
         if not support_chat:
-            raise Http404("SupportChat does not exist for this user.")
+            support_chat = SupportChat.objects.create(name=signed_in_user)
 
         # Fetch the associated ProfileDetails
         profile_details = get_object_or_404(ProfileDetails, user__username=signed_in_user)
@@ -2632,7 +2657,8 @@ class SupportRoomView(TemplateView):
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
         # Retrieve messages for the specific room (which is the username in this case) and signed-in user
         messages = SupportMessage.objects.filter(signed_in_user__username=signed_in_user).order_by('date')
 
@@ -3217,19 +3243,7 @@ class BilletCreatePostView(CreateView):
     success_url = reverse_lazy("billets")
 
 
-class RuleBackgroundView(BaseView):
-    model = RuleBackgroundImage
-    template_name = "rules.html"
 
-
-def get_context_data(self, **kwargs):
-    context = super().get_context_data(**kwargs)
-    context['RuleBackgroundImage'] = RuleBackgroundImage.objects.all()
-    context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-    context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-    context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-    context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-    return context
 
 
 class RuleCreatePostView(CreateView):
@@ -4208,7 +4222,7 @@ class SearchResultsView(ListView):
 
         vote_list = Vote.objects.filter(
             Q(name__icontains=query) | Q(category__icontains=query)
-            | Q(description__icontains=query) | Q(image__icontains=query))
+            | Q(description__icontains=query))
 
         profile_list = UpdateProfile.objects.filter(
             Q(name__icontains=query) | Q(description__icontains=query)
@@ -4553,6 +4567,7 @@ class BusinessMailingView(FormView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         return context
@@ -4577,6 +4592,7 @@ class BusinessSuccessMailingView(TemplateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         print(context["Contact"])
         context["BusinessMailingContact"] = "2123123123123"
@@ -4733,7 +4749,7 @@ class ProductView(DetailView):
         context = super().get_context_data(**kwargs)
         context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, default=1, page=self.template_name).order_by(
             "position")
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -6001,6 +6017,7 @@ class ContactViewe(CreateView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Contact'] = Contact.objects.order_by('-id').first()
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -6794,6 +6811,24 @@ from .forms import FeedbackForm
 from .models import OrderItem, Feedback
 
 
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.urls import reverse
+from django.views import View
+from django.views.generic.edit import FormMixin
+from .models import Feedback, OrderItem
+from .forms import FeedbackForm
+from .models import (
+    LogoBase,
+    BaseCopyrightTextField,
+    Titled,
+    FaviconBase,
+    NavBarHeader,
+    NavBar,
+    BackgroundImageBase,
+)
+
+
 class CreateReviewView(FormMixin, LoginRequiredMixin, View):
     template_name = "create_review.html"
     form_class = FeedbackForm
@@ -6804,23 +6839,19 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, View):
 
         try:
             orderitem = OrderItem.objects.get(id=orderitem_id)
+            item = orderitem.item  # Fetch the associated item
         except OrderItem.DoesNotExist:
             return HttpResponse('Sorry, this order does not exist.')
 
-        try:
-            existing_feedback = Feedback.objects.get(order=orderitem)
-        except Feedback.DoesNotExist:
-            existing_feedback = None
-
         user = request.user if request.user.is_authenticated else None
 
-        # Pass the orderitem to the form
-        form = FeedbackForm(request=request, orderitem=orderitem)
+        # Pass the item and orderitem to the form
+        form = FeedbackForm(request=request, item=item, orderitem=orderitem)
 
         context = self.get_context_data(form=form)
-        context.update({'form': form})  # Add form to the context
+        context.update({'form': form})
 
-        return render(request, self.template_name, context)
+        return render(request, 'create_review.html', context)
 
     def get_context_data(self, **kwargs):
         print("get_context_data is being called")
@@ -6835,34 +6866,25 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, View):
         }
         return context
 
-    # ... Your existing code ...
-
     def post(self, request, *args, **kwargs):
-        orderitem_id = request.POST.get('orderitem_id')  # Retrieve orderitem_id from POST data
-        print("Received orderitem_id:", orderitem_id)  # Debug print
+        item_slug = request.GET.get('item_slug')
+        orderitem_id = request.GET.get('orderitem_id')
 
         try:
             orderitem = OrderItem.objects.get(id=orderitem_id)
         except OrderItem.DoesNotExist:
-            print("Order not found-maybe it does not exist?")
             return redirect('showcase:ehome')
 
-        # Rest of your code for handling existing feedback, form creation, and form validation
-
         try:
-            existing_feedback = Feedback.objects.get(order=orderitem)
+            existing_feedback = Feedback.objects.get(item=orderitem.item)
         except Feedback.DoesNotExist:
             existing_feedback = None
 
         user = request.user if request.user.is_authenticated else None
-
-        form = FeedbackForm(request.POST, request=request, orderitem=orderitem)
-        form.instance.order = orderitem  # Set the order for the form instance
+        # Pass the item and orderitem to the form
+        form = FeedbackForm(request.POST, request=request, item=orderitem.item, orderitem=orderitem)
 
         if form.is_valid():
-            # Ensure the 'order' field is set correctly
-            form.instance.order = orderitem
-
             if existing_feedback:
                 existing_feedback.star_rating = form.cleaned_data.get('star_rating')
                 existing_feedback.comment = form.cleaned_data.get('comment')
@@ -6873,16 +6895,18 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, View):
             else:
                 feedback = form.save(commit=False)
                 feedback.item = orderitem.item
-                feedback.order = orderitem
-                feedback.save()
+                feedback.order = orderitem.order  # Set the order for the feedback
                 slug = str(feedback.slug)
+                feedback.save()
 
-            url = reverse('showcase:review_detail', args=[slug])
+            url = reverse('showcase:review_detail', args=[str(feedback.slug)])
             return redirect(url)
 
         context = self.get_context_data(form=form)
         context['form'] = form
-        return render(request, self.template_name, context)
+        return render(request, 'create_review.html', context)
+
+
 
 
 @login_required(login_url='/accounts/login/')

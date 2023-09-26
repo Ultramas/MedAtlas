@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 
+    {% for RuleBackgroundImage in Titles %}
+      {% if RuleBackgroundImage.page == 'rule.html' %}
+         {{ RuleBackgroundImage.overtitle }}
+      {% endif %}
+    {% endfor %}
+
 {% block content %}
 
 <head>
@@ -9,78 +15,125 @@
 <link rel="icon" href="{% static 'images/favicon.ico' type='image/ico' %}">
 </head>
   
-<body>   
+<body>
  
 
   <div id="overlay">  
     <img src = "76.gif">
     </div>
+{% for RuleBackgroundImage in Background %}
+  {% if RuleBackgroundImage.page == "rules.html" %}
+  {% if RuleBackgroundImage.position == 1 %}
+    <div class="parallax1arules" id = "main" style="background-image: url({{RuleBackgroundImage.cover.url}})">
+        {% endif %}
+        {% endif %}
+        {% endfor %}
 
-    <div class="parallax1arules" id = "main">
-      <h2 class = "opening">Quantumsim Rules</h2> 
+{% for RuleBackgroundImage in TextFielde %}
+  {% if RuleBackgroundImage.page == "rules.html" %}
+  {% if RuleBackgroundImage.section == 1 %}
+      <h2 class = "opening" style="color: {{RuleBackgroundImage.text_color}}">{{RuleBackgroundImage.text}}</h2>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
 <br>
-<br>      
-<br>      
-<br>      
-<br>      
-<br>      
-<br>      
-<br>      
-<br>      
-<br>      
-<br>      
-<br>    
-<br>      
-<br>      
-<br>      
-<br>      
-<br>      
-<br>      
-<br>           
-      <h2 class="caption1arules">1. No backstabbing
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+        {% for RuleBackgroundImage in TextFielde %}
+  {% if RuleBackgroundImage.page == "rules.html" %}
+  {% if RuleBackgroundImage.section == 2 %}
+      <h2 class="caption1arules" style="color: {{RuleBackgroundImage.text_color}}">{{RuleBackgroundImage.text}}</h2>
         <br>
-2. There is a 3-strike rule; if you get 3 strikes you get banned from the server
-        <br>
-3. No spamming general or you will be muted 5 minutes
-        <br>
-4. If you continue spamming after you have been muted, it can result in a longer mute or a strike (or even both)
-        <br>
-5. No bullying members; if you do bully them, you will get a chance to state your side of it
-        <br>
-6. No inviting members on the hitlist (banlist)
-        <br>
-7. No NSFW in non-NSFW designated channels
-        <br>
-8. If a staff gives you a punishment you feel you did not deserve, you reserve the right to appeal the punishment <wbr> or talk to a staff about it.
-        <br>
-9. No begging for roles; it will do nothing for you. There is a specific application form, along with some requiernments. <br> For more information, ask a staff member or see the staff-applications channel.
-        <br>
-10. No twisting/bending the rules, like role-begging in dms or bullying members in dms.
-        <br>
-11. No pinging everyone, or a group of people unnecessarily. Only ping everyone if there is an emergency concerning everyone, <br>like a bad hacker. </h2>
-        <br>
-    </div>  
-      
-    
-    <div class="parallax2arules" id = "leaders">
-       {% for RuleBackgroundImage in object_list %}
-    <!--<h2>{{ BackgroundImage.title }}</h2>-->
-      <img class = "backgroundimages" src="{{RuleBackgroundImage.cover.url}}" alt="{{ RuleBackgroundImage.title }}">
+  {% endif %}
+  {% endif %}
   {% endfor %}
-        <h2 class = "opening2rules">Rule Appeal</h2>
-          <h2 class="caption2arules">
-      Our rules are meant to be fair and create a welcoming, thriving community. If you want to appeal a punishment for breaking a rule, or you think were unfairly punished or falsely accused of breaking a rule please fill out this form. A staff member will look over it and decide whether or not to give you an appeal, or if you were unfairly punished, have a fair jury to decide your case.</div>
-          </h2>
+
     </div>
 
-    <div class="parallax3arules" id = "difference"><h2 class = "opening3rules">Ban Appeal</h2><h2 class="caption3arules">If you want to appeal your ban, please fill out this form. A staff member will look over it and decide whether or not to give you an appeal. If your appeal is valid, you will be reinvited to MC, but you will start off as a member regardless of your previous rank unless the ban was accidental or falsely done. You are still able to apply for staff but you must wait at least 2 months after you are accepted back to apply for staff.</h2></div>
+       {% for RuleBackgroundImage in Background %}
+      {% if RuleBackgroundImage.page == "rules.html" %}
+      {% if RuleBackgroundImage.position == 2 %}
+    <div class="parallax2arules" id = "leaders" style="background-image: url({{RuleBackgroundImage.cover.url}})">
+    <!--<h2>{{ RuleBackgroundImage.title }}</h2>-->
+  {% endif %}
+  {% endif %}
+  {% endfor %}
+
+        {% for RuleBackgroundImage in TextFielde %}
+  {% if RuleBackgroundImage.page == "rules.html" %}
+  {% if RuleBackgroundImage.section == 3 %}
+        <h2 class = "opening2rules" style="color: {{RuleBackgroundImage.text_color}}">{{ RuleBackgroundImage.text }}</h2>
+
+{% endif %}
+  {% endif %}
+  {% endfor %}
+
+
+        {% for RuleBackgroundImage in TextFielde %}
+  {% if RuleBackgroundImage.page == "rules.html" %}
+  {% if RuleBackgroundImage.section == 4 %}
+          <h2 class="caption2arules" style="color: {{RuleBackgroundImage.text_color}}">
+     {{ RuleBackgroundImage.text }} </h2>
     </div>
+{% endif %}
+  {% endif %}
+  {% endfor %}
+
+
+    <div class="parallax3arules" id = "difference">
+                {% for RuleBackgroundImage in TextFielde %}
+  {% if RuleBackgroundImage.page == "rules.html" %}
+  {% if RuleBackgroundImage.section == 5 %}
+        <h2 class = "opening3rules" style="color: {{RuleBackgroundImage.text_color}}">{{RuleBackgroundImage.text}}</h2>
+
+{% endif %}
+  {% endif %}
+  {% endfor %}
+
+                      {% for RuleBackgroundImage in TextFielde %}
+  {% if RuleBackgroundImage.page == "rules.html" %}
+  {% if RuleBackgroundImage.section == 6 %}
+        <h2 class="caption3arules" style="color: {{RuleBackgroundImage.text_color}}">{{RuleBackgroundImage.text}}</h2></div>
+
+{% endif %}
+  {% endif %}
+  {% endfor %}
+  </div>
     </div>
 
 
     <div class="parallax4arules" id = "innovation">
-      <h2 class = "opening4rules">Rule Revision</h2><h2 class="caption4arules">If you think a rule needs a revision or needs to be deleted, or a new rule needs to be added, please contact one of our Team Leaders and we will see if your request is valid. If it is valid, we will forward it into a voting poll. If at least 2/3 of the server's members (or congress members) decide to change, delete, or add a rule, it will be done.</h2></div>  
+        {% for RuleBackgroundImage in TextFielde %}
+  {% if RuleBackgroundImage.page == "rules.html" %}
+  {% if RuleBackgroundImage.section == 7 %}
+      <h2 class = "opening4rules" style="color: {{RuleBackgroundImage.text_color}}">{{RuleBackgroundImage.text}}</h2>
+       {% endif %}
+  {% endif %}
+  {% endfor %}
 
+                {% for RuleBackgroundImage in TextFielde %}
+  {% if RuleBackgroundImage.page == "rules.html" %}
+  {% if RuleBackgroundImage.section == 8 %}
+        <h2 class="caption4arules" style="color: {{RuleBackgroundImage.text_color}}">{{RuleBackgroundImage.text}}</h2></div>
+       {% endif %}
+  {% endif %}
+  {% endfor %}
     </div>
   </div> 
 

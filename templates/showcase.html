@@ -14,34 +14,6 @@
 
   {% if user.is_authenticated %}
 
-
-
-<div class="poste1">
-
-
-{% for ShowcaseBackgroundImage in Background %}
-    <img class = "backgroundimages" src="{{ShowcaseBackgroundImage.cover.url}}" alt="{{ ShowcaseBackgroundImage.backgroundtitle }}" style="background-position: fixed;">
-
-</div>
-{% endfor %}
-
-<div class = "search">
-
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-
-<form action="{% url 'showcase:search_results' %}" method="get">
-  <input name="q" type="text" placeholder="Search...">
-</form>
-</div>
-<br>
-  <br>
-
-<!DOCTYPE html>
 <html>
 
 <head>
@@ -82,10 +54,36 @@
 }
   </style>
 </head>
+<body>
+
+    {% for newprofile in Background %}
+    {% if newprofile.page == "showcase.html" %}
+<div class="poste1" style="background-image: url({{ newprofile.cover.url }}); background-position: fixed; background-size: cover;">
+    {% endif %}
+{% endfor %}
+
+
+
+<div style="margin-top: 5%;" class = "search">
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<form action="{% url 'showcase:search_results' %}" method="get">
+  <input name="q" type="text" placeholder="Search...">
+</form>
+</div>
+<br>
+  <br>
+
 
   <div class = "boedy">
   <div class="containereatede">
- <h1 class="hello">Hello {{user.username}}!</h1>
+ <h1 class="hello" style="margin-top: 6.5%;">Hello {{user.username}}!</h1>
 </div>
   </div>
 
@@ -93,8 +91,10 @@
         <br>
     <!--saved items here-->
 
-<!---->
-{% for newprofile in UpdateProfile %}
+
+
+
+{% for newprofile in Profiles %}
     <div class="postop">
         <h1>
             {% if newprofile.newprofile_profile_picture_url %}
@@ -116,18 +116,19 @@
         <br>
         <br>
     </div>
-    <br>
-    <br>
 
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
+    <br>
+<br>
+<br>
+<br>
+    {% endfor %}
+
+<br>
+<br>
+<br>
+<br>
+
+</div>
 
 
    <!--Custom JS-->
@@ -136,8 +137,8 @@
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
 
-    {% endfor %}
-
+</body>
+</html>
 
   {% load guest_user %}
 

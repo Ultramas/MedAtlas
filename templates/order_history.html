@@ -168,8 +168,9 @@
             <h4>Order Date: {{ order_item.order_date }}</h4>
             <img src="{{order_item.image.url}}" alt="{{order_item.item}}">
 
-<a href="{% url 'showcase:create_review' %}?item_slug={{ order_item.slug }}&orderitem_id={{ order_item.id }}" class="button-64" role="button"><span class="text">Leave Feedback</span></a>
+<a href="{% url 'showcase:create_review' %}?item_slug={{ order_item.item.slug }}&orderitem_id={{ order_item.id }}" class="button-64" role="button"><span class="text">Leave Feedback</span></a>
 
+<!--how to pass the orderitem.item to the form once the button is pressed based on the associated item-->
             <br>
                     </a>
                 </div>

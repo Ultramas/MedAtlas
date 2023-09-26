@@ -1,14 +1,46 @@
 {% extends 'contactbase.html' %}
 
 {% block content %}
-<div class="mx-auto my-4 text-center">
-    <h1>Contact Us</h1>
-</div>
-<div class="container">
+<html>
+<head>
+    {% for ContactViewe in Titles %}
+      {% if ContactViewe.page == 'contact.html' %}
+    <title>{{ ContactViewe.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+</head>
+<body>
+{% for ContactViewe in Logo %}
+        {% if ContactViewe.page == 'contact.html' %}
+        <a class="logo" href="{{ContactViewe.hyperlink}}">
+          <img class="imageicon" src="{{ContactViewe.logocover.url}}"
+                alt="{{ContactViewe.alternate}}" style="length: {{ContactViewe.length_for_resize}}px; width: {{ContactViewe.width_for_resize}}px; position: fixed;"></a>
+        {% endif %}
+{% endfor %}
+
+{% for ContactViewe in Background %}
+{% if ContactViewe.page == "contact.html" %}
+<div class="mx-auto my-4 text-center" style="background-image: url({{ContactViewe.cover.url}}); background-size: cover;">
+    {% endif %}
+    {% endfor %}
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+    <h1 style="margin-bottom: -10%;">Contact Us</h1>
+<div class="container" style="height: 140vh;">
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-    <button class="btn btn-success my-3" type="submit">Send message</button>
+    <button class="btn btn-success my-3" type="submit">Send Message</button>
     </form>
 </div>
+
+</div>
+</body>
+</html>
 {% endblock content %}

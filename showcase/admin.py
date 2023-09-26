@@ -808,7 +808,7 @@ admin.site.register(NewsFeed, NewsFeedAdmin)
 class AdministrationRoleAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Administration Role Information', {
-            'fields': ('roles', 'role_description', 'is_active',),
+            'fields': ('role', 'role_description', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
     )

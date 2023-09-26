@@ -4,7 +4,7 @@
 
 {% block title %}
     {% for ShowcaseBackgroundImage in Titles %}
-      {% if ShowcaseBackgroundImage.page == 'showcase.html' %}
+      {% if ShowcaseBackgroundImage.page == 'share.html' %}
          {{ ShowcaseBackgroundImage.overtitle }}
       {% endif %}
     {% endfor %}
@@ -14,34 +14,6 @@
 
   {% if user.is_authenticated %}
 
-
-
-<div class="poste1">
-
-
-{% for ShowcaseBackgroundImage in Background %}
-    <img class = "backgroundimages" src="{{ShowcaseBackgroundImage.cover.url}}" alt="{{ ShowcaseBackgroundImage.backgroundtitle }}" style="background-position: fixed;">
-
-</div>
-{% endfor %}
-
-<div class = "search">
-
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-
-<form action="{% url 'showcase:search_results' %}" method="get">
-  <input name="q" type="text" placeholder="Search...">
-</form>
-</div>
-<br>
-  <br>
-
-<!DOCTYPE html>
 <html>
 
 <head>
@@ -82,10 +54,41 @@
 }
   </style>
 </head>
+<body>
+
+{% for newprofile in Background %}
+    {% if newprofile.page == "share.html" %}
+    {% if newprofile.cover %}
+        <div class="poste1" style="background-image: url({{ newprofile.cover.url }}); background-position: fixed; background-size: cover;">
+            <!-- Other content within the div -->
+
+    {% endif %}
+{% endif %}
+{% endfor %}
+
+
+
+
+<div class = "search">
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<form action="{% url 'showcase:search_results' %}" method="get">
+  <input name="q" type="text" placeholder="Search...">
+</form>
+</div>
+<br>
+  <br>
+
 
   <div class = "boedy">
   <div class="containereatede">
- <h1 class="hello">Hello {{user.username}}!</h1>
+ <h1 class="hello" style="margin-top: 13.5%;">Hello {{user.username}}!</h1>
 </div>
   </div>
 
@@ -118,19 +121,17 @@
         <br>
         <br>
     </div>
-    <br>
-    <br>
+<br>
+<br>
+<br>
+<br>
+    {% endfor %}
 
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-
+<br>
+<br>
+<br>
+<br>
+</div>
 
 
    <!--Custom JS-->
@@ -139,8 +140,9 @@
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
 
-    {% endfor %}
-
+        </div>
+</body>
+</html>
 
   {% load guest_user %}
 

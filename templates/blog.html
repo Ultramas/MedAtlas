@@ -28,7 +28,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <title>DevBlog - Julia Walker's Personal Blog</title>
 
   <!--
     - favicon
@@ -179,31 +179,13 @@
         <div class="left">
 
           <h1 class="h1">
-            {% for BlogBackgroundImage in TextFielde %}
-              {% if BlogBackgroundImage.page == 'blog.html' %}
-              {% if BlogBackgroundImage.section == 1 %}
-              {{BlogBackgroundImage.text}}
-              {% endif %}
-              {% endif %}
-            {% endfor %}
-            <br>
-            {% for BlogBackgroundImage in TextFielde %}
-              {% if BlogBackgroundImage.page == 'blog.html' %}
-              {% if BlogBackgroundImage.section == 2 %}
-              {{BlogBackgroundImage.text}}
-              {% endif %}
-              {% endif %}
-            {% endfor %}
+            Hi, I'm <b>Julia&nbsp;Walker</b>.
+            <br>Web Developer
           </h1>
 
           <p class="h3">
-            {% for BlogBackgroundImage in TextFielde %}
-              {% if BlogBackgroundImage.page == 'blog.html' %}
-              {% if BlogBackgroundImage.section == 3 %}
-              {{BlogBackgroundImage.text}}
-              {% endif %}
-              {% endif %}
-            {% endfor %}
+            Specialized in <abbr title="Accessibility">a11y</abbr>
+            and Core Web Vitals
           </p>
 
           <div class="btn-group">
@@ -853,24 +835,13 @@
 
           <div class="contact">
 
-            <h2 class="h2">           {% for BlogBackgroundImage in TextFielde %}
-              {% if BlogBackgroundImage.page == 'blog.html' %}
-              {% if BlogBackgroundImage.section == 4 %}
-              {{BlogBackgroundImage.text}}
-              {% endif %}
-              {% endif %}
-            {% endfor %}</h2>
+            <h2 class="h2">Let's Talk</h2>
 
             <div class="wrapper">
 
               <p>
-                           {% for BlogBackgroundImage in TextFielde %}
-              {% if BlogBackgroundImage.page == 'blog.html' %}
-              {% if BlogBackgroundImage.section == 5 %}
-              {{BlogBackgroundImage.text}}
-              {% endif %}
-              {% endif %}
-            {% endfor %}
+                Do you want to learn more about how I can help your company overcome problems? Let us have a
+                conversation.
               </p>
 
               <ul class="social-link">

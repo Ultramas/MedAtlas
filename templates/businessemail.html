@@ -5,26 +5,35 @@
 
 {% load static %}
 
-{% block title %}
-    {% for BusinessMessageBackgroundImage in Titles %}
-      {% if BusinessMessageBackgroundImage.page == 'businessemail.html' %}
-         {{ BusinessMessageBackgroundImage.overtitle }}
+{% block content %}
+
+<html>
+<head>
+    {% for BusinessMailingView in Titles %}
+      {% if BusinessMailingView.page == 'businessemail.html' %}
+         <title>{{ BusinessMailingView.overtitle }}</title>
       {% endif %}
     {% endfor %}
-{% endblock title %}
-
-{% block content %}
+</head>
+<body>
+{% for BusinessMailingView in Logo %}
+        {% if BusinessMailingView.page == 'businessemail.html' %}
+        <a class="logo" href="{{BusinessMailingView.hyperlink}}">
+          <img class="imageicon" src="{{BusinessMailingView.logocover.url}}"
+                alt="{{BusinessMailingView.alternate}}" style="length: {{BusinessMailingView.length_for_resize}}px; width: {{BusinessMailingView.width_for_resize}}px;"></a>
+        {% endif %}
+{% endfor %}
 
   {% if user.is_authenticated %}
 
 
 
-<div class="poste1">
+{% for BusinessMailingView in Background %}
+{% if BusinessMailingView.page == "businessemail.html" %}
+<div class="poste1" style="background-image: url({{BusinessMailingView.cover.url}}); background-size: cover;">
+    {% endif %}
+    {% endfor %}
 
-
-{% for BusinessMessageBackgroundImage in Background %}
-    <img class = "backgroundimages" src="{{BusinessMessageBackgroundImage.cover.url}}" alt="{{ BusinessMessageBackgroundImage.backgroundtitle }}">
-{% endfor %}
 
 
   {% load guest_user %}
@@ -38,6 +47,8 @@
 {% endif %}
 
 
+<br>
+  <br>
 <br>
   <br>
     <div class="mx-auto my-4 text-center">
@@ -59,7 +70,8 @@
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
 
-
+</body>
+</html>
   {% else %}
 <head>
   <meta http-equiv="refresh" content="0; {% url 'login' %}">

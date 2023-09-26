@@ -5187,8 +5187,8 @@ footer a:active {
   list-style: none;
   margin: 0;
   padding: 0;
-  text-align: center;
-  margin-left: -20%;
+  /*text-align: center;
+  margin-left: -20%;*/
 }
 
 .navbarx li {
@@ -6139,13 +6139,12 @@ input[type="range"]::-moz-focus-outer {
 .parallax1arules{
     background-attachment: fixed;
     background-size: cover;
-    background-image: url(images/Re.jpg);
+    /*background-image: url(images/Re.jpg);*/
     background-position: center; 
     background-repeat: no-repeat;
     min-height: 100%;
     text-align: center;
-    justify-content: center; 
-    height: 100vh;
+    justify-content: center;
     padding: 0;
     margin: 0;
     z-index: -2;

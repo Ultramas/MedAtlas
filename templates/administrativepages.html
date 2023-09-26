@@ -1,22 +1,154 @@
-
 {% extends 'memberbase.html' %}
+
 {% load static %}
 
+{% block title %}
+    {% for AdminPages in Titles %}
+      {% if AdminPages.page == 'administrativepages.html' %}
+         {{ AdminPages.overtitle }}
+      {% endif %}
+    {% endfor %}
+{% endblock title %}
+
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
+
+  {% if user.is_authenticated %}
+
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>replit</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <style>
+    .boedy{
+  display: flex;
+  justify-content: center;
+    }
+
+/* DEMO-SPECIFIC STYLES */
+.containereatede h1 {
+  color: red;
+  font-family: 'Playfair Display', serif;
+  overflow: hidden; /* Ensures the content is not revealed until the animation */
+  border-right: .15em solid red; /* The typewriter cursor */
+  white-space: nowrap; /* Keeps the content on a single line */
+  margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+  letter-spacing: .0em; /* Adjust as needed */
+  animation:
+    typing 3.5s steps(30, end),
+    blink-caret .5s step-end infinite;
+}
+
+/* The typing effect */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: red }
+}
+  </style>
 </head>
 <body>
+gsrdvfeasd
+{% for AdminPages in Background %}
+    erdzfgew
+    {% if AdminPages.page == "administrativepages.html" %}
+        {% if AdminPages.cover %}
+            kbhvjgfyk
+            <div class="poste1" style="background-image: url({{ AdminPages.cover.url }}); background-position: fixed; background-size: cover;">
+                <!-- Other content within the div -->
+            </div>
+        {% endif %}
+    {% endif %}
+{% endfor %}
 
-            {% for AdminPages in Pages %}
-                    <a href="{{AdminPages.hyperlink}}">
 
-                    <h2>{{ AdminPages.pages }}</h2>
-                    </a>
-                    {% endfor %}
+
+
+
+<div class = "search">
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<form action="{% url 'showcase:search_results' %}" method="get">
+  <input name="q" type="text" placeholder="Search...">
+</form>
+</div>
+<br>
+  <br>
+
+
+  <div class = "boedy">
+  <div class="containereatede">
+ <h1 class="hello" style="margin-top: 13.5%;">Hello {{user.username}}!</h1>
+</div>
+  </div>
+
+      <br>
+        <br>
+    <!--saved items here-->
+
+
+
+
+{% for AdminPages in Pages %}
+    <div class="postop">
+        <h1>
+            {{ AdminPages.pages }}
+        </h1>
+        <br>
+        <p class="describe">{{ AdminPages.description }}</p>
+        <br>
+        <br>
+        <br>
+    </div>
+<br>
+<br>
+<br>
+<br>
+    {% endfor %}
+
+<br>
+<br>
+<br>
+<br>
+</div>
+
+
+   <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+
+        </div>
 </body>
 </html>
+
+  {% load guest_user %}
+
+    {% elif user|is_guest_user %}
+    {# user is a guest instance, link to conversion page #}
+
+  <a href="{% url 'showcase:convert' %}">Sign up and save your work!</a>
+    {% else %}
+<head>
+  <meta http-equiv="refresh" content="0; url=http://{{ request.get_host }}/accounts/login">
+  </head>
+<!--{# regular sign up link #}
+  <a href="{% url "form"}">Register now!</a>-->
+    {% endif %}
+
+
 {% endblock content %}

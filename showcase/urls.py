@@ -247,9 +247,9 @@ urlpatterns = [
     #path('profile/', views.profile, name="profile"),
     path('like/<username>/', profile, name='like'), #consider making it views.profile
     path('administration/', AdministrationView.as_view(), name='administration'),
-    path('administrativeroles/', AdminRolesView.as_view(), name='administrativeroles'),
-    path('administrativetasks/', AdminTasksView.as_view(), name='administrativetasks'),
-    path('administrativepages/', AdminPagesView.as_view(), name='administrativepages'),
+    path('administrativeroles/', views.AdminRolesView.as_view(), name='administrativeroles'),
+    path('administrativetasks/', views.AdminTasksView.as_view(), name='administrativetasks'),
+    path('administrativepages/', views.AdminPagesView.as_view(), name='administrativepages'),
     path('issues/', TemplateView.as_view(template_name='issues.html'), name='issues'),
     path('punishapps/', TemplateView.as_view(template_name='punishapps.html'), name='punishapps'),
     path('banappeals/', TemplateView.as_view(template_name='banappeals.html'), name='banappeals'),

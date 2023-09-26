@@ -655,10 +655,10 @@ class ContactForme(forms.ModelForm):
         fields = {"name", "email", "inquiry", "message"}
 
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}),
-            "email": forms.TextInput(attrs={"class": "form-control"}),
-            "inquiry": forms.TextInput(attrs={"class": "form-control"}),
-            "message": forms.TextInput(attrs={"class": "form-control"})
+            "name": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'e.g. Marinara Sauce'}),
+            "email": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'e.g. Intellex@gmail.com'}),
+            "inquiry": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'Subject of your message.'}),
+            "message": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'Your message.'})
         }
 
     def get_info(self):
@@ -790,30 +790,34 @@ from .models import Feedback
 from django import forms
 
 
-
-
 class FeedbackForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        orderitem = kwargs.pop('orderitem', None)  # Get the orderitem
+        item = kwargs.pop('item', None)
+        orderitem = kwargs.pop('orderitem', None)
+        request = kwargs.pop('request', None)
 
         super().__init__(*args, **kwargs)
 
-        # Set the initial value and queryset for the 'order' field
-        self.fields['order'].initial = orderitem.id if orderitem else None
-        self.fields['order'].queryset = OrderItem.objects.filter(
-            id=orderitem.id) if orderitem else OrderItem.objects.none()
+        # Set a placeholder for the 'order' field
+        self.fields['order'].widget.attrs['placeholder'] = 'Order: {0}'.format(
+            orderitem.item if orderitem else 'Not specified'
+        )
+
+        # Set the initial value for the 'order' field based on the order item
+        self.fields['order'].initial = item if item else None
+
+        print(orderitem.item)
 
         # Set the initial value for the 'username' field
-        if self.request and self.request.user.is_authenticated:
-            self.fields['username'] = forms.CharField(initial=self.request.user.username)
+        if request and request.user.is_authenticated:
+            self.fields['username'] = forms.CharField(initial=request.user.username)
             self.fields['username'].widget.attrs['readonly'] = True
         else:
             self.fields['username'] = forms.CharField(required=False)
 
         # Filter the choices for the 'order' field based on the logged-in user
-        if self.request and self.request.user.is_authenticated:
-            self.fields['order'].queryset = OrderItem.objects.filter(user=self.request.user)
+        if request and request.user.is_authenticated:
+            self.fields['order'].queryset = OrderItem.objects.filter(user=request.user)
         else:
             self.fields['order'].queryset = OrderItem.objects.none()
 
@@ -824,17 +828,19 @@ class FeedbackForm(forms.ModelForm):
     def save(self, commit=True, user=None):
         feedback = super().save(commit=False)
 
+        # Ensure the 'order' field is set correctly
+        orderitem = self.cleaned_data.get('orderitem')  # Get the order item
+        feedback.order = orderitem.order if orderitem else None  # Set the order for the feedback
+
+        # Set other fields
+        feedback.star_rating = self.cleaned_data.get('star_rating')
+        feedback.slug = self.cleaned_data.get('slug')
+        feedback.image = self.cleaned_data.get('image')
+
         if user and user.is_authenticated:
             feedback.username = user
         else:
             feedback.username = self.cleaned_data.get('username')
-
-        # Ensure the 'order' field is set correctly
-        feedback.order = self.cleaned_data.get('order')
-
-        feedback.star_rating = self.cleaned_data.get('star_rating')
-        feedback.slug = self.cleaned_data.get('slug')
-        feedback.image = self.cleaned_data.get('image')
 
         if commit:
             feedback.save()

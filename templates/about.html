@@ -9,111 +9,138 @@
 
 {% block content %}
 
-<html>
-  <head>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-    <title>Gluons & Leptons</title>
-  </head>
-  <body>
+<head>
+  <!--change title tags to django form -->
 
- <div id="overlay">  
-    <img src = "{% static 'css/images/76.gif' %}">
+<link rel="icon" href="{% static 'images/favicon.ico' type='image/ico' %}">
+</head>
+
+<body>
+
+
+  <div id="overlay">
+    <img src = "76.gif">
     </div>
-   
+{% for AboutBackgroundImage in Background %}
+  {% if AboutBackgroundImage.page == "about.html" %}
+  {% if AboutBackgroundImage.position == 1 %}
 
-    <div class="subscripteds" id="cover-image"><h2 class = "opening">
-               {% for AboutBackgroundImage in TextFielde %}
-             {% for section in TextFielde %}
-          {% if section.section == AboutBackgroundImage.section %}
-         {% if AboutBackgroundImage.page == 'about.html' %}
-       {% if AboutBackgroundImage.section == 1 %}
-     {{ AboutBackgroundImage.text }}
-            {% endif %}
-          {% endif %}
-          {% endif %}
-  {% endfor %}
-{% endfor %}  </h2></div>
+    <div class="parallax1arules" id="main">
+  <video autoplay muted loop id="background-video" style="position: absolute; top: 0; left: 0;
+  min-width: 100%; min-height: 100%; width: 100vw; height: auto; z-index: 0;">
+    <source src="{{AboutBackgroundImage.file.url}}" type="video/mp4">
+  </video>
+  <!-- Other content goes here -->
 
-    <div class="parallaxc2" id="image-carousel">
-          {% for AboutBackgroundImage in object_list %}
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+
+  <div class="text" style="text-align: left; left: 50px; top: 30%; font-size: 100px;">
+            {% for BackgroundImage in TextFielde %}
+        {% if BackgroundImage.page == "about.html" %}
+    {% if BackgroundImage.section == 1 %}
+      <h2 style="text-align: left; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h2>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+      <br>
+
+            {% for BackgroundImage in TextFielde %}
+        {% if BackgroundImage.page == "about.html" %}
+    {% if BackgroundImage.section == 2 %}
+      <p style="text-align: left; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
+                {% endif %}
+        {% endif %}
+        {% endfor %}
+      <br>
+
+    </div>
+
+       {% for AboutBackgroundImage in Background %}
+      {% if AboutBackgroundImage.page == "about.html" %}
+      {% if AboutBackgroundImage.position == 2 %}
+    <div class="parallax2arules" id = "leaders" style="background-image: url({{AboutBackgroundImage.cover.url}})">
     <!--<h2>{{ AboutBackgroundImage.title }}</h2>-->
-      <img class = "backgroundimages" src="{{AboutBackgroundImage.cover.url}}" alt="{{ AboutBackgroundImage.backgroundtitle  }}">
+  {% endif %}
+  {% endif %}
   {% endfor %}
-      <h2 class="opening2">
-        {% for AboutBackgroundImage in TextFielde %}
-             {% for section in TextFielde %}
-          {% if section.section == AboutBackgroundImage.section %}
-         {% if AboutBackgroundImage.page == 'about.html' %}
-       {% if AboutBackgroundImage.section == 2 %}
-     {{ AboutBackgroundImage.text }}
-            {% endif %}
-          {% endif %}
-          {% endif %}
-  {% endfor %}
-{% endfor %}</h2>
-      <h2 class = "caption2">
-        {% for AboutBackgroundImage in TextFielde %}
-             {% for section in TextFielde %}
-          {% if section.section == AboutBackgroundImage.section %}
-         {% if AboutBackgroundImage.page == 'about.html' %}
-       {% if AboutBackgroundImage.section == 3 %}
-     {{ AboutBackgroundImage.text }}
-            {% endif %}
-          {% endif %}
-          {% endif %}
-  {% endfor %}
-{% endfor %}</h2></div>  
 
-    <div class="parallaxc3" id="featuredproducts1"><h2 class="opening3">
-      {% for AboutBackgroundImage in TextFielde %}
-             {% for section in TextFielde %}
-          {% if section.section == AboutBackgroundImage.section %}
-         {% if AboutBackgroundImage.page == 'about.html' %}
-       {% if AboutBackgroundImage.section == 4 %}
-     {{ AboutBackgroundImage.text }}
-            {% endif %}
-          {% endif %}
-          {% endif %}
+        {% for AboutBackgroundImage in TextFielde %}
+  {% if AboutBackgroundImage.page == "about.html" %}
+  {% if AboutBackgroundImage.section == 3 %}
+        <h2 class = "opening2rules">{{ AboutBackgroundImage.text }}</h2>
+
+{% endif %}
+  {% endif %}
   {% endfor %}
-{% endfor %}</h2><h2 class="caption3">{% for AboutBackgroundImage in TextFielde %}
-             {% for section in TextFielde %}
-          {% if section.section == AboutBackgroundImage.section %}
-         {% if AboutBackgroundImage.page == 'about.html' %}
-       {% if AboutBackgroundImage.section == 5 %}
-     {{ AboutBackgroundImage.text }}
-            {% endif %}
-          {% endif %}
-          {% endif %}
-  {% endfor %}
-{% endfor %}
-  <br><br><br><br><br><br><br><br><br><br><br>
-  </h2>
-    <div class = "qgp"><img src = "{% static 'css/images/qgp.png' %}"></div>
+
+
+        {% for AboutBackgroundImage in TextFielde %}
+  {% if AboutBackgroundImage.page == "about.html" %}
+  {% if AboutBackgroundImage.section == 4 %}
+          <h2 class="caption2arules">
+     {{ AboutBackgroundImage.text }} </h2>
     </div>
-    
-    <div class="parallaxc4" id="hot_new_products"><h2 class="opening3">
-      {% for AboutBackgroundImage in TextFielde %}
-             {% for section in TextFielde %}
-          {% if section.section == AboutBackgroundImage.section %}
-         {% if AboutBackgroundImage.page == 'about.html' %}
-       {% if AboutBackgroundImage.section == 6 %}
-     {{ AboutBackgroundImage.text }}
-            {% endif %}
-          {% endif %}
-          {% endif %}
+{% endif %}
+  {% endif %}
   {% endfor %}
-{% endfor %}</h2>
 
+
+    <div class="parallax3arules" id = "difference">
+                {% for AboutBackgroundImage in TextFielde %}
+  {% if AboutBackgroundImage.page == "about.html" %}
+  {% if AboutBackgroundImage.section == 5 %}
+        <h2 class = "opening3rules">{{AboutBackgroundImage.text}}</h2>
+
+{% endif %}
+  {% endif %}
+  {% endfor %}
+
+                      {% for AboutBackgroundImage in TextFielde %}
+  {% if AboutBackgroundImage.page == "about.html" %}
+  {% if AboutBackgroundImage.section == 6 %}
+        <h2 class="caption3arules">{{AboutBackgroundImage.text}}</h2></div>
+
+{% endif %}
+  {% endif %}
+  {% endfor %}
+  </div>
+    </div>
+
+
+    <div class="parallax4arules" id = "innovation">
+      <h2 class = "opening4rules">About Revision</h2><h2 class="caption4arules">If you think a About needs a revision or needs to be deleted, or a new About needs to be added, please contact one of our Team Leaders and we will see if your request is valid. If it is valid, we will forward it into a voting poll. If at least 2/3 of the server's members (or congress members) decide to change, delete, or add a About, it will be done.</h2></div>
+
+    </div>
+  </div>
+
+
+     <!--<div class="parallax5arules"><h2 class = "opening5rules">Join Us</h2><h2 class="caption5arules">If you have read this far, don't just sit there. Click the〖𐌑𐌂〗icon below to get in! </h2></div>
+
+           <div class="metaclass">
+    <a href="https://discord.gg/g43uGbURUz">
+         <img alt="Qries" src="../static/css/images/MC.png"
+         width="350" height="150">
+      </a>
+
+          </div>
+    </div>
 
     </div>
 
-     <!--Custom JS-->
+    </div>-->
+
+
+
+
+
+    <!--Custom JS-->
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
-  </body>
-</html>
+
+</body>
 
 {% endblock content %}
-

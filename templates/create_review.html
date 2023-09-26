@@ -68,14 +68,12 @@
 </head>
 <body>
 
-     {% for Feedback in Background %}
-    <img class = "backgroundimages" src="{{Feedback.cover.url}}" alt="{{ Feedback.backgroundtitle }}">
-       <div class="view overlay">
-                  <div class="mask rgba-white-slight"></div>
-              </div>
-  {% endfor %}
 
-<div class="postww">
+    {% for Feedback in Background %}
+    {% if Feedback.page == "create_review.html" %}
+<div class="postww" style="background-image: url({{ Feedback.cover.url }}); background-position: fixed; background-size: cover;">
+    {% endif %}
+{% endfor %}
   <br>
   <br>
   <br>
@@ -99,7 +97,8 @@
       {% endfor %}
     </ul>
   </div>
-{% endif %}<form id="SubmitReviewForm" action="" method="POST" enctype="multipart/form-data">
+{% endif %}
+      <form id="SubmitReviewForm" action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <!-- Form fields -->
     {{ form.star_rating.label_tag }} {{ form.star_rating }}

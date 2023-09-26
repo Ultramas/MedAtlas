@@ -2,19 +2,20 @@
 {% extends 'base.html' %}
 {% load static %}
 
-    {% for ChatBackgroundImage in Titles %}
-      {% if ChatBackgroundImage.page == 'home.html' %}
-         {{ ChatBackgroundImage.overtitle }}
-      {% endif %}
-  {% endfor %}
 
 
 {% block content %}
 
 
+    {% for ChatBackgroundImage in Titles %}
+ehatrdgfsFvbesrtwfadgrs
+      {% if ChatBackgroundImage.page == 'home.html' %}
+ehatrdgfsFvbesrtwfadgrs
+        <title>{{ ChatBackgroundImage.overtitle }}</title>
+      {% endif %}
+  {% endfor %}
 
 
-<!DOCTYPE html>
 
 
 
@@ -28,50 +29,32 @@
   flex-direction: row;
   padding-top: 8%;
 }
-</style>
-</head>
-<body>
 
-  {% for ChatBackgroundImage in Background %}
-      <img class = "backgroundimages" src="{{ChatBackgroundImage.cover.url}}" alt="{{ ChatBackgroundImage.backgroundtitle }}" style="position: absolute">
+  input[type=text], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  }
 
-<div class = home>
-  <br>
-<br>
-<br>
-   <div class = "interface">
-  <div align="center">
-    <h2 class = "tip">Quantum Chat Interface</h2>
-  </div>
-   </div>
+  input[type=submit] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  }
 
-  <div class="container">
-      <style>
-      input[type=text], select {
-      width: 100%;
-      padding: 12px 20px;
-      margin: 8px 0;
-      display: inline-block;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-      }
-
-      input[type=submit] {
-      width: 100%;
-      background-color: #4CAF50;
-      color: white;
-      padding: 14px 20px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 15px;
-      cursor: pointer;
-      }
-
-      input[type=submit]:hover {
-      background-color: #45a049;
-      opacity: 0.5;
-      }
+  input[type=submit]:hover {
+  background-color: #45a049;
+  opacity: 0.5;
+  }
 
 
 
@@ -125,6 +108,27 @@
   }
 
       </style>
+</head>
+<body>
+
+{% for ChatBackgroundImage in Background %}
+{% if ChatBackgroundImage.page == 'home.html' %}
+  <div style="background: url('{{ChatBackgroundImage.cover.url}}'); background-size: cover;">
+      {% endif %}
+{% endfor %}
+
+<div class = home>
+  <br>
+<br>
+<br>
+   <div class = "interface">
+  <div align="center">
+    <h2 class = "tip">Quantum Chat Interface</h2>
+  </div>
+   </div>
+
+  <div class="container">
+
     <div class = "room">
       <form id="post-form" method="POST" action="checkview">
           {% csrf_token %}
@@ -137,7 +141,7 @@
     </div>
   </div>
 </div>
-{% endfor %}
+</div>
 </body>
 
 
