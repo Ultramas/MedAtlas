@@ -540,6 +540,21 @@ class StaffProfile(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
 
+class FrequentlyAskedQuestions(models.Model):
+    question = models.TextField()
+    position = models.IntegerField(help_text='Positioning of the image within the carousel.',
+                                   verbose_name='position', default=1)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    class Meta:
+        verbose_name = "Frequently-Asked Question"
+        verbose_name_plural = "Frequently-Asked Questions"
+
+
 class Event(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text='Event name goes here.')

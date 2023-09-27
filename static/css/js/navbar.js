@@ -3,6 +3,10 @@ function navToggle(that){
     navbar.classList.toggle('show')
 }
 window.onload = function() {
-  var navbar = document.querySelector('.navbar');
-  navbar.style.top = '0';
-}
+    var navbar = document.querySelector('.navbarx');
+    if (navbar) {
+        navbar.style.top = '0';
+    } else {
+        console.error('Navbar element with class "navbarx" not found.');
+    }
+};

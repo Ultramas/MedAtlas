@@ -18,7 +18,7 @@
 
 {% load crispy_forms_tags %}
 
-<!DOCTYPE html>
+
 <html lang="en">
 
 <head><head>
@@ -226,6 +226,7 @@
 
           <h2 class="h2">Latest Blog Post</h2>
 
+            {% for blog in BlogPosts %}
           <div class="blog-card-group">
 
             <div class="blog-card">
@@ -234,7 +235,6 @@
     <div class="row">
         <!-- Blog Entries Column -->
         <div class="col-md-8 mt-3 left">
-            {% for blog in BlogPosts %}
             <div class="card mb-4">
                 <div class="card-body1">
                     <h2 class="card-title">{{ blog.title }}</h2>

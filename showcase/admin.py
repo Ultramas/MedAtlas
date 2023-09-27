@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UpdateProfile, Questionaire, PollQuestion, Choice
+from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -749,6 +749,16 @@ class FaviconBaseAdmin(admin.ModelAdmin):
 
 admin.site.register(FaviconBase, FaviconBaseAdmin)
 
+class FrequentlyAskedQuestionsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Administration Role Information', {
+            'fields': ('question', 'position', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+
+admin.site.register(FrequentlyAskedQuestions, FrequentlyAskedQuestionsAdmin)
 
 class AdvertisementBaseAdmin(admin.ModelAdmin):
     fieldsets = (

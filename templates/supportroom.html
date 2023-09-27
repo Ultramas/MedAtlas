@@ -125,45 +125,50 @@
 </div>
 
 <script type="text/javascript">
-  // Function to fetch and display messages
-  function fetchAndDisplayMessages() {
-    var user = "{{ username }}";
+$(document).ready(function() {
+  var user = "{{ username }}";
 
-    $.ajax({
-      type: 'GET',
-      url: `/supportgetMessages/room/${user}`,
-      success: function(response) {
-        $("#display").empty();
-        response.messages.forEach(function(message) {
-          var messageHtml = `
-            <div class="message">
-              <a href="${message.user_profile_url}">
-                <img src="${message.user_profile_picture_url}" alt="${message.user}">
-              </a>
-              <div class="message-content">
-                <div class="sender">${message.user}</div>
-                <div>${message.value}</div>
-                <div class="time">${message.date}</div>
-              </div>
-            </div>`;
-          $("#display").append(messageHtml);
-        });
-      },
-      error: function() {
-        console.error('An error occurred while fetching messages.');
-      }
-    });
-  }
+function fetchAndDisplayMessages() {
+  var user = "{{ username }}";
+  var url = `/supportgetMessages/room/${user}/`;
 
-  // Fetch and display messages initially
+  console.log('Current URL:', url);  // Log the URL
+
+  $.ajax({
+    type: 'GET',
+    url: url,
+    success: function(response) {
+      $("#display").empty();
+      response.messages.forEach(function(messages) {
+        var messageHtml = `
+          <div class="message">
+            <a href="${messages.user_profile_url}">
+              <img src="${messages.user_profile_picture_url}" alt="${messages.user}">
+            </a>
+            <div class="message-content">
+              <div class="sender">${messages.user}</div>
+              <div>${messages.value}</div>
+              <div class="time">${messages.date}</div>
+            </div>
+          </div>`;
+        $("#display").append(messageHtml);
+      });
+    },
+    error: function() {
+      console.error('An error occurred while fetching messages.');
+    }
+  });
+}
+
+fetchAndDisplayMessages();
+
+// Fetch new messages every 5 seconds
+setInterval(function() {
   fetchAndDisplayMessages();
+}, 1000);  // Fetch every 5 seconds
 
-  // Fetch new messages every second
-  setInterval(function() {
-    fetchAndDisplayMessages();
-  }, 1000);
+
 </script>
-
 
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js/darkmode.js' %}"></script>

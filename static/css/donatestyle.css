@@ -1,3 +1,284 @@
+header {
+    font-family: Press Start 2P;
+    background-attachment: fixed;
+    position: fixed;
+    height: 14vh;
+    width: 100%;
+    display: flex;
+    text-align: center;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background: rgba(50, 146, 209, 0.329);
+    margin-top: 0px;
+    z-index: 1;
+ }
+
+.bun {
+    height: 4px;
+    width: 30px;
+    border-radius: 6px;
+    background-color: white;
+    border: 1px solid rgb(0, 238, 255);
+    margin-bottom: 3px;
+    z-index: 3;
+}
+
+.navItem {
+    margin-top: 20px;
+    width: 70px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Times New Roman', Times, serif;
+    background: url(images/gelbuttonleft.gif) top left no-repeat, url(images/gelbuttonright.gif) top right no-repeat, url(images/gelbuttoncenter.gif) top center repeat-x;
+    margin-left: 10px;
+}
+
+.navItem2 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 100px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
+
+}
+
+.navItem3 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 180px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Times New Roman', Times, serif;
+    background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+    margin-left: 10px;
+}
+
+.navItem4 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 150px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
+}
+
+.navItem5 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 165px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
+}
+
+.navItem6 {
+    margin-top: 20px;
+     padding-right: 10px;
+    background-color: blue;
+    width: 194px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
+}
+
+.navItem7 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 60px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
+}
+
+.navItem8 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 75px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
+}
+
+.navItem9 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 140px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+     margin-left: 10px;
+}
+
+.navItem10 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 150px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Times New Roman', Times, serif;
+    background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+    margin-left: 10px;}
+
+.navItem11 {
+    margin-top: 20px;
+    margin-left: 10px;
+    background-color: blue;
+    width: 80px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Times New Roman', Times, serif;
+    background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;}
+    margin-left: 20px;
+
+
+@media screen and (max-width: 1400px) {
+
+.navItem {
+    margin-top: 20px;
+    width: 70px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+    background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+}
+
+.navItem2 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 100px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+}
+
+.navItem3 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 180px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+    background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+}
+
+.navItem4 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 150px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+}
+
+.navItem5 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 165px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+}
+
+.navItem6 {
+    margin-top: 20px;
+     padding-right: 10px;
+    background-color: blue;
+    width: 194px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+}
+
+.navItem7 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 60px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+}
+
+.navItem8 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 75px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+}
+
+.navItem9 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 140px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+}
+
+.navItem10 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 150px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+    background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;}
+
+.navItem11 {
+    margin-top: 20px;
+    background-color: blue;
+    width: 80px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+    background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;}
+    margin-left: 10px;
+}
 
 .navbarx{
   position: fixed;

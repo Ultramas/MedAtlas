@@ -14,17 +14,44 @@
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
 
+      {% for MemberBaseView in Favicons %}
+      {% if MemberBaseView.faviconpage == 'memberbase.html' %}
+       <link rel="icon" type="image/x-icon" href="{{ MemberBaseView.faviconcover.url }}">
+
+
+      {% endif %}
+    {% endfor %}
 
   </head>
    {% if user.is_authenticated %}
 
   <body>
        <header>
+           <div class="column three mobile-twelve section_header_logo vertical-align-middle">
+      {% for MemberBaseView in Logo %}
+      {% if MemberBaseView.page == 'memberbase.html' %}
+     <a class = "logo" href="{{MemberBaseView.hyperlink}}"><img class = "imageicon"  src="{{MemberBaseView.logocover.url}}" alt = "{{MemberBaseView.alternate}}" width="145vh"
+     height="100vh" style="z-index: 100;"></a>
+    {% endif %}
+
+      {% endfor %}
+
+       {% for ChatBackgroundView in Logo %}
+            {% if ChatBackgroundView.page == 'home.html' %}
+                {% if not request.path == '/home.html' %}
+         <a class = "logo" href="{{MemberBaseView.hyperlink}}">
+             <img class = "imageicon"  src="/media/{{ChatBackgroundView.logocover}}" alt = "{{ChatBackgroundView.alternate}}" width="145vh"
+     height="100vh" style="z-index: 30;">
+         </a>
+                 {% endif %}
+         {% endif %}
+  {% endfor %}
+ </div>
 
 <!--<div class="column three mobile-twelve section_header_logo vertical-align-middle">
  <a class = "logo" href="/"><img class = "imageicon"  src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6khv+EqxJLmRfFwXs1M3EMoAJtliUohPZi8...oz " width="145vh"
      height="100vh"></a>
- </div>-->
+ </div>
 
       {% for MemberBaseView in Logo %}
 
@@ -34,7 +61,7 @@
      </a>
 
 
-      {% endfor %}
+      {% endfor %}-->
 
      </header>
     <div class = "navbarx">

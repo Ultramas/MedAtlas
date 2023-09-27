@@ -95,8 +95,14 @@
   {% endif %}
   {% endfor %}
 
+       {% for RuleBackgroundImage in Background %}
+      {% if RuleBackgroundImage.page == "rules.html" %}
+      {% if RuleBackgroundImage.position == 3 %}
+    <div class="parallax3arules" id = "difference" style="background-image: url({{RuleBackgroundImage.cover.url}})">
+{% endif %}
+  {% endif %}
+  {% endfor %}
 
-    <div class="parallax3arules" id = "difference">
                 {% for RuleBackgroundImage in TextFielde %}
   {% if RuleBackgroundImage.page == "rules.html" %}
   {% if RuleBackgroundImage.section == 5 %}
@@ -117,8 +123,14 @@
   </div>
     </div>
 
+       {% for RuleBackgroundImage in Background %}
+      {% if RuleBackgroundImage.page == "rules.html" %}
+      {% if RuleBackgroundImage.position == 4 %}
+    <div class="parallax4arules" id = "innovation" style="background-image: url({{RuleBackgroundImage.cover.url}})">
+{% endif %}
+  {% endif %}
+  {% endfor %}
 
-    <div class="parallax4arules" id = "innovation">
         {% for RuleBackgroundImage in TextFielde %}
   {% if RuleBackgroundImage.page == "rules.html" %}
   {% if RuleBackgroundImage.section == 7 %}

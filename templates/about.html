@@ -1,21 +1,35 @@
 {% extends 'base.html' %}
 {% load static %}
 
-    {% for AboutBackgroundImage in Titles %}
-      {% if AboutBackgroundImage.page == 'about.html' %}
-         {{ AboutBackgroundImage.overtitle }}
-      {% endif %}
-    {% endfor %}
 
 {% block content %}
 
 <head>
   <!--change title tags to django form -->
+  {% for AboutBackgroundImage in Titles %}
+{% if AboutBackgroundImage.page == "about.html" or AboutBackgroundImage.page == "base.html" %}
+  <title>{{AboutBackgroundImage.overtitle}}</title>
+  {% endif %}
+  {% endfor %}
 
 <link rel="icon" href="{% static 'images/favicon.ico' type='image/ico' %}">
+
+        <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for BackgroundView in Logo %}
+        {% if BackgroundView.page == 'index.html' %}
+
+        <a class="logo" href="{{BackgroundView.hyperlink}}">
+          <img class="imageicon" src="{{BackgroundView.logocover.url}}"
+                alt="{{BackgroundView.alternate}}" style="length: {{BackgroundView.length_for_resize}}px; width: {{BackgroundView.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
 </head>
 
 <body>
+
 
 
   <div id="overlay">
@@ -25,8 +39,8 @@
   {% if AboutBackgroundImage.page == "about.html" %}
   {% if AboutBackgroundImage.position == 1 %}
 
-    <div class="parallax1arules" id="main">
-  <video autoplay muted loop id="background-video" style="position: absolute; top: 0; left: 0;
+    <div class="parallax1arules" id="main" style="background: url('{{AboutBackgroundImage.cover.url}}'); background-size: cover;">
+  <video autoplay muted loop id="background-video" style="top: 0; left: 0;
   min-width: 100%; min-height: 100%; width: 100vw; height: auto; z-index: 0;">
     <source src="{{AboutBackgroundImage.file.url}}" type="video/mp4">
   </video>
@@ -37,23 +51,28 @@
         {% endfor %}
 
   <div class="text" style="text-align: left; left: 50px; top: 30%; font-size: 100px;">
-            {% for BackgroundImage in TextFielde %}
-        {% if BackgroundImage.page == "about.html" %}
-    {% if BackgroundImage.section == 1 %}
-      <h2 style="text-align: left; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h2>
+            {% for AboutBackgroundImage in TextFielde %}
+        {% if AboutBackgroundImage.page == "about.html" %}
+    {% if AboutBackgroundImage.section == 1 %}
+      <h2 style="text-align: left; color: {{AboutBackgroundImage.text_color}};">{{AboutBackgroundImage.text}}</h2>
         {% endif %}
         {% endif %}
         {% endfor %}
       <br>
 
-            {% for BackgroundImage in TextFielde %}
-        {% if BackgroundImage.page == "about.html" %}
-    {% if BackgroundImage.section == 2 %}
-      <p style="text-align: left; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
+            {% for AboutBackgroundImage in TextFielde %}
+        {% if AboutBackgroundImage.page == "about.html" %}
+    {% if AboutBackgroundImage.section == 2 %}
+      <p style="text-align: left; color: {{AboutBackgroundImage.text_color}};">{{AboutBackgroundImage.text}}</p>
                 {% endif %}
         {% endif %}
         {% endfor %}
       <br>
+
+    </div>
+
+    </div>
+
 
     </div>
 
@@ -69,7 +88,7 @@
         {% for AboutBackgroundImage in TextFielde %}
   {% if AboutBackgroundImage.page == "about.html" %}
   {% if AboutBackgroundImage.section == 3 %}
-        <h2 class = "opening2rules">{{ AboutBackgroundImage.text }}</h2>
+        <h2 class = "opening2rules" style="color: {{AboutBackgroundImage.text_color}}">{{ AboutBackgroundImage.text }}</h2>
 
 {% endif %}
   {% endif %}
@@ -79,19 +98,25 @@
         {% for AboutBackgroundImage in TextFielde %}
   {% if AboutBackgroundImage.page == "about.html" %}
   {% if AboutBackgroundImage.section == 4 %}
-          <h2 class="caption2arules">
+          <h2 class="caption2arules" style="color: {{AboutBackgroundImage.text_color}}">
      {{ AboutBackgroundImage.text }} </h2>
     </div>
 {% endif %}
   {% endif %}
   {% endfor %}
 
+       {% for AboutBackgroundImage in Background %}
+      {% if AboutBackgroundImage.page == "about.html" %}
+      {% if AboutBackgroundImage.position == 3 %}
+    <div class="parallax3arules" id = "difference" style="background-image: url({{AboutBackgroundImage.cover.url}})">
+{% endif %}
+  {% endif %}
+  {% endfor %}
 
-    <div class="parallax3arules" id = "difference">
                 {% for AboutBackgroundImage in TextFielde %}
   {% if AboutBackgroundImage.page == "about.html" %}
   {% if AboutBackgroundImage.section == 5 %}
-        <h2 class = "opening3rules">{{AboutBackgroundImage.text}}</h2>
+        <h2 class = "opening3rules" style="color: {{AboutBackgroundImage.text_color}}">{{AboutBackgroundImage.text}}</h2>
 
 {% endif %}
   {% endif %}
@@ -100,7 +125,7 @@
                       {% for AboutBackgroundImage in TextFielde %}
   {% if AboutBackgroundImage.page == "about.html" %}
   {% if AboutBackgroundImage.section == 6 %}
-        <h2 class="caption3arules">{{AboutBackgroundImage.text}}</h2></div>
+        <h2 class="caption3arules" style="color: {{AboutBackgroundImage.text_color}}">{{AboutBackgroundImage.text}}</h2></div>
 
 {% endif %}
   {% endif %}
@@ -108,10 +133,29 @@
   </div>
     </div>
 
+       {% for AboutBackgroundImage in Background %}
+      {% if AboutBackgroundImage.page == "about.html" %}
+      {% if AboutBackgroundImage.position == 4 %}
+    <div class="parallax4arules" id = "innovation" style="background-image: url({{AboutBackgroundImage.cover.url}})">
+{% endif %}
+  {% endif %}
+  {% endfor %}
 
-    <div class="parallax4arules" id = "innovation">
-      <h2 class = "opening4rules">About Revision</h2><h2 class="caption4arules">If you think a About needs a revision or needs to be deleted, or a new About needs to be added, please contact one of our Team Leaders and we will see if your request is valid. If it is valid, we will forward it into a voting poll. If at least 2/3 of the server's members (or congress members) decide to change, delete, or add a About, it will be done.</h2></div>
+        {% for AboutBackgroundImage in TextFielde %}
+  {% if AboutBackgroundImage.page == "about.html" %}
+  {% if AboutBackgroundImage.section == 7 %}
+      <h2 class = "opening4rules" style="color: {{AboutBackgroundImage.text_color}}">{{AboutBackgroundImage.text}}</h2>
+       {% endif %}
+  {% endif %}
+  {% endfor %}
 
+                {% for AboutBackgroundImage in TextFielde %}
+  {% if AboutBackgroundImage.page == "about.html" %}
+  {% if AboutBackgroundImage.section == 8 %}
+        <h2 class="caption4arules" style="color: {{AboutBackgroundImage.text_color}}">{{AboutBackgroundImage.text}}</h2></div>
+       {% endif %}
+  {% endif %}
+  {% endfor %}
     </div>
   </div>
 

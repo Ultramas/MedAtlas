@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<!DOCTYPE html>
+
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,24 +17,6 @@
   flex-direction: row;
   padding-top: 8%;
 }
-</style>
-</head>
-<body>
-{% for SupportChatBackgroundImage in Background %}
-   <img class = "ebackgroundimages" src="{{ SupportChatBackgroundImage.cover.url }}" alt="supportchatbackgroundimage" style="position: absolute">
-    {% endfor %}
-<div class = home>
-  <br>
-<br>
-<br>
-   <div class = "interface"> 
-  <div align="center">
-    <h2 class = "tip">Quantum Chat Interface</h2>  
-  </div>  
-   </div>
-
-  <div class="container">
-      <style>
       input[type=text], select {
       width: 100%;
       padding: 12px 20px;
@@ -43,7 +25,7 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       box-sizing: border-box;
-      }  
+      }
 
       input[type=submit] {
       width: 100%;
@@ -75,7 +57,7 @@
     margin-left: auto;
     margin-right: auto;
     margin-top: auto;
-  }  
+  }
 
   .darker {
     border-color: #ccc;
@@ -113,6 +95,23 @@
   }
 
       </style>
+</head>
+<body>
+{% for SupportChatBackgroundImage in Background %}
+   <img class = "ebackgroundimages" src="{{ SupportChatBackgroundImage.cover.url }}" alt="supportchatbackgroundimage" style="position: absolute">
+    {% endfor %}
+<div class = home>
+  <br>
+<br>
+<br>
+   <div class = "interface"> 
+  <div align="center">
+    <h2 class = "tip">Quantum Chat Interface</h2>  
+  </div>  
+   </div>
+
+  <div class="container">
+
     {% for SupportChatBackgroundImage in object_list %}
    <img class = "ebackgroundimages" src="{{ SupportChatBackgroundImage.cover.url }}" alt="supportchatbackgroundimage">
     {% endfor %}
@@ -122,8 +121,10 @@
     <div class = "room">
       <form id="post-form" method="POST" action="checkview">
           {% csrf_token %}
-          <label>What do you need help with?</label>
+          <label>What can we help you with today?</label>
           <input type="text" name="help" id="help" width="100px" />
+          <input type="hidden" name="username" id="username" value="{{ username }}">
+          <input type="hidden" name="room_name" id="room_name" value="{{room}}" />
           <input type="submit" value="Quantum Teleport To Room">
       </form>
     </div>   

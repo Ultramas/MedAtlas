@@ -69,6 +69,7 @@ from .models import IssueBackgroundImage
 from .models import BackgroundImageBase
 from .models import TextBase
 from .models import LogoBase
+from .models import FrequentlyAskedQuestions
 from .models import MemberHomeBackgroundImage
 from .models import NavBar
 from .models import NavBarHeader
@@ -1725,6 +1726,7 @@ class RoomView(TemplateView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['username'] = username
         context['room'] = room
         context['room_details'] = room_details
@@ -2627,54 +2629,51 @@ class eventview(ListView):
 
         return context"""
 
+
 class SupportRoomView(TemplateView):
     model = SupportMessage
     template_name = 'supportroom.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        signed_in_user = self.kwargs.get('signed_in_user')
+        signed_in_user = self.kwargs['signed_in_user']
+        #room_name = self.kwargs['room_name']
+        context['username'] = signed_in_user  # Set 'username' to the extracted 'signed_in_user'
 
-        # Fetch the associated SupportChat
-        support_chat = get_object_or_404(SupportChat, name=signed_in_user)
-        try:
-            support_chat = SupportChat.objects.filter(signed_in_user__username=signed_in_user).first()
-        except SupportChat.DoesNotExist:
-            support_chat = SupportChat.objects.create(name=signed_in_user)
-        except SupportChat.MultipleObjectsReturned:
-            support_chat = SupportChat.objects.filter(signed_in_user__username=signed_in_user).first()
-            # Handle multiple SupportChat instances for the same user here
-
-        if not support_chat:
-            support_chat = SupportChat.objects.create(name=signed_in_user)
-
-        # Fetch the associated ProfileDetails
-        profile_details = get_object_or_404(ProfileDetails, user__username=signed_in_user)
-
-        context['username'] = signed_in_user
-        context['room'] = support_chat  # Assign the SupportChat instance
-        context['profile_details'] = profile_details
+        # room = self.kwargs['room']
+        # room_details = SupportChat.objects.get(name=signed_in_user)  # Use 'signed_in_user' here
+        profile_details = ProfileDetails.objects.filter(user__username=signed_in_user).first()
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
-        # Retrieve messages for the specific room (which is the username in this case) and signed-in user
-        messages = SupportMessage.objects.filter(signed_in_user__username=signed_in_user).order_by('date')
 
+        context['room'] = room
+        context['profile_details'] = profile_details
+
+        # Retrieve the author's profile avatar
+        # Retrieve the messages
+        messages = SupportMessage.objects.all().order_by('-date')
+
+        context['Messanger'] = messages
+
+        # Create a list to store formatted message data
         messages_data = []
 
-        for message in messages:
-            profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+        for messages in context['Messanger']:
+            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
+
+            # Create a dictionary to store message data including profile information
             message_data = {
                 'user_profile_picture_url': profile.avatar.url if profile else '',
-                'user_profile_url': message.get_profile_url(),
-                'user': message.signed_in_user,
-                'value': message.value,
-                'date': message.date,
+                'user_profile_url': messages.get_profile_url(),
+                'user': messages.signed_in_user,
+                'value': messages.value,
+                'date': messages.date,
             }
+
             messages_data.append(message_data)
 
+        # Assign the list of formatted message data to the context
         context['Messaging'] = messages_data
 
         return context
@@ -3284,6 +3283,7 @@ class FaqBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Faq'] = FrequentlyAskedQuestions.objects.all().order_by("position")
         return context
 
 
@@ -4749,7 +4749,7 @@ class ProductView(DetailView):
         context = super().get_context_data(**kwargs)
         context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, default=1, page=self.template_name).order_by(
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")

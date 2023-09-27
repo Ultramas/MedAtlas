@@ -6140,7 +6140,7 @@ input[type="range"]::-moz-focus-outer {
     background-attachment: fixed;
     background-size: cover;
     /*background-image: url(images/Re.jpg);*/
-    background-position: center; 
+    background-position: center;
     background-repeat: no-repeat;
     min-height: 100%;
     text-align: center;
@@ -12314,3 +12314,112 @@ border-radius: 30px;
     font-weight: 500;
     color: #17a2b8;
     }
+
+
+
+
+.aboutparallax-container1 {
+  position: relative;
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100vh; /* Adjust the height as needed */
+  overflow: hidden;
+}
+
+.parallax2abouts {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.parallax3abouts {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.parallax4abouts {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+/* Adjust the parallax effect as needed */
+.aboutparallax-container1  .parallax2abouts {
+  transform: translate3d(0, 0, 0);
+}
+
+.aboutparallax-container1  .parallax2abouts {
+  transition: transform 0.25s ease;
+}
+
+/* Adjust the scale and blur as needed */
+.aboutparallax-container1 .parallax2abouts::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  filter: blur(5px);
+  transform: scale(1.2);
+  z-index: -1;
+}
+
+/* Adjust the parallax effect as needed */
+.aboutparallax-container1  .parallax3abouts {
+  transform: translate3d(0, 0, 0);
+}
+
+.aboutparallax-container1  .parallax3abouts {
+  transition: transform 0.25s ease;
+}
+
+/* Adjust the scale and blur as needed */
+.aboutparallax-container1 .parallax3abouts::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  filter: blur(5px);
+  transform: scale(1.2);
+  z-index: -1;
+}
+
+/* Adjust the parallax effect as needed */
+.aboutparallax-container1  .parallax4abouts {
+  transform: translate3d(0, 0, 0);
+}
+
+.aboutparallax-container1  .parallax4abouts {
+  transition: transform 0.25s ease;
+}
+
+/* Adjust the scale and blur as needed */
+.aboutparallax-container1 .parallax4abouts::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  filter: blur(5px);
+  transform: scale(1.2);
+  z-index: -1;
+}
