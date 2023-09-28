@@ -4216,32 +4216,80 @@ class SearchResultsView(ListView):
 
     def get_queryset(self):
         query = self.request.GET.get('q')
+        filter_by = self.request.GET.get('filter')  # Get the filter parameter
 
-        city_list = City.objects.filter(
-            Q(name__icontains=query) | Q(state__icontains=query))
+        # Define the lists to search based on the filter parameter
+        search_lists = []
 
-        vote_list = Vote.objects.filter(
-            Q(name__icontains=query) | Q(category__icontains=query)
-            | Q(description__icontains=query))
+        if filter_by == 'city':
+            search_lists.append(City.objects.filter(Q(name__icontains=query) | Q(state__icontains=query)))
+        elif filter_by == 'vote':
+            search_lists.append(Vote.objects.filter(
+                Q(name__icontains=query) | Q(category__icontains=query) | Q(description__icontains=query)))
+        elif filter_by == 'profile':
+            search_lists.append(UpdateProfile.objects.filter(
+                Q(name__icontains=query) | Q(description__icontains=query) | Q(image__icontains=query)))
+        elif filter_by == 'idea':
+            search_lists.append(Idea.objects.filter(
+                Q(name__icontains=query) | Q(category__icontains=query) | Q(description__icontains=query) | Q(
+                    image__icontains=query)))
+        elif filter_by == 'partner':
+            search_lists.append(PartnerApplication.objects.filter(
+                Q(name__icontains=query) | Q(description__icontains=query) | Q(server_invite__icontains=query)))
+        else:
+            # If no filter is specified, search all lists
+            search_lists = [City.objects.filter(Q(name__icontains=query) | Q(state__icontains=query)),
+                            Vote.objects.filter(Q(name__icontains=query) | Q(category__icontains=query) | Q(
+                                description__icontains=query)),
+                            UpdateProfile.objects.filter(
+                                Q(name__icontains=query) | Q(description__icontains=query) | Q(image__icontains=query)),
+                            Idea.objects.filter(Q(name__icontains=query) | Q(category__icontains=query) | Q(
+                                description__icontains=query) | Q(image__icontains=query)),
+                            PartnerApplication.objects.filter(
+                                Q(name__icontains=query) | Q(description__icontains=query) | Q(
+                                    server_invite__icontains=query))]
 
-        profile_list = UpdateProfile.objects.filter(
-            Q(name__icontains=query) | Q(description__icontains=query)
-            | Q(image__icontains=query))
-
-        idea_list = Idea.objects.filter(
-            Q(name__icontains=query) | Q(category__icontains=query)
-            | Q(description__icontains=query) | Q(image__icontains=query))
-
-        partner_list = PartnerApplication.objects.filter(
-            Q(name__icontains=query) | Q(description__icontains=query)
-            | Q(server_invite__icontains=query))
-
-        all_list = list(city_list) + list(vote_list) + list(profile_list) + list(idea_list) + list(partner_list)
+        # Combine the search results from selected lists
         search_results = []
-        for item in all_list:
-            search_result = SearchResult(content_object=item)
-            search_results.append(search_result)
+        for search_list in search_lists:
+            for item in search_list:
+                search_result = SearchResult(content_object=item)
+                search_results.append(search_result)
+
         return search_results
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        # settings to alter the username & password
+
+        # Add type information for each item
+        for result in context['all_list']:
+            if isinstance(result.content_object, City):
+                result.type = 'City'
+                result.url = ''
+            elif isinstance(result.content_object, Vote):
+                result.type = 'Vote'
+                result.url = reverse_lazy('showcase:voting')
+            elif isinstance(result.content_object, UpdateProfile):
+                result.type = 'Profile'
+                result.url = reverse_lazy('showcase:showcase')
+            elif isinstance(result.content_object, Idea):
+                result.type = 'Idea'
+                result.url = reverse_lazy('showcase:share')
+            elif isinstance(result.content_object, PartnerApplication):
+                result.type = 'Partner'
+                result.url = reverse_lazy('showcase:partners')
+            else:
+                result.type = 'Unknown'
+                result.url = ''
+
+        return context
 
 
 class EcommerceSearchResultsView(ListView):

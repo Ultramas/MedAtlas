@@ -1,8 +1,46 @@
 {% extends 'memberbase.html' %}
 {% block content %}
+<head>
+  {% block title %}
+    {% for SearchResultsView in Titles %}
+      {% if SearchResultsView.page == 'search_results.html' %}
+         {{ SearchResultsView.overtitle }}
+      {% endif %}
+    {% endfor %}
+{% endblock title %}
+  <style>
+.link-style {
+  text-decoration: none;
+  color: inherit; /* Optionally, to inherit the color from the parent */
+}
+</style>
+
+</head>
+
+<body>
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for SearchResultsView in Logo %}
+        {% if SearchResultsView.page == 'search_results.html' %}
+
+        <a class="logo" href="{{SearchResultsView.hyperlink}}">
+          <img class="imageicon" src="{{SearchResultsView.logocover.url}}"
+                alt="{{SearchResultsView.alternate}}" style="length: {{SearchResultsView.length_for_resize}}px; width: {{SearchResultsView.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+
+        {% for SearchResultsView in Background %}
+    {% if SearchResultsView.page == "search_results.html" %}
+<div class="poste1" style="background-image: url({{ SearchResultsView.cover.url }}); background-position: fixed; background-size: cover;">
+    {% endif %}
+{% endfor %}
+
 
 <div class = "searcherbackground">
   <div class = "searcher">
+
   <ul>
 
   <br>
@@ -11,6 +49,11 @@
   <br>
   <br>
   <br>
+  <br>
+  <br>
+    <a href="e">
+    <h1 style="text-align: center;">Search Results</h1>
+    </a>
   <br>
   <br>
 <!-- search_results.html -->
@@ -26,11 +69,11 @@
   <tbody>
     {% for result in all_list %}
       <tr>
-        <a href="{{ result.page }}">
-        <td>{{ result.content_object.name }}</td>
-        <td>{{ result.content_object.description }}</td>
-        <td><a href="{{ result.content_object.get_absolute_url }}">{{ result.content_object.get_absolute_url }}</a></td>
-          </a>
+
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.name }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.description }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">Type: {{ result.type }}</a></td>
+
       </tr>
     {% empty %}
       <tr>
@@ -41,5 +84,7 @@
 </table>
 
   </ul>
-
+  </div>
+</div>
+</body>
 {% endblock content %}

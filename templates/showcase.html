@@ -2,24 +2,25 @@
 
 {% load static %}
 
-{% block title %}
-    {% for ShowcaseBackgroundImage in Titles %}
-      {% if ShowcaseBackgroundImage.page == 'showcase.html' %}
-         {{ ShowcaseBackgroundImage.overtitle }}
-      {% endif %}
-    {% endfor %}
-{% endblock title %}
+
 
 {% block content %}
+
+
 
   {% if user.is_authenticated %}
 
 <html>
 
 <head>
+    {% for ShowcaseBackgroundImage in Titles %}
+      {% if ShowcaseBackgroundImage.page == 'showcase.html' %}
+         <title>{{ ShowcaseBackgroundImage.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>replit</title>
+
   <link href="style.css" rel="stylesheet" type="text/css" />
   <style>
     .boedy{
@@ -55,6 +56,18 @@
   </style>
 </head>
 <body>
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for newprofile in Logo %}
+        {% if newprofile.page == 'showcase.html' %}
+
+        <a class="logo" href="{{newprofile.hyperlink}}">
+          <img class="imageicon" src="{{newprofile.logocover.url}}"
+                alt="{{newprofile.alternate}}" style="length: {{newprofile.length_for_resize}}px; width: {{newprofile.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
 
     {% for newprofile in Background %}
     {% if newprofile.page == "showcase.html" %}
@@ -64,21 +77,24 @@
 
 
 
-<div style="margin-top: 5%;" class = "search">
-
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-
-<form action="{% url 'showcase:search_results' %}" method="get">
-  <input name="q" type="text" placeholder="Search...">
-</form>
+<div style="margin-top: 8%;" class="search">
+    <ul>
+    <form action="{% url 'showcase:search_results' %}" method="get">
+        <input name="q" type="text" placeholder="Search...">
+        <select name="filter">
+            <option value="">All</option>
+            <option value="city">City</option>
+            <option value="vote">Vote</option>
+            <option value="profile">Profile</option>
+            <option value="idea">Idea</option>
+            <option value="partner">Partner</option>
+        </select>
+        <button type="submit">Search</button>
+    </form>
+        </ul>
 </div>
 <br>
-  <br>
+<br>
 
 
   <div class = "boedy">
