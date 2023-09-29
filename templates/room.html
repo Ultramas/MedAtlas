@@ -80,15 +80,33 @@
   margin-top: 10px;
 }
 
+.username-room{
+background-color: rgba(102, 102, 102, 0.06);
+margin-bottom: 22px;
+  border-radius: 5px;
+padding-top: 36px;
+padding-bottom: 1px;
+    }
 </style>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 </head>
 <body>
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for Room in Logo %}
+        {% if Room.page == 'room.html' %}
+
+        <a class="logo" href="{{Room.hyperlink}}">
+          <img class="imageicon" src="{{Room.logocover.url}}"
+                alt="{{Room.alternate}}" style="length: {{Room.length_for_resize}}px; width: {{Room.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
 
 {% for Room in Background %}
 {% if Room.page == 'room.html' %}
-QWTYZERUXtjykd7jxrhefwDA
-  <div class="backgroundimages" style="background: url('{{Room.cover.url}}'); background-size: cover;">
+  <div class="backgroundimages" style="background: url('{{Room.cover.url}}'); background-size: cover; min-height: 140vh;">
       {% endif %}
 {% endfor %}
 
@@ -96,9 +114,20 @@ QWTYZERUXtjykd7jxrhefwDA
 <br>
 <br>
 <br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 <div class="chat-container" id="chat-container">
 <br>
+
+  <div class="username-room">
   <h2>{{username}} - {{room}}</h2>
+</div>
 
   <div id="display"></div>
   <div class="chat-input">
@@ -110,7 +139,10 @@ QWTYZERUXtjykd7jxrhefwDA
       <input type="submit" value="Send">
     </form>
   </div>
+<br>
 </div>
+<br>
+<br>
 
 
 
@@ -141,10 +173,11 @@ $(document).ready(function(){
   var user = message.user; // Store user in a separate variable
   var value = message.value; // Store value in a separate variable
   var date = message.date; // Store date in a separate variable
+  var message_number = message.message_number;
 
   console.log(user_profile_url);
   var messageHtml = `
-    <div class="message">
+    <div class="message" id="#${message_number}">
       <a href="${user_profile_url}">
         <img src="${avatar_url}" alt="${user}">
       </a>

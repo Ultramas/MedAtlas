@@ -1,17 +1,81 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
-<h1 class="text-center mb-3" style="color: red;">Poll Questions</h1>
+<head>
+
+    {% for PollQuestionsView in Titles %}
+      {% if PollQuestionsView.page == 'pollquestions.html' %}
+         <title>{{ PollQuestionsView.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+</head>
+<body>
+<div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for PollQuestionsView in Logo %}
+        {% if PollQuestionsView.page == 'pollquestions.html' %}
+
+        <a class="logo" href="{{PollQuestionsView.hyperlink}}">
+          <img class="imageicon" src="{{PollQuestionsView.logocover.url}}"
+                alt="{{PollQuestionsView.alternate}}" style="length: {{PollQuestionsView.length_for_resize}}px; width: {{PollQuestionsView.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+{% for PollQuestionsView in Background %}
+    {% if PollQuestionsView.page == "pollquestions.html" %}
+<div class="poste1" style="background-image: url({{ PollQuestionsView.cover.url }}); background-position: fixed; background-size: cover;">
+    {% endif %}
+{% endfor %}
+
+
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<div style="" class="search">
+    <ul>
+    <form action="{% url 'showcase:search_results' %}" method="get">
+        <input name="q" type="text" placeholder="Search...">
+        <select name="filter">
+            <option value="">All</option>
+            <option value="city">City</option>
+            <option value="vote">Vote</option>
+            <option value="profile">Profile</option>
+            <option value="idea">Idea</option>
+            <option value="partner">Partner</option>
+        </select>
+        <button type="submit">Search</button>
+    </form>
+        </ul>
+</div>
+
+<h1 class="text-center mb-3" style="color: white;">Poll Questions</h1>
 {% if latest_question_list %}
 {% for question in latest_question_list %}
 <div class="card-mb-3" style="margin-top: 15%;">
 	<div class="card-body">
-		<p class="lead" style="color: black;">{{ question.question_text }}</p>
-		<a href="{% url 'showcase:polldetail' question.id %}" class="btn btn-primary btn-sm" style="color: black;">Vote Now</a>
-		<a href="{% url 'showcase:pollresults' question.id %}" class="btn btn-secondary btn-sm" style="color: black;">Results</a>
+		<p class="lead" style="color: white;">{{ question.question_text }}</p>
+		<a href="{% url 'showcase:polldetail' question.id %}" class="btn btn-primary btn-sm" style="color: white;">Vote Now</a>
+		<a href="{% url 'showcase:pollresults' question.id %}" class="btn btn-secondary btn-sm" style="color: white;">Results</a>
 	</div>
 </div>
 {% endfor %}
 {% else %}
 <p>No polls available</p>
 {% endif %}
+</div>
+   <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+
+</body>
 {% endblock %}

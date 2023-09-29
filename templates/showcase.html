@@ -111,7 +111,7 @@
 
 
 {% for newprofile in Profiles %}
-    <div class="postop">
+    <div class="postop" id="{{newprofile.profile_number}}">
         <h1>
             {% if newprofile.newprofile_profile_picture_url %}
                 <a href="{{ newprofile.newprofile_profile_url }}">

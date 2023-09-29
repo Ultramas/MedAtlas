@@ -185,7 +185,7 @@ class SignupView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Favicons'] = FaviconBase.objects.all()
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -231,7 +231,7 @@ class TotalView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Favicons'] = FaviconBase.objects.all()
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -327,7 +327,7 @@ class BaseView(ListView):
         context = super().get_context_data(**kwargs)
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(is_active=1)
-        context['Favicons'] = FaviconBase.objects.all()
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         print(f'User: {user.username}, is_authenticated: {user.is_authenticated}, is_staff: {user.is_staff}')
 
@@ -366,7 +366,7 @@ class EBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logos'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
-        context['Favicons'] = FaviconBase.objects.all()
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
@@ -1131,6 +1131,7 @@ class SupportChatBackgroundView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
 
@@ -1727,6 +1728,7 @@ class RoomView(TemplateView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['username'] = username
         context['room'] = room
         context['room_details'] = room_details
@@ -2131,7 +2133,7 @@ class SignupView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Favicons'] = FaviconBase.objects.all()
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -2177,7 +2179,7 @@ class TotalView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Favicons'] = FaviconBase.objects.all()
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -2274,7 +2276,7 @@ class BaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(is_active=1)
-        context['Favicons'] = FaviconBase.objects.all()
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
@@ -2295,7 +2297,7 @@ class EBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logos'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
-        context['Favicons'] = FaviconBase.objects.all()
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
@@ -2379,6 +2381,8 @@ class AdminRolesView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
@@ -2394,6 +2398,8 @@ class AdminTasksView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
@@ -2408,10 +2414,14 @@ class AdminPagesView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Pages'] = AdminPages.objects.filter(is_active=1)
+        AdminPage = AdminPages.objects.filter(is_active=1)
+
         return context
 
 
@@ -2423,10 +2433,12 @@ class AdministrationView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         return context
 
 
@@ -2495,6 +2507,7 @@ class PostList(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['TextFielde'] = TextBase.objects.filter(is_active=1)
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
 
@@ -3059,6 +3072,7 @@ class EBackgroundView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         items_query = Item.objects.filter(is_active=1)
         paginator = Paginator(items_query, paginate_by)
         page_number = self.request.GET.get('page')
@@ -3591,7 +3605,7 @@ class PartnerBackgroundView(BaseView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Partner'] = PartnerApplication.objects.all()
 
-        newprofile = Partner.objects.filter(is_active=1)
+        newprofile = PartnerApplication.objects.filter(is_active=1)
         # Retrieve the author's profile avatar
 
         context['Profiles'] = newprofile
@@ -3979,6 +3993,7 @@ class PollQuestionsView(View):
             'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
             'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
             'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
+            'Logo': LogoBase.objects.filter(page=self.template_name, is_active=1),
         }
         return context
 
@@ -4139,7 +4154,7 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Favicons'] = FaviconBase.objects.all()
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         print(FaviconBase.objects.all())
         context['SettingsBackgroundView'] = self.model.objects.all()
         return context
@@ -4236,6 +4251,9 @@ class SearchResultsView(ListView):
         elif filter_by == 'partner':
             search_lists.append(PartnerApplication.objects.filter(
                 Q(name__icontains=query) | Q(description__icontains=query) | Q(server_invite__icontains=query)))
+        elif filter_by == 'news':
+            search_lists.append(NewsFeed.objects.filter(
+                Q(name__icontains=query) | Q(description__icontains=query) | Q(slug__icontains=query)))
         else:
             # If no filter is specified, search all lists
             search_lists = [City.objects.filter(Q(name__icontains=query) | Q(state__icontains=query)),
@@ -4247,7 +4265,9 @@ class SearchResultsView(ListView):
                                 description__icontains=query) | Q(image__icontains=query)),
                             PartnerApplication.objects.filter(
                                 Q(name__icontains=query) | Q(description__icontains=query) | Q(
-                                    server_invite__icontains=query))]
+                                    server_invite__icontains=query)),
+                            NewsFeed.objects.filter(
+                Q(name__icontains=query) | Q(description__icontains=query) | Q(slug__icontains=query))]
 
         # Combine the search results from selected lists
         search_results = []
@@ -4257,6 +4277,7 @@ class SearchResultsView(ListView):
                 search_results.append(search_result)
 
         return search_results
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -4285,6 +4306,9 @@ class SearchResultsView(ListView):
             elif isinstance(result.content_object, PartnerApplication):
                 result.type = 'Partner'
                 result.url = reverse_lazy('showcase:partners')
+            elif isinstance(result.content_object, NewsFeed):
+                result.type = 'News'
+                result.url = reverse_lazy('showcase:newsfeed')
             else:
                 result.type = 'Unknown'
                 result.url = ''
@@ -4354,6 +4378,8 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
         profile = self.get_object()
         context['profile'] = profile
@@ -5709,7 +5735,7 @@ class SignupView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Favicons'] = FaviconBase.objects.all()
+        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")

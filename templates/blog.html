@@ -2,17 +2,7 @@
 
 {% load static %}
 
-{% block title %}
-    {% for BlogBackgroundImage in Titles %}
-      {% if BlogBackgroundImage.page == 'blog.html' %}
-         {{ BlogBackgroundImage.overtitle }}
 
-
-
-
-      {% endif %}
-    {% endfor %}
-{% endblock title %}
 
 {% block content %}
 
@@ -22,13 +12,19 @@
 <html lang="en">
 
 <head><head>
+  {% block title %}
+    {% for PostList in Titles %}
+      {% if PostList.page == 'blog.html' %}
+         {{ PostList.overtitle }}
+      {% endif %}
+    {% endfor %}
+{% endblock title %}
 
   <link href="style.css" rel="stylesheet" type="text/css" />
 
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DevBlog - Julia Walker's Personal Blog</title>
 
   <!--
     - favicon
@@ -49,14 +45,16 @@
 </head>
 
 <body class="light-theme">
-
-  <!--
-    - #HEADER
-  -->
-
-
-  </header>
-
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for PostList in Logo %}
+        {% if PostList.page == 'blog.html' %}
+        <a class="logo" href="{{PostList.hyperlink}}">
+          <img class="imageicon" src="{{PostList.logocover.url}}"
+                alt="{{PostList.alternate}}" style="length: {{PostList.length_for_resize}}px; width: {{PostList.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
 
 
 
@@ -68,10 +66,7 @@
 
       <div class="navbarblog">
 
-        <a href="#">
-          <img src="./assets/images/logo-light.svg" alt="Devblog's logo" width="150" height="40" class="logo-light">
-          <img src="./assets/images/logo-dark.svg" alt="Devblog's logo" width="150" height="40" class="logo-dark">
-        </a>
+
 
         <div class="btn-group">
 
@@ -435,7 +430,7 @@
                   <a href="#" class="icon-box facebook">
                     <ion-icon name="logo-facebook"></ion-icon>
                   </a>
-                </li>
+
 
               </ul>
 

@@ -2,17 +2,17 @@
 
 {% load static %}
 
-{% block title %}
-    {% for EBackgroundImage in Titles %}
-      {% if EBackgroundImage.page == 'ehome.html' %}
-         {{ EBackgroundImage.overtitle }}
-      {% endif %}
-    {% endfor %}
-{% endblock title %} 
 
 {% block content %}
 <head>
+
+    {% for EBackgroundImage in Titles %}
+      {% if EBackgroundImage.page == 'ehome.html' %}
+         <title>{{ EBackgroundImage.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/buttonclasse.css' %}">
+
     <style>
 /* CSS */
 .button-64 {
@@ -85,14 +85,12 @@
       <br>
     </div>
 
-    {% block logos %}
       {% for EBaseView in Logos %}
         <a class="logo" href="{{ EBaseView.hyperlink }}">
-          <img class="imageicon" src="media/{{ EBaseView.logocover }}" alt="{{ EBaseView.alternate }}"
+          <img class="imageicon" src="media/{{ EBaseView.logocover.url }}" alt="{{ EBaseView.alternate }}"
                width="145vh" height="100vh" style="z-index: 100;">
         </a>
       {% endfor %}
-    {% endblock %}
 
     <!-- Navbar -->
     <div class="navbarbo">

@@ -2,13 +2,6 @@
 
 {% load static %}
 
-{% block title %}
-    {% for AdminRoles in Titles %}
-      {% if AdminRoles.page == 'administrativeroles.html' %}
-         {{ AdminRoles.overtitle }}
-      {% endif %}
-    {% endfor %}
-{% endblock title %}
 
 {% block content %}
 
@@ -17,9 +10,14 @@
 <html>
 
 <head>
+    {% for AdminRoles in Titles %}
+      {% if AdminRoles.page == 'administrativeroles.html' %}
+    <title>{{ AdminRoles.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>replit</title>
   <link href="style.css" rel="stylesheet" type="text/css" />
   <style>
     .boedy{
@@ -55,15 +53,11 @@
   </style>
 </head>
 <body>
-gsrdvfeasd
 {% for AdminRolesView in Background %}
-    erdzfgew
     {% if AdminRolesView.page == "administrativeroles.html" %}
         {% if AdminRolesView.cover %}
-            kbhvjgfyk
             <div class="poste1" style="background-image: url({{ AdminRolesView.cover.url }}); background-position: fixed; background-size: cover;">
                 <!-- Other content within the div -->
-            </div>
         {% endif %}
     {% endif %}
 {% endfor %}
@@ -123,8 +117,8 @@ gsrdvfeasd
 <br>
 <br>
 <br>
-</div>
 
+        </div>
 
    <!--Custom JS-->
     <script src="{% static 'css/js/script.js' %}"></script>
@@ -132,7 +126,6 @@ gsrdvfeasd
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
 
-        </div>
 </body>
 </html>
 

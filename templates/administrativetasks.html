@@ -2,13 +2,6 @@
 
 {% load static %}
 
-{% block title %}
-    {% for AdminTasks in Titles %}
-      {% if AdminTasks.page == 'administrativetasks.html' %}
-         {{ AdminTasks.overtitle }}
-      {% endif %}
-    {% endfor %}
-{% endblock title %}
 
 {% block content %}
 
@@ -17,9 +10,14 @@
 <html>
 
 <head>
+    {% for AdminTasks in Titles %}
+      {% if AdminTasks.page == 'administrativetasks.html' %}
+         <title>{{ AdminTasks.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>replit</title>
   <link href="style.css" rel="stylesheet" type="text/css" />
   <style>
     .boedy{
@@ -55,15 +53,11 @@
   </style>
 </head>
 <body>
-gsrdvfeasd
 {% for AdminTasks in Background %}
-    erdzfgew
     {% if AdminTasks.page == "administrativetasks.html" %}
         {% if AdminTasks.cover %}
-            kbhvjgfyk
             <div class="poste1" style="background-image: url({{ AdminTasks.cover.url }}); background-position: fixed; background-size: cover;">
                 <!-- Other content within the div -->
-            </div>
         {% endif %}
     {% endif %}
 {% endfor %}
@@ -132,7 +126,6 @@ gsrdvfeasd
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
 
-        </div>
 </body>
 </html>
 

@@ -52,6 +52,7 @@ class Idea(models.Model):
     name = models.CharField(max_length=100, help_text='Your name goes here.')
     category = models.CharField(max_length=100,
                                 help_text='Choose a category you want your idea to affect (server layout, event idea, etc).')
+    profile_number = models.PositiveIntegerField(default=0, editable=False)
     description = models.TextField(help_text='Please share any ideas you may have.')
     image = models.ImageField(help_text='Attach an image for your idea (scales to your picture`s dimensions).')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -72,6 +73,11 @@ class Idea(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
+            max_message_number = Idea.objects.aggregate(max_message_number=models.Max('profile_number'))[
+                                     'max_message_number'] or 0
+
+            # Increment the maximum message number to get the new message number
+            self.profile_number = max_message_number + 1
             # Get the associated ProfileDetails for the donor
             profile = ProfileDetails.objects.filter(user=self.user).first()
 
@@ -80,6 +86,9 @@ class Idea(models.Model):
                 self.position = profile.position
 
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return f"http://127.0.0.1:8000/share/#{str(self.profile_number)}"
 
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.user).first()
@@ -92,6 +101,7 @@ class UpdateProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text='Your name goes here.')
     description = models.TextField(help_text='Your profile description goes here.')
+    profile_number = models.PositiveIntegerField(default=0, editable=False)
     image = models.ImageField(help_text='Attach an image for your profile (scales to your picture`s dimensions.)')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
@@ -111,6 +121,11 @@ class UpdateProfile(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
+            max_message_number = UpdateProfile.objects.aggregate(max_message_number=models.Max('profile_number'))[
+                                     'max_message_number'] or 0
+
+            # Increment the maximum message number to get the new message number
+            self.profile_number = max_message_number + 1
             # Get the associated ProfileDetails for the donor
             profile = ProfileDetails.objects.filter(user=self.user).first()
 
@@ -119,6 +134,9 @@ class UpdateProfile(models.Model):
                 self.position = profile.position
 
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return f"http://127.0.0.1:8000/showcase/#{str(self.profile_number)}"
 
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.user).first()
@@ -1851,6 +1869,7 @@ class Message(models.Model):
     signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='messages',
                                        verbose_name="User")
     room = models.CharField(max_length=1000000)
+    message_number = models.PositiveIntegerField(default=0, editable=False)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
@@ -1866,6 +1885,12 @@ class Message(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
+            # Get the current maximum message number
+            max_message_number = Message.objects.aggregate(max_message_number=models.Max('message_number'))[
+                                     'max_message_number'] or 0
+
+            # Increment the maximum message number to get the new message number
+            self.message_number = max_message_number + 1
             # Get the associated ProfileDetails for the donor
             profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
 

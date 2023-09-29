@@ -1,13 +1,11 @@
 {% extends 'memberbase.html' %}
 {% block content %}
 <head>
-  {% block title %}
     {% for SearchResultsView in Titles %}
       {% if SearchResultsView.page == 'search_results.html' %}
-         {{ SearchResultsView.overtitle }}
+        <title>{{ SearchResultsView.overtitle }}</title>
       {% endif %}
     {% endfor %}
-{% endblock title %}
   <style>
 .link-style {
   text-decoration: none;
@@ -51,9 +49,7 @@
   <br>
   <br>
   <br>
-    <a href="e">
     <h1 style="text-align: center;">Search Results</h1>
-    </a>
   <br>
   <br>
 <!-- search_results.html -->

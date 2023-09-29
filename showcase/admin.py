@@ -916,6 +916,7 @@ class MessageAdmin(admin.ModelAdmin):
             'fields': ('is_active',)
         }),
     )
+    readonly_fields = ('message_number',)
 
 
 admin.site.register(Message, MessageAdmin)

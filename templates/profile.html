@@ -1,10 +1,53 @@
 {% extends 'ebase.html' %}
 
+{% load static %}
+
 {% block head %}
-<title>Profile</title>
+    {% if profile %}
+        <link rel="icon" type="image/x-icon" href="{{ profile.avatar.url }}">
+    {% else %}
+        {% for favicon in Favicons %}
+            {% if favicon.faviconpage == 'profile.html' %}
+                <link rel="icon" type="image/x-icon" href="{{ favicon.faviconcover.url }}">
+            {% endif %}
+        {% endfor %}
+    {% endif %}
 {% endblock %}
 
 {% block content %}
+
+<head>
+
+    {% if profile %}
+<title>{{profile.user}}'s Profile</title>
+        {% else %}
+        <title>No Profile Found</title>
+    {% endif %}
+
+{% if profile %}
+    <link rel="icon" type="image/x-icon" href="{{ profile.avatar.url }}">
+{% else %}
+    {% for favicon in Favicons %}
+        {% if favicon.faviconpage == 'profile.html' %}
+            <link rel="icon" type="image/x-icon" href="{{ favicon.faviconcover.url }}">
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+
+</head>
+<body>
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+      {% for profile in Logo %}
+      {% if profile.page == "profile.html" %}
+        <a class="logo" href="{{ profile.hyperlink }}">
+          <img class="imageicon" src="media/{{ profile.logocover.url }}" alt="{{ profile.alternate }}"
+               width="145vh" height="100vh" style="z-index: 100;">
+        </a>
+      {% endif %}
+      {% endfor %}
+    </div>
 
 <br>
 <br>
@@ -37,4 +80,6 @@
 
 </div>
 <!--could make a profile home page that redirects to your profile based on the url (which in turn is based on your profile)-->
+
+</body>
 {% endblock %}

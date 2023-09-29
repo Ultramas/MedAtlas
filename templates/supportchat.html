@@ -2,13 +2,18 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %} Quantum Chat Interface {% endblock title %} 
 
 {% block content %}
 
 
 <html>
 <head>
+    {% for SupportChatBackgroundImage in Titles %}
+{% if SupportChatBackgroundImage.page == "supportchat.html" or SupportChatBackgroundImage.page == "base.html" %}
+  <title>{{SupportChatBackgroundImage.overtitle}}</title>
+  {% endif %}
+  {% endfor %}
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 .interface{
@@ -97,10 +102,24 @@
       </style>
 </head>
 <body>
+  <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for SupportChatBackgroundImage in Logo %}
+        {% if SupportChatBackgroundImage.page == 'supportchat.html' %}
+
+        <a class="logo" href="{{SupportChatBackgroundImage.hyperlink}}">
+          <img class="imageicon" src="{{SupportChatBackgroundImage.logocover.url}}"
+                alt="{{SupportChatBackgroundImage.alternate}}" style="length: {{SupportChatBackgroundImage.length_for_resize}}px; width: {{SupportChatBackgroundImage.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
 {% for SupportChatBackgroundImage in Background %}
-   <img class = "ebackgroundimages" src="{{ SupportChatBackgroundImage.cover.url }}" alt="supportchatbackgroundimage" style="position: absolute">
-    {% endfor %}
-<div class = home>
+{% if SupportChatBackgroundImage.page == 'supportchat.html' %}
+  <div class = home style="background: url('{{SupportChatBackgroundImage.cover.url}}'); background-size: cover; z-index: 1;">
+      {% endif %}
+{% endfor %}
+
   <br>
 <br>
 <br>
@@ -112,9 +131,7 @@
 
   <div class="container">
 
-    {% for SupportChatBackgroundImage in object_list %}
-   <img class = "ebackgroundimages" src="{{ SupportChatBackgroundImage.cover.url }}" alt="supportchatbackgroundimage">
-    {% endfor %}
+
        <div class="view overlay">
                   <div class="mask rgba-white-slight"></div>
               </div>
@@ -130,7 +147,6 @@
     </div>   
   </div>
 </div>
-
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
