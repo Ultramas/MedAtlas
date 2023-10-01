@@ -6908,20 +6908,9 @@ from .models import (
 
 
 
-class CreateReviewView(FormMixin, LoginRequiredMixin, View):
-    model = Feedback
+class CreateReviewView(LoginRequiredMixin, FormView):
     template_name = "create_review.html"
     form_class = FeedbackForm
-
-    def get_queryset(self):
-        # Customize the queryset based on your requirements
-        # For example, you might want to filter based on the request
-        item_slug = self.request.GET.get('item_slug')
-        orderitem_id = self.request.GET.get('orderitem_id')
-        # Adjust this queryset according to your needs
-        queryset = Feedback.objects.filter(order__id=orderitem_id)
-
-        return queryset
 
     def get(self, request, *args, **kwargs):
         item_slug = request.GET.get('item_slug')
@@ -6945,13 +6934,26 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, View):
         # Create an instance of the FeedbackForm and pass the initial data
         form = FeedbackForm(initial=initial, request=request)
 
-        # Get the additional context data from the parent class's get_context_data
-        additional_context = self.get_context_data(**kwargs)
+        context = self.get_context_data(form=form)
 
-        # Add the additional context to the form context
-        form_context = {'form': form, **additional_context}
+        return render(request, 'create_review.html', context)
 
-        return render(request, 'create_review.html', {'form': form})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Profile'] = UpdateProfile.objects.all()
+        context['Logo'] = LogoBase.objects.all()
+        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
+
+
+
+        return context
 
     def post(self, request, *args, **kwargs):
         item_slug = request.GET.get('item_slug')
@@ -6976,34 +6978,36 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, View):
             # Set the 'item' field based on the order item
             feedback.item = orderitem.item  # Assuming 'item' is a ForeignKey in Feedback
 
-            # Set other fields and save the feedback instance
+            # Set other fields
             feedback.username = request.user if request.user.is_authenticated else None
             feedback.order = orderitem
             feedback.slug = orderitem.slug
+
+            # Automatically set the user, item, and order fields
+            if request.user.is_authenticated:
+                feedback.username = request.user
+            else:
+                feedback.username = None
+
+            feedback.item = orderitem.item
+            feedback.order = orderitem
+
             feedback.save()
 
             if existing_feedback and existing_feedback != feedback:
                 existing_feedback.delete()
-                slug = str(existing_feedback.slug)  # Use the existing_feedback object's slug
+                slug = str(existing_feedback.slug)
             else:
-                slug = str(feedback.slug)  # Use the feedback object's slug
+                slug = str(feedback.slug)
 
             url = reverse('showcase:review_detail', args=[slug])
             return redirect(url)
 
-        return render(request, 'create_review.html', {'form': form})
+        else:
+            context = self.get_context_data(form=form)
+            return render(request, 'create_review.html', context)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Add the additional context data to the existing context
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
-        return context
+        return render(request, 'create_review.html', {'form': form})
 
 
 

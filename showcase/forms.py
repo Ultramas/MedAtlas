@@ -799,8 +799,6 @@ from django import forms
 from .models import Feedback
 
 
-
-
 class FeedbackForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -840,7 +838,6 @@ class FeedbackForm(forms.ModelForm):
         if commit:
             feedback.save()
         return feedback
-
 
 
 class FeedForm(forms.ModelForm):
