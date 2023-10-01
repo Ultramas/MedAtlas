@@ -1723,7 +1723,6 @@ class RoomView(TemplateView):
         profile_details = ProfileDetails.objects.filter(user__username=username).first()
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -2663,7 +2662,7 @@ class SupportRoomView(TemplateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
 
-        context['room'] = room
+        context['room'] = signed_in_user
         context['profile_details'] = profile_details
 
         # Retrieve the author's profile avatar
@@ -2690,11 +2689,22 @@ class SupportRoomView(TemplateView):
             messages_data.append(message_data)
 
         # Assign the list of formatted message data to the context
-        context['Messaging'] = messages_data
+        context['Messanger'] = messages_data
 
         return context
 
+def supportroom(request, signed_in_user):
 
+    return render(request, 'supportroom.html', {
+        'username': username,
+        'supportroom': supportroom,
+        'signed_in_user': signed_in_user,
+        'room_details': room_details,
+        'profile_details': profile_details,
+        'Logo': Logo,
+        'Header': Header,
+        'Dropdown': DropDown,
+    })
 
 class SupportCombinedView(SupportRoomView, ListView):
     paginate_by = 10
