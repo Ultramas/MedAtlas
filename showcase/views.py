@@ -1750,9 +1750,8 @@ class RoomView(TemplateView):
 
 def room(request, room):
     username = request.GET.get('username')
-    room_details = Room.objects.get(name=room)
-    profile_details = ProfileDetails.objects.filter(
-        user__username=username).first()  # Fetch profile details for the specified username
+
+    profile_details = ProfileDetails.objects.filter(user__username=username).first()
     Logo = LogoBase.objects.filter(page='room.html', is_active=1)
     Header = NavBarHeader.objects.filter(is_active=1).order_by("row")
     DropDown = NavBar.objects.filter(is_active=1).order_by('position')
@@ -1760,13 +1759,13 @@ def room(request, room):
     return render(request, 'room.html', {
         'username': username,
         'room': room,
+        'signed_in_user': signed_in_user,
         'room_details': room_details,
         'profile_details': profile_details,
         'Logo': Logo,
         'Header': Header,
         'Dropdown': DropDown,
     })
-
 
 def checkview(request):
     room = request.POST['room_name']
@@ -1776,6 +1775,10 @@ def checkview(request):
         return redirect('/home/' + room + '/?username=' + username)
     else:
         new_room = Room.objects.create(name=room)
+        signed_in_user = request.user
+        print('the room owner is ' + str(signed_in_user))
+        # Assuming there's a room associated with the provided name\
+        new_room.signed_in_user = signed_in_user if signed_in_user.is_authenticated else None
         new_room.save()
         return redirect('/home/' + room + '/?username=' + username)
 
@@ -3735,7 +3738,6 @@ def supportgetMessages(request, signed_in_user, **kwargs):
         chat_room = SupportChat.objects.get(signed_in_user__username=signed_in_user)
     except SupportChat.DoesNotExist:
         # Handle the case where the chat room doesn't exist
-        # You might want to return a 404 or display an error message
         chat_room = SupportChat(signed_in_user=request.user)
         chat_room.save()
 
@@ -4129,6 +4131,7 @@ class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
         context['news'] = SettingsModel.news
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         # context['name'] = Showcase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -4155,6 +4158,7 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         print(FaviconBase.objects.all())
         context['SettingsBackgroundView'] = self.model.objects.all()
         return context

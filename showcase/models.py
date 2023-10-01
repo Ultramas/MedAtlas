@@ -1,20 +1,16 @@
-from PIL import Image
-from django.db import models, migrations
-from django.contrib.auth.models import User
-from uuid import uuid4
 import uuid
+from uuid import uuid4
 
-from django.dispatch import receiver
-
-# from image.utils import render
-
-
+from PIL import Image
 # from django.db.models.signals import post_save
 from django.conf import settings
-from django.db.models import Sum
-from django.http import HttpResponseForbidden
-from django.shortcuts import reverse, get_object_or_404, render
+from django.contrib.auth.models import User
+from django.db import models
+from django.dispatch import receiver
+from django.shortcuts import reverse
 from django_countries.fields import CountryField
+
+# from image.utils import render
 
 CATEGORY_CHOICES = (
     ('G', 'Gold'),
@@ -1103,9 +1099,6 @@ class NavBarHeader(models.Model):
         verbose_name_plural = "Navigational Bar Headers"
 
 
-from django.contrib.auth.models import AbstractUser
-
-
 class SettingsModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='settings')
     username = models.CharField(help_text='Your username', max_length=200)
@@ -1797,9 +1790,8 @@ from django.db.models.signals import post_save
 # user_profile = UserProfile(user=user, bio='my bio') #website='http://poketrove.com')
 # user_profile.save()
 # post_save.connect(create_profile, sender=User)
-import random
 
-from django.contrib.auth import get_user_model, get_user
+from django.contrib.auth import get_user_model
 
 
 class ProfileDetails(models.Model):
@@ -1839,27 +1831,31 @@ class ProfileDetails(models.Model):
 # link the profiledetails page to settings
 
 from django.utils import timezone
-import pytz
-from django.utils.timezone import make_aware
-
-from datetime import datetime
 
 
 # Create your models here.
 class Room(models.Model):
     name = models.CharField(max_length=1000)
+    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='room',
+                                       verbose_name="Room Creator")
+
+    def __str__(self):
+        if self.name:
+            return str(self.name)
+        else:
+            return str('Guest')
 
     def get_absolute_url(self):
         # Construct the URL for the room detail page
-        room_url = reverse("showcase:room", kwargs={'room': self.room})
+        if self.name == '':
+            return reverse("showcase:room", kwargs={'room': ''})
 
-        # Construct the query parameters
-        final_url = f"{room_url}?username={self.signed_in_user.username}"
+        room_url = reverse("showcase:room", kwargs={'room': self.name})
+
+        # Construct the query parameters with the username
+        final_url = f"{room_url}?username={self.name}"
 
         return final_url
-
-
-from urllib.parse import urlencode
 
 
 class Message(models.Model):
@@ -1882,6 +1878,9 @@ class Message(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.value)
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -1934,7 +1933,7 @@ class Message(models.Model):
 class SupportChat(models.Model):
     name = models.CharField(max_length=1000)
     signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
-                                       verbose_name="User")
+                                       verbose_name="User") #room should be based on the signed-in user
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1943,6 +1942,9 @@ class SupportChat(models.Model):
 
     # datetime.now()
     # api_time = models.DateTimeField()
+
+    def __str__(self):
+        return str(self.signed_in_user)
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -1958,6 +1960,11 @@ class SupportChat(models.Model):
         profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
+    def get_absolute_url(self):
+        # Construct the URL for the room detail page
+        room_url = reverse('showcase:supportroom', args=[str(self.signed_in_user)])
+        return room_url
 
     class Meta:
         verbose_name = "Support Chat"
@@ -1986,6 +1993,9 @@ class SupportMessage(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.value)
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -2114,8 +2124,6 @@ class EBackgroundImage(models.Model):
 
 
 from django.core.validators import MinValueValidator, MaxValueValidator
-
-from django.contrib import messages
 
 
 class ChatBackgroundImage(models.Model):
@@ -2726,11 +2734,6 @@ class ImageCarousel(models.Model):
             # Handle any IntegrityError exceptions that may occur during save
             # Print or log the error for debugging
             print(f"IntegrityError during save: {e}")
-
-
-from io import BytesIO
-from django.core.files import File
-from django.core.files.base import ContentFile
 
 
 class AdvertisementBase(models.Model):

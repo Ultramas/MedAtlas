@@ -6,6 +6,12 @@
 <html>
 
 <head>
+        {% for ShowcaseBackgroundImage in Titles %}
+      {% if ShowcaseBackgroundImage.page == 'showcase.html' %}
+         <title>{{ ShowcaseBackgroundImage.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <link href="style.css" rel="stylesheet" type="text/css" />
@@ -48,8 +54,42 @@
 
 
 <body>
+        {% for newprofile in Logo %}
+        {% if newprofile.page == 'showcase.html' %}
 
-  {% for feedback_objects in Feed %}
+        <a class="logo" href="{{newprofile.hyperlink}}">
+          <img class="imageicon" src="{{newprofile.logocover.url}}"
+                alt="{{newprofile.alternate}}" style="length: {{newprofile.length_for_resize}}px; width: {{newprofile.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+
+
+    {% for newprofile in Background %}
+    {% if newprofile.page == "showcase.html" %}
+<div class="poste1" style="background-image: url({{ newprofile.cover.url }}); background-position: fixed; background-size: cover;">
+    {% endif %}
+{% endfor %}
+
+
+<div style="margin-top: 8%;" class="search">
+    <ul>
+    <form action="{% url 'showcase:search_results' %}" method="get">
+        <input name="q" type="text" placeholder="Search...">
+        <select name="filter">
+            <option value="">All</option>
+            <option value="city">City</option>
+            <option value="vote">Vote</option>
+            <option value="profile">Profile</option>
+            <option value="idea">Idea</option>
+            <option value="partner">Partner</option>
+        </select>
+        <button type="submit">Search</button>
+    </form>
+        </ul>
+</div>
+<br>
+<br>
+
                     {% for feedback_objects in Feed %}
 
                                 {% if feedback_objects.newprofile_profile_picture_url %}
@@ -61,19 +101,17 @@
                                    <!-- Placeholder image or default avatar -->
                                   <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
                                 {% endif %}
-            {% endfor %}
 
-<h1>{{feedback_objects.username}}</h1>
 
     <!-- Display user profile picture and username -->
-    <a href="{{ feedback_objects.user_profile_picture_url }}">
-       <h2>{{ feedback_objects.user.username }}</h2>
+    <a href="{{ feedback_objects.newprofile_profile_url }}">
+       <h2>{{feedback_objects.username}}</h2>
     </a>
 
 {% if feedback_objects.image %}
-<img src="{{ feedback_objects.image.url }}">
+<img src="{{ feedback_objects.image.url }}" style="width: 15%; height: 12%;">
 {% endif %}
-
+<br>
     <!-- Display star rating image based on feedback.star_rating -->
 <!--    {% with star_rating=feedback_objects.star_rating %}
         {% if star_rating >= 1 and star_rating <= 5 %}
@@ -125,7 +163,6 @@
 </ul>
 {% endfor %}
 {% elif feedback_objects.star_rating == 3 %}
-  nbihlvg
 {% for feedback_objects in Image %}
 <ul class="star" style="margin-left: 5%;">
     {% if feedback_objects.alternate == 'star-solid' %}
@@ -194,6 +231,7 @@
     <h3>{{ feedback_objects.comment }}</h3>
 
                                 {% endfor %}
+</div>
 </body>
 </html>
 {% endblock content %}

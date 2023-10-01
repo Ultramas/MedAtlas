@@ -110,6 +110,7 @@ padding-bottom: 1px;
       {% endif %}
 {% endfor %}
 
+
 <br>
 <br>
 <br>
@@ -122,6 +123,31 @@ padding-bottom: 1px;
 <br>
 <br>
 <br>
+
+<script>
+    function copyToClipboard() {
+        const roomUrl = window.location.href;  // Get the current room URL
+        const input = document.createElement('textarea');
+        input.value = roomUrl;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+
+        // Show "Link Copied" message
+        const copyMessage = document.getElementById('copy-message');
+        copyMessage.style.display = 'inline';
+        setTimeout(() => {
+            copyMessage.style.display = 'none';
+        }, 2000);  // Hide the message after 2 seconds
+    }
+</script>
+<div class="shareable-link">
+    <button id="copy-link-button" class="sharelink" onclick="copyToClipboard()">Room Invite</button>
+    <span id="copy-message" style="display: none;">Invite Copied!</span>
+</div>
+
+
 <div class="chat-container" id="chat-container">
 <br>
 
@@ -146,7 +172,7 @@ padding-bottom: 1px;
 
 
 
-<!--maybe consider shifting other users to the right side and keep current user on left side (optional, based on your asthetic preferences)-->
+<!--maybe consider shifting other users to the right side and keep current user on left side (optional, based on your aesthetic preferences)-->
 <script>
 $(document).ready(function(){
   // Preload avatars

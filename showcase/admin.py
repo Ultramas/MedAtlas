@@ -577,7 +577,7 @@ admin.site.register(OrderItemField, OrderItemFieldAdmin)
 class RoomAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Room Information', {
-            'fields': ('name',),
+            'fields': ('name', 'signed_in_user'),
             'classes': ('collapse-open',),
         }),
     )

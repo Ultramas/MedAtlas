@@ -42,7 +42,7 @@
       {% for profile in Logo %}
       {% if profile.page == "profile.html" %}
         <a class="logo" href="{{ profile.hyperlink }}">
-          <img class="imageicon" src="media/{{ profile.logocover.url }}" alt="{{ profile.alternate }}"
+          <img class="imageicon" src="{{ profile.logocover.url }}" alt="{{ profile.alternate }}"
                width="145vh" height="100vh" style="z-index: 100;">
         </a>
       {% endif %}

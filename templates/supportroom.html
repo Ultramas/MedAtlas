@@ -162,10 +162,10 @@ function fetchAndDisplayMessages() {
 
 fetchAndDisplayMessages();
 
-// Fetch new messages every 5 seconds
+// Fetch new messages every second
 setInterval(function() {
   fetchAndDisplayMessages();
-}, 1000);  // Fetch every 5 seconds
+}, 1000);  // Fetch every second
 
 
 </script>
@@ -178,25 +178,27 @@ setInterval(function() {
 
 
 <script type="text/javascript">
-$(document).on('submit','#post-form',function(e){
-  e.preventDefault();
+  $(document).on('submit','#post-form',function(e){
+    e.preventDefault();
 
-  $.ajax({
-    type:'POST',
-    url:'/supportchat/send',
-    data:{
-      username: $('#username').val(),
-      room_name: $('#username').val(),
-      message: $('#message').val(),
-      csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-    },
-    success: function(data){
-       //alert(data)
-    }
+    $.ajax({
+      type:'POST',
+      url:'/supportchat/send',
+      data:{
+          username:$('#username').val(),
+          room_id:$('#room_id').val(),
+          room_name:$('#room_name').val(),
+          message:$('#message').val(),
+        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+      },
+      success: function(data){
+         //alert(data)
+      }
+    });
+    document.getElementById('message').value = ''
   });
-  document.getElementById('message').value = '';
-});
 </script>
+
 </body>
 
 </html>

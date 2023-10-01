@@ -2,13 +2,6 @@
 
 {% load static %}
 
-{% block title %}
-    {% for ShowcaseBackgroundImage in Titles %}
-      {% if ShowcaseBackgroundImage.page == 'share.html' %}
-         {{ ShowcaseBackgroundImage.overtitle }}
-      {% endif %}
-    {% endfor %}
-{% endblock title %}
 
 {% block content %}
 
@@ -17,9 +10,14 @@
 <html>
 
 <head>
+    {% for newprofile in Titles %}
+      {% if newprofile.page == 'newsfeed.html' %}
+    <title>{{ newprofile.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>replit</title>
   <link href="style.css" rel="stylesheet" type="text/css" />
   <style>
     .boedy{
@@ -55,6 +53,17 @@
   </style>
 </head>
 <body>
+  <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for newprofile in Logo %}
+        {% if newprofile.page == 'newsfeed.html' %}
+
+        <a class="logo" href="{{newprofile.hyperlink}}">
+          <img class="imageicon" src="{{newprofile.logocover.url}}"
+                alt="{{newprofile.alternate}}" style="length: {{newprofile.length_for_resize}}px; width: {{newprofile.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
 
 {% for newprofile in Background %}
     {% if newprofile.page == "newsfeed.html" %}
@@ -140,7 +149,7 @@
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
 
-        </div>
+
 </body>
 </html>
 

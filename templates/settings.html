@@ -3,17 +3,14 @@
 
 {% load static %}
 
-{% block title %}
-    {% for SettingsView in Titles %}
-      {% if SettingsView.page == 'post_edit.html' %}
-         {{ SettingsView.overtitle }}
-      {% endif %}
-    {% endfor %}
-{% endblock title %}
 
 {% block content %}
 
+
 <head>
+
+    <title>{{ user.username }}'s Account Settings</title>
+
    <style>
         .advertisement-image {
             position: absolute;
@@ -53,9 +50,20 @@
 
 </head>
 <body>
+  <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for SettingsModel in Logo %}
+        {% if SettingsModel.page == 'settings.html' %}
 
-     {% for SettingsView in Background %}
-    <img class = "backgroundimages" src="{{SettingsView.cover.url}}" alt="{{ SettingsView.backgroundtitle }}">
+        <a class="logo" href="{{SettingsModel.hyperlink}}">
+          <img class="imageicon" src="{{SettingsModel.logocover.url}}"
+                alt="{{SettingsModel.alternate}}" style="length: {{SettingsModel.length_for_resize}}px; width: {{SettingsModel.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+     {% for SettingsModel in Background %}
+    <img class = "backgroundimages" src="{{SettingsModel.cover.url}}" alt="{{ SettingsModel.backgroundtitle }}">
        <div class="view overlay">
                   <div class="mask rgba-white-slight"></div>
               </div>

@@ -53,6 +53,17 @@
 
 </head>
 <body>
+  <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for PostingView in Logo %}
+        {% if PostingView.page == 'showcase.html' %}
+
+        <a class="logo" href="{{PostingView.hyperlink}}">
+          <img class="imageicon" src="{{PostingView.logocover.url}}"
+                alt="{{PostingView.alternate}}" style="length: {{PostingView.length_for_resize}}px; width: {{PostingView.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
 
      {% for PostingView in Background %}
     <img class = "backgroundimages" src="{{PostingView.cover.url}}" alt="{{ PostingView.backgroundtitle }}">
