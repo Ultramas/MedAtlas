@@ -3,6 +3,10 @@
 
 {% load static %}
 
+
+
+{% block content %}
+
 {% block title %}
     {% for PostingView in Titles %}
       {% if PostingView.page == 'post_edit.html' %}
@@ -10,8 +14,6 @@
       {% endif %}
     {% endfor %}
 {% endblock title %}
-
-{% block content %}
 
 <head>
    <style>
@@ -98,18 +100,11 @@
     </ul>
   </div>
 {% endif %}
+
       <form id="SubmitReviewForm" action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    <!-- Form fields -->
-    {{ form.star_rating.label_tag }} {{ form.star_rating }}
-    {{ form.comment.label_tag }} {{ form.comment }}
-    {{ form.slug.label_tag }} {{ form.slug }}
-    {{ form.image.label_tag }} {{ form.image }}
 
-    <!-- Hidden fields -->
-    <input type="hidden" id="username" name="username" value="{{ user.username }}">
-    <input type="hidden" id="order" name="order" value="{{ orderitem_id }}">
-
+    {{form.as_p}}
     <div class="row">
         <div class="col-md-12">
             <!-- Submit button -->
@@ -117,6 +112,7 @@
         </div>
     </div>
 </form>
+
 
 </div>
 

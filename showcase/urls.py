@@ -86,6 +86,7 @@ from .views import (
     BlogBaseView,
     RoomView,
     FeedbackView,
+    FeedView,
     ContactViewe,
     BusinessMailingView,
     BusinessEmailViewe,

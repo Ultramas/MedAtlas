@@ -2837,6 +2837,9 @@ class ImageBase(models.Model):
         verbose_name = 'Image Base'
         verbose_name_plural = 'Image Base'
 
+    def __str__(self):
+        return self.title
+
     def image_save(self, *args, **kwargs):
         if not self.id:  # Object is being created for the first time
             super().save(*args, **kwargs)

@@ -5933,6 +5933,7 @@ class DonateView(ListView):
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['donation'] = Donate.objects.filter(is_active=1)
+        context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
     def donate(request):
@@ -6903,9 +6904,24 @@ from .models import (
 )
 
 
+
+
+
+
 class CreateReviewView(FormMixin, LoginRequiredMixin, View):
+    model = Feedback
     template_name = "create_review.html"
     form_class = FeedbackForm
+
+    def get_queryset(self):
+        # Customize the queryset based on your requirements
+        # For example, you might want to filter based on the request
+        item_slug = self.request.GET.get('item_slug')
+        orderitem_id = self.request.GET.get('orderitem_id')
+        # Adjust this queryset according to your needs
+        queryset = Feedback.objects.filter(order__id=orderitem_id)
+
+        return queryset
 
     def get(self, request, *args, **kwargs):
         item_slug = request.GET.get('item_slug')
@@ -6913,19 +6929,92 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, View):
 
         try:
             orderitem = OrderItem.objects.get(id=orderitem_id)
-            item = orderitem.item  # Fetch the associated item
         except OrderItem.DoesNotExist:
             return HttpResponse('Sorry, this order does not exist.')
 
-        user = request.user if request.user.is_authenticated else None
+        # Set the 'item' and 'slug' fields based on the order item
+        if orderitem.item:
+            initial = {
+                'item': orderitem.item,
+                'slug': orderitem.slug,
+                'order': orderitem,
+            }
+        else:
+            initial = {'slug': orderitem.slug}
 
-        # Pass the item and orderitem to the form
-        form = FeedbackForm(request=request, item=item, orderitem=orderitem)
+        # Create an instance of the FeedbackForm and pass the initial data
+        form = FeedbackForm(initial=initial, request=request)
 
-        context = self.get_context_data(form=form)
-        context.update({'form': form})
+        # Get the additional context data from the parent class's get_context_data
+        additional_context = self.get_context_data(**kwargs)
 
-        return render(request, 'create_review.html', context)
+        # Add the additional context to the form context
+        form_context = {'form': form, **additional_context}
+
+        return render(request, 'create_review.html', {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        item_slug = request.GET.get('item_slug')
+        orderitem_id = request.GET.get('orderitem_id')
+
+        try:
+            orderitem = OrderItem.objects.get(id=orderitem_id)
+        except OrderItem.DoesNotExist:
+            return redirect('showcase:ehome')
+
+        try:
+            existing_feedback = Feedback.objects.get(order=orderitem)
+        except Feedback.DoesNotExist:
+            existing_feedback = None
+
+        # Create or update the feedback instance
+        form = FeedbackForm(request.POST, request.FILES, request=request, instance=existing_feedback)
+
+        if form.is_valid():
+            feedback = form.save(commit=False)
+
+            # Set the 'item' field based on the order item
+            feedback.item = orderitem.item  # Assuming 'item' is a ForeignKey in Feedback
+
+            # Set other fields and save the feedback instance
+            feedback.username = request.user if request.user.is_authenticated else None
+            feedback.order = orderitem
+            feedback.slug = orderitem.slug
+            feedback.save()
+
+            if existing_feedback and existing_feedback != feedback:
+                existing_feedback.delete()
+                slug = str(existing_feedback.slug)  # Use the existing_feedback object's slug
+            else:
+                slug = str(feedback.slug)  # Use the feedback object's slug
+
+            url = reverse('showcase:review_detail', args=[slug])
+            return redirect(url)
+
+        return render(request, 'create_review.html', {'form': form})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add the additional context data to the existing context
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Favicons'] = FaviconBase.objects.filter(is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        return context
+
+
+
+
+
+from .forms import FeedForm
+
+class FeedView(FormMixin, ListView):
+    model = Feedback
+    template_name = "create_review.html"
+    form_class = FeedForm
 
     def get_context_data(self, **kwargs):
         print("get_context_data is being called")
@@ -6939,48 +7028,63 @@ class CreateReviewView(FormMixin, LoginRequiredMixin, View):
             'Background': BackgroundImageBase.objects.filter(is_active=1)
         }
         return context
-
+    @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
-        item_slug = request.GET.get('item_slug')
-        orderitem_id = request.GET.get('orderitem_id')
-
-        try:
-            orderitem = OrderItem.objects.get(id=orderitem_id)
-        except OrderItem.DoesNotExist:
-            return redirect('showcase:ehome')
-
-        try:
-            existing_feedback = Feedback.objects.get(item=orderitem.item)
-        except Feedback.DoesNotExist:
-            existing_feedback = None
-
-        user = request.user if request.user.is_authenticated else None
-        # Pass the item and orderitem to the form
-        form = FeedbackForm(request.POST, request=request, item=orderitem.item, orderitem=orderitem)
-
-        if form.is_valid():
-            if existing_feedback:
-                existing_feedback.star_rating = form.cleaned_data.get('star_rating')
-                existing_feedback.comment = form.cleaned_data.get('comment')
-                existing_feedback.slug = form.cleaned_data.get('slug')
-                existing_feedback.image = form.cleaned_data.get('image')
-                existing_feedback.save()
-                slug = str(existing_feedback.slug)
+            form = FeedForm(request.POST)
+            if form.is_valid():
+                post = form.save(commit=False)
+                form.instance.user = request.user
+                post.save()
+                messages.success(request, 'Form submitted successfully.')
+                url = reverse('showcase:review_detail', args=[slug])
+                return redirect(url)
             else:
-                feedback = form.save(commit=False)
-                feedback.item = orderitem.item
-                feedback.order = orderitem.order  # Set the order for the feedback
-                slug = str(feedback.slug)
-                feedback.save()
-
-            url = reverse('showcase:review_detail', args=[str(feedback.slug)])
-            return redirect(url)
-
-        context = self.get_context_data(form=form)
-        context['form'] = form
-        return render(request, 'create_review.html', context)
+                print(form.errors)
+                print(form.non_field_errors())
+                print(form.cleaned_data)
+                messages.error(request, "Form submission invalid")
+                return render(request, "create_review.html", {'form': form})
 
 
+@login_required(login_url='/accounts/login/')
+def submit_feedback(request):
+    user = request.user
+
+    if request.method == 'POST':
+        form = FeedbackForm(request=request, item=item, orderitem=orderitem)
+        if form.is_valid():
+            star_rating = form.cleaned_data['star_rating']
+            comment = form.cleaned_data['comment']
+
+            # Update or create feedback
+            feedback, created = Feedback.objects.update_or_create(
+                username=request.user,
+                # Use request.user.username to get the currently logged-in user's username
+                defaults={'star_rating': star_rating, 'comment': comment}
+            )
+
+            # Redirect to a thank-you page or some other appropriate view
+            return redirect('showcase:feedbackfinish')  # Change this to your desired URL
+
+    else:
+        # If the request method is GET, create a new feedback form
+        form = FeedbackForm(request=request)
+
+    return render(request, 'create_review.html', {'form': form})
+
+
+def edit_feedback(request, feedback_id):
+    feedback = get_object_or_404(Feedback, id=feedback_id)
+
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST, instance=feedback, request=request)
+        if form.is_valid():
+            form.save()
+            return redirect('showcase:create_review')
+    else:
+        form = FeedbackForm(instance=feedback, request=request)
+
+    return render(request, 'create_review.html', {'form': form})
 
 
 @login_required(login_url='/accounts/login/')

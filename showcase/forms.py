@@ -1,3 +1,5 @@
+from urllib import request
+
 from django import forms
 
 from mysite import settings
@@ -790,63 +792,61 @@ from .models import Feedback
 from django import forms
 
 
+from django import forms
+from .models import Feedback
+
+from django import forms
+from .models import Feedback
+
+
+
+
 class FeedbackForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        item = kwargs.pop('item', None)
-        orderitem = kwargs.pop('orderitem', None)
-        request = kwargs.pop('request', None)
-
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-
-        # Set a placeholder for the 'order' field
-        self.fields['order'].widget.attrs['placeholder'] = 'Order: {0}'.format(
-            orderitem.item if orderitem else 'Not specified'
-        )
-
-        # Set the initial value for the 'order' field based on the order item
-        self.fields['order'].initial = item if item else None
-
-        print(orderitem.item)
-
-        # Set the initial value for the 'username' field
-        if request and request.user.is_authenticated:
-            self.fields['username'] = forms.CharField(initial=request.user.username)
-            self.fields['username'].widget.attrs['readonly'] = True
-        else:
-            self.fields['username'] = forms.CharField(required=False)
-
-        # Filter the choices for the 'order' field based on the logged-in user
-        if request and request.user.is_authenticated:
-            self.fields['order'].queryset = OrderItem.objects.filter(user=request.user)
-        else:
-            self.fields['order'].queryset = OrderItem.objects.none()
 
     class Meta:
         model = Feedback
         fields = ('order', 'star_rating', 'comment', 'slug', 'image')
 
-    def save(self, commit=True, user=None):
+    def save(self, commit=True):
+        # Get the user who created the feedback
+        user = self.request.user if self.request.user.is_authenticated else None
+
+        # Create an instance of the Feedback model
         feedback = super().save(commit=False)
 
-        # Ensure the 'order' field is set correctly
-        orderitem = self.cleaned_data.get('orderitem')  # Get the order item
-        feedback.order = orderitem.order if orderitem else None  # Set the order for the feedback
+        if feedback.order and feedback.order.item:
+            feedback.item = feedback.order.item
+        if feedback.order:
+            feedback.slug = feedback.order.slug
 
-        # Set other fields
-        feedback.star_rating = self.cleaned_data.get('star_rating')
-        feedback.slug = self.cleaned_data.get('slug')
-        feedback.image = self.cleaned_data.get('image')
-
-        if user and user.is_authenticated:
+        # Set the user, star rating, and slug if available
+        if user and isinstance(user, User):  # Check if user is a User instance
             feedback.username = user
         else:
-            feedback.username = self.cleaned_data.get('username')
+            feedback.username = None  # Set to None if user is not a valid User instance
+
+        if 'star_rating' in self.cleaned_data:
+            feedback.star_rating = self.cleaned_data['star_rating']
+        if 'slug' in self.cleaned_data:
+            feedback.slug = self.cleaned_data['slug']
+
+        # Set the 'image' field if an image file is provided
+        if 'image' in self.cleaned_data:
+            feedback.image = self.cleaned_data['image']
 
         if commit:
             feedback.save()
         return feedback
 
 
+
+class FeedForm(forms.ModelForm):
+    class Meta:
+        model = Feedback
+        fields = ('order', 'star_rating', 'comment', 'slug', 'image')
 
 
 class EmailForm(forms.ModelForm):

@@ -1,14 +1,21 @@
 {% extends 'donatebase.html' %}
 {% load static %}
 {% block content %}
+<head>
+    {% for DonorBackgroundImage in Titles %}
+      {% if DonorBackgroundImage.page == 'donate.html' %}
+         <title>{{ DonorBackgroundImage.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+
 	<style type="text/css">
 		/**
 		 * The CSS shown here will not be introduced in the Quickstart guide, but shows
 		 * how you can use CSS to style your Element's container.
-		 */        
+		 */
 		.StripeElement {
 		  box-sizing: border-box;
-           
+
 		  height: 40px;
 
 		  padding: 10px 12px;
@@ -35,6 +42,25 @@
 		}
 	</style>
 
+</head>
+<body>
+<div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for DonorBackgroundImage in Logo %}
+        {% if DonorBackgroundImage.page == 'donate.html' %}
+
+        <a class="logo" href="{{DonorBackgroundImage.hyperlink}}">
+          <img class="imageicon" src="{{DonorBackgroundImage.logocover.url}}"
+                alt="{{DonorBackgroundImage.alternate}}" style="length: {{DonorBackgroundImage.length_for_resize}}px; width: {{DonorBackgroundImage.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    {% for DonorBackgroundImage in Background %}
+    {% if DonorBackgroundImage.page == "donate.html" %}
+<div class="poste1" style="background-image: url({{ DonorBackgroundImage.cover.url }}); background-position: fixed; background-size: cover;">
+    {% endif %}
+{% endfor %}
 
 	<script src="https://js.stripe.com/v3/"></script>
 
@@ -45,10 +71,97 @@
 	<div id="container">
 		<div class="column-6">
 			<div id="left-wrapper">
+			{% for BackgroundImage in Image %}
+            {% if BackgroundImage.page == 'donate.html' %}
+            {% if BackgroundImage.image_position == 1 %}
 				<img id="profile-pic" src="{% static 'images/qs.jpg' %}">
+            {% endif %}
+            {% endif %}
+            {% endfor %}
 				<div id="left-wrapper-header">
-					<h3>Support Quantumism</h3>    
-					<h5>One-Time Donation</h5>
+					<!--h3-->
+				{% for DonorBackgroundImage in TextFielde %}
+					{% if DonorBackgroundImage.page == 'donate.html' and DonorBackgroundImage.section == 1 %}
+							{% if DonorBackgroundImage.hyperlink %}
+									<a href="{{DonorBackgroundImage.hyperlink}}">
+										{% if DonorBackgroundImage.text_size == 1 %}
+											<h1>{{ DonorBackgroundImage.text }}</h1>
+										{% elif DonorBackgroundImage.text_size == 2 %}
+											<h2>{{ DonorBackgroundImage.text }}</h2>
+										{% elif DonorBackgroundImage.text_size == 3 %}
+											<h3>{{ DonorBackgroundImage.text }}</h3>
+										{% elif DonorBackgroundImage.text_size == 4 %}
+											<h4>{{ DonorBackgroundImage.text }}</h4>
+										{% elif DonorBackgroundImage.text_size == 5 %}
+											<h5>{{ DonorBackgroundImage.text }}</h5>
+										{% elif DonorBackgroundImage.text_size == 6 %}
+											<h6>{{ DonorBackgroundImage.text }}</h6>
+										{% else %}
+											<p>{{ DonorBackgroundImage.text }}</p>
+										{% endif %}
+									</a>
+								{% else %}
+									{% if DonorBackgroundImage.text_size == 1 %}
+										<h1>{{ DonorBackgroundImage.text }}</h1>
+									{% elif DonorBackgroundImage.text_size == 2 %}
+										<h2>{{ DonorBackgroundImage.text }}</h2>
+									{% elif DonorBackgroundImage.text_size == 3 %}
+										<h3>{{ DonorBackgroundImage.text }}</h3>
+									{% elif DonorBackgroundImage.text_size == 4 %}
+										<h4>{{ DonorBackgroundImage.text }}</h4>
+									{% elif DonorBackgroundImage.text_size == 5 %}
+										<h5>{{ DonorBackgroundImage.text }}</h5>
+									{% elif DonorBackgroundImage.text_size == 6 %}
+										<h6>{{ DonorBackgroundImage.text }}</h6>
+									{% else %}
+										<p>{{ DonorBackgroundImage.text }}</p>
+									{% endif %}
+								{% endif %}
+
+								{% endif %}
+				{% endfor %}
+
+					<!--h5-->
+				{% for DonorBackgroundImage in TextFielde %}
+										{% if DonorBackgroundImage.page == 'donate.html' and DonorBackgroundImage.section == 2 %}
+							{% if DonorBackgroundImage.hyperlink %}
+									<a href="{{DonorBackgroundImage.hyperlink}}">
+										{% if DonorBackgroundImage.text_size == 1 %}
+											<h1>{{ DonorBackgroundImage.text }}</h1>
+										{% elif DonorBackgroundImage.text_size == 2 %}
+											<h2>{{ DonorBackgroundImage.text }}</h2>
+										{% elif DonorBackgroundImage.text_size == 3 %}
+											<h3>{{ DonorBackgroundImage.text }}</h3>
+										{% elif DonorBackgroundImage.text_size == 4 %}
+											<h4>{{ DonorBackgroundImage.text }}</h4>
+										{% elif DonorBackgroundImage.text_size == 5 %}
+											<h5>{{ DonorBackgroundImage.text }}</h5>
+										{% elif DonorBackgroundImage.text_size == 6 %}
+											<h6>{{ DonorBackgroundImage.text }}</h6>
+										{% else %}
+											<p>{{ DonorBackgroundImage.text }}</p>
+										{% endif %}
+									</a>
+								{% else %}
+									{% if DonorBackgroundImage.text_size == 1 %}
+										<h1>{{ DonorBackgroundImage.text }}</h1>
+									{% elif DonorBackgroundImage.text_size == 2 %}
+										<h2>{{ DonorBackgroundImage.text }}</h2>
+									{% elif DonorBackgroundImage.text_size == 3 %}
+										<h3>{{ DonorBackgroundImage.text }}</h3>
+									{% elif DonorBackgroundImage.text_size == 4 %}
+										<h4>{{ DonorBackgroundImage.text }}</h4>
+									{% elif DonorBackgroundImage.text_size == 5 %}
+										<h5>{{ DonorBackgroundImage.text }}</h5>
+									{% elif DonorBackgroundImage.text_size == 6 %}
+										<h6>{{ DonorBackgroundImage.text }}</h6>
+									{% else %}
+										<p>{{ DonorBackgroundImage.text }}</p>
+									{% endif %}
+								{% endif %}
+
+								{% endif %}
+				{% endfor %}
 				</div>
 				<div style="clear:left"></div>
 				<hr>
@@ -107,12 +220,29 @@
 
 		<div class="column-6">
 			<div id="right-wrapper">
-
-				<img class="coffee-cup" src="{% static 'images/sc.jpg' %}">
-				<img class="coffee-cup2" src="{% static 'images/sc2.jpg' %}">
-				<img class="coffee-cup3" src="{% static 'images/sc3.jpg' %}">
+			{% for BackgroundImage in Image %}
+            {% if BackgroundImage.page == 'donate.html' %}
+            {% if BackgroundImage.image_position == 2 %}
+				<img class="coffee-cup" src="{{BackgroundImage.image.url}}">
+			{% endif %}
+            {% endif %}
+            {% endfor %}
+			{% for BackgroundImage in Image %}
+            {% if BackgroundImage.page == 'donate.html' %}
+            {% if BackgroundImage.image_position == 3 %}
+				<img class="coffee-cup2" src="{{BackgroundImage.image.url}}">
+			{% endif %}
+            {% endif %}
+            {% endfor %}
+			{% for BackgroundImage in Image %}
+            {% if BackgroundImage.page == 'donate.html' %}
+            {% if BackgroundImage.image_position == 4 %}
+				<img class="coffee-cup3" src="{{BackgroundImage.image.url}}">
+			{% endif %}
+            {% endif %}
+            {% endfor %}
 				{% for DonorBackgroundImage in TextFielde %}
-					{% if DonorBackgroundImage.page == 'donate.html' and DonorBackgroundImage.section == 1 %}
+					{% if DonorBackgroundImage.page == 'donate.html' and DonorBackgroundImage.section == 3 %}
 							{% if DonorBackgroundImage.hyperlink %}
 									<a href="{{DonorBackgroundImage.hyperlink}}">
 										{% if DonorBackgroundImage.text_size == 1 %}
@@ -159,7 +289,7 @@
 
 
 
-
+</div>
 
 
 	<script>
@@ -234,5 +364,6 @@
 		  form.submit();
 		}
 	</script>
-	
+
+</body>
 {% endblock content %}
