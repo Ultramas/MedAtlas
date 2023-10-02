@@ -386,7 +386,6 @@ urlpatterns = [
     #path('supportchat/room', views.SupportRoomView.as_view(), name='supportroom'),
     path('supportchat/room/<str:signed_in_user>/', views.SupportRoomView.as_view(), name='supportroom'),
 
-    path('user.user/<str:signed_in_user>/', views.supportline, name='supportline'),
     path('supportinterface/room/<str:room>/', views.SupportLineView.as_view(), name='supportline'),
     path('supportlinegetMessages/<str:room>/', views.supportlinegetMessages, name='supportlinegetMessages'),
 

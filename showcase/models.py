@@ -2023,8 +2023,8 @@ class SupportMessage(models.Model):
         return room_url
 
     class Meta:
-        verbose_name = "Support Thread Message"
-        verbose_name_plural = "Support Thread Messages"
+        verbose_name = "Support Message"
+        verbose_name_plural = "Support Messages"
 
 
 # support live chat below, support thread above (requires refresh)
@@ -2048,21 +2048,24 @@ class SupportInterface(models.Model):
     def get_absolute_url(self):
         # Construct the URL for the room detail page
         if self.name == '':
-            return reverse("showcase:room", kwargs={'room': ''})
+            return reverse("showcase:supportline", kwargs={'supportline': ''})
 
-        room_url = reverse("showcase:room", kwargs={'room': self.name})
+        room_url = reverse("showcase:supportline", kwargs={'supportline': self.name})
 
         # Construct the query parameters with the username
         final_url = f"{room_url}?username={self.name}"
 
         return final_url
 
+    class Meta:
+        verbose_name = "Administration Chat Thread"
+        verbose_name_plural = "Administration Chat Thread"
+
 
 class SupportLine(models.Model):
     value = models.CharField(max_length=1000000)
     date = models.DateTimeField(default=timezone.now, blank=True)
-    user = models.CharField(max_length=1000000, verbose_name="Username")
-    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='supportlineuser',
+    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='supportlinemessages',
                                        verbose_name="User")
     room = models.CharField(max_length=1000000)
     message_number = models.PositiveIntegerField(default=0, editable=False)
@@ -2085,7 +2088,7 @@ class SupportLine(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             # Get the current maximum message number
-            max_message_number = Message.objects.aggregate(max_message_number=models.Max('message_number'))[
+            max_message_number = SupportLine.objects.aggregate(max_message_number=models.Max('message_number'))[
                                      'max_message_number'] or 0
 
             # Increment the maximum message number to get the new message number
@@ -2115,8 +2118,8 @@ class SupportLine(models.Model):
         return final_url
 
     class Meta:
-        verbose_name = "Support Message"
-        verbose_name_plural = "Support Messages"
+        verbose_name = "Administration Thread Message"
+        verbose_name_plural = "Administration Thread Messages"
 
 
 class UserProfile(models.Model):

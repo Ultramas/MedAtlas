@@ -2751,7 +2751,7 @@ class SupportLineView(TemplateView):
         context['profile_details'] = profile_details
 
         # Retrieve the author's profile avatar
-        messages = Message.objects.all().order_by('-date')
+        messages = SupportLine.objects.all().order_by('-date')
 
         context['Messaging'] = messages
 
@@ -2766,64 +2766,62 @@ class SupportLineView(TemplateView):
 
 def supportline(request, room):
     username = request.GET.get('username')
-
-    profile_details = ProfileDetails.objects.filter(user__username=username).first()
-    Logo = LogoBase.objects.filter(page='supportline.html', is_active=1)
-    Header = NavBarHeader.objects.filter(is_active=1).order_by("row")
-    DropDown = NavBar.objects.filter(is_active=1).order_by('position')
-
+    room_details = SupportChat.objects.get(name=username)
+    profile_details = ProfileDetails.objects.filter(
+        user__username=username).first()
     return render(request, 'supportline.html', {
         'username': username,
-        'room': room,
-        'signed_in_user': signed_in_user,
+        'room': room_details,
         'room_details': room_details,
         'profile_details': profile_details,
-        'Logo': Logo,
-        'Header': Header,
-        'Dropdown': DropDown,
     })
 
 def supportlinecheckview(request):
-    room = request.POST['room_name']
-    username = request.POST['username']
+    user_str = str(message.signed_in_user)
+    username = request.user.username
 
-    if SupportInterface.objects.filter(name=room).exists():
-        return redirect('/supportinterface/room/' + room)
+    if SupportInterface.objects.filter(name=username).exists():
+        #return redirect('/supportchat/room')
+        return redirect('/supportline/room/' + username)
     else:
-        new_room = SupportInterface.objects.create(name=room)
+        new_room = SupportInterface.objects.create(name=username)
         signed_in_user = request.user
         print('the room owner is ' + str(signed_in_user))
-        # Assuming there's a room associated with the provided name\
-        new_room.signed_in_user = signed_in_user if signed_in_user.is_authenticated else None
         new_room.save()
-        return redirect('/supportinterface/room/' + room)
+        #return redirect('/supportchat/room')
+        return redirect('/supportline/room/' + username)
+
 
 
 def supportlinesend(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         username = request.POST.get('username')
-        room_id = request.POST.get('room_id')
+        room = request.POST.get('username')
+        # room_id = request.POST.get('room_id')
+        # profile = request.POST.get('profile')
+        # signed_in_user = request.POST.get('signed_in_user')
 
-        print(f"message: {message}, username: {username}, room_id: {room_id}")
-
-        # Retrieve the User instance with the given username
-
+        print(f"message: {message}, username: {username}, room_name: {username}")
+        # print(f"profile: {profile}")
         # Check if the user is authenticated
         if request.user.is_authenticated:
             # User is authenticated, use their user ID for the message user field
             new_message = SupportLine.objects.create(
                 value=message,
-                user=str(request.user.username),
-                room=str(request.user.username),
+                user=username,
+                room=username,
+                # room=room_id,
                 signed_in_user=request.user  # Set the signed_in_user to the authenticated user
             )
+            # print(f"signed_in_user: {signed_in_user}")
             new_message.save()
         else:
             # User is not authenticated, use the provided username for the message user field
             new_message = SupportLine.objects.create(
                 value=message,
-                room=room_id,
+                user=username,
+                room=username,
             )
             new_message.save()
 
@@ -2832,6 +2830,7 @@ def supportlinesend(request):
 
     # If the request method is not POST, handle the appropriate response here
     return HttpResponse('Invalid request method. Please use POST to send a message.')
+
 
 def supportlinegetMessages(request, room):
     room_details = SupportInterface.objects.get(name=room)
@@ -3912,8 +3911,15 @@ def supportgetMessages(request, signed_in_user, **kwargs):
         for message in messages:
             user_str = str(message.signed_in_user)  # Convert User object to its string representation
 
-            # Extract the URL of the image
-            avatar_url = message.image.url if message.image else None
+            profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+            if profile_details:
+                user_profile_url = message.get_profile_url()
+                # Extract the URL of the image
+                avatar_url = profile_details.avatar.url
+            else:
+                # Set a default avatar URL or path in case the user doesn't have an avatar
+                user_profile_url = ('/supportchat/room' + request.user)
+                avatar_url = staticfiles_storage.url('css/images/a.jpg')
 
             messages_data.append({
                 'user_profile_url': message.get_profile_url(),
@@ -3925,6 +3931,7 @@ def supportgetMessages(request, signed_in_user, **kwargs):
 
         return JsonResponse({'messages': messages_data})
     else:
+        return redirect('showcase:forbiddenaccess')
         return HttpResponseForbidden("You do not have permission to access this chat room")
 
 """def supportgetMessages(request, **kwargs):
