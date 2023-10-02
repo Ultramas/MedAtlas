@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions
+from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
+    SupportInterface
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -132,6 +133,7 @@ class PollQuestionAdmin(admin.ModelAdmin):
 
 admin.site.register(PollQuestion, PollQuestionAdmin)
 
+
 class authorAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Vote Information - Categorial Descriptions', {
@@ -147,6 +149,8 @@ admin.site.register(UpdateProfile, categoryAdmin)
 admin.site.register(Idea, categoryAdmin)
 
 admin.site.register(Vote, authorAdmin)
+
+
 class StaffApplicationAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Staff Application Information - Staff Background Check', {
@@ -158,6 +162,8 @@ class StaffApplicationAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+
+
 admin.site.register(StaffApplication, StaffApplicationAdmin)
 
 
@@ -201,6 +207,7 @@ class ReportIssueAdmin(admin.ModelAdmin):
 
 admin.site.register(ReportIssue, ReportIssueAdmin)
 
+
 class StaffProfileAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Staff Profile Information - Categorial Description', {
@@ -212,6 +219,8 @@ class StaffProfileAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+
+
 admin.site.register(StaffProfile, StaffProfileAdmin)
 
 
@@ -241,6 +250,8 @@ class SettingsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(SettingsModel, SettingsAdmin)
+
+
 # admin.site.register(SettingsBackgroundImage)
 # admin.site.register(ConvertBackgroundImage)
 class UserProfileAdmin(admin.ModelAdmin):
@@ -250,6 +261,7 @@ class UserProfileAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+
 
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(UserProfile2, UserProfile2Admin)
@@ -749,6 +761,7 @@ class FaviconBaseAdmin(admin.ModelAdmin):
 
 admin.site.register(FaviconBase, FaviconBaseAdmin)
 
+
 class FrequentlyAskedQuestionsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Administration Role Information', {
@@ -759,6 +772,7 @@ class FrequentlyAskedQuestionsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(FrequentlyAskedQuestions, FrequentlyAskedQuestionsAdmin)
+
 
 class AdvertisementBaseAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -901,6 +915,7 @@ class ImageCarouselAdmin(admin.ModelAdmin):
         # Return a tuple of fields to be read-only
         return ('specialty',)
 
+
 admin.site.register(ImageCarousel, ImageCarouselAdmin)
 
 
@@ -938,6 +953,36 @@ class SupportMessageAdmin(admin.ModelAdmin):
 
 
 admin.site.register(SupportMessage, SupportMessageAdmin)
+
+
+class SupportInterfaceAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Support Interface Information - Categorial Descriptions', {
+            'fields': ('name', 'room', 'is_active',)
+        }),
+    )
+    readonly_fields = ('date',)
+
+
+admin.site.register(SupportInterface, SupportInterfaceAdmin)
+
+
+class SupportThreadAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Administration Thread Information - Categorial Descriptions', {
+            'fields': ('value', 'user', 'signed_in_user', 'room',)
+        }),
+        ('Administration Thread Information - Image Display', {
+            'fields': ('image', 'image_length', 'image_width',)
+        }),
+        ('Administration Thread Information - Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+    readonly_fields = ('date', 'message_number')
+
+
+admin.site.register(SupportLine, SupportThreadAdmin)
 
 
 class BanAppealAdmin(admin.ModelAdmin):

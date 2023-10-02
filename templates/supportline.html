@@ -6,6 +6,8 @@
 <html>
 <head>
 
+    {% if user.is_staff %}
+
 {% for Room in Titles %}
   {% if Room.page == 'room.html' %}
     <title>{{ Room.overtitle }}</title>
@@ -173,68 +175,57 @@ padding-bottom: 1px;
 
 
 <!--maybe consider shifting other users to the right side and keep current user on left side (optional, based on your aesthetic preferences)-->
+
+<!-- HTML structure to display messages -->
+
 <script>
-$(document).ready(function(){
-  // Preload avatars
-  var avatarUrls = [];
-  $(".message img").each(function() {
-    avatarUrls.push($(this).attr("src"));
-  });
+$(document).ready(function() {
+    // Function to load and display messages
+    function loadAndDisplayMessages() {
+        var room = "{{ room }}";  // Replace with the actual value of the room
 
-  preloadImages(avatarUrls);
+        $.ajax({
+            type: 'GET',
+            url: "/supportlinegetMessages/" + room + "/",
+            success: function(response) {
+                console.log(response);
+                $("#display").empty();
 
-  setInterval(function(){
-    var room = "{{ room }}"; // Replace with the actual value of the room
+                // Iterate through each message and display it
+                for (var key in response.messages) {
+                    var message = response.messages[key];
 
-    $.ajax({
-      type: 'GET',
-      url : "/supportlinegetMessages/" + room + "/",
-      success: function(response){
-        console.log(response);
-        $("#display").empty();
-        for (var key in response.messages) {
-  var message = response.messages[key];
-  var user_profile_url = message.user_profile_url;
-  var avatar_url = message.avatar_url; // Store avatar_url in a separate variable
-  var user = message.signed_in_user; // Store user in a separate variable
-  var value = message.value; // Store value in a separate variable
-  var date = message.date; // Store date in a separate variable
-  var message_number = message.message_number;
+                    var messageHtml = `
+                        <div class="message" id="#${message.message_number}">
+                            <a href="${message.user_profile_url}">
+                                <img src="${message.avatar_url}" alt="${message.user}">
+                            </a>
+                            <div class="message-content">
+                                <div class="sender">${message.user}</div>
+                                <div>${message.value}</div>
+                                <div class="time">${message.date}</div>
+                            </div>
+                        </div>`;
 
-  console.log(user_profile_url);
-  var messageHtml = `
-    <div class="message" id="#${message_number}">
-      <a href="${user_profile_url}">
-        <img src="${avatar_url}" alt="${user}">
-      </a>
-      <div class="message-content">
-        <div class="sender">${user}</div>
-        <div>${value}</div>
-        <div class="time">${date}</div>
-      </div>
-    </div>`;
-  console.log(user_profile_url);
-  $("#display").append(messageHtml);
-}
+                    $("#display").append(messageHtml);
+                }
+            },
+            error: function(response) {
+                alert('An error occurred');
+            }
+        });
+    }
 
-      },
-      error: function(response){
-        alert('An error occurred');
-      }
-    });
-  }, 1000);
+    // Load and display messages initially
+    loadAndDisplayMessages();
+
+    // Refresh messages every second (1000 milliseconds)
+    setInterval(loadAndDisplayMessages, 1000);
 });
-
-// Preload images
-function preloadImages(urls) {
-  for (var i = 0; i < urls.length; i++) {
-    var img = new Image();
-    img.src = urls[i];
-  }
-}
-
-
 </script>
+
+
+
 
 
     <script src="{% static 'css/js/script.js' %}"></script>
@@ -280,6 +271,15 @@ $(document).on('submit','#post-form',function(e){
 </script>
 
 </html>
+
+{% else %}
+<head>
+  <meta http-equiv="refresh" content="0; url=http://{{ request.get_host }}/forbiddenaccess">
+  </head>
+<!--{# regular sign up link #}
+  <a href="{% url "form"}">Register now!</a>-->
+    {% endif %}
+
 
 {% endblock content %}
 

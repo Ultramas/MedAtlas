@@ -1972,8 +1972,8 @@ class SupportChat(models.Model):
         return room_url
 
     class Meta:
-        verbose_name = "Support Thread"
-        verbose_name_plural = "Support Threads"
+        verbose_name = "Support Chat"
+        verbose_name_plural = "Support Chat"
 
 
 class SupportMessage(models.Model):
@@ -2030,9 +2030,10 @@ class SupportMessage(models.Model):
 # support live chat below, support thread above (requires refresh)
 
 class SupportInterface(models.Model):
-    name = models.CharField(max_length=1000)
+    name = models.CharField(max_length=1000, null=True)
     room = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='supportinterfaceroom',
                                        verbose_name="Room Creator")
+    date = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2048,9 +2049,9 @@ class SupportInterface(models.Model):
     def get_absolute_url(self):
         # Construct the URL for the room detail page
         if self.name == '':
-            return reverse("showcase:supportline", kwargs={'supportline': ''})
+            return reverse("showcase:supportline", kwargs={'room': ''})
 
-        room_url = reverse("showcase:supportline", kwargs={'supportline': self.name})
+        room_url = reverse("showcase:supportline", kwargs={'room': self.name})
 
         # Construct the query parameters with the username
         final_url = f"{room_url}?username={self.name}"
@@ -2068,6 +2069,7 @@ class SupportLine(models.Model):
     signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='supportlinemessages',
                                        verbose_name="User")
     room = models.CharField(max_length=1000000)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     message_number = models.PositiveIntegerField(default=0, editable=False)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,

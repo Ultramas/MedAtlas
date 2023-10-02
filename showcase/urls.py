@@ -377,20 +377,21 @@ urlpatterns = [
     # path('supportchat/<str:room>/', views.room, name='room'),
     path('user.username/<str:room>/', views.room, name='room'), #causes admistration redirection on messages' "view on site"
     path('home/<str:room>/', views.RoomView.as_view(), name='room'),
-    path('supportinterface/', views.ChatBackgroundView.as_view(), name='supportinterface'),
     path('supportchat/checkview', views.supportcheckview, name='supportcheckview'),
     path('supportchat/send', views.supportsend, name='supportsend'),
     #path('supportgetMessages/room/', views.supportgetMessages, name='supportgetMessages'),
-    path('supportgetMessages/<str:signed_in_user>/', views.supportgetMessages, name='support_get_messages'),
+    path('supportgetMessages/<str:signed_in_user>/', views.supportgetMessages, name='supportlinegetmessages'),
     #path('supportchat/', views.supportroom, name='supportroom'),
     #path('supportchat/room', views.SupportRoomView.as_view(), name='supportroom'),
     path('supportchat/room/<str:signed_in_user>/', views.SupportRoomView.as_view(), name='supportroom'),
 
+    path('supportinterface/', views.SupportLineBackgroundView.as_view(), name='supportinterface'),
     path('supportinterface/room/<str:room>/', views.SupportLineView.as_view(), name='supportline'),
     path('supportlinegetMessages/<str:room>/', views.supportlinegetMessages, name='supportlinegetMessages'),
 
     path('supportinterface/checkview', views.supportlinecheckview, name='supportlinecheckview'),
     path('supportinterface/send', views.supportlinesend, name='supportlinesend'),
+    path('forbiddenaccess/', views.forbidden_access, name='forbiddenaccess'),
 
     # change url <str:room> to use user username for added security
     path('product/<slug>/', views.ProductView.as_view(), name='product'),
