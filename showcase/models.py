@@ -1938,7 +1938,7 @@ class Message(models.Model):
 class SupportChat(models.Model):
     name = models.CharField(max_length=1000)
     signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
-                                       verbose_name="User") #room should be based on the signed-in user
+                                       verbose_name="User")  # room should be based on the signed-in user
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1972,8 +1972,8 @@ class SupportChat(models.Model):
         return room_url
 
     class Meta:
-        verbose_name = "Support Chat"
-        verbose_name_plural = "Support Chat"
+        verbose_name = "Support Thread"
+        verbose_name_plural = "Support Threads"
 
 
 class SupportMessage(models.Model):
@@ -2023,11 +2023,100 @@ class SupportMessage(models.Model):
         return room_url
 
     class Meta:
+        verbose_name = "Support Thread Message"
+        verbose_name_plural = "Support Thread Messages"
+
+
+# support live chat below, support thread above (requires refresh)
+
+class SupportInterface(models.Model):
+    name = models.CharField(max_length=1000)
+    room = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='supportinterfaceroom',
+                                       verbose_name="Room Creator")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        if self.name:
+            return str(self.name)
+        else:
+            return str('Guest')
+
+    def get_absolute_url(self):
+        # Construct the URL for the room detail page
+        if self.name == '':
+            return reverse("showcase:room", kwargs={'room': ''})
+
+        room_url = reverse("showcase:room", kwargs={'room': self.name})
+
+        # Construct the query parameters with the username
+        final_url = f"{room_url}?username={self.name}"
+
+        return final_url
+
+
+class SupportLine(models.Model):
+    value = models.CharField(max_length=1000000)
+    date = models.DateTimeField(default=timezone.now, blank=True)
+    user = models.CharField(max_length=1000000, verbose_name="Username")
+    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='supportlineuser',
+                                       verbose_name="User")
+    room = models.CharField(max_length=1000000)
+    message_number = models.PositiveIntegerField(default=0, editable=False)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.value)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the current maximum message number
+            max_message_number = Message.objects.aggregate(max_message_number=models.Max('message_number'))[
+                                     'max_message_number'] or 0
+
+            # Increment the maximum message number to get the new message number
+            self.message_number = max_message_number + 1
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+    def get_absolute_url(self):
+
+        # Construct the URL for the room detail page
+        room_url = reverse("showcase:room", kwargs={'room': str(self.room)})
+
+        # Construct the query parameters
+        final_url = f"{room_url}?username={self.signed_in_user.username}"
+
+        return final_url
+
+    class Meta:
         verbose_name = "Support Message"
         verbose_name_plural = "Support Messages"
-
-
-# is_active is new
 
 
 class UserProfile(models.Model):

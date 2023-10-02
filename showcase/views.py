@@ -147,6 +147,8 @@ from django.shortcuts import get_object_or_404
 
 from .models import Room, Message
 from .models import SupportChat, SupportMessage
+from .models import SupportLine
+from .models import SupportInterface
 from django.http import JsonResponse
 import os
 
@@ -1851,6 +1853,7 @@ def getMessages(request, room):
             'user': message.user,
             'value': message.value,
             'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
+            'message_number': message.message_number,
         })
 
     return JsonResponse({'messages': messages_data})
@@ -2693,6 +2696,7 @@ class SupportRoomView(TemplateView):
 
         return context
 
+
 def supportroom(request, signed_in_user):
 
     return render(request, 'supportroom.html', {
@@ -2720,6 +2724,139 @@ class supportview(ListView):
 
     def get_queryset(self):
         return Support.objects.all()
+
+
+
+
+class SupportLineView(TemplateView):
+    model = SupportLine
+    template_name = 'supportline.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        room = self.kwargs['room']
+        username = self.request.GET.get('username')
+        room_details = SupportInterface.objects.get(name=room)
+        profile_details = ProfileDetails.objects.filter(user__username=username).first()
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['username'] = username
+        context['room'] = room
+        context['room_details'] = room_details
+        context['profile_details'] = profile_details
+
+        # Retrieve the author's profile avatar
+        messages = Message.objects.all().order_by('-date')
+
+        context['Messaging'] = messages
+
+        for messages in context['Messaging']:
+            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
+            if profile:
+                messages.user_profile_picture_url = profile.avatar.url
+                messages.user_profile_url = messages.get_profile_url()
+
+        return context
+
+
+def supportline(request, room):
+    username = request.GET.get('username')
+
+    profile_details = ProfileDetails.objects.filter(user__username=username).first()
+    Logo = LogoBase.objects.filter(page='supportline.html', is_active=1)
+    Header = NavBarHeader.objects.filter(is_active=1).order_by("row")
+    DropDown = NavBar.objects.filter(is_active=1).order_by('position')
+
+    return render(request, 'supportline.html', {
+        'username': username,
+        'room': room,
+        'signed_in_user': signed_in_user,
+        'room_details': room_details,
+        'profile_details': profile_details,
+        'Logo': Logo,
+        'Header': Header,
+        'Dropdown': DropDown,
+    })
+
+def supportlinecheckview(request):
+    room = request.POST['room_name']
+    username = request.POST['username']
+
+    if SupportInterface.objects.filter(name=room).exists():
+        return redirect('/supportinterface/room/' + room)
+    else:
+        new_room = SupportInterface.objects.create(name=room)
+        signed_in_user = request.user
+        print('the room owner is ' + str(signed_in_user))
+        # Assuming there's a room associated with the provided name\
+        new_room.signed_in_user = signed_in_user if signed_in_user.is_authenticated else None
+        new_room.save()
+        return redirect('/supportinterface/room/' + room)
+
+
+def supportlinesend(request):
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        username = request.POST.get('username')
+        room_id = request.POST.get('room_id')
+
+        print(f"message: {message}, username: {username}, room_id: {room_id}")
+
+        # Retrieve the User instance with the given username
+
+        # Check if the user is authenticated
+        if request.user.is_authenticated:
+            # User is authenticated, use their user ID for the message user field
+            new_message = SupportLine.objects.create(
+                value=message,
+                user=str(request.user.username),
+                room=str(request.user.username),
+                signed_in_user=request.user  # Set the signed_in_user to the authenticated user
+            )
+            new_message.save()
+        else:
+            # User is not authenticated, use the provided username for the message user field
+            new_message = SupportLine.objects.create(
+                value=message,
+                room=room_id,
+            )
+            new_message.save()
+
+        # Return a response indicating the message was sent successfully
+        return HttpResponse('Message sent successfully')
+
+    # If the request method is not POST, handle the appropriate response here
+    return HttpResponse('Invalid request method. Please use POST to send a message.')
+
+def supportlinegetMessages(request, room):
+    room_details = SupportInterface.objects.get(name=room)
+    messages = SupportLine.objects.filter(room=room)
+
+    messages_data = []
+    for message in messages:
+        profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+        if profile_details:
+            user_profile_url = message.get_profile_url()
+            avatar_url = profile_details.avatar.url
+        else:
+            user_profile_url = f'/supportline/{message.user}'
+            avatar_url = staticfiles_storage.url('css/images/a.jpg')
+
+        messages_data.append({
+            'user_profile_url': user_profile_url,
+            'avatar_url': avatar_url,
+            'user': message.signed_in_user,
+            'value': message.value,
+            'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
+            'message_number': message.message_number,  # Add message_number to the response
+        })
+
+    return JsonResponse({'messages': messages_data})
 
 
 class MemberHomeBackgroundView(ListView):
@@ -3162,6 +3299,18 @@ class SupportChatBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         return context
 
+class SupportLineBackgroundView(BaseView):
+    model = SupportInterface
+    template_name = "supportinterface.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        return context
 
 class ChatCreatePostView(CreateView):
     model = ChatBackgroundImage
@@ -3740,33 +3889,43 @@ def get_profile_url(message):
 """
 from django.http import JsonResponse
 
-def supportgetMessages(request, signed_in_user, **kwargs):
 
-    # Prepare the messages data to be sent in the AJAX response
+def supportgetMessages(request, signed_in_user, **kwargs):
+    # Check if the user is authenticated
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("You do not have permission to access this chat room")
 
     try:
         chat_room = SupportChat.objects.get(signed_in_user__username=signed_in_user)
     except SupportChat.DoesNotExist:
-        # Handle the case where the chat room doesn't exist
+        # Create a new chat room if it doesn't exist
         chat_room = SupportChat(signed_in_user=request.user)
         chat_room.save()
 
     # Check if the requesting user is the creator of the room or an administrator
     if request.user == chat_room.signed_in_user or request.user.is_staff:
-        messages = SupportMessage.objects.filter(room=chat_room)  # Filter messages for the chat room
+        messages = SupportMessage.objects.filter(room=chat_room, signed_in_user=request.user)
         messages_data = []
 
+        # Get the profile details outside the loop to avoid duplicate queries
+        profile_details = ProfileDetails.objects.filter(user__in=[message.signed_in_user for message in messages]).values('user', 'avatar')
         for message in messages:
-            profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+            user_str = str(message.signed_in_user)  # Convert User object to its string representation
 
-            # Rest of your code for preparing messages goes here...
+            # Extract the URL of the image
+            avatar_url = message.image.url if message.image else None
+
+            messages_data.append({
+                'user_profile_url': message.get_profile_url(),
+                'avatar_url': avatar_url,
+                'user': user_str,
+                'value': message.value,
+                'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
+            })
 
         return JsonResponse({'messages': messages_data})
     else:
-        # Handle unauthorized access (e.g., return a 403 Forbidden response)
         return HttpResponseForbidden("You do not have permission to access this chat room")
-
-
 
 """def supportgetMessages(request, **kwargs):
    messages = SupportMessage.objects.filter(room=request.user.username)

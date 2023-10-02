@@ -97,20 +97,8 @@
   <h2>{{ username }}</h2>
 
   <!--not ajax, has to refresh to render-->
-  <div id="display">
-    {% for messages in Messanger %}
-      <div class="message">
-        <a href="{{ messages.user_profile_url }}">
-          <img src="{{ messages.user_profile_picture_url }}" alt="{{ messages.user }}">
-        </a>
-        <div class="message-content">
-          <div class="sender">{{ messages.user }}</div>
-          <div>{{ messages.value }}</div>
-          <div class="time">{{ messages.date }}</div>
-        </div>
-      </div>
-    {% endfor %}
-  </div>
+  <div id="display"></div>
+
 
 
   <div class="chat-input">
@@ -123,51 +111,61 @@
     </form>
   </div>
 </div>
+<script>
+$(document).ready(function(){
+  // Function to load and display messages
+  function loadAndDisplayMessages() {
+    var room = "{{ room }}"; // Replace with the actual value of the room
 
-<script type="text/javascript">
-$(document).ready(function() {
-  var user = "{{ username }}";
+    $.ajax({
+      type: 'GET',
+      url: "/supportgetMessages/" + room + "/",
+      success: function(response) {
+        console.log(response);
+        $("#display").empty();
 
-function fetchAndDisplayMessages() {
-  var user = "{{ username }}";
-  var url = `/supportgetMessages/room/${user}/`;
+        for (var key in response.messages) {
+          var message = response.messages[key];
 
-  console.log('Current URL:', url);  // Log the URL
+          var messageHtml = `
+            <div class="message">
+              <a href="${message.user_profile_url}">
+                <img src="${message.avatar_url}" alt="${message.user}">
+              </a>
+              <div class="message-content">
+                <div class="sender">${message.user}</div>
+                <div>${message.value}</div>
+                <div class="time">${message.date}</div>
+              </div>
+            </div>`;
 
-  $.ajax({
-    type: 'GET',
-    url: url,
-    success: function(response) {
-      $("#display").empty();
-      response.messages.forEach(function(messages) {
-        var messageHtml = `
-          <div class="message">
-            <a href="${messages.user_profile_url}">
-              <img src="${messages.user_profile_picture_url}" alt="${messages.user}">
-            </a>
-            <div class="message-content">
-              <div class="sender">${messages.user}</div>
-              <div>${messages.value}</div>
-              <div class="time">${messages.date}</div>
-            </div>
-          </div>`;
-        $("#display").append(messageHtml);
-      });
-    },
-    error: function() {
-      console.error('An error occurred while fetching messages.');
-    }
+          $("#display").append(messageHtml);
+        }
+      },
+      error: function(response) {
+        alert('An error occurred');
+      }
+    });
+  }
+
+  // Preload avatars (if needed)
+  var avatarUrls = [];
+  $(".message img").each(function() {
+    avatarUrls.push($(this).attr("src"));
   });
+  preloadImages(avatarUrls);
+
+  // Load and display messages every second
+  setInterval(loadAndDisplayMessages, 1000);
+});
+
+// Preload images
+function preloadImages(urls) {
+  for (var i = 0; i < urls.length; i++) {
+    var img = new Image();
+    img.src = urls[i];
+  }
 }
-
-fetchAndDisplayMessages();
-
-// Fetch new messages every second
-setInterval(function() {
-  fetchAndDisplayMessages();
-}, 1000);  // Fetch every second
-
-
 </script>
 
     <script src="{% static 'css/js/script.js' %}"></script>
