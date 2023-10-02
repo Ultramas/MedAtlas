@@ -2662,6 +2662,10 @@ class SupportRoomView(TemplateView):
         # room_details = SupportChat.objects.get(name=signed_in_user)  # Use 'signed_in_user' here
         profile_details = ProfileDetails.objects.filter(user__username=signed_in_user).first()
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
 
@@ -3291,17 +3295,6 @@ class ChatBackgroundView(BaseView):
         return context
 
 
-class SupportChatBackgroundView(BaseView):
-    model = SupportChatBackgroundImage
-    template_name = "supportchat.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        return context
 
 class SupportLineBackgroundView(BaseView):
     model = SupportInterface
@@ -3894,6 +3887,8 @@ def get_profile_url(message):
 from django.http import JsonResponse
 
 
+from django.shortcuts import get_object_or_404
+
 def supportgetMessages(request, signed_in_user, **kwargs):
     # Check if the user is authenticated
     if not request.user.is_authenticated:
@@ -3908,26 +3903,23 @@ def supportgetMessages(request, signed_in_user, **kwargs):
 
     # Check if the requesting user is the creator of the room or an administrator
     if request.user == chat_room.signed_in_user or request.user.is_staff:
-        messages = SupportMessage.objects.filter(room=chat_room, signed_in_user=request.user)
+        messages = SupportMessage.objects.filter(room=chat_room)
         messages_data = []
 
-        # Get the profile details outside the loop to avoid duplicate queries
-        profile_details = ProfileDetails.objects.filter(user__in=[message.signed_in_user for message in messages]).values('user', 'avatar')
         for message in messages:
-            user_str = str(message.signed_in_user)  # Convert User object to its string representation
-
+            user_str = str(message.signed_in_user) if message.signed_in_user else 'Support Request'
+            user_profile_url = ''  # Initialize user_profile_url
             profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+
+            if message.signed_in_user:
+                user_profile_url = profile_details.get_absolute_url()  # Get the user_profile_url for each message
             if profile_details:
-                user_profile_url = message.get_profile_url()
-                # Extract the URL of the image
-                avatar_url = profile_details.avatar.url
+                avatar_url = profile_details.avatar.url  # Get the avatar URL
             else:
-                # Set a default avatar URL or path in case the user doesn't have an avatar
-                user_profile_url = ('/supportchat/room' + request.user)
-                avatar_url = staticfiles_storage.url('css/images/a.jpg')
+                avatar_url = staticfiles_storage.url('css/images/a.jpg')  # Default avatar URL
 
             messages_data.append({
-                'user_profile_url': message.get_profile_url(),
+                'user_profile_url': user_profile_url,
                 'avatar_url': avatar_url,
                 'user': user_str,
                 'value': message.value,
@@ -3936,7 +3928,6 @@ def supportgetMessages(request, signed_in_user, **kwargs):
 
         return JsonResponse({'messages': messages_data})
     else:
-        return redirect('showcase:forbiddenaccess')
         return HttpResponseForbidden("You do not have permission to access this chat room")
 
 """def supportgetMessages(request, **kwargs):

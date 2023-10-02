@@ -1,16 +1,19 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% for ChatBackgroundImage in Titles %}
-  {% if ChatBackgroundImage.page == 'supportroom.html' %}
-     {{ ChatBackgroundImage.overtitle }}
-  {% endif %}
-{% endfor %}
-
 {% block content %}
+
+
 
 <html>
 <head>
+
+{% for SupportChat in Titles %}
+  {% if SupportChat.page == 'supportroom.html' %}
+     <title>{{ SupportChat.overtitle }}</title>
+  {% endif %}
+{% endfor %}
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 
@@ -85,10 +88,26 @@
 <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 </head>
 <body>
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for SupportChat in Logo %}
+        {% if SupportChat.page == 'supportroom.html' %}
 
-{% for messages in Background %}
-  <img class="backgroundimages" src="{{BackgroundImage.cover.url}}" alt="{{ BackgroundImage.backgroundtitle }}">
+        <a class="logo" href="{{SupportChat.hyperlink}}">
+          <img class="imageicon" src="{{SupportChat.logocover.url}}"
+                alt="{{SupportChat.alternate}}" style="length: {{SupportChat.length_for_resize}}px; width: {{SupportChat.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+
+{% for SupportChat in Background %}
+{% if SupportChat.page == 'supportroom.html' %}
+  <div class="backgroundimages" style="background: url('{{SupportChat.cover.url}}'); background-size: cover; min-height: 140vh;">
+      {% endif %}
 {% endfor %}
+
+
 <br>
 <br>
 <br>
@@ -110,6 +129,10 @@
     </form>
   </div>
 </div>
+      <br>
+      <br>
+      <br>
+      <br>
 <script>
 $(document).ready(function(){
   // Function to load and display messages
@@ -195,7 +218,7 @@ function preloadImages(urls) {
     document.getElementById('message').value = ''
   });
 </script>
-
+  </div>
 </body>
 
 </html>
