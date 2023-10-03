@@ -73,6 +73,7 @@ from .models import FrequentlyAskedQuestions
 from .models import MemberHomeBackgroundImage
 from .models import NavBar
 from .models import NavBarHeader
+from .models import FeaturedNavigationBar
 from .models import DonateIcon
 from .models import Donate
 from .models import Titled
@@ -2280,6 +2281,7 @@ class BaseView(ListView):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         context['Logo'] = LogoBase.objects.filter(is_active=1)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
@@ -3911,7 +3913,7 @@ def supportgetMessages(request, signed_in_user, **kwargs):
             user_profile_url = ''  # Initialize user_profile_url
             profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
 
-            if message.signed_in_user:
+            if message.signed_in_user and profile_details:
                 user_profile_url = profile_details.get_absolute_url()  # Get the user_profile_url for each message
             if profile_details:
                 avatar_url = profile_details.avatar.url  # Get the avatar URL
@@ -4209,6 +4211,7 @@ class PollDetailView(TemplateView):
             'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
             'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
             'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
+            'Logo': LogoBase.objects.filter(page=self.template_name, is_active=1),
         }
         return context
 
@@ -4497,18 +4500,35 @@ class EcommerceSearchResultsView(ListView):
     template_name = 'ecommercesearch_results.html'
 
     def get_queryset(self):
-        print(1234)
         query = self.request.GET.get('q')
+        search_lists = []
+
         item_list = Item.objects.filter(
             Q(title__icontains=query) | Q(slug__icontains=query))
 
-        all_list = {
+        # Pass the queryset directly as 'item_list'
+        context = {
             "item_list": item_list,
         }
-        print(234)
-        print(all_list)
 
-        return (all_list)
+        return context
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+
+
+        # settings to alter the username & password
+
+        return context
+
+
 
 
 # class ProductSearchResultsView(ListView):

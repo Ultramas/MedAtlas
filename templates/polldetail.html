@@ -1,5 +1,60 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
+
+<head>
+
+    {% for PollDetailView in Titles %}
+      {% if PollDetailView.page == 'polldetail.html' %}
+         <title>{{ PollDetailView.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+</head>
+<body>
+<div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for PollDetailView in Logo %}
+        {% if PollDetailView.page == 'polldetail.html' %}
+
+        <a class="logo" href="{{PollDetailView.hyperlink}}">
+          <img class="imageicon" src="{{PollDetailView.logocover.url}}"
+                alt="{{PollDetailView.alternate}}" style="length: {{PollDetailView.length_for_resize}}px; width: {{PollDetailView.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+{% for PollDetailView in Background %}
+    {% if PollDetailView.page == "polldetail.html" %}
+<div class="poste1" style="background-image: url({{ PollDetailView.cover.url }}); background-position: fixed; background-size: cover;">
+    {% endif %}
+{% endfor %}
+
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<div style="" class="search">
+    <ul>
+    <form action="{% url 'showcase:search_results' %}" method="get">
+        <input name="q" type="text" placeholder="Search...">
+        <select name="filter">
+            <option value="">All</option>
+            <option value="city">City</option>
+            <option value="vote">Vote</option>
+            <option value="profile">Profile</option>
+            <option value="idea">Idea</option>
+            <option value="partner">Partner</option>
+        </select>
+        <button type="submit">Search</button>
+    </form>
+        </ul>
+</div>
+
 <a class="btn btn-secondary btn-sm mb-3" href="{% url 'showcase:index' %}">Back To Polls</a>
 <h1 class="text-center mb-3">{{ question.question_text }}</h1>
 
@@ -8,7 +63,10 @@
 	<strong>{{ error_message }}</strong>
 </p>
 {% endif %}
-
+<br>
+<br>
+<br>
+<br>
 <form action="{% url 'showcase:pollvote' question.id %}" method="post">
 	{% csrf_token %}
 	{% for choice in question.choice_set.all %}
@@ -20,4 +78,11 @@
 	{% endfor %}
 	<input type="submit" value="Vote" class="btn btn-success btn-lg btn-block mt-4" />
 </form>
+</div>
+   <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+</body>
 {% endblock %}

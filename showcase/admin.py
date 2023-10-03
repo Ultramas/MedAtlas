@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
-    SupportInterface
+    SupportInterface, FeaturedNavigationBar
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -1117,6 +1117,23 @@ class NavBarHeaderAdmin(admin.ModelAdmin):
 
 
 admin.site.register(NavBarHeader, NavBarHeaderAdmin)
+
+
+class FeaturedNavBarAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Featured Navigational Bar Dropdown Information - Categorial Descriptions', {
+            'fields': ('default_header', 'text', 'url',)
+        }),
+        ('Featured Navigational Bar Dropdown Information', {
+            'fields': ('position', 'opennew', 'is_active',)
+        }),
+        ('Featured Navigational Bar Dropdown Information - Image Display', {
+            'fields': ('image', 'image_width', 'image_length',)
+        }),
+    )
+
+
+admin.site.register(FeaturedNavigationBar, FeaturedNavBarAdmin)
 
 
 class CouponAdmin(admin.ModelAdmin):

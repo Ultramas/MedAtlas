@@ -1099,6 +1099,39 @@ class NavBarHeader(models.Model):
         verbose_name_plural = "Navigational Bar Headers"
 
 
+class FeaturedNavigationBar(models.Model):
+    default_header = models.TextField(help_text="Only set if occupying 1'st position", blank=True, null=True, default='IntelleX', verbose_name='Heading')
+    text = models.TextField(blank=True, null=True)
+    image = models.ImageField(verbose_name="Navigational image", blank=True, null=True)
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Width of the image (in percent relative).',
+                                              verbose_name="image width")
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Length of the image (in percent relative).',
+                                               verbose_name="image length")
+    url = models.TextField(blank=True, null=True)
+    position = models.IntegerField()
+    opennew = models.BooleanField(verbose_name="Open In New Tab?", default=False,
+                                  choices=((True, 'Yes'), (False, 'No')))
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        if self.text:
+            return self.text
+        elif self.image:
+            return self.image.url
+        else:
+            return self.default_header
+
+    class Meta:
+        verbose_name = "Featured Navigation Bar"
+        verbose_name_plural = "Featured Navigation Bar"
+
+
 class SettingsModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='settings')
     username = models.CharField(help_text='Your username', max_length=200)

@@ -123,23 +123,23 @@
               {% endif %}
               <hr>
 
-              <h3>Payment Option</h3>
+             <!-- <h3>Payment Option</h3>
 
 
     <!-- Set up a container element for the button -->
-    <div id="paypal-button-container"></div>
-
+    <!--<div id="paypal-button-container"></div>
+-->
     <!-- Include the PayPal JavaScript SDK -->
-    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
+<!--    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>-->
 
 
-    <!-- Set up a container element for the button -->
-    <div id="paypal-button-container"></div>
+<!--    &lt;!&ndash; Set up a container element for the button &ndash;&gt;-->
+<!--    <div id="paypal-button-container"></div>-->
 
-    <!-- Include the PayPal JavaScript SDK -->
-    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
+<!--    &lt;!&ndash; Include the PayPal JavaScript SDK &ndash;&gt;-->
+<!--    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>-->
 
-    <script>
+   <!-- <script>
         // Render the PayPal button into #paypal-button-container
         paypal.Buttons({
 
@@ -204,6 +204,8 @@
 
         }).render('#paypal-button-container');
     </script>
+              -->
+
               <div class="d-block my-3">
                 {% for value, name in form.fields.payment_option.choices %}
                 <div class="custom-control custom-radio">

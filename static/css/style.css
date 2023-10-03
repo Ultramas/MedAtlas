@@ -1757,6 +1757,16 @@ nav a:hover{
     object-position: right;
 }
 
+.metaclass1e{
+    padding-top: 5%;
+    font-size: 10px;
+    width: 5vw;
+    height: 5vh
+    text-align: left;
+    justify-content: left;
+    object-position: right;
+}
+
 .c1e{
     padding: 10px;
     background-size: cover;
@@ -2044,6 +2054,16 @@ nav.show {
     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;}
     margin-left: 20px;
 
+.navIteme {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Times New Roman', Times, serif;
+    background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
+    margin-left: 10px;
+}
 
 @media screen and (max-width: 1400px) {
 

@@ -291,7 +291,46 @@
        <div class="bun"></div>
        <div class="bun"></div>
      </div>
+{% if FeaturedNavigation %}
+    {% for BaseView in FeaturedNavigation %}
+    {% if BaseView.position == 1 %}
+    <h2 class="navtext">{{BaseView.default_header}}</h2>
+    {% endif %}
+    {% if BaseView.text %}
 
+            {% if BaseView.url == 'http://127.0.0.1:8000/profile' %}
+              {% if BaseView.opennew %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{profile_url}}" target="_blank">{{BaseView.text}}</a>
+                </div>
+              {% else %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{profile_url}}">{{BaseView.text}}</a>
+                </div>
+              {% endif %}
+            {% else %}
+              {% if BaseView.opennew %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{BaseView.url}}" target="_blank">{{BaseView.text}}</a>
+                </div>
+              {% else %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{BaseView.url}}">{{BaseView.text}}</a>
+                </div>
+              {% endif %}
+            {% endif %}
+    {% endif %}
+             {% if BaseView.image %}
+<div class="metaclass1">
+    <a href="{{BaseView.url}}">
+         <img src="{{BaseView.image.url}}" width="300px" height="300px" alt="{{BaseView.url}}">
+      </a>
+</div>
+
+    {% endif %}
+{% endfor %}
+</nav>
+{% else %}
 <h2 class = "navtext">Quantumism</h2>
     <div class="navItem"><a href = "{% url 'showcase:index' %}">Home</a></div>
      <div class="navItem2"><a href = "{% url 'showcase:about' %}">About Us</a></div>
@@ -314,6 +353,7 @@
           </div>
     </div>
 </nav>
+       {% endif %}
 
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js/darkmode.js' %}"></script>

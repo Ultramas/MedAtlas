@@ -1,5 +1,39 @@
 {% extends 'memberbase.html' %}
 {% block content %}
+<head>
+    {% for EcommerceSearchResultsView in Titles %}
+      {% if EcommerceSearchResultsView.page == 'search_results.html' %}
+        <title>{{ EcommerceSearchResultsView.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+  <style>
+.link-style {
+  text-decoration: none;
+  color: inherit; /* Optionally, to inherit the color from the parent */
+}
+</style>
+
+</head>
+
+<body>
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for EcommerceSearchResultsView in Logo %}
+        {% if EcommerceSearchResultsView.page == 'search_results.html' %}
+
+        <a class="logo" href="{{EcommerceSearchResultsView.hyperlink}}">
+          <img class="imageicon" src="{{EcommerceSearchResultsView.logocover.url}}"
+                alt="{{EcommerceSearchResultsView.alternate}}" style="length: {{EcommerceSearchResultsView.length_for_resize}}px; width: {{EcommerceSearchResultsView.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+
+        {% for EcommerceSearchResultsView in Background %}
+    {% if EcommerceSearchResultsView.page == "ecommercesearch_results.html" %}
+<div class="poste1" style="background-image: url({{ EcommerceSearchResultsView.cover.url }}); background-position: fixed; background-size: cover;">
+    {% endif %}
+{% endfor %}
 
 <div class = "searcherbackground">
   <div class = "searcher">
@@ -14,20 +48,35 @@
   <br>
 
 
-      {% for item in object_list.item_list %}
       <h1 class = "banh1t">Pokemon Products</h1>
-    <div class = "searchere"> 
-        <li>    
-          hi andy
-      <a href="{% url 'showcase:ehome'%}">
-           {{ item.title}}, by {{ item.slug }}
-          </a>
-        </li>
-    </div>
-    <br>
-     {% endfor %}
-    </ul>
+    <table>
+  <thead>
+    <tr>
+      <th>Product Title</th>
+      <th>Product Slug</th>
+    </tr>
+  </thead>
+  <tbody>
+
+
+      {% for item in object_list.item_list %}
+        <tr>
+          <td><a href="{{ item.get_profile_url }}" class="link-style">{{ item.title }}</a></td>
+          <td><a href="{{ item.get_profile_url }}" class="link-style">{{ item.slug }}</a></td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="2">No results found.</td>
+        </tr>
+      {% endfor %}
+
+  </tbody>
+</table>
+
+  </ul>
   </div>
 </div>
+</div>
+</body>
 
 {% endblock content %}
