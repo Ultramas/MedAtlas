@@ -1,22 +1,35 @@
 {% extends 'base.html' %}
 {% load static %}
 
-    {% for RuleBackgroundImage in Titles %}
-      {% if RuleBackgroundImage.page == 'rule.html' %}
-         {{ RuleBackgroundImage.overtitle }}
-      {% endif %}
-    {% endfor %}
 
 {% block content %}
 
 <head>
   <!--change title tags to django form -->
 
+    {% for RuleBackgroundImage in Titles %}
+      {% if RuleBackgroundImage.page == 'rules.html' %}
+    <title>{{ RuleBackgroundImage.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+
 <link rel="icon" href="{% static 'images/favicon.ico' type='image/ico' %}">
 </head>
   
 <body>
  
+
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for RuleBackgroundImage in Logo %}
+        {% if RuleBackgroundImage.page == 'rules.html' %}
+
+        <a class="logo" href="{{RuleBackgroundImage.hyperlink}}">
+          <img class="imageicon" src="{{RuleBackgroundImage.logocover.url}}"
+                alt="{{RuleBackgroundImage.alternate}}" style="length: {{RuleBackgroundImage.length_for_resize}}px; width: {{RuleBackgroundImage.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
 
   <div id="overlay">  
     <img src = "76.gif">

@@ -386,9 +386,13 @@ class BlogBaseView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
@@ -572,6 +576,7 @@ class PostList(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['TextFielde'] = TextBase.objects.filter(is_active=1)
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
 
@@ -1234,6 +1239,7 @@ class BilletBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
 
@@ -1255,6 +1261,7 @@ class RuleBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
 
@@ -1264,6 +1271,18 @@ class RuleCreatePostView(CreateView):
     template_name = "rulebackgroundimagechange.html"
     success_url = reverse_lazy("rules")
 
+class ServersView(BaseView):
+    model = RuleBackgroundImage
+    template_name = "servers.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        return context
 
 class AboutBackgroundView(BaseView):
     model = AboutBackgroundImage
@@ -1275,6 +1294,7 @@ class AboutBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
 
@@ -1296,6 +1316,7 @@ class FaqBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
 
@@ -1316,6 +1337,7 @@ class StaffBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
 
@@ -1338,6 +1360,7 @@ class StaffApplyBackgroundView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -1395,6 +1418,7 @@ class TagBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
 
@@ -1415,6 +1439,7 @@ class UserBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['UserBackgroundImage'] = UserBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         return context
 
@@ -4215,9 +4240,28 @@ class PollDetailView(TemplateView):
         }
         return context
 
-def pollresults(request, question_id):
-	question = get_object_or_404(PollQuestion, pk = question_id)
-	return render(request, 'pollresults.html', {'question': question})
+
+class PollResultsView(View):
+    template_name = 'pollresults.html'  # specify your template name here
+
+    def get(self, request, question_id):
+        context = self.get_context_data(question_id)
+        return render(request, self.template_name, context)
+
+    def get_context_data(self, question_id):
+        question = get_object_or_404(PollQuestion, pk=question_id)
+        context = {
+            'question': question,
+            'Background': BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+            'PostBackgroundImage': PostBackgroundImage.objects.all(),
+            'BaseCopyrightTextFielded': BaseCopyrightTextField.objects.filter(is_active=1),
+            'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+            'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
+            'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
+            'Logo': LogoBase.objects.filter(page=self.template_name, is_active=1),
+        }
+        return context
+
 
 # Vote for a question choice
 

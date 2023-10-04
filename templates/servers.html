@@ -2,95 +2,192 @@
 {% load static %}
 
 
+
 {% block content %}
 
-<html>
-  <head>
-     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">  
-    <title>MegaClan Servers</title>
-  </head>
-  <body>
+<head>
+        {% for ServersView in Titles %}
+      {% if ServersView.page == 'servers.html' %}
+        <title>{{ ServersView.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+  <!--change title tags to django form -->
+
+<link rel="icon" href="{% static 'images/favicon.ico' type='image/ico' %}">
+</head>
+
+<body>
 
 
-    <div id="overlay">
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for ServersView in Logo %}
+        {% if ServersView.page == 'servers.html' %}
+
+        <a class="logo" href="{{ServersView.hyperlink}}">
+          <img class="imageicon" src="{{ServersView.logocover.url}}"
+                alt="{{ServersView.alternate}}" style="length: {{ServersView.length_for_resize}}px; width: {{ServersView.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+  <div id="overlay">
     <img src = "76.gif">
     </div>
-    
-    <div class="parallaxt"><h2 class = "openinge">Website Showcase</h2><h2 class="caption1a">This is a showcase of some of our agency's websites, to give you . </h2></div>  
-   
+{% for ServersView in Background %}
+  {% if ServersView.page == "servers.html" %}
+  {% if ServersView.position == 1 %}
+    <div class="parallax1arules" id = "main" style="background-image: url({{ServersView.cover.url}})">
+        {% endif %}
+        {% endif %}
+        {% endfor %}
 
-    <div class="parallax2c"><h2 class = "opening2e">New Hits</h2>
-    <br>
-    <br>
-    <br>
-    <br>
-    <!-- Slideshow container -->
-<div class="slideshow-container fade">
-
-  <!-- Full images with numbers and message Info -->
-  <div class="Containers">
-    <div class="MessageInfo">1 / 3</div>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-        <img src="../static/css/images/ch.png" style="width: 35%">
-   <br>
-    <br>
-    <br>
-    <br>
-    <div class="Info">IntelleX</div>
-  </div>
-
-  <div class="Containers">
-    
-    <div class="MessageInfo">2 / 3</div>
-    <img src="image2.jpg" style="width:80%">
-    <div class="Info">Second Caption</div>
-  </div>
-
-  <div class="Containers">
-    <div class="MessageInfo">3 / 3</div>
-    <img src="image3.jpg" style="width:80%">
-    <div class="Info">Third Caption</div>
-  </div>
-
-  <!-- Back and forward buttons -->
-  <a class="Back" onclick="plusSlides(-1)">&#10094;</a>
-  <a class="forward" onclick="plusSlides(1)">&#10095;</a>
-</div>
+{% for ServersView in TextFielde %}
+  {% if ServersView.page == "servers.html" %}
+  {% if ServersView.section == 1 %}
+      <h2 class = "opening" style="color: {{ServersView.text_color}}">{{ServersView.text}}</h2>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
 <br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+        {% for ServersView in TextFielde %}
+  {% if ServersView.page == "servers.html" %}
+  {% if ServersView.section == 2 %}
+      <h2 class="caption1arules" style="color: {{ServersView.text_color}}">{{ServersView.text}}</h2>
+        <br>
+  {% endif %}
+  {% endif %}
+  {% endfor %}
 
-<!-- The circles/dots -->
-<div style="text-align:center">
-  <span class="dots" onclick="currentSlide(1)"></span>
-  <span class="dots" onclick="currentSlide(2)"></span>
-  <span class="dots" onclick="currentSlide(3)"></span>
-</div>  
-
-
-</div>
-</div>
-    <div class="parallax3c"><h2 class = "opening3e">Our Bestselling Products</h2><h2 class="caption3a">These are our bestselling products (updated regularly).</h2></div>  
-   
-
-    <div class="parallax4t"><h2 class = "opening4e">Online Training</h2><h2 class="caption4a">We will give you all of the tools you will need to succeed, with attentive staff, adaptive instruction, and a wealth of knowledge. Our goal is to train you as well as possible in a short amount of time. To this end, we offer intruction adaptive to the individual (you), and intructors actively teaching rather than passively waiting to help.</h2></div>
     </div>
 
+       {% for ServersView in Background %}
+      {% if ServersView.page == "servers.html" %}
+      {% if ServersView.position == 2 %}
+    <div class="parallax2arules" id = "leaders" style="background-image: url({{ServersView.cover.url}})">
+    <!--<h2>{{ ServersView.title }}</h2>-->
+  {% endif %}
+  {% endif %}
+  {% endfor %}
+
+        {% for ServersView in TextFielde %}
+  {% if ServersView.page == "servers.html" %}
+  {% if ServersView.section == 3 %}
+        <h2 class = "opening2rules" style="color: {{ServersView.text_color}}">{{ ServersView.text }}</h2>
+
+{% endif %}
+  {% endif %}
+  {% endfor %}
+
+
+        {% for ServersView in TextFielde %}
+  {% if ServersView.page == "servers.html" %}
+  {% if ServersView.section == 4 %}
+          <h2 class="caption2arules" style="color: {{ServersView.text_color}}">
+     {{ ServersView.text }} </h2>
+    </div>
+{% endif %}
+  {% endif %}
+  {% endfor %}
+
+       {% for ServersView in Background %}
+      {% if ServersView.page == "servers.html" %}
+      {% if ServersView.position == 3 %}
+    <div class="parallax3arules" id = "difference" style="background-image: url({{ServersView.cover.url}})">
+{% endif %}
+  {% endif %}
+  {% endfor %}
+
+                {% for ServersView in TextFielde %}
+  {% if ServersView.page == "servers.html" %}
+  {% if ServersView.section == 5 %}
+        <h2 class = "opening3rules" style="color: {{ServersView.text_color}}">{{ServersView.text}}</h2>
+
+{% endif %}
+  {% endif %}
+  {% endfor %}
+
+                      {% for ServersView in TextFielde %}
+  {% if ServersView.page == "servers.html" %}
+  {% if ServersView.section == 6 %}
+        <h2 class="caption3arules" style="color: {{ServersView.text_color}}">{{ServersView.text}}</h2></div>
+
+{% endif %}
+  {% endif %}
+  {% endfor %}
+  </div>
+    </div>
+
+       {% for ServersView in Background %}
+      {% if ServersView.page == "servers.html" %}
+      {% if ServersView.position == 4 %}
+    <div class="parallax4arules" id = "innovation" style="background-image: url({{ServersView.cover.url}})">
+{% endif %}
+  {% endif %}
+  {% endfor %}
+
+        {% for ServersView in TextFielde %}
+  {% if ServersView.page == "servers.html" %}
+  {% if ServersView.section == 7 %}
+      <h2 class = "opening4rules" style="color: {{ServersView.text_color}}">{{ServersView.text}}</h2>
+       {% endif %}
+  {% endif %}
+  {% endfor %}
+
+                {% for ServersView in TextFielde %}
+  {% if ServersView.page == "servers.html" %}
+  {% if ServersView.section == 8 %}
+        <h2 class="caption4arules" style="color: {{ServersView.text_color}}">{{ServersView.text}}</h2></div>
+       {% endif %}
+  {% endif %}
+  {% endfor %}
+    </div>
+  </div>
+
+
+     <!--<div class="parallax5arules"><h2 class = "opening5rules">Join Us</h2><h2 class="caption5arules">If you have read this far, don't just sit there. Click the〖𐌑𐌂〗icon below to get in! </h2></div>
+
+           <div class="metaclass">
+    <a href="https://discord.gg/g43uGbURUz">
+         <img alt="Qries" src="../static/css/images/MC.png"
+         width="350" height="150">
+      </a>
+
+          </div>
+    </div>
+
+    </div>
+
+    </div>-->
 
 
 
-   
+
+
     <!--Custom JS-->
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js.darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
-    <script src="{% static 'css/js/carousel.js' %}"></script>
-   </div>
-  </body>
-</html>
 
+</body>
 
 {% endblock content %}

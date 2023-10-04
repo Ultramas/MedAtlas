@@ -61,36 +61,80 @@
     </ul>
 
 
-     <nav>
-     <div class="bell"></div>
-     <div onclick='navToggle(this)'  class="hamburger">
+
+<nav class="show">
+     <div  onclick="navToggle(this)" class="bell"></div>
+     <div onclick="navToggle(this)" class="hamburger">
        <div class="bun"></div>
        <div class="bun"></div>
        <div class="bun"></div>
      </div>
 
-<h2 class = "navtext">Quantumism</h2>
-    <div class="navItem"><a href = "{% url 'showcase:index' %}">Home</a></div>
-     <div class="navItem2"><a href = "{% url 'showcase:about' %}">About Us</a></div>
-     <div class="navItem3"><a href = "{% url 'showcase:servers' %}" target="_blank">Discord Servers</a></li></div>
-     <!--<div class="navItem10"><a href = "{% url 'showcase:perks' %}">Member Perks</a></li></div>-->
-     <div class="navItem4"><a href = "{% url 'showcase:admin'%}" target="_blank">Administration</a></li></div>
-     <div class="navItem5"><a href="https://discord.com/channels/813761567304843315/813779502190297108" target="_blank">Quantum Discord</a></li></div>
-     <div class="navItem8"><a href = "{% url 'showcase:rules' %}">Rules</a></li></div>
-     <div class="navItem9"><a href = "{% url 'showcase:showcase' %}">VIP Area</a></div>
+{% if FeaturedNavigation %}
+    {% for BaseView in FeaturedNavigation %}
+    {% if BaseView.position == 1 %}
+    <h2 class="navtext">{{BaseView.default_header}}</h2>
+    {% endif %}
+    {% if BaseView.text %}
 
+            {% if BaseView.url == 'http://127.0.0.1:8000/profile' %}
+              {% if BaseView.opennew %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{profile_url}}" target="_blank">{{BaseView.text}}</a>
+                </div>
+              {% else %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{profile_url}}">{{BaseView.text}}</a>
+                </div>
+              {% endif %}
+            {% else %}
+              {% if BaseView.opennew %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{BaseView.url}}" target="_blank">{{BaseView.text}}</a>
+                </div>
+              {% else %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{BaseView.url}}">{{BaseView.text}}</a>
+                </div>
+              {% endif %}
+            {% endif %}
+
+    {% endif %}
+    {% if BaseView.image %}
+<div class="metaclass1e" style="padding-top: 10%; font-size: 10px; text-align: left;
+    justify-content: left;
+    object-position: right;">
+    <a href="{{BaseView.url}}">
+         <img src="{{BaseView.image.url}}" width="150px" height="150px" style="border-radius: 50px;" alt="{{BaseView.url}}">
+      </a>
+</div>
+
+    {% endif %}
+
+    {% endfor %}
+    {% else %}
+
+<h2 class="navtext">Accomfort</h2>
+    <div class="navItem"><a href="/">Home</a></div>
+     <div class="navItem2"><a href="/about/">About Us</a></div>
+     <div class="navItem3"><a href="/home/" target="_blank">Community</a></div>
+     <!--<div class="navItem10"><a href = "/perks/">Member Perks</a></li></div>-->
+     <div class="navItem4"><a href="/admin/" target="_blank">Administration</a></div>
+     <div class="navItem8"><a href="/ehome/">Store</a></div>
+     <div class="navItem11"><a href="/accounts/logout/">Logout</a></div>
+<br>
+<br>
 
 <div class="metaclass1">
     <a href="https://discord.gg/g43uGbURUz">
-         <img alt="Qries" src="../static/css/images/MC.png"
-         width="150" height="150">
+         <img alt="Qries" src="../static/css/images/MC.png" width="280" height="150">
       </a>
 
-          </div>
-     </nav>
-    </div>
-
+</div>
 </nav>
+    </div>
+    {% endif %}
+
 
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js/darkmode.js' %}"></script>
