@@ -41,6 +41,13 @@ ADDRESS_CHOICES = (
     ('S', 'Shipping'),
 )
 
+BLOG_TYPE_CHOICES = (
+    ('F', 'Featured'),
+    ('N', 'New'),
+    ('P', 'Popular'),
+    ('EC', "Editor's Choice"),
+)
+
 
 class Idea(models.Model):
     """Model for sharing ideas and getting user feedback"""
@@ -322,6 +329,7 @@ class StaffApplication(models.Model):
 
 class PartnerApplication(models.Model):
     """Application to partner with the server"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=100, help_text='Your server name goes here.')
     category = models.CharField(
         max_length=100,
@@ -341,6 +349,9 @@ class PartnerApplication(models.Model):
     class Meta:
         verbose_name = "Partner Application"
         verbose_name_plural = "Partner Applications"
+
+    def __str__(self):
+        return self.name + "'s website at: " + self.server_invite
 
 
 class PunishmentAppeal(models.Model):
@@ -653,12 +664,15 @@ class PatreonBackgroundImage(models.Model):
 
 class Partner(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, help_text='Your server name goes here.')
+    name = models.CharField(max_length=100, help_text='Your username goes here.')
     category = models.CharField(max_length=100,
                                 help_text='Pick a category you feel your server represents (gaming, community, etc).')
     description = models.TextField(help_text='Describe your server. Tell potential members why they should join.')
     server_invite = models.URLField(help_text='Post your server invite link here.')
     anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
+
+    def __str__(self):
+        return str(self.user) + " " + self.server_invite
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -687,10 +701,28 @@ class Patreon(models.Model):
 
     # change rest to either imagefields or urlfields (has to be uniform throughout the form)
 
-    # widget=form.TextInput, help_text='Your name goes here.')
+    # widget=form.TextInput, help_text='Your name goes here.'
     class Meta:
         verbose_name = "Patreon"
         verbose_name_plural = "Patreons"
+
+
+class BlogHeader(models.Model):
+    category = models.CharField(max_length=200, verbose_name="Category")
+    image = models.ImageField(upload_to='images/')
+    position = models.IntegerField(verbose_name="Position", default=1)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    class Meta:
+        verbose_name = "Blog Header"
+        verbose_name_plural = "Blog Headers"
+
+    def __str__(self):
+        return self.category
 
 
 from django.template.defaultfilters import slugify
@@ -700,10 +732,13 @@ class Blog(models.Model):
     """Each blog post"""
     title = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
+    type = models.CharField(choices=BLOG_TYPE_CHOICES, max_length=2)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
     updated_on = models.DateTimeField(auto_now=True, verbose_name="updated on: ")
     content = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
+    category = models.ForeignKey(BlogHeader, verbose_name="Category", on_delete=models.CASCADE, blank=True, null=True, help_text="Optional")
+    minute_read = models.IntegerField(verbose_name="Time to read (in minutes)", blank=True, null=True)
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=0)
     image = models.ImageField(upload_to='images/')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,

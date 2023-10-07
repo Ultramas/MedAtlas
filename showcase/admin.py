@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
-    SupportInterface, FeaturedNavigationBar
+    SupportInterface, FeaturedNavigationBar, BlogHeader
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -650,10 +650,28 @@ class LogoBaseAdmin(admin.ModelAdmin):
 admin.site.register(LogoBase, LogoBaseAdmin)
 
 
+class BlogHeaderAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Blog Header Information - Categorial Descriptions', {
+            'fields': ('category', 'image', 'position', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+    class Media:
+        js = ('admin-collapse-default.js',)  # Include the custom JavaScript file
+        css = {
+            'all': ('admin-collapse-default.css',)
+        }
+
+
+admin.site.register(BlogHeader, BlogHeaderAdmin)
+
+
 class BlogAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Blog Information - Categorial Descriptions', {
-            'fields': ('title', 'slug', 'author', 'content', 'status', 'is_active',),
+            'fields': ('title', 'slug', 'type', 'author', 'content', 'category', 'minute_read', 'status', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Blog Information - Image Display', {
@@ -666,6 +684,7 @@ class BlogAdmin(admin.ModelAdmin):
             'classes': ('collapse-open',),  # Open by default
         }),
     )
+    readonly_fields = ('updated_on', 'created_on',)
 
     class Media:
         js = ('admin-collapse-default.js',)  # Include the custom JavaScript file

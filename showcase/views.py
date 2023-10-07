@@ -558,8 +558,8 @@ class usersview(ListView):
     def get_queryset(self):
         return Idea.objects.all()
 
-
-class PostList(ListView):
+"""
+class PostList(BaseView):
     model = BlogBackgroundImage
     # backgroundqueryset = BackgroundImageBase.objects.filter('page').order_by('position')
     # queryset = Blog.objects.filter(status=1).order_by('-created_on')
@@ -601,7 +601,7 @@ class PostList(ListView):
     def get_queryset(self):
         return Blog.objects.filter(status=1).order_by('-created_on')
 
-
+"""
 class votingview(ListView):
     model = VoteBackgroundImage
     paginate_by = 10
@@ -2340,6 +2340,8 @@ class EBaseView(ListView):
         return context
 
 
+
+
 class BlogBaseView(ListView):
     template_name = "blogbase.html"
     model = LogoBase
@@ -2348,7 +2350,9 @@ class BlogBaseView(ListView):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(is_active=1)
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
@@ -2521,8 +2525,9 @@ class usersview(ListView):
     def get_queryset(self):
         return Idea.objects.all()
 
+from .models import BlogHeader
 
-class PostList(ListView):
+class PostList(BaseView):
     model = BlogBackgroundImage
     # backgroundqueryset = BackgroundImageBase.objects.filter('page').order_by('position')
     # queryset = Blog.objects.filter(status=1).order_by('-created_on')
@@ -2539,9 +2544,13 @@ class PostList(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['TextFielde'] = TextBase.objects.filter(is_active=1)
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by("image_position")
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        context['BlogHeader'] = BlogHeader.objects.filter(is_active=1).order_by('category')
+        context['blog_count'] = BlogHeader.objects.filter(is_active=1).order_by('category').count()
+
 
         # Retrieve the signed-in user's profile and profile picture URL
 
@@ -2560,6 +2569,9 @@ class PostList(ListView):
                 print('imgsrcimg')
 
         return context
+
+    def get_blog_count():
+        return Blog.objects.all().count()
 
     def get_queryset(self):
         return Blog.objects.filter(status=1).order_by('-created_on')
@@ -2592,8 +2604,6 @@ class votingview(ListView):
             if profile:
                 newprofile.newprofile_profile_picture_url = profile.avatar.url
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
-
-        return context
 
         return context
 

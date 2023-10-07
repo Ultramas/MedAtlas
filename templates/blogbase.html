@@ -3,18 +3,18 @@
 <html>
 
     <head>
-        <link rel="stylesheet" type="text/css" href="{% static 'css/style.blog.css' %}">
+       <!-- <link rel="stylesheet" type="text/css" href="{% static 'css/style.blog.css' %}">
         <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
 
         <link rel="stylesheet" type="text/css" href="{% static 'css/blogstyle.css' %}">
 
         <link rel="stylesheet" type="text/css" href="{% static 'css/blogstyle.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/style.blog.css' %}">
         <meta name="google" content="notranslate" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmostFcJlSAwiGgFAW/dAiS6JXm"
-            crossorigin="anonymous" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />-->
+       <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmostFcJlSAwiGgFAW/dAiS6JXm"
+            crossorigin="anonymous" />-->
 
-    <title>{% block title %}PokeTrove{% endblock title %}</title>
 
     </head>
 
@@ -71,41 +71,41 @@
      </div>
 
 {% if FeaturedNavigation %}
-    {% for BaseView in FeaturedNavigation %}
-    {% if BaseView.position == 1 %}
-    <h2 class="navtext">{{BaseView.default_header}}</h2>
+    {% for BlogBaseView in FeaturedNavigation %}
+    {% if BlogBaseView.position == 1 %}
+    <h2 class="navtext">{{BlogBaseView.default_header}}</h2>
     {% endif %}
-    {% if BaseView.text %}
+    {% if BlogBaseView.text %}
 
-            {% if BaseView.url == 'http://127.0.0.1:8000/profile' %}
-              {% if BaseView.opennew %}
+            {% if BlogBaseView.url == 'http://127.0.0.1:8000/profile' %}
+              {% if BlogBaseView.opennew %}
                 <div class="navItem10" style="justify-content: center;">
-                  <a href="{{profile_url}}" target="_blank">{{BaseView.text}}</a>
+                  <a href="{{profile_url}}" target="_blank">{{BlogBaseView.text}}</a>
                 </div>
               {% else %}
                 <div class="navItem10" style="justify-content: center;">
-                  <a href="{{profile_url}}">{{BaseView.text}}</a>
+                  <a href="{{profile_url}}">{{BlogBaseView.text}}</a>
                 </div>
               {% endif %}
             {% else %}
-              {% if BaseView.opennew %}
+              {% if BlogBaseView.opennew %}
                 <div class="navItem10" style="justify-content: center;">
-                  <a href="{{BaseView.url}}" target="_blank">{{BaseView.text}}</a>
+                  <a href="{{BlogBaseView.url}}" target="_blank">{{BlogBaseView.text}}</a>
                 </div>
               {% else %}
                 <div class="navItem10" style="justify-content: center;">
-                  <a href="{{BaseView.url}}">{{BaseView.text}}</a>
+                  <a href="{{BlogBaseView.url}}">{{BlogBaseView.text}}</a>
                 </div>
               {% endif %}
             {% endif %}
 
     {% endif %}
-    {% if BaseView.image %}
+    {% if BlogBaseView.image %}
 <div class="metaclass1e" style="padding-top: 10%; font-size: 10px; text-align: left;
     justify-content: left;
     object-position: right;">
-    <a href="{{BaseView.url}}">
-         <img src="{{BaseView.image.url}}" width="150px" height="150px" style="border-radius: 50px;" alt="{{BaseView.url}}">
+    <a href="{{BlogBaseView.url}}">
+         <img src="{{BlogBaseView.image.url}}" width="150px" height="150px" style="border-radius: 50px;" alt="{{BlogBaseView.url}}">
       </a>
 </div>
 
@@ -143,29 +143,6 @@
     <script src="{% static 'css/js/blogscript.js' %}"></script>
     <script src="{% static 'css/js/blogscript.min.js' %}"></script>
 
-
-        <style>
-            body {
-            font-family: "Roboto", sans-serif;
-            font-size: 17px;
-            background-color: #fdfdfd;
-        }
-        .shadow {
-            box-shadow: 0 4px 2px -2px rgba(0, 0, 0, 0.1);
-        }
-        .btn-danger {
-            color: #fff;
-            background-color: #f00000;
-            border-color: #dc281e;
-        }
-        /*.masthead {
-            background: #3398E1;
-            height: auto;
-            padding-bottom: 15px;
-            box-shadow: 0 16px 48px #E3E7EB;
-            padding-top: 10px;
-        }*/
-    </style>
 
 
 

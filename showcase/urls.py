@@ -256,7 +256,7 @@ urlpatterns = [
     path('banappeals/', TemplateView.as_view(template_name='banappeals.html'), name='banappeals'),
     path('information/', views.InformationBackgroundView.as_view(), name='information'),
     path('invite/', TemplateView.as_view(template_name='invite.html'), name='invite'),
-    path('partners/', TemplateView.as_view(template_name='partners.html'), name='partners'),
+    #path('partners/', TemplateView.as_view(template_name='partners.html'), name='partners'),
     path('tag/', views.TagBackgroundView.as_view(), name='tag'),
     path('originalmembers/', TemplateView.as_view(template_name='originalmembers.html'), name='originalmembers'),
     path('staffranks/', views.StaffRanksBackgroundView.as_view(), name='staffranks'),

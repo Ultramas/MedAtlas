@@ -791,7 +791,7 @@ nav{
     padding: 60px 40px;
     background: linear-gradient(33deg, rgba(255, 0, 0, 0.637), rgba(0, 26, 255, 0.637), rgba(0, 247, 255, 0.637)); 
     position: fixed;
-    right: -350px;
+    right: -280px;
     top: 0;
     transition: right 0.5s;
     z-index: 3;
