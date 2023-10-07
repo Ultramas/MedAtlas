@@ -6991,15 +6991,26 @@ def postpreference(request, post_name, like_or_dislike):
     if request.method == "POST":
         eachpost = get_object_or_404(Blog, slug=post_name)
 
-        if request.user in eachpost.likes.iterator():
-            eachpost.likes.remove(request.user)
-        if request.user in eachpost.dislikes.iterator():
-            eachpost.dislikes.remove(request.user)
-
         if int(like_or_dislike) == 1:
-            eachpost.likes.add(request.user)
+            # If the user has already liked this post, remove the like.
+            if request.user in eachpost.likes.iterator():
+                eachpost.likes.remove(request.user)
+            else:
+                # Otherwise, add a like.
+                eachpost.likes.add(request.user)
+                # If the user has disliked this post, remove the dislike.
+                if request.user in eachpost.dislikes.iterator():
+                    eachpost.dislikes.remove(request.user)
         else:
-            eachpost.dislikes.add(request.user)
+            # If the user has already disliked this post, remove the dislike.
+            if request.user in eachpost.dislikes.iterator():
+                eachpost.dislikes.remove(request.user)
+            else:
+                # Otherwise, add a dislike.
+                eachpost.dislikes.add(request.user)
+                # If the user has liked this post, remove the like.
+                if request.user in eachpost.likes.iterator():
+                    eachpost.likes.remove(request.user)
 
         context = {'eachpost': eachpost,
                    'post_name': post_name}
@@ -7012,6 +7023,7 @@ def postpreference(request, post_name, like_or_dislike):
                    'post_name': post_name}
 
         return render(request, 'showcase:likes.html', context)
+
 
 
 from django.shortcuts import get_object_or_404, redirect, render

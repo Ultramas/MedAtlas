@@ -737,17 +737,16 @@
 
                         <span class="span">{{blog_post.minute_read}}-minute read</span>
 
-                    <a class="like" href="#" onClick="document.getElementById('likebutton').submit()">👍</a> {{blog_post.likes.count}}   |   <a class = "dislike" href="#" onClick="document.getElementById('dislikebutton').submit()">👎</a> {{blog_post.dislikes.count}}
+                <a class="like" href="#" onClick="document.getElementById('likebutton{{blog_post.slug}}').submit()">👍</a> {{blog_post.likes.count}}   |   <a class = "dislike" href="#" onClick="document.getElementById('dislikebutton{{blog_post.slug}}').submit()">👎</a> {{blog_post.dislikes.count}}
 
+<form id="likebutton{{blog_post.slug}}" method="POST" action="/blogpost-like/{{blog_post.slug}}/preference/1/">
+{% csrf_token %}
+</form>
 
-                    <form id="likebutton" method="POST" action="/blogpost-like/{{blog_post.slug}}/preference/1/">
-                    {% csrf_token %}
-                    </form>
+<form id="dislikebutton{{blog_post.slug}}" method="POST" action="/blogpost-like/{{blog_post.slug}}/preference/2/">
+{% csrf_token %}
+</form>
 
-                    <form id="dislikebutton" method="POST" action="/blogpost-like/{{blog_post.slug}}/preference/2/">
-                    {% csrf_token %}
-                    </form>
-                    <br>
                           <div class="profile-card">
                        {% if blog_post.author_profile_picture_url %}
                         <a href="{{ blog_post.author_profile_url }}">
@@ -799,31 +798,32 @@
 
               <ul class="popular-list">
 
+            {% for blog_post in BlogPosts %}
                 <li>
                   <div class="popular-card">
 
                     <figure class="card-banner img-holder" style="--width: 64; --height: 64;">
-                      <img src="./assets/images/popular-post-1.jpg" width="64" height="64" loading="lazy"
-                        alt="Creating is a privilege but it’s also a gift" class="img-cover">
+                      <img src="{{blog_post.image.url}}" width="64" height="64" loading="lazy"
+                        alt="{{blog_post.title}}" class="img-cover">
                     </figure>
 
                     <div class="card-content">
 
                       <h4 class="headline headline-4 card-title">
-                        <a href="#" class="link hover-2">Creating is a privilege but it’s also a gift</a>
+                        <a href="#" class="link hover-2">{{blog_post.title}}</a>
                       </h4>
 
                       <div class="warpper">
-                        <p class="card-subtitle">15 mins read</p>
+                        <p class="card-subtitle">{{blog_post.minute_read}} minute read</p>
 
-                        <time class="publish-date" datetime="2022-04-15">15 April 2022</time>
+                        <time class="publish-date" datetime="2022-04-15">{{blog_post.created_on}}</time>
                       </div>
 
                     </div>
 
                   </div>
                 </li>
-
+{% endfor %}
                 <li>
                   <div class="popular-card">
 
