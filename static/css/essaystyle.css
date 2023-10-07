@@ -680,10 +680,11 @@ body.nav-active { overflow: hidden; }
   transition: var(--transition-1);
 }
 
+/*
 .tag-btn img {
   width: 100%;
   max-width: 32px;
-}
+}*/
 
 
 

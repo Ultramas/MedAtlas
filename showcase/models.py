@@ -6,6 +6,7 @@ from PIL import Image
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Max, F
 from django.dispatch import receiver
 from django.shortcuts import reverse
 from django_countries.fields import CountryField
@@ -728,16 +729,37 @@ class BlogHeader(models.Model):
 from django.template.defaultfilters import slugify
 
 
+class BlogFilter(models.Model):
+    blog_filter = models.CharField(verbose_name="Hashtag filters", max_length=200, blank=True, null=True)
+    clicks = models.IntegerField(verbose_name="Popularity", blank=True, null=True)
+    image = models.ImageField(verbose_name="Filter Image", blank=True, null=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.blog_filter
+
+    class Meta:
+        verbose_name = "Blog Filter"
+        verbose_name_plural = "Blog Filters"
+
+
 class Blog(models.Model):
     """Each blog post"""
     title = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
-    type = models.CharField(choices=BLOG_TYPE_CHOICES, max_length=2)
+    type = models.CharField(choices=BLOG_TYPE_CHOICES, max_length=2, blank=True, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
     updated_on = models.DateTimeField(auto_now=True, verbose_name="updated on: ")
     content = models.TextField()
+    filters = models.ForeignKey(BlogFilter, on_delete=models.CASCADE, blank=True, null=True, verbose_name="Hashtag filters")
     created_on = models.DateTimeField(auto_now_add=True)
-    category = models.ForeignKey(BlogHeader, verbose_name="Category", on_delete=models.CASCADE, blank=True, null=True, help_text="Optional")
+    position = models.IntegerField(blank=True, null=True)
+    category = models.ForeignKey(BlogHeader, verbose_name="Category", on_delete=models.CASCADE, blank=True, null=True,
+                                 help_text="Optional")
     minute_read = models.IntegerField(verbose_name="Time to read (in minutes)", blank=True, null=True)
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=0)
     image = models.ImageField(upload_to='images/')
@@ -777,7 +799,11 @@ class Blog(models.Model):
             # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
-
+            max_position = Blog.objects.all().aggregate(Max('position'))['position__max']
+            if max_position is None:  # if there are no other blog posts
+                self.position = 1
+            else:
+                self.position = max_position + 1
         super().save(*args, **kwargs)
 
     def get_profile_url(self):
@@ -801,6 +827,17 @@ class Blog(models.Model):
 
     # def number_of_likes(self):
     #    return self.likes.count()
+    def delete(self, *args, **kwargs):
+        # Get all Blog objects with a position greater than the one being deleted
+        blogs_to_update = Blog.objects.filter(position__gt=self.position)
+
+        # Delete the object
+        super().delete(*args, **kwargs)
+
+        # Decrement the position of each remaining object
+        for i, blog in enumerate(blogs_to_update.order_by('position')):
+            blog.position = self.position + i
+            blog.save()
 
 
 class Preference(models.Model):
@@ -1135,7 +1172,8 @@ class NavBarHeader(models.Model):
 
 
 class FeaturedNavigationBar(models.Model):
-    default_header = models.TextField(help_text="Only set if occupying 1'st position", blank=True, null=True, default='IntelleX', verbose_name='Heading')
+    default_header = models.TextField(help_text="Only set if occupying 1'st position", blank=True, null=True,
+                                      default='IntelleX', verbose_name='Heading')
     text = models.TextField(blank=True, null=True)
     image = models.ImageField(verbose_name="Navigational image", blank=True, null=True)
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -2100,7 +2138,7 @@ class SupportMessage(models.Model):
 class SupportInterface(models.Model):
     name = models.CharField(max_length=1000, null=True)
     room = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='supportinterfaceroom',
-                                       verbose_name="Room Creator")
+                             verbose_name="Room Creator")
     date = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -2134,7 +2172,8 @@ class SupportInterface(models.Model):
 class SupportLine(models.Model):
     value = models.CharField(max_length=1000000)
     date = models.DateTimeField(default=timezone.now, blank=True)
-    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='supportlinemessages',
+    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
+                                       related_name='supportlinemessages',
                                        verbose_name="User")
     room = models.CharField(max_length=1000000)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

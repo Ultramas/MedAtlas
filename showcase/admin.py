@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
-    SupportInterface, FeaturedNavigationBar, BlogHeader
+    SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -668,10 +668,22 @@ class BlogHeaderAdmin(admin.ModelAdmin):
 admin.site.register(BlogHeader, BlogHeaderAdmin)
 
 
+class BlogFilterAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Blog Information - Categorial Descriptions', {
+            'fields': ('blog_filter', 'clicks', 'image', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+
+admin.site.register(BlogFilter, BlogFilterAdmin)
+
+
 class BlogAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Blog Information - Categorial Descriptions', {
-            'fields': ('title', 'slug', 'type', 'author', 'content', 'category', 'minute_read', 'status', 'is_active',),
+            'fields': ('title', 'slug', 'type', 'author', 'content', 'filters', 'position', 'category', 'minute_read', 'status', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Blog Information - Image Display', {

@@ -463,7 +463,7 @@
         <div class="container">
 
           <h2 class="headline headline-2 section-title">
-            <span class="span">Editor's picked</span>
+            <span class="span">Editor's Choice</span>
           </h2>
 
           <p class="section-text">
@@ -472,17 +472,14 @@
 
           <ul class="feature-list">
 
+        {% if BlogPosts %}
+            {% for blog_post in BlogPosts %}
+                    {% if blog_post.type == "EC"%}
 
             <li>
               <div class="card feature-card">
 
                 <figure class="card-banner img-holder" style="--width: 1602; --height: 903;">
-{% for PostList in BlogHeader %}
-    {% if PostList.position == 1 %}
-        {% if BlogPosts %}
-            {% for blog_post in BlogPosts %}
-                    {% if blog_post.type == "EC"%}
-                {% if PostList.category == blog_post.category.category %}
                     <img src="{{blog_post.image.url}}" width="1602" height="903" loading="lazy"
                     alt="{{blog_post.category}}" class="img-cover">                </figure>
 
@@ -533,301 +530,16 @@
 
                 </div>
 
-        {% endif %}
+              </div>
+            </li>
+
                 {% endif %}
             {% endfor %}
         {% else %}
             <p>No blog posts found.</p>
         {% endif %}
-    {% endif %}
-{% endfor %}
-              </div>
-            </li>
 
 
-            <li>
-              <div class="card feature-card">
-
-                <figure class="card-banner img-holder" style="--width: 1602; --height: 903;">
-{% for PostList in BlogHeader %}
-    {% if PostList.position == 2 %}
-        {% if BlogPosts %}
-            {% for blog_post in BlogPosts %}
-                    {% if blog_post.type == "EC"%}
-                {% if PostList.category == blog_post.category.category %}
-                    <img src="{{blog_post.image.url}}" width="1602" height="903" loading="lazy"
-                    alt="{{blog_post.category}}" class="img-cover">                </figure>
-
-                <div class="card-content">
-
-                  <div class="card-wrapper">
-                    <div class="card-tag">
-                      <a href="#" class="span hover-2">#Design</a>
-
-                      <a href="#" class="span hover-2">#Movie</a>
-                    </div>
-
-                    <div class="wrapper">
-                      <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
-
-                      <span class="span">{{blog_post.minute_read}}-minute read</span>
-                    </div>
-                  </div>
-
-                  <h3 class="headline headline-3">
-                    <a href="{% url 'showcase:post_detail' blog_post.slug  %}" class="card-title hover-2">
-                      {{blog_post.content|slice:":200" }}...
-                    </a>
-                  </h3>
-
-                  <div class="card-wrapper">
-
-                    <div class="profile-card">
-                       {% if blog_post.author_profile_picture_url %}
-                        <a href="{{ blog_post.author_profile_url }}">
-                            <img src="{{ blog_post.author_profile_picture_url }}" width="50px" height="50px" loading="lazy" alt="Profile Picture"
-                        class="profile-banner">
-      </a>
-
-{% endif %}
-
-                      <div>
-                        <p class="card-title">{{ blog_post.author }}</p>
-
-                        <p class="card-subtitle">Created on: {{ blog_post.created_on }} </p>
-                        <p class="card-subtitle">Updated on: {{ blog_post.updated_on }} </p>
-                      </div>
-                    </div>
-
-                    <a href="{% url 'showcase:post_detail' blog_post.slug  %}" class="card-btn">Read more</a>
-
-                  </div>
-
-                </div>
-
-        {% endif %}
-                {% endif %}
-            {% endfor %}
-        {% else %}
-            <p>No blog posts found.</p>
-        {% endif %}
-    {% endif %}
-{% endfor %}
-              </div>
-            </li>
-
-            <li>
-              <div class="card feature-card">
-
-                <figure class="card-banner img-holder" style="--width: 1602; --height: 903;">
-{% for PostList in BlogHeader %}
-    {% if PostList.position == 3 %}
-        {% if BlogPosts %}
-            {% for blog_post in BlogPosts %}
-                    {% if blog_post.type == "EC"%}
-                {% if PostList.category == blog_post.category.category %}
-                    <img src="{{blog_post.image.url}}" width="1602" height="903" loading="lazy"
-                    alt="{{blog_post.category}}" class="img-cover">                </figure>
-
-                <div class="card-content">
-
-                  <div class="card-wrapper">
-                    <div class="card-tag">
-                      <a href="#" class="span hover-2">#Design</a>
-
-                      <a href="#" class="span hover-2">#Movie</a>
-                    </div>
-
-                    <div class="wrapper">
-                      <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
-
-                      <span class="span">{{blog_post.minute_read}}-minute read</span>
-                    </div>
-                  </div>
-
-                  <h3 class="headline headline-3">
-                    <a href="{% url 'showcase:post_detail' blog_post.slug  %}" class="card-title hover-2">
-                      {{blog_post.content|slice:":200" }}...
-                    </a>
-                  </h3>
-
-                  <div class="card-wrapper">
-
-                    <div class="profile-card">
-                       {% if blog_post.author_profile_picture_url %}
-                        <a href="{{ blog_post.author_profile_url }}">
-                            <img src="{{ blog_post.author_profile_picture_url }}" width="50px" height="50px" loading="lazy" alt="Profile Picture"
-                        class="profile-banner">
-      </a>
-
-{% endif %}
-
-                      <div>
-                        <p class="card-title">{{ blog_post.author }}</p>
-
-                        <p class="card-subtitle">Created on: {{ blog_post.created_on }} </p>
-                        <p class="card-subtitle">Updated on: {{ blog_post.updated_on }} </p>
-                      </div>
-                    </div>
-
-                    <a href="{% url 'showcase:post_detail' blog_post.slug  %}" class="card-btn">Read more</a>
-
-                  </div>
-
-                </div>
-
-        {% endif %}
-                {% endif %}
-            {% endfor %}
-        {% else %}
-            <p>No blog posts found.</p>
-        {% endif %}
-    {% endif %}
-{% endfor %}
-              </div>
-            </li>
-
-            <li>
-              <div class="card feature-card">
-
-                <figure class="card-banner img-holder" style="--width: 1602; --height: 903;">
-{% for PostList in BlogHeader %}
-    {% if PostList.position == 4 %}
-        {% if BlogPosts %}
-            {% for blog_post in BlogPosts %}
-                    {% if blog_post.type == "EC"%}
-                {% if PostList.category == blog_post.category.category %}
-                    <img src="{{blog_post.image.url}}" width="1602" height="903" loading="lazy"
-                    alt="{{blog_post.category}}" class="img-cover">                </figure>
-
-                <div class="card-content">
-
-                  <div class="card-wrapper">
-                    <div class="card-tag">
-                      <a href="#" class="span hover-2">#Design</a>
-
-                      <a href="#" class="span hover-2">#Movie</a>
-                    </div>
-
-                    <div class="wrapper">
-                      <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
-
-                      <span class="span">{{blog_post.minute_read}}-minute read</span>
-                    </div>
-                  </div>
-
-                  <h3 class="headline headline-3">
-                    <a href="{% url 'showcase:post_detail' blog_post.slug  %}" class="card-title hover-2">
-                      {{blog_post.content|slice:":200" }}...
-                    </a>
-                  </h3>
-
-                  <div class="card-wrapper">
-
-                    <div class="profile-card">
-                       {% if blog_post.author_profile_picture_url %}
-                        <a href="{{ blog_post.author_profile_url }}">
-                            <img src="{{ blog_post.author_profile_picture_url }}" width="50px" height="50px" loading="lazy" alt="Profile Picture"
-                        class="profile-banner">
-      </a>
-
-{% endif %}
-
-                      <div>
-                        <p class="card-title">{{ blog_post.author }}</p>
-
-                        <p class="card-subtitle">Created on: {{ blog_post.created_on }} </p>
-                        <p class="card-subtitle">Updated on: {{ blog_post.updated_on }} </p>
-                      </div>
-                    </div>
-
-                    <a href="{% url 'showcase:post_detail' blog_post.slug  %}" class="card-btn">Read more</a>
-
-                  </div>
-
-                </div>
-
-        {% endif %}
-                {% endif %}
-            {% endfor %}
-        {% else %}
-            <p>No blog posts found.</p>
-        {% endif %}
-    {% endif %}
-{% endfor %}
-              </div>
-            </li>
-
-            <li>
-              <div class="card feature-card">
-
-                <figure class="card-banner img-holder" style="--width: 1602; --height: 903;">
-{% for PostList in BlogHeader %}
-    {% if PostList.position == 5 %}
-        {% if BlogPosts %}
-            {% for blog_post in BlogPosts %}
-                    {% if blog_post.type == "EC"%}
-                {% if PostList.category == blog_post.category.category %}
-                    <img src="{{blog_post.image.url}}" width="1602" height="903" loading="lazy"
-                    alt="{{blog_post.category}}" class="img-cover">                </figure>
-
-                <div class="card-content">
-
-                  <div class="card-wrapper">
-                    <div class="card-tag">
-                      <a href="#" class="span hover-2">#Design</a>
-
-                      <a href="#" class="span hover-2">#Movie</a>
-                    </div>
-
-                    <div class="wrapper">
-                      <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
-
-                      <span class="span">{{blog_post.minute_read}}-minute read</span>
-                    </div>
-                  </div>
-
-                  <h3 class="headline headline-3">
-                    <a href="{% url 'showcase:post_detail' blog_post.slug  %}" class="card-title hover-2">
-                      {{blog_post.content|slice:":200" }}...
-                    </a>
-                  </h3>
-
-                  <div class="card-wrapper">
-
-                    <div class="profile-card">
-                       {% if blog_post.author_profile_picture_url %}
-                        <a href="{{ blog_post.author_profile_url }}">
-                            <img src="{{ blog_post.author_profile_picture_url }}" width="50px" height="50px" loading="lazy" alt="Profile Picture"
-                        class="profile-banner">
-      </a>
-
-{% endif %}
-
-                      <div>
-                        <p class="card-title">{{ blog_post.author }}</p>
-
-                        <p class="card-subtitle">Created on: {{ blog_post.created_on }} </p>
-                        <p class="card-subtitle">Updated on: {{ blog_post.updated_on }} </p>
-                      </div>
-                    </div>
-
-                    <a href="{% url 'showcase:post_detail' blog_post.slug  %}" class="card-btn">Read more</a>
-
-                  </div>
-
-                </div>
-
-        {% endif %}
-                {% endif %}
-            {% endfor %}
-        {% else %}
-            <p>No blog posts found.</p>
-        {% endif %}
-    {% endif %}
-{% endfor %}
-              </div>
-            </li>
           </ul>
 
           <a href="#" class="btn btn-secondary">
@@ -862,15 +574,18 @@
           </p>
 
           <ul class="grid-list">
-
+{% for PostList in BlogFilter %}
             <li>
               <button class="card tag-btn">
-                <img src="./assets/images/tag1.png" width="32" height="32" loading="lazy" alt="Travel">
-
-                <p class="btn-text">Travel</p>
+                  {% if PostList.image %}
+                <img src="{{PostList.image.url}}" width="50px" height="50px" style="border-radius: 50px; max-width: 50px;" loading="lazy" alt="{{PostList.blog_filter}}">
+                    {% else %}
+                  <h5>no image</h5>
+                  {% endif %}
+                <p class="btn-text">{{PostList.blog_filter}}</p>
               </button>
             </li>
-
+{% endfor %}
             <li>
               <button class="card tag-btn">
                 <img src="./assets/images/tag2.png" width="32" height="32" loading="lazy" alt="Culture">
@@ -978,215 +693,81 @@
           <div class="post-main">
 
             <h2 class="headline headline-2 section-title">
-              <span class="span">Recent posts</span>
+              <span class="span">Recent Posts</span>
             </h2>
 
             <p class="section-text">
-              Don't miss the latest trends
+              Do not miss the latest trends!
             </p>
 
             <ul class="grid-list">
 
+                    {% for blog_post in BlogPosts %}
               <li>
                 <div class="recent-post-card">
 
+
+                    {% if blog_post.image %}
                   <figure class="card-banner img-holder" style="--width: 271; --height: 258;">
-                    <img src="./assets/images/recent-post-1.jpg" width="271" height="258" loading="lazy"
-                      alt="Helpful Tips for Working from Home as a Freelancer" class="img-cover">
+                      <img src="{{blog_post.image.url}}" width="1602" height="903" loading="lazy"
+                    alt="{{blog_post.category}}" class="img-cover">
                   </figure>
+                    {% endif %}
 
                   <div class="card-content">
 
-                    <a href="#" class="card-badge">Working Tips</a>
+                    <a href="#" class="card-badge">{{blog_post.category}}</a>
 
                     <h3 class="headline headline-3 card-title">
-                      <a href="#" class="link hover-2">Helpful Tips for Working from Home as a Freelancer</a>
+                      <a href="#" class="link hover-2">{{blog_post.title}}</a>
                     </h3>
 
                     <p class="card-text">
-                      Gosh jaguar ostrich quail one excited dear hello and bound and the and bland moral misheard
-                      roadrunner flapped lynx far that and jeepers giggled far and far
+                      {{blog_post.content}}
                     </p>
 
                     <div class="card-wrapper">
                       <div class="card-tag">
-                        <a href="#" class="span hover-2"># Travel</a>
+                        <a href="#" class="span hover-2">#{{blog_post.filters}}</a>
 
-                        <a href="#" class="span hover-2"># Lifestyle</a>
                       </div>
 
                       <div class="wrapper">
                         <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
 
-                        <span class="span">{{blog_posts.minute_read}}-minute read</span>
+                        <span class="span">{{blog_post.minute_read}}-minute read</span>
+
+                    <a class="like" href="#" onClick="document.getElementById('likebutton').submit()">👍</a> {{blog_post.likes.count}}   |   <a class = "dislike" href="#" onClick="document.getElementById('dislikebutton').submit()">👎</a> {{blog_post.dislikes.count}}
+
+
+                    <form id="likebutton" method="POST" action="/blogpost-like/{{blog_post.slug}}/preference/1/">
+                    {% csrf_token %}
+                    </form>
+
+                    <form id="dislikebutton" method="POST" action="/blogpost-like/{{blog_post.slug}}/preference/2/">
+                    {% csrf_token %}
+                    </form>
+                    <br>
+                          <div class="profile-card">
+                       {% if blog_post.author_profile_picture_url %}
+                        <a href="{{ blog_post.author_profile_url }}">
+                            <img src="{{ blog_post.author_profile_picture_url }}" width="50px" height="50px" loading="lazy" alt="Profile Picture"
+                        class="profile-banner">
+      </a>
+
+{% endif %}
+
                       </div>
+                      </div>
+
+
                     </div>
 
                   </div>
 
                 </div>
               </li>
-
-              <li>
-                <div class="recent-post-card">
-
-                  <figure class="card-banner img-holder" style="--width: 271; --height: 258;">
-                    <img src="./assets/images/recent-post-2.jpg" width="271" height="258" loading="lazy"
-                      alt="Helpful Tips for Working from Home as a Freelancer" class="img-cover">
-                  </figure>
-
-                  <div class="card-content">
-
-                    <a href="#" class="card-badge">Working Tips</a>
-
-                    <h3 class="headline headline-3 card-title">
-                      <a href="#" class="link hover-2">Helpful Tips for Working from Home as a Freelancer</a>
-                    </h3>
-
-                    <p class="card-text">
-                      Gosh jaguar ostrich quail one excited dear hello and bound and the and bland moral misheard
-                      roadrunner flapped lynx far that and jeepers giggled far and far
-                    </p>
-
-                    <div class="card-wrapper">
-                      <div class="card-tag">
-                        <a href="#" class="span hover-2"># Travel</a>
-
-                        <a href="#" class="span hover-2"># Lifestyle</a>
-                      </div>
-
-                      <div class="wrapper">
-                        <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
-
-                        <span class="span">3 mins read</span>
-                      </div>
-                    </div>
-
-                  </div>
-
-                </div>
-              </li>
-
-              <li>
-                <div class="recent-post-card">
-
-                  <figure class="card-banner img-holder" style="--width: 271; --height: 258;">
-                    <img src="./assets/images/recent-post-3.jpg" width="271" height="258" loading="lazy"
-                      alt="Helpful Tips for Working from Home as a Freelancer" class="img-cover">
-                  </figure>
-
-                  <div class="card-content">
-
-                    <a href="#" class="card-badge">Working Tips</a>
-
-                    <h3 class="headline headline-3 card-title">
-                      <a href="#" class="link hover-2">Helpful Tips for Working from Home as a Freelancer</a>
-                    </h3>
-
-                    <p class="card-text">
-                      Gosh jaguar ostrich quail one excited dear hello and bound and the and bland moral misheard
-                      roadrunner flapped lynx far that and jeepers giggled far and far
-                    </p>
-
-                    <div class="card-wrapper">
-                      <div class="card-tag">
-                        <a href="#" class="span hover-2"># Travel</a>
-
-                        <a href="#" class="span hover-2"># Lifestyle</a>
-                      </div>
-
-                      <div class="wrapper">
-                        <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
-
-                        <span class="span">3 mins read</span>
-                      </div>
-                    </div>
-
-                  </div>
-
-                </div>
-              </li>
-
-              <li>
-                <div class="recent-post-card">
-
-                  <figure class="card-banner img-holder" style="--width: 271; --height: 258;">
-                    <img src="./assets/images/recent-post-4.jpg" width="271" height="258" loading="lazy"
-                      alt="Helpful Tips for Working from Home as a Freelancer" class="img-cover">
-                  </figure>
-
-                  <div class="card-content">
-
-                    <a href="#" class="card-badge">Working Tips</a>
-
-                    <h3 class="headline headline-3 card-title">
-                      <a href="#" class="link hover-2">Helpful Tips for Working from Home as a Freelancer</a>
-                    </h3>
-
-                    <p class="card-text">
-                      Gosh jaguar ostrich quail one excited dear hello and bound and the and bland moral misheard
-                      roadrunner flapped lynx far that and jeepers giggled far and far
-                    </p>
-
-                    <div class="card-wrapper">
-                      <div class="card-tag">
-                        <a href="#" class="span hover-2"># Travel</a>
-
-                        <a href="#" class="span hover-2"># Lifestyle</a>
-                      </div>
-
-                      <div class="wrapper">
-                        <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
-
-                        <span class="span">3 mins read</span>
-                      </div>
-                    </div>
-
-                  </div>
-
-                </div>
-              </li>
-
-              <li>
-                <div class="recent-post-card">
-
-                  <figure class="card-banner img-holder" style="--width: 271; --height: 258;">
-                    <img src="./assets/images/recent-post-5.jpg" width="271" height="258" loading="lazy"
-                      alt="Helpful Tips for Working from Home as a Freelancer" class="img-cover">
-                  </figure>
-
-                  <div class="card-content">
-
-                    <a href="#" class="card-badge">Working Tips</a>
-
-                    <h3 class="headline headline-3 card-title">
-                      <a href="#" class="link hover-2">Helpful Tips for Working from Home as a Freelancer</a>
-                    </h3>
-
-                    <p class="card-text">
-                      Gosh jaguar ostrich quail one excited dear hello and bound and the and bland moral misheard
-                      roadrunner flapped lynx far that and jeepers giggled far and far
-                    </p>
-
-                    <div class="card-wrapper">
-                      <div class="card-tag">
-                        <a href="#" class="span hover-2"># Travel</a>
-
-                        <a href="#" class="span hover-2"># Lifestyle</a>
-                      </div>
-
-                      <div class="wrapper">
-                        <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
-
-                        <span class="span">3 mins read</span>
-                      </div>
-                    </div>
-
-                  </div>
-
-                </div>
-              </li>
-
+{% endfor %}
             </ul>
 
             <nav aria-label="pagination" class="pagination">

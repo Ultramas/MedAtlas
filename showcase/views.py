@@ -134,6 +134,8 @@ from django.views.generic import UpdateView
 from .forms import ProfileForm
 from django.contrib.auth.models import User
 from .models import Blog
+from .models import BlogHeader
+from .models import BlogFilter
 from .models import UserProfile2
 from django.views.generic.edit import FormMixin
 
@@ -2525,19 +2527,24 @@ class usersview(ListView):
     def get_queryset(self):
         return Idea.objects.all()
 
-from .models import BlogHeader
 
 class PostList(BaseView):
     model = BlogBackgroundImage
     # backgroundqueryset = BackgroundImageBase.objects.filter('page').order_by('position')
     # queryset = Blog.objects.filter(status=1).order_by('-created_on')
     # normally can only filter once per view
-    paginate_by = 10
     template_name = 'blog.html'
 
     def get_context_data(self, **kwargs):
         print(124)
         context = super().get_context_data(**kwargs)
+        paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
+
+        blog_query = Blog.objects.filter(is_active=1)
+        paginator = Paginator(blog_query, paginate_by)
+        page_number = self.request.GET.get('page')
+        paginated_items = paginator.get_page(page_number)
+
         context['BlogBackgroundImage'] = BlogBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -2548,6 +2555,7 @@ class PostList(BaseView):
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
+        context['BlogFilter'] = BlogFilter.objects.filter(is_active=1).order_by('clicks')
         context['BlogHeader'] = BlogHeader.objects.filter(is_active=1).order_by('category')
         context['blog_count'] = BlogHeader.objects.filter(is_active=1).order_by('category').count()
 
@@ -2575,6 +2583,8 @@ class PostList(BaseView):
 
     def get_queryset(self):
         return Blog.objects.filter(status=1).order_by('-created_on')
+
+
 
 
 class votingview(ListView):
@@ -2950,7 +2960,7 @@ class PatreonBackgroundView(ListView):
         return context
 
 
-class BlogComment(generic.DetailView):
+"""class BlogComment(generic.DetailView):
     model = Blog
     paginate_by = 10
     template_name = 'blog_comment.html'
@@ -2980,7 +2990,7 @@ class BlogComment(generic.DetailView):
             'category_count': category_count,
             'form': form
         }
-        return render(request, 'blog_comment.html', context)
+        return render(request, 'blog_comment.html', context)"""
 
 
 # def BlogPostLike(request, slug):
