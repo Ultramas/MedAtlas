@@ -2114,6 +2114,7 @@ from django.views.generic import UpdateView
 from .forms import ProfileForm
 from django.contrib.auth.models import User
 from .models import Blog
+from .models import Comment
 from .models import UserProfile2
 from django.views.generic.edit import FormMixin
 
@@ -2527,6 +2528,7 @@ class usersview(ListView):
     def get_queryset(self):
         return Idea.objects.all()
 
+from django.db.models import Count, F
 
 class PostList(BaseView):
     model = BlogBackgroundImage
@@ -2545,6 +2547,16 @@ class PostList(BaseView):
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
 
+        # Annotate each blog post with the difference between the number of likes and dislikes
+        PopularBlogOrder = Blog.objects.annotate(like_dislike_diff=Count(F('likes')) - Count(F('dislikes'))).order_by('-like_dislike_diff', '-created_on')
+
+
+        # Order the blog posts by this difference
+        PopularBlogOrder = PopularBlogOrder.order_by('-like_dislike_diff')
+
+        # Pass the ordered blog posts to the template
+        context = {'PopularBlogOrder': PopularBlogOrder}
+
         context['BlogBackgroundImage'] = BlogBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -2559,6 +2571,18 @@ class PostList(BaseView):
         context['BlogHeader'] = BlogHeader.objects.filter(is_active=1).order_by('category')
         context['blog_count'] = BlogHeader.objects.filter(is_active=1).order_by('category').count()
 
+        comments = Comment.objects.filter(active=True, is_active=1).order_by('-created_on')
+
+        context['Comments'] = comments
+
+        for comments in context['Comments']:
+            commentator = comments.commentator
+            profile = ProfileDetails.objects.filter(user=commentator).first()
+            if profile:
+                comments.author_profile_picture_url = profile.avatar.url
+                comments.author_profile_url = comments.get_profile_url()
+
+                print('imgsrcimg')
 
         # Retrieve the signed-in user's profile and profile picture URL
 
@@ -2577,6 +2601,19 @@ class PostList(BaseView):
                 print('imgsrcimg')
 
         return context
+
+    def post(self, request, *args, **kwargs):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            return redirect('showcase:emaildone')
+        else:
+            messages.error(request, "Form submission invalid")
+            print("there was an error in registering the email")
+            return render(request, "blog.html", {'form': form})
+
 
     def get_blog_count():
         return Blog.objects.all().count()
@@ -3232,6 +3269,17 @@ class BackgroundView(FormMixin, BaseView):
                 print(user)
 
         return context
+    def post(self, request, *args, **kwargs):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            return redirect('showcase:emaildone')
+        else:
+            messages.error(request, "Form submission invalid")
+            print("there was an error in registering the email")
+            return render(request, "index.html", {'form': form})
 
 
 def dynamic_css(request):
@@ -3250,6 +3298,18 @@ class CreatePostView(CreateView):
     template_name = "backgroundimagechange.html"
     success_url = reverse_lazy("index")
 
+
+class TermsAndConditionsView(BaseView):
+    model = BackgroundImage
+    form_class = EmailForm
+    template_name = "termsandconditions.html"
+    section = TextBase.section
+
+class PolicyView(BaseView):
+    model = BackgroundImage
+    form_class = EmailForm
+    template_name = "policy.html"
+    section = TextBase.section
 
 class EBackgroundView(BaseView):
     model = EBackgroundImage
@@ -6986,6 +7046,7 @@ def post_detail(request, slug):
         })
 
 
+
 @login_required
 def postpreference(request, post_name, like_or_dislike):
     if request.method == "POST":
@@ -7012,10 +7073,11 @@ def postpreference(request, post_name, like_or_dislike):
                 if request.user in eachpost.likes.iterator():
                     eachpost.likes.remove(request.user)
 
-        context = {'eachpost': eachpost,
-                   'post_name': post_name}
+        # Save the changes to the database
+        eachpost.save()
 
-        return render(request, 'likes.html', context)
+        # Return a JSON response with the new like and dislike counts
+        return JsonResponse({'likes': eachpost.likes.count(), 'dislikes': eachpost.dislikes.count()})
 
     else:
         eachpost = get_object_or_404(Blog, slug=post_name)
@@ -7023,6 +7085,8 @@ def postpreference(request, post_name, like_or_dislike):
                    'post_name': post_name}
 
         return render(request, 'showcase:likes.html', context)
+
+
 
 
 

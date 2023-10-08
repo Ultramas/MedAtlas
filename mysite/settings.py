@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'django_private_chat2.apps.DjangoPrivateChat2Config',
     "guest_user",
     "social_django",
+    'widget_tweaks',
     "guest_user.contrib.allauth",
     'changelogs',
     'favicon',

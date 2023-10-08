@@ -847,6 +847,9 @@ class FeedForm(forms.ModelForm):
 
 
 class EmailForm(forms.ModelForm):
+    email = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'Email'}))
+
     class Meta:
         model = EmailField
         fields = ('email', 'confirmation')

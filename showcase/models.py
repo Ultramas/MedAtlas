@@ -218,7 +218,7 @@ class Vote(models.Model):
 
 
 class EmailField(models.Model):
-    email = models.EmailField(
+    email = models.EmailField(unique=True,
         help_text="Sign up for our newsletter to get the latest news and gossip! We will never share your personal information with anyone without your explicit permission. Unsubscribe at any time. ")
     confirmation = models.BooleanField(
         help_text="By clicking this box, I agree to receive emails, coupons and discounts from PokeTrove. I also understand that I may unsubscribe at any time and PokeTrove will not share my personal information with anyone without my explicit permission.")
@@ -228,6 +228,9 @@ class EmailField(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.email
 
     class Meta:
         verbose_name = "Email"
@@ -857,6 +860,8 @@ class Preference(models.Model):
 
 
 class Comment(models.Model):
+    commentator = models.ForeignKey(User, on_delete=models.CASCADE)
+    slug = models.SlugField(max_length=200, unique=True)
     post = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='comments')
     name = models.CharField(max_length=80)
     email = models.EmailField()
@@ -874,6 +879,22 @@ class Comment(models.Model):
 
     def __str__(self):
         return 'Comment {} by {}'.format(self.body, self.name)
+
+    def save(self, *args, **kwargs):
+        self.url = slugify(self.name)
+
+
+        if not self.pk:
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.commentator).first()
+
+            # Set the position to the position value from the associated ProfileDetails
+            if profile:
+                self.position = profile.position
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        return reverse('showcase:profile', args=[str(self.slug)])
 
     def get_absolute_url(self):
         from django.urls import reverse

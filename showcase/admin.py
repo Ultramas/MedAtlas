@@ -1069,7 +1069,7 @@ admin.site.register(CheckoutAddress, CheckoutAddressAdmin)
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'body', 'post', 'created_on', 'active')
+    list_display = ('commentator', 'slug', 'name', 'body', 'post', 'created_on', 'active', 'is_active')
     list_filter = ('active', 'created_on')
     search_fields = ('name', 'email', 'body')
     actions = ['approve_comments']
@@ -1080,10 +1080,10 @@ class CommentAdmin(admin.ModelAdmin):
     # Define your custom fieldsets below
     fieldsets = (
         ('Ban Appeals Information - Categorial Description', {
-            'fields': ('post', 'name', 'email', 'body',)
+            'fields': ('commentator', 'post', 'name', 'email', 'body',)
         }),
         ('Ban Appeals Information - Moderation', {
-            'fields': ('active',)
+            'fields': ('slug', 'active', 'is_active',)
         })
     )
     readonly_fields = ('created_on',)

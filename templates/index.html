@@ -1420,15 +1420,30 @@
         <div class="email">
           <img class="newsletterlogo" src="static/css/images/te.png">
           <b>
-            <p class="newsletter">Subscribe to our newsletter!</p>
           </b>
-          <form class="emaile" action="/url" method="GET">
             <div class="input_group">
-              <input class="emailbox" type="text" id="username" name="username" minlength="3" maxlength="30" required
-                placeholder="Enter your email address">
-              <button type="submit">Submit</button>
+
+        <form method="POST">
+    {% csrf_token %}
+            <div class="input-wrapper" style="padding: 12px; padding-inline-start: 20px;
+            border-block-end: 1px solid var(--text-wild-blue-yonder); font-size: var(--fontSize-6);}">
+                {{ form.email }}
+                <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
             </div>
-          </form>
+
+            <div class="input-wrapper">
+    {{ form.confirmation.label_tag }} {{ form.confirmation }}
+            </div>
+            <div class="btn btn-primary">
+
+
+              <button type="submit">Submit</button>
+
+              <ion-icon name="arrow-forward" aria-hidden="true" role="img" class="md hydrated"></ion-icon>
+            </div>
+</form>
+
+            </div>
         </div>
       </section>
 
