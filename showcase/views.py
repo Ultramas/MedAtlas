@@ -2545,7 +2545,7 @@ class PostList(BaseView):
         blog_query = Blog.objects.filter(is_active=1)
         paginator = Paginator(blog_query, paginate_by)
         page_number = self.request.GET.get('page')
-        paginated_items = paginator.get_page(page_number)
+        paginated_blog = paginator.get_page(page_number)
 
         # Annotate each blog post with the difference between the number of likes and dislikes
         PopularBlogOrder = Blog.objects.annotate(like_dislike_diff=Count(F('likes')) - Count(F('dislikes'))).order_by('-like_dislike_diff', '-created_on')
@@ -2570,6 +2570,8 @@ class PostList(BaseView):
         context['BlogFilter'] = BlogFilter.objects.filter(is_active=1).order_by('clicks')
         context['BlogHeader'] = BlogHeader.objects.filter(is_active=1).order_by('category')
         context['blog_count'] = BlogHeader.objects.filter(is_active=1).order_by('category').count()
+
+        context['blogpagination'] = paginated_blog
 
         comments = Comment.objects.filter(active=True, is_active=1).order_by('-created_on')
 
@@ -4500,7 +4502,6 @@ class HomePageView(TemplateView):
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-
 class EcommerceSearchResultsView(ListView):
     model = Item
     template_name = 'ecommercesearch_results.html'
@@ -4519,8 +4520,70 @@ class EcommerceSearchResultsView(ListView):
 
         return (all_list)
 
+class BlogSearchResultsView(ListView):
+    template_name = 'blogsearch_results.html'
+    paginate_by = 10
+    context_object_name = 'all_list'
 
-# views.py
+
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        filter_by = self.request.GET.get('filter')  # Get the filter parameter
+
+        # Define the lists to search based on the filter parameter
+        search_lists = []
+
+        if filter_by == 'blog':
+            search_lists.append(Blog.objects.filter(Q(title__icontains=query) | Q(slug__icontains=query) | Q(type__icontains=query) | Q(author__username__icontains=query)))
+        elif filter_by == 'blogfilter':
+            search_lists.append(BlogFilter.objects.filter(
+                Q(blog_filter__icontains=query)))
+        elif filter_by == 'blogheader':
+            search_lists.append(BlogHeader.objects.filter(
+                Q(category__icontains=query)))
+        else:
+            search_lists = [Blog.objects.filter(Q(title__icontains=query) | Q(slug__icontains=query) |
+                                                Q(type__icontains=query) | Q(author__username__icontains=query)),
+                            BlogFilter.objects.filter(Q(blog_filter__icontains=query)),
+                            BlogHeader.objects.filter(Q(category__icontains=query))]
+
+        # Combine the search results from selected lists
+        search_results = []
+        for search_list in search_lists:
+            for item in search_list:
+                search_result = SearchResult(content_object=item)
+                search_results.append(search_result)
+
+        return search_results
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        # settings to alter the username & password
+
+        # Add type information for each item
+        for result in context['all_list']:
+            if isinstance(result.content_object, Blog):
+                result.type = 'Blog'
+                result.url = reverse_lazy('showcase:blog')
+            elif isinstance(result.content_object, BlogFilter):
+                result.type = 'BlogFilter'
+                result.url = reverse_lazy('showcase:blog')
+            elif isinstance(result.content_object, BlogHeader):
+                result.type = 'Blog Header'
+                result.url = reverse_lazy('showcase:blog')
+            else:
+                result.type = 'Unknown'
+                result.url = ''
+
+        return context
+
+
 
 from django.views.generic import ListView
 from django.db.models import Q

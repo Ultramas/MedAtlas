@@ -55,6 +55,17 @@
   <link rel="preload" as="image" href="./assets/images/pattern-3.svg">
 <style>
 
+a.page-link {
+    background-color: var(--bg-prussian-blue);
+    transition: all var(--transition-1);
+    /* other styles... */
+}
+
+a.page-link:hover {
+    background-color: hsla(199, 89%, 49%, 1); /* change to the desired color */
+    transform: scale(1.1) translateY(-10%); /* makes the button 20% larger and moves it up by 20% */
+}
+
 
 </style>
 </head>
@@ -192,6 +203,14 @@
       <section class="hero" id="home" aria-label="home">
         <div class="container">
 
+      <!--pagination change station-->
+<form method="GET">
+    <label for="paginate-by">Items per page:</label>
+    <input type="number" name="paginate_by" id="paginate-by" value="{{ blogpagination.paginator.per_page }}">
+
+<button class="button-64" role="button" type="submit"><span class="text">Update</span></button>
+</form>
+
           <div class="hero-content">
 {% for PostList in TextFielde %}
             {% if Postlist.page == 'blog.html' %}
@@ -230,7 +249,18 @@
 {% endfor %}
 
 
+    <br>
+    <br>
+    <div class="search">
+      <form class="searchbar" action="{% url 'showcase:blogsearch_results' %}" method="get" style="border-radius: 30px;">
+        <input name="q" type="text" placeholder="Search Blog Posts..." style="border-radius: 30px;">
+      </form>
+      <br>
+      <br>
+    </div>
+
 <form method="POST">
+            {{form.errors}}
     {% csrf_token %}
 
 
@@ -730,7 +760,7 @@
 
             <ul class="grid-list">
 
-                    {% for blog_post in BlogPosts %}
+                    {% for blog_post in blogpagination %}
               <li>
                 <div class="recent-post-card">
 
@@ -793,18 +823,49 @@
 
             <nav aria-label="pagination" class="pagination">
 
-              <a href="#" class="pagination-btn" aria-label="previous page">
-                <ion-icon name="arrow-back" aria-hidden="true"></ion-icon>
-              </a>
+<div class="d-flex justify-content-center wow fadeIn">
+  <ul class="pagination pg-blue">
+   <li class="page-item {% if not blogpagination.has_previous %}disabled{% endif %}">
+   {% if blogpagination.has_previous %}
+    <a class="page-link" style="
+    color: var(--text-white); font-weight: var(--weight-bold); line-height: 1;
+    width: 35px; height: 35px; display: grid; place-items: center; border-radius: var(--radius-circle);
+    transition: var(--transition-1);" href="?page={{ blogpagination.previous_page_number }}&paginate_by={{ blogpagination.paginator.per_page }}" aria-label="Previous">
+        <ion-icon name="arrow-back" aria-hidden="true"></ion-icon>
+        <!--<span class="sr-only">Previous</span>-->
+    </a>
+{% endif %}
 
-              <a href="#" class="pagination-btn">1</a>
-              <a href="#" class="pagination-btn">2</a>
-              <a href="#" class="pagination-btn">3</a>
-              <a href="#" class="pagination-btn" aria-label="more page">...</a>
+</li>
 
-              <a href="#" class="pagination-btn" aria-label="next page">
-                <ion-icon name="arrow-forward" aria-hidden="true"></ion-icon>
-              </a>
+                <!-- Page numbers -->
+{% for page in blogpagination.paginator.page_range %}
+    <li class="page-item {% if page == blogpagination.number %}active{% endif %}">
+        <a class="page-link" class="pagination-btn" style="
+    color: var(--text-white); font-weight: var(--weight-bold); line-height: 1;
+    width: 35px; height: 35px; display: grid; place-items: center; border-radius: var(--radius-circle);
+    transition: var(--transition-1);
+    --transition-1: 0.25s ease;
+    --transition-2: 0.5s ease;" href="?page={{ page }}&paginate_by={{ blogpagination.paginator.per_page }}">{{ page }}</a>
+    </li>
+{% endfor %}
+
+<!-- Arrow right -->
+<li class="page-item {% if not blogpagination.has_next %}disabled{% endif %}">
+    {% if blogpagination.has_next %}
+    <a class="page-link" style="
+    color: var(--text-white); font-weight: var(--weight-bold); line-height: 1;
+    width: 35px; height: 35px; display: grid; place-items: center; border-radius: var(--radius-circle);
+    transition: var(--transition-1);" href="?page={{ blogpagination.next_page_number }}&paginate_by={{ blogpagination.paginator.per_page }}" aria-label="Next">
+        <ion-icon name="arrow-forward" aria-hidden="true"></ion-icon>
+        <!--<span class="sr-only">Next</span>-->
+    </a>
+{% endif %}
+
+</li>
+
+  </ul>
+</div>
 
             </nav>
 
@@ -954,9 +1015,17 @@
 
             <div class="card aside-card insta-card">
 
-              <a href="#" class="logo">
-                <img src="./assets/images/logo.svg" width="119" height="37" loading="lazy" alt="Wren logo">
-              </a>
+                 <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="">
+        {% for PostList in Logo %}
+        {% if PostList.page == 'blog.html' %}
+
+        <a class="logo" href="{{PostList.hyperlink}}">
+          <img class="imageicon" src="{{PostList.logocover.url}}"
+                alt="{{PostList.alternate}}" style="length: {{PostList.length_for_resize}}px; width: {{PostList.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
 
               <p class="card-text">
                 Follow us on instagram
@@ -1145,6 +1214,7 @@
 
 
         <form method="POST">
+            {{form.errors}}
     {% csrf_token %}
             <div class="input-wrapper" style="padding: 12px; padding-inline-start: 20px;
             border-block-end: 1px solid var(--text-wild-blue-yonder); font-size: var(--fontSize-6);}">
@@ -1266,8 +1336,10 @@
    <script src="{% static 'css/js/cover.js' %}"></script>
    <script src="{% static 'css/js/autochat.js' %}"></script>
    <script src="{% static 'css/js/essayscript.js' %}"></script>
-  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+   <script src="https://unpkg.com/ionicons@5.0.0/dist/ionicons.js"></script>
+
 
 </body>
 

@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.generic.base import TemplateView
-from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView
+from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, BlogSearchResultsView
 
 # remove this:
 # from . import settings
@@ -282,6 +282,7 @@ urlpatterns = [
     path('quantumentangling/', TemplateView.as_view(template_name='quantumentangling.html'), name='quantumentangling'),
     path('featuredproducts/', TemplateView.as_view(template_name='featuredproducts.html'), name='featuredproducts'),
     path('ecommercesearch/', EcommerceSearchResultsView.as_view(), name='ecommercesearch_results'),
+    path('blogsearch/', BlogSearchResultsView.as_view(), name='blogsearch_results'),
     path('i2/', TemplateView.as_view(template_name='i2.html'), name='i2'),
 
     # might try to switch to using slug filter format like the below comment rather than primary key filter format

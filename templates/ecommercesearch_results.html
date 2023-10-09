@@ -2,7 +2,7 @@
 {% block content %}
 <head>
     {% for EcommerceSearchResultsView in Titles %}
-      {% if EcommerceSearchResultsView.page == 'search_results.html' %}
+      {% if EcommerceSearchResultsView.page == 'ecommercesearch_results.html' %}
         <title>{{ EcommerceSearchResultsView.overtitle }}</title>
       {% endif %}
     {% endfor %}
@@ -19,7 +19,7 @@
     <div class="column three mobile-twelve section_header_logo vertical-align-middle"
         style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
         {% for EcommerceSearchResultsView in Logo %}
-        {% if EcommerceSearchResultsView.page == 'search_results.html' %}
+        {% if EcommerceSearchResultsView.page == 'ecommercesearch_results.html' %}
 
         <a class="logo" href="{{EcommerceSearchResultsView.hyperlink}}">
           <img class="imageicon" src="{{EcommerceSearchResultsView.logocover.url}}"

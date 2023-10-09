@@ -1,9 +1,9 @@
 {% extends 'memberbase.html' %}
 {% block content %}
 <head>
-    {% for SearchResultsView in Titles %}
-      {% if SearchResultsView.page == 'search_results.html' %}
-        <title>{{ SearchResultsView.overtitle }}</title>
+    {% for BlogSearchResultsView in Titles %}
+      {% if BlogSearchResultsView.page == 'blogsearch_results.html' %}
+        <title>{{ BlogSearchResultsView.overtitle }}</title>
       {% endif %}
     {% endfor %}
   <style>
@@ -18,41 +18,37 @@
 <body>
     <div class="column three mobile-twelve section_header_logo vertical-align-middle"
         style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
-        {% for SearchResultsView in Logo %}
-        {% if SearchResultsView.page == 'search_results.html' %}
+        {% for BlogSearchResultsView in Logo %}
+        {% if BlogSearchResultsView.page == 'search_results.html' %}
 
-        <a class="logo" href="{{SearchResultsView.hyperlink}}">
-          <img class="imageicon" src="{{SearchResultsView.logocover.url}}"
-                alt="{{SearchResultsView.alternate}}" style="length: {{SearchResultsView.length_for_resize}}px; width: {{SearchResultsView.width_for_resize}}px;"></a>
+        <a class="logo" href="{{BlogSearchResultsView.hyperlink}}">
+          <img class="imageicon" src="{{BlogSearchResultsView.logocover.url}}"
+                alt="{{BlogSearchResultsView.alternate}}" style="length: {{BlogSearchResultsView.length_for_resize}}px; width: {{BlogSearchResultsView.width_for_resize}}px;"></a>
         {% endif %}
         {% endfor %}
     </div>
 
 
-        {% for SearchResultsView in Background %}
-    {% if SearchResultsView.page == "search_results.html" %}
-<div class="poste1" style="background-image: url({{ SearchResultsView.cover.url }}); background-position: fixed; background-size: cover;">
+        {% for BlogSearchResultsView in Background %}
+    {% if BlogSearchResultsView.page == "blogsearch_results.html" %}
+<div class="poste1" style="background-image: url({{ BlogSearchResultsView.cover.url }}); background-position: fixed; background-size: cover;">
     {% endif %}
 {% endfor %}
 
-
 <div class = "searcherbackground">
   <div class = "searcher">
-
   <ul>
+  <br>
+  <br>        
+  <br>                 
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
 
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-    <h1 style="text-align: center;">Search Results</h1>
-  <br>
-  <br>
-<!-- search_results.html -->
+
+      <h1 class = "banh1t">Blog Posts</h1>
 
 <table>
   <thead>
@@ -66,7 +62,8 @@
     {% for result in all_list %}
       <tr>
 
-        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.title }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.name }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.blog_filter }}</a></td>
         <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.category }}</a></td>
         <td><a href="{{ result.url }}" class="link-style">Type: {{ result.type }}</a></td>
 
@@ -79,9 +76,11 @@
   </tbody>
 </table>
 
+
   </ul>
   </div>
 </div>
 </div>
 </body>
+
 {% endblock content %}
