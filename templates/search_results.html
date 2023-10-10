@@ -65,11 +65,33 @@
   <tbody>
     {% for result in all_list %}
       <tr>
-
-        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.title }}</a></td>
-        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.category }}</a></td>
+    {% if result.type == 'News' %}
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.name }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.description }}</a></td>
         <td><a href="{{ result.url }}" class="link-style">Type: {{ result.type }}</a></td>
-
+    {% elif result.type == 'Profile' %}
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.name }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.description }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">Type: {{ result.type }}</a></td>
+    {% elif result.type == 'Idea' %}
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.name }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.description }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">Type: {{ result.type }}</a></td>
+    {% elif result.type == 'Partner' %}
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.name }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.description }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">Type: {{ result.type }}</a></td>
+    {% elif result.type == 'City' %}
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.name }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.description }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">Type: {{ result.type }}</a></td>
+    {% elif result.type == 'Vote' %}
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.name }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.description }}</a></td>
+        <td><a href="{{ result.url }}" class="link-style">Type: {{ result.type }}</a></td>
+    {% else %}
+          <td>unsearchable...</td>
+    {% endif %}
       </tr>
     {% empty %}
       <tr>

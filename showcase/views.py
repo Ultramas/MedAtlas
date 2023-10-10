@@ -2570,6 +2570,7 @@ class PostList(BaseView):
         context['BlogFilter'] = BlogFilter.objects.filter(is_active=1).order_by('clicks')
         context['BlogHeader'] = BlogHeader.objects.filter(is_active=1).order_by('category')
         context['blog_count'] = BlogHeader.objects.filter(is_active=1).order_by('category').count()
+        context['form'] = EmailForm()
 
         context['blogpagination'] = paginated_blog
 

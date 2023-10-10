@@ -219,7 +219,7 @@ class Vote(models.Model):
 
 class EmailField(models.Model):
     email = models.EmailField(unique=True,
-        help_text="Sign up for our newsletter to get the latest news and gossip! We will never share your personal information with anyone without your explicit permission. Unsubscribe at any time. ")
+                              help_text="Sign up for our newsletter to get the latest news and gossip! We will never share your personal information with anyone without your explicit permission. Unsubscribe at any time. ")
     confirmation = models.BooleanField(
         help_text="By clicking this box, I agree to receive emails, coupons and discounts from PokeTrove. I also understand that I may unsubscribe at any time and PokeTrove will not share my personal information with anyone without my explicit permission.")
     # username = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
@@ -758,7 +758,8 @@ class Blog(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
     updated_on = models.DateTimeField(auto_now=True, verbose_name="updated on: ")
     content = models.TextField()
-    filters = models.ForeignKey(BlogFilter, on_delete=models.CASCADE, blank=True, null=True, verbose_name="Hashtag filters")
+    filters = models.ForeignKey(BlogFilter, on_delete=models.CASCADE, blank=True, null=True,
+                                verbose_name="Hashtag filters")
     created_on = models.DateTimeField(auto_now_add=True)
     position = models.IntegerField(blank=True, null=True)
     category = models.ForeignKey(BlogHeader, verbose_name="Category", on_delete=models.CASCADE, blank=True, null=True,
@@ -882,7 +883,6 @@ class Comment(models.Model):
 
     def save(self, *args, **kwargs):
         self.url = slugify(self.name)
-
 
         if not self.pk:
             # Get the associated ProfileDetails for the donor
@@ -1077,7 +1077,7 @@ class TextBase(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return self.text
+        return self.text + " in " + self.page + " at Section " + str(self.section)
 
     class Meta:
         verbose_name = "Text Base"

@@ -8,9 +8,9 @@
 
     {% if user.is_staff %}
 
-{% for Room in Titles %}
-  {% if Room.page == 'room.html' %}
-    <title>{{ Room.overtitle }}</title>
+{% for SupportLineView in Titles %}
+  {% if SupportLineView.page == 'supportline.html' %}
+    <title>{{ SupportLineView.overtitle }}</title>
   {% endif %}
 {% endfor %}
 
@@ -95,20 +95,20 @@ padding-bottom: 1px;
 <body>
     <div class="column three mobile-twelve section_header_logo vertical-align-middle"
         style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
-        {% for Room in Logo %}
-        {% if Room.page == 'room.html' %}
+        {% for SupportLineView in Logo %}
+        {% if SupportLineView.page == 'supportline.html' %}
 
-        <a class="logo" href="{{Room.hyperlink}}">
-          <img class="imageicon" src="{{Room.logocover.url}}"
-                alt="{{Room.alternate}}" style="length: {{Room.length_for_resize}}px; width: {{Room.width_for_resize}}px;"></a>
+        <a class="logo" href="{{SupportLineView.hyperlink}}">
+          <img class="imageicon" src="{{SupportLineView.logocover.url}}"
+                alt="{{SupportLineView.alternate}}" style="length: {{SupportLineView.length_for_resize}}px; width: {{SupportLineView.width_for_resize}}px;"></a>
         {% endif %}
         {% endfor %}
     </div>
 
 
-{% for Room in Background %}
-{% if Room.page == 'room.html' %}
-  <div class="backgroundimages" style="background: url('{{Room.cover.url}}'); background-size: cover; min-height: 140vh;">
+{% for SupportLineView in Background %}
+{% if SupportLineView.page == 'supportline.html' %}
+  <div class="backgroundimages" style="background: url('{{SupportLineView.cover.url}}'); background-size: cover; min-height: 140vh;">
       {% endif %}
 {% endfor %}
 
