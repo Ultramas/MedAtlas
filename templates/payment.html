@@ -165,7 +165,7 @@ margin-left: 5.2vh;
           <div class="p-PaymentDetails-group">
             <form>
               <div class="p-Grid p-CardForm">
-                <div class="p-GridCell p-GridCell--12 p-GridCell--md6">
+                <div class="p-GridCell p-GridCell--12 p-GridCell--md6" style="padding-right: 20px;">
                   <div data-field="number" class="p-Field">
                     <label class="p-FieldLabel Label Label--empty" for="Field-numberInput">
                       Card number
@@ -215,8 +215,9 @@ margin-left: 5.2vh;
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </div><br><img src="{% static 'css/images/creditcard.png' %}"  style="width: 45vh; height: 30vh;">
                   </div>
+
                 </div>
                 <div class="p-GridCell p-GridCell--6 p-GridCell--md3">
                   <div data-field="exp_month" class="p-Field">
@@ -226,7 +227,7 @@ margin-left: 5.2vh;
                     <div>
                       <div class="p-Input">
                         <input dir="ltr" type="text" inputmode="numeric" name="exp_month" id="Field-exp_monthInput"
-                        placeholder="MM / YY" autocomplete="billing cc-exp" aria-invalid="false"
+                        placeholder="MM " autocomplete="billing cc-exp" aria-invalid="false"
                         aria-required="true" class="p-Input-input Input Input--empty p-Input-input--textRight"
                         value="">
                         <div data-field="exp_year" class="p-Field">
@@ -236,7 +237,7 @@ margin-left: 5.2vh;
                           <div>
                             <div class="p-Input">
                               <input dir="ltr" type="text" inputmode="numeric" name="exp_year" id="Field-exp_yearInput"
-                              placeholder="MM / YY" autocomplete="billing cc-exp" aria-invalid="false"
+                              placeholder="YYYY" autocomplete="billing cc-exp" aria-invalid="false"
                               aria-required="true" class="p-Input-input Input Input--empty p-Input-input--textRight"
                               value="">
                             </div>
@@ -1149,5 +1150,4 @@ margin-left: 5.2vh;
 </script>
 
 {% endblock extra_scripts %}
-
 

@@ -783,11 +783,15 @@
                  <strong>$
                  {% if product.discount_price %}
                  {{ product.discount_price }}
-                 {% else %}
-                 {{ product.price }}
+
                  <br>
                    <br>
+          <a href="{{ product.get_profile_url }}" class="btntrees">Buy now</a>
+                 {% else %}
+                 {{ product.price }}
 
+                 <br>
+                   <br>
 
                    <a href = "{{ product.get_profile_url }}">Buy Now</a>
            <br>
@@ -797,7 +801,6 @@
                </h4>
 
             <br>
-          <a href="{{ product.get_profile_url }}" class="btntrees">Buy now</a>
         </div>
         </div>
     </div>
@@ -818,9 +821,7 @@
       {% endfor %}
 
 
-    {% for BackgroundImage in Events %}
-    {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 1 %}
+
     <div class="leftBox">
       <div class="content">
                       {% for BackgroundImage in TextFielde %}
@@ -842,34 +843,33 @@
     </div>
     <div class="eventtimeline" style="background-color: rgba(0, 0, 0, 0.4);">
       <ul>
+          {% for BackgroundImage in Events %}
+    {% if BackgroundImage.page == "index.html" %}
+    {% if BackgroundImage.section == 1 %}
         <li>
+            <a href="{% url 'showcase:events' %}">
           <div class="time">
   <p>{{ BackgroundImage.date|date:"l, F j" }} at {{ BackgroundImage.time|time:"g:i A" }}</p>
 
           </div>
-
+</a>
           <div class="eventdetails">
 
-                {% for BackgroundImage in TextFielde %}
-        {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 6 %}
-       <h3 style="text-align: center; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h3>
-        {% endif %}
-        {% endif %}
-        {% endfor %}
+       <h3 style="text-align: center; color: black;">Description: {{BackgroundImage.description}}</h3>
 
 
-                {% for BackgroundImage in TextFielde %}
+
+                {% for BackgroundImage in Events %}
         {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 7 %}
+    {% if BackgroundImage.section == 3 %}
        <p style="text-align: center; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
         {% endif %}
         {% endif %}
         {% endfor %}
 
-                {% for BackgroundImage in TextFielde %}
+                {% for BackgroundImage in Events %}
         {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 8 %}
+    {% if BackgroundImage.section == 4 %}
 
             <a href="events" style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</a>
                       {% endif %}
@@ -890,7 +890,7 @@
 
                 {% for BackgroundImage in TextFielde %}
         {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 9 %}
+    {% if BackgroundImage.section == 6 %}
     <h1 class='newses' style='text-align: center; color: {{BackgroundImage.text_color}};' >{{BackgroundImage.text}}</h1>
               {% endif %}
         {% endif %}
@@ -1209,7 +1209,7 @@
 
                {% for BackgroundImage in TextFielde %}
         {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 10 %}
+    {% if BackgroundImage.section == 7 %}
           <h2 class="aboutPoketrove" style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h2>
 
         {% endif %}
@@ -1219,7 +1219,7 @@
 
    {% for BackgroundImage in TextFielde %}
         {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 11 %}
+    {% if BackgroundImage.section == 8 %}
       <p class="abouttext" style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
 
         {% endif %}
@@ -1242,7 +1242,7 @@
 
     {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.position == 8 %}
+    {% if BackgroundImage.position == 9 %}
     <div class="left-content" style="background: url('{{BackgroundImage.cover.url}}'); background-size: cover; padding: 20px;">
         {% endif %}
         {% endif %}
@@ -1250,7 +1250,7 @@
         <div class="memberperks">
     {% for BackgroundImage in TextFielde %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 12 %}
+    {% if BackgroundImage.section == 9 %}
                  <p style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
         {% endif %}
         {% endif %}
@@ -1258,7 +1258,7 @@
               <!-- HTML !-->
     {% for BackgroundImage in TextFielde %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 13 %}
+    {% if BackgroundImage.section == 10 %}
 <a href="{{BackgroundImage.hyperlink}}">
 <button class="button-85"  role="button">
      <p style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
@@ -1281,7 +1281,7 @@
         <div class="becomeamember">
     {% for BackgroundImage in TextFielde %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 14 %}
+    {% if BackgroundImage.section == 11 %}
       <p style="text-align: center; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
      {% endif %}
      {% endif %}
@@ -1289,7 +1289,7 @@
 
     {% for BackgroundImage in TextFielde %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 15 %}
+    {% if BackgroundImage.section == 12 %}
 <a href="{{BackgroundImage.hyperlink}}">
 <button class="button-85"  role="button">
      <p style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
@@ -1309,7 +1309,7 @@
 
     {% for BackgroundImage in TextFielde %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 16 %}
+    {% if BackgroundImage.section == 13 %}
       <h1 style="text-align: center; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h1>
      {% endif %}
      {% endif %}
@@ -1325,7 +1325,7 @@
     <div class="memberperks">
     {% for BackgroundImage in TextFielde %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 17 %}
+    {% if BackgroundImage.section == 14 %}
       <p style="text-align: center; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
      {% endif %}
      {% endif %}
@@ -1333,7 +1333,7 @@
       <br>
     {% for BackgroundImage in TextFielde %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 18 %}
+    {% if BackgroundImage.section == 15 %}
 <a href="{{BackgroundImage.hyperlink}}">
 <button class="button-85"  role="button">
      <p style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
@@ -1356,7 +1356,7 @@
     <div class="becomeamember">
           {% for BackgroundImage in TextFielde %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 19 %}
+    {% if BackgroundImage.section == 16 %}
       <p style="text-align: center; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
      {% endif %}
      {% endif %}
@@ -1364,7 +1364,7 @@
       <br>
           {% for BackgroundImage in TextFielde %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 20 %}
+    {% if BackgroundImage.section == 17 %}
 <a href="{{BackgroundImage.hyperlink}}">
 <button class="button-85"  role="button">
      <p style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
@@ -1387,7 +1387,7 @@
     <div class="becomeamember">
           {% for BackgroundImage in TextFielde %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 21 %}
+    {% if BackgroundImage.section == 18 %}
       <p style="text-align: center; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
      {% endif %}
      {% endif %}
@@ -1395,7 +1395,7 @@
       <br>
           {% for BackgroundImage in TextFielde %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 22 %}
+    {% if BackgroundImage.section == 19 %}
 <a href="{{BackgroundImage.hyperlink}}">
 <button class="button-85"  role="button">
      <p style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>

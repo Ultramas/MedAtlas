@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
-    SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter
+    SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -711,7 +711,7 @@ admin.site.register(Blog, BlogAdmin)
 class TextBaseAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Text Base Information - Categorial Descriptions', {
-            'fields': ('text', 'page', 'url', 'text_color',),
+            'fields': ('text', 'page', 'url', 'created_at', 'text_color',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Text Base  Information - Attributes', {
@@ -725,6 +725,7 @@ class TextBaseAdmin(admin.ModelAdmin):
         css = {
             'all': ('admin-collapse-default.css',)
         }
+    ordering = ['page', '-section', 'created_at']
 
 
 admin.site.register(TextBase, TextBaseAdmin)
@@ -901,6 +902,7 @@ class BackgroundImageBaseAdmin(admin.ModelAdmin):
             'fields': ('page', 'url', 'position', 'is_active',)
         }),
     )
+    ordering = ['page', '-position']
 
 
 admin.site.register(BackgroundImageBase, BackgroundImageBaseAdmin)
@@ -997,6 +999,19 @@ class SupportInterfaceAdmin(admin.ModelAdmin):
 
 admin.site.register(SupportInterface, SupportInterfaceAdmin)
 
+
+class SocialMediaAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Social Media Information - Categorial Descriptions', {
+            'fields': ('social', 'page', 'hyperlink', 'is_active',)
+        }),
+        ('Social Media Information - Image Display', {
+            'fields': ('image', 'image_width', 'image_length', 'width_for_resize', 'height_for_resize', 'image_position', 'alternate',)
+        }),
+    )
+
+
+admin.site.register(SocialMedia, SocialMediaAdmin)
 
 class SupportThreadAdmin(admin.ModelAdmin):
     fieldsets = (

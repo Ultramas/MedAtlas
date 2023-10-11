@@ -609,6 +609,8 @@ class Event(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+    def __str__(self):
+        return self.name + " hosted by " + str(self.user)
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -1056,6 +1058,7 @@ class TextBase(models.Model):
     text = models.TextField(verbose_name="Text")
     page = models.TextField(verbose_name="Page Name")
     url = models.URLField(verbose_name="Page URL")
+    created_at = models.DateTimeField(auto_now_add=True)
     text_color = models.CharField(blank=True, null=True, default="white", verbose_name="Text Color",
                                   help_text="Color of the text (accepts color names, hex codes or RGBA values in format (R, G, B, A))",
                                   max_length=200)
@@ -1377,7 +1380,7 @@ class SocialMedia(models.Model):
     image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position')
     alternate = models.TextField(verbose_name="Alternate Text")
     page = models.TextField(verbose_name="Page Name")
-    hyperlink = models.TextField(verbose_name="Hyperlink")
+    hyperlink = models.URLField(verbose_name="Hyperlink")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,

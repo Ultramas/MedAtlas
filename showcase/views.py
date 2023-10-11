@@ -1236,6 +1236,7 @@ class BilletBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['BilletBackgroundImage'] = BilletBackgroundImage.objects.all()
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -1258,6 +1259,7 @@ class RuleBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Rules'] = RuleBackgroundImage.objects.all()
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -1272,6 +1274,19 @@ class RuleCreatePostView(CreateView):
     form_class = RuleBackgroundImagery
     template_name = "rulebackgroundimagechange.html"
     success_url = reverse_lazy("rules")
+
+class PolicyBackgroundView(BaseView):
+    template_name = "policy.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        return context
 
 class ServersView(BaseView):
     model = RuleBackgroundImage
@@ -2565,6 +2580,7 @@ class PostList(BaseView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by("image_position")
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1).order_by('image_position')
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['BlogFilter'] = BlogFilter.objects.filter(is_active=1).order_by('clicks')
