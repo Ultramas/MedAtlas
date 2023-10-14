@@ -338,13 +338,16 @@
 
     <video src="{{ BackgroundImage.file.url }}" muted loop autoplay></video>
 
+        {% endif %}
+        {% endif %}
+    {% endfor %}
     <div class="overlay"></div>
 
     <div class="text">
             {% for BackgroundImage in TextFielde %}
         {% if BackgroundImage.page == "index.html" %}
     {% if BackgroundImage.section == 1 %}
-      <h2 style="text-align: left; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h2>
+      <h2 style="text-align: left; color: {{BackgroundImage.text_color}}; font-size: 120px;">{{BackgroundImage.text}}</h2>
         {% endif %}
         {% endif %}
         {% endfor %}
@@ -353,7 +356,7 @@
             {% for BackgroundImage in TextFielde %}
         {% if BackgroundImage.page == "index.html" %}
     {% if BackgroundImage.section == 2 %}
-      <h3 style="text-align: left; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h3>
+      <h3 style="text-align: left; color: {{BackgroundImage.text_color}}; font-size: 50px;">{{BackgroundImage.text}}</h3>
                 {% endif %}
         {% endif %}
         {% endfor %}
@@ -378,9 +381,6 @@
       <li><a href="#"><img src="https://i.ibb.co/Wnxq2Nq/twitter.png"></a></li>
       <li><a href="#"><img src="https://i.ibb.co/ySwtH4B/instagram.png"></a></li>
     </ul>
-        {% endif %}
-        {% endif %}
-    {% endfor %}
   </section>
 
 

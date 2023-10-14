@@ -10,6 +10,7 @@ from django.db.models import Max, F
 from django.dispatch import receiver
 from django.shortcuts import reverse
 from django_countries.fields import CountryField
+from django.utils import timezone
 
 # from image.utils import render
 
@@ -1055,10 +1056,19 @@ class BackgroundImageBase(models.Model):
 
 
 class TextBase(models.Model):
+    TEXT_MEASUREMENT_CHOICES = (
+        ('px', 'Pixels'),
+        ('%', 'Percent'),
+        ('vh', 'View Height'),
+        ('em', 'em'),
+        ('rem', 'Root em'),
+        ('pt', 'Points'),
+        ('pc', 'Picas'),
+    )
     text = models.TextField(verbose_name="Text")
     page = models.TextField(verbose_name="Page Name")
     url = models.URLField(verbose_name="Page URL")
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
     text_color = models.CharField(blank=True, null=True, default="white", verbose_name="Text Color",
                                   help_text="Color of the text (accepts color names, hex codes or RGBA values in format (R, G, B, A))",
                                   max_length=200)
@@ -1072,7 +1082,10 @@ class TextBase(models.Model):
                                     help_text='6->Body 3, 5->Body 2, 4->Body 1, 3-> Heading 3,2-> Heading 2, 1-> Heading 1,',
                                     choices=(
                                         (6, 'H6'), (5, 'H5'), (4, 'H4'), (3, 'H3'), (2, 'H2'), (1, 'H1'), (0, 'p')),
-                                    verbose_name="Text Size")
+
+                                    verbose_name="Text Type")
+    font_size = models.IntegerField(blank=True, null=True, verbose_name="Font Size")
+    font_measurement = models.CharField(blank=True, null=True, choices=TEXT_MEASUREMENT_CHOICES, max_length=3)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1960,7 +1973,6 @@ class ProfileDetails(models.Model):
 
 # link the profiledetails page to settings
 
-from django.utils import timezone
 
 
 # Create your models here.
@@ -3104,7 +3116,6 @@ class ImageBase(models.Model):
         image.save()
 
 
-from django.utils import timezone
 
 
 class State(models.Model):
