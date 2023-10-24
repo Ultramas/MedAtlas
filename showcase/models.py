@@ -610,6 +610,7 @@ class Event(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
     def __str__(self):
         return self.name + " hosted by " + str(self.user)
 
@@ -617,11 +618,11 @@ class Event(models.Model):
         if not self.pk:
             # Get the associated ProfileDetails for the donor
             profile = ProfileDetails.objects.filter(user=self.user).first()
+            self.section = AdminPages.objects.filter(page=self.page).count() + 1
 
             # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
-
         super().save(*args, **kwargs)
 
     def get_profile_url(self):
@@ -984,6 +985,11 @@ class LogoBase(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Check if this is a new object
+            self.section = LogoBase.objects.filter(page=self.page).count() + 1
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = "Logo"
         verbose_name_plural = "Logos"
@@ -1022,13 +1028,18 @@ class HyperlinkBase(models.Model):
     def __str__(self):
         return self.hyperlink
 
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Check if this is a new object
+            self.section = HyperlinkBase.objects.filter(page=self.page).count() + 1
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = "Hyperlink Base"
         verbose_name_plural = "Hyperlink Base"
 
 
 class BackgroundImageBase(models.Model):
-    backgroundtitle = models.TextField(verbose_name="Background Title")
+    backgroundtitle = models.TextField(verbose_name="Background Title", blank=True, null=True)
     cover = models.ImageField(blank=True, null=True, upload_to='images/')
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Width of the image (in percent relative).',
@@ -1039,8 +1050,8 @@ class BackgroundImageBase(models.Model):
     file = models.FileField(blank=True, null=True, upload_to='images/', verbose_name="Non-image File")
     alternate = models.TextField(verbose_name="Alternate Text")
     page = models.TextField(verbose_name="Page Name")
-    url = models.URLField(verbose_name="Page URL")
-    position = models.IntegerField(verbose_name="Image Position", default=1)
+    url = models.CharField(verbose_name="Page URL", max_length=250, blank=True, null=True)
+    position = models.IntegerField(verbose_name="Image Position", blank=True, null=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1048,7 +1059,23 @@ class BackgroundImageBase(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return self.backgroundtitle
+        return self.backgroundtitle + " in " + self.page + " at Section " + str(self.position)
+
+    def clean(self):
+        if not self.backgroundtitle:
+            self.backgroundtitle = f'background {self.position}'
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # Call clean method before saving
+        if not self.page.endswith('.html'):
+            self.page += '.html'
+        if not self.url:
+            self.url = 'http://127.0.0.1:8000/'
+        elif not self.url.startswith('http://127.0.0.1:8000/'):
+            self.url = f'http://127.0.0.1:8000/{self.url}'
+        if not self.pk:  # Check if this is a new object
+            self.position = BackgroundImageBase.objects.filter(page=self.page).count() + 1
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Background Image Base"
@@ -1094,6 +1121,11 @@ class TextBase(models.Model):
 
     def __str__(self):
         return self.text + " in " + self.page + " at Section " + str(self.section)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Check if this is a new object
+            self.section = TextBase.objects.filter(page=self.page).count() + 1
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Text Base"
@@ -1170,7 +1202,7 @@ class NavBar(models.Model):
     text = models.TextField()
     url = models.TextField(blank=True, null=True)
     row = models.IntegerField()
-    position = models.IntegerField()
+    position = models.IntegerField(blank=True, null=True)
     opennew = models.BooleanField(verbose_name="Open In New Tab?", default=False,
                                   choices=((True, 'Yes'), (False, 'No')))
     is_active = models.IntegerField(default=1,
@@ -1181,6 +1213,11 @@ class NavBar(models.Model):
 
     def __str__(self):
         return self.text
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Check if this is a new object
+            self.position = NavBar.objects.filter(row=self.row).count() + 1
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Navigational Bar Dropdown"
@@ -1193,7 +1230,7 @@ class NavBarHeader(models.Model):
                                blank=True,
                                null=True,
                                help_text='ID Section of page.')
-    row = models.IntegerField()
+    row = models.IntegerField(blank=True, null=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1202,6 +1239,11 @@ class NavBarHeader(models.Model):
 
     def __str__(self):
         return self.text
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Check if this is a new object
+            self.row = NavBarHeader.objects.count() + 1
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Navigational Bar Header"
@@ -1236,6 +1278,11 @@ class FeaturedNavigationBar(models.Model):
             return self.image.url
         else:
             return self.default_header
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Check if this is a new object
+            self.position = FeaturedNavigationBar.objects.count() + 1
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Featured Navigation Bar"
@@ -1402,6 +1449,11 @@ class SocialMedia(models.Model):
 
     def __str__(self):
         return self.social
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Check if this is a new object
+            self.image_position = SocialMedia.objects.filter(page=self.page).count() + 1
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Social Media"
@@ -2665,6 +2717,11 @@ class AdminTasks(models.Model):
     def __str__(self):
         return self.task
 
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Check if this is a new object
+            self.section = AdminTasks.objects.filter(page_name=self.page_name).count() + 1
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name_plural = 'Administrative Tasks'
 
@@ -2687,6 +2744,11 @@ class AdminPages(models.Model):
 
     def __str__(self):
         return self.pages
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Check if this is a new object
+            self.section = AdminPages.objects.filter(page_name=self.page_name).count() + 1
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Administrative Pages'
@@ -2976,6 +3038,9 @@ class ImageCarousel(models.Model):
             # Handle any IntegrityError exceptions that may occur during save
             # Print or log the error for debugging
             print(f"IntegrityError during save: {e}")
+        if not self.pk:  # Check if this is a new object
+            self.carouselposition = ImageCarousel.objects.filter(page=self.page).count() + 1
+        super().save(*args, **kwargs)
 
 
 class AdvertisementBase(models.Model):
@@ -3026,6 +3091,9 @@ class AdvertisementBase(models.Model):
             img = img.resize((self.width_for_resize, self.length_for_resize), Image.ANTIALIAS)
             self.advertisement_width, self.advertisement_length = img.size
             super().save(*args, **kwargs)
+        if not self.pk:  # Check if this is a new object
+            self.advertisement_position = AdvertisementBase.objects.filter(page=self.page).count() + 1
+        super().save(*args, **kwargs)
 
 
 class Advertising(AdvertisementBase):
@@ -3115,7 +3183,10 @@ class ImageBase(models.Model):
         # Save the updated Image object back to the database
         image.save()
 
-
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Check if this is a new object
+            self.image_position = ImageBase.objects.filter(page=self.page).count() + 1
+        super().save(*args, **kwargs)
 
 
 class State(models.Model):
