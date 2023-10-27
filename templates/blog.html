@@ -5,7 +5,6 @@
        {% block content %}
        {% load widget_tweaks %}
 
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -89,9 +88,6 @@ a.page-link:hover {
   <header class="header" data-header>
     <div class="container">
 
-      <a href="#" class="logo">
-        <img src="./assets/images/logo.svg" width="119" height="37" alt="Wren logo">
-      </a>
 
       <nav class="navbar" data-navbar>
 
@@ -205,8 +201,9 @@ a.page-link:hover {
 
       <!--pagination change station-->
 <form method="GET">
-    <label for="paginate-by">Items per page:</label>
+    <label for="paginate-by">Items per page:
     <input type="number" name="paginate_by" id="paginate-by" value="{{ blogpagination.paginator.per_page }}">
+    </label>
 
 <button class="button-64" role="button" type="submit"><span class="text">Update</span></button>
 </form>
@@ -309,9 +306,6 @@ a.page-link:hover {
 {% endfor %}
           </div>
 
-          <img src="./assets/images/shadow-1.svg" width="500" height="800" alt="" class="hero-bg hero-bg-1">
-
-          <img src="./assets/images/shadow-2.svg" width="500" height="500" alt="" class="hero-bg hero-bg-2">
 
         </div>
       </section>
@@ -608,7 +602,6 @@ a.page-link:hover {
 
         </div>
 
-        <img src="./assets/images/shadow-3.svg" width="500" height="1500" loading="lazy" alt="" class="feature-bg">
 
       </section>
 
@@ -635,9 +628,11 @@ a.page-link:hover {
 {% for PostList in BlogFilter %}
             <li>
               <button class="card tag-btn">
-                  {% if PostList.image %}
-                <img src="{{PostList.image.url}}" width="50px" height="50px" style="border-radius: 50px; max-width: 50px;" loading="lazy" alt="{{PostList.blog_filter}}">
-                    {% else %}
+                  {% if PostList.logo.url %}
+               <a class="logo" href="{{PostList.hyperlink}}">
+          <img class="imageicon" src="{{PostList.logocover.url}}"
+                alt="{{PostList.alternate}}" style="length: {{PostList.length_for_resize}}px; width: {{PostList.width_for_resize}}px;"></a>
+         {% else %}
                   <h5>no image</h5>
                   {% endif %}
                 <p class="btn-text">{{PostList.blog_filter}}</p>
@@ -871,6 +866,7 @@ a.page-link:hover {
                     </div>
 
                   </div>
+
                 </li>
 
                       {% endfor %}
@@ -941,9 +937,14 @@ a.page-link:hover {
 
           <div class="footer-brand">
 
-            <a href="#" class="logo">
-              <img src="./assets/images/logo.svg" width="119" height="37" loading="lazy" alt="Wren logo">
-            </a>
+        {% for PostList in Logo %}
+        {% if PostList.page == "blog.html" %}
+        <a class="logo" href="{{PostList.hyperlink}}">
+          <img class="imageicon" src="{{PostList.logocover.url}}"
+                alt="{{PostList.alternate}}" style="length: {{PostList.length_for_resize}}px; width: {{PostList.width_for_resize}}px;"></a>
+
+        {% endif %}
+        {% endfor %}
 
             <p class="footer-text">
               When an unknown prnoto sans took a galley and scrambled it to make specimen book not only five When an
@@ -1039,7 +1040,9 @@ a.page-link:hover {
             </div>
 
             <div class="input-wrapper">
-                I agree to the <a href="{% url 'showcase:termsandconditions' %}">Terms & Conditions</a>: {{ form.confirmation }}
+                <a href="{% url 'showcase:termsandconditions' %}">
+                I agree to the Terms & Conditions: {{ form.confirmation }}
+                </a>
             </div>
 
 

@@ -132,10 +132,10 @@
       <div class="row wow fadeIn">
         {% for item in items %}
           <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card">
-              <div class="view overlay">
+            <div class="card" style="width: 300px; height: 600px;" >
+              <div class="view overlay" style="width: 500px; height: 500px;">
                 <a href="{{ item.get_absolute_url }}">
-                  <img class="hunt" src="{{ item.image.url }}" class="card-img-top" alt="{{ item.image.url }}">
+                  <img class="hunt" style="width: 300px; height: 300px;" src="{{ item.image.url }}" class="card-img-top" alt="{{ item.image.url }}">
                   <div class="mask rgba-white-slight"></div>
                 </a>
               </div>

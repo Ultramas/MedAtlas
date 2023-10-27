@@ -6093,7 +6093,8 @@ def edit_profile(request, pk):
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ProfileDetail
 from .models import ProfileDetails
-class ProfileEditView(View):
+
+class ProfileEditView(FormView):
     template_name = 'profile_edit.html'
     form_class = ProfileDetail
 
@@ -6109,18 +6110,27 @@ class ProfileEditView(View):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         return context
 
-    def get(self, request, pk):
-        profile = get_object_or_404(ProfileDetails, pk=pk)
-        form = self.form_class(instance=profile)
-        return render(request, self.template_name, {'form': form, 'profile': profile})
+    def form_valid(self, form):
+        profile = form.save(commit=False)  # Don't save to DB yet
+        profile.user = self.request.user  # Set the user
+        profile.save()  # Now save to DB
+        return redirect('showcase:profile', pk=profile.pk)
 
-    def post(self, request, pk):
-        profile = get_object_or_404(ProfileDetails, pk=pk)
-        form = self.form_class(request.POST, request.FILES, instance=profile)
+
+    def post(self, request, pk=None):
+        profile = ProfileDetails.objects.filter(user=request.user).first()
+        if profile:
+            form = self.form_class(request.POST, request.FILES, instance=profile)
+        else:
+            form = self.form_class(request.POST, request.FILES)
+
         if form.is_valid():
-            form.save()
-            return redirect('showcase:profile', pk=pk)
-        return render(request, self.template_name, {'form': form, 'profile': profile})
+            profile = form.save(commit=False)  # Don't save to DB yet
+            profile.user = request.user  # Set the user
+            profile.save()  # Now save to DB
+            return redirect('showcase:profile', pk=profile.pk)
+        return render(request, self.template_name, {'form': form})
+
 
 class SignupView(FormMixin, ListView):
     model = SignupBackgroundImage

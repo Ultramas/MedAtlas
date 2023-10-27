@@ -1048,7 +1048,7 @@ class BackgroundImageBase(models.Model):
                                                help_text='Length of the image (in percent relative).',
                                                verbose_name="image length")
     file = models.FileField(blank=True, null=True, upload_to='images/', verbose_name="Non-image File")
-    alternate = models.TextField(verbose_name="Alternate Text")
+    alternate = models.TextField(verbose_name="Alternate Text", blank=True, null=True)
     page = models.TextField(verbose_name="Page Name")
     url = models.CharField(verbose_name="Page URL", max_length=250, blank=True, null=True)
     position = models.IntegerField(verbose_name="Image Position", blank=True, null=True)
@@ -1061,26 +1061,43 @@ class BackgroundImageBase(models.Model):
     def __str__(self):
         return self.backgroundtitle + " in " + self.page + " at Section " + str(self.position)
 
-    def clean(self):
-        if not self.backgroundtitle:
-            self.backgroundtitle = f'background {self.position}'
-
     def save(self, *args, **kwargs):
-        self.full_clean()  # Call clean method before saving
-        if not self.page.endswith('.html'):
-            self.page += '.html'
-        if not self.url:
-            self.url = 'http://127.0.0.1:8000/'
-        elif not self.url.startswith('http://127.0.0.1:8000/'):
-            self.url = f'http://127.0.0.1:8000/{self.url}'
         if not self.pk:  # Check if this is a new object
             self.position = BackgroundImageBase.objects.filter(page=self.page).count() + 1
+            self.backgroundtitle = f'background {self.position}'  # Set the title here
+        if not self.url and self.page == "index":
+            self.url = 'http://127.0.0.1:8000/'
+        elif not self.url and self.page == "login":
+            self.url = 'http://127.0.0.1:8000/accounts/login'
+        elif not self.url:
+            self.url = f'http://127.0.0.1:8000/{self.page}'
+        elif not self.url.startswith('http://127.0.0.1:8000/'):
+            self.url = f'http://127.0.0.1:8000/{self.url}'
+        if not self.page.endswith('.html'):
+            self.page += '.html'
+        if not self.pk:  # Check if this is a new object
+            self.position = BackgroundImageBase.objects.filter(page=self.page).count() + 1
+        if self.cover and not self.alternate:  # Check if an image exists and alternate text is not set
+            self.alternate = str(self.cover)  # Set the alternate text to the string version of the image name
+        elif self.file and not self.alternate:
+            self.alternate = str(self.file)
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Background Image Base"
         verbose_name_plural = "Background Image Base"
 
+    def set_image_position(image_id, xposition, yposition):
+        # Retrieve the Image object from the database
+        image = ImageBase.objects.get(id=image_id)
+        print("Current coordinates: x={image.x}, y={image.y}")
+
+        # Set the x and y positions to the desired values
+        image.x = xposition
+        image.y = yposition
+
+        # Save the updated Image object back to the database
+        image.save()
 
 class TextBase(models.Model):
     TEXT_MEASUREMENT_CHOICES = (
@@ -1094,7 +1111,7 @@ class TextBase(models.Model):
     )
     text = models.TextField(verbose_name="Text")
     page = models.TextField(verbose_name="Page Name")
-    url = models.URLField(verbose_name="Page URL")
+    url = models.URLField(verbose_name="Page URL", blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
     text_color = models.CharField(blank=True, null=True, default="white", verbose_name="Text Color",
                                   help_text="Color of the text (accepts color names, hex codes or RGBA values in format (R, G, B, A))",
@@ -1123,6 +1140,10 @@ class TextBase(models.Model):
         return self.text + " in " + self.page + " at Section " + str(self.section)
 
     def save(self, *args, **kwargs):
+        if not self.url:
+            self.url = 'http://127.0.0.1:8000/'
+        elif not self.url.startswith('http://127.0.0.1:8000/'):
+            self.url = f'http://127.0.0.1:8000/{self.url}'
         if not self.pk:  # Check if this is a new object
             self.section = TextBase.objects.filter(page=self.page).count() + 1
         super().save(*args, **kwargs)
@@ -1212,9 +1233,11 @@ class NavBar(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return self.text
+        return self.text + " at Row " + str(self.row) + ", Position " + str(self.position)
 
     def save(self, *args, **kwargs):
+        if not self.url.startswith('http'):
+            self.url = f'http://127.0.0.1:8000/{self.url}'
         if not self.pk:  # Check if this is a new object
             self.position = NavBar.objects.filter(row=self.row).count() + 1
         super().save(*args, **kwargs)
@@ -3110,7 +3133,7 @@ class ImageBase(models.Model):
         ('pt', 'Points'),
         ('pc', 'Picas'),
     )
-    title = models.CharField(max_length=100, help_text='title.',
+    title = models.CharField(max_length=100, help_text='title.', blank=True, null=True,
                              verbose_name="title")
     image = models.ImageField(blank=True, null=True, help_text='Image of the advertisement.', upload_to='images/',
                               height_field="image_length",
@@ -3129,8 +3152,8 @@ class ImageBase(models.Model):
     image_measurement = models.CharField(blank=True, null=True, choices=IMAGE_MEASUREMENT_CHOICES, max_length=3)
     width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Width")
     height_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Height")
-    image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position')
-    alternate = models.TextField(verbose_name="Alternate Text")
+    image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position', blank=True, null=True)
+    alternate = models.TextField(verbose_name="Alternate Text", blank=True, null=True)
     page = models.TextField(verbose_name="Page Name")
     xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position", default="0")
     yposition = models.IntegerField(help_text='x-position.', verbose_name="y-position", default="0")
@@ -3151,7 +3174,7 @@ class ImageBase(models.Model):
         verbose_name_plural = 'Image Base'
 
     def __str__(self):
-        return self.title
+        return self.title + " in " + self.page + " at Image Position " + str(self.image_position)
 
     def image_save(self, *args, **kwargs):
         if not self.id:  # Object is being created for the first time
@@ -3184,8 +3207,15 @@ class ImageBase(models.Model):
         image.save()
 
     def save(self, *args, **kwargs):
+        if not self.page.endswith('.html'):
+            self.page += '.html'
         if not self.pk:  # Check if this is a new object
             self.image_position = ImageBase.objects.filter(page=self.page).count() + 1
+            self.title = f'background {self.image_position}'  # Set the title here
+        if self.image and not self.alternate:  # Check if an image exists and alternate text is not set
+            self.alternate = str(self.image)  # Set the alternate text to the string version of the image name
+        elif self.file and not self.alternate:
+            self.alternate = str(self.file)
         super().save(*args, **kwargs)
 
 

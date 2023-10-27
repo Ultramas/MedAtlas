@@ -240,13 +240,13 @@ urlpatterns = [
     path('password_reset_complete/', TemplateView.as_view(template_name='password_reset_complete.html'),
          name='password_reset_complete'),
     path('email/', TemplateView.as_view(template_name='email.html'), name='email'),
-    path('profilehome/', TemplateView.as_view(template_name='profilehome.html'), name='home'),
+    path('profilehome/', TemplateView.as_view(template_name='profilehome.html'), name='profilehome'),
     path('profile/<int:pk>/', views.ProfileView.as_view(), name='profile'),
     #path('blog/<int:pk>/', views.ProfileDetails.as_view(), name='profile'),
 
     path('profile/edit/<int:pk>', views.edit_profile, name="edit_profile"),
 
-    path('profile_edit/<int:pk>', views.ProfileEditView.as_view(), name="profile_edit"),
+    path('profile_edit/', views.ProfileEditView.as_view(), name="profile_edit"),
     #path('profile/', views.profile, name="profile"),
     path('like/<username>/', profile, name='like'), #consider making it views.profile
     path('administration/', AdministrationView.as_view(), name='administration'),

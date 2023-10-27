@@ -47,9 +47,9 @@
       .carousel {
         height: 100vh;
       }
-    }        
+    }
 
-    
+
 
   </style>
 
@@ -66,7 +66,7 @@
 </head>
 
 <body>
-  
+
  <header>
 
     <div class="column three mobile-twelve section_header_logo vertical-align-middle">
@@ -112,25 +112,25 @@
   </div>
 {% endfor %}
 
-    </ul>   
+    </ul>
 
   </div>
-       
+
     </div>
          </div>
       </div>
     </ul>
 
-    
+
      <nav>
      <div class="bell"></div>
      <div onclick='navToggle(this)'  class="hamburger">
        <div class="bun"></div>
-       <div class="bun"></div>    
+       <div class="bun"></div>
        <div class="bun"></div>
      </div>
-     
-<h2 class = "navtext">Quantumism</h2>  
+
+<h2 class = "navtext">Quantumism</h2>
     <div class="navItem"><a href = "{% url 'showcase:index' %}">Home</a></div>
      <div class="navItem2"><a href = "{% url 'showcase:about' %}">About Us</a></div>
      <div class="navItem3"><a href = "{% url 'showcase:servers' %}">Discord Servers</a></li></div>
@@ -164,7 +164,7 @@
         <!-- Left -->
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
-          
+
           </li>
         </ul>
 
@@ -173,12 +173,12 @@
     <div class="container">
 
       <!-- Brand -->
- 
-    
+
+
         <!-- Right -->
         <ul class="navbar-nav nav-flex-icons">
-          
-         
+
+
             {% if user.is_authenticated %}
             <li class="nav-item">
                 <a href="{% url 'showcase:order-summary' %}" class="nav-link waves-effect">
@@ -189,7 +189,7 @@
                 <span class="clearfix d-none d-sm-inline-block"> Cart </span>
                 </a>
             </li>
-          
+
 
             <li class="nav-item">
                  <a class="nav-link waves-effect">

@@ -348,8 +348,12 @@
         {% if BackgroundImage.page == "index.html" %}
     {% if BackgroundImage.section == 1 %}
       <h2 style="text-align: left; color: {{BackgroundImage.text_color}}; font-size: 120px;">{{BackgroundImage.text}}</h2>
+
         {% endif %}
+
         {% endif %}
+        {% empty %}
+      <h2 style="text-align: left; color: {{BackgroundImage.text_color}}; font-size: 120px;">Text 1-Heading</h2>
         {% endfor %}
       <br>
 
@@ -357,8 +361,11 @@
         {% if BackgroundImage.page == "index.html" %}
     {% if BackgroundImage.section == 2 %}
       <h3 style="text-align: left; color: {{BackgroundImage.text_color}}; font-size: 50px;">{{BackgroundImage.text}}</h3>
+
                 {% endif %}
         {% endif %}
+        {% empty %}
+      <h3 style="text-align: left; color: {{BackgroundImage.text_color}}; font-size: 50px;">Text 2-Subheading</h3>
         {% endfor %}
       <br>
                     {% for BackgroundImage in TextFielde %}
@@ -367,6 +374,8 @@
       <p style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
                         {% endif %}
         {% endif %}
+        {% empty %}
+      <p style="text-align: left; color: {{BackgroundImage.text_color}};">Text 3</p>
         {% endfor %}
       <br>
       <a href="#featuredproducts">See what we have</a>
@@ -409,6 +418,9 @@
       <div class="containereggspacing">
         </div>
         {% endif %}
+
+        {% empty %}
+      <h2 style="text-align: left; color: {{BackgroundImage.text_color}}; font-size: 120px;">Text 4</h2>
       {% endfor %}
      <br>
         <br>

@@ -60,7 +60,6 @@
     </tr>
   </thead>
   <tbody>
-    {% for result in all_list %}
       <tr>
 
     {% for result in all_list %}
@@ -84,18 +83,7 @@
       <tr>
         <td colspan="3">No results found.</td>
       </tr>
-    {% endfor %}
 
-        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.name }}</a></td>
-        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.blog_filter }}</a></td>
-        <td><a href="{{ result.url }}" class="link-style">{{ result.content_object.category }}</a></td>
-        <td><a href="{{ result.url }}" class="link-style">Type: {{ result.type }}</a></td>
-
-      </tr>
-    {% empty %}
-      <tr>
-        <td colspan="3">No results found.</td>
-      </tr>
     {% endfor %}
   </tbody>
 </table>
