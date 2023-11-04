@@ -835,29 +835,43 @@
 
 
     <div class="leftBox">
-      <div class="content">
-                      {% for BackgroundImage in TextFielde %}
+        {% for BackgroundImage in TextFielde %}
         {% if BackgroundImage.page == "index.html" %}
     {% if BackgroundImage.section == 4 %}
-      <h1 style="text-align: center; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h1>
+    <h1 class='newses' style='text-align: center; color: {{BackgroundImage.text_color}};'>{{BackgroundImage.text}}</h1>
+              {% endif %}
         {% endif %}
+        {% endfor %}
+      <div class="content">
+                      {% for BackgroundImage in Events %}
+        {% if BackgroundImage.page == "index.html" %}
+
+
+
+      <h1 style="text-align: center; color: {{BackgroundImage.text_color}};">{{BackgroundImage.name}}</h1>
+      <p style="text-align: center; font-size: 20px; font-color: {{BackgroundImage.text_color}};">Hosted By {{BackgroundImage.user}}</p>
+          <br>
+          <br>
         {% endif %}
         {% endfor %}
         <p>
-          {% for BackgroundImage in TextFielde %}
-        {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 5 %}
-      <p style="text-align: center; font-color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
-        {% endif %}
-        {% endif %}
-        {% endfor %}
       </div>
     </div>
     <div class="eventtimeline" style="background-color: rgba(0, 0, 0, 0.4);">
       <ul>
           {% for BackgroundImage in Events %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 1 %}
+
+                   {% for BackgroundImage in TextFielde %}
+        {% if BackgroundImage.page == "index.html" %}
+    {% if BackgroundImage.section == 5 %}
+    <h1 class='newses' style='text-align: center; color: {{BackgroundImage.text_color}};' >{{BackgroundImage.text}}</h1>
+              {% endif %}
+        {% endif %}
+        {% endfor %}
+
+                {% for BackgroundImage in Events %}
+        {% if BackgroundImage.page == "index.html" %}
         <li>
             <a href="{% url 'showcase:events' %}">
           <div class="time">
@@ -865,99 +879,48 @@
 
           </div>
 </a>
+
           <div class="eventdetails">
 
        <h3 style="text-align: center; color: black;">Description: {{BackgroundImage.description}}</h3>
 
 
-
-                {% for BackgroundImage in Events %}
-        {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 3 %}
+              <a href="events" style="color: {{BackgroundImage.text_color}};">
        <p style="text-align: center; color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
-        {% endif %}
-        {% endif %}
-        {% endfor %}
+              </a>
 
-                {% for BackgroundImage in Events %}
-        {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.section == 4 %}
-
-            <a href="events" style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</a>
-                      {% endif %}
-        {% endif %}
-        {% endfor %}
           </div>
           <div style="clear: both;"></div>
         </li>
+
+        {% endif %}
+        {% endfor %}
       </ul>
     </div>
 
-        {% endif %}
         {% endif %}
         {% endfor %}
   </section>
 
     <!--news section-->
 
-                {% for BackgroundImage in TextFielde %}
+
+
+    {% for BackgroundImage in Background %}
+        {% if BackgroundImage.page == "index.html" %}
+    {% if BackgroundImage.position == 9 %}
+  <div class="containernews" style="background-image: url('{{BackgroundImage.cover.url}}'); background-size: cover;">
+            {% endif %}
+      {% endif %}
+      {% endfor %}
+
+          {% for BackgroundImage in TextFielde %}
         {% if BackgroundImage.page == "index.html" %}
     {% if BackgroundImage.section == 6 %}
     <h1 class='newses' style='text-align: center; color: {{BackgroundImage.text_color}};' >{{BackgroundImage.text}}</h1>
               {% endif %}
         {% endif %}
         {% endfor %}
-
-    {% for BackgroundImage in Background %}
-        {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.position == 7 %}
-  <div class="containernews" style="background-image: url('{{BackgroundImage.cover.url}}'); background-size: cover;">
-            {% endif %}
-      {% endif %}
-      {% endfor %}
-
-    {% for BackgroundImage in newsfeeds %}
-    {% if BackgroundImage.position == 1 %}
-    <div class="box" style="--clr:#89ec5b;">
-      <div class="content">
-        <div class="iconic"><ion-icon name="brush"></ion-icon></div>
-        <div class="text">
-          <h3>{{BackgroundImage.title}}</h3>
-          <p>{{BackgroundImage.description}}</p>
-          <a href="{% url 'showcase:newsfeed' %}">Read More</a>
-        </div>
-    </div>
-  </div>
-      {% endif %}
-
-    {% if BackgroundImage.position == 2 %}
-    <div class="box" style="--clr:#eb5ae5e5;">
-      <div class="content">
-        <div class="iconic"></div>
-        <div class="text">
-          <h3>{{BackgroundImage.title}}</h3>
-          <p>{{BackgroundImage.description}}</p>
-          <a href="{% url 'showcase:newsfeed' %}">Read More</a>
-        </div>
-    </div>
-  </div>
-
-      {% endif %}
-
-    {% if BackgroundImage.position == 3 %}
-    <div class="box" style="--clr: #5b98eb;">
-      <div class="content">
-        <div class="iconic"></div>
-        <div class="text">
-          <h3>{{BackgroundImage.title}}</h3>
-          <p>{{BackgroundImage.description}}</p>
-          <a href="{% url 'showcase:newsfeed' %}">Read More</a>
-        </div>
-    </div>
-  </div>
-  </div>
-      {% endif %}
-      {% endfor %}
 
 
     <!--about us section-->
@@ -1218,21 +1181,36 @@
         {% if BackgroundImage.page == "index.html" %}
     {% if BackgroundImage.position == 7 %}
         <div class=stripelineabout style="background-image: url('{{BackgroundImage.cover.url}}'); background-size: cover; ">
-
+<br><br>
                {% for BackgroundImage in TextFielde %}
         {% if BackgroundImage.page == "index.html" %}
     {% if BackgroundImage.section == 7 %}
-          <h2 class="aboutPoketrove" style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h2>
+          <h2 class="aboutPoketrove" style="color: {{BackgroundImage.text_color}};"><b>{{BackgroundImage.text}}</b></h2>
 
         {% endif %}
         {% endif %}
         {% endfor %}
+
+<div class="news" style="padding: 50px; display: flex;">
+    {% for BackgroundImage in newsfeeds %}
+    <div class="box" style="--clr:#89ec5b; margin-left: 100px;">
+      <div class="content">
+        <div class="iconic"><ion-icon name="brush"></ion-icon></div>
+        <div class="text">
+          <h3>{{BackgroundImage.title}}</h3>
+          <p>{{BackgroundImage.description}}</p>
+          <a href="{% url 'showcase:newsfeed' %}">Read More</a>
+        </div>
+    </div>
+  </div>
+      {% endfor %}
+</div>
         </div>
 
    {% for BackgroundImage in TextFielde %}
         {% if BackgroundImage.page == "index.html" %}
     {% if BackgroundImage.section == 8 %}
-      <p class="abouttext" style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</p>
+      <h1 class="abouttext" style="color: {{BackgroundImage.text_color}}; text-align: center; font-size: 50px;">{{BackgroundImage.text}}</h1>
 
         {% endif %}
         {% endif %}
@@ -1244,7 +1222,6 @@
       <br>
       <br>
       <br>
- <h1 style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">Become A Member!</h1>
 
     </section>
       <!--guest to member section-->
@@ -1254,7 +1231,7 @@
 
     {% for BackgroundImage in Background %}
         {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.position == 9 %}
+    {% if BackgroundImage.position == 10 %}
     <div class="left-content" style="background: url('{{BackgroundImage.cover.url}}'); background-size: cover; padding: 20px;">
         {% endif %}
         {% endif %}
@@ -1285,7 +1262,7 @@
     </div>
     {% for BackgroundImage in Background %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.position == 9 %}
+    {% if BackgroundImage.position == 11 %}
     <div class="right-content" style="background: url('{{BackgroundImage.cover.url}}'); background-size: cover; padding: 20px;">
         {% endif %}
         {% endif %}
@@ -1326,6 +1303,7 @@
      {% endif %}
      {% endif %}
      {% endfor %}
+ <h1 style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">Become A Member!</h1>
 <div class="contactusmethods">
     {% for BackgroundImage in Background %}
     {% if BackgroundImage.page == "index.html" %}
@@ -1360,7 +1338,7 @@
 
     {% for BackgroundImage in Background %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.position == 11 %}
+    {% if BackgroundImage.position == 12 %}
   <div class="middle2-content" style="background: url('{{BackgroundImage.cover.url}}'); background-size: cover; padding: 20px;">
      {% endif %}
      {% endif %}
@@ -1391,7 +1369,7 @@
 
     {% for BackgroundImage in Background %}
     {% if BackgroundImage.page == "index.html" %}
-    {% if BackgroundImage.position == 12 %}
+    {% if BackgroundImage.position == 13 %}
   <div class="right2-content" style="background: url('{{BackgroundImage.cover.url}}'); background-size: cover; padding: 20px;">
      {% endif %}
      {% endif %}
@@ -1423,18 +1401,21 @@
 
 
 
-     {% for BackgroundImage in Background %}
-     {% endfor %}
-      <section class="new_email">
+
+           <section class="new_email">
         <div class="poketrove_email_header">
 
         </div>
-        <div class="email">
-          <img class="newsletterlogo" src="static/css/images/te.png">
-          <b>
-          </b>
 
-            <div class="input_group" style="background: blue;">
+{% for BackgroundImage in Background %}
+     {% if BackgroundImage.position == 14 %}
+        <div class="email" style="background: url('{{BackgroundImage.cover.url}}');">
+
+     {% endif %}
+{% endfor %}
+          <b>
+            <p class="newsletter" style="color: blue;">Subscribe to our newsletter!</p>
+          </b>
 
         <form method="POST">
     {% csrf_token %}
@@ -1444,26 +1425,32 @@
                 <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
             </div>
 
-            <div class="input-wrapper">
+            <div class="input-wrapper" style="width: 20px;">
     {{ form.confirmation.label_tag }} {{ form.confirmation }}
             </div>
-            <div class="btn btn-primary">
+            <div class="btn btn-primary32">
 
 
               <button type="submit">Submit</button>
 
-              <ion-icon name="arrow-forward" aria-hidden="true" role="img" class="md hydrated"></ion-icon>
             </div>
 </form>
-
-            </div>
-
         </div>
       </section>
 
+      </div>
+    </section>
 
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
     <div class="stripe"></div>
-
     <div class="customerreviewwrapper">
       <h2 class="testimonials">What our customers say about us:</h2>
 
@@ -1566,18 +1553,36 @@
         <div class="wave" id="wave4"></div>
       </div>
       <ul class="social-icon">
-        <li class="social-icon__item"><a class="social-icon__link" href="#">
-            <ion-icon name="logo-facebook"></ion-icon>
+          {% for BackgroundView in Social %}
+            {% if BackgroundView.image_position == 1 %}
+        <li class="social-icon__item"><a class="social-icon__link" href="{{BackgroundView.hyperlink}}">
+
+            <ion-icon name="{{BackgroundView.social}}"></ion-icon>
           </a></li>
-        <li class="social-icon__item"><a class="social-icon__link" href="#">
-            <ion-icon name="logo-twitter"></ion-icon>
+            {% endif %}
+
+            {% if BackgroundView.image_position == 2 %}
+        <li class="social-icon__item"><a class="social-icon__link" href="{{BackgroundView.hyperlink}}">
+
+            <ion-icon name="{{BackgroundView.social}}"></ion-icon>
+
           </a></li>
-        <li class="social-icon__item"><a class="social-icon__link" href="#">
-            <ion-icon name="logo-linkedin"></ion-icon>
+            {% endif %}
+            {% if BackgroundView.image_position == 3 %}
+        <li class="social-icon__item"><a class="social-icon__link" href="{{BackgroundView.hyperlink}}">
+
+            <ion-icon name="{{BackgroundView.social}}"></ion-icon>
           </a></li>
-        <li class="social-icon__item"><a class="social-icon__link" href="#">
-            <ion-icon name="logo-instagram"></ion-icon>
+            {% endif %}
+
+            {% if BackgroundView.image_position == 4 %}
+        <li class="social-icon__item"><a class="social-icon__link" href="{{BackgroundView.hyperlink}}">
+
+            <ion-icon name="{{BackgroundView.social}}"></ion-icon>
+
           </a></li>
+            {% endif %}
+          {% endfor %}
       </ul>
       <ul class="menu">
         <li class="menu__item"><a class="menu__link" href="#">Home</a></li>

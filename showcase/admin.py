@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
-    SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia
+    SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -596,6 +596,18 @@ class RoomAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Room, RoomAdmin)
+
+
+class ItemFilterAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Item Information - Categorial Descriptions', {
+            'fields': ('product_filter', 'clicks', 'image', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+
+admin.site.register(ItemFilter, ItemFilterAdmin)
 
 
 class ItemAdmin(admin.ModelAdmin):

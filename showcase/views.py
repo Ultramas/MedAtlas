@@ -15,6 +15,7 @@ from .models import NewsFeed
 from .models import StaffProfile
 from .models import Event
 from .models import City, Vote, UpdateProfile, Idea, PartnerApplication
+from .models import ItemFilter
 from .models import Support
 from .models import CheckoutAddress
 from .models import Item
@@ -1042,38 +1043,6 @@ class CreatePostView(CreateView):
     template_name = "backgroundimagechange.html"
     success_url = reverse_lazy("index")
 
-
-class EBackgroundView(BaseView):
-    model = EBackgroundImage
-    template_name = "ehome.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        total_items = Item.objects.filter(is_active=1).count()
-
-        # Get the paginate_by value from the form data or settings
-        paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
-
-        items_query = Item.objects.filter(is_active=1)
-        paginator = Paginator(items_query, paginate_by)
-        page_number = self.request.GET.get('page')
-        paginated_items = paginator.get_page(page_number)
-
-        # context['items'] = paginated_items
-
-        # context['items'] = Item.objects.filter(is_active=1)
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        items_query = Item.objects.filter(is_active=1)
-        paginator = Paginator(items_query, paginate_by)
-        page_number = self.request.GET.get('page')
-        paginated_items = paginator.get_page(page_number)
-
-        context['items'] = paginated_items
-        return context
 
 
 class ECreatePostView(CreateView):
@@ -2586,6 +2555,7 @@ class PostList(BaseView):
         context['BlogFilter'] = BlogFilter.objects.filter(is_active=1).order_by('clicks')
         context['BlogHeader'] = BlogHeader.objects.filter(is_active=1).order_by('category')
         context['blog_count'] = BlogHeader.objects.filter(is_active=1).order_by('category').count()
+        context['Email'] = EmailField.objects.filter(is_active=1)
         context['form'] = EmailForm()
 
         context['blogpagination'] = paginated_blog
@@ -3342,7 +3312,7 @@ class EBackgroundView(BaseView):
         # Get the paginate_by value from the form data or settings
         paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
 
-        items_query = Item.objects.filter(is_active=1)
+        items_query = Item.objects.filter(is_active=1).order_by('price')
         paginator = Paginator(items_query, paginate_by)
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
@@ -3355,6 +3325,17 @@ class EBackgroundView(BaseView):
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['Image'] = ImageBase.objects.filter(is_active=1, page=self.template_name)
+        context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(page=self.template_name, is_active=1)
+        context['Email'] = EmailField.objects.filter(is_active=1)
+        context['form'] = EmailForm()
+        context['item_filters'] = ItemFilter.objects.filter(is_active=1)
+        item_filters = ItemFilter.objects.filter(is_active=1)
+        for item_filter in item_filters:
+            print(str(item_filter))
+        print(context)
+        print('The item filters are:')
         items_query = Item.objects.filter(is_active=1)
         paginator = Paginator(items_query, paginate_by)
         page_number = self.request.GET.get('page')
@@ -3362,6 +3343,17 @@ class EBackgroundView(BaseView):
 
         context['items'] = paginated_items
         return context
+    def post(self, request, *args, **kwargs):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            return redirect('showcase:emaildone')
+        else:
+            messages.error(request, "Form submission invalid")
+            print("there was an error in registering the email")
+            return render(request, "ehome.html", {'form': form})
 
 
 class ECreatePostView(CreateView):

@@ -72,6 +72,9 @@ class Idea(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+    def __str__(self):
+        return self.user
+
     class Meta:
         verbose_name = "Idea"
         verbose_name_plural = "Ideas"
@@ -119,6 +122,9 @@ class UpdateProfile(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.user
 
     class Meta:
         verbose_name = "User Profile Post"
@@ -177,6 +183,9 @@ class Choice(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.question
 
     class Meta:
         verbose_name = "Choice"
@@ -285,6 +294,7 @@ class SearchResult(models.Model):
 
 class StaffApplication(models.Model):
     """For applying for staff"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=100, help_text='Your name & tag go here.')
     overall_time_check = models.BooleanField(
         verbose_name="I have been in MC for at least 2 months",
@@ -327,6 +337,9 @@ class StaffApplication(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+    def __str__(self):
+        return self.role + " submitted by " + str(self.user)
+
     class Meta:
         verbose_name = "Staff Application"
         verbose_name_plural = "Staff Applications"
@@ -360,6 +373,7 @@ class PartnerApplication(models.Model):
 
 
 class PunishmentAppeal(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text='Your name and tag go here.')
     Rule_broken = models.CharField(max_length=200,
                                    help_text='Tell us the numbers of the rule(s) you broke. Refer to our rules page to see the rules and their corresponding numbers.',
@@ -374,6 +388,9 @@ class PunishmentAppeal(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.Why_I_should_have_my_punishment_revoked + " submitted by " + str(self.user)
 
     class Meta:
         verbose_name = "Punishment Appeal"
@@ -394,6 +411,9 @@ class BanAppeal(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.Why_I_should_have_my_ban_revoked + " submitted by " + str(self.name)
 
     class Meta:
         verbose_name = "Ban Appeal"
@@ -421,6 +441,8 @@ class ReportIssue(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+    def __str__(self):
+        return self.issue + " reported by " + str(self.user)
 
     # class Changelog(models.Model):
     #  name = models.CharField(max_length = 100, help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
@@ -472,6 +494,9 @@ class Support(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+    def __str__(self):
+        return self.issue + " submitted by " + str(self.user)
+
     class Meta:
         verbose_name = "Customer Support"
         verbose_name_plural = "Customer Support"
@@ -500,6 +525,9 @@ class NewsFeed(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.title + " authored by " + str(self.user)
 
     class Meta:
         verbose_name = "News Feed"
@@ -549,6 +577,9 @@ class StaffProfile(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+    def __str__(self):
+        return str(self.user)
+
     class Meta:
         verbose_name = "Staff Profile"
         verbose_name_plural = "Staff Profiles"
@@ -580,6 +611,9 @@ class FrequentlyAskedQuestions(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+    def __str__(self):
+        return self.question
+
     class Meta:
         verbose_name = "Frequently-Asked Question"
         verbose_name_plural = "Frequently-Asked Questions"
@@ -594,7 +628,7 @@ class Event(models.Model):
     date = models.DateField(null=True, help_text='Event date (day, date, and month)')
     time = models.TimeField(null=True, help_text='Event time (hour/minute)')
     date_and_time = models.DateTimeField(null=True, verbose_name="Time and date of Event Creation")
-    section = models.IntegerField(verbose_name="Page Section")
+    section = models.IntegerField(verbose_name="Page Section", blank=True, null=True)
     page = models.TextField(verbose_name="Page Name")
     slug = models.SlugField()
     anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
@@ -615,10 +649,12 @@ class Event(models.Model):
         return self.name + " hosted by " + str(self.user)
 
     def save(self, *args, **kwargs):
+        if not self.page.endswith('.html'):
+            self.page += '.html'
         if not self.pk:
             # Get the associated ProfileDetails for the donor
             profile = ProfileDetails.objects.filter(user=self.user).first()
-            self.section = AdminPages.objects.filter(page=self.page).count() + 1
+            self.section = Event.objects.filter(page=self.page).count() + 1
 
             # Set the position to the position value from the associated ProfileDetails
             if profile:
@@ -1040,7 +1076,7 @@ class HyperlinkBase(models.Model):
 
 class BackgroundImageBase(models.Model):
     backgroundtitle = models.TextField(verbose_name="Background Title", blank=True, null=True)
-    cover = models.ImageField(blank=True, null=True, upload_to='images/')
+    cover = models.ImageField(blank=True, null=True, upload_to='images/', verbose_name="Images")
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Width of the image (in percent relative).',
                                               verbose_name="image width")
@@ -1099,6 +1135,7 @@ class BackgroundImageBase(models.Model):
         # Save the updated Image object back to the database
         image.save()
 
+
 class TextBase(models.Model):
     TEXT_MEASUREMENT_CHOICES = (
         ('px', 'Pixels'),
@@ -1142,6 +1179,8 @@ class TextBase(models.Model):
     def save(self, *args, **kwargs):
         if not self.url:
             self.url = 'http://127.0.0.1:8000/'
+        if not self.page.endswith('.html'):
+            self.page += '.html'
         elif not self.url.startswith('http://127.0.0.1:8000/'):
             self.url = f'http://127.0.0.1:8000/{self.url}'
         if not self.pk:  # Check if this is a new object
@@ -1433,7 +1472,7 @@ class DonateIcon(models.Model):
 class Titled(models.Model):
     overtitle = models.TextField(verbose_name="Title")
     page = models.TextField(verbose_name="Page Name", blank=True, null=True, )
-    url = models.URLField(verbose_name="Page URL")
+    url = models.URLField(verbose_name="Page URL", blank=True, null=True, )
     position = models.IntegerField(default=1)
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -1442,16 +1481,29 @@ class Titled(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return self.overtitle
+        return self.overtitle + " at " + self.page
 
     class Meta:
         verbose_name = "Page Title"
         verbose_name_plural = "Page Titles"
 
+    def save(self, *args, **kwargs):
+        if not self.url and self.page == "index":
+            self.url = 'http://127.0.0.1:8000/'
+        elif not self.url and self.page == "login":
+            self.url = 'http://127.0.0.1:8000/accounts/login'
+        elif not self.url:
+            self.url = f'http://127.0.0.1:8000/{self.page}'
+        elif not self.url.startswith('http://127.0.0.1:8000/'):
+            self.url = f'http://127.0.0.1:8000/{self.url}'
+        if not self.page.endswith('.html'):
+            self.page += '.html'
+        super().save(*args, **kwargs)
+
 
 class SocialMedia(models.Model):
-    social = models.TextField(verbose_name="Social Media Platform")
-    image = models.ImageField(verbose_name="Social Media Logo")
+    social = models.TextField(verbose_name="Social Media Platform", help_text="Follow format 'logo-{platform name}'", blank=True, null=True )
+    image = models.ImageField(verbose_name="Social Media Logo", blank=True, null=True)
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Width of the image (in percent relative).',
                                               verbose_name="image width")
@@ -1460,8 +1512,8 @@ class SocialMedia(models.Model):
                                                verbose_name="image length")
     width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Width")
     height_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Height")
-    image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position')
-    alternate = models.TextField(verbose_name="Alternate Text")
+    image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position', blank=True, null=True)
+    alternate = models.TextField(verbose_name="Alternate Text", blank=True, null=True)
     page = models.TextField(verbose_name="Page Name")
     hyperlink = models.URLField(verbose_name="Hyperlink")
     is_active = models.IntegerField(default=1,
@@ -1474,8 +1526,12 @@ class SocialMedia(models.Model):
         return self.social
 
     def save(self, *args, **kwargs):
+        if not self.page.endswith('.html'):
+            self.page += '.html'
         if not self.pk:  # Check if this is a new object
             self.image_position = SocialMedia.objects.filter(page=self.page).count() + 1
+        if self.image and not self.alternate:  # Check if an image exists and alternate text is not set
+            self.alternate = str(self.image)  # Set the alternate text to the string version of the image name
         super().save(*args, **kwargs)
 
     class Meta:
@@ -2372,6 +2428,24 @@ class UserProfile(models.Model):
 from django.db.models.signals import pre_save
 
 
+class ItemFilter(models.Model):
+    product_filter = models.CharField(verbose_name="Hashtag filters", max_length=200, blank=True, null=True)
+    clicks = models.IntegerField(verbose_name="Popularity", blank=True, null=True)
+    image = models.ImageField(verbose_name="Filter Image", blank=True, null=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.product_filter
+
+    class Meta:
+        verbose_name = "Item Filter"
+        verbose_name_plural = "Item Filters"
+
+
 class Item(models.Model):
     title = models.CharField(max_length=100)
     price = models.FloatField()
@@ -2990,6 +3064,9 @@ class BusinessMailingContact(models.Model):
     inquiry = models.CharField(max_length=100)
     message = models.TextField()
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         verbose_name = "Business Mailing Message"
         verbose_name_plural = "Business Mailing Messages"
@@ -3018,7 +3095,7 @@ from django.db import IntegrityError
 
 
 class ImageCarousel(models.Model):
-    carouseltitle = models.CharField(max_length=100, help_text='Title of the image.', verbose_name="title")
+    carouseltitle = models.CharField(max_length=100, help_text='Title of the image.', verbose_name="title", blank=True, null=True)
     carouselcaption = models.TextField(help_text='Caption for the image.', verbose_name="caption")
     carouselimage = models.ImageField(help_text='Upload an image for the carousel.)',
                                       upload_to='images/', verbose_name='image')
@@ -3036,22 +3113,35 @@ class ImageCarousel(models.Model):
     carouselnumber = models.IntegerField(help_text='What carousel number is this?.',
                                          verbose_name='Carousel number')
     carouselposition = models.IntegerField(help_text='Positioning of the image within the carousel.',
-                                           verbose_name='position')
+                                           verbose_name='position', blank=True, null=True)
     carouseltotal = models.IntegerField(help_text='Total number of images within the carousel.',
-                                        verbose_name='total images')
+                                        verbose_name='total images', default=9)
     carouselpage = models.TextField(verbose_name="Page Name")
     hyperlink = models.TextField(verbose_name="Hyperlink")
+    alternate = models.TextField(verbose_name="Alternate Text", blank=True, null=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+    def __str__(self):
+        return self.carouseltitle
+
     class Meta:
         verbose_name = "Image Carousel Post"
         verbose_name_plural = "Image Carousel Posts"
 
     def save(self, *args, **kwargs):
+
+        if not self.carouselpage.endswith('.html'):
+            self.carouselpage += '.html'
+        if not self.pk:  # Check if this is a new object
+            self.carouselposition = ImageCarousel.objects.filter(carouselpage=self.carouselpage,
+                                                                 carouselnumber=self.carouselnumber).count() + 1
+            self.carouseltitle = f'background {self.carouselposition}'  # Set the title here
+        if self.carouselimage and not self.alternate:  # Check if an image exists and alternate text is not set
+            self.alternate = str(self.carouselimage)  # Set the alternate text to the string version of the image name
         # Set the specialty based on the associated product
         if self.associated_product and self.associated_product.specialty:
             self.specialty = self.associated_product.specialty
@@ -3061,8 +3151,6 @@ class ImageCarousel(models.Model):
             # Handle any IntegrityError exceptions that may occur during save
             # Print or log the error for debugging
             print(f"IntegrityError during save: {e}")
-        if not self.pk:  # Check if this is a new object
-            self.carouselposition = ImageCarousel.objects.filter(page=self.page).count() + 1
         super().save(*args, **kwargs)
 
 

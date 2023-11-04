@@ -324,7 +324,7 @@ section {
 
 /* Add more styling as needed for chat messages, input fields, etc. */
 
-.about_us{
+/*.about_us{
   background:linear-gradient(var(--clr-inner, white), var(--clr-outer, #070727));
 
 
@@ -332,7 +332,7 @@ section {
 }
 .about{
   margin-top: -50px;
-}
+}*/
 .aboutPoketrove{
 text-align: center;
 font-size: 40px;

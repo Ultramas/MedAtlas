@@ -1,6 +1,6 @@
 /*ebase styling*/
 body{
-  background: linear-gradient(blue, skyblue);	
+  background: linear-gradient(blue, skyblue);
   /*affects ecommerce section background color scheme*/
 }
 
@@ -85,10 +85,10 @@ body{
 }
 
  .logo{
-    position: absolute; 
-    top: 5px; 
-    left: 2.6vh; 
-    height: 10px;  
+    position: absolute;
+    top: 5px;
+    left: 2.6vh;
+    height: 10px;
     width: 10px;
   }
 
@@ -110,16 +110,16 @@ body{
          }
 
   .logo{
-  position: absolute; 
-  top: 5px; 
-  left: 4vh; 
-  height: 10px;  
+  position: absolute;
+  top: 5px;
+  left: 4vh;
+  height: 10px;
   width: 10px;
   }
 }
 
 .navbarx a{
-  /*text-decoration: none;*/  
+  /*text-decoration: none;*/
     /*style of LI that gets dynamically added to menu to create background effect*/
   font-size: 20px;
 }
@@ -194,7 +194,7 @@ body{
 }
 
 .glass:hover{
-	background: linear-gradient(blue, skyblue);	
+	background: linear-gradient(blue, skyblue);
 }
 
 
@@ -542,7 +542,7 @@ navtext{
     font-size: 18px;
     font-family: 'Times New Roman', Times, serif;
     background: url("images/gelbuttonleft.gif") top left no-repeat, url("images/gelbuttonright.gif") top right no-repeat, url("images/gelbuttoncenter.gif") top center repeat-x;
-}  
+}
 
 .navItem4 {
     margin-top: 20px;
@@ -765,7 +765,7 @@ nav li a{
 
 nav{
     padding: 60px 40px;
-    background: linear-gradient(33deg, rgba(255, 0, 0, 0.637), rgba(0, 26, 255, 0.637), rgba(0, 247, 255, 0.637)); 
+    background: linear-gradient(33deg, rgba(255, 0, 0, 0.637), rgba(0, 26, 255, 0.637), rgba(0, 247, 255, 0.637));
     position: fixed;
     right: -250px;
     top: 0;
