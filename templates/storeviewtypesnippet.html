@@ -1,0 +1,39 @@
+{% extends 'ebase.html' %}
+
+{% load static %}
+
+
+{% block content %}
+
+<br>
+<br>
+<br>
+<br>
+<h1 style="padding: 10px;">Store View Settings</h1>
+<form method="post" style="padding: 10px;">
+    {% csrf_token %}
+    {{ eform.as_p }}
+    <button type="submit">Submit</button>
+</form>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>
+
+{% endblock content %}

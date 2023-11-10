@@ -687,7 +687,7 @@
 
 
 
- <main>
+ <main style="background: linear-gradient(-45deg, rgba(0, 0, 255, 0), #5f91ff, rgba(0, 0, 255, 0));">
     <div class="chat-widget">
       <div class="chat-icon">
         <span class="iconicwidget"></span>
@@ -1292,9 +1292,10 @@
     </div>
 </div>
 </div>
+
+     <div class="eeee" style="background: linear-gradient(-45deg, rgba(0, 0, 255, 0), #5f91ff, rgba(0, 0, 255, 0));">
+
       <br>
-
-
 
     {% for BackgroundImage in TextFielde %}
     {% if BackgroundImage.page == "index.html" %}
@@ -1304,7 +1305,7 @@
      {% endif %}
      {% endfor %}
  <h1 style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">Become A Member!</h1>
-<div class="contactusmethods">
+<div class="contactusmethods" style="height: 50vh;">
     {% for BackgroundImage in Background %}
     {% if BackgroundImage.page == "index.html" %}
     {% if BackgroundImage.position == 10 %}
@@ -1586,10 +1587,10 @@
       </ul>
       <ul class="menu">
         <li class="menu__item"><a class="menu__link" href="#">Home</a></li>
-        <li class="menu__item"><a class="menu__link" href="#">About</a></li>
-        <li class="menu__item"><a class="menu__link" href="#">Services</a></li>
-        <li class="menu__item"><a class="menu__link" href="#">Team</a></li>
-        <li class="menu__item"><a class="menu__link" href="#">Contact</a></li>
+        <li class="menu__item"><a class="menu__link" href="{% url 'showcase:about' %}">About</a></li>
+        <li class="menu__item"><a class="menu__link" href="{% url 'showcase:supportchat' %}">Support</a></li>
+        <li class="menu__item"><a class="menu__link" href="{% url 'showcase:staff' %}">Our Team</a></li>
+        <li class="menu__item"><a class="menu__link" href="{% url 'showcase:contact' %}">Contact</a></li>
 
       </ul>
       <p>&copy;2023 PokeTrove | All Rights Reserved</p>

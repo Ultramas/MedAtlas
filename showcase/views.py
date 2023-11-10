@@ -29,6 +29,7 @@ from .models import BilletBackgroundImage
 from .models import PatreonBackgroundImage
 from .models import BusinessMessageBackgroundImage
 from .models import Patreon
+from .models import StoreViewType
 from .models import BlogBackgroundImage
 from .models import PostBackgroundImage
 from .models import PosteBackgroundImage
@@ -122,6 +123,7 @@ from .forms import PaypalPaymentForm
 from .forms import BaseCopyrightTextField
 from .forms import ContactForme
 from .forms import SignUpForm
+from .forms import StoreViewTypeForm
 # from .forms import OrderItems
 from django.contrib import messages
 from django.contrib.auth import authenticate
@@ -3300,13 +3302,34 @@ class PolicyView(BaseView):
     template_name = "policy.html"
     section = TextBase.section
 
-class EBackgroundView(BaseView):
+import urllib.request as url_request
+
+
+def get_items_by_category(category):
+    if category == 'all':
+        items = Item.objects.all()
+    elif category == 'gold':
+        items = Item.objects.filter(category='G')
+    elif category == 'platinum':
+        items = Item.objects.filter(category='P')
+    elif category == 'emerald':
+        items = Item.objects.filter(category='E')
+    elif category == 'diamond':
+        items = Item.objects.filter(category='D')
+    else:
+        items = Item.objects.all()
+    return items
+
+
+class EBackgroundView(BaseView, FormView):
     model = EBackgroundImage
     template_name = "ehome.html"
+    form_class = EmailForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        current_user = self.request.user
         total_items = Item.objects.filter(is_active=1).count()
 
         # Get the paginate_by value from the form data or settings
@@ -3329,7 +3352,17 @@ class EBackgroundView(BaseView):
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(page=self.template_name, is_active=1)
         context['Email'] = EmailField.objects.filter(is_active=1)
+        context['store_view_form'] = StoreViewTypeForm()
         context['form'] = EmailForm()
+        try:
+            user_store_view_type = StoreViewType.objects.get(user=current_user, is_active=1)
+            context['store_view_type_str'] = str(user_store_view_type)
+            context['streamfilter_string'] = f'streamfilter set by {self.request.user.username}'
+            print('store view exists')
+            print(str(user_store_view_type))
+        except StoreViewType.DoesNotExist:
+            user_store_view_type = None
+            print('store view does not exist')
         context['item_filters'] = ItemFilter.objects.filter(is_active=1)
         item_filters = ItemFilter.objects.filter(is_active=1)
         for item_filter in item_filters:
@@ -3342,18 +3375,80 @@ class EBackgroundView(BaseView):
         paginated_items = paginator.get_page(page_number)
 
         context['items'] = paginated_items
+
+        category = self.request.GET.get('category', 'all')
+        categoryitems = self.get_items_by_category(category)
+        context['categorizeditems'] = categoryitems
         return context
+
+    def get_items_by_category(self, category):
+        if category == 'all':
+            items = Item.objects.all()
+        elif category == 'gold':
+            items = Item.objects.filter(category='G')
+        elif category == 'platinum':
+            items = Item.objects.filter(category='P')
+        elif category == 'emerald':
+            items = Item.objects.filter(category='E')
+        elif category == 'diamond':
+            items = Item.objects.filter(category='D')
+        else:
+            items = Item.objects.all()
+        return items
+
     def post(self, request, *args, **kwargs):
         form = EmailForm(request.POST)
+
         if form.is_valid():
             post = form.save(commit=False)
             post.save()
-            messages.success(request, 'Form submitted successfully.')
-            return redirect('showcase:emaildone')
+            messages.success(request, 'EmailForm submitted successfully.')
         else:
-            messages.error(request, "Form submission invalid")
+            messages.error(request, "EmailForm submission invalid")
             print("there was an error in registering the email")
-            return render(request, "ehome.html", {'form': form})
+
+            return render(request, 'ehome.html', {'form': form})
+
+
+
+
+class StoreView(BaseView, FormView, ListView):
+    model = StoreViewType
+    template_name = "storeviewtypesnippet.html"
+    form_class = StoreViewTypeForm
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()  # Add this line
+        context = self.get_context_data()
+        eform = StoreViewTypeForm(request=request)
+        return render(request, 'storeviewtypesnippet.html', {'eform': eform, **context})
+
+    def get_context_data(self, **kwargs):
+        context = {}
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['Image'] = ImageBase.objects.filter(is_active=1, page=self.template_name)
+        context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(page=self.template_name, is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        return context
+
+
+    def post(self, request, *args, **kwargs):
+        eform = StoreViewTypeForm(request.POST, request=request)
+
+        if eform.is_valid():
+            post = eform.save(commit=False)
+            post.save()
+            return redirect('showcase:ehome')
+        else:
+            print('the errors with the storeviewtype form are '+ str(eform.errors))
+        return render(request, 'storeviewtypesnippet.html', {'eform': eform})
+
 
 
 class ECreatePostView(CreateView):

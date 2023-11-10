@@ -110,7 +110,7 @@
 
 {% for newprofile in Profiles %}
     <div class="postop">
-        <h1>
+        <h1 style="color: white;">
             {% if newprofile.newprofile_profile_picture_url %}
                 <a href="{{ newprofile.newprofile_profile_url }}">
                     <img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">

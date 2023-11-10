@@ -27,13 +27,11 @@
   box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
   box-sizing: border-box;
   color: #FFFFFF;
-  display: flex;
   font-family: Phantomsans, sans-serif;
   font-size: 20px;
   justify-content: center;
   line-height: 1em;
-  max-width: 100%;
-  min-width: 140px;
+  min-width: 440px;
   padding: 3px;
   text-decoration: none;
   user-select: none;
@@ -52,7 +50,6 @@
   background-color: rgb(5, 6, 45);
   padding: 16px 24px;
   border-radius: 6px;
-  width: 100%;
   height: 100%;
   transition: 300ms;
 }
@@ -151,28 +148,33 @@
         <div class="row wow fadeIn"><!--eee-->
             {% for order_item in orders %}
     <div class="orderhistory" style="margin-top: 10%; justify-content: center; margin-left: auto; margin-right: auto;">
-        {% if order_item.author_profile_picture_url %}
-            <a href="{{ order_item.profile_url }}">
-                <h2>{{ order_item.user.username }}</h2>
-                <img src="{{ order_item.author_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
-            </a>
-        {% else %}
 
-
-                <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
+        <ul style="align-items: center; justify-content: center;">
+            <li style="display: flex; align-items: center; justify-content: center;">
+                {% if order_item.author_profile_picture_url %}
+                    <a href="{{ order_item.profile_url }}">
+                        <img src="{{ order_item.author_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 25px;">
+                    </a>
+                    <h2 style="padding-left: 10px;">{{ order_item.user.username }}</h2>
+                {% else %}
+                    <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 25px;">
                 {% endif %}
+            </li>
+        </ul>
+
+
 <a href="{{ order_item.author_profile_url }}">
 
             <h3>Product Name: {{ order_item.item }}</h3>
             <br>
             <h4>Order Date: {{ order_item.order_date }}</h4>
-            <img src="{{order_item.image.url}}" alt="{{order_item.item}}">
-
-<a href="{% url 'showcase:create_review' %}?item_slug={{ order_item.item.slug }}&orderitem_id={{ order_item.id }}" class="button-64" role="button"><span class="text">Leave Feedback</span></a>
+            <img src="{{order_item.image.url}}" alt="{{order_item.item}}" style="width: 50%; height: 50%; border-radius: 20px;">
+                    </a>
+<br>
+<a href="{% url 'showcase:create_review' %}?item_slug={{ order_item.item.slug }}&orderitem_id={{ order_item.id }}" class="button-64" role="button" style="width: 100%; height: 10%; justify-content: center; align-items: center;"><span class="text" style="justify-content: center; ">Leave Feedback</span></a>
 
 <!--how to pass the orderitem.item to the form once the button is pressed based on the associated item-->
             <br>
-                    </a>
                 </div>
 {% endfor %}
         </div>

@@ -1098,9 +1098,6 @@ class BackgroundImageBase(models.Model):
         return self.backgroundtitle + " in " + self.page + " at Section " + str(self.position)
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # Check if this is a new object
-            self.position = BackgroundImageBase.objects.filter(page=self.page).count() + 1
-            self.backgroundtitle = f'background {self.position}'  # Set the title here
         if not self.url and self.page == "index":
             self.url = 'http://127.0.0.1:8000/'
         elif not self.url and self.page == "login":
@@ -1113,6 +1110,7 @@ class BackgroundImageBase(models.Model):
             self.page += '.html'
         if not self.pk:  # Check if this is a new object
             self.position = BackgroundImageBase.objects.filter(page=self.page).count() + 1
+            self.backgroundtitle = f'background {self.position}'  # Set the title here
         if self.cover and not self.alternate:  # Check if an image exists and alternate text is not set
             self.alternate = str(self.cover)  # Set the alternate text to the string version of the image name
         elif self.file and not self.alternate:
@@ -1134,6 +1132,34 @@ class BackgroundImageBase(models.Model):
 
         # Save the updated Image object back to the database
         image.save()
+
+
+class StoreViewType(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
+    VIEW_TYPE_CHOICES = (
+        ('stream', 'Streamlined View'),
+        ('detail', 'Detailed View'),
+     )
+    type = models.CharField(blank=True, null=True, choices=VIEW_TYPE_CHOICES, default='stream', max_length=6)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.type + "filter set by " + str(self.user)
+
+    def save(self, *args, **kwargs):
+        # If a StoreViewType for this user already exists, delete it
+        StoreViewType.objects.filter(user=self.user).delete()
+
+        # Now save the new StoreViewType
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Store View Type"
+        verbose_name_plural = "Store View Types"
 
 
 class TextBase(models.Model):
@@ -1523,7 +1549,7 @@ class SocialMedia(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return self.social
+        return self.social + " in " + self.page
 
     def save(self, *args, **kwargs):
         if not self.page.endswith('.html'):
@@ -2427,11 +2453,17 @@ class UserProfile(models.Model):
      """
 from django.db.models.signals import pre_save
 
+from django.http import JsonResponse
+from django.core import serializers
+
 
 class ItemFilter(models.Model):
     product_filter = models.CharField(verbose_name="Hashtag filters", max_length=200, blank=True, null=True)
     clicks = models.IntegerField(verbose_name="Popularity", blank=True, null=True)
     image = models.ImageField(verbose_name="Filter Image", blank=True, null=True)
+    category = models.IntegerField(default=0, blank=True,
+                                   null=True, verbose_name='Make the Filter a Category?', help_text='1->Yes, 0->No',
+                                   choices=((1, 'Yes'), (0, 'No')))
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2491,6 +2523,8 @@ class Item(models.Model):
 
     def get_profile_url(self):
         return reverse('showcase:product', args=[str(self.slug)])
+
+
 
 
 class EBackgroundImage(models.Model):

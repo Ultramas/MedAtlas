@@ -65,20 +65,24 @@
 <br>
 <br>
 -->
-<div class="container">
     {% if profile %}
-        <img src="{{ profile.avatar.url }}">
+<div class="container" style="background: {{profile.avatar.url}}; border-radius: 20px;" >
+        <img src="{{ profile.avatar.url }}" style="max-width: 50%; max-height: 50%; border-radius: 50px;">
         <h1>My Profile</h1>
         <p style="color: black">Username: {{ profile.user }}</p>
         <p style="color: black">About Me: {{ profile.about_me }}</p>
         <p style="color: black">Email: {{ profile.email }}</p>
-    {% else %}
-        <h1>No Profile Found</h1>
-    {% endif %}
+<br>
+
+<br>
+
 
 
 
 </div>
+    {% else %}
+        <h1>No Profile Found</h1>
+    {% endif %}
 <!--could make a profile home page that redirects to your profile based on the url (which in turn is based on your profile)-->
 
 </body>

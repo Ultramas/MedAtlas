@@ -61,7 +61,7 @@ $(document).ready(function() {
 
 <!-- Ehome Settings Form -->
 <a href="{% url 'showcase:storeviewtypesnippet' %}">
-<h1 style="padding-left: 40px;" title="Store View Settings">⚙️</h1>
+<h1>⚙️</h1>
 </a>
 
 {% if store_view_type_str == streamfilter_string %}
@@ -157,7 +157,7 @@ $(document).ready(function() {
     <!-- Search bar -->
     <br>
     <br>
-    <div class="search" style="margin-right: 50px;">
+    <div class="search">
       <form class="searchbar" action="{% url 'showcase:ecommercesearch_results' %}" method="get" style="border-radius: 30px;">
         <input name="q" type="text" placeholder="Search Products..." style="border-radius: 30px;">
       </form>
@@ -172,6 +172,31 @@ $(document).ready(function() {
         </a>
       {% endfor %}
 
+    <!-- Navbar -->
+    <div class="navbarbo">
+      <!-- Navbar links -->
+      <ul class="navbarbeo" style="padding: 3%;">
+        <li class="nav-item">
+              <li class="nav-item">
+        <a class="nav-link filter-link" href="#" data-category="all" style="color: white">All</a>
+    </li>
+        </li>
+        <li class="nav-item">
+              <li class="nav-item">
+        <a class="nav-link filter-link" href="#" data-category="gold" style="color: white">Gold Tier</a>
+    </li>
+        </li>
+        <li class="nav-item">
+        <a class="nav-link filter-link" href="#" data-category="platinum" style="color: white">Platinum Tier</a>
+        </li>
+        <li class="nav-item">
+        <a class="nav-link filter-link" href="#" data-category="emerald" style="color: white">Emerald Tier</a>
+        </li>
+        <li class="nav-item">
+        <a class="nav-link filter-link" href="#" data-category="diamond" style="color: white">Diamond Tier</a>
+        </li>
+      </ul>
+      <!-- Search form -->
 
     <!-- Navbar -->
 
@@ -180,7 +205,7 @@ $(document).ready(function() {
     <label for="paginate-by" style="color: white; height: 50px;">Items per page:</label>
     <input type="number" name="paginate_by" id="paginate-by" value="{{ items.paginator.per_page }}">
 
-<button class="button-64" role="button" type="submit" title="Update Page Filter"><span class="text">Update</span></button>
+<button class="button-64" role="button" type="submit"><span class="text">Update</span></button>
 </form>
 
 
@@ -194,7 +219,7 @@ $(document).ready(function() {
             <div class="card">
               <div class="view overlay">
                 <a href="{{ item.get_absolute_url }}">
-                  <img class="hunt" src="{{ item.image.url }}" class="card-img-top" alt="{{ item.image.url }}" title="{{ item.image.url }}">
+                  <img class="hunt" src="{{ item.image.url }}" class="card-img-top" alt="{{ item.image.url }}">
                   <div class="mask rgba-white-slight"></div>
                 </a>
               </div>

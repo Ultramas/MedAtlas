@@ -3,7 +3,7 @@ from urllib import request
 from django import forms
 
 from mysite import settings
-from .models import Idea, OrderItem, EmailField, Item, Questionaire
+from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -506,6 +506,36 @@ class ProfileDetail(forms.ModelForm):
     class Meta:
         model = ProfileDetails
         fields = ('email', 'avatar', 'alternate', 'about_me')
+
+
+class StoreViewTypeForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+
+    class Meta:
+        model = StoreViewType
+        fields = ('type',)
+
+
+
+    def save(self, commit=True):
+
+        user = self.request.user if self.request.user.is_authenticated else None
+
+        storeviewtype = super().save(commit=False)
+
+        # Set the user, star rating, and slug if available
+        if user and isinstance(user, User):  # Check if user is a User instance
+            storeviewtype.user = user
+        else:
+            storeviewtype.user = None  # Set to None if user is not a valid User instance
+
+        if commit:
+            storeviewtype.save()
+        return storeviewtype
 
 
 # class PublicForm(forms.ModelForm):

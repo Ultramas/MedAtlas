@@ -65,6 +65,10 @@ a.page-link:hover {
     transform: scale(1.1) translateY(-10%); /* makes the button 20% larger and moves it up by 20% */
 }
 
+.text {
+    border: 2px solid silver;
+}
+
 
 </style>
 </head>
@@ -200,13 +204,19 @@ a.page-link:hover {
         <div class="container">
 
       <!--pagination change station-->
-<form method="GET">
-    <label for="paginate-by">Items per page:
-    <input type="number" name="paginate_by" id="paginate-by" value="{{ blogpagination.paginator.per_page }}">
+            <div class="card topic-card" style="display: flex; align-items: center;">
+<form method="GET" style="">
+    <div class="itemsperpage" style="display: flex; align-items: center;">
+    <label for="paginate-by" style="display: flex; align-items: center;">Blog Posts per page:
+    <input type="number" name="paginate_by" id="paginate-by" style="background: rgba(255, 255, 255, 0.1); padding-left: 11%; margin-left: 2%;border-radius: 10px; width: 30%;" value="{{ blogpagination.paginator.per_page }}">
     </label>
-
-<button class="button-64" role="button" type="submit"><span class="text">Update</span></button>
+</div>
+    <br>
+<button class="button-64" role="button" type="submit" style="background: linear-gradient(-45deg, rgba(0, 0, 255, 0), #5f91ff, rgba(0, 0, 255, 0)); border-radius: 10px; padding: 5px;">
+    <span style="color: white;">Update</span>
+</button>
 </form>
+            </div>
 
           <div class="hero-content">
 {% for PostList in TextFielde %}
@@ -248,13 +258,14 @@ a.page-link:hover {
 
     <br>
     <br>
-    <div class="search">
-      <form class="searchbar" action="{% url 'showcase:blogsearch_results' %}" method="get" style="border-radius: 30px;">
-        <input name="q" type="text" placeholder="Search Blog Posts..." style="border-radius: 30px;">
+    <div class="search" style="height: 50px; border-radius: 20px; flex-direction: row; z-index: 3;">
+      <form class="searchbar" action="{% url 'showcase:blogsearch_results' %}" method="get" style="border-radius: 30px; padding: 5px; background-color: rgba(255, 255, 255, 0.1);">
+        <input name="q" type="text" placeholder=" 🔍 Search Blog Posts..." style="border-radius: 30px;">
       </form>
       <br>
       <br>
     </div>
+              <br>
 
 <form method="POST">
             {{form.errors}}
@@ -272,8 +283,11 @@ a.page-link:hover {
 </button>
 
             </div>
-
-               <ul>I agree to the <a href="{% url 'showcase:termsandconditions' %}">Terms & Conditions</a>: {{ form.confirmation }}</ul>
+    <br>
+<ul style="display: flex; align-items: center; max-width: 100%;" > <a href="{% url 'showcase:termsandconditions' %}">
+    <li style="margin-right: 10px;">I agree to the Terms & Conditions:</a></li>
+    <li>{{ form.confirmation }}</li>
+</ul>
 </form>
 
 
@@ -900,7 +914,9 @@ a.page-link:hover {
                   {% if PostList.page == 'blog.html' %}
                 <li>
                   <a href="{{PostList.hyperlink}}" target="_blank" class="insta-post img-holder" style="--width: 276; --height: 277;">
+                      {% if image %}
                     <img src="{{PostList.image.url}}" width="276" height="277" loading="lazy" alt="{{PostList.social}}"
+                         {% endif %}
                       class="img-cover">
                   </a>
                 </li>
@@ -946,9 +962,16 @@ a.page-link:hover {
         {% endif %}
         {% endfor %}
 
+
+
+        {% for PostList in TextFielde %}
+
+            {% if Postlist.section == 7 %}
             <p class="footer-text">
-              When an unknown prnoto sans took a galley and scrambled it to make specimen book not only five When an
-              unknown prnoto sans took a galley and scrambled it to five centurie.
+                {{Postlist.text}}
+            </p>
+            {% endif %}
+        {% endfor %}
             </p>
 
             <p class="footer-list-title">Address</p>
@@ -1039,7 +1062,7 @@ a.page-link:hover {
                 <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
             </div>
 
-            <div class="input-wrapper">
+            <div class="input-wrapper" style="">
                 <a href="{% url 'showcase:termsandconditions' %}">
                 I agree to the Terms & Conditions: {{ form.confirmation }}
                 </a>
@@ -1068,31 +1091,28 @@ a.page-link:hover {
           </p>
 
           <ul class="social-list">
+                {% for PostList in Social %}
+                  {% if PostList.page == 'blog.html' %}
+                <li>
+                  <a href="{{PostList.hyperlink}}" target="_blank" class="insta-post img-holder" style="--width: 50; --height: 50;">
+                      {% if PostList.image %}
+                    <img src="{{PostList.image.url}}" width="50" height="50" loading="lazy" alt="{{PostList.social}}"
+                      class="img-cover">
+                      {% else %}
 
-            <li>
-              <a href="#" class="social-link">
-                <ion-icon name="logo-twitter"></ion-icon>
+        <li class="social-icon__item"><a class="social-icon__link" href="{{PostList.hyperlink}}">
 
-                <span class="span">Twitter</span>
-              </a>
-            </li>
+            <ion-icon style="width:32px; height:32px;" name="{{PostList.social}}"></ion-icon>
 
-            <li>
-              <a href="#" class="social-link">
-                <ion-icon name="logo-linkedin"></ion-icon>
+          </a></li>
+                         {% endif %}
+                  </a>
+                </li>
+                  {% endif %}
+                  {% endfor %}
 
-                <span class="span">LinkedIn</span>
-              </a>
-            </li>
 
-            <li>
-              <a href="#" class="social-link">
-                <ion-icon name="logo-instagram"></ion-icon>
-
-                <span class="span">Instagram</span>
-              </a>
-            </li>
-
+              </ul>
           </ul>
 
         </div>
