@@ -977,6 +977,38 @@ form input {
 width: 500px;
 height: 500px;
 }
+
+      <!-- HTML !-->
+<button class="button-88" role="button">Button 88</button>
+
+/* CSS */
+.button-88 {
+  display: flex;
+  align-items: center;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 16px;
+  padding: 0.7em 1.4em 0.7em 1.1em;
+  color: white;
+  background: #ad5389;
+  background: linear-gradient(0deg, rgba(20,167,62,1) 0%, rgba(102,247,113,1) 100%);
+  border: none;
+  box-shadow: 0 0.7em 1.5em -0.5em #14a73e98;
+  letter-spacing: 0.05em;
+  border-radius: 20em;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-88:hover {
+  box-shadow: 0 0.5em 1.5em -0.5em #14a73e98;
+}
+
+.button-88:active {
+  box-shadow: 0 0.3em 1em -0.5em #14a73e98;
+}
   </style>
 
     {% for EBaseView in Favicons %}
@@ -1048,35 +1080,73 @@ height: 500px;
     </ul>
 
 
-     <nav>
-     <div class="bell"></div>
-     <div onclick='navToggle(this)'  class="hamburger">
+
+<nav class="show">
+     <div  onclick="navToggle(this)" class="bell"></div>
+     <div onclick="navToggle(this)" class="hamburger">
        <div class="bun"></div>
        <div class="bun"></div>
        <div class="bun"></div>
      </div>
 
-<h2 class = "navtext">Quantumism</h2>
-    <div class="navItem"><a href = "{% url 'showcase:index' %}">Home</a></div>
-     <div class="navItem2"><a href = "{% url 'showcase:about' %}">About Us</a></div>
-     <div class="navItem3"><a href = "{% url 'showcase:servers' %}">Discord Servers</a></li></div>
-     <!--<div class="navItem10"><a href = "{% url 'showcase:perks' %}">Member Perks</a></li></div>-->
-     <div class="navItem4"><a href = "{% url 'showcase:admin' %}" target="_blank">Administration</a></li></div>
-     <div class="navItem5"><a href="https://discord.com/channels/813761567304843315/813779502190297108">Quantum Discord</a></li></div>
-     <div class="navItem8"><a href = "{% url 'showcase:rules' %}">Rules</a></li></div>
-     <div class="navItem9"><a href = "{% url 'showcase:showcase' %}">VIP Area</a></div>
-<br>
-<br>
+{% if FeaturedNavigation %}
+    {% for BaseView in FeaturedNavigation %}
+    {% if BaseView.position == 1 %}
+    <h2 class="navtext">{{BaseView.default_header}}</h2>
+    {% endif %}
+    {% if BaseView.text %}
 
-<div class="metaclass1">
-    <a href="https://discord.gg/g43uGbURUz">
-         <img alt="Qries" src="../static/css/images/MC.png"
-         width="150" height="150">
+            {% if BaseView.url == 'http://127.0.0.1:8000/profile' %}
+              {% if BaseView.opennew %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{profile_url}}" target="_blank">{{BaseView.text}}</a>
+                </div>
+              {% else %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{profile_url}}">{{BaseView.text}}</a>
+                </div>
+              {% endif %}
+            {% else %}
+              {% if BaseView.opennew %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{BaseView.url}}" target="_blank">{{BaseView.text}}</a>
+                </div>
+              {% else %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{BaseView.url}}">{{BaseView.text}}</a>
+                </div>
+              {% endif %}
+            {% endif %}
+
+    {% endif %}
+    {% if BaseView.image %}
+<div class="metaclass1e" style="padding-top: 10%; font-size: 10px; text-align: left;
+    justify-content: left;
+    object-position: right;">
+    <a href="{{BaseView.url}}">
+         <img src="{{BaseView.image.url}}" width="150px" height="150px" style="border-radius: 50px;" alt="{{BaseView.url}}">
       </a>
+</div>
 
-          </div>
-    </div>
+    {% endif %}
+
+    {% endfor %}
+    {% else %}
+<h2 class="navtext">Accomfort</h2>
+    <div class="navItem" style="background: linear-gradient(45deg, gold, red);"><a href="/">Home</a></div>
+     <div class="navItem2" style="background: linear-gradient(45deg, gold, red);"><a href="/about/">About Us</a></div>
+     <div class="navItem3" style="background: linear-gradient(45deg, gold, red);"><a href="/home/" target="_blank">Community</a></div>
+     <!--<div class="navItem10"><a href = "/perks/">Member Perks</a></li></div>-->
+     <div class="navItem4" style="background: linear-gradient(45deg, gold, red);"><a href="/admin/" target="_blank">Administration</a></div>
+     <div class="navItem8" style="background: linear-gradient(45deg, gold, red);"><a href="/ehome/">Store</a></div>
+     <div class="navItem11" style="background: linear-gradient(45deg, gold, red);"><a href="/accounts/logout/">Logout</a></div>
+<br>
+<br>
+
 </nav>
+    </div>
+    {% endif %}
+</section>
 
       <!-- Collapse -->
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"

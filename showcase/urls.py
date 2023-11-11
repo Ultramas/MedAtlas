@@ -231,7 +231,6 @@ urlpatterns = [
     path('settings', views.SettingsBackgroundView.as_view(), name='settings'),
     path('addons/', TemplateView.as_view(template_name='addons.html'), name='addons'),
     path('rules/', views.RuleBackgroundView.as_view(), name='rules'),
-    path('staffapplications/', TemplateView.as_view(template_name='staffapplications.html'), name='staffapplications'),
     path('social-auth/', include('social_django.urls', namespace='social')),
     path('social-auth/sociallogin', TemplateView.as_view(template_name='sociallogin.html'), name='sociallogin'),
     path('password_reset/', TemplateView.as_view(template_name='password_reset.html'), name='password_reset'),

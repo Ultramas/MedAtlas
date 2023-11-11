@@ -156,11 +156,11 @@ class UpdateProfile(models.Model):
 
 
 class PollQuestion(models.Model):
-    question_text = models.CharField(max_length=200, verbose_name="Question")
+    question_text = models.CharField(max_length=500, verbose_name="Question")
     pub_date = models.DateTimeField('date published', auto_now_add=True)
 
     def __str__(self):
-        return self.question_text
+        return str(self.question_text)
 
     class Meta:
         verbose_name = "Poll Question"
@@ -185,7 +185,7 @@ class Choice(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return self.question
+        return str(self.question)
 
     class Meta:
         verbose_name = "Choice"
@@ -295,22 +295,7 @@ class SearchResult(models.Model):
 class StaffApplication(models.Model):
     """For applying for staff"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    name = models.CharField(max_length=100, help_text='Your name & tag go here.')
-    overall_time_check = models.BooleanField(
-        verbose_name="I have been in MC for at least 2 months",
-        default=False,
-        choices=((True, 'Yes'), (False, 'No'))
-    )
-    previous_role_time_check = models.BooleanField(
-        verbose_name="I have been in MC for at least 1 month",
-        default=False,
-        choices=((True, 'Yes'), (False, 'No'))
-    )
-    meeting_attendance_check = models.BooleanField(
-        verbose_name="I can attend at least half of the staff meetings.",
-        default=False,
-        choices=((True, 'Yes'), (False, 'No'))
-    )
+    name = models.CharField(max_length=100, help_text='Your full name goes here.')
     strikes_check = models.BooleanField(
         verbose_name="I have no strikes on my account currently",
         default=False,
@@ -319,12 +304,12 @@ class StaffApplication(models.Model):
     role = models.TextField(help_text='What role are you applying for?', verbose_name="Roles")
     resume = models.FileField(help_text='Your Resume', verbose_name="Resume")
     why = models.TextField(
-        help_text='Tell us why you want to be a MegaClan Staff Member. Be descriptive.',
+        help_text='Tell us why you want to be an Accomfort Staff Member. Be descriptive.',
         verbose_name="Why do you want to apply for staff?"
     )
     how_better = models.TextField(
-        help_text='Tell us what you will do to make MC better as a staff member.',
-        verbose_name="How do you think you can make MC better?"
+        help_text='Tell us what you will do to make Accomfort better as a staff member.',
+        verbose_name="How do you think you can make Accomfort better?"
     )
     read_requirements = models.BooleanField(
         verbose_name="I confirm that I have read all the staff requirements and meet all of them.",

@@ -3700,44 +3700,6 @@ class StaffCreatePostView(CreateView):
     success_url = reverse_lazy("staff")
 
 
-class StaffApplyBackgroundView(FormMixin, ListView):
-    model = StaffApplyBackgroundImage
-    template_name = "staffapplications.html"
-    form_class = StaffJoin
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['StaffApplyBackgroundImage'] = StaffApplyBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
-        return context
-
-    @method_decorator(login_required)
-    def post(self, request, *args, **kwargs):
-        if request.method == "POST":
-            form = StaffJoin(request.POST, request.FILES)
-            if form.is_valid():
-                post = form.save(commit=False)
-                post.save()
-                messages.success(request, 'Form submitted successfully.')
-                return redirect('showcase:staffdone')
-            else:
-                print(form.errors)
-                print(form.non_field_errors())
-                print(form.cleaned_data)
-                messages.error(request, "Form submission invalid")
-                return render(request, "staffapplications.html", {'form': form})
-        else:
-            form = StaffJoin()
-            messages.error(request, 'Form submission failed to register, please try again.')
-            messages.error(request, form.errors)
-            return render(request, "staffapplications.html", {'form': form})
-
 
 class InformationBackgroundView(BaseView):
     InformationBackgroundImage

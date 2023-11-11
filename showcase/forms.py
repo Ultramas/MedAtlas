@@ -135,23 +135,18 @@ class ProfileForm(forms.ModelForm):
 
 
 class StaffJoin(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Lime#6510'}))
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Lemon Sauce'}))
     role = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'What role are you applying for?'}))
-    I_have_been_in_MC_for_at_least_2_months = forms.BooleanField()
-    I_have_been_in_a_previous_role_for_at_least_1_month = forms.BooleanField()
-    I_can_attend_at_least_half_of_the_staff_meetings = forms.BooleanField()
     I_have_no_strikes_on_my_account_currently = forms.BooleanField()
     Why_do_you_want_to_apply_for_staff = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Tell us why you want to be a MegaClan Staff Member. Be descriptive.'}))
+        attrs={'placeholder': 'Tell us why you want to be a Accomfort Staff Member. Be descriptive.'}))
     How_do_you_think_you_can_make_MC_better = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Tell us what you will do to make MC better as a staff member.'}))
+        widget=forms.TextInput(attrs={'placeholder': 'Tell us what you will do to make Accomfort better as a staff member.'}))
     I_confirm_that_I_have_read_all_the_staff_requirements_and_meet_all_of_them = forms.BooleanField()
 
     class Meta:
         model = StaffApplication
-        fields = ('name', 'role', 'I_have_been_in_MC_for_at_least_2_months',
-                  'I_have_been_in_a_previous_role_for_at_least_1_month',
-                  'I_can_attend_at_least_half_of_the_staff_meetings', 'I_have_no_strikes_on_my_account_currently',
+        fields = ('name', 'role', 'I_have_no_strikes_on_my_account_currently',
                   'Why_do_you_want_to_apply_for_staff',
                   'How_do_you_think_you_can_make_MC_better',
                   'I_confirm_that_I_have_read_all_the_staff_requirements_and_meet_all_of_them')

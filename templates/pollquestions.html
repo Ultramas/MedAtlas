@@ -60,10 +60,10 @@
 {% if latest_question_list %}
 {% for question in latest_question_list %}
 <div class="card-mb-3" style="margin-top: 15%;">
-	<div class="card-body">
-		<p class="lead" style="color: white;">{{ question.question_text }}</p>
-		<a href="{% url 'showcase:polldetail' question.id %}" class="btn btn-primary btn-sm" style="color: white;">Vote Now</a>
-		<a href="{% url 'showcase:pollresults' question.id %}" class="btn btn-secondary btn-sm" style="color: white;">Results</a>
+	<div class="card-body" style="background: linear-gradient(45deg, #1feb0c, #3f5efb); padding: 5px; border-radius: 5px; justify-content: center; max-width: 20%; margin-left: 50px;">
+		<h2 class="lead" style="color: white; align-items: center; text-align: center;">{{ question.question_text }}</h2>
+		<a href="{% url 'showcase:polldetail' question.id %}" class="btn btn-primary btn-sm" style="color: white; text-decoration: none; padding-left: 15%; padding-right: 15%;">Vote Now</a>
+		<a href="{% url 'showcase:pollresults' question.id %}" class="btn btn-secondary btn-sm" style="color: white; text-decoration: none;">Results</a>
 	</div>
 </div>
 {% endfor %}
