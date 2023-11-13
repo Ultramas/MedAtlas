@@ -427,7 +427,9 @@
         <br>
 
 <!-- Slideshow container -->
-      <h1 style="text-align: center; color: black;"><strong>Featured Products</strong></h1>
+      <br>
+      <h1 style="text-align: center; color: black;"><strong>Curated Product Selection</strong></h1>
+      <br>
 <div class="slideshow-container" id="featuredproducts">
   <a class="prevredone" style="color: white;" onclick="plusSlides(-1)">&#10094;</a>
 
@@ -726,11 +728,18 @@
 
 
 <!--new item additions-->
+     <br>
+     <h1>Featured Products</h1>
+
+     <br>
+     <br>
+     <br>
            {% for product in Products %}
 
             {% if product.specialty == 'F' %}
     {% if product.image_url %}
-          <a href="{{ product.hyperlink }}" class="featured__item">
+          <a href="{{ product.hyperlink }}" class="featured__item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; top: 0%; left: 0%;
+  margin-top: 4%; margin-bottom: 4%;">
          <img src="{{ product.image_url }}" alt="Profile Picture" class="featured__img"  style="width: 250px; height: 250px; border-radius: 50px; padding: 10px;">
             <p class="featured__details">
                 <span class="price">
@@ -768,7 +777,7 @@
      <!--older product item selection-->
 <br><br>
     <div class="our-products">
-        <h2 class="section-title">Our Products</h2>
+        <h2 class="section-title" style="margin-bottom: -5%;">Product Showcase</h2>
 
       {% for product in Products %}
 
