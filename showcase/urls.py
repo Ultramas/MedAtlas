@@ -254,6 +254,7 @@ urlpatterns = [
     path('administrativeroles/', views.AdminRolesView.as_view(), name='administrativeroles'),
     path('administrativetasks/', views.AdminTasksView.as_view(), name='administrativetasks'),
     path('administrativepages/', views.AdminPagesView.as_view(), name='administrativepages'),
+    path('app/', views.AdminPagesView.as_view(), name='app'),
     path('issues/', TemplateView.as_view(template_name='issues.html'), name='issues'),
     path('punishapps/', TemplateView.as_view(template_name='punishapps.html'), name='punishapps'),
     path('banappeals/', TemplateView.as_view(template_name='banappeals.html'), name='banappeals'),

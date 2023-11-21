@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.generic.base import TemplateView
+
+#from showcase.api import ChatterBotView
 from . import settings
 from django.contrib.staticfiles.urls import static, staticfiles_urlpatterns
 #from sendemail.views import contactView, successView
@@ -25,6 +27,9 @@ from . import views
 
 
 from showcase import urls as showcase_urls
+
+from rest_framework import routers
+router = routers.DefaultRouter()
 
 
 app_name = "main"
@@ -36,6 +41,10 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),  
     
     path('', include('showcase.urls')),
+
+    re_path(r'^api/', include(router.urls)),
+    #re_path(r'^api/chatterbot/', ChatterBotView.as_view(), name='chatterbot'),
+    #re_path(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     #path('accounts/', include('django.contrib.auth.urls'))
 
@@ -95,9 +104,8 @@ urlpatterns = [
 #         ),
 #         name='password_reset_form'),
 
-
-
-
+    re_path(r'^api/', include(router.urls)),
+    re_path(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     # Change Password
     path(

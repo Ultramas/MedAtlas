@@ -3320,6 +3320,7 @@ def get_items_by_category(category):
         items = Item.objects.all()
     return items
 
+from django.contrib.auth.models import AnonymousUser
 
 class EBackgroundView(BaseView, FormView):
     model = EBackgroundImage
@@ -3354,15 +3355,28 @@ class EBackgroundView(BaseView, FormView):
         context['Email'] = EmailField.objects.filter(is_active=1)
         context['store_view_form'] = StoreViewTypeForm()
         context['form'] = EmailForm()
-        try:
-            user_store_view_type = StoreViewType.objects.get(user=current_user, is_active=1)
-            context['store_view_type_str'] = str(user_store_view_type)
-            context['streamfilter_string'] = f'streamfilter set by {self.request.user.username}'
-            print('store view exists')
-            print(str(user_store_view_type))
-        except StoreViewType.DoesNotExist:
-            user_store_view_type = None
-            print('store view does not exist')
+
+        if isinstance(current_user, AnonymousUser):
+            try:
+                user_store_view_type = StoreViewType.objects.filter(is_active=1).first()
+                context['store_view_type_str'] = str(user_store_view_type)
+                context['streamfilter_string'] = f'streamfilter set by {self.request.user.username}'
+                print('store view exists')
+                print(str(user_store_view_type))
+            except StoreViewType.DoesNotExist:
+                user_store_view_type = None
+                print('store view does not exist')
+        else:
+            try:
+                user_store_view_type = StoreViewType.objects.get(user=current_user, is_active=1)
+                context['store_view_type_str'] = str(user_store_view_type)
+                context['streamfilter_string'] = f'streamfilter set by {self.request.user.username}'
+                print('store view exists')
+                print(str(user_store_view_type))
+            except StoreViewType.DoesNotExist:
+                user_store_view_type = None
+                print('store view does not exist')
+
         context['item_filters'] = ItemFilter.objects.filter(is_active=1)
         item_filters = ItemFilter.objects.filter(is_active=1)
         for item_filter in item_filters:

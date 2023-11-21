@@ -78,9 +78,16 @@ INSTALLED_APPS = [
     "guest_user.contrib.allauth",
     'changelogs',
     'favicon',
+    'rest_framework',
     # 'django.chatbot',
     # 'chat',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
+    'PAGE_SIZE': 10,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+}
 
 # BACKGROUND_TASK_RUN_ASYNC = True
 # CHATBOT_TEMPLATE = os.path.join(BASE_DIR, "chatbotTemplate", "webbot.template")
