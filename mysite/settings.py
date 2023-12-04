@@ -52,7 +52,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '4929dda8-2133-4047-8e0e-c1bcbd53fc3a.id.repl.co',
     'poketrove-attempt-backeds.andythemaster.repl.co', '10.10.0.141:16524',
-    '10.30.2.204:16410', '10.20.1.253:16451', '127.0.0.1'
+    '10.30.2.204:16410', '10.20.1.253:16451', '52.52.92.3', '127.0.0.1'
 ]
 
 # Application definition
