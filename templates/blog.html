@@ -977,8 +977,19 @@ a.page-link:hover {
             <p class="footer-list-title">Address</p>
 
             <address class="footer-text address">
-              123 Main Street <br>
-              New York, NY 10001
+              {% for PostList in TextFielde %}
+            {% if Postlist.page == 'blog.html' %}
+            {% if Postlist.section == 8 %}
+
+            {% endif %}
+            {% endif %}
+{% endfor %} <br>
+              {% for PostList in TextFielde %}
+            {% if Postlist.page == 'blog.html' %}
+            {% if Postlist.section == 9 %}
+            {% endif %}
+            {% endif %}
+{% endfor %}
             </address>
 
           </div>
@@ -990,52 +1001,15 @@ a.page-link:hover {
             <ul>
 
               <li>
-                <a href="#" class="footer-link hover-2">Action</a>
+                  {% for PostList in TextFielde %}
+            {% if Postlist.page == 'blog.html' %}
+            {% if Postlist.section == 10 %}
+            <p class="hero-subtitle">Hello Everyone!</p>
+            {% endif %}
+            {% endif %}
+{% endfor %}
               </li>
-
-              <li>
-                <a href="#" class="footer-link hover-2">Business</a>
-              </li>
-
-              <li>
-                <a href="#" class="footer-link hover-2">Adventure</a>
-              </li>
-
-              <li>
-                <a href="#" class="footer-link hover-2">Canada</a>
-              </li>
-
-              <li>
-                <a href="#" class="footer-link hover-2">America</a>
-              </li>
-
-              <li>
-                <a href="#" class="footer-link hover-2">Curiosity</a>
-              </li>
-
-              <li>
-                <a href="#" class="footer-link hover-2">Animal</a>
-              </li>
-
-              <li>
-                <a href="#" class="footer-link hover-2">Dental</a>
-              </li>
-
-              <li>
-                <a href="#" class="footer-link hover-2">Biology</a>
-              </li>
-
-              <li>
-                <a href="#" class="footer-link hover-2">Design</a>
-              </li>
-
-              <li>
-                <a href="#" class="footer-link hover-2">Breakfast</a>
-              </li>
-
-              <li>
-                <a href="#" class="footer-link hover-2">Dessert</a>
-              </li>
+                <!--same position, organized by age-->
 
             </ul>
 
@@ -1046,7 +1020,7 @@ a.page-link:hover {
             <p class="footer-list-title">Newsletter</p>
 
             <p class="footer-text">
-              Sign up to be first to receive the latest stories inspiring us, case studies, and industry news.
+              Sign up to be first to receive the latest inspiring stories & news.
             </p>
 
 

@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'changelogs',
     'favicon',
     'rest_framework',
+    'sslserver',
     # 'django.chatbot',
     # 'chat',
 ]

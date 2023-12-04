@@ -309,7 +309,7 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: nowrap;
-    width: calc(96vw / 3); height: calc(100vh / 2.5);
+    width: calc(96vw 3.5 3); height: calc(100vh / 2.5);
     margin-right: 10px;
 }
   </style>
@@ -428,7 +428,7 @@
 
 <!-- Slideshow container -->
       <br>
-      <h1 style="text-align: center; color: black;"><strong>Curated Product Selection</strong></h1>
+      <h1 style="text-align: center; color: black;"><strong>Curated Card Selection</strong></h1>
       <br>
 <div class="slideshow-container" id="featuredproducts">
   <a class="prevredone" style="color: white;" onclick="plusSlides(-1)">&#10094;</a>
@@ -444,7 +444,7 @@
          {% if BackgroundImage.carouselpage == 'index.html' %}
        {% if BackgroundImage.carouselposition == 1 %}
        <a href="{{BackgroundImage.hyperlink}}">
-       <img class="slide-img" style="width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+       <img class="slide-img" 3.5tyle="width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -466,7 +466,7 @@
        {% if BackgroundImage.carouselposition == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img class="slide-img" style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -486,7 +486,7 @@
        {% if BackgroundImage.carouselposition == 3 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img class="slide-img" style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -507,7 +507,7 @@
        {% if BackgroundImage.carouselposition == 4 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img class="slide-img" style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -527,7 +527,7 @@
        {% if BackgroundImage.carouselposition == 5 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img class="slide-img" style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -547,7 +547,7 @@
        {% if BackgroundImage.carouselposition == 6 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img class="slide-img" style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -567,7 +567,7 @@
        {% if BackgroundImage.carouselposition == 7 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img class="slide-img" style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -587,7 +587,7 @@
        {% if BackgroundImage.carouselposition == 8 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img class="slide-img" style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -607,7 +607,7 @@
        {% if BackgroundImage.carouselposition == 9 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img class="slide-img" style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -628,7 +628,7 @@
        {% if BackgroundImage.carouselposition == 1 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img class="slide-img" style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -648,7 +648,7 @@
        {% if BackgroundImage.carouselposition == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img class="slide-img" style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate">
                             </a>
                         <h3>{{ BackgroundImage.caption }}</h3>
             {% endif %}
@@ -949,7 +949,7 @@
               {% if BackgroundImage.carouselnumber == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
                             </a>
                         <div class="text2">{{ BackgroundImage.caption }}</div>
             {% endif %}
@@ -969,7 +969,7 @@
        {% if BackgroundImage.carouselposition == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
                             </a>
                         <div class="text2">{{ BackgroundImage.caption }}</div>
             {% endif %}
@@ -989,7 +989,7 @@
               {% if BackgroundImage.carouselnumber == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
                             </a>
                         <div class="text2">{{ BackgroundImage.caption }}</div>
             {% endif %}
@@ -1010,7 +1010,7 @@
               {% if BackgroundImage.carouselnumber == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
                             </a>
                         <div class="text2">{{ BackgroundImage.caption }}</div>
             {% endif %}
@@ -1030,7 +1030,7 @@
               {% if BackgroundImage.carouselnumber == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
                             </a>
                         <div class="text2">{{ BackgroundImage.caption }}</div>
             {% endif %}
@@ -1050,7 +1050,7 @@
               {% if BackgroundImage.carouselnumber == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
                             </a>
                         <div class="text2">{{ BackgroundImage.caption }}</div>
             {% endif %}
@@ -1070,7 +1070,7 @@
               {% if BackgroundImage.carouselnumber == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
                             </a>
                         <div class="text2">{{ BackgroundImage.caption }}</div>
             {% endif %}
@@ -1090,7 +1090,7 @@
               {% if BackgroundImage.carouselnumber == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
                             </a>
                         <div class="text2">{{ BackgroundImage.caption }}</div>
             {% endif %}
@@ -1110,7 +1110,7 @@
               {% if BackgroundImage.carouselnumber == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
                             </a>
                         <div class="text2">{{ BackgroundImage.caption }}</div>
             {% endif %}
@@ -1131,7 +1131,7 @@
               {% if BackgroundImage.carouselnumber == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
                             </a>
                         <div class="text2">{{ BackgroundImage.caption }}</div>
             {% endif %}
@@ -1151,7 +1151,7 @@
               {% if BackgroundImage.carouselnumber == 2 %}
        <a href="{{BackgroundImage.hyperlink}}">
        <img style="
-    width: calc(96vw / 3); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
+    width: calc(96vw / 3.5); height: calc(100vh / 2.5);" src = "{{ BackgroundImage.carouselimage.url }}" alt = "BackgroundImage.alternate" style="background-size: cover;">
                             </a>
                         <div class="text2">{{ BackgroundImage.caption }}</div>
             {% endif %}

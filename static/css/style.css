@@ -44,7 +44,7 @@
 header{
   font-family: Press Start 2P;
   background-attachment: fixed;
-  position: fixed;
+  /*position: fixed;*/
   height: 14vh;
   width: 100%;
   display: flex;

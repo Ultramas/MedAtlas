@@ -1,144 +1,180 @@
 {% extends 'base.html' %}
 {% load static %}
 
+    {% for PerksBackgroundImage in Titles %}
+      {% if PerksBackgroundImage.page == 'perks.html' %}
+         {{ PerksBackgroundImage.overtitle }}
+      {% endif %}
+    {% endfor %}
 
-       {% block content %}
- <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >
-    <title>{% block title %}Quantumism{% endblock title %}</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+{% block content %}
 
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-    <meta name="msapplication-TileColor" content="#da532c">
-    <meta name="theme-color" content="#ffffff">
+<head>
+  <!--change title tags to django form -->
 
-
-  </head>
+<link rel="icon" href="{% static 'images/favicon.ico' type='image/ico' %}">
+</head>
 
 <body>
 
- <div id="overlay">
-   <img src = "76.gif">
-   </div>
 
-   <div class="parallax1">
+  <div id="overlay">
+    <img src = "76.gif">
+    </div>
+{% for PerksBackgroundImage in Background %}
+  {% if PerksBackgroundImage.page == "perks.html" %}
+  {% if PerksBackgroundImage.position == 1 %}
+    <div class="parallax1arules" id = "main" style="background-image: url({{PerksBackgroundImage.cover.url}})">
+        {% endif %}
+        {% endif %}
+        {% endfor %}
 
- <span>〖𐌑𐌂〗</span>
- </div>
-   <div class="parallax2" id = "leaders">
-       <h2 class = "opening2vb">
-           {% for PerksBackgroundImage in TextFielde %}
-            {% for section in TextFielde %}
-         {% if section.section == PerksBackgroundImage.section %}
-        {% if PerksBackgroundImage.page == 'index.html' %}
-      {% if PerksBackgroundImage.section == 1 %}
-    {{ PerksBackgroundImage.text }}
-           {% endif %}
-         {% endif %}
-         {% endif %}
- {% endfor %}
-{% endfor %}
-       </h2>
-         <h2 class="caption2a">
+{% for PerksBackgroundImage in TextFielde %}
+  {% if PerksBackgroundImage.page == "perks.html" %}
+  {% if PerksBackgroundImage.section == 1 %}
+      <h2 class = "opening" style="color: {{PerksBackgroundImage.text_color}}">{{PerksBackgroundImage.text}}</h2>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+        {% for PerksBackgroundImage in TextFielde %}
+  {% if PerksBackgroundImage.page == "perks.html" %}
+  {% if PerksBackgroundImage.section == 2 %}
+      <h2 class="caption1arules" style="color: {{PerksBackgroundImage.text_color}}">{{PerksBackgroundImage.text}}</h2>
+        <br>
+  {% endif %}
+  {% endif %}
+  {% endfor %}
 
-          {% for PerksBackgroundImage in TextFielde %}
-            {% for section in TextFielde %}
-           {% if PerksBackgroundImage.page == 'index.html' %}
-           {% if PerksBackgroundImage.section == 2 %}
-         {% if section.section == PerksBackgroundImage.section %}
-   {{ PerksBackgroundImage.text }}
-           {% endif %}
-           {% endif %}
-         {% endif %}
- {% endfor %}
-{% endfor %}
-         </h2>
-           </div>
-         </h2>
-   </div>
+    </div>
 
+       {% for PerksBackgroundImage in Background %}
+      {% if PerksBackgroundImage.page == "perks.html" %}
+      {% if PerksBackgroundImage.position == 2 %}
+    <div class="parallax2arules" id = "leaders" style="background-image: url({{PerksBackgroundImage.cover.url}})">
+    <!--<h2>{{ PerksBackgroundImage.title }}</h2>-->
+  {% endif %}
+  {% endif %}
+  {% endfor %}
 
-   <div class="parallax3" id = "innovation">
-     <h2 class = "opening3vb">Power To The People</h2><h2 class="caption3a">
+        {% for PerksBackgroundImage in TextFielde %}
+  {% if PerksBackgroundImage.page == "perks.html" %}
+  {% if PerksBackgroundImage.section == 3 %}
+        <h2 class = "opening2rules" style="color: {{PerksBackgroundImage.text_color}}">{{ PerksBackgroundImage.text }}</h2>
 
-<div class="item" data-aos="fade-up">1</div>
-<div class="item" data-aos="fade-down">2</div>
-<div class="item" data-aos="fade-right">3</div>
-<div class="item" data-aos="fade-left">4</div>
-
-<div class="item" data-aos="zoom-in">5</div>
-<div class="item" data-aos="zoom-out">6</div>
-
-<div class="item" data-aos="slide-up">7</div>
-
-<div class="item" data-aos="flip-up">8</div>
-<div class="item" data-aos="flip-down">9</div>
-<div class="item" data-aos="flip-right">10</div>
-<div class="item" data-aos="flip-left">11</div></h2></div>
-
-   <div class="parallax4" id = "difference"><h2 class = "opening4">
-       {% for PerksBackgroundImage in TextFielde %}
-            {% for section in TextFielde %}
-         {% if section.section == PerksBackgroundImage.section %}
-        {% if PerksBackgroundImage.page == 'index.html' %}
-      {% if PerksBackgroundImage.section == 3 %}
-    {{ PerksBackgroundImage.text }}
-           {% endif %}
-         {% endif %}
-         {% endif %}
- {% endfor %}
-{% endfor %}
-   </h2><h2 class="caption4a">
-   {% for PerksBackgroundImage in TextFielde %}
-            {% for section in TextFielde %}
-         {% if section.section == PerksBackgroundImage.section %}
-        {% if PerksBackgroundImage.page == 'index.html' %}
-      {% if PerksBackgroundImage.section == 4 %}
-    {{ PerksBackgroundImage.text }}
-           {% endif %}
-         {% endif %}
-         {% endif %}
- {% endfor %}
-       {% endfor %}</h2>
-   </div>
- </div>
+{% endif %}
+  {% endif %}
+  {% endfor %}
 
 
-    <div class="parallax5"><h2 class = "opening5vb">Join Us</h2><h2 class="caption5a">If you have read this far, don't just sit there. Click the〖𐌑𐌂〗icon below to get in! </h2></div>
+        {% for PerksBackgroundImage in TextFielde %}
+  {% if PerksBackgroundImage.page == "perks.html" %}
+  {% if PerksBackgroundImage.section == 4 %}
+          <h2 class="caption2arules" style="color: {{PerksBackgroundImage.text_color}}">
+     {{ PerksBackgroundImage.text }} </h2>
+    </div>
+{% endif %}
+  {% endif %}
+  {% endfor %}
 
-          <div class="metaclass">
-   <a href="https://discord.gg/g43uGbURUz">
-        <img alt="Qries" src="../static/css/images/MC.png"
-        width="350" height="150">
-     </a>
+       {% for PerksBackgroundImage in Background %}
+      {% if PerksBackgroundImage.page == "perks.html" %}
+      {% if PerksBackgroundImage.position == 3 %}
+    <div class="parallax3arules" id = "difference" style="background-image: url({{PerksBackgroundImage.cover.url}})">
+{% endif %}
+  {% endif %}
+  {% endfor %}
 
-         </div>
-   </div>
+                {% for PerksBackgroundImage in TextFielde %}
+  {% if PerksBackgroundImage.page == "perks.html" %}
+  {% if PerksBackgroundImage.section == 5 %}
+        <h2 class = "opening3rules" style="color: {{PerksBackgroundImage.text_color}}">{{PerksBackgroundImage.text}}</h2>
 
-   </div>
+{% endif %}
+  {% endif %}
+  {% endfor %}
 
-   </div>
+                      {% for PerksBackgroundImage in TextFielde %}
+  {% if PerksBackgroundImage.page == "perks.html" %}
+  {% if PerksBackgroundImage.section == 6 %}
+        <h2 class="caption3arules" style="color: {{PerksBackgroundImage.text_color}}">{{PerksBackgroundImage.text}}</h2></div>
+
+{% endif %}
+  {% endif %}
+  {% endfor %}
+  </div>
+    </div>
+
+       {% for PerksBackgroundImage in Background %}
+      {% if PerksBackgroundImage.page == "perks.html" %}
+      {% if PerksBackgroundImage.position == 4 %}
+    <div class="parallax4arules" id = "innovation" style="background-image: url({{PerksBackgroundImage.cover.url}})">
+{% endif %}
+  {% endif %}
+  {% endfor %}
+
+        {% for PerksBackgroundImage in TextFielde %}
+  {% if PerksBackgroundImage.page == "perks.html" %}
+  {% if PerksBackgroundImage.section == 7 %}
+      <h2 class = "opening4rules" style="color: {{PerksBackgroundImage.text_color}}">{{PerksBackgroundImage.text}}</h2>
+       {% endif %}
+  {% endif %}
+  {% endfor %}
+
+                {% for PerksBackgroundImage in TextFielde %}
+  {% if PerksBackgroundImage.page == "perks.html" %}
+  {% if PerksBackgroundImage.section == 8 %}
+        <h2 class="caption4arules" style="color: {{PerksBackgroundImage.text_color}}">{{PerksBackgroundImage.text}}</h2></div>
+       {% endif %}
+  {% endif %}
+  {% endfor %}
+    </div>
+  </div>
+
+
+     <!--<div class="parallax5arules"><h2 class = "opening5rules">Join Us</h2><h2 class="caption5arules">If you have read this far, don't just sit there. Click the〖𐌑𐌂〗icon below to get in! </h2></div>
+
+           <div class="metaclass">
+    <a href="https://discord.gg/g43uGbURUz">
+         <img alt="Qries" src="../static/css/images/MC.png"
+         width="350" height="150">
+      </a>
+
+          </div>
+    </div>
+
+    </div>
+
+    </div>-->
 
 
 
 
 
-
-   <!--Custom JS-->
-   <script src="{% static 'css/js/script.js' %}"></script>
-   <script src="{% static 'css/js.darkmode.js' %}"></script>
-   <script src="{% static 'css/js/navbar.js' %}"></script>
-   <script src="{% static 'css/js/scroll.js' %}"></script>
-   <script src="{% static 'css/js/header1.js' %}"></script>
-   <script src="{% static 'css/js/change.js' %}"></script>
+    <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
 
 </body>
 
 {% endblock content %}
-

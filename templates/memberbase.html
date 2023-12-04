@@ -25,7 +25,7 @@
    {% if user.is_authenticated %}
 
   <body>
-       <header>
+       <header style="margin-top: -8%;">
            <div class="column three mobile-twelve section_header_logo vertical-align-middle">
       {% for MemberBaseView in Logo %}
       {% if MemberBaseView.page == 'memberbase.html' %}
@@ -364,7 +364,6 @@
 
 <body>
        <header>
-
   <div class="column three mobile-twelve section_header_logo vertical-align-middle">
  <a class = "logo" href="/"><img class = "imageicon"  src="https://www.logomaker.com/api/main/images/1j+ojFVDOMkX9Wytexe43D6khv+EqxJLmRfFwXs1M3EMoAJtliUohPZi8...oz " width="145vh"
      height="100vh"></a>
@@ -625,12 +624,12 @@
 
 <footer>
      <div class = "copyright">
-     <h3> 
+     <h3>
        {% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
     {{ BaseCopyrightTextField.text }}
   {% endfor %}</h3>
    </div>
-   
+
   </footer>
   </body>
 </html>
