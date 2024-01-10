@@ -53,7 +53,7 @@
 
 
 
-<body>
+<body style="height: 100vh;">
         {% for newprofile in Logo %}
         {% if newprofile.page == 'showcase.html' %}
 
@@ -74,7 +74,7 @@
 <div style="margin-top: 8%;" class="search">
     <ul>
     <form action="{% url 'showcase:search_results' %}" method="get">
-        <input name="q" type="text" placeholder="Search...">
+        <input name="q" type="text" placeholder="Search..." style="border-radius: 30px; margin-right: 10%;">
         <select name="filter">
             <option value="">All</option>
             <option value="city">City</option>
@@ -120,10 +120,13 @@
     {% endwith %}
 -->
     <!-- Display star rating as text --><!--consider displaying star picture-->
+
+
+<div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
 {% if feedback_objects.star_rating == 1 %}
 {% for feedback_objects in Image %}
 
-<ul class="star" style="margin-left: 5%;">
+<ul class="star" style="margin-left: -2.15%;">
 {% if feedback_objects.alternate == 'star-solid' %}
     <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
     {% endif %}
@@ -144,7 +147,7 @@
 {% elif feedback_objects.star_rating == 2 %}
 {% for feedback_objects in Image %}
 
-<ul class="star" style="margin-left: 5%;">
+<ul class="star" style="margin-left: -2.15%;">
 {% if feedback_objects.alternate == 'star-solid' %}
     <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
     {% endif %}
@@ -164,7 +167,7 @@
 {% endfor %}
 {% elif feedback_objects.star_rating == 3 %}
 {% for feedback_objects in Image %}
-<ul class="star" style="margin-left: 5%;">
+<ul class="star" style="margin-left: -2.15%;">
     {% if feedback_objects.alternate == 'star-solid' %}
     <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
     {% endif %}
@@ -189,7 +192,7 @@
     <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}{{feedback_objects.image_measurement}}; height: {{feedback_objects.height_for_resize}}{{feedback_objects.image_measurement}}; margin-left: {{feedback_objects.xposition}}{{feedback_objects.image_measurement}}; margin-top: {{feedback_objects.yposition}}{{feedback_objects.image_measurement}};">
     {% endif %}
 
-<ul class="star" style="margin-left: 5%;">
+<ul class="star" style="margin-left: -2.15%;">
     {% if feedback_objects.alternate == 'star-solid' %}
     <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
     {% endif %}
@@ -206,7 +209,7 @@
 {% endfor %}
 {% else %}
 {% for feedback_objects in Image %}
-<ul class="star" style="margin-left: 5%;">
+<ul class="star" style="margin-left: -2.15%;">
     {% if feedback_objects.alternate == 'star-solid' %}
     <img src="{{ feedback_objects.image.url }}" alt="{{ feedback_objects.star_rating }}" style="width: {{feedback_objects.width_for_resize}}px; height: {{feedback_objects.height_for_resize}}px;">
     {% endif %}
@@ -226,12 +229,24 @@
     </ul>
 {% endfor %}
 {% endif %}
+</div>
 
     <!-- Display feedback comment -->
     <h3>{{ feedback_objects.comment }}</h3>
 
                                 {% endfor %}
 </div>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 </body>
 </html>
 {% endblock content %}

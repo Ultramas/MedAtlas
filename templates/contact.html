@@ -1,4 +1,5 @@
 {% extends 'contactbase.html' %}
+{% load static %}
 
 {% block content %}
 <html>
@@ -9,7 +10,7 @@
       {% endif %}
     {% endfor %}
 </head>
-<body>
+<body style="background: linear-gradient(rgba(0, 23, 45), rgba(34, 20, 64))">
 {% for ContactViewe in Logo %}
         {% if ContactViewe.page == 'contact.html' %}
         <a class="logo" href="{{ContactViewe.hyperlink}}">
@@ -29,18 +30,25 @@
 <br>
 <br>
 <br>
-<br>
 
-    <h1 style="margin-bottom: -10%;">Contact Us</h1>
-<div class="container" style="height: 140vh;">
-    <form method="post">
+<div class="container" style="height: 130vh;">
+    <form method="post" style="background: linear-gradient(-45deg, rgba(134, 20, 64), rgba(200, 143, 45)); padding: 50px; border-radius: 50px;">
+    <h1 class="banh1" >Contact Us</h1>
         {% csrf_token %}
         {{ form.as_p }}
     <button class="btn btn-success my-3" type="submit">Send Message</button>
     </form>
 </div>
-
 </div>
+
+
+     <script src="{% static 'css/js/featuredproductscript.js' %}"></script>
+     <script src="{% static 'css/js.featuredproductscript2.js' %}"></script>
+     <script src="{% static 'css/js.darkmode.js' %}"></script>
+     <script src="{% static 'css/js/navbar.js' %}"></script>
+     <script src="{% static 'css/js/scroll.js' %}"></script>
+     <script src="{% static 'css/js/cover.js' %}"></script>
+     <script src="{% static 'css/js/autochat.js' %}"></script>
 </body>
 </html>
 {% endblock content %}

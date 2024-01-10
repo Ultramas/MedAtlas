@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
-    SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType
+    SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
+    Currency
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -66,6 +67,8 @@ from .models import SupportChat
 from .models import BaseCopyrightTextField
 from .models import AdvertisementBase
 # from .models import ResizeImageMixin
+from .models import TradeItem
+from .models import TradeOffer
 from .models import ImageBase
 from .models import DonateIcon
 from .models import Coupon
@@ -222,6 +225,42 @@ class StaffProfileAdmin(admin.ModelAdmin):
 
 
 admin.site.register(StaffProfile, StaffProfileAdmin)
+
+
+class TradeItemAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Trade Offer Information - Categorial Description', {
+            'fields': ('user', 'title', 'category', 'specialty', 'status', 'description', ),
+            'classes': ('collapse',),
+        }),
+        ('Trade Offer Information - Technical Description', {
+            'fields': ('fees', 'condition', 'label', 'slug', 'relateditems', 'is_active',),
+            'classes': ('collapse',),
+        }),
+        ('Trade Offer Information - Image Description', {
+            'fields': ('image', 'image_length', 'image_width','length_for_resize', 'width_for_resize',),
+            'classes': ('collapse',),
+        }),
+    )
+
+
+admin.site.register(TradeItem, TradeItemAdmin)
+
+
+class TradeOfferAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Trade Offer Information - Categorial Description', {
+            'fields': ('trade_items', 'estimated_trading_value', 'message', 'user', 'user2',),
+            'classes': ('collapse',),
+        }),
+        ('Trade Offer Information - Technical Description', {
+            'fields': ('timestamp', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+
+
+admin.site.register(TradeOffer, TradeOfferAdmin)
 
 
 class ProfileAdmin(admin.ModelAdmin):
@@ -883,6 +922,50 @@ class NewsFeedAdmin(admin.ModelAdmin):
 
 
 admin.site.register(NewsFeed, NewsFeedAdmin)
+
+
+class ShufflerAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Shuffler Information - Categorial Descriptions', {
+            'fields': ('name', 'choice_text', 'question', 'category', 'heat',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Shuffler Information - Attributes', {
+            'fields': ('is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Shuffler Information - Image Display', {
+            'fields': ('file', 'image_length', 'image_width',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+    readonly_fields = ('mfg_date',)
+
+
+admin.site.register(Shuffler, ShufflerAdmin)
+
+
+class CurrencyAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Currency Information - Categorial Descriptions', {
+            'fields': ('name', 'flavor_text', 'question', 'category',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Currency Information - Attributes', {
+            'fields': ('is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Currency Information - Image Display', {
+            'fields': ('file', 'image_length', 'image_width',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+    readonly_fields = ('mfg_date',)
+
+
+admin.site.register(Currency, CurrencyAdmin)
 
 
 class AdministrationRoleAdmin(admin.ModelAdmin):

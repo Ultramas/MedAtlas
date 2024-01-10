@@ -309,6 +309,9 @@ urlpatterns = [
     path('create_questions/<int:num_questions>/', views.create_questions, name='create_questions'),
     path('answer/<int:question_id>/', views.submit_answer, name='answer'),
     path('add_question/', views.add_question, name='answer'),
+    path('create_product/', views.CreateItemView.as_view(), name='create_product'),
+    path('tradeitems/', views.TradeBackgroundView.as_view(), name='tradeitems'),
+    path('tradingcentral/', views.TradeItemCreateView.as_view(), name='tradingcentral'),
 
     # path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='main/password/password_reset_done.html'), name='password_reset_done'),
 

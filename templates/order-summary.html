@@ -11,46 +11,46 @@
       <br>
         <div class="table-responsive text-nowrap">
     <h3>
-        <strong>Your Cart</strong>
+        <strong style="color: white;">Your Cart</strong>
     </h3>
     <table class="table">
         <thead>
         <tr>
-            <th scope="col">#</th>
-            <th scope="col">Item Name</th>
-            <th scope="col">Price</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Total Item Price</th>
+            <th scope="col" style="color: white;">#</th>
+            <th scope="col" style="color: white;">Item Name</th>
+            <th scope="col" style="color: white;">Price</th>
+            <th scope="col" style="color: white;">Quantity</th>
+            <th scope="col" style="color: white;">Total Item Price</th>
         </tr>
         </thead>
         <tbody>
         {% for order_item in object.items.all %}
         <tr>
-            <th scope="row">{{ forloop.counter }}</th>
-            <td>{{ order_item.item.title }}</td>
-            <td>
+            <th scope="row" style="color: white;">{{ forloop.counter }}</th>
+            <td style="color: white;">{{ order_item.item.title }}</td>
+            <td style="color: white;">
             {% if order_item.item.discount_price %}
-                <del>${{ order_item.item.price}}</del>
+                <del style="color: white;">${{ order_item.item.price}}</del>
                 ${{ order_item.item.discount_price }}
             {% else %}
                 ${{ order_item.item.price}}
             {% endif %}
 
             </td>
-            <td>
-                <a href="{% url 'showcase:reduce-quantity-item' order_item.item.slug %}"><i class="fas fa-minus mr-2"></i></a>
+            <td style="color: white;">
+                <a href="{% url 'showcase:reduce-quantity-item' order_item.item.slug %}"><i class="fas fa-minus mr-2" style="color: white;"></i></a>
                 {{ order_item.quantity }}
-                <a href="{% url 'showcase:add-to-cart' order_item.item.slug %}"><i class="fas fa-plus ml-2"></i></a>
+                <a href="{% url 'showcase:add-to-cart' order_item.item.slug %}"><i class="fas fa-plus ml-2" style="color: white;"></i></a>
             </td>
             <td>
             {% if order_item.item.discount_price %}
-                ${{ order_item.get_discount_item_price }}
-                <span class="badge badge-success" >Saved ${{ order_item.get_amount_saved }}</span>
+                <span style="color: white;"> ${{ order_item.get_discount_item_price }}</span>
+                <span class="badge badge-success" style="color: white;" >Saved ${{ order_item.get_amount_saved }}</span>
             {% else %}
-                ${{ order_item.get_total_item_price}}
+               <span style="color: white;"> ${{ order_item.get_total_item_price}}</span>
             {% endif %}
              <a href="{% url 'showcase:remove-from-cart' order_item.item.slug %}">
-                <i class="fas fa-trash float-right text-danger"></i>
+                <i class="fas fa-trash float-right text-danger" style="color: white;"></i>
              </a>
 
             </td>
@@ -58,12 +58,12 @@
 
         {% empty %}
         <tr>
-            <td colspan="5">Your Cart Is Empty</td>
+            <td colspan="5" style="color: white;">Your Cart Is Empty</td>
         </tr>
 
          <tr>
             <td colspan="5">
-                <a href="{% url 'showcase:ehome' %}" class="btn btn-primary float-right">Continue Shopping</a>
+                <a href="{% url 'showcase:ehome' %}" class="btn btn-primary float-right" style="color: white;">Continue Shopping</a>
             </td>
         </tr>
 
@@ -71,13 +71,13 @@
 
         {% if object.get_total_price %}
         <tr>
-            <td colspan="4"><b>Total Order Price</b></td>
-            <td>${{ object.get_total_price }}</td>
+            <td colspan="4" style="color: white;"><b>Total Order Price</b></td>
+            <td style="color: white;">${{ object.get_total_price }}</td>
         </tr>
          <tr>
             <td colspan="5">
-                <a href="{% url 'showcase:checkout' %}" class="btn btn-warning float-right ml-2">Checkout</a>
-                <a href="{% url 'showcase:ehome' %}" class="btn btn-primary float-right">Continue Shopping</a>
+                <a href="{% url 'showcase:checkout' %}" class="btn btn-warning float-right ml-2" style="color: black;">Checkout</a>
+                <a href="{% url 'showcase:ehome' %}" class="btn btn-primary float-right" style="color: white;">Continue Shopping</a>
             </td>
         </tr>
 

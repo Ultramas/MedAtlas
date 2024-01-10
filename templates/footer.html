@@ -30,9 +30,19 @@
         <i class="fab fa-pinterest mr-3"></i>
       </a>
       
-      © 2022 Copyright:
-      <a href="https://djangoecommerce.andythemaster.repl.co/#" target="_blank"> IntelleX </a>
- 
+      <footer>
+     <div class = "copyright">
+     <p>
+       <br>
+       {% for BackgroundImage in BaseCopyrightTextFielded %}
+                         <a href="{{BackgroundImage.hyperlink}}" class="gf_product-title gf_gs-text-heading-3" data-bss-pl="active">
+                                {{BackgroundImage.copyright}}
+                         </a>
+    {% endfor %}
+     </p>
+   </div>
+
+</footer>
 
     </div>
     <!-- Social icons -->

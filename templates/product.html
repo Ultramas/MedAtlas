@@ -14,7 +14,7 @@
         <!--Grid column-->
         <div class="col-md-6 mb-4">
 
-          <h1 class = "itemtitle">{{item.title}}</h1>
+          <h1 class = "itemtitle" style="color: white;">{{item.title}}</h1>
       <img class = "hunte" src="{{item.image.url}}"
         alt="{{ item.get_absolute_url }}">
           
@@ -41,21 +41,38 @@
             <p class="lead">
 
             {% if object.discount_price %}
-              <span class="mr-1">
+              <span class="mr-1" style="color: white;">
               <del>${{ object.price }}</del>
               </span>
-              <span>${{ object.discount_price }}</span>
+              <span style="color: white;">${{ object.discount_price }}</span>
             {% else %}
-             <span>${{ object.price }}</span>
+             <span style="color: white;">${{ object.price }}</span>
             {% endif %}
 
             </p>
 
             <p class="lead font-weight-bold">{{ object.item_name }}</p>
+<ul>
+              {% if object.user.username != 'PokeTrove' %}
 
-            <p>{{ object.description }}</p>
+              <div style="display: flex; align-items: center;">
+    {% if object.user.profiledetails.avatar.url %}
+        <a href="{{ object.get_profile_url2 }}">
+            <img src="{{ object.user.profiledetails.avatar.url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 0px;">
+        </a>
+    {% else %}
+        <!-- Placeholder image or default avatar -->
+        <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
+    {% endif %}
+    <p style="color: white; margin-left: 10px; font-size: 20px;">{{ object.user.username }}</p>
+</div>
 
-            {% comment %} <form class="d-flex justify-content-left">
+    {% else %}
+              <p style="color: white">Product fulfilled by PokeTrove INC</p>
+              {% endif %}
+</ul>
+            {% comment %}
+              <form class="d-flex justify-content-left">
               <!-- Default input -->
               <input type="number" value="1" aria-label="Search" class="form-control" style="width: 100px">
               <button class="btn btn-primary btn-md my-0 p" type="submit">Add To Cart

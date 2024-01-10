@@ -18,6 +18,13 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/buttonclasse.css' %}">
 <style>
+    h3, h4 {
+    color: white;
+}
+
+h3:hover, h4:hover {
+    color: black; /* Replace 'otherColor' with the color you want upon hover */
+}
 /* CSS */
 .button-64 {
   align-items: center;
@@ -61,7 +68,7 @@
 @media (min-width: 768px) {
   .button-64 {
     font-size: 24px;
-    min-width: 196px;
+    min-width: 16px;
   }
 }
 </style>
@@ -132,11 +139,16 @@
          <!--pagination change station-->
 <form method="GET">
     <label for="paginate-by" style="margin-right: 1%;">
-        <h1>Orders per page: </h1>
+        <p style="color: white; font-size: 10x; margin-left: 50px;">Orders per page: </p>
     </label>
     <input type="number" name="paginate_by" id="paginate-by" value="{{ orders.paginator.per_page }}">
-
-<button class="button-64" role="button" type="submit"><span class="text">Submit</span></button>
+<br>
+    <button class="button-64" role="button" type="submit" title="Update Page Filter" style="
+    background-color: rgb(5, 6, 45);
+    padding: 21px 3px;
+    border-radius: 6px;
+    margin-left: 50px;
+    transition: 300ms;"><span class="text">Submit</span></button>
 </form>
 
 
@@ -155,7 +167,7 @@
                     <a href="{{ order_item.profile_url }}">
                         <img src="{{ order_item.author_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 25px;">
                     </a>
-                    <h2 style="padding-left: 10px;">{{ order_item.user.username }}</h2>
+                    <h2 style="padding-left: 10px; color: white;">{{ order_item.user.username }}</h2>
                 {% else %}
                     <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 25px;">
                 {% endif %}
@@ -171,7 +183,11 @@
             <img src="{{order_item.image.url}}" alt="{{order_item.item}}" style="width: 50%; height: 50%; border-radius: 20px;">
                     </a>
 <br>
-<a href="{% url 'showcase:create_review' %}?item_slug={{ order_item.item.slug }}&orderitem_id={{ order_item.id }}" class="button-64" role="button" style="width: 100%; height: 10%; justify-content: center; align-items: center;"><span class="text" style="justify-content: center; ">Leave Feedback</span></a>
+<br>
+<a href="{% url 'showcase:create_review' %}?item_slug={{ order_item.item.slug }}&orderitem_id={{ order_item.id }}" class="button-64" role="button" style="width: 100%; height: 10%; justify-content: center; align-items: center;">
+
+    <span class="text" style="justify-content: center;
+padding: 1px 3px; border-radius: 6px;">Leave Feedback</span></a>
 
 <!--how to pass the orderitem.item to the form once the button is pressed based on the associated item-->
             <br>

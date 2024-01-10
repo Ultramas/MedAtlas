@@ -782,6 +782,57 @@ class OrderItemAdmin(admin.ModelAdmin):
 
 admin.site.register(OrderItem, OrderItemAdmin)
 
+
+from django.core.exceptions import ValidationError
+
+
+class ItemForm(forms.ModelForm):
+    class Meta:
+        model = Item
+        fields = ('title', 'price', 'discount_price', 'specialty', 'label', 'slug', 'description', 'image')
+        widgets = {
+            # 'slug': forms.TextInput(attrs={'readonly': 'readonly'})
+        }
+
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        user = self.instance.user
+        if Item.objects.filter(title=title, user=user).exists():
+            raise ValidationError("You have already created an item with this title.")
+        return title
+
+    def clean(self):
+        cleaned_data = super().clean()
+        price = cleaned_data.get('price')
+        discount_price = cleaned_data.get('discount_price')
+
+        if discount_price is not None:
+            fees = discount_price * 0.07
+        else:
+            fees = price * 0.07
+
+        cleaned_data['fees'] = fees
+
+        return cleaned_data
+
+
+from .models import TradeItem
+
+from .models import TradeOffer
+
+
+class TradeItemForm(forms.ModelForm):
+    class Meta:
+        model = TradeItem
+        fields = ['title', 'category', 'specialty', 'condition', 'slug', 'status', 'description', 'image']
+
+
+class TradeProposalForm(forms.ModelForm):
+    class Meta:
+        model = TradeOffer
+        fields = ['trade_items', 'estimated_trading_value', 'message']
+
+
 from django.contrib.auth import get_user_model
 from django import forms
 from django.contrib.auth import get_user_model

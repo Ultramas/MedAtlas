@@ -1,7 +1,7 @@
 import django
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
-from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage
+from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -86,7 +86,7 @@ from .models import AdminRoles
 from .models import AdminTasks
 from .models import AdminPages
 # from .models import Background2aImage
-from .forms import PosteForm, EmailForm, AnswerForm
+from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -2516,6 +2516,7 @@ class usersview(ListView):
 
 from django.db.models import Count, F
 
+
 class PostList(BaseView):
     model = BlogBackgroundImage
     # backgroundqueryset = BackgroundImageBase.objects.filter('page').order_by('position')
@@ -2605,14 +2606,11 @@ class PostList(BaseView):
             print("there was an error in registering the email")
             return render(request, "blog.html", {'form': form})
 
-
     def get_blog_count():
         return Blog.objects.all().count()
 
     def get_queryset(self):
         return Blog.objects.filter(status=1).order_by('-created_on')
-
-
 
 
 class votingview(ListView):
@@ -2647,6 +2645,142 @@ class votingview(ListView):
 
     def get_queryset(self):
         return Vote.objects.all()
+
+
+class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
+    model = Item
+    paginate_by = 10
+    template_name = 'create_product.html'
+    form_class = ItemForm
+
+    def get_context_data(self, **kwargs):
+        self.object_list = self.get_queryset()
+        context = super(CreateItemView, self).get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Item'] = Item.objects.filter(is_active=1)
+
+        newprofile = Item.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+        form = ItemForm()
+        context = self.get_context_data()
+        return render(request, 'create_product.html', {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = ItemForm(request.POST, request.FILES)  # Include request.FILES
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            return redirect('showcase:ehome')
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            form = ItemForm()
+        return render(request, 'create_product.html', {'form': form})
+
+    def profileview(request):
+        instance = Item.objects.get(pk=1)
+        fields = []
+        for field in instance._meta.get_fields():
+            fields.append({
+                'name': field.name,
+                'value': getattr(instance, field.name),
+            })
+        return render(request, 'some_template.html', {'fields': fields})
+
+
+class TradeItemCreateView(ListView):
+    model = TradeItem
+    template_name = 'tradingcentral.html'
+    success_url = '/tradingcentral/'
+
+    def get_context_data(self, **kwargs):
+        self.object_list = self.get_queryset()
+        context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['TradeItems'] = TradeItem.objects.filter(is_active=1)
+
+        return context
+
+
+class TradeBackgroundView(FormMixin, LoginRequiredMixin, ListView):
+    model = TradeItem
+    template_name = "tradeitems.html"
+    form_class = TradeItemForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['TradeItem'] = TradeItem.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = TradeItemForm(request.POST, request.FILES)  # Include request.FILES
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            return redirect('showcase:tradingcentral')
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            form = TradeItemForm()
+        return render(request, 'tradeitems.html', {'form': form})
+
+
+class TradeOfferCreateView(CreateView):
+    model = TradeOffer
+    form_class = TradeProposalForm
+    template_name = 'tradingcentral.html'
+    success_url = '/ehome/'
+
+    def get_context_data(self, **kwargs):
+        self.object_list = self.get_queryset()
+        context = super(CreateItemView, self).get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['TradeOffer'] = TradeOffer.objects.filter(is_active=1)
+
+        return context
 
 
 class partnerview(ListView):
@@ -5315,6 +5449,9 @@ class OrderSummaryView(EBaseView):
         return context
 
     def get(self, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            messages.warning(self.request, "Please log in to see your order history.")
+            return redirect("accounts/login")  # replace "login" with your login route
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
             context = self.get_context_data()
@@ -6893,8 +7030,6 @@ class FeedbackView(BaseView):
     template_name = 'review_detail.html'
     context_object_name = 'feedback'
 
-
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -7661,12 +7796,24 @@ class OrderHistory(ListView):
 
         context['Iteme'] = items
 
+        # Iterate over each item in 'Iteme'
         for items in context['Iteme']:
+            # Get the image of the item
             image = items.image
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                items.author_profile_picture_url = profile.avatar.url
-                items.author_profile_url = items.get_profile_url()
+            # Check if the user is authenticated
+            if user.is_authenticated:
+                # Try to get the first profile detail of the current user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                # If a profile detail exists
+                if profile:
+                    # Update the author's profile picture URL in the item
+                    items.author_profile_picture_url = profile.avatar.url
+                    # Update the author's profile URL in the item
+                    items.author_profile_url = items.get_profile_url()
+            else:
+                # Handle the case when the user is not authenticated
+                messages.warning(self.request, "You need to log in")
+                return redirect("accounts/login")  # replace "login" with your login route
 
         order = OrderItem.objects.filter(is_active=1, user=user)
         context['orders'] = order

@@ -28,6 +28,14 @@ SPECIAL_CHOICES = (
     ('LE', 'Limited Edition'),
 )
 
+CONDITION_CHOICES = (
+    ('M', 'Mint'),
+    ('NM', 'Near Mint'),
+    ('MP', 'Moderately Played'),
+    ('HP', 'Heavily Played'),
+    ('D', 'Damaged'),
+)
+
 LABEL_CHOICES = (
     ('N', 'New'),
     ('BS', 'Best Seller'),
@@ -48,6 +56,26 @@ BLOG_TYPE_CHOICES = (
     ('N', 'New'),
     ('P', 'Popular'),
     ('EC', "Editor's Choice"),
+)
+
+HEAT = (
+    ('M', 'Mild'),
+    ('S', 'Spicy'),
+    ('F', 'Fiery'),
+    ('W', 'Wild'),
+    ('E', 'Explosive'),
+)
+
+LEVEL = (
+    ('C', 'Common'),
+    ('U', 'Uncommon'),
+    ('R', 'Rare'),
+    ('E', 'Epic'),
+    ('M', 'Mythical'),
+    ('T', 'Transcendent'),
+    ('P', 'Primordial'),
+    ('L', 'Legendary'),
+    ('U', 'Ultimate'),
 )
 
 
@@ -174,10 +202,18 @@ class Choice(models.Model):
     question = models.ForeignKey(PollQuestion, on_delete=models.CASCADE)
     choice_text = models.CharField(max_length=200)
     file = models.FileField(null=True, verbose_name='File')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
     votes = models.IntegerField(default=0)
     category = models.CharField(max_length=100,
                                 help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).')
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    tier = models.CharField(choices=LEVEL, max_length=1, blank=True, null=True)
+    rarity = models.DecimalField(max_digits=7, decimal_places=4, help_text="Rarity of choice in percent (optional).", blank=True, null=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1136,11 +1172,20 @@ class StoreViewType(models.Model):
         return self.type + "filter set by " + str(self.user)
 
     def save(self, *args, **kwargs):
-        # If a StoreViewType for this user already exists, delete it
-        StoreViewType.objects.filter(user=self.user).delete()
+        if self.user_id is not None:
+            # If a StoreViewType for this user already exists, delete it
+            StoreViewType.objects.filter(user=self.user).delete()
 
-        # Now save the new StoreViewType
-        super().save(*args, **kwargs)
+            # Now save the new StoreViewType
+            super().save(*args, **kwargs)
+        else:
+            view_type_choice = 'stream'  # replace with the view type the user wants
+
+            # Create a StoreViewType instance without saving it to the database
+            store_view_type = StoreViewType(type=view_type_choice)
+
+            # Now you can use store_view_type as needed
+            print(store_view_type.type)
 
     class Meta:
         verbose_name = "Store View Type"
@@ -2464,13 +2509,16 @@ class ItemFilter(models.Model):
 
 
 class Item(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=100)
     price = models.FloatField()
+    fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     discount_price = models.FloatField(blank=True, null=True)
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
     label = models.CharField(choices=LABEL_CHOICES, max_length=1000)  # can use for cataloging products
     slug = models.SlugField()  # might change to automatically get the slug
+    status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
     description = models.TextField()
     image = models.ImageField()
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -2490,7 +2538,10 @@ class Item(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
 
     def __str__(self):
-        return self.title
+        if self.user:
+            return self.title + " by " + self.user.username
+        else:
+            return self.title + " by PokeTrove"
 
     def get_absolute_url(self):
         return reverse("showcase:product", kwargs={'slug': self.slug})
@@ -2509,7 +2560,11 @@ class Item(models.Model):
     def get_profile_url(self):
         return reverse('showcase:product', args=[str(self.slug)])
 
-
+    # used to get the user;s profile url
+    def get_profile_url2(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
 
 
 class EBackgroundImage(models.Model):
@@ -2531,6 +2586,74 @@ class EBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Ecommerce Background Image"
         verbose_name_plural = "Ecommerce Background Images"
+
+
+class TradeItem(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    title = models.CharField(max_length=100)
+    fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
+    specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
+    condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2)
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1000)  # can use for cataloging products
+    slug = models.SlugField()  # might change to automatically get the slug
+    status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
+    description = models.TextField()
+    image = models.ImageField()
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
+    # hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
+    relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
+
+    def __str__(self):
+        if self.user:
+            return self.title + " by " + self.user.username
+        else:
+            return self.title + " by PokeTrove"
+
+    class Meta:
+        verbose_name = "Trade Item"
+        verbose_name_plural = "Trade Items"
+
+
+class TradeOffer(models.Model):
+    trade_items = models.ManyToManyField(TradeItem)
+    estimated_trading_value = models.DecimalField(
+        help_text="Estimated Market Price of Trade Item (will be displayed to potential traders)", decimal_places=2, max_digits=4)
+    message = models.CharField(max_length=2000, blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Trader')
+    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Receiver')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
+
+    def __str__(self):
+        item_titles = ", ".join([item.title for item in self.trade_items.all()])
+        return f'Transaction: {item_titles} between {self.user1.username} and {self.user2.username}'
+
+    def __str__(self):
+        if self.user:
+            return self.trade_item + " by " + self.user.username
+        else:
+            return self.trade_item + " by PokeTrove"
+
+    class Meta:
+        verbose_name = "Trade Offer"
+        verbose_name_plural = "Trade Offers"
 
 
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -3454,3 +3577,58 @@ def set_slug(sender, instance, *args, **kwargs):
     # Check if instance.slug is not already set before updating it
     if not instance.slug and instance.item:
         instance.slug = instance.item.slug
+
+
+class Shuffler(models.Model):
+    """Used for voting on different new ideas"""
+    name = models.ForeignKey(PollQuestion, on_delete=models.CASCADE)
+    choice_text = models.CharField(max_length=200)
+    file = models.FileField(null=True, verbose_name='File')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    question = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    category = models.CharField(max_length=100,
+                                help_text='Type the category of product getting shuffled.')
+    heat = models.CharField(choices=HEAT, max_length=2, blank=True, null=True)
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.question)
+
+    class Meta:
+        verbose_name = "Shuffle Choice"
+        verbose_name_plural = "Shuffle Choices"
+
+
+class Currency(models.Model):
+    name = models.CharField(default='Rubiaces', max_length=200)
+    flavor_text = models.CharField(max_length=200)
+    file = models.FileField(null=True, verbose_name='Sprite')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.name)
+
+    class Meta:
+        verbose_name = "PokeTrove Currency"
+        verbose_name_plural = "PokeTrove Currencies"
