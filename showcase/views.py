@@ -1,7 +1,8 @@
 import django
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
-from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer
+from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
+    PrizePool
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -1192,6 +1193,34 @@ class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
             print(form.non_field_errors())
             print(form.cleaned_data)
             return render(request, "post_edit.html", {'form': form})
+
+
+class ShufflerBackgroundView(BaseView):
+    model = Shuffler
+    template_name = "pack_home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['UpdateProfile'] = UpdateProfile.objects.all()
+        context['Shuffle'] = Shuffler.objects.filter(is_active=1).order_by("category")
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
 
 
 class PostCreatePostView(CreateView):
@@ -4479,6 +4508,7 @@ from django.shortcuts import render
 from django.views import View
 from .models import PollQuestion
 
+
 class PollQuestionsView(View):
     template_name = "pollquestions.html"
 
@@ -4588,6 +4618,82 @@ class PollingView(View):
             selected_choice.votes += 1
             selected_choice.save()
             return HttpResponseRedirect(reverse('showcase:pollresults', args=(question.id,)))
+
+
+class InventoryView(FormMixin, ListView):
+    model = PrizePool
+    template_name = "pokespinner.html"
+    form_class = PosteForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['PrizePool'] = PrizePool.objects.all()
+        context['Shuffle'] = Shuffler.objects.filter(is_active=1).order_by("category")
+        return context
+
+
+from .models import LotteryTickets, Lottery
+from .forms import TicketRequestForm
+
+
+class DailyLotteryView(FormMixin, ListView):
+    model = Lottery
+    template_name = "dailylotto.html"
+    form_class = TicketRequestForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Profile'] = UpdateProfile.objects.all()
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        form = TicketRequestForm(request.POST, user=request.user)  # Pass user=request.user
+        if form.is_valid():
+            post = form.save(commit=False)
+            lottery, created = Lottery.objects.get_or_create(
+                name__in=['Daily Lotto', 'Daily Lottery'],
+                defaults={'name': 'Daily Lotto', 'flavor_text': 'Your daily chance to win!'}
+            )
+            lottery.save()  # Save the lottery object to the database
+            post.lottery = lottery
+            post.user = request.user  # Set the user attribute
+            post.save()
+            return redirect('showcase:dailylotto')
+        else:
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            messages.error(request, 'You need to log in to claim your daily ticket!')
+            return render(request, 'registration/login.html', {'form': form})
+
 
 class PosteView(FormMixin, ListView):
     model = VoteBackgroundImage
@@ -7054,7 +7160,6 @@ class FeedbackView(BaseView):
             # Add the feedback_objects to the context
             context['Feed'] = feedback_objects
 
-
         for feedback_objects in context['Feed']:
             user = feedback_objects.username
             profile = ProfileDetails.objects.filter(user=user).first()
@@ -7528,10 +7633,6 @@ from .models import (
 )
 
 
-
-
-
-
 class CreateReviewView(LoginRequiredMixin, FormView):
     template_name = "create_review.html"
     form_class = FeedbackForm
@@ -7574,8 +7675,6 @@ class CreateReviewView(LoginRequiredMixin, FormView):
         context['Profile'] = UpdateProfile.objects.all()
         context['Logo'] = LogoBase.objects.all()
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
-
-
 
         return context
 

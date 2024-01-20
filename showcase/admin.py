@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
     SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
-    Currency
+    Currency, ShuffleType, PrizePool, Lottery, LotteryTickets
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -128,13 +128,61 @@ class ChoiceInLine(admin.TabularInline):
     extra = 1
 
 
+class Prizes(admin.TabularInline):
+    model = PrizePool
+    extra = 1
+
+
 class PollQuestionAdmin(admin.ModelAdmin):
-    fieldsets = [(None, {'fields': ['question_text']})]
-    inlines = [ChoiceInLine]
+    fieldsets = (
+        ('Question Information - Categorial Descriptions', {
+            'fields': ('question_text', 'choice', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+    #inlines = [ChoiceInLine]
     readonly_fields = ('pub_date',)
 
 
 admin.site.register(PollQuestion, PollQuestionAdmin)
+
+
+class PrizePoolAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Prize Information - Categorial Descriptions', {
+            'fields': ('prize_name', 'image', 'number', 'is_active')
+        }),
+    )
+    Prizes = ['prize_name']
+    readonly_fields = ('mfg_date',)
+
+
+admin.site.register(PrizePool, PrizePoolAdmin)
+
+
+class LotteryTicketAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Lottery Information - Categorial Descriptions', {
+            'fields': ('name', 'flavor_text', 'file', 'user', 'lottery', 'lottery_number', 'image_length', 'image_width', 'is_active')
+        }),
+    )
+    readonly_fields = ('mfg_date',)
+
+
+admin.site.register(LotteryTickets, LotteryTicketAdmin)
+
+
+class LotteryAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Lottery Information - Categorial Descriptions', {
+            'fields': ('name', 'flavor_text', 'file', 'image_length', 'image_width', 'is_active')
+        }),
+    )
+    readonly_fields = ('mfg_date',)
+
+
+admin.site.register(Lottery, LotteryAdmin)
+
 
 
 class authorAdmin(admin.ModelAdmin):
@@ -927,7 +975,7 @@ admin.site.register(NewsFeed, NewsFeedAdmin)
 class ShufflerAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Shuffler Information - Categorial Descriptions', {
-            'fields': ('name', 'choice_text', 'question', 'category', 'heat',),
+            'fields': ('question', 'choice_text', 'choices', 'category', 'heat', 'shuffletype',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Shuffler Information - Attributes', {
@@ -946,10 +994,23 @@ class ShufflerAdmin(admin.ModelAdmin):
 admin.site.register(Shuffler, ShufflerAdmin)
 
 
+class ShuffleTypeAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Shuffle Type Information - Categorial Descriptions', {
+            'fields': ('name', 'type', 'circumstance', 'game_mode', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+
+# Register outside the class
+admin.site.register(ShuffleType, ShuffleTypeAdmin)
+
+
 class CurrencyAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Currency Information - Categorial Descriptions', {
-            'fields': ('name', 'flavor_text', 'question', 'category',),
+            'fields': ('name', 'flavor_text',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Currency Information - Attributes', {
@@ -978,6 +1039,30 @@ class AdministrationRoleAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AdminRoles, AdministrationRoleAdmin)
+
+
+class ChoiceAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Choice Information - Categorial Descriptions', {
+            'fields': ('choice_text', 'category', 'tier',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Choice Information - Attributes', {
+            'fields': ('votes', 'mfg_date', 'rarity', 'is_active', 'number', 'prizes',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Choice Information - Image Display', {
+            'fields': ('file', 'image_length', 'image_width',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+    #inlines = [Prizes]
+
+    readonly_fields = ('mfg_date',)
+
+
+admin.site.register(Choice, ChoiceAdmin)
+
 
 
 class AdministrationTaskAdmin(admin.ModelAdmin):

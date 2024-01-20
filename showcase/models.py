@@ -6,11 +6,12 @@ from PIL import Image
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import Max, F
+from django.db.models import Max, F, Count
 from django.dispatch import receiver
 from django.shortcuts import reverse
 from django_countries.fields import CountryField
 from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # from image.utils import render
 
@@ -42,6 +43,29 @@ LABEL_CHOICES = (
     ('BV', 'Best Value'),
 )
 
+SHUFFLE_CHOICES = (
+    ('L', 'Luck'),
+    ('S', 'Skill'),
+    ('G', 'Grade'),
+)
+
+AVALIABLE_CHOICES = (
+    ('OP', 'One Player'),
+    ('PVP', 'Player Versus Player'),
+    ('MP', 'Multiple Players'),
+    ('T', 'Tournament'),
+    ('OE', 'Other Event'),
+    ('L', 'Limited'),
+    ('D', 'Drop'),
+)
+
+GAME_MODE = (
+    ('STW', 'Spin The Wheel'),
+    ('OB', 'Open Box'),
+    ('OP', 'Open Pack'),
+    ('SR', 'Spin Roulette'),
+)
+
 TYPE_CHOICES = (('S', 'Singles'), ('BP', 'Booster Pack'),
                 ('BB', 'Booster Box'), ('PP', 'Pokemon Product'), ('O',
                                                                    'Other'))
@@ -66,6 +90,11 @@ HEAT = (
     ('E', 'Explosive'),
 )
 
+PRIVACY = (
+    ('PUB', 'Public'),
+    ('PRI', 'Private'),
+)
+
 LEVEL = (
     ('C', 'Common'),
     ('U', 'Uncommon'),
@@ -76,6 +105,12 @@ LEVEL = (
     ('P', 'Primordial'),
     ('L', 'Legendary'),
     ('U', 'Ultimate'),
+)
+
+PRACTICE = (
+    ('P', 'Practice'),
+    ('R', 'Real'),
+    ('DN', 'Double_Or_Nothing'),
 )
 
 
@@ -152,7 +187,7 @@ class UpdateProfile(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return self.user
+        return str(self.user)
 
     class Meta:
         verbose_name = "User Profile Post"
@@ -183,24 +218,29 @@ class UpdateProfile(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
 
-class PollQuestion(models.Model):
-    question_text = models.CharField(max_length=500, verbose_name="Question")
-    pub_date = models.DateTimeField('date published', auto_now_add=True)
+class PrizePool(models.Model):
+    prize_name = models.CharField(max_length=500, verbose_name="Prize Name")
+    image = models.FileField(upload_to='images/', verbose_name="Prize Image")
+    number = models.IntegerField(default=1, verbose_name="Number of Prize")
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return str(self.question_text)
+        return str(self.prize_name)
 
     class Meta:
-        verbose_name = "Poll Question"
-        verbose_name_plural = "Poll Questions"
+        verbose_name = "Inventory"
+        verbose_name_plural = "Inventory"
 
 
 class Choice(models.Model):
     """Used for voting on different new ideas"""
-    # user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # name = models.CharField(max_length=100, help_text='Your name goes here.')
-    question = models.ForeignKey(PollQuestion, on_delete=models.CASCADE)
-    choice_text = models.CharField(max_length=200)
+    #question = models.ForeignKey(PollQuestion, on_delete=models.CASCADE)
+    choice_text = models.CharField(max_length=200, verbose_name='Choice Text')
     file = models.FileField(null=True, verbose_name='File')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
@@ -210,10 +250,32 @@ class Choice(models.Model):
                                               verbose_name="image width")
     votes = models.IntegerField(default=0)
     category = models.CharField(max_length=100,
-                                help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).')
+                                help_text='Category of choice (Pokemon, trainers, etc.).')
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     tier = models.CharField(choices=LEVEL, max_length=1, blank=True, null=True)
-    rarity = models.DecimalField(max_digits=7, decimal_places=4, help_text="Rarity of choice in percent (optional).", blank=True, null=True)
+    rarity = models.DecimalField(max_digits=7, decimal_places=4, help_text="Rarity of choice in percent (optional).",
+                                 blank=True, null=True, verbose_name="Rarity (%)")
+    prizes = models.ForeignKey(PrizePool, on_delete=models.CASCADE, blank=True, null=True)
+    lower_nonce = models.DecimalField(
+        max_digits=6,
+        decimal_places=0,
+        validators=[MaxValueValidator(999999), MinValueValidator(0)],
+        help_text="Lower bound nonce of Choice",
+        blank=True,
+        null=True
+    )
+    upper_nonce = models.DecimalField(
+        max_digits=6,
+        decimal_places=0,
+        validators=[MaxValueValidator(999999), MinValueValidator(0)],
+        help_text="Upper bound nonce of Choice",
+        blank=True,
+        null=True
+    )
+    nodes = models.IntegerField(help_text="Number of the choice included", blank=True, null=True, )
+    value = models.DecimalField(max_digits=12, decimal_places=2, help_text="Value of item in Rubicoins.", blank=True,
+                                null=True, verbose_name="Value (Rubicoins)")
+    number = models.IntegerField(help_text="Position in rarity (ordered by value)")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -221,11 +283,32 @@ class Choice(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return str(self.question)
+        if self.prizes:
+            return str(self.choice_text) + ' with prize ' + str(self.prizes)
+        else:
+            return str(self.choice_text)
 
     class Meta:
         verbose_name = "Choice"
         verbose_name_plural = "Choices"
+
+
+class PollQuestion(models.Model):
+    question_text = models.CharField(max_length=500, verbose_name="Question")
+    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    pub_date = models.DateTimeField('date published', auto_now_add=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.question_text)
+
+    class Meta:
+        verbose_name = "Poll Question"
+        verbose_name_plural = "Poll Questions"
 
 
 class Vote(models.Model):
@@ -462,6 +545,7 @@ class ReportIssue(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
     def __str__(self):
         return self.issue + " reported by " + str(self.user)
 
@@ -790,7 +874,7 @@ class BlogHeader(models.Model):
         return self.category
 
 
-from django.template.defaultfilters import slugify
+from django.template.defaultfilters import slugify, random
 
 
 class BlogFilter(models.Model):
@@ -1160,7 +1244,7 @@ class StoreViewType(models.Model):
     VIEW_TYPE_CHOICES = (
         ('stream', 'Streamlined View'),
         ('detail', 'Detailed View'),
-     )
+    )
     type = models.CharField(blank=True, null=True, choices=VIEW_TYPE_CHOICES, default='stream', max_length=6)
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -1558,7 +1642,8 @@ class Titled(models.Model):
 
 
 class SocialMedia(models.Model):
-    social = models.TextField(verbose_name="Social Media Platform", help_text="Follow format 'logo-{platform name}'", blank=True, null=True )
+    social = models.TextField(verbose_name="Social Media Platform", help_text="Follow format 'logo-{platform name}'",
+                              blank=True, null=True)
     image = models.ImageField(verbose_name="Social Media Logo", blank=True, null=True)
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Width of the image (in percent relative).',
@@ -1568,7 +1653,8 @@ class SocialMedia(models.Model):
                                                verbose_name="image length")
     width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Width")
     height_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Height")
-    image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position', blank=True, null=True)
+    image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position', blank=True,
+                                         null=True)
     alternate = models.TextField(verbose_name="Alternate Text", blank=True, null=True)
     page = models.TextField(verbose_name="Page Name")
     hyperlink = models.URLField(verbose_name="Hyperlink")
@@ -2161,7 +2247,6 @@ class ProfileDetails(models.Model):
 # link the profiledetails page to settings
 
 
-
 # Create your models here.
 class Room(models.Model):
     name = models.CharField(max_length=1000)
@@ -2630,7 +2715,8 @@ class TradeItem(models.Model):
 class TradeOffer(models.Model):
     trade_items = models.ManyToManyField(TradeItem)
     estimated_trading_value = models.DecimalField(
-        help_text="Estimated Market Price of Trade Item (will be displayed to potential traders)", decimal_places=2, max_digits=4)
+        help_text="Estimated Market Price of Trade Item (will be displayed to potential traders)", decimal_places=2,
+        max_digits=4)
     message = models.CharField(max_length=2000, blank=True, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Trader')
     user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Receiver')
@@ -2656,7 +2742,6 @@ class TradeOffer(models.Model):
         verbose_name_plural = "Trade Offers"
 
 
-from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class ChatBackgroundImage(models.Model):
@@ -3237,7 +3322,8 @@ from django.db import IntegrityError
 
 
 class ImageCarousel(models.Model):
-    carouseltitle = models.CharField(max_length=100, help_text='Title of the image.', verbose_name="title", blank=True, null=True)
+    carouseltitle = models.CharField(max_length=100, help_text='Title of the image.', verbose_name="title", blank=True,
+                                     null=True)
     carouselcaption = models.TextField(help_text='Caption for the image.', verbose_name="caption")
     carouselimage = models.ImageField(help_text='Upload an image for the carousel.)',
                                       upload_to='images/', verbose_name='image')
@@ -3382,7 +3468,8 @@ class ImageBase(models.Model):
     image_measurement = models.CharField(blank=True, null=True, choices=IMAGE_MEASUREMENT_CHOICES, max_length=3)
     width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Width")
     height_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Height")
-    image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position', blank=True, null=True)
+    image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position', blank=True,
+                                         null=True)
     alternate = models.TextField(verbose_name="Alternate Text", blank=True, null=True)
     page = models.TextField(verbose_name="Page Name")
     xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position", default="0")
@@ -3579,9 +3666,50 @@ def set_slug(sender, instance, *args, **kwargs):
         instance.slug = instance.item.slug
 
 
+class ShuffleType(models.Model):
+    name = models.CharField(default="Pack Opening", max_length=200)
+    type = models.CharField(choices=SHUFFLE_CHOICES, default='L',
+                            max_length=1)  # skill-based are usually reserved for tournament-type scenarios
+    circumstance = models.CharField(choices=AVALIABLE_CHOICES, default='OP', max_length=3)
+    game_mode = models.CharField(choices=GAME_MODE, default="STP", max_length=3)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.name)
+
+    class Meta:
+        verbose_name = "Shuffle Type"
+        verbose_name_plural = "Shuffle Types"
+
+
+class PlayerVersusPlayer(models.Model):
+    name = models.CharField(default="Pack Opening", max_length=200)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    privacy = models.CharField(choices=PRIVACY, max_length=3)
+    locked_in = models.BooleanField(default=0,
+                                    help_text='0->Open, 1->Locked In',
+                                    verbose_name="Open or Locked In?")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.name)
+
+    class Meta:
+        verbose_name = "Player Versus Player"
+        verbose_name_plural = "Player Versus Players"
+
+
 class Shuffler(models.Model):
     """Used for voting on different new ideas"""
-    name = models.ForeignKey(PollQuestion, on_delete=models.CASCADE)
+    question = models.ForeignKey(PollQuestion, on_delete=models.CASCADE)
     choice_text = models.CharField(max_length=200)
     file = models.FileField(null=True, verbose_name='File')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -3590,11 +3718,14 @@ class Shuffler(models.Model):
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
-    question = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    choices = models.ManyToManyField(Choice, blank=True)
     category = models.CharField(max_length=100,
                                 help_text='Type the category of product getting shuffled.')
     heat = models.CharField(choices=HEAT, max_length=2, blank=True, null=True)
+    shuffletype = models.ForeignKey(ShuffleType, on_delete=models.CASCADE, blank=True, null=True,
+                                    verbose_name="Shuffle Type")
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    demonstration = models.CharField(choices=PRACTICE, max_length=2, blank=True, null=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -3604,9 +3735,101 @@ class Shuffler(models.Model):
     def __str__(self):
         return str(self.question)
 
+    # Signal receiver function
+    @receiver(post_save, sender=Choice)
+    def update_shuffler(sender, instance, **kwargs):
+        shufflers = Shuffler.objects.filter(choices=instance)
+        for shuffler in shufflers:
+            shuffler.tier = instance.tier
+            shuffler.rarity = instance.rarity
+            shuffler.value = instance.value
+            shuffler.number = instance.number
+            shuffler.save()
+
     class Meta:
         verbose_name = "Shuffle Choice"
         verbose_name_plural = "Shuffle Choices"
+
+
+import random
+
+
+def create_unique_lottery_number():
+    return str(random.randint(1000000000, 9999999999))
+
+
+class Lottery(models.Model):
+    name = models.CharField(default='Daily Lotto', max_length=200)
+    flavor_text = models.CharField(max_length=200)
+    file = models.FileField(null=True, verbose_name='Sprite')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.name)
+
+    def select_winner(self):
+        # Get all tickets associated with this lottery
+        tickets = list(self.tickets.all())
+
+        # Count the number of tickets
+        count = len(tickets)
+
+        if count == 0:
+            # No tickets sold for this lottery
+            return None
+
+        # Select a random ticket
+        random_index = random.randint(0, count - 1)
+        winner_ticket = tickets[random_index]
+
+        return winner_ticket.user
+
+    class Meta:
+        verbose_name = "Lottery"
+        verbose_name_plural = "Lotteries"
+
+
+class LotteryTickets(models.Model):
+    name = models.CharField(default='Daily Lotto', max_length=200)
+    flavor_text = models.CharField(max_length=200, blank=True, null=True)
+    file = models.FileField(null=True, verbose_name='Sprite')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    lottery = models.ForeignKey(Lottery, on_delete=models.CASCADE)
+    lottery_number = models.CharField(
+        max_length=10,
+        unique=True,
+        default=create_unique_lottery_number
+    )
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.name) + " #" + str(self.lottery_number) + " - " + str(self.user)
+
+    class Meta:
+        verbose_name = "Lottery Ticket"
+        verbose_name_plural = "Lottery Tickets"
 
 
 class Currency(models.Model):

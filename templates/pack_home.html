@@ -150,7 +150,9 @@ $(document).ready(function() {
     {% for EBackgroundImage in Background %}
       <img class="ebackgroundimages" src="{{ EBackgroundImage.cover.url }}" alt="{{ EBackgroundImage.title }}">
       <div class="view overlay">
-        <div class="mask rgba-white-slight"></div>
+        <div class="mask rgba-white-slight">
+
+        </div>
       </div>
     {% endfor %}
 
@@ -189,31 +191,33 @@ $(document).ready(function() {
     <section class="text-center mb-4">
       <!-- Products grid -->
       <div class="row wow fadeIn">
-        {% for item in items %}
+        {% for Shuffler in Shuffle %}
           <div class="col-lg-3 col-md-6 mb-4">
             <div class="card">
               <div class="view overlay">
-                <a href="{{ shuffler.get_absolute_url }}">
-                  <img class="hunt" src="{{ shuffler.image.url }}" class="card-img-top" alt="{{ shuffler.image.url }}" title="{{ shuffler.image.url }}">
-                  <div class="mask rgba-white-slight"></div>
+                <a href="{{ Shuffler.get_absolute_url }}">
+                  <img class="hunt" src="{{ Shuffler.image.url }}" class="card-img-top" alt="{{ Shuffler.image.url }}" title="{{ Shuffler.image.url }}">
+                  <div class="mask rgba-white-slight">
+
+                  </div>
                 </a>
               </div>
               <div class="card-body text-center">
-                <h5 class="itemtitle">{{ shuffler.title }}</h5>
+                <h5 class="itemtitle">{{ Shuffler.title }}</h5>
                 <h5 class="itemtitle">
                   <strong>
-                    {{ shuffler.item_name }}
-                    <span class="badge badge-pill {% if shuffler.get_label_display == 'New' %} danger-color {% else %} primary-color {% endif %}">
-                      {{ shuffler.get_label_display }}
+                    {{ Shuffler.item_name }}
+                    <span class="badge badge-pill {% if Shuffler.get_label_display == 'New' %} danger-color {% else %} primary-color {% endif %}">
+                      {{ Shuffler.get_label_display }}
                     </span>
                   </strong>
                 </h5>
                 <h4 class="font-weight-bold blue-text">
                   <strong>
-                    ${% if shuffler.discount_price %}
-                      {{ shuffler.discount_price }}
+                    ${% if Shuffler.discount_price %}
+                      {{ Shuffler.discount_price }}
                     {% else %}
-                      {{ shuffler.price }}
+                      {{ Shuffler.price }}
                     {% endif %}
                   </strong>
                 </h4>
@@ -585,20 +589,20 @@ $(document).ready(function() {
           <ul class="product-list">
 
         {% for item in items %}
-            {% if shuffler.specialty == "P" %}
+            {% if Shuffler.specialty == "P" %}
             <li class="product-item">
               <div class="product-card" tabindex="0">
 
                 <figure class="card-banner">
 
-                <a href="{{ shuffler.get_absolute_url }}">
-                  <img src="{{ shuffler.image.url }}" style='width:350px; height:350px;' loading="lazy"
+                <a href="{{ Shuffler.get_absolute_url }}">
+                  <img src="{{ Shuffler.image.url }}" style='width:350px; height:350px;' loading="lazy"
                     alt="Running Sneaker Shoes" class="image-contain">
 
                   <div class="card-badge">
 
-                    {{ shuffler.item_name }} <span class="badge badge-pill {% if shuffler.get_label_display == 'New' %} danger-color {% else %} primary-color {% endif %}">
-                      {{ shuffler.get_label_display }}
+                    {{ Shuffler.item_name }} <span class="badge badge-pill {% if Shuffler.get_label_display == 'New' %} danger-color {% else %} primary-color {% endif %}">
+                      {{ Shuffler.get_label_display }}
                     </span>
                   </div>
                 </a>
@@ -626,7 +630,7 @@ $(document).ready(function() {
                     </li>
 
                     <li class="card-action-item">
-                      <a href="{{ shuffler.get_absolute_url }}">
+                      <a href="{{ Shuffler.get_absolute_url }}">
                       <button class="card-action-btn" aria-labelledby="card-label-3">
                         <ion-icon name="eye-outline"></ion-icon>
                       </button>
@@ -654,15 +658,15 @@ $(document).ready(function() {
                   </div>
 
                   <h3 class="h3 card-title">
-                    <a href="{{ shuffler.get_absolute_url }}">{{ shuffler.title }}</a>
+                    <a href="{{ Shuffler.get_absolute_url }}">{{ Shuffler.title }}</a>
                   </h3>
 
                   <data class="card-price" value="180.85">
                     <strong>
-                    ${% if shuffler.discount_price %}
-                      {{ shuffler.discount_price }}
+                    ${% if Shuffler.discount_price %}
+                      {{ Shuffler.discount_price }}
                     {% else %}
-                      {{ shuffler.price }}
+                      {{ Shuffler.price }}
                     {% endif %}
                   </strong>
                   </data>
@@ -1203,7 +1207,7 @@ $(document).ready(function() {
            <ul class="has-scrollbar">
 
        {% for item in items %}
-           {% if shuffler.specialty == "F" %}
+           {% if Shuffler.specialty == "F" %}
 
 
 
@@ -1212,14 +1216,14 @@ $(document).ready(function() {
 
 
                 <figure class="card-banner">
-                                   <a href="{{ shuffler.get_absolute_url }}">
-                 <img src="{{ shuffler.image.url }}" style='width:350px; height:350px;' loading="lazy"
+                                   <a href="{{ Shuffler.get_absolute_url }}">
+                 <img src="{{ Shuffler.image.url }}" style='width:350px; height:350px;' loading="lazy"
                    alt="Running Sneaker Shoes" class="image-contain">
 
 
                    <div class="card-badge">
-                     {{ shuffler.item_name }} <span class="badge badge-pill {% if shuffler.get_label_display == 'New' %} danger-color {% else %} primary-color {% endif %}">
-                   {{ shuffler.get_label_display }}</span>
+                     {{ Shuffler.item_name }} <span class="badge badge-pill {% if Shuffler.get_label_display == 'New' %} danger-color {% else %} primary-color {% endif %}">
+                   {{ Shuffler.get_label_display }}</span>
                    </div>
 
 
@@ -1290,10 +1294,10 @@ $(document).ready(function() {
                     </h3>
 
                     <data class="card-price" value="180.85">
-                     ${% if shuffler.discount_price %}
-                      {{ shuffler.discount_price }}
+                     ${% if Shuffler.discount_price %}
+                      {{ Shuffler.discount_price }}
                     {% else %}
-                      {{ shuffler.price }}
+                      {{ Shuffler.price }}
                     {% endif %}
                     </data>
 

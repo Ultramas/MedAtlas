@@ -1,9 +1,10 @@
+from datetime import timezone, timedelta
 from urllib import request
 
 from django import forms
 
 from mysite import settings
-from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType
+from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -831,6 +832,35 @@ class TradeProposalForm(forms.ModelForm):
     class Meta:
         model = TradeOffer
         fields = ['trade_items', 'estimated_trading_value', 'message']
+
+
+from django.utils import timezone
+
+
+class TicketRequestForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(TicketRequestForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        user = self.user
+
+        # Get the current time and the time at 5pm of the previous day
+        now = timezone.now()  # Use timezone.now() instead of datetime.timezone.now()
+        reset_time = now.replace(hour=17, minute=0, second=0)
+        if now.hour < 17:
+            reset_time -= timedelta(days=1)
+
+        # Check if the user has already submitted a form since the reset time
+        if LotteryTickets.objects.filter(user=user, mfg_date__gte=reset_time).exists():
+            raise forms.ValidationError("You have already collected your daily ticket. Please try again after 5pm.")
+
+        return cleaned_data
+
+    class Meta:
+        model = LotteryTickets
+        fields = ('name',)
 
 
 from django.contrib.auth import get_user_model

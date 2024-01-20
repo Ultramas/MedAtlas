@@ -280,6 +280,7 @@ urlpatterns = [
     # path('changelog/', ChangelogView.as_view(), name='changelog'),
     path('blogbase/', BlogBaseView.as_view(), name='blogbase'),
     path('base/', BaseView.as_view(), name='base'),
+    path('spinbase/', BaseView.as_view(), name='spinbase'),
     path('sidebar/', TemplateView.as_view(template_name='sidebar.html'), name='sidebar'),
     path('quantumentangling/', TemplateView.as_view(template_name='quantumentangling.html'), name='quantumentangling'),
     path('featuredproducts/', TemplateView.as_view(template_name='featuredproducts.html'), name='featuredproducts'),
@@ -299,7 +300,7 @@ urlpatterns = [
     #might cause issues due to the implementation of an integer rather than the foreignkey
     #path('order_history/', my_order_items, name='order_history'),
     path('order_history/', views.OrderHistory.as_view(), name='order_history'),
-    #path('order_history/<str:username>/', views.OrderHistory.as_view(), name='order_history'),
+    #path('order_history/<str:usernamep>/', views.OrderHistory.as_view(), name='order_history'),
     #path('create_review/', views.submit_feedback, name='create_review'),
     #path('create_review/<int:item_id>/', views.submit_feedback, name='create_review'),
     #possibly consider making wireframes to see where the create feedback form based on bought products url would look like
@@ -312,6 +313,12 @@ urlpatterns = [
     path('create_product/', views.CreateItemView.as_view(), name='create_product'),
     path('tradeitems/', views.TradeBackgroundView.as_view(), name='tradeitems'),
     path('tradingcentral/', views.TradeItemCreateView.as_view(), name='tradingcentral'),
+    path('pack_home/', views.ShufflerBackgroundView.as_view(), name='pack_home'),
+    path('pokespinner/', views.InventoryView.as_view(), name='pokespinner'),
+    path('pokechests/', views.InventoryView.as_view(), name='pokechests'),
+    path('lotteries/', views.DailyLotteryView.as_view(), name='lotteries'),
+    path('dailylotto/', views.DailyLotteryView.as_view(), name='dailylotto'), #special variant of Lottery, the daily lottery
+    path('under_construction/', TemplateView.as_view(template_name='under_construction.html'), name='under_construction'),
 
     # path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='main/password/password_reset_done.html'), name='password_reset_done'),
 
