@@ -106,11 +106,17 @@ LEVEL = (
     ('L', 'Legendary'),
     ('U', 'Ultimate'),
 )
-
 PRACTICE = (
     ('P', 'Practice'),
     ('R', 'Real'),
-    ('DN', 'Double_Or_Nothing'),
+)
+
+MEMBERSHIP_TIER = (
+    ('S', 'Sapphire'),
+    ('R', 'Ruby'),
+    ('E', 'Emerald'),
+    ('D', 'Diamond'),
+    ('?', '???'),
 )
 
 
@@ -239,7 +245,7 @@ class PrizePool(models.Model):
 
 class Choice(models.Model):
     """Used for voting on different new ideas"""
-    #question = models.ForeignKey(PollQuestion, on_delete=models.CASCADE)
+    # question = models.ForeignKey(PollQuestion, on_delete=models.CASCADE)
     choice_text = models.CharField(max_length=200, verbose_name='Choice Text')
     file = models.FileField(null=True, verbose_name='File')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -987,6 +993,142 @@ class Blog(models.Model):
         for i, blog in enumerate(blogs_to_update.order_by('position')):
             blog.position = self.position + i
             blog.save()
+
+
+class Currency(models.Model):
+    name = models.CharField(default='Rubiaces', max_length=200)
+    flavor_text = models.CharField(max_length=200)
+    file = models.FileField(null=True, verbose_name='Sprite')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.name)
+
+    class Meta:
+        verbose_name = "PokeTrove Currency"
+        verbose_name_plural = "PokeTrove Currencies"
+
+
+class CurrencyMarket(models.Model):
+    name = models.CharField(max_length=200)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    amount = models.IntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_price = models.FloatField(blank=True, null=True)
+    slug = models.SlugField()
+    unit_ratio = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    deal = models.BooleanField(default=False)
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, blank=True, null=True)  # can use for cataloging products
+    flavor_text = models.CharField(max_length=200)
+    file = models.FileField(null=True, verbose_name='Sprite')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.name)
+
+    def get_absolute_url(self):
+        return reverse("showcase:currencyproduct", kwargs={'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        if self.amount != 0:  # Avoid division by zero
+            self.unit_ratio = self.price / self.amount
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Currency Market"
+        verbose_name_plural = "Currency Markets"
+
+
+class CurrencyOrder(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    ref_code = models.CharField(max_length=20, blank=True, null=True)
+    items = models.OneToOneField(CurrencyMarket, on_delete=models.CASCADE)
+    itemhistory = models.ForeignKey(CurrencyMarket, on_delete=models.CASCADE, verbose_name="Order history", null=True, related_name='currency_item_history')
+    start_date = models.DateTimeField(auto_now_add=True)
+    ordered_date = models.DateTimeField()
+    ordered = models.BooleanField(default=False)
+    shipping_address = models.ForeignKey('Address', related_name='currency_shipping_address', on_delete=models.SET_NULL,
+                                         blank=True, null=True)
+    billing_address = models.ForeignKey('Address', related_name='currency_billing_address', on_delete=models.SET_NULL,
+                                        blank=True, null=True)
+    payment = models.ForeignKey('Payment', on_delete=models.SET_NULL, blank=True, null=True)
+    coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, blank=True, null=True)
+    being_delivered = models.BooleanField(default=False)
+    received = models.BooleanField(default=False)
+    refund_requested = models.BooleanField(default=False)
+    refund_granted = models.BooleanField(default=False)
+    id = uuid4()
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active order?")
+    '''
+   1. Item added to cart
+   2. Adding a billing address
+   (Failed checkout)
+   3. Payment
+   (Preprocessing, processing, packaging etc.)
+   4. Being delivered
+   5. Received
+   6. Refunds
+   '''
+
+    def __str__(self):
+        return self.user.username
+
+    def get_add_to_cart_url(self):
+        return reverse("showcase:add-to-cart", kwargs={'slug': self.slug})
+
+    def get_remove_from_cart_url(self):
+        return reverse("showcase:remove-from-cart", kwargs={'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        if self.items.discount_price:
+            self.amount = self.items.discount_price
+        else:
+            self.amount = self.items.price
+        super().save(*args, **kwargs)
+
+    def get_total_price(self):
+        total = 0
+        for order_item in self.items.all():
+            total += order_item.get_final_price()
+        if self.coupon:
+            if self.coupon.percentDollars:
+                total *= 1 - (0.01 * self.coupon.amount)
+            else:
+                total -= self.coupon.amount
+        return total
+
+    def get_profile_url(self):
+        return reverse('showcase:profile', args=[str(self.slug)])
+
+    def get_profile_url2(self):
+        return reverse('showcase:currencymarket', args=[str(self.slug)])
 
 
 class Preference(models.Model):
@@ -2210,40 +2352,6 @@ from django.db.models.signals import post_save
 from django.contrib.auth import get_user_model
 
 
-class ProfileDetails(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    email = models.EmailField(blank=True, null=True)
-    # username = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to='profile_image', null=True, blank=True, verbose_name="Profile picture")
-    alternate = models.TextField(verbose_name="Alternate text")
-    about_me = models.TextField(blank=True, null=True)
-    position = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        unique=True,
-        help_text="Position for sorting",
-    )
-    # link_to_profile = models.URLField(default=1, blank=True, null=True, verbose_name="Link to profile") #possibly consider making this automatically fill with the link to the user's profile
-    # consider making a randomized pk that is assigned to each invididual user and can be attached to the end of the default profile url like in this schema: "http://127.0.0.1:8000/profile/pk/
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
-
-    def __str__(self):
-        return str(self.user)
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-
-        return reverse('showcase:profile', kwargs={'pk': self.pk})
-
-    class Meta:
-        verbose_name = "Account Profile"
-        verbose_name_plural = "Account Profiles"
-
-
 # link the profiledetails page to settings
 
 
@@ -2740,8 +2848,6 @@ class TradeOffer(models.Model):
     class Meta:
         verbose_name = "Trade Offer"
         verbose_name_plural = "Trade Offers"
-
-
 
 
 class ChatBackgroundImage(models.Model):
@@ -3726,6 +3832,8 @@ class Shuffler(models.Model):
                                     verbose_name="Shuffle Type")
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     demonstration = models.CharField(choices=PRACTICE, max_length=2, blank=True, null=True)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    cost = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True, default=0.0)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -3761,7 +3869,10 @@ def create_unique_lottery_number():
 class Lottery(models.Model):
     name = models.CharField(default='Daily Lotto', max_length=200)
     flavor_text = models.CharField(max_length=200)
+    file_path = models.CharField(max_length=500, blank=True, null=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True, null=True)
     file = models.FileField(null=True, verbose_name='Sprite')
+    profile_number = models.PositiveIntegerField(default=0, editable=False)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
                                                verbose_name="image length")
@@ -3777,6 +3888,20 @@ class Lottery(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            max_message_number = Lottery.objects.aggregate(max_message_number=models.Max('profile_number'))[
+                                     'max_message_number'] or 0
+            self.profile_number = max_message_number + 1
+
+        if not self.slug:
+            if self.name != "Daily Lotto" and self.name != "Daily Lottery" and self.name != "daily lotto" and self.name != "daily lottery":
+                self.slug = slugify(self.name)
+
+        self.file_path = reverse('showcase:lottery', kwargs={'slug': self.slug})
+
+        super().save(*args, **kwargs)  # Call the "real" save() method.
 
     def select_winner(self):
         # Get all tickets associated with this lottery
@@ -3832,9 +3957,9 @@ class LotteryTickets(models.Model):
         verbose_name_plural = "Lottery Tickets"
 
 
-class Currency(models.Model):
+class Membership(models.Model):
     name = models.CharField(default='Rubiaces', max_length=200)
-    flavor_text = models.CharField(max_length=200)
+    tier = models.CharField(choices=MEMBERSHIP_TIER, max_length=2, blank=True, null=True)
     file = models.FileField(null=True, verbose_name='Sprite')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
@@ -3853,5 +3978,108 @@ class Currency(models.Model):
         return str(self.name)
 
     class Meta:
-        verbose_name = "PokeTrove Currency"
-        verbose_name_plural = "PokeTrove Currencies"
+        verbose_name = "Membership Tier"
+        verbose_name_plural = "Membership Tiers"
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    membership_tier = models.ForeignKey(Membership, on_delete=models.CASCADE)
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.name)
+
+    class Meta:
+        verbose_name = "Subscription"
+        verbose_name_plural = "Subscriptions"
+
+
+class Level(models.Model):
+    level = models.IntegerField(default=1)
+    level_name = models.CharField(max_length=200)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.level_name) + " " + str(self.level)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # if the object is being created, not updated
+            last_level = Level.objects.all().order_by('-level').first()
+            if last_level:
+                self.level = last_level.level + 1
+            # if there is no last_level, self.level will be 1 by default
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Level"
+        verbose_name_plural = "Levels"
+        ordering = ['level']
+
+
+
+class ProfileDetails(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email = models.EmailField(blank=True, null=True)
+    # username = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='profile_image', null=True, blank=True, verbose_name="Profile picture")
+    alternate = models.TextField(verbose_name="Alternate text")
+    about_me = models.TextField(blank=True, null=True)
+    level = models.ForeignKey(Level, on_delete=models.CASCADE, default="")
+    subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, blank=True, null=True)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    currency_amount = models.DecimalField(max_digits=10, decimal_places=1, default=0.0)
+    position = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+        help_text="Position for sorting",
+    )
+    # link_to_profile = models.URLField(default=1, blank=True, null=True, verbose_name="Link to profile") #possibly consider making this automatically fill with the link to the user's profile
+    # consider making a randomized pk that is assigned to each invididual user and can be attached to the end of the default profile url like in this schema: "http://127.0.0.1:8000/profile/pk/
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.user)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+
+        return reverse('showcase:profile', kwargs={'pk': self.pk})
+
+    def add_currency(self, amount):
+        self.currency_amount += amount
+        self.save()
+
+    def subtract_currency(self, amount):
+        if self.currency_amount >= amount:
+            self.currency_amount -= amount
+            self.save()
+        else:
+            raise ValueError("Not enough currency")
+
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            default_level = Level.objects.first()  # or set this to whatever you want the default to be
+            default_currency = Currency.objects.first()  # or set this to whatever you want the default to be
+            ProfileDetails.objects.create(user=instance, currency=default_currency, level=default_level)
+
+    post_save.connect(create_user_profile, sender=User)
+
+    class Meta:
+        verbose_name = "Account Profile"
+        verbose_name_plural = "Account Profiles"

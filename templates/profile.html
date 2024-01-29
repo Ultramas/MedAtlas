@@ -4,7 +4,11 @@
 
 {% block head %}
     {% if profile %}
+        {% if profile.avatar %}
         <link rel="icon" type="image/x-icon" href="{{ profile.avatar.url }}">
+        {% else %}
+        <h1>No Profile Image Found</h1>
+        {% endif %}
     {% else %}
         {% for favicon in Favicons %}
             {% if favicon.faviconpage == 'profile.html' %}
@@ -25,7 +29,10 @@
     {% endif %}
 
 {% if profile %}
-    <link rel="icon" type="image/x-icon" href="{{ profile.avatar.url }}">
+        {% if profile.avatar %}
+        <link rel="icon" type="image/x-icon" href="{{ profile.avatar.url }}">
+        {% else %}
+        {% endif %}
 {% else %}
     {% for favicon in Favicons %}
         {% if favicon.faviconpage == 'profile.html' %}
@@ -66,14 +73,33 @@
 <br>
 -->
     {% if profile %}
+        {% if profile.avatar %}
 <div class="container" style="background: {{profile.avatar.url}}; border-radius: 20px;" >
         <img src="{{ profile.avatar.url }}" style="max-width: 50%; max-height: 50%; border-radius: 50px;">
+        {% else %}
+    <div class="container">
+        <h1 style="color: white;">No Profile Image Found</h1>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        {% endif %}
         <h1 style="color: white;">My Profile</h1>
         <p style="color: white;">Username: {{ profile.user }}</p>
         <p style="color: white;">About Me: {{ profile.about_me }}</p>
         <p style="color: white;">Email: {{ profile.email }}</p>
 <br>
 
+        <br>
+        <br>
 <br>
 
 

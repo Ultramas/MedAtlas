@@ -2,7 +2,7 @@ import django
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
-    PrizePool
+    PrizePool, CurrencyMarket, CurrencyOrder
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -564,6 +564,7 @@ class usersview(ListView):
     def get_queryset(self):
         return Idea.objects.all()
 
+
 """
 class PostList(BaseView):
     model = BlogBackgroundImage
@@ -608,6 +609,8 @@ class PostList(BaseView):
         return Blog.objects.filter(status=1).order_by('-created_on')
 
 """
+
+
 class votingview(ListView):
     model = VoteBackgroundImage
     paginate_by = 10
@@ -680,7 +683,6 @@ class eventview(ListView):
 
     def get_queryset(self):
         return Event.objects.all()
-
 
 
 class supportview(ListView):
@@ -1002,7 +1004,6 @@ class BackgroundView(FormMixin, BaseView):
             # Add the feedback_objects to the context
             context['Feed'] = feedback_objects
 
-
         for feedback_objects in context['Feed']:
             user = feedback_objects.username
             profile = ProfileDetails.objects.filter(user=user).first()
@@ -1045,7 +1046,6 @@ class CreatePostView(CreateView):
     form_class = BackgroundImagery
     template_name = "backgroundimagechange.html"
     success_url = reverse_lazy("index")
-
 
 
 class ECreatePostView(CreateView):
@@ -1275,6 +1275,7 @@ class RuleCreatePostView(CreateView):
     template_name = "rulebackgroundimagechange.html"
     success_url = reverse_lazy("rules")
 
+
 class PolicyBackgroundView(BaseView):
     template_name = "policy.html"
 
@@ -1288,6 +1289,7 @@ class PolicyBackgroundView(BaseView):
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
+
 class ServersView(BaseView):
     model = RuleBackgroundImage
     template_name = "servers.html"
@@ -1300,6 +1302,7 @@ class ServersView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
+
 
 class AboutBackgroundView(BaseView):
     model = AboutBackgroundImage
@@ -1811,6 +1814,7 @@ def room(request, room):
         'Dropdown': DropDown,
     })
 
+
 def checkview(request):
     room = request.POST['room_name']
     username = request.POST['username']
@@ -1931,7 +1935,7 @@ def privateroom(request, room):
 
 def supportcheckview(request):
     help = request.POST['help']
-    #user = request.POST['username'] #based off def checkview
+    # user = request.POST['username'] #based off def checkview
     username = request.user.username
 
     if SupportChat.objects.filter(name=username).exists():
@@ -1939,7 +1943,7 @@ def supportcheckview(request):
                                                     user=username,
                                                     room=username)
         new_message.save()
-        #return redirect('/supportchat/room')
+        # return redirect('/supportchat/room')
         return redirect('/supportchat/room/' + username)
     else:
         new_room = SupportChat.objects.create(name=username)
@@ -1950,7 +1954,7 @@ def supportcheckview(request):
                                                     room=username)
         new_message.save()
 
-        #return redirect('/supportchat/room')
+        # return redirect('/supportchat/room')
         return redirect('/supportchat/room/' + username)
         print('support message sent')
 
@@ -2358,8 +2362,6 @@ class EBaseView(ListView):
         return context
 
 
-
-
 class BlogBaseView(ListView):
     template_name = "blogbase.html"
     model = LogoBase
@@ -2543,6 +2545,7 @@ class usersview(ListView):
     def get_queryset(self):
         return Idea.objects.all()
 
+
 from django.db.models import Count, F
 
 
@@ -2564,8 +2567,8 @@ class PostList(BaseView):
         paginated_blog = paginator.get_page(page_number)
 
         # Annotate each blog post with the difference between the number of likes and dislikes
-        PopularBlogOrder = Blog.objects.annotate(like_dislike_diff=Count(F('likes')) - Count(F('dislikes'))).order_by('-like_dislike_diff', '-created_on')
-
+        PopularBlogOrder = Blog.objects.annotate(like_dislike_diff=Count(F('likes')) - Count(F('dislikes'))).order_by(
+            '-like_dislike_diff', '-created_on')
 
         # Order the blog posts by this difference
         PopularBlogOrder = PopularBlogOrder.order_by('-like_dislike_diff')
@@ -2893,7 +2896,7 @@ class SupportRoomView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         signed_in_user = self.kwargs['signed_in_user']
-        #room_name = self.kwargs['room_name']
+        # room_name = self.kwargs['room_name']
         context['username'] = signed_in_user  # Set 'username' to the extracted 'signed_in_user'
 
         # room = self.kwargs['room']
@@ -2940,7 +2943,6 @@ class SupportRoomView(TemplateView):
 
 
 def supportroom(request, signed_in_user):
-
     return render(request, 'supportroom.html', {
         'username': username,
         'supportroom': supportroom,
@@ -2951,6 +2953,7 @@ def supportroom(request, signed_in_user):
         'Header': Header,
         'Dropdown': DropDown,
     })
+
 
 class SupportCombinedView(SupportRoomView, ListView):
     paginate_by = 10
@@ -2966,8 +2969,6 @@ class supportview(ListView):
 
     def get_queryset(self):
         return Support.objects.all()
-
-
 
 
 class SupportLineView(TemplateView):
@@ -3018,24 +3019,24 @@ def supportline(request, room):
         'profile_details': profile_details,
     })
 
+
 def supportlinecheckview(request):
     room = request.POST['room_name']
 
     if SupportInterface.objects.filter(name=room).exists():
-        #return redirect('/supportchat/room')
+        # return redirect('/supportchat/room')
         return redirect('/supportinterface/room/' + room)
     else:
         new_room = SupportInterface.objects.create(name=room)
         signed_in_user = request.user
         print('the room owner is ' + str(signed_in_user))
         new_room.save()
-        #return redirect('/supportchat/room')
+        # return redirect('/supportchat/room')
         return redirect('/supportinterface/room/' + room)
 
 
-
-
 from django.shortcuts import get_object_or_404
+
 
 def supportlinesend(request):
     if request.method == 'POST':
@@ -3066,7 +3067,6 @@ def supportlinesend(request):
 
 
 def supportlinegetMessages(request, room, **kwargs):
-
     room_details = SupportInterface.objects.get(name=room)
     messages = SupportLine.objects.filter(room=room)
     # Check if the user is authenticated
@@ -3102,6 +3102,7 @@ def supportlinegetMessages(request, room, **kwargs):
         return JsonResponse({'messages': messages_data})
     else:
         return HttpResponseForbidden("You do not have permission to access this chat room")
+
 
 class MemberHomeBackgroundView(ListView):
     model = MemberHomeBackgroundImage
@@ -3182,7 +3183,6 @@ class PatreonBackgroundView(ListView):
             'form': form
         }
         return render(request, 'blog_comment.html', context)"""
-
 
 # def BlogPostLike(request, slug):
 #    post = get_object_or_404(Blog, id=request.POST.get('blog_id'))
@@ -3408,7 +3408,6 @@ class BackgroundView(FormMixin, BaseView):
                 news.hyperlink = newsfeeding.get_profile_url()
                 news.description = newsfeeding.description
 
-
         feed = Feedback.objects.filter(is_active=1).order_by('-timestamp')
 
         context['FeedBacking'] = feed
@@ -3423,6 +3422,7 @@ class BackgroundView(FormMixin, BaseView):
                 print(user)
 
         return context
+
     def post(self, request, *args, **kwargs):
         form = EmailForm(request.POST)
         if form.is_valid():
@@ -3459,11 +3459,13 @@ class TermsAndConditionsView(BaseView):
     template_name = "termsandconditions.html"
     section = TextBase.section
 
+
 class PolicyView(BaseView):
     model = BackgroundImage
     form_class = EmailForm
     template_name = "policy.html"
     section = TextBase.section
+
 
 import urllib.request as url_request
 
@@ -3483,7 +3485,9 @@ def get_items_by_category(category):
         items = Item.objects.all()
     return items
 
+
 from django.contrib.auth.models import AnonymousUser
+
 
 class EBackgroundView(BaseView, FormView):
     model = EBackgroundImage
@@ -3514,7 +3518,8 @@ class EBackgroundView(BaseView, FormView):
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Image'] = ImageBase.objects.filter(is_active=1, page=self.template_name)
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(page=self.template_name, is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(page=self.template_name,
+                                                                                    is_active=1)
         context['Email'] = EmailField.objects.filter(is_active=1)
         context['store_view_form'] = StoreViewTypeForm()
         context['form'] = EmailForm()
@@ -3587,8 +3592,6 @@ class EBackgroundView(BaseView, FormView):
             return render(request, 'ehome.html', {'form': form})
 
 
-
-
 class StoreView(BaseView, FormView, ListView):
     model = StoreViewType
     template_name = "storeviewtypesnippet.html"
@@ -3609,11 +3612,11 @@ class StoreView(BaseView, FormView, ListView):
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Image'] = ImageBase.objects.filter(is_active=1, page=self.template_name)
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(page=self.template_name, is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(page=self.template_name,
+                                                                                    is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         return context
-
 
     def post(self, request, *args, **kwargs):
         eform = StoreViewTypeForm(request.POST, request=request)
@@ -3623,9 +3626,8 @@ class StoreView(BaseView, FormView, ListView):
             post.save()
             return redirect('showcase:ehome')
         else:
-            print('the errors with the storeviewtype form are '+ str(eform.errors))
+            print('the errors with the storeviewtype form are ' + str(eform.errors))
         return render(request, 'storeviewtypesnippet.html', {'eform': eform})
-
 
 
 class ECreatePostView(CreateView):
@@ -3668,8 +3670,10 @@ class ShowcaseCreatePostView(CreateView):
     template_name = "showcasebackgroundimagechange.html"
     success_url = reverse_lazy("showcase")
 
+
 def forbidden_access(request):
     return render(request, 'forbiddenaccess.html')
+
 
 class ChatBackgroundView(BaseView):
     model = ChatBackgroundImage
@@ -3685,7 +3689,6 @@ class ChatBackgroundView(BaseView):
         return context
 
 
-
 class SupportLineBackgroundView(BaseView):
     model = SupportInterface
     template_name = "supportinterface.html"
@@ -3698,6 +3701,7 @@ class SupportLineBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
+
 
 class ChatCreatePostView(CreateView):
     model = ChatBackgroundImage
@@ -3805,9 +3809,6 @@ class BilletCreatePostView(CreateView):
     success_url = reverse_lazy("billets")
 
 
-
-
-
 class RuleCreatePostView(CreateView):
     model = RuleBackgroundImage
     form_class = RuleBackgroundImagery
@@ -3875,7 +3876,6 @@ class StaffCreatePostView(CreateView):
     form_class = StaffBackgroundImagery
     template_name = "staffbackgroundimagechange.html"
     success_url = reverse_lazy("staff")
-
 
 
 class InformationBackgroundView(BaseView):
@@ -4238,8 +4238,8 @@ def get_profile_url(message):
 """
 from django.http import JsonResponse
 
-
 from django.shortcuts import get_object_or_404
+
 
 def supportgetMessages(request, signed_in_user, **kwargs):
     # Check if the user is authenticated
@@ -4281,6 +4281,7 @@ def supportgetMessages(request, signed_in_user, **kwargs):
         return JsonResponse({'messages': messages_data})
     else:
         return HttpResponseForbidden("You do not have permission to access this chat room")
+
 
 """def supportgetMessages(request, **kwargs):
    messages = SupportMessage.objects.filter(room=request.user.username)
@@ -4494,6 +4495,7 @@ class PostingView(FormMixin, ListView):
             messages.error(request, form.errors)
             return render(request, "post_edit.html", {'form': form})
 
+
 from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -4540,12 +4542,14 @@ class PollQuestionsView(View):
         # Render the template with the context
         return render(request, self.template_name, context)
 
+
 def polldetail(request, question_id):
-	try:
-		question = PollQuestion.objects.get(pk = question_id)
-	except PollQuestion.DoesNotExist:
-		raise Http404("Question does not exist")
-	return render(request, 'polldetail.html', {'question': question})
+    try:
+        question = PollQuestion.objects.get(pk=question_id)
+    except PollQuestion.DoesNotExist:
+        raise Http404("Question does not exist")
+    return render(request, 'polldetail.html', {'question': question})
+
 
 class PollDetailView(TemplateView):
     template_name = 'polldetail.html'
@@ -4606,7 +4610,8 @@ class PollingView(View):
             context = {
                 'question': question,
                 'error_message': error_message,
-                'Background': BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+                'Background': BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+                    "position"),
                 'PostBackgroundImage': PostBackgroundImage.objects.all(),
                 'BaseCopyrightTextFielded': BaseCopyrightTextField.objects.filter(is_active=1),
                 'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
@@ -4641,6 +4646,21 @@ class InventoryView(FormMixin, ListView):
 
 from .models import LotteryTickets, Lottery
 from .forms import TicketRequestForm
+
+
+class LotteryBackgroundView(BaseView):
+    model = Lottery
+    template_name = "lotteries.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Lotto'] = Lottery.objects.filter(is_active=1)
+
+        return context
 
 
 class DailyLotteryView(FormMixin, ListView):
@@ -4686,13 +4706,30 @@ class DailyLotteryView(FormMixin, ListView):
             post.lottery = lottery
             post.user = request.user  # Set the user attribute
             post.save()
-            return redirect('showcase:dailylotto')
+            return redirect('showcase:dailylottoclaimed')
         else:
             print(form.errors)
             print(form.non_field_errors())
             print(form.cleaned_data)
             messages.error(request, 'You need to log in to claim your daily ticket!')
             return render(request, 'registration/login.html', {'form': form})
+
+
+class Lottereal(BaseView):
+    model = Lottery
+    template_name = "lotteries.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Vote'] = Vote.objects.all()
+        return context
 
 
 class PosteView(FormMixin, ListView):
@@ -4822,6 +4859,7 @@ class HomePageView(TemplateView):
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+
 class EcommerceSearchResultsView(ListView):
     model = Item
     template_name = 'ecommercesearch_results.html'
@@ -4840,11 +4878,11 @@ class EcommerceSearchResultsView(ListView):
 
         return (all_list)
 
+
 class BlogSearchResultsView(ListView):
     template_name = 'blogsearch_results.html'
     paginate_by = 10
     context_object_name = 'all_list'
-
 
     def get_queryset(self):
         query = self.request.GET.get('q')
@@ -4854,7 +4892,9 @@ class BlogSearchResultsView(ListView):
         search_lists = []
 
         if filter_by == 'blog':
-            search_lists.append(Blog.objects.filter(Q(title__icontains=query) | Q(slug__icontains=query) | Q(type__icontains=query) | Q(author__username__icontains=query)))
+            search_lists.append(Blog.objects.filter(
+                Q(title__icontains=query) | Q(slug__icontains=query) | Q(type__icontains=query) | Q(
+                    author__username__icontains=query)))
         elif filter_by == 'blogfilter':
             search_lists.append(BlogFilter.objects.filter(
                 Q(blog_filter__icontains=query)))
@@ -4875,6 +4915,7 @@ class BlogSearchResultsView(ListView):
                 search_results.append(search_result)
 
         return search_results
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -4902,7 +4943,6 @@ class BlogSearchResultsView(ListView):
                 result.url = ''
 
         return context
-
 
 
 from django.views.generic import ListView
@@ -4953,7 +4993,7 @@ class SearchResultsView(ListView):
                                 Q(name__icontains=query) | Q(description__icontains=query) | Q(
                                     server_invite__icontains=query)),
                             NewsFeed.objects.filter(
-                Q(name__icontains=query) | Q(description__icontains=query) | Q(slug__icontains=query))]
+                                Q(name__icontains=query) | Q(description__icontains=query) | Q(slug__icontains=query))]
 
         # Combine the search results from selected lists
         search_results = []
@@ -5030,12 +5070,9 @@ class EcommerceSearchResultsView(ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
 
-
         # settings to alter the username & password
 
         return context
-
-
 
 
 # class ProductSearchResultsView(ListView):
@@ -5105,6 +5142,7 @@ def profile_edit(request, pk):
 
     return render(request, 'profile_edit.html', {'form': form, 'profile': profile})
 
+
 def edit_profile(request):
     if request.method == 'POST':
         form = EditProfileForm(request.POST, instance=request.user)
@@ -5117,6 +5155,7 @@ def edit_profile(request):
         form = EditProfileForm(instance=request.user)
         args = {'form': form}
         return render(request, 'edit_profile.html', args)
+
 
 class StaffJoine(ListView):
     paginate_by = 10
@@ -5445,6 +5484,379 @@ class PostDetailView(View):
         }
 
         return render(request, self.template_name, context)
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@csrf_exempt
+def subtract_currency(request):
+    if request.method == 'POST':
+        user = request.user
+        cost = request.POST.get('cost')
+        profile = ProfileDetails.objects.get(user=user)
+        try:
+            profile.subtract_currency(cost)
+            return JsonResponse({'status': 'success'})
+        except ValueError:
+            return JsonResponse({'status': 'error', 'message': 'Not enough currency'})
+
+
+class CurrencyMarketView(EBaseView):
+    model = CurrencyMarket
+    template_name = "currencymarket.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+        context['Logos'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
+        context['Currency'] = CurrencyMarket.objects.filter(is_active=1).order_by('price') #deals/non-deals can be seperated in the templates
+        return context
+
+
+from paypalrestsdk import Payment as PayPalPayment
+
+
+class CurrencyPaymentView(EBaseView):
+    template_name = "currencypayment.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
+        return context
+
+    def get(self, *args, **kwargs):
+        # request (self) does not seem to be getting user
+        order = CurrencyOrder.objects.get(user=self.request.user, ordered=False)
+        if order.billing_address:
+            context = self.get_context_data(**kwargs)
+            context['order'] = order
+            context['DISPLAY_COUPON_FORM'] = False
+            context['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
+            userprofile = User.objects.get(username=self.request.user.username)
+            if hasattr(userprofile, "one_click_purchasing"):
+                # userprofile is probably not linked to database
+                if userprofile.one_click_purchasing:
+                    # fetch the users list
+                    cards = stripe.Customer.list_sources(
+                        userprofile.stripe_customer_id,
+                        limit=3,
+                        object='card'
+                    )
+                    card_list = cards['data']
+                    if len(card_list) > 0:
+                        # update the context with the default card
+                        context.update({
+                            'card': card_list[0]
+                        })
+            else:
+                userprofile.one_click_purchasing = False
+                return render(self.request, "payment.html", context)
+                # Check if PayPal payment method is available
+            if hasattr(userprofile, 'paypal_enabled') and userprofile.paypal_enabled:
+                context['PAYPAL_CLIENT_ID'] = settings.PAYPAL_CLIENT_ID
+
+            return render(self.request, "payment.html", context)
+        else:
+            messages.warning(
+                self.request, "You have not added a billing address.")
+            return redirect("showcase:checkout")
+
+    def post(self, *args, **kwargs):
+        order = CurrencyOrder.objects.get(user=self.request.user, ordered=False)
+        form = PaymentForm(self.request.POST)
+        userprofile = User.objects.get(username=self.request.user.username)
+        payment_method = self.request.POST.get('payment_method')
+
+        if form.is_valid():
+            print(form.cleaned_data)
+            print(form.cleaned_data.get("expiry"))
+
+            token = stripe.Token.create(
+                card={
+                    "number": form.cleaned_data.get("number"),
+                    "exp_month": form.cleaned_data.get("exp_month"),
+                    "exp_year": form.cleaned_data.get("exp_year"),
+                    "cvc": form.cleaned_data.get("cvc"),
+                },
+            )
+            save = form.cleaned_data.get('save')
+            use_default = form.cleaned_data.get('use_default')
+
+            if save:
+                if userprofile.stripe_customer_id != '' and userprofile.stripe_customer_id is not None:
+                    customer = stripe.Customer.retrieve(userprofile.stripe_customer_id)
+                    customer.sources.create(source=token)
+                else:
+                    customer = stripe.Customer.create(email=self.request.user.email)
+                    customer.sources.create(source=token)
+                    userprofile.stripe_customer_id = customer['id']
+                    userprofile.one_click_purchasing = True
+                    userprofile.save()
+
+            amount = int(order.get_total_price() * 100)
+
+            try:
+                if use_default or save:
+                    # charge the customer because we cannot charge the token more than once
+                    charge = stripe.Charge.create(
+                        amount=amount,  # cents
+                        currency="usd",
+                        customer=userprofile.stripe_customer_id
+                    )
+                    print('the payment went through')
+                else:
+                    # charge once off on the token
+                    charge = stripe.Charge.create(
+                        amount=amount,  # cents
+                        currency="usd",
+                        source=token
+                    )
+                    print('the payment went through')
+
+                # create the payment
+                payment = Payment()
+                payment.stripe_charge_id = charge['id']
+                payment.user = self.request.user
+                payment.amount = order.get_total_price()
+                payment.save()
+
+                # assign the payment to the order
+                order_items = order.items.all()
+                order_items.update(ordered=True)
+                for item in order_items:
+                    item.save()
+
+                order.ordered = True
+                order.payment = payment
+                order.ref_code = create_ref_code()
+                order.save()
+
+                messages.success(self.request, "Your order was successful!")
+
+                if payment_method == 'paypal':
+                    return HttpResponseRedirect(self.process_paypal_payment(order))
+                return redirect("showcase:ehome")
+
+            except stripe.error.CardError as e:
+                body = e.json_body
+                err = body.get('error', {})
+                messages.warning(self.request, f"{err.get('message')}")
+                return redirect("showcase:ehome")
+
+            except stripe.error.RateLimitError as e:
+                # Too many requests made to the API too quickly
+                messages.warning(self.request, "Rate limit error")
+                return redirect("showcase:ehome")
+
+            except stripe.error.InvalidRequestError as e:
+                # Invalid parameters were supplied to Stripe's API
+                print(e)
+                print(12345)
+                # print ('stripeToken', stripeToken)
+                messages.warning(self.request, "Invalid parameters")
+                return redirect("/ehome")
+
+            except stripe.error.AuthenticationError as e:
+                # Authentication with Stripe's API failed
+                # (maybe you changed API keys recently)
+                messages.warning(self.request, "Not authenticated")
+                return redirect("/")
+
+            except stripe.error.APIConnectionError as e:
+                # Network communication with Stripe failed
+                messages.warning(self.request, "Network error")
+                return redirect("/ehome")
+
+            except stripe.error.StripeError as e:
+                # Display a very generic error to the user, and maybe send
+                # yourself an email
+                messages.warning(
+                    self.request, "Something went wrong. You were not charged. Please try again."
+                )
+                return redirect("/ehome")
+
+            except Exception as e:
+                # send an email to ourselves
+                messages.warning(
+                    self.request, "A serious error occurred. We have been notified."
+                )
+                return redirect("/ehome")
+
+        messages.warning(self.request, "Invalid data received")
+        return redirect("/payment/stripe")
+
+
+class PayPalExecuteView(View):
+    def get(self, request, *args, **kwargs):
+        payer_id = request.GET.get('PayerID')
+        payment_id = request.GET.get('paymentId')
+
+        try:
+            order = CurrencyOrder.objects.get(paypal_payment_id=payment_id, ordered=False)
+            paypal_payment = PayPalPayment.find(payment_id)
+
+            if paypal_payment.execute({'payer_id': payer_id}):
+                # Payment successful
+                payment = Payment()
+                payment.paypal_payment_id = payment_id
+                payment.user = self.request.user
+                payment.amount = order.get_total_price()
+                payment.save()
+
+                # Mark order items as ordered
+                order_items = order.items.all()
+                order_items.update(ordered=True)
+
+                # Associate the payment with the order
+                order.ordered = True
+                order.payment = payment
+                order.ref_code = create_ref_code()
+                order.save()
+
+                messages.success(self.request, 'Your order was successful!')
+                return redirect('showcase:ehome')
+
+            # Payment failed
+            messages.error(self.request, 'Failed to process PayPal payment')
+            return redirect('/payment')
+
+        except CurrencyOrder.DoesNotExist:
+            messages.error(self.request, 'Order not found')
+            return redirect('/payment')
+
+
+class PaypalFormView(FormView):
+    template_name = 'paypalpayment.html'
+    form_class = PaypalPaymentForm
+
+    def get_initial(self):
+        return {
+            'business': 'your-paypal-business-address@example.com',
+            'amount': 20,
+            'currency_code': 'EUR',
+            'item_name': 'Example item',
+            'invoice': 1234,
+            'notify_url': self.request.build_absolute_uri(reverse('paypal-ipn')),
+            'return_url': self.request.build_absolute_uri(reverse('paypal-return')),
+            'cancel_return': self.request.build_absolute_uri(reverse('paypal-cancel')),
+            'lc': 'EN',
+            'no_shipping': '1',
+        }
+
+
+@allow_guest_user
+def add_to_cart(request, slug):
+    item = get_object_or_404(CurrencyOrder, slug=slug)
+    order_item, created = OrderItem.objects.get_or_create(
+        item=item,
+        user=request.user,
+        ordered=False,
+        # id=10,
+    )
+    order_qs = CurrencyOrder.objects.filter(user=request.user, ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        # check if the order item is in the order
+        if order.items.filter(item__slug=item.slug).exists():
+            order_item.quantity += 1
+            order_item.save()
+            messages.info(
+                request,
+                "\"" + order_item.item.title + "\" was added to your cart.")
+            return redirect("showcase:checkout")
+        else:
+            order.items.add(order_item)
+            messages.info(request, "This item was added to your cart.")
+            return redirect("showcase:checkout")
+    else:
+        order_qs = CurrencyOrder.objects.create(user=request.user,
+                                        ordered=False,
+                                        ordered_date=timezone.now())
+        print("Order created")
+        # check if the order item is in the order
+        if order_qs.items.filter(item__slug=item.slug).exists():
+            order_item.quantity += 1
+            order_item.save()
+            messages.info(
+                request,
+                "\"" + order_item.item.title + "\" was added to your cart.")
+            return redirect("showcase:checkout")
+        else:
+            order_qs.items.add(order_item)
+            messages.info(request, "This item was added to your cart.")
+            return redirect("showcase:checkout")
+
+
+@login_required
+def remove_from_cart(request, slug):
+    item = get_object_or_404(CurrencyOrder, slug=slug)
+    order_qs = CurrencyOrder.objects.filter(user=request.user, ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        if order.items.filter(item__slug=item.slug).exists():
+            order_item = OrderItem.objects.filter(item=item,
+                                                  user=request.user,
+                                                  ordered=False)[0]
+            order_item.delete()
+            messages.info(
+                request, "Item \"" + order_item.item.title +
+                         "\" was removed from your cart")
+            return redirect("showcase:currencymarket")
+        else:
+            messages.info(request, "This item is no longer in your cart")
+            return redirect("showcase:product", slug=slug)
+    else:
+        # add message doesnt have order
+        messages.info(request, "You do not seem to have an order currently")
+        return redirect("showcase:product", slug=slug)
+
+
+def index(request):
+    return redirect('showcase')
+
+
+@login_required
+def reduce_quantity_item(request, slug):
+    item = get_object_or_404(Item, slug=slug)
+    order_qs = Order.objects.filter(user=request.user, ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        if order.items.filter(item__slug=item.slug).exists():
+            order_item = OrderItem.objects.filter(item=item,
+                                                  user=request.user,
+                                                  ordered=False)[0]
+            if order_item.quantity > 1:
+                order_item.quantity -= 1
+                order_item.save()
+            else:
+                order_item.delete()
+            messages.info(request, "Item quantity was updated")
+            return redirect("showcase:order-summary")
+        else:
+            messages.info(request, "This Item is not in your cart")
+            return redirect("showcase:order-summary")
+    else:
+        # add message doesnt have order
+        messages.info(request, "You do not have an Order")
+        return redirect("showcase:order-summary")
+
 
 
 # users/views.py
@@ -6396,9 +6808,11 @@ def edit_profile(request, pk):
         args = {'form': form}
         return render(request, 'edit_profile.html', args)
 
+
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ProfileDetail
 from .models import ProfileDetails
+
 
 class ProfileEditView(FormView):
     template_name = 'profile_edit.html'
@@ -6421,7 +6835,6 @@ class ProfileEditView(FormView):
         profile.user = self.request.user  # Set the user
         profile.save()  # Now save to DB
         return redirect('showcase:profile', pk=profile.pk)
-
 
     def post(self, request, pk=None):
         profile = ProfileDetails.objects.filter(user=request.user).first()
@@ -7169,6 +7582,7 @@ class FeedbackView(BaseView):
 
         return context
 
+
 """@method_decorator(login_required, name='dispatch')
 class FeedbackView(UpdateView):
     model = Feedback
@@ -7439,7 +7853,6 @@ def post_detail(request, slug):
         })
 
 
-
 @login_required
 def postpreference(request, post_name, like_or_dislike):
     if request.method == "POST":
@@ -7478,9 +7891,6 @@ def postpreference(request, post_name, like_or_dislike):
                    'post_name': post_name}
 
         return render(request, 'showcase:likes.html', context)
-
-
-
 
 
 from django.shortcuts import get_object_or_404, redirect, render
@@ -7614,7 +8024,6 @@ from django.shortcuts import render, redirect
 from .forms import FeedbackForm
 from .models import OrderItem, Feedback
 
-
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.urls import reverse
@@ -7733,10 +8142,8 @@ class CreateReviewView(LoginRequiredMixin, FormView):
         return render(request, 'create_review.html', {'form': form})
 
 
-
-
-
 from .forms import FeedForm
+
 
 class FeedView(FormMixin, ListView):
     model = Feedback
@@ -7755,22 +8162,23 @@ class FeedView(FormMixin, ListView):
             'Background': BackgroundImageBase.objects.filter(is_active=1)
         }
         return context
+
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
-            form = FeedForm(request.POST)
-            if form.is_valid():
-                post = form.save(commit=False)
-                form.instance.user = request.user
-                post.save()
-                messages.success(request, 'Form submitted successfully.')
-                url = reverse('showcase:review_detail', args=[slug])
-                return redirect(url)
-            else:
-                print(form.errors)
-                print(form.non_field_errors())
-                print(form.cleaned_data)
-                messages.error(request, "Form submission invalid")
-                return render(request, "create_review.html", {'form': form})
+        form = FeedForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            url = reverse('showcase:review_detail', args=[slug])
+            return redirect(url)
+        else:
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            messages.error(request, "Form submission invalid")
+            return render(request, "create_review.html", {'form': form})
 
 
 @login_required(login_url='/accounts/login/')
@@ -7867,9 +8275,6 @@ def my_order_items(request):
     return render(request, 'order_history.html', context)
 
 
-
-
-
 class OrderHistory(ListView):
     model = Order
     template_name = "order_history.html"
@@ -7950,10 +8355,10 @@ class OrderHistory(ListView):
         return context
 
 
-
 from django.forms import formset_factory
 from .models import Questionaire
 from .forms import QuestionCountForm, QuestionForm
+
 
 def get_num_questions(request, question_id):
     if request.method == 'POST':
@@ -7966,11 +8371,12 @@ def get_num_questions(request, question_id):
         form = QuestionCountForm()
     return render(request, 'get_num_questions.html', {'form': form})
 
+
 from django.forms import formset_factory, modelformset_factory
+
 
 @login_required  # previous
 def create_questioned(request, num_questions):
-
     QuestionFormSet = formset_factory(QuestionForm, extra=num_questions)
 
     if request.method == 'POST':
@@ -7985,6 +8391,7 @@ def create_questioned(request, num_questions):
         formset = QuestionFormSet(prefix='question')
 
     return render(request, 'create_questions.html', {'formset': formset})
+
 
 @login_required
 def create_questions(request, num_questions):
@@ -8040,6 +8447,7 @@ def add_question(request):
 
     return render(request, 'add_question.html', {'question_form': question_form, 'formset': formset})
 
+
 """
 def create_questionaire(request, num_questions):
     if request.method == 'POST':
@@ -8055,6 +8463,7 @@ def create_questionaire(request, num_questions):
         form = QuestionForm()
     return render(request, 'create_questions.html', {'form': form})
 """
+
 
 def submit_answer(request, question_id):
     questionaire = get_object_or_404(Questionaire, pk=question_id)
@@ -8077,7 +8486,6 @@ def submit_answer(request, question_id):
         form = AnswerForm(questions=questions)
 
     return render(request, 'showcase/answer_questions.html', {'form': form})
-
 
 
 def sociallogin(request):

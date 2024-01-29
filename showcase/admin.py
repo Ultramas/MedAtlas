@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
     SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
-    Currency, ShuffleType, PrizePool, Lottery, LotteryTickets
+    Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -175,7 +175,7 @@ admin.site.register(LotteryTickets, LotteryTicketAdmin)
 class LotteryAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Lottery Information - Categorial Descriptions', {
-            'fields': ('name', 'flavor_text', 'file', 'image_length', 'image_width', 'is_active')
+            'fields': ('name', 'flavor_text', 'file_path', 'slug', 'file', 'image_length', 'image_width', 'is_active')
         }),
     )
     readonly_fields = ('mfg_date',)
@@ -979,7 +979,7 @@ class ShufflerAdmin(admin.ModelAdmin):
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Shuffler Information - Attributes', {
-            'fields': ('is_active',),
+            'fields': ('cost', 'currency', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Shuffler Information - Image Display', {
@@ -1028,6 +1028,27 @@ class CurrencyAdmin(admin.ModelAdmin):
 
 admin.site.register(Currency, CurrencyAdmin)
 
+
+class CurrencyMarketAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Currency Information - Categorial Descriptions', {
+            'fields': ('name', 'currency', 'amount', 'price', 'discount_price', 'unit_ratio', 'flavor_text',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Shuffler Information - Attributes', {
+            'fields': ('slug', 'deal', 'label', 'mfg_date', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Shuffler Information - Image Display', {
+            'fields': ('file', 'image_length', 'image_width',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+    readonly_fields = ('mfg_date',)
+
+
+admin.site.register(CurrencyMarket, CurrencyMarketAdmin)
 
 class AdministrationRoleAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -1469,13 +1490,24 @@ admin.site.register(Questionaire, FormBaseAdmin)
 class ProfileDetailsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Profile Information', {
-            'fields': ('user', 'email', 'avatar', 'alternate', 'about_me', 'is_active')
+            'fields': ('user', 'email', 'avatar', 'alternate', 'about_me', 'level', 'subscription', 'currency', 'currency_amount', 'is_active')
         }),
     )
     readonly_fields = ('position',)
 
 
 admin.site.register(ProfileDetails, ProfileDetailsAdmin)
+
+
+class LevelAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Level Information', {
+            'fields': ('level', 'level_name', 'is_active',)
+        }),
+    )
+
+
+admin.site.register(Level, LevelAdmin)
 
 
 class AdministrationPagesAdmin(admin.ModelAdmin):

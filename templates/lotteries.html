@@ -1,10 +1,173 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'memberbase.html' %}
+
+{% load static %}
+
+
+
+{% block content %}
+
+
+
+  {% if user.is_authenticated %}
+
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    {% for LotteryBackgroundView in Titles %}
+      {% if LotteryBackgroundView.page == 'lotteries.html' %}
+         <title>{{ LotteryBackgroundView.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <style>
+    .boedy{
+  display: flex;
+  justify-content: center;
+    }
+
+/* DEMO-SPECIFIC STYLES */
+.containereatede h1 {
+  color: red;
+  font-family: 'Playfair Display', serif;
+  overflow: hidden; /* Ensures the content is not revealed until the animation */
+  border-right: .15em solid red; /* The typewriter cursor */
+  white-space: nowrap; /* Keeps the content on a single line */
+  margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+  letter-spacing: .0em; /* Adjust as needed */
+  animation:
+    typing 3.5s steps(30, end),
+    blink-caret .5s step-end infinite;
+}
+
+/* The typing effect */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: red }
+}
+  </style>
 </head>
 <body>
+    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
+        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
+        {% for Lottery in Logo %}
+        {% if Lottery.page == 'lotteries.html' %}
+
+        <a class="logo" href="{{Lottery.hyperlink}}">
+          <img class="imageicon" src="{{Lottery.logocover.url}}"
+                alt="{{Lottery.alternate}}" style="length: {{Lottery.length_for_resize}}px; width: {{Lottery.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+
+    {% for Lottery in Background %}
+    {% if Lottery.page == "lotteries.html" %}
+<div class="poste1" style="background-image: url({{ Lottery.cover.url }}); background-position: fixed; background-size: cover;">
+    {% endif %}
+{% endfor %}
+
+
+
+<div style="margin-top: 8%;" class="search">
+    <ul>
+    <form action="{% url 'showcase:search_results' %}" method="get">
+        <input name="q" type="text" placeholder="Search...">
+        <select name="filter">
+            <option value="">All</option>
+            <option value="city">City</option>
+            <option value="vote">Vote</option>
+            <option value="profile">Profile</option>
+            <option value="idea">Idea</option>
+            <option value="partner">Partner</option>
+            <option value="lottery">Lottery</option>
+        </select>
+        <button type="submit">Search</button>
+    </form>
+        </ul>
+</div>
+<br>
+<br>
+
+
+  <div class = "boedy">
+  <div class="containereatede">
+ <h1 class="hello" style="margin-top: 6.5%;">Hello {{user.username}}!</h1>
+</div>
+  </div>
+
+      <br>
+        <br>
+    <!--saved items here-->
+
+
+
+
+{% for Lottery in Lotto %}
+    {% if Lottery.name == 'Daily Lotto' or Lottery.name == 'Daily Lottery' %}
+    <a href="http://127.0.0.1:8000/dailylotto/">
+        {% else %}
+            <a href="{{Lottery.file_path}}">
+                {% endif %}
+
+    <div class="postop" id="{{Lottery.profile_number}}" style="background: url('')">
+        <h1>
+            {{ Lottery.name }}
+        </h1>
+        <br>
+        <p class="describe">{{ Lottery.description }}</p>
+        <br>
+        <br>
+        <img class="hunt" src="{{ Lottery.file.url }}">
+        <br>
+        <br>
+        <br>
+    </div>
+</a>
+    <br>
+<br>
+<br>
+<br>
+    {% endfor %}
+
+<br>
+<br>
+<br>
+<br>
+
+</div>
+
+
+   <!--Custom JS-->
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
 
 </body>
 </html>
+
+  {% load guest_user %}
+
+    {% elif user|is_guest_user %}
+    {# user is a guest instance, link to conversion page #}
+
+  <a href="{% url 'showcase:convert' %}">Sign up and save your work!</a>
+    {% else %}
+<head>
+  <meta http-equiv="refresh" content="0; url=http://{{ request.get_host }}/accounts/login">
+  </head>
+<!--{# regular sign up link #}
+  <a href="{% url "form"}">Register now!</a>-->
+    {% endif %}
+
+
+{% endblock content %}

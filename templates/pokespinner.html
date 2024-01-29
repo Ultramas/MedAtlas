@@ -105,6 +105,9 @@
 		<span class="mid"></span>
 		<button id="spin">Spin</button>
 		<div class="stoper"></div>
+{% if Shuffler.cost %}
+        <h3 style="margin-top: 30%; position: absolute;">{{Shuffler.cost}} {{Shuffler.currency}}</h3>
+{% endif %}
     {% endif %}
 {% endfor %}
   <script>
@@ -151,13 +154,35 @@ let prizeLabel = prizeToLabel[prize];
       btn.disabled = false;
     });
 
-    btn.onclick = function () {
-      // Disable the button when it is clicked
-      btn.disabled = true;
+btn.onclick = function () {
+    // Disable the button when it is clicked
+    btn.disabled = true;
 
-      containerty.style.transform = "rotate(" + number + "deg)";
-      number += Math.ceil(Math.random() * 10000);
-    }
+    // Subtract the cost
+    fetch('/subtract_currency/', {
+        method: 'POST',
+        body: JSON.stringify({
+            'cost': Shuffler.cost  // replace this with the actual cost
+        }),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')  // function to get CSRF token
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Spin the wheel
+            containerty.style.transform = "rotate(" + number + "deg)";
+            number += Math.ceil(Math.random() * 10000);
+        } else {
+            // Handle the error
+            console.error(data.message);
+            btn.disabled = false;
+        }
+    });
+}
+
 
 
   </script>

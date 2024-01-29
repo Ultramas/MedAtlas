@@ -198,10 +198,7 @@ urlpatterns = [
     path('search/', SearchResultsView.as_view(), name='search_results'),
     # path('', TemplateView.as_view(template_name='index.html'), name = 'index'),
     path('website/', TemplateView.as_view(template_name='website.html'), name='website'),
-    path('css/style.css', TemplateView.as_view(
-    template_name='style.css',
-    content_type='text/css')
-  ),
+    path('css/style.css', TemplateView.as_view(template_name='style.css',content_type='text/css')),
     path('about/', views.AboutBackgroundView.as_view(), name='about'),
     path('commitment/', TemplateView.as_view(template_name='commitment.html'), name='commitment'),
     path('faq/', views.FaqBackgroundView.as_view(), name='faq'),
@@ -316,8 +313,13 @@ urlpatterns = [
     path('pack_home/', views.ShufflerBackgroundView.as_view(), name='pack_home'),
     path('pokespinner/', views.InventoryView.as_view(), name='pokespinner'),
     path('pokechests/', views.InventoryView.as_view(), name='pokechests'),
-    path('lotteries/', views.DailyLotteryView.as_view(), name='lotteries'),
+    path('lotteries/', views.LotteryBackgroundView.as_view(), name='lotteries'),
     path('dailylotto/', views.DailyLotteryView.as_view(), name='dailylotto'), #special variant of Lottery, the daily lottery
+    path('dailylottoclaimed/', views.DailyLotteryView.as_view(), name='dailylottoclaimed'),
+    path('lottery/<slug:slug>/', views.Lottereal.as_view(), name='lottery'),
+    path('lotterywinners/', views.Lottereal.as_view(), name='lotterywinners'),
+    path('currencymarket/', views.CurrencyMarketView.as_view(), name='currencymarket'),
+    path('currencyproduct/<slug>/', views.ProductView.as_view(), name='currencyproduct'),
     path('under_construction/', TemplateView.as_view(template_name='under_construction.html'), name='under_construction'),
 
     # path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='main/password/password_reset_done.html'), name='password_reset_done'),
