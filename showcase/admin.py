@@ -1359,7 +1359,7 @@ admin.site.register(BusinessMailingContact, BusinessMailingContactAdmin)
 class EmailFieldAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Email Information', {
-            'fields': ('email', 'confirmation', 'is_active',)
+            'fields': ('user', 'email', 'confirmation', 'is_active',)
         }),
     )
 

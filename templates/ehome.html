@@ -1940,15 +1940,15 @@ $(document).ready(function() {
 <form method="post" action="">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" name="form">Submit Form</button>
+    <button class="btn btn-primary" type="submit">
+    <span class="span" type="submit" name="form">Subscribe</span>
+    <ion-icon name="arrow-forward" aria-hidden="true" role="img" class="md hydrated"></ion-icon>
+</button>
 </form>
 
 
 
-              <button class="btn btn-primary" type="submit">
-    <span class="span">Subscribe</span>
-    <ion-icon name="arrow-forward" aria-hidden="true" role="img" class="md hydrated"></ion-icon>
-</button>
+
 
               </form>
           </div>

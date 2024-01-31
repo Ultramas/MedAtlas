@@ -920,14 +920,33 @@ class BackgroundView(FormMixin, BaseView):
 
     def post(self, request, *args, **kwargs):
         form = EmailForm(request.POST)
+
         if form.is_valid():
             post = form.save(commit=False)
             form.instance.user = request.user
             post.save()
-            messages.success(request, 'Form submitted successfully.')
+            messages.success(request, 'Email subscription added!')
+            try:
+                email = EmailField.objects.get(user=request.user)
+                profile = ProfileDetails.objects.get(user=request.user)
+                profile.email = email.email
+                profile.save()
+            except ProfileDetails.DoesNotExist:
+                messages.error(request, 'Profile details not found.')
+            except EmailField.DoesNotExist:
+                print("EmailField does not exist.")
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+            try:
+                email = EmailField.objects.get(user=request.user)
+                user = request.user
+                user.email = email.email
+                user.save()
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
 
             return render(request, "emaildone.html", {'form': form})
-            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
+
         else:
             messages.error(request, "Form submission invalid")
             print(form.errors)
@@ -3583,13 +3602,33 @@ class EBackgroundView(BaseView, FormView):
 
         if form.is_valid():
             post = form.save(commit=False)
+            form.instance.user = request.user
             post.save()
             messages.success(request, 'EmailForm submitted successfully.')
+            try:
+                email = EmailField.objects.get(user=request.user)
+                profile = ProfileDetails.objects.get(user=request.user)
+                profile.email = email.email
+                profile.save()
+            except ProfileDetails.DoesNotExist:
+                messages.error(request, 'Profile details not found.')
+            except EmailField.DoesNotExist:
+                print("EmailField does not exist.")
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+            try:
+                email = EmailField.objects.get(user=request.user)
+                user = request.user
+                user.email = email.email
+                user.save()
+            except Exception as e:
+                messages.error(request, f'An error occurred: {e}')
+
         else:
             messages.error(request, "EmailForm submission invalid")
             print("there was an error in registering the email")
 
-            return render(request, 'ehome.html', {'form': form})
+        return render(request, 'ehome.html', {'form': form})
 
 
 class StoreView(BaseView, FormView, ListView):
@@ -7426,6 +7465,15 @@ def verify_otp(request):
             profile.save()
         except ProfileDetails.DoesNotExist:
             messages.error(request, 'Profile details not found.')
+        except Exception as e:
+            messages.error(request, f'An error occurred: {e}')
+
+        try:
+            user = request.user
+            user.email = application.email
+            user.first_name = application.first_name
+            user.last_name = application.last_name
+            user.save()
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
 

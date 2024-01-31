@@ -505,7 +505,7 @@ class SellerApplicationForm(forms.ModelForm):
 
     class Meta:
         model = SellerApplication
-        fields = ['age', 'identification', 'email']
+        fields = ['first_name', 'last_name', 'age', 'identification', 'email']
 
     def clean_date_of_birth(self):
         dob = self.cleaned_data.get('age')

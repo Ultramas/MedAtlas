@@ -354,6 +354,7 @@ class Vote(models.Model):
 
 
 class EmailField(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     email = models.EmailField(unique=True,
                               help_text="Sign up for our newsletter to get the latest news and gossip! We will never share your personal information with anyone without your explicit permission. Unsubscribe at any time. ")
     confirmation = models.BooleanField(
@@ -1146,9 +1147,11 @@ class CurrencyOrder(models.Model):
 
 
 class SellerApplication(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     age = models.DateField(verbose_name='Date of birth')
-    identification = models.FileField(help_text="Please provide a valid government-issued id (Passport, Driver's License, Birth Certificate, etc")
+    identification = models.FileField(help_text="Please provide a valid government-issued id (Passport, Driver's License, Birth Certificate, etc)")
     email = models.EmailField(help_text="Please input your email", unique=True)
     email_verified = models.BooleanField(default=False)
 
