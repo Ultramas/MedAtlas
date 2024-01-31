@@ -2,7 +2,7 @@ import django
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
-    PrizePool, CurrencyMarket, CurrencyOrder
+    PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -87,7 +87,7 @@ from .models import AdminRoles
 from .models import AdminTasks
 from .models import AdminPages
 # from .models import Background2aImage
-from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm
+from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, SellerApplicationForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -5490,6 +5490,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
+
 @login_required
 @csrf_exempt
 def subtract_currency(request):
@@ -5502,6 +5503,27 @@ def subtract_currency(request):
             return JsonResponse({'status': 'success'})
         except ValueError:
             return JsonResponse({'status': 'error', 'message': 'Not enough currency'})
+
+
+class CurrencyProductView(DetailView):
+    model = CurrencyMarket
+    paginate_by = 10
+    template_name = "currencyproduct.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        # context['object'] = Item.objects.filter(is_active=1).order_by('slug')  #maybe change to be able to be ordered by different parameters
+        # like slug, price, popularity, type (gold, platinum, emerald, diamond), etc
+        # somehow limited to 3 products on first page, yet products still exist and can be accessed by "view on site"
+        return context
 
 
 class CurrencyMarketView(EBaseView):
@@ -5521,7 +5543,8 @@ class CurrencyMarketView(EBaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
-        context['Currency'] = CurrencyMarket.objects.filter(is_active=1).order_by('price') #deals/non-deals can be seperated in the templates
+        context['Currency'] = CurrencyMarket.objects.filter(is_active=1).order_by(
+            'price')  # deals/non-deals can be seperated in the templates
         return context
 
 
@@ -5762,7 +5785,7 @@ class PaypalFormView(FormView):
 
 
 @allow_guest_user
-def add_to_cart(request, slug):
+def currency_add_to_cart(request, slug):
     item = get_object_or_404(CurrencyOrder, slug=slug)
     order_item, created = OrderItem.objects.get_or_create(
         item=item,
@@ -5787,8 +5810,8 @@ def add_to_cart(request, slug):
             return redirect("showcase:checkout")
     else:
         order_qs = CurrencyOrder.objects.create(user=request.user,
-                                        ordered=False,
-                                        ordered_date=timezone.now())
+                                                ordered=False,
+                                                ordered_date=timezone.now())
         print("Order created")
         # check if the order item is in the order
         if order_qs.items.filter(item__slug=item.slug).exists():
@@ -5805,7 +5828,7 @@ def add_to_cart(request, slug):
 
 
 @login_required
-def remove_from_cart(request, slug):
+def currency_remove_from_cart(request, slug):
     item = get_object_or_404(CurrencyOrder, slug=slug)
     order_qs = CurrencyOrder.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
@@ -5833,9 +5856,9 @@ def index(request):
 
 
 @login_required
-def reduce_quantity_item(request, slug):
-    item = get_object_or_404(Item, slug=slug)
-    order_qs = Order.objects.filter(user=request.user, ordered=False)
+def currency_reduce_quantity_item(request, slug):
+    item = get_object_or_404(CurrencyOrder, slug=slug)
+    order_qs = CurrencyOrder.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
         if order.items.filter(item__slug=item.slug).exists():
@@ -5856,7 +5879,6 @@ def reduce_quantity_item(request, slug):
         # add message doesnt have order
         messages.info(request, "You do not have an Order")
         return redirect("showcase:order-summary")
-
 
 
 # users/views.py
@@ -7254,6 +7276,162 @@ class ContactSuccessView(BaseView):
         print(context["Contact"])
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         return context
+
+
+from twilio.rest import Client
+from .forms import SellerApplicationForm
+
+from django_otp.plugins.otp_totp.models import TOTPDevice
+from .forms import SellerApplicationForm
+
+import pyotp
+import qrcode
+from django.shortcuts import render
+from io import BytesIO
+from django.http import FileResponse
+
+import base64
+from django.core.mail import send_mail
+import pyotp
+
+
+class SellerApplicationView(FormMixin, LoginRequiredMixin, ListView):
+    model = SellerApplication
+    template_name = "sellerapplication.html"
+    form_class = SellerApplicationForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        return context
+
+    # @login_required
+    def post(self, request, *args, **kwargs):
+        form = SellerApplicationForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            application = form.save()
+
+            # Create a TOTP device for the user
+            device = TOTPDevice.objects.create(user=application.user)
+            device.save()
+
+            # Base32-encode the binary key
+            secret_key = base64.b32encode(device.bin_key).decode()
+
+            # Generate OTP
+            totp = pyotp.TOTP(secret_key)
+            otp = totp.now()
+
+            user = form.save()
+            subject = "Your One-Time Password"
+            message = f'Your OTP is: {otp}'
+            email_from = settings.EMAIL_HOST_USER
+            recipent_list = [application.email, ]
+            send_mail(subject, message, email_from, recipent_list)
+
+
+            # Save device id in session for later verification
+            request.session['device_id'] = device.id
+
+            return redirect('showcase:verify_otp')
+        else:
+            form = SellerApplicationForm()
+
+
+import base64
+from django.http import HttpResponse
+from PIL import Image
+import io
+
+def submit_seller_application(request):
+    if request.method == 'POST':
+        form = SellerApplicationForm(request.POST)
+        if form.is_valid():
+            application = form.save()
+
+            # Create a TOTP device for the user
+            device = TOTPDevice.objects.create(user=application.user)
+            device.save()
+
+            # Generate a secret key for the user
+            secret_key = device.bin_key
+
+            # Generate a provision URL for the OTP, this URL contains the secret key
+            otp_provision_uri = pyotp.totp.TOTP(secret_key).provisioning_uri(name=request.user.email,
+                                                                             issuer_name='YourApp')
+
+            # Generate a QR code from the provision URL
+            qr_img = qrcode.make(otp_provision_uri)
+
+            # Save the QR code to a BytesIO object
+            byte_arr = io.BytesIO()
+            qr_img.save(byte_arr, format='PNG')
+            byte_arr.seek(0)
+
+            # Convert the BytesIO object to a base64-encoded string
+            base64_image = base64.b64encode(byte_arr.getvalue()).decode('utf-8')
+
+            # Save device id in session for later verification
+            request.session['device_id'] = device.id
+
+            # Pass the base64-encoded string to the template
+            return render(request, 'submit_application.html', {'form': form, 'qr_code_data_url': f'data:image/png;base64,{base64_image}'})
+    else:
+        form = SellerApplicationForm()
+
+    return render(request, 'submit_application.html', {'form': form})
+
+
+def verify_otp(request):
+    if request.method == 'POST':
+        user_entered_otp = request.POST.get('otp')
+
+        # Get the device id from the session
+        device_id = request.session.get('device_id')
+
+        # Get the TOTP device
+        device = TOTPDevice.objects.get(id=device_id)
+
+        # Base32-encode the binary key
+        secret_key = base64.b32encode(device.bin_key).decode()
+
+        # Generate OTP
+        totp = pyotp.TOTP(secret_key)
+
+        # Verify the OTP
+        if totp.verify(int(user_entered_otp)):  # Convert user_entered_otp to int
+            application = SellerApplication.objects.get(user=request.user)
+            application.email_verified = True
+            application.save()
+
+            messages.success(request, 'OTP verified successfully.')
+        else:
+            messages.error(request, 'Invalid OTP. Please try again.')
+            return render(request, 'verify_otp.html')
+
+        try:
+            profile = ProfileDetails.objects.get(user=request.user)
+            profile.email = application.email
+            profile.save()
+        except ProfileDetails.DoesNotExist:
+            messages.error(request, 'Profile details not found.')
+        except Exception as e:
+            messages.error(request, f'An error occurred: {e}')
+
+        return redirect('showcase:ehome')
+
+    return render(request, 'verify_otp.html')
 
 
 class BusinessEmailViewe(CreateView):

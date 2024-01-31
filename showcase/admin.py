@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
     SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
-    Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket
+    Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket, SellerApplication
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -1049,6 +1049,23 @@ class CurrencyMarketAdmin(admin.ModelAdmin):
 
 
 admin.site.register(CurrencyMarket, CurrencyMarketAdmin)
+
+
+class SellerApplicationAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Seller Application Information - Categorial Descriptions', {
+            'fields': ('user', 'age', 'email', 'email_verified',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Seller Application Information - Image Display', {
+            'fields': ('identification',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+
+admin.site.register(SellerApplication, SellerApplicationAdmin)
+
 
 class AdministrationRoleAdmin(admin.ModelAdmin):
     fieldsets = (

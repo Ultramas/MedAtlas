@@ -17,7 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.generic.base import TemplateView
-from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, BlogSearchResultsView
+from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, BlogSearchResultsView, \
+    currency_remove_from_cart, currency_add_to_cart, currency_reduce_quantity_item, submit_seller_application
 
 # remove this:
 # from . import settings
@@ -308,6 +309,9 @@ urlpatterns = [
     path('answer/<int:question_id>/', views.submit_answer, name='answer'),
     path('add_question/', views.add_question, name='answer'),
     path('create_product/', views.CreateItemView.as_view(), name='create_product'),
+    path('sellerapplication/', views.SellerApplicationView.as_view(), name='sellerapplication'),
+    path('submit_application/', views.submit_seller_application, name='submit_application'),
+    path('verify_otp/', views.verify_otp, name='verify_otp'),
     path('tradeitems/', views.TradeBackgroundView.as_view(), name='tradeitems'),
     path('tradingcentral/', views.TradeItemCreateView.as_view(), name='tradingcentral'),
     path('pack_home/', views.ShufflerBackgroundView.as_view(), name='pack_home'),
@@ -319,7 +323,10 @@ urlpatterns = [
     path('lottery/<slug:slug>/', views.Lottereal.as_view(), name='lottery'),
     path('lotterywinners/', views.Lottereal.as_view(), name='lotterywinners'),
     path('currencymarket/', views.CurrencyMarketView.as_view(), name='currencymarket'),
-    path('currencyproduct/<slug>/', views.ProductView.as_view(), name='currencyproduct'),
+    path('currencyproduct/<slug>/', views.CurrencyProductView.as_view(), name='currencyproduct'),
+    path('currency-add-to-cart/<slug>/', currency_add_to_cart, name='currency-add-to-cart'),
+    path('currency-remove-from-cart/<slug>/', currency_remove_from_cart, name='currency-remove-from-cart'),
+    path('currency-reduce-quantity-item/<slug>/', currency_reduce_quantity_item, name='currency-reduce-quantity-item'),
     path('under_construction/', TemplateView.as_view(template_name='under_construction.html'), name='under_construction'),
 
     # path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='main/password/password_reset_done.html'), name='password_reset_done'),

@@ -12,6 +12,7 @@ from django.shortcuts import reverse
 from django_countries.fields import CountryField
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
+from pydantic import ValidationError
 
 # from image.utils import render
 
@@ -880,7 +881,7 @@ class BlogHeader(models.Model):
         return self.category
 
 
-from django.template.defaultfilters import slugify, random
+from django.template.defaultfilters import slugify, random, date
 
 
 class BlogFilter(models.Model):
@@ -1051,6 +1052,15 @@ class CurrencyMarket(models.Model):
     def get_absolute_url(self):
         return reverse("showcase:currencyproduct", kwargs={'slug': self.slug})
 
+    def get_add_to_cart_url(self):
+        return reverse("showcase:currency-add-to-cart", kwargs={'slug': self.slug})
+
+    def get_remove_from_cart_url(self):
+        return reverse("showcase:currency-remove-from-cart", kwargs={'slug': self.slug})
+
+    def get_profile_url(self):
+        return reverse('showcase:product', args=[str(self.slug)])
+
     def save(self, *args, **kwargs):
         if self.amount != 0:  # Avoid division by zero
             self.unit_ratio = self.price / self.amount
@@ -1065,6 +1075,7 @@ class CurrencyOrder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
+    slug = models.SlugField()
     items = models.OneToOneField(CurrencyMarket, on_delete=models.CASCADE)
     itemhistory = models.ForeignKey(CurrencyMarket, on_delete=models.CASCADE, verbose_name="Order history", null=True, related_name='currency_item_history')
     start_date = models.DateTimeField(auto_now_add=True)
@@ -1099,12 +1110,15 @@ class CurrencyOrder(models.Model):
 
     def __str__(self):
         return self.user.username
+        if not self.id:  # Newly created object, so set slug
+            self.slug = slugify(self.market.slug)
+        super(CurrencyOrder, self).save(*args, **kwargs)
 
     def get_add_to_cart_url(self):
-        return reverse("showcase:add-to-cart", kwargs={'slug': self.slug})
+        return reverse("showcase:currency-add-to-cart", kwargs={'slug': self.slug})
 
     def get_remove_from_cart_url(self):
-        return reverse("showcase:remove-from-cart", kwargs={'slug': self.slug})
+        return reverse("showcase:currency-remove-from-cart", kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
         if self.items.discount_price:
@@ -1129,6 +1143,21 @@ class CurrencyOrder(models.Model):
 
     def get_profile_url2(self):
         return reverse('showcase:currencymarket', args=[str(self.slug)])
+
+
+class SellerApplication(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    age = models.DateField(verbose_name='Date of birth')
+    identification = models.FileField(help_text="Please provide a valid government-issued id (Passport, Driver's License, Birth Certificate, etc")
+    email = models.EmailField(help_text="Please input your email", unique=True)
+    email_verified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.user)
+
+    class Meta:
+        verbose_name = "Seller Application"
+        verbose_name_plural = "Seller Applications"
 
 
 class Preference(models.Model):
@@ -4026,7 +4055,6 @@ class Level(models.Model):
         ordering = ['level']
 
 
-
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(blank=True, null=True)
@@ -4038,6 +4066,7 @@ class ProfileDetails(models.Model):
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
     currency_amount = models.DecimalField(max_digits=10, decimal_places=1, default=0.0)
+    seller = models.BooleanField(default=False, null=True)
     position = models.UUIDField(
         default=uuid.uuid4,
         editable=False,

@@ -14,9 +14,9 @@
         <!--Grid column-->
         <div class="col-md-6 mb-4">
 
-          <h1 class = "itemtitle" style="color: white;">{{CurrencyMarket.title}}</h1>
-      <img class = "hunte" src="{{CurrencyMarket.image.url}}"
-        alt="{{ CurrencyMarket.get_absolute_url }}">
+          <h1 class = "itemtitle" style="color: white;">{{object.name}}</h1>
+      <img class = "hunte" src="{{ object.file.url }}"
+        alt="{{ object.get_absolute_url }}">
           
           <!--can be replaced with a hardcoded normal image link (not a image name) somehow-->
 
@@ -51,7 +51,7 @@
 
             </p>
 
-            <p class="lead font-weight-bold">{{ object.item_name }}</p>
+            <p class="lead font-weight-bold">{{ object.name }}</p>
 <ul>
               {% if object.user.username != 'PokeTrove' %}
 
@@ -81,12 +81,12 @@
 
             </form> {% endcomment %}
 
-            <a href="{{ object.get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p" >Add To Cart
+            <a href="{{ object.get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p" >Buy Rubicoins Package
                 <i class="fas fa-shopping-cart ml-1"></i>
             </a>
 
             {{ object.get_quantity_in_chart }}
-            <a href="{{ object.get_remove_from_cart_url }}" class="btn btn-danger btn-md my-0 p" >Remove From Cart
+            <a href="{{ object.get_remove_from_cart_url }}" class="btn btn-danger btn-md my-0 p" >Remove Rubicoins Package
                 <i class="fas fa-trash ml-1"></i>
             </a>
            
@@ -111,7 +111,7 @@
 
           <h4 class="my-4 h4">Additional Information</h4>
 
-          <p>{{CurrencyMarket.description}}</p>
+          <p>{{object.flavor_text}}</p>
 
         </div>
         <!--Grid column-->

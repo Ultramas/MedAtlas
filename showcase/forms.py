@@ -1,4 +1,4 @@
-from datetime import timezone, timedelta
+from datetime import timezone, timedelta, date
 from urllib import request
 
 from django import forms
@@ -496,6 +496,23 @@ class PaypalPaymentForm(forms.Form):
     cvc = forms.IntegerField(required=True)
     save = forms.BooleanField(required=False)
     use_default = forms.BooleanField(required=False)
+
+
+from .models import SellerApplication
+
+
+class SellerApplicationForm(forms.ModelForm):
+
+    class Meta:
+        model = SellerApplication
+        fields = ['age', 'identification', 'email']
+
+    def clean_date_of_birth(self):
+        dob = self.cleaned_data.get('age')
+        today = date.today()
+        if (today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))) < 18:
+            raise ValidationError('You need to be 18 or older to apply to sell!')
+        return dob
 
 
 class ProfileDetail(forms.ModelForm):
