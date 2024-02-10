@@ -837,7 +837,9 @@
         {% for BackgroundImage in TextFielde %}
         {% if BackgroundImage.page == "index.html" %}
     {% if BackgroundImage.section == 4 %}
-    <h1 class='newses' style='text-align: center; color: {{BackgroundImage.text_color}};'>{{BackgroundImage.text}}</h1>
+    <h1 class='newses' style='text-align: center; color: {{BackgroundImage.text_color}};'>
+
+    </h1>
               {% endif %}
         {% endif %}
         {% endfor %}
@@ -878,6 +880,16 @@
 
           </div>
 </a>
+
+            {% if newprofile.newprofile_profile_picture_url %}
+								<a href="{{ newprofile.newprofile_profile_url }}">
+									<img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
+								</a>
+							{% else %}
+						    {{ newprofile.name }}
+								<!-- Placeholder image or default avatar -->
+							<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
+							{% endif %}
 
           <div class="eventdetails">
 

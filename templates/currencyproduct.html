@@ -19,7 +19,8 @@
         alt="{{ object.get_absolute_url }}">
           
           <!--can be replaced with a hardcoded normal image link (not a image name) somehow-->
-
+<br><br>
+            <h2 style="color: white;"> {{object.amount}} {{object.currency}}</h2>
         </div>
         <!--Grid column-->
 
@@ -81,12 +82,12 @@
 
             </form> {% endcomment %}
 
-            <a href="{{ object.get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p" >Buy Rubicoins Package
+            <a href="{{ object.currency_get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p" >Buy Rubicoins Package
                 <i class="fas fa-shopping-cart ml-1"></i>
             </a>
 
             {{ object.get_quantity_in_chart }}
-            <a href="{{ object.get_remove_from_cart_url }}" class="btn btn-danger btn-md my-0 p" >Remove Rubicoins Package
+            <a href="{{ object.currency_get_remove_from_cart_url }}" class="btn btn-danger btn-md my-0 p" >Remove Rubicoins Package
                 <i class="fas fa-trash ml-1"></i>
             </a>
            

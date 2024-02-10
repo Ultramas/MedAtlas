@@ -1,0 +1,90 @@
+{% extends 'ebase.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+{% block logos %}
+    {% for EBaseView in Logos %}
+    {% if EBaseView.page == 'currencycheckout.html' %}
+        <a class="logo" href="{{ EBaseView.hyperlink }}">
+            <img class="imageicon" src="media/{{ EBaseView.logocover }}" alt="{{ EBaseView.alternate }}"
+                 width="145vh" height="100vh" style="z-index: 100;">
+        </a>
+    {% endif %}
+    {% endfor %}
+{% endblock %}
+
+  <main >
+    <div class="container wow fadeIn">
+      <h2 class="my-5 h2 text-center" style="color: white;">RubiAce Checkout</h2>
+      <div class="row">
+        <div class="col-md-8 mb-4">
+          <div class="card">
+            <form method="POST" class="card-body">
+              {% csrf_token %}
+              <h2>Select Payment Type</h2>
+              <hr>
+
+              <div class="d-block my-3">
+                {% for value, name in form.fields.payment_option.choices %}
+                <div class="custom-control custom-radio">
+                  <input id="{{ name }}" name="payment_option" value="{{ value }}" type="radio" class="custom-control-input" required>
+                  <label class="custom-control-label" for="{{ name }}">{{ name }}</label>
+                </div>
+                {% endfor %}
+                <!--keep operating until alternate payment methods are avaliable-->
+
+
+
+              </div>
+
+              <hr class="mb-4">
+              <button class="btn btn-primary btn-lg btn-block" type="submit">Continue To Checkout</button>
+              <!--<button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>-->
+
+            </form>
+
+          </div>
+
+        </div>
+
+        <div class="col-md-4 mb-4">
+          {% include "currency_order_snippet.html" %}
+        </div>
+
+      </div>
+<br><br><br><br><br><br><br>
+    </div>
+  </main>
+
+{% endblock content %}
+
+{% block extra_scripts %}
+<script>
+var hideable_shipping_form = $('.hideable_shipping_form');
+var hideable_billing_form = $('.hideable_billing_form');
+
+var use_default_shipping = document.querySelector("input[name=use_default_shipping]");
+var use_default_billing = document.querySelector("input[name=use_default_billing]");
+
+use_default_shipping.addEventListener('change', function() {
+  if (this.checked) {
+    hideable_shipping_form.hide();
+  } else {
+    hideable_shipping_form.show();
+  }
+})
+
+use_default_billing.addEventListener('change', function() {
+  if (this.checked) {
+    hideable_billing_form.hide();
+  } else {
+    hideable_billing_form.show();
+  }
+})
+
+</script>
+{% endblock extra_scripts %}
+
+

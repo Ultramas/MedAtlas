@@ -4,7 +4,7 @@ from urllib import request
 from django import forms
 
 from mysite import settings
-from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets
+from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -498,6 +498,37 @@ class PaypalPaymentForm(forms.Form):
     use_default = forms.BooleanField(required=False)
 
 
+class CurrencyCheckoutForm(forms.Form):
+
+    payment_option = forms.ChoiceField(
+        widget=forms.RadioSelect, choices=PAYMENT_CHOICES)
+
+
+class CurrencyPaymentForm(forms.Form):
+    number = forms.IntegerField(required=False)
+    exp_month = forms.IntegerField(required=False)
+    expiry = forms.CharField(required=False)
+    exp_year = forms.IntegerField(required=False)
+    cvc = forms.IntegerField(required=False)
+    save = forms.BooleanField(required=False)
+    use_default = forms.BooleanField(required=False)
+
+
+class CurrencyPaypalPaymentForm(forms.Form):
+    # number = forms.IntegerField(required=True)
+    number = forms.CharField(required=True)
+    exp_month = forms.IntegerField(required=True)
+    expiry = forms.CharField(required=True)
+    exp_year = forms.IntegerField(required=True)
+    cvc = forms.IntegerField(required=True)
+    save = forms.BooleanField(required=False)
+    use_default = forms.BooleanField(required=False)
+
+
+class HitStandForm(forms.Form):
+    action = forms.ChoiceField(choices=[('hit', 'Hit'), ('stand', 'Stand')], label='Action')
+
+
 from .models import SellerApplication
 
 
@@ -526,7 +557,6 @@ class StoreViewTypeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-
 
     class Meta:
         model = StoreViewType
@@ -703,7 +733,7 @@ class ContactForme(forms.ModelForm):
             "name": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'e.g. Marinara Sauce'}),
             "email": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'e.g. Intellex@gmail.com'}),
             "inquiry": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'Subject of your message.'}),
-            "message": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'Your message.'})
+            "message": forms.Textarea(attrs={"class": "form-control", 'placeholder': 'Your message.'})
         }
 
     def get_info(self):
@@ -1032,3 +1062,9 @@ class AnswerForm(forms.Form):
                 required=True,
                 widget=forms.TextInput(attrs={'class': 'form-control'})
             )
+
+
+class MemeForm(forms.ModelForm):
+    class Meta:
+        model = Meme
+        fields = ['title', 'image']

@@ -13,6 +13,7 @@ from django_countries.fields import CountryField
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 from pydantic import ValidationError
+from django.contrib.auth.models import Group
 
 # from image.utils import render
 
@@ -143,7 +144,7 @@ class Idea(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return self.user
+        return str(self.user)
 
     class Meta:
         verbose_name = "Idea"
@@ -180,6 +181,7 @@ class UpdateProfile(models.Model):
     name = models.CharField(max_length=100, help_text='Your name goes here.')
     description = models.TextField(help_text='Your profile description goes here.')
     profile_number = models.PositiveIntegerField(default=0, editable=False)
+    date_and_time = models.DateTimeField(null=True, verbose_name="time and date", auto_now_add=True)
     image = models.ImageField(help_text='Attach an image for your profile (scales to your picture`s dimensions.)')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
@@ -671,12 +673,13 @@ class NewsFeed(models.Model):
 class StaffProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100,
-                            help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
-    position = models.CharField(max_length=200, help_text='Please let us know what staff position you serve currently.')
+                            help_text='Your name goes here. If you wish to stay anonymous, put "Anonymous".')
+    role_position = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name="Position")
     description = models.TextField(help_text='Write whatever you want on your profile here (within regulations).')
     staff_feats = models.TextField(
-        help_text='Let us know of your transcendental feats of making MegaClan a better place.',
-        verbose_name="staff feats")
+        help_text='Let us know of your transcendental feats of making PokeTrove a better place.',
+        verbose_name="Staff feats")
+    date_and_time = models.DateTimeField(null=True, verbose_name="Time and date of Staff Profile Creation")
     image = models.ImageField(help_text='Please provide a cover image for your profile.')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
@@ -706,12 +709,60 @@ class StaffProfile(models.Model):
             if profile:
                 self.position = profile.position
 
+        # If a profile already exists for this user, update it
+        try:
+            existing = StaffProfile.objects.get(user=self.user)
+            self.pk = existing.pk  # set this instance's pk to the existing profile's pk
+        except StaffProfile.DoesNotExist:
+            pass  # No existing profile, so we're creating a new one
+
         super().save(*args, **kwargs)
 
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
+
+class SocialMedia(models.Model):
+    social = models.TextField(verbose_name="Social Media Platform", help_text="Follow format 'logo-{platform name}'",
+                              blank=True, null=True)
+    icon = models.ImageField(verbose_name="Social Media Logo", blank=True, null=True)
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Width of the image (in percent relative).',
+                                              verbose_name="image width")
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Length of the image (in percent relative).',
+                                               verbose_name="image length")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Width")
+    height_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Height")
+    image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position', blank=True,
+                                         null=True)
+    alternate = models.TextField(verbose_name="Alternate Text", blank=True, null=True)
+    page = models.TextField(verbose_name="Page Name")
+    hyperlink = models.URLField(verbose_name="Hyperlink")
+    staff_profile = models.ForeignKey(StaffProfile, on_delete=models.CASCADE, blank=True, null=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.social + " in " + self.page
+
+    def save(self, *args, **kwargs):
+        if not self.page.endswith('.html'):
+            self.page += '.html'
+        if not self.pk:  # Check if this is a new object
+            self.image_position = SocialMedia.objects.filter(page=self.page).count() + 1
+        if self.icon and not self.alternate:  # Check if an image exists and alternate text is not set
+            self.alternate = str(self.icon)  # Set the alternate text to the string version of the image name
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Social Media"
+        verbose_name_plural = "Social Media"
 
 
 class FrequentlyAskedQuestions(models.Model):
@@ -737,6 +788,8 @@ class Event(models.Model):
     name = models.CharField(max_length=100, help_text='Event name goes here.')
     category = models.CharField(max_length=200,
                                 help_text='Please let us know what type of event this is (tournament, stage night, etc).')
+    numeric_quantifier = models.FloatField()
+    qualitative_qualifier = models.CharField(max_length=500)
     description = models.TextField(help_text='Give a brief description of the event.')
     date = models.DateField(null=True, help_text='Event date (day, date, and month)')
     time = models.TimeField(null=True, help_text='Event time (hour/minute)')
@@ -1053,10 +1106,10 @@ class CurrencyMarket(models.Model):
     def get_absolute_url(self):
         return reverse("showcase:currencyproduct", kwargs={'slug': self.slug})
 
-    def get_add_to_cart_url(self):
+    def currency_get_add_to_cart_url(self):
         return reverse("showcase:currency-add-to-cart", kwargs={'slug': self.slug})
 
-    def get_remove_from_cart_url(self):
+    def currency_get_remove_from_cart_url(self):
         return reverse("showcase:currency-remove-from-cart", kwargs={'slug': self.slug})
 
     def get_profile_url(self):
@@ -1080,12 +1133,102 @@ class CurrencyOrder(models.Model):
     items = models.OneToOneField(CurrencyMarket, on_delete=models.CASCADE)
     itemhistory = models.ForeignKey(CurrencyMarket, on_delete=models.CASCADE, verbose_name="Order history", null=True, related_name='currency_item_history')
     start_date = models.DateTimeField(auto_now_add=True)
-    ordered_date = models.DateTimeField()
+    ordered_date = models.DateTimeField(blank=True, null=True)
     ordered = models.BooleanField(default=False)
     shipping_address = models.ForeignKey('Address', related_name='currency_shipping_address', on_delete=models.SET_NULL,
                                          blank=True, null=True)
     billing_address = models.ForeignKey('Address', related_name='currency_billing_address', on_delete=models.SET_NULL,
                                         blank=True, null=True)
+    payment = models.ForeignKey('Payment', on_delete=models.SET_NULL, blank=True, null=True)
+    coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, blank=True, null=True)
+    being_delivered = models.BooleanField(default=False)
+    received = models.BooleanField(default=False)
+    refund_requested = models.BooleanField(default=False)
+    refund_granted = models.BooleanField(default=False)
+    quantity = models.IntegerField(default=1)
+    id = uuid4()
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active order?")
+    '''
+   1. Item added to cart
+   2. Adding a billing address
+   (Failed checkout)
+   3. Payment
+   (Preprocessing, processing, packaging etc.)
+   4. Being delivered
+   5. Received
+   6. Refunds
+   '''
+
+    def __str__(self):
+        return self.user.username
+        if not self.id:  # Newly created object, so set slug
+            self.slug = slugify(self.market.slug)
+        super(CurrencyOrder, self).save(*args, **kwargs)
+
+    def get_total_item_price(self):
+        if self.items.discount_price:
+            return self.quantity * self.get_discount_item_price()
+        return self.quantity * self.items.price
+
+    def get_discount_item_price(self):
+        return self.quantity * self.items.discount_price
+
+    def get_amount_saved(self):
+        return self.get_total_item_price() - self.get_discount_item_price()
+
+    def currency_get_add_to_cart_url(self):
+        return reverse("showcase:currency-add-to-cart", kwargs={'slug': self.slug})
+
+    def currency_get_remove_from_cart_url(self):
+        return reverse("showcase:currency-remove-from-cart", kwargs={'slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        if self.items.discount_price:
+            self.amount = self.items.discount_price
+        else:
+            self.amount = self.items.price
+        super().save(*args, **kwargs)
+
+    def get_total_price(self):
+        total = 0
+        total += self.items.price  # or another field representing the item's price
+        if self.coupon:
+            if self.coupon.percentDollars:
+                total *= 1 - (0.01 * self.coupon.amount)
+            else:
+                total -= self.coupon.amount
+        return total
+
+    def get_final_price(self):
+        if self.items.discount_price:
+            return self.get_discount_item_price()
+        return self.get_total_item_price()
+
+    def get_profile_url(self):
+        return reverse('showcase:profile', args=[str(self.slug)])
+
+    def get_profile_url2(self):
+        return reverse('showcase:currencymarket', args=[str(self.slug)])
+
+    class Meta:
+        verbose_name = "Individiual Currency Order"
+        verbose_name_plural = "Individiual Currency Orders"
+
+
+class CurrencyFullOrder(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    ref_code = models.CharField(max_length=20, blank=True, null=True)
+    items = models.ManyToManyField(CurrencyOrder)
+    itemhistory = models.ForeignKey(CurrencyMarket, on_delete=models.CASCADE, verbose_name="Order history", null=True)
+    start_date = models.DateTimeField(auto_now_add=True)
+    ordered_date = models.DateTimeField()
+    ordered = models.BooleanField(default=False)
+    #billing_address = models.ForeignKey('Address', related_name='billing-address', on_delete=models.SET_NULL,
+    #                                    blank=True, null=True)
     payment = models.ForeignKey('Payment', on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, blank=True, null=True)
     being_delivered = models.BooleanField(default=False)
@@ -1111,22 +1254,17 @@ class CurrencyOrder(models.Model):
 
     def __str__(self):
         return self.user.username
-        if not self.id:  # Newly created object, so set slug
-            self.slug = slugify(self.market.slug)
-        super(CurrencyOrder, self).save(*args, **kwargs)
 
-    def get_add_to_cart_url(self):
-        return reverse("showcase:currency-add-to-cart", kwargs={'slug': self.slug})
-
-    def get_remove_from_cart_url(self):
-        return reverse("showcase:currency-remove-from-cart", kwargs={'slug': self.slug})
-
-    def save(self, *args, **kwargs):
+    def get_final_price(self):
         if self.items.discount_price:
-            self.amount = self.items.discount_price
-        else:
-            self.amount = self.items.price
-        super().save(*args, **kwargs)
+            return self.get_discount_item_price()
+        return self.get_total_item_price()
+
+    def get_discount_item_price(self):
+        return self.item.discount_price
+
+    def get_amount_saved(self):
+        return self.get_total_item_price() - self.get_discount_item_price()
 
     def get_total_price(self):
         total = 0
@@ -1143,7 +1281,75 @@ class CurrencyOrder(models.Model):
         return reverse('showcase:profile', args=[str(self.slug)])
 
     def get_profile_url2(self):
-        return reverse('showcase:currencymarket', args=[str(self.slug)])
+        return reverse('showcase:currencyproducts', args=[str(self.slug)])
+
+    class Meta:
+        verbose_name = "Total Currency Order"
+        verbose_name_plural = "Total Currency Orders"
+
+
+class Card(models.Model):
+    RANK_CHOICES = (
+        ('A', 'Ace'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
+        ('5', '5'),
+        ('6', '6'),
+        ('7', '7'),
+        ('8', '8'),
+        ('9', '9'),
+        ('10', '10'),
+        ('J', 'Jack'),
+        ('Q', 'Queen'),
+        ('K', 'King'),
+    )
+    SUIT_CHOICES = (
+        ('♠', 'Spades'),
+        ('♥', 'Hearts'),
+        ('♦', 'Diamonds'),
+        ('♣', 'Clubs'),
+    )
+
+    rank = models.CharField(max_length=2, choices=RANK_CHOICES)
+    suit = models.CharField(max_length=1, choices=SUIT_CHOICES)
+    card_design = models.ImageField(blank=True, null=True)
+    is_hidden = models.BooleanField(default=False)
+
+
+    def __str__(self):
+        return f"{self.rank}{self.suit}"
+
+
+class Hand(models.Model):
+    cards = models.ManyToManyField(Card)
+    is_hidden = models.BooleanField(default=False)
+
+    def __str__(self):
+        return ", ".join([str(card) for card in self.cards.all()])
+
+    def get_value(self):
+        total_value = 0
+        has_ace = False
+
+        for card in self.cards.all():
+            if card.rank in ['J', 'Q', 'K']:
+                card_value = 10
+            elif card.rank == 'A':
+                has_ace = True
+                card_value = 11  # Initially assume 11 for Ace
+            else:
+                # Convert numeric ranks to integers
+                card_value = int(card.rank)
+
+            total_value += card_value
+
+        # Adjust Ace value if necessary to avoid busting:
+        while has_ace and total_value > 21:
+            total_value -= 10  # Change Ace value to 1
+            has_ace = False  # Only adjust once per Ace
+
+        return total_value
 
 
 class SellerApplication(models.Model):
@@ -1303,6 +1509,8 @@ class LogoBase(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:  # Check if this is a new object
             self.section = LogoBase.objects.filter(page=self.page).count() + 1
+        if not self.page.endswith('.html'):
+            self.page += '.html'
         super().save(*args, **kwargs)
 
     class Meta:
@@ -1815,23 +2023,21 @@ class Titled(models.Model):
         super().save(*args, **kwargs)
 
 
-class SocialMedia(models.Model):
-    social = models.TextField(verbose_name="Social Media Platform", help_text="Follow format 'logo-{platform name}'",
-                              blank=True, null=True)
-    image = models.ImageField(verbose_name="Social Media Logo", blank=True, null=True)
-    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                              help_text='Width of the image (in percent relative).',
-                                              verbose_name="image width")
+
+class Meme(models.Model):
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
+                             verbose_name="Meme Creator")
+    title = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='images/')
+    font_size = models.IntegerField(blank=True, null=True, verbose_name="Font Size")
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                               help_text='Length of the image (in percent relative).',
+                                               help_text='Original length of the advertisement (use for original ratio).',
                                                verbose_name="image length")
-    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Width")
-    height_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Height")
-    image_position = models.IntegerField(help_text='Positioning of the image.', verbose_name='Position', blank=True,
-                                         null=True)
-    alternate = models.TextField(verbose_name="Alternate Text", blank=True, null=True)
-    page = models.TextField(verbose_name="Page Name")
-    hyperlink = models.URLField(verbose_name="Hyperlink")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+
+    uploaded_at = models.DateTimeField(auto_now_add=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1839,20 +2045,38 @@ class SocialMedia(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return self.social + " in " + self.page
+        return self.title
 
-    def save(self, *args, **kwargs):
-        if not self.page.endswith('.html'):
-            self.page += '.html'
-        if not self.pk:  # Check if this is a new object
-            self.image_position = SocialMedia.objects.filter(page=self.page).count() + 1
-        if self.image and not self.alternate:  # Check if an image exists and alternate text is not set
-            self.alternate = str(self.image)  # Set the alternate text to the string version of the image name
-        super().save(*args, **kwargs)
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
 
     class Meta:
-        verbose_name = "Social Media"
-        verbose_name_plural = "Social Media"
+        verbose_name = "Meme Text"
+        verbose_name_plural = "Meme Texts"
+
+
+class MemeTextField(models.Model):
+    meme = models.ForeignKey(Meme, on_delete=models.CASCADE, related_name='text_fields')
+    text = models.TextField(null=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.text
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+    class Meta:
+        verbose_name = "Meme Text Field"
+        verbose_name_plural = "Meme Texts Fields"
 
 
 class BaseCopyrightTextField(models.Model):
@@ -1867,6 +2091,11 @@ class BaseCopyrightTextField(models.Model):
 
     def __str__(self):
         return self.copyright
+
+    def save(self, *args, **kwargs):
+        if not self.page.endswith('.html'):
+            self.page += '.html'
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Base Text Field Copyright"
@@ -2680,10 +2909,12 @@ class SupportLine(models.Model):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_profile')
     stripe_customer_id = models.CharField(max_length=50, blank=True, null=True)
     # related name could be a possible solution
     one_click_purchasing = models.BooleanField(default=False)
+    currency = models.ForeignKey('Currency', on_delete=models.SET_NULL, null=True)  # Adjust model name if needed
+    currency_amount = models.IntegerField(default=0, verbose_name='Currency Amount')
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -3415,7 +3646,7 @@ post_save.connect(userprofile_receiver, sender=settings.AUTH_USER_MODEL)
 class Contact(models.Model):
     name = models.TextField()
     email = models.EmailField(max_length=200, verbose_name="Recipient")
-    inquiry = models.CharField(max_length=100)
+    inquiry = models.CharField(max_length=100, verbose_name="Subject")
     message = models.TextField()
 
     class Meta:
@@ -3560,12 +3791,12 @@ class AdvertisementBase(models.Model):
         if not self.id:  # object is being created for the first time
             super().save(*args, **kwargs)
             img = Image.open(self.advertisement.path)
-            img = img.resize((self.width_for_resize, self.length_for_resize), Image.ANTIALIAS)
+            img = img.resize((self.width_for_resize, self.length_for_resize), Image.LANCZOS)
             self.advertisement_length, self.advertisement_width = img.size
             super().save(*args, **kwargs)
         else:  # object already exists and is being updated
             img = Image.open(self.advertisement.path)
-            img = img.resize((self.width_for_resize, self.length_for_resize), Image.ANTIALIAS)
+            img = img.resize((self.width_for_resize, self.length_for_resize), Image.LANCZOS)
             self.advertisement_width, self.advertisement_length = img.size
             super().save(*args, **kwargs)
         if not self.pk:  # Check if this is a new object
@@ -3737,7 +3968,7 @@ class Feedback(models.Model):
 
     comment = models.TextField()
     feedbackpage = models.TextField(verbose_name="Page Name", blank=True, null=True)
-    slug = models.SlugField(max_length=200, blank=False,
+    slug = models.SlugField(max_length=200, blank=True, null=True,
                             help_text="Leave blank to use corresponding product slug.")  # get the actual item slug
     # unique=True prevents saving, but does not prevent the IntegrityError at /create_review/1/ UNIQUE constraint failed: showcase_feedback.slug
     star_rating = models.IntegerField(verbose_name='Star Rating',
@@ -4115,3 +4346,4 @@ class ProfileDetails(models.Model):
     class Meta:
         verbose_name = "Account Profile"
         verbose_name_plural = "Account Profiles"
+

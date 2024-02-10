@@ -1,8 +1,10 @@
 import django
+import self
+from django.db import transaction
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
-    PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication
+    PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -87,7 +89,8 @@ from .models import AdminRoles
 from .models import AdminTasks
 from .models import AdminPages
 # from .models import Background2aImage
-from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, SellerApplicationForm
+from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, SellerApplicationForm, \
+    MemeForm, CurrencyCheckoutForm, CurrencyPaymentForm, CurrencyPaypalPaymentForm, HitStandForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -610,7 +613,7 @@ class PostList(BaseView):
 
 """
 
-
+"""
 class votingview(ListView):
     model = VoteBackgroundImage
     paginate_by = 10
@@ -643,7 +646,7 @@ class votingview(ListView):
 
     def get_queryset(self):
         return Vote.objects.all()
-
+"""
 
 class partnerview(ListView):
     paginate_by = 10
@@ -912,125 +915,127 @@ class ImageCarouselView(BaseView):
         return context
 
 
-class BackgroundView(FormMixin, BaseView):
-    model = BackgroundImage
-    form_class = EmailForm
-    template_name = "index.html"
-    section = TextBase.section
+#class BackgroundView(FormMixin, BaseView):
+#    model = BackgroundImage
+#    form_class = EmailForm
+#    template_name = "index.html"
+#    section = TextBase.section
 
-    def post(self, request, *args, **kwargs):
-        form = EmailForm(request.POST)
+#    def post(self, request, *args, **kwargs):
+#        form = EmailForm(request.POST)
 
-        if form.is_valid():
-            post = form.save(commit=False)
-            form.instance.user = request.user
-            post.save()
-            messages.success(request, 'Email subscription added!')
-            try:
-                email = EmailField.objects.get(user=request.user)
-                profile = ProfileDetails.objects.get(user=request.user)
-                profile.email = email.email
-                profile.save()
-            except ProfileDetails.DoesNotExist:
-                messages.error(request, 'Profile details not found.')
-            except EmailField.DoesNotExist:
-                print("EmailField does not exist.")
-            except Exception as e:
-                messages.error(request, f'An error occurred: {e}')
-            try:
-                email = EmailField.objects.get(user=request.user)
-                user = request.user
-                user.email = email.email
-                user.save()
-            except Exception as e:
-                messages.error(request, f'An error occurred: {e}')
+#        if form.is_valid():
+#            post = form.save(commit=False)
+#            form.instance.user = request.user
+#            post.save()
+#            messages.success(request, 'Email subscription added!')
+#            try:
+#                email = EmailField.objects.get(user=request.user)
+#                profile = ProfileDetails.objects.get(user=request.user)
+#                profile.email = email.email
+#                profile.save()
+#            except ProfileDetails.DoesNotExist:
+#                messages.error(request, 'Profile details not found.')
+#            except EmailField.DoesNotExist:
+#                print("EmailField does not exist.")
+#            except Exception as e:
+#                messages.error(request, f'An error occurred: {e}')
+#            try:
+#                email = EmailField.objects.get(user=request.user)
+#                user = request.user
+#                user.email = email.email
+#                user.save()
+#            except Exception as e:
+#                messages.error(request, f'An error occurred: {e}')
 
-            return render(request, "emaildone.html", {'form': form})
+#            return render(request, "emaildone.html", {'form': form})
 
-        else:
-            messages.error(request, "Form submission invalid")
-            print(form.errors)
-            print(form.non_field_errors())
-            print(form.cleaned_data)
-            return render(request, "index.html", {'form': form})
-            return redirect('showcase:index')
+#        else:
+#            messages.error(request, "Form submission invalid")
+#            print(form.errors)
+#            print(form.non_field_errors())
+#            print(form.cleaned_data)
+#            return render(request, "index.html", {'form': form})
+#            return redirect('showcase:index')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by(
-            "carouselposition")
-        context['Advertisement'] = AdvertisementBase.objects.filter(page=self.template_name, is_active=1).order_by(
-            "advertisement_position")
-        context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by("image_position")
-        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
-        context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
-        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
-        context['Email'] = EmailField.objects.filter(is_active=1)
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
-        context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
+#    def get_context_data(self, **kwargs):
+#        context = super().get_context_data(**kwargs)
+#        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+#        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+#        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+#        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+#        context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by(
+#            "carouselposition")
+#        context['Advertisement'] = AdvertisementBase.objects.filter(page=self.template_name, is_active=1).order_by(
+#            "advertisement_position")
+#        context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by("image_position")
+#        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+#        context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
+#        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
+#        context['Email'] = EmailField.objects.filter(is_active=1)
+#        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+#        context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
         # context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
-        print(FaviconBase.objects.all())
-        print(213324)
-        # Retrieve the signed-in user's profile and profile picture URL
+#        print(FaviconBase.objects.all())
+#        print(213324)
+#        # Retrieve the signed-in user's profile and profile picture URL
 
         # Retrieve the items
-        product = Item.objects.filter(is_active=1)
+#        product = Item.objects.filter(is_active=1)
 
-        context['Products'] = product
+#        context['Products'] = product
 
-        for product in context['Products']:
-            image = product.image
-            item = Item.objects.filter(slug=product.slug).first()
-            if product:
-                product.title = item.title
-                product.price = item.price
-                product.discount_price = item.discount_price
-                product.image_url = item.image.url
-                product.label = item.label
-                product.hyperlink = item.get_profile_url()
-                product.description = item.description
+#        for product in context['Products']:
+#            image = product.image
+#            item = Item.objects.filter(slug=product.slug).first()
+#            if product:
+#                product.title = item.title
+#                product.price = item.price
+#                product.discount_price = item.discount_price
+#                product.image_url = item.image.url
+#                product.label = item.label
+#                product.hyperlink = item.get_profile_url()
+#                product.description = item.description
 
-        events = Event.objects.filter(is_active=1)
-        context['NewEvents'] = events
+#        events = Event.objects.filter(is_active=1)
+#        context['NewEvents'] = events
 
-        for events in context['NewEvents']:
-            image = events.image
-            eventful = Event.objects.filter(date_and_time=events.date_and_time).first()
-            if events:
-                events.name = eventful.name
-                events.image_url = eventful.image.url
-                events.hyperlink = eventful.get_profile_url()
-                events.description = eventful.description
+#        for events in context['NewEvents']:
+#            image = events.image
+#            eventful = Event.objects.filter(date_and_time=events.date_and_time).first()
+#            if events:
+#                events.name = eventful.name
+#                events.image_url = eventful.image.url
+#                events.hyperlink = eventful.get_profile_url()
+#                events.description = eventful.description
 
-        news = NewsFeed.objects.filter(is_active=1)
-        context['newsfeeds'] = news
+#        context['News'] = NewsFeed.objects.all()
 
-        for news in context['newsfeeds']:
-            image = news.image
-            newsfeeding = NewsFeed.objects.filter(date_and_time=news.date_and_time).first()
-            if news:
-                news.name = newsfeeding.name
-                news.image_url = newsfeeding.image.url
-                news.hyperlink = newsfeeding.get_profile_url()
-                news.description = newsfeeding.description
+#        newprofile = NewsFeed.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
 
-            feedback_objects = Feedback.objects.filter(slug=slug)
+#        context['Profiles'] = newprofile
 
-            # Add the feedback_objects to the context
-            context['Feed'] = feedback_objects
+#        for newprofile in context['Profiles']:
+#            user = newprofile.user
+#            profile = ProfileDetails.objects.filter(user=user).first()
+#            if profile:
+#                newprofile.newprofile_profile_picture_url = profile.avatar.url
+#                newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
-        for feedback_objects in context['Feed']:
-            user = feedback_objects.username
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                feedback_objects.newprofile_profile_picture_url = profile.avatar.url
-                feedback_objects.newprofile_profile_url = feedback_objects.get_profile_url2()
+#        feedback_objects = Feedback.objects.filter(slug=slug)
 
-        return context
+        # Add the feedback_objects to the context
+#        context['Feed'] = feedback_objects
+
+#        for feedback_objects in context['Feed']:
+#            user = feedback_objects.username
+#            profile = ProfileDetails.objects.filter(user=user).first()
+#            if profile:
+#                feedback_objects.newprofile_profile_picture_url = profile.avatar.url
+#                feedback_objects.newprofile_profile_url = feedback_objects.get_profile_url2()
+
+#        return context
 
 
 from django.views.generic import TemplateView
@@ -1312,20 +1317,6 @@ class PolicyBackgroundView(BaseView):
 class ServersView(BaseView):
     model = RuleBackgroundImage
     template_name = "servers.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
-        return context
-
-
-class AboutBackgroundView(BaseView):
-    model = AboutBackgroundImage
-    template_name = "about.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1668,33 +1659,6 @@ class PartnerBackgroundView(BaseView):
         context['Partner'] = PartnerApplication.objects.all()
 
         newprofile = Partner.objects.filter(is_active=1)
-        # Retrieve the author's profile avatar
-
-        context['Profiles'] = newprofile
-
-        for newprofile in context['Profiles']:
-            user = newprofile.user
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
-
-        return context
-
-
-class ShareBackgroundView(BaseView):
-    model = ShareBackgroundImage
-    template_name = "share.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['Ideas'] = Idea.objects.all()
-
-        newprofile = Idea.objects.filter(is_active=1)
         # Retrieve the author's profile avatar
 
         context['Profiles'] = newprofile
@@ -2669,6 +2633,33 @@ class votingview(ListView):
     paginate_by = 10
     template_name = 'voting.html'
 
+    def post(self, request, *args, **kwargs):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+
+            return render(request, "emaildone.html", {'form': form})
+            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            return render(request, "voting.html", {'form': form})
+            return redirect('showcase:voting')
+
+    def get(self, request, *args, **kwargs):
+        form = EmailForm()
+        self.object_list = self.get_queryset()  # Add this line
+        context = self.get_context_data(**kwargs)  # Call get_context_data here
+        return render(request, "voting.html", {'form': form, **context})
+
+    def get_queryset(self):
+        return VoteBackgroundImage.objects.all()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Background'] = BackgroundImageBase.objects.filter(
@@ -2732,7 +2723,8 @@ class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
     def get(self, request, *args, **kwargs):
         form = ItemForm()
         context = self.get_context_data()
-        return render(request, 'create_product.html', {'form': form})
+        context['form'] = form
+        return render(request, 'create_product.html', context)
 
     def post(self, request, *args, **kwargs):
         form = ItemForm(request.POST, request.FILES)  # Include request.FILES
@@ -3364,6 +3356,7 @@ class BackgroundView(FormMixin, BaseView):
             return render(request, "index.html", {'form': form})
             return redirect('showcase:index')
 
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -3380,6 +3373,7 @@ class BackgroundView(FormMixin, BaseView):
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['Email'] = EmailField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['About'] = Event.objects.filter(page=self.template_name, is_active=1)
         context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
         context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
         print(FaviconBase.objects.all())
@@ -3415,17 +3409,20 @@ class BackgroundView(FormMixin, BaseView):
                 events.hyperlink = eventful.get_profile_url()
                 events.description = eventful.description
 
-        news = NewsFeed.objects.filter(is_active=1)
-        context['newsfeeds'] = news
+        context['News'] = NewsFeed.objects.all()
 
-        for news in context['newsfeeds']:
-            image = news.image
-            newsfeeding = NewsFeed.objects.filter(date_and_time=news.date_and_time).first()
-            if news:
-                news.name = newsfeeding.name
-                news.image_url = newsfeeding.image.url
-                news.hyperlink = newsfeeding.get_profile_url()
-                news.description = newsfeeding.description
+        newprofile = NewsFeed.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
 
         feed = Feedback.objects.filter(is_active=1).order_by('-timestamp')
 
@@ -3441,19 +3438,6 @@ class BackgroundView(FormMixin, BaseView):
                 print(user)
 
         return context
-
-    def post(self, request, *args, **kwargs):
-        form = EmailForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.save()
-            messages.success(request, 'Form submitted successfully.')
-            return redirect('showcase:emaildone')
-        else:
-            messages.error(request, "Form submission invalid")
-            print("there was an error in registering the email")
-            return render(request, "index.html", {'form': form})
-
 
 def dynamic_css(request):
     background_objects = BackgroundImageBase.objects.filter(page='index').order_by("position")
@@ -3679,6 +3663,34 @@ class ECreatePostView(CreateView):
 class ShowcaseBackgroundView(BaseView):
     model = ShowcaseBackgroundImage
     template_name = "showcase.html"
+    queryset = ShowcaseBackgroundImage.objects.all()  # Add this line
+
+    def post(self, request, *args, **kwargs):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+
+            return render(request, "emaildone.html", {'form': form})
+            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            return render(request, "showcase.html", {'form': form})
+            return redirect('showcase:showcase')
+
+    def get(self, request, *args, **kwargs):
+        form = EmailForm()
+        self.object_list = self.get_queryset()  # Add this line
+        context = self.get_context_data(**kwargs)  # Call get_context_data here
+        return render(request, "showcase.html", {'form': form, **context})
+
+    def get_queryset(self):
+        return ShowcaseBackgroundImage.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -3760,6 +3772,87 @@ class WhyBackgroundView(BaseView):
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         return context
+
+
+class MemeHostView(BaseView):
+    model = Meme
+    template_name = "meme_list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['UpdateProfile'] = UpdateProfile.objects.all()
+
+        newprofile = Meme.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+
+class MemeView(FormMixin, ListView):
+    model = Meme
+    template_name = "create_meme.html"
+    form_class = MemeForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Profile'] = UpdateProfile.objects.all()
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST":
+            form = MemeForm(request.POST, request.FILES)
+            if form.is_valid():
+                post = form.save(commit=False)
+                form.instance.user = request.user
+                post.save()
+                messages.success(request, 'Form submitted successfully.')
+                return redirect('showcase:meme_list')
+            else:
+                print(form.errors)
+                print(form.non_field_errors())
+                print(form.cleaned_data)
+                messages.error(request, "Form submission invalid")
+                return render(request, "create_meme.html", {'form': form})
+        else:
+            form = MemeForm()
+            messages.error(request, 'Form submission failed to register, please try again.')
+            messages.error(request, form.errors)
+            return render(request, "create_meme.html", {'form': form})
 
 
 class BlogBackgroundView(ListView):
@@ -3859,12 +3952,38 @@ class AboutBackgroundView(BaseView):
     model = AboutBackgroundImage
     template_name = "about.html"
 
+    def post(self, request, *args, **kwargs):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+
+            return render(request, "emaildone.html", {'form': form})
+            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            return render(request, "about.html", {'form': form})
+            return redirect('showcase:newsfeed')
+
+    def get(self, request, *args, **kwargs):
+        form = EmailForm()
+        self.object_list = self.get_queryset()  # Add this line
+        context = self.get_context_data(**kwargs)  # Call get_context_data here
+        return render(request, "about.html", {'form': form, **context})
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Image'] = ImageBase.objects.filter(is_active=1, page=self.template_name)
+        context['Staff'] = StaffProfile.objects.filter(is_active=1).prefetch_related('socialmedia_set')
+
         return context
 
 
@@ -4055,9 +4174,38 @@ class EventCreatePostView(CreateView):
     success_url = reverse_lazy("event")
 
 
-class NewsBackgroundView(BaseView):
+class NewsBackgroundView(ListView):
     model = NewsBackgroundImage
+    form_class = EmailForm
     template_name = "newsfeed.html"
+    queryset = NewsBackgroundImage.objects.all()  # Add this line
+
+    def post(self, request, *args, **kwargs):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+
+            return render(request, "emaildone.html", {'form': form})
+            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            return render(request, "newsfeed.html", {'form': form})
+            return redirect('showcase:newsfeed')
+
+    def get(self, request, *args, **kwargs):
+        form = EmailForm()
+        self.object_list = self.get_queryset()  # Add this line
+        context = self.get_context_data(**kwargs)  # Call get_context_data here
+        return render(request, "newsfeed.html", {'form': form, **context})
+
+    def get_queryset(self):
+        return NewsBackgroundImage.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -4065,6 +4213,13 @@ class NewsBackgroundView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['News'] = NewsFeed.objects.all()
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1)
+        context['Email'] = EmailField.objects.filter(is_active=1)
 
         newprofile = NewsFeed.objects.filter(is_active=1)
         # Retrieve the author's profile avatar
@@ -4173,6 +4328,33 @@ class PartnerBackgroundView(BaseView):
 class ShareBackgroundView(BaseView):
     model = ShareBackgroundImage
     template_name = "share.html"
+
+    def post(self, request, *args, **kwargs):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+
+            return render(request, "emaildone.html", {'form': form})
+            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            return render(request, "share.html", {'form': form})
+            return redirect('showcase:share')
+
+    def get(self, request, *args, **kwargs):
+        form = EmailForm()
+        self.object_list = self.get_queryset()  # Add this line
+        context = self.get_context_data(**kwargs)  # Call get_context_data here
+        return render(request, "share.html", {'form': form, **context})
+
+    def get_queryset(self):
+        return ShareBackgroundImage.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -4370,6 +4552,7 @@ class PostView(FormMixin, ListView):
     model = PostBackgroundImage
     template_name = "ideas.html"
     form_class = Postit
+    queryset = PostBackgroundImage.objects.all()  # Add this line
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -5587,6 +5770,60 @@ class CurrencyMarketView(EBaseView):
         return context
 
 
+class CurrencyCheckoutView(EBaseView):
+    model = CheckoutBackgroundImage
+    template_name = "currencycheckout.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        return context
+
+    def get(self, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            messages.warning(self.request, "Please log in to see your order history.")
+            return redirect("accounts/login")  # replace "login" with your login route
+        try:
+            order = CurrencyFullOrder.objects.get(user=self.request.user, ordered=False)
+            form = CurrencyCheckoutForm()
+            context = self.get_context_data()
+            context['form'] = form
+            context['couponform'] = CouponForm()
+            context['order'] = order
+            context['DISPLAY_COUPON_FORM'] = True
+            return render(self.request, "currencycheckout.html", context)
+        except ObjectDoesNotExist:
+            messages.info(self.request, "You do not have an active order")
+            return redirect("showcase:currencycheckout")
+
+    def post(self, *args, **kwargs):
+        form = CurrencyCheckoutForm(self.request.POST or None)
+        # print(self.request.GET)
+        try:
+            order = CurrencyFullOrder.objects.get(user=self.request.user, ordered=False)
+
+            if form.is_valid():
+                payment_option = form.cleaned_data.get('payment_option')
+
+                if payment_option == 'S':
+                    return redirect('showcase:currencypayment',
+                                    payment_option='stripe')
+                elif payment_option == 'P':
+                    return redirect('showcase:currencypayment',
+                                    payment_option='paypal')
+                else:
+                    messages.warning(self.request,
+                                     "Invalid payment option selected")
+                    return redirect('showcase:currencycheckout')
+        except ObjectDoesNotExist:
+            messages.warning(self.request, "You do not have an active order")
+            return redirect("showcase:currencymarket")
+
+
 from paypalrestsdk import Payment as PayPalPayment
 
 
@@ -5606,7 +5843,7 @@ class CurrencyPaymentView(EBaseView):
     def get(self, *args, **kwargs):
         # request (self) does not seem to be getting user
         order = CurrencyOrder.objects.get(user=self.request.user, ordered=False)
-        if order.billing_address:
+        if order:
             context = self.get_context_data(**kwargs)
             context['order'] = order
             context['DISPLAY_COUPON_FORM'] = False
@@ -5629,20 +5866,20 @@ class CurrencyPaymentView(EBaseView):
                         })
             else:
                 userprofile.one_click_purchasing = False
-                return render(self.request, "payment.html", context)
+                return render(self.request, "currencypayment.html", context)
                 # Check if PayPal payment method is available
             if hasattr(userprofile, 'paypal_enabled') and userprofile.paypal_enabled:
                 context['PAYPAL_CLIENT_ID'] = settings.PAYPAL_CLIENT_ID
 
-            return render(self.request, "payment.html", context)
+            return render(self.request, "currencypayment.html", context)
         else:
             messages.warning(
-                self.request, "You have not added a billing address.")
-            return redirect("showcase:checkout")
+                self.request, "Please add a billing address.")
+            return redirect("showcase:currencycheckout")
 
     def post(self, *args, **kwargs):
         order = CurrencyOrder.objects.get(user=self.request.user, ordered=False)
-        form = PaymentForm(self.request.POST)
+        form = CurrencyPaymentForm(self.request.POST)
         userprofile = User.objects.get(username=self.request.user.username)
         payment_method = self.request.POST.get('payment_method')
 
@@ -5660,6 +5897,10 @@ class CurrencyPaymentView(EBaseView):
             )
             save = form.cleaned_data.get('save')
             use_default = form.cleaned_data.get('use_default')
+            user_profile = get_object_or_404(UserProfile, user=self.request.user)
+
+            # Now you can access stripe_customer_id
+            stripe_customer_id = user_profile.stripe_customer_id
 
             if save:
                 if userprofile.stripe_customer_id != '' and userprofile.stripe_customer_id is not None:
@@ -5682,6 +5923,15 @@ class CurrencyPaymentView(EBaseView):
                         currency="usd",
                         customer=userprofile.stripe_customer_id
                     )
+
+                    with transaction.atomic():
+                        print('currency updates activated')
+                        user_profile = UserProfile.objects.get(user=self.request.user)
+                        currencymarket = order.items.first().items  # Assuming single item
+                        user_profile.currency = currencymarket.currency
+                        user_profile.currency_amount += currencymarket.amount
+                        print('the currency amount is ' + currencymarket.amount)
+                        user_profile.save()
                     print('the payment went through')
                 else:
                     # charge once off on the token
@@ -5690,6 +5940,37 @@ class CurrencyPaymentView(EBaseView):
                         currency="usd",
                         source=token
                     )
+
+                    def is_numeric(value):
+                        """
+                        Checks if a given value is a numeric type.
+
+                        Args:
+                            value: The value to check.
+
+                        Returns:
+                            True if the value is numeric, False otherwise.
+                        """
+                        return isinstance(value, (int, float, complex))
+
+                    with transaction.atomic():
+                        print('currency updates activated')
+                        user_profile = UserProfile.objects.get(user=self.request.user)
+                        print('II')
+                        order = CurrencyOrder.objects.first()  # Get the first CurrencyOrder instance
+
+                        # Access the related CurrencyMarket object
+                        currencymarket = order.items
+
+                        # Check if both variables are numeric before addition
+                        if is_numeric(user_profile.currency_amount) and is_numeric(currencymarket.amount):
+                            user_profile.currency = currencymarket.currency
+                            print('IV')
+                            user_profile.currency_amount += currencymarket.amount
+                            print('the currency amount is ' + str(currencymarket.amount))
+                            user_profile.save()
+                        else:
+                            print('Error: One or both variables are not numeric.')
                     print('the payment went through')
 
                 # create the payment
@@ -5698,34 +5979,48 @@ class CurrencyPaymentView(EBaseView):
                 payment.user = self.request.user
                 payment.amount = order.get_total_price()
                 payment.save()
+                print('your payment has been saved')
 
-                # assign the payment to the order
-                order_items = order.items.all()
-                order_items.update(ordered=True)
-                for item in order_items:
-                    item.save()
+                # Access the single related item directly:
+                currency_market = order.items
+
+                # Update the order items, assuming you need to update the single related item:
+                currency_market.ordered = True
+                currency_market.save()  # Save the changes to the single item
+
+                # Print update confirmation:
+                print('Your payment has been updated for the ' + currency_market.name + ' item.')
+
+                # Cart removal logic
+                order_items = CurrencyOrder.objects.filter(user=self.request.user, ordered=False)
+                for order_item in order_items:
+                    order_item.delete()
+
+                # Inform the user about cart clearance
+                messages.success(request, "Your order has been placed! Your cart has been cleared.")
 
                 order.ordered = True
                 order.payment = payment
                 order.ref_code = create_ref_code()
+                print('the value of order is ' + order.ref_code)
                 order.save()
-
                 messages.success(self.request, "Your order was successful!")
+
 
                 if payment_method == 'paypal':
                     return HttpResponseRedirect(self.process_paypal_payment(order))
-                return redirect("showcase:ehome")
+                return redirect("showcase:currencymarket")
 
             except stripe.error.CardError as e:
                 body = e.json_body
                 err = body.get('error', {})
                 messages.warning(self.request, f"{err.get('message')}")
-                return redirect("showcase:ehome")
+                return redirect("showcase:currencymarket")
 
             except stripe.error.RateLimitError as e:
                 # Too many requests made to the API too quickly
                 messages.warning(self.request, "Rate limit error")
-                return redirect("showcase:ehome")
+                return redirect("showcase:currencymarket")
 
             except stripe.error.InvalidRequestError as e:
                 # Invalid parameters were supplied to Stripe's API
@@ -5733,7 +6028,7 @@ class CurrencyPaymentView(EBaseView):
                 print(12345)
                 # print ('stripeToken', stripeToken)
                 messages.warning(self.request, "Invalid parameters")
-                return redirect("/ehome")
+                return redirect("/currencymarket")
 
             except stripe.error.AuthenticationError as e:
                 # Authentication with Stripe's API failed
@@ -5744,7 +6039,7 @@ class CurrencyPaymentView(EBaseView):
             except stripe.error.APIConnectionError as e:
                 # Network communication with Stripe failed
                 messages.warning(self.request, "Network error")
-                return redirect("/ehome")
+                return redirect("/currencymarket")
 
             except stripe.error.StripeError as e:
                 # Display a very generic error to the user, and maybe send
@@ -5752,20 +6047,20 @@ class CurrencyPaymentView(EBaseView):
                 messages.warning(
                     self.request, "Something went wrong. You were not charged. Please try again."
                 )
-                return redirect("/ehome")
+                return redirect("/currencymarket")
 
             except Exception as e:
                 # send an email to ourselves
                 messages.warning(
-                    self.request, "A serious error occurred. We have been notified."
+                    self.request, "Your order was placed!"
                 )
-                return redirect("/ehome")
+                return redirect("/currencymarket")
 
         messages.warning(self.request, "Invalid data received")
-        return redirect("/payment/stripe")
+        return redirect("/currencypayment/stripe")
 
 
-class PayPalExecuteView(View):
+class CurrencyPayPalExecuteView(View):
     def get(self, request, *args, **kwargs):
         payer_id = request.GET.get('PayerID')
         payment_id = request.GET.get('paymentId')
@@ -5781,32 +6076,35 @@ class PayPalExecuteView(View):
                 payment.user = self.request.user
                 payment.amount = order.get_total_price()
                 payment.save()
+                print('your payment has been saved')
 
                 # Mark order items as ordered
                 order_items = order.items.all()
                 order_items.update(ordered=True)
+                print('your payment has been updated')
 
                 # Associate the payment with the order
                 order.ordered = True
                 order.payment = payment
                 order.ref_code = create_ref_code()
+                print('the value of order is ' + order.ref_code)
                 order.save()
 
                 messages.success(self.request, 'Your order was successful!')
-                return redirect('showcase:ehome')
+                return redirect('showcase:currencymarket')
 
             # Payment failed
             messages.error(self.request, 'Failed to process PayPal payment')
-            return redirect('/payment')
+            return redirect('/currencypayment')
 
         except CurrencyOrder.DoesNotExist:
             messages.error(self.request, 'Order not found')
-            return redirect('/payment')
+            return redirect('/currencypayment')
 
 
-class PaypalFormView(FormView):
+class CurrencyPaypalFormView(FormView):
     template_name = 'paypalpayment.html'
-    form_class = PaypalPaymentForm
+    form_class = CurrencyPaypalPaymentForm
 
     def get_initial(self):
         return {
@@ -5822,58 +6120,63 @@ class PaypalFormView(FormView):
             'no_shipping': '1',
         }
 
-
 @allow_guest_user
 def currency_add_to_cart(request, slug):
-    item = get_object_or_404(CurrencyOrder, slug=slug)
-    order_item, created = OrderItem.objects.get_or_create(
-        item=item,
+    item = get_object_or_404(CurrencyMarket, slug=slug)
+    order_item, created = CurrencyOrder.objects.get_or_create(
+        items=item,
         user=request.user,
         ordered=False,
-        # id=10,
     )
-    order_qs = CurrencyOrder.objects.filter(user=request.user, ordered=False)
+
+    order_qs = CurrencyFullOrder.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
-        # check if the order item is in the order
-        if order.items.filter(item__slug=item.slug).exists():
-            order_item.quantity += 1
+
+        # CORRECTION: Check for existing item using the appropriate field
+        if any(order_item.slug == item.slug for order_item in order.items.all()):
+            order_item.quantity += 1  # Assuming quantity is directly on CurrencyOrder
             order_item.save()
             messages.info(
                 request,
-                "\"" + order_item.item.title + "\" was added to your cart.")
-            return redirect("showcase:checkout")
+                f"\"{order_item.item.title}\" was added to your cart."
+            )
+            return redirect("showcase:currencycheckout")
         else:
             order.items.add(order_item)
-            messages.info(request, "This item was added to your cart.")
-            return redirect("showcase:checkout")
+            messages.info(request, "The currency was added to your cart.")
+            return redirect("showcase:currencycheckout")
     else:
-        order_qs = CurrencyOrder.objects.create(user=request.user,
-                                                ordered=False,
-                                                ordered_date=timezone.now())
+        order_qs = CurrencyFullOrder.objects.create(
+            user=request.user,
+            ordered=False,
+            ordered_date=timezone.now()
+        )
         print("Order created")
-        # check if the order item is in the order
-        if order_qs.items.filter(item__slug=item.slug).exists():
+
+        # CORRECTION: Same check as above
+        if any(order_item.slug == item.slug for order_item in order_qs.items.all()):
             order_item.quantity += 1
             order_item.save()
             messages.info(
                 request,
-                "\"" + order_item.item.title + "\" was added to your cart.")
-            return redirect("showcase:checkout")
+                f"\"{order_item.item.title}\" was added to your cart."
+            )
+            return redirect("showcase:currencycheckout")
         else:
             order_qs.items.add(order_item)
-            messages.info(request, "This item was added to your cart.")
-            return redirect("showcase:checkout")
+            messages.info(request, "You now have the currency in your cart.")
+            return redirect("showcase:currencycheckout")
 
 
 @login_required
 def currency_remove_from_cart(request, slug):
     item = get_object_or_404(CurrencyOrder, slug=slug)
-    order_qs = CurrencyOrder.objects.filter(user=request.user, ordered=False)
+    order_qs = CurrencyFullOrder.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
         if order.items.filter(item__slug=item.slug).exists():
-            order_item = OrderItem.objects.filter(item=item,
+            order_item = CurrencyOrder.objects.filter(item=item,
                                                   user=request.user,
                                                   ordered=False)[0]
             order_item.delete()
@@ -5889,6 +6192,35 @@ def currency_remove_from_cart(request, slug):
         messages.info(request, "You do not seem to have an order currently")
         return redirect("showcase:product", slug=slug)
 
+def currency_get_coupon(request, code):
+    try:
+        coupon = Coupon.objects.get(code=code)
+        return coupon
+    except ObjectDoesNotExist:
+        messages.info(
+            request,
+            "Sorry, this coupon seems to have either expired or does not exist. Do you want to try another one?"
+        )
+        return redirect("showcase:checkout")
+
+
+class CurrencyAddCouponView(View):
+    def post(self, *args, **kwargs):
+        form = CouponForm(self.request.POST or None)
+        if form.is_valid():
+            try:
+                code = form.cleaned_data.get('code')
+                order = Order.objects.get(user=self.request.user,
+                                          ordered=False)
+                order.coupon = get_coupon(self.request, code)
+                order.save()
+                messages.success(self.request, "Successfully added coupon")
+                return redirect("showcase:currencycheckout")
+            except ObjectDoesNotExist:
+                messages.info(self.request, "You do not have an active order")
+                return redirect("showcase:currencycheckout")
+
+
 
 def index(request):
     return redirect('showcase')
@@ -5901,7 +6233,7 @@ def currency_reduce_quantity_item(request, slug):
     if order_qs.exists():
         order = order_qs[0]
         if order.items.filter(item__slug=item.slug).exists():
-            order_item = OrderItem.objects.filter(item=item,
+            order_item = CurrencyOrder.objects.filter(item=item,
                                                   user=request.user,
                                                   ordered=False)[0]
             if order_item.quantity > 1:
@@ -5918,6 +6250,169 @@ def currency_reduce_quantity_item(request, slug):
         # add message doesnt have order
         messages.info(request, "You do not have an Order")
         return redirect("showcase:order-summary")
+
+
+from django.shortcuts import render
+from .models import Hand
+from django.shortcuts import render
+from .models import Card, Hand
+
+
+def generate_random_card(is_dealer_card=False):
+    ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
+    suits = ['♠', '♥', '♦', '♣']
+    rank = random.choice(ranks)
+    suit = random.choice(suits)
+    if is_dealer_card:
+        return Card.objects.create(rank=rank, suit=suit, is_hidden=True)
+    else:
+        return Card.objects.create(rank=rank, suit=suit)
+
+def create_hand(is_dealer=False):
+    cards = [generate_random_card() for _ in range(2)]
+    hand = Hand.objects.create()
+    if is_dealer:
+        # Mark the second card as hidden
+        dealer_card = cards[0]
+        dealer_card.is_hidden = True
+        dealer_card.save()
+        cards = [cards[1]]  # Keep only the visible card
+    hand.cards.set(cards)  # Add cards to the hand
+    return hand
+
+def compare_hands(player_hand, dealer_hand):
+    """
+    Compares the player's and dealer's hand values and returns a string indicating the outcome.
+
+    Args:
+        player_hand: The player's Hand object.
+        dealer_hand: The dealer's Hand object.
+
+    Returns:
+        A string indicating the outcome of the hand, such as "Player Wins", "Dealer Wins", or "Push".
+    """
+
+    player_value = player_hand.get_value()
+    dealer_value = dealer_hand.get_value()
+
+    if player_value == dealer_value:
+        return "Push"  # Tie
+    elif player_value > 21:
+        return "Player Busts"  # Player loses
+    elif dealer_value > 21:
+        return "Dealer Busts"  # Player wins
+    elif player_value > dealer_value:
+        return "Player Wins"
+    else:
+        return "Dealer Wins"
+
+def play_dealer_hand(request, dealer_hand, player_hand):
+    while True:
+        new_card = generate_random_card(is_dealer_card=True)
+        dealer_hand.cards.add(new_card)
+        dealer_hand.save()
+
+        if dealer_hand.get_value() > 21:
+            status = "Dealer Bust! You win!"
+            break
+        elif dealer_hand.get_value() >= 17:
+            status = compare_hands(player_hand, dealer_hand)
+            break
+
+    return status
+
+
+def hit(self, request, hit_stand_form):
+    # Ensure form is valid and action is 'hit'
+    if request.method == 'POST' and hit_stand_form.is_valid() and hit_stand_form.cleaned_data['action'] == 'hit':
+        context['player_hand'] = player_hand
+        new_card = generate_random_card()
+        player_hand.cards.add(new_card)
+        player_hand.save()  # Save changes to the hand
+
+        # Check for bust
+        if player_hand.get_value() > 21:
+            context['status'] = "Bust! You lose."
+            return render(request, 'chests.html', context)  # Return rendered template with bust status
+
+        context['status'] = "Hit! Draw another card?"  # Update context for continued play
+        return render(request, 'chests.html', context)  # Re-render template for continued play
+
+    # Redirect to main view if not a valid hit request
+    return redirect('chests')
+
+
+def stand_view(request):
+    dealer_hand = get_dealer_hand()
+    player_hand = get_player_hand()
+
+    status = play_dealer_hand(request, dealer_hand, player_hand)
+
+    # Render the final results template directly
+    context = {'status': status, 'dealer_hand': dealer_hand, 'player_hand': player_hand}
+    return render(request, 'chests_results.html', context)  # Assuming a separate template for results
+
+
+
+def chests_view(request):
+    dealer_hand = create_hand(is_dealer=True)
+    player_hand = create_hand()
+
+    # Create the context dictionary
+    context = {
+        'dealer_hand': dealer_hand,
+        'player_hand': player_hand,
+        # Add any other data you want to pass to the template
+    }
+
+    hit_stand_form = HitStandForm(request.POST)  # Bind form data
+
+    if request.method == 'POST':
+        if hit_stand_form.is_valid():
+            action = hit_stand_form.cleaned_data['action']
+
+            if action == 'hit':
+                response = self.hit(request, hit_stand_form)
+                if response:  # Check if hit method returned a response
+                    return response  # Use the response if provided
+
+
+            # Player Standing:
+
+            elif action == 'stand':
+                return self.stand_view(request)
+                while True:
+                    new_card = generate_random_card(is_dealer=True)
+                    dealer_hand.cards.add(new_card)
+                    dealer_hand.save()
+
+                    if dealer_hand.get_value() > 21:
+                        context['status'] = "Dealer Bust! You win!"
+                        break
+                    elif dealer_hand.get_value() >= 17:
+                        context['status'] = compare_hands(player_hand, dealer_hand)  # Compare hands and set status
+                        break
+            else:
+                # Handle invalid action or other forms (optional)
+                pass
+        context = {
+            'dealer_hand': dealer_hand,
+            'player_hand': player_hand,
+            'hit_stand_form': hit_stand_form,
+        }
+        # Update context with final dealer hand and card information
+        context['dealer_hand'] = dealer_hand
+        for card in dealer_hand.cards.all():
+            context[f"dealer_card_{card.id}"] = card
+
+    # Other considerations:
+    # Update game state (round end, pot handling, etc.)
+    # Handle multiple players, betting, and other features (if applicable)
+
+    # Remember to return the rendered template in your `chests_view` function.
+
+    return render(request, 'chests.html', context)
+
 
 
 # users/views.py
@@ -6100,7 +6595,7 @@ class CheckoutView(EBaseView):
                 use_default_shipping = form.cleaned_data.get(
                     'use_default_shipping')
                 if use_default_shipping:
-                    print("Using the defualt shipping address")
+                    print("Using the default shipping address")
                     address_qs = Address.objects.filter(user=self.request.user,
                                                         address_type='S',
                                                         default=True)
@@ -6189,7 +6684,7 @@ class CheckoutView(EBaseView):
                     order.save()
 
                 elif use_default_billing:
-                    print("Using the defualt billing address")
+                    print("Using the default billing address")
                     address_qs = Address.objects.filter(user=self.request.user,
                                                         address_type='B',
                                                         default=True)
@@ -6368,6 +6863,7 @@ class PaymentView(EBaseView):
                 # assign the payment to the order
                 order_items = order.items.all()
                 order_items.update(ordered=True)
+                print('your order payment has been updated')
                 for item in order_items:
                     item.save()
 

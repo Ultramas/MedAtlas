@@ -1,10 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+ {% load static %}
 
-</body>
-</html>
+  <html>
+
+  <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+      <title>Blackjack</title>
+      <link rel="stylesheet" type="text/css" href="{% static 'css/cheststyle.css' %}">
+      <script src="{% static 'css/js/chests.js' %}"></script>
+  </head>
+
+  <body>
+      <div class="layout">
+          <h2>Dealer Hand</h2>
+          <div class="wrapper">
+            <div class="cards" id="dealer">
+              {% for card in dealer_hand.cards.all %}
+                <div class="card">
+                  {% if card.is_hidden %}
+                    Hidden
+                  {% else %}
+                    {{ card }}
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+
+
+          </div>
+          <h2>Player Hand</h2>
+          <div class="wrapper">
+            <div class="cards" id="player">
+              {% for card in player_hand.cards.all %}
+                <div class="card">{{ card }}</div>
+              {% endfor %}
+            </div>
+          </div>
+            <form method="post" action="{% url 'showcase:hit' %}">
+                {% csrf_token %}
+                {{ hit_stand_form.as_p }}
+                <button type="submit" id="hit-button">Hit</button>
+                <button type="submit" id="stand-button">Stand</button>
+                </form>
+
+
+          <div class="background" id="notice">
+          <div class="notice">
+              <p></p>
+              <button id="next-hand">Deal Next Hand</button>
+          </div>
+          </div>
+      </div>
+      <script>
+document.getElementById("hit-button").addEventListener("click", function() {
+    this.form.action = "{% url 'showcase:hit' %}";
+});
+
+document.getElementById("stand-button").addEventListener("click", function() {
+    this.form.action = "{% url 'showcase:stand' %}";
+    // Optionally submit the form manually:
+    // this.form.submit();
+});
+
+
+</script>
+
+  </body>
+
+  </html>

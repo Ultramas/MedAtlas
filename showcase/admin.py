@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
     SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
-    Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket, SellerApplication
+    Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket, SellerApplication, Meme, \
+    MemeTextField, CurrencyFullOrder, CurrencyOrder
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -258,11 +259,19 @@ class ReportIssueAdmin(admin.ModelAdmin):
 
 admin.site.register(ReportIssue, ReportIssueAdmin)
 
+from django.contrib import admin
+from .models import SocialMedia
+
+
+class SocialMediaInline(admin.TabularInline):  # Or admin.StackedInline
+    model = SocialMedia
+    extra = 1  # Allow adding one extra social media link by default
+
 
 class StaffProfileAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Staff Profile Information - Categorial Description', {
-            'fields': ('user', 'name', 'position', 'description', 'staff_feats', 'is_active',),
+            'fields': ('user', 'name', 'role_position', 'description', 'staff_feats', 'date_and_time', 'is_active',),
             'classes': ('collapse',),
         }),
         ('Staff Profile Information - Image Description', {
@@ -270,9 +279,49 @@ class StaffProfileAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+    inlines = [SocialMediaInline]
 
 
 admin.site.register(StaffProfile, StaffProfileAdmin)
+
+
+class CurrencyOrderAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Order Item Information - Categorial Description', {
+            'fields': ('user', 'ordered', 'quantity', 'items',),
+            'classes': ('collapse',),
+        }),
+        ('Order Item Information - Attributes', {
+            'fields': ('slug', 'is_active'),
+        }),
+    )
+    readonly_fields = ('ordered_date', 'id',)
+
+
+admin.site.register(CurrencyOrder, CurrencyOrderAdmin)
+
+
+class CurrencyFullOrderAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Order Item Information - Order Outline', {
+            'fields': ('user', 'items', 'itemhistory', 'coupon',),
+            'classes': ('collapse',),
+        }),
+        ('Order Item Information - Personal Information', {
+            'fields': ('payment',),
+            'classes': ('collapse',),
+        }),
+        ('Order Item Information - Attributes', {
+            'fields': ('ref_code', 'ordered_date', 'is_active'),
+        }),
+        ('Order Item Information - Logistics', {
+            'fields': ('ordered', 'being_delivered', 'received', 'refund_requested', 'refund_granted'),
+        }),
+    )
+    readonly_fields = ('start_date', 'id',)
+
+
+admin.site.register(CurrencyFullOrder, CurrencyFullOrderAdmin)
 
 
 class TradeItemAdmin(admin.ModelAdmin):
@@ -344,7 +393,7 @@ admin.site.register(SettingsModel, SettingsAdmin)
 class UserProfileAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Partner Application Information - Categorial Description', {
-            'fields': ('user', 'stripe_customer_id', 'one_click_purchasing', 'is_active',),
+            'fields': ('user', 'stripe_customer_id', 'one_click_purchasing', 'currency', 'currency_amount', 'is_active',),
             'classes': ('collapse',),
         }),
     )
@@ -575,7 +624,7 @@ admin.site.register(State, StateAdmin)
 # admin.site.register(ExtendUser)
 
 # from .models import Group
-from .forms import GroupAdminForm
+from .forms import GroupAdminForm, MemeForm
 
 # Unregister the original Group admin.
 admin.site.unregister(Group)
@@ -859,7 +908,7 @@ class EventAdmin(admin.ModelAdmin):
     form = EventAdminForm
     fieldsets = (
         ('Event Information - Categorial Descriptions', {
-            'fields': ('user', 'name', 'category', 'description', 'section', 'page',),
+            'fields': ('user', 'name', 'category', 'numeric_quantifier', 'qualitative_qualifier', 'description', 'section', 'page',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Event Information - Image Display', {
@@ -926,7 +975,7 @@ class AdvertisementBaseAdmin(admin.ModelAdmin):
         ('Advertisement Base Information - Advertisement', {
             'fields': (
                 'advertisement', 'advertisement_length', 'advertisement_width', 'length_for_resize', 'width_for_resize',
-                'file', 'xposition', 'yposition',),
+                'advertisement_file', 'xposition', 'yposition',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Advertisement Base  Information - Attributes', {
@@ -970,6 +1019,37 @@ class NewsFeedAdmin(admin.ModelAdmin):
 
 
 admin.site.register(NewsFeed, NewsFeedAdmin)
+
+
+class MemeTextFieldAdmin(admin.ModelAdmin):
+    form = MemeForm
+    fieldsets = (
+        ('Meme Text Information - Categorial Descriptions', {
+            'fields': ('meme', 'text', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+
+admin.site.register(MemeTextField, MemeTextFieldAdmin)
+
+
+class MemeAdmin(admin.ModelAdmin):
+    form = MemeForm
+    fieldsets = (
+        ('Meme Information - Categorial Descriptions', {
+            'fields': ('user', 'title', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+        ('Event Information - Image Display', {
+            'fields': ('image', 'image_length', 'image_width',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+    readonly_fields = ('uploaded_at',)
+
+
+admin.site.register(Meme, MemeAdmin)
 
 
 class ShufflerAdmin(admin.ModelAdmin):
@@ -1236,12 +1316,13 @@ class SocialMediaAdmin(admin.ModelAdmin):
             'fields': ('social', 'page', 'hyperlink', 'is_active',)
         }),
         ('Social Media Information - Image Display', {
-            'fields': ('image', 'image_width', 'image_length', 'width_for_resize', 'height_for_resize', 'image_position', 'alternate',)
+            'fields': ('icon', 'image_width', 'image_length', 'width_for_resize', 'height_for_resize', 'image_position', 'alternate',)
         }),
     )
 
 
 admin.site.register(SocialMedia, SocialMediaAdmin)
+
 
 class SupportThreadAdmin(admin.ModelAdmin):
     fieldsets = (
