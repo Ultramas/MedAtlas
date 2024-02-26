@@ -4,7 +4,8 @@ from urllib import request
 from django import forms
 
 from mysite import settings
-from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme
+from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme, TradeOffer, \
+    FriendRequest
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -142,7 +143,8 @@ class StaffJoin(forms.ModelForm):
     Why_do_you_want_to_apply_for_staff = forms.CharField(widget=forms.TextInput(
         attrs={'placeholder': 'Tell us why you want to be a Accomfort Staff Member. Be descriptive.'}))
     How_do_you_think_you_can_make_MC_better = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Tell us what you will do to make Accomfort better as a staff member.'}))
+        widget=forms.TextInput(
+            attrs={'placeholder': 'Tell us what you will do to make Accomfort better as a staff member.'}))
     I_confirm_that_I_have_read_all_the_staff_requirements_and_meet_all_of_them = forms.BooleanField()
 
     class Meta:
@@ -499,7 +501,6 @@ class PaypalPaymentForm(forms.Form):
 
 
 class CurrencyCheckoutForm(forms.Form):
-
     payment_option = forms.ChoiceField(
         widget=forms.RadioSelect, choices=PAYMENT_CHOICES)
 
@@ -533,7 +534,6 @@ from .models import SellerApplication
 
 
 class SellerApplicationForm(forms.ModelForm):
-
     class Meta:
         model = SellerApplication
         fields = ['first_name', 'last_name', 'age', 'identification', 'email']
@@ -561,8 +561,6 @@ class StoreViewTypeForm(forms.ModelForm):
     class Meta:
         model = StoreViewType
         fields = ('type',)
-
-
 
     def save(self, commit=True):
 
@@ -830,6 +828,44 @@ class OrderItemAdmin(admin.ModelAdmin):
 
 admin.site.register(OrderItem, OrderItemAdmin)
 
+from .models import Wager
+
+
+class WagerForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user_profile = kwargs.pop('user_profile', None)
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = Wager
+        fields = ['amount']
+
+    def clean_amount(self):
+        amount = self.cleaned_data.get('amount')
+        if self.user_profile and self.user_profile.currency_amount < amount:
+            raise forms.ValidationError("Insufficient funds for this bet.")
+        return amount
+
+
+class DirectedTradeOfferForm(forms.ModelForm):
+    class Meta:
+        model = TradeOffer
+        fields = ['trade_status']  # or any other fields you want in the form
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['trade_status'].widget = forms.RadioSelect(choices=TradeOffer.TRADE_STATUS)
+
+    def clean_direct_trade_offer(self):
+        user = self.instance.user
+        return user
+
+
+class TradeOfferAcceptanceForm(forms.ModelForm):
+    class Meta:
+        model = TradeOffer
+        fields = ['user', 'user2']
+
 
 from django.core.exceptions import ValidationError
 
@@ -878,7 +914,37 @@ class TradeItemForm(forms.ModelForm):
 class TradeProposalForm(forms.ModelForm):
     class Meta:
         model = TradeOffer
-        fields = ['trade_items', 'estimated_trading_value', 'message']
+        fields = ['title', 'trade_items', 'estimated_trading_value', 'user2', 'message', 'quantity', ]
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(TradeProposalForm, self).__init__(*args, **kwargs)
+        if user:
+            self.fields['trade_items'].queryset = TradeItem.objects.filter(user=user)
+
+
+class FriendRequestForm(forms.ModelForm):
+    class Meta:
+        model = FriendRequest
+        fields = ['receiver']  # or any other fields you want in the form
+
+
+class FriendRequestAcceptanceForm(forms.ModelForm):
+    class Meta:
+        model = FriendRequest
+        fields = ['sender', 'receiver']
+
+
+from django import forms
+from .models import RespondingTradeOffer, TradeOffer
+
+
+class RespondingTradeOfferForm(forms.ModelForm):
+    class Meta:
+        model = RespondingTradeOffer
+        fields = ['offered_trade_items', 'message']
+
+
 
 
 from django.utils import timezone
@@ -943,7 +1009,6 @@ from django.utils.text import slugify
 from django import forms
 from .models import Feedback
 from django import forms
-
 
 from django import forms
 from .models import Feedback

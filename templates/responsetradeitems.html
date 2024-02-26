@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.offered_trade_items.errors }}
+    {{ form.offered_trade_items.label_tag }} {{ form.offered_trade_items }}
+    {{ form.message.errors }}
+    {{ form.message.label_tag }} {{ form.message }}
+    <input type="submit" value="Submit">
+</form>
+
+</body>
+</html>

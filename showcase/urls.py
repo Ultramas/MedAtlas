@@ -19,7 +19,7 @@ from django.urls import path, include, re_path
 from django.views.generic.base import TemplateView
 from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, BlogSearchResultsView, \
     currency_remove_from_cart, currency_add_to_cart, currency_reduce_quantity_item, submit_seller_application, \
-    chests_view
+    PlaceWagerView, update_wager, SendFriendRequestView
 
 # remove this:
 # from . import settings
@@ -314,13 +314,25 @@ urlpatterns = [
     path('submit_application/', views.submit_seller_application, name='submit_application'),
     path('verify_otp/', views.verify_otp, name='verify_otp'),
     path('tradeitems/', views.TradeBackgroundView.as_view(), name='tradeitems'),
+    path('createtradeoffer/', views.TradeOfferCreateView.as_view(), name='createtradeoffer'),
     path('tradingcentral/', views.TradeItemCreateView.as_view(), name='tradingcentral'),
+    path('mytrades/', views.TradeHistory.as_view(), name='mytrades'),
+    path('tradeitems/', views.TradeBackgroundView.as_view(), name='tradeitems'),
+    path('directedtradeoffers/', views.DirectedTradeOfferView.as_view(), name='directedtradeoffers'),
+    path('responsetradeitems/<slug:slug>', views.ResponseTradeOfferCreateView.as_view(), name='responsetradeitems'),
+    path('accept_trade/<int:request_id>/', views.accept_trade, name='accept_trade'),
+    path('decline_trade/<int:request_id>/', views.decline_trade, name='decline_trade'),
+    path('directedtradeoffers/<int:trade_item_id>/', views.DirectedTradeOfferView.as_view(), name='directedtradeoffers'),
     path('pack_home/', views.ShufflerBackgroundView.as_view(), name='pack_home'),
     path('pokespinner/', views.InventoryView.as_view(), name='pokespinner'),
     path('pokechests/', views.InventoryView.as_view(), name='pokechests'),
-    path('chests/', chests_view, name='chests'),
-    path('hit/', views.hit, name='hit'),
-    path('stand/', views.stand_view, name='stand'),  # Name the URL pattern 'stand'
+    path('chests/', views.ChestBackgroundView.as_view(), name='chests'),
+    path('gamehub/', views.GameHubView.as_view(), name='gamehub'),
+    path('gameroom/', views.GameRoomView.as_view(), name='gameoom'),
+    path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
+    path('inventory/', views.PlayerInventoryView.as_view(), name='inventory'),
+    path('update_wager/<int:wager_id>/', update_wager, name='update_wager'),
+    path('place_wager/', PlaceWagerView.as_view(), name='place_wager'),
     path('lotteries/', views.LotteryBackgroundView.as_view(), name='lotteries'),
     path('dailylotto/', views.DailyLotteryView.as_view(), name='dailylotto'), #special variant of Lottery, the daily lottery
     path('dailylottoclaimed/', views.DailyLotteryView.as_view(), name='dailylottoclaimed'),
@@ -424,6 +436,12 @@ urlpatterns = [
     path('supportinterface/checkview', views.supportlinecheckview, name='supportlinecheckview'),
     path('supportinterface/send', views.supportlinesend, name='supportlinesend'),
     path('forbiddenaccess/', views.forbidden_access, name='forbiddenaccess'),
+
+    path('send_friend_request/', SendFriendRequestView.as_view(), name='send_friend_request'),
+    path('my_friend_requests/', views.FriendRequestsView.as_view(), name='my_friend_requests'),
+    path('my_friends/', views.FriendlyView.as_view(), name='my_friends'),
+    path('accept_friend_request/<int:request_id>/', views.accept_friend_request, name='accept_friend_request'),
+    path('decline_friend_request/<int:request_id>/', views.decline_friend_request, name='decline_friend_request'),
 
     # change url <str:room> to use user username for added security
     path('product/<slug>/', views.ProductView.as_view(), name='product'),

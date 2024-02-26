@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
     SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
     Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket, SellerApplication, Meme, \
-    MemeTextField, CurrencyFullOrder, CurrencyOrder
+    MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
+    FriendRequest, Friend, RespondingTradeOffer
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -326,15 +327,15 @@ admin.site.register(CurrencyFullOrder, CurrencyFullOrderAdmin)
 
 class TradeItemAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Trade Offer Information - Categorial Description', {
+        ('Trade Item Information - Categorial Description', {
             'fields': ('user', 'title', 'category', 'specialty', 'status', 'description', ),
             'classes': ('collapse',),
         }),
-        ('Trade Offer Information - Technical Description', {
+        ('Trade Item Information - Technical Description', {
             'fields': ('fees', 'condition', 'label', 'slug', 'relateditems', 'is_active',),
             'classes': ('collapse',),
         }),
-        ('Trade Offer Information - Image Description', {
+        ('Trade Item Information - Image Description', {
             'fields': ('image', 'image_length', 'image_width','length_for_resize', 'width_for_resize',),
             'classes': ('collapse',),
         }),
@@ -344,21 +345,51 @@ class TradeItemAdmin(admin.ModelAdmin):
 admin.site.register(TradeItem, TradeItemAdmin)
 
 
-class TradeOfferAdmin(admin.ModelAdmin):
+class TradeAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Trade Offer Information - Categorial Description', {
-            'fields': ('trade_items', 'estimated_trading_value', 'message', 'user', 'user2',),
-            'classes': ('collapse',),
-        }),
-        ('Trade Offer Information - Technical Description', {
-            'fields': ('timestamp', 'is_active',),
+            'fields': ('trade_offers', 'users', 'is_active',),
             'classes': ('collapse',),
         }),
     )
+    readonly_fields = ('timestamp',)
+
+
+admin.site.register(Trade, TradeAdmin)
+
+
+class TradeOfferAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Trade Offer Information - Categorial Description', {
+            'fields': ('title', 'trade_items', 'estimated_trading_value', 'user', 'user2', 'trade_status', 'message', 'quantity'),
+            'classes': ('collapse',),
+        }),
+        ('Trade Offer Information - Technical Description', {
+            'fields': ('slug', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('slug', 'timestamp',)
 
 
 admin.site.register(TradeOffer, TradeOfferAdmin)
 
+
+class RespondingTradeOfferAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Trade Offer Information - Categorial Description', {
+            'fields': ('wanted_trade_items', 'estimated_trading_value', 'user', 'user2', 'trade_status', 'message', 'quantity'),
+            'classes': ('collapse',),
+        }),
+        ('Trade Offer Information - Technical Description', {
+            'fields': ('is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('timestamp',)
+
+
+admin.site.register(RespondingTradeOffer, RespondingTradeOfferAdmin)
 
 class ProfileAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -369,6 +400,30 @@ class ProfileAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Profile, ProfileAdmin)
+
+
+class FriendRequestAdmin(admin.ModelAdmin):
+   fieldsets = (
+       ('Room Information', {
+           'fields': ('sender', 'receiver', 'status',),
+           'classes': ('collapse-open',),
+       }),
+   )
+
+
+admin.site.register(FriendRequest, FriendRequestAdmin)
+
+
+class FriendAdmin(admin.ModelAdmin):
+   fieldsets = (
+       ('Room Information', {
+           'fields': ('user', 'friend', ),
+           'classes': ('collapse-open',),
+       }),
+   )
+   readonly_fields = ('created_at',)
+
+admin.site.register(Friend, FriendAdmin)
 
 
 class SettingsAdmin(admin.ModelAdmin):
@@ -403,17 +458,41 @@ admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(UserProfile2, UserProfile2Admin)
 
 
-class PostLikesAdmin(admin.ModelAdmin):
+class GameHubAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Partner Application Information - Categorial Description', {
-            'fields': ('user', 'post',),
+        ('Game Hub Information - Categorial Description', {
+            'fields': ('name', 'type', 'filter', 'is_active',),
             'classes': ('collapse',),
         }),
     )
-    readonly_fields = ('created',)
 
 
-admin.site.register(PostLikes, PostLikesAdmin)
+admin.site.register(GameHub, GameHubAdmin)
+
+
+class BlackJackAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('BlackJack Game Information - Categorial Description', {
+            'fields': ('name', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+
+
+admin.site.register(BlackJack, BlackJackAdmin)
+
+
+class BlackJackWagerAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Wager Game Information - Categorial Description', {
+            'fields': ('user_profile', 'amount', 'outcome',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('timestamp',)
+
+
+admin.site.register(Wager, BlackJackWagerAdmin)
 
 
 # admin.site.register(BackgroundImage)
@@ -1182,6 +1261,28 @@ class ChoiceAdmin(admin.ModelAdmin):
 admin.site.register(Choice, ChoiceAdmin)
 
 
+class InventoryAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Inventory Application Information - Categorial Description', {
+            'fields': ('user', 'name', 'image', 'image_length', 'image_width', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+
+
+admin.site.register(Inventory, InventoryAdmin)
+
+
+class InventoryObjectAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Inventory Application Information - Categorial Description', {
+            'fields': ('user', 'inventory', 'choice', 'choice_text', 'image', 'image_length', 'image_width', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+
+
+admin.site.register(InventoryObject, InventoryObjectAdmin)
 
 class AdministrationTaskAdmin(admin.ModelAdmin):
     fieldsets = (

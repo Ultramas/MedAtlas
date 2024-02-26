@@ -1,0 +1,67 @@
+
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{user.username}}'s Pending Incoming Trades</title>
+</head>
+<body>
+  <div class="column three mobile-twelve section_header_logo vertical-align-middle">
+          <a class="logo" href="">
+          <img class="imageicon" src="{% static 'css/images/quasarlogo.png' %}"
+                alt="Quasar Logo" style="length: 120px; width: 180px;"></a>
+
+
+
+ </div>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+<h1>Pending Incoming Trades:
+</h1>
+{% for request in pending_requests %}
+    <p>{{ request.sender.username }} wants to be friends!</p>
+    <a href="{% url 'showcase:accept_friend_request' request.id %}">Accept</a>
+    <a href="{% url 'showcase:decline_friend_request' request.id %}">Decline</a>
+{% endfor %}
+
+<h1>Pending Outgoing Trades:</h1>
+{% for request in outgoing_requests %}
+    <p style="color: black;">You sent a friend request to {{ request.receiver.username }}.</p>
+{% endfor %}
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for radio in form.trade_status %}
+        <label for="{{ radio.id_for_label }}">
+            {{ radio.choice_label }}
+            <input type="radio" name="{{ radio.name }}" id="{{ radio.id_for_label }}" value="{{ radio.choice_value }}">
+        </label>
+    {% endfor %}
+    <!-- Include other fields and a submit button -->
+    <input type="submit" value="Submit">
+</form>
+
+
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js.darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}

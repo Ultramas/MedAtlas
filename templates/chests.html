@@ -1,70 +1,63 @@
  {% load static %}
+ <!DOCTYPE html>
+<html>
 
-  <html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-  <head>
-      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Blackjack</title>
+    <link rel="stylesheet" href="{% static 'css/cheststyle.css' %}">
 
-      <title>Blackjack</title>
-      <link rel="stylesheet" type="text/css" href="{% static 'css/cheststyle.css' %}">
-      <script src="{% static 'css/js/chests.js' %}"></script>
-  </head>
+</head>
 
-  <body>
-      <div class="layout">
-          <h2>Dealer Hand</h2>
-          <div class="wrapper">
+<body>
+    <div id="user-currency">
+        <div>
+            <ul>
+                <li style="display: flex;">
+                    <h2>{{ SentProfile.user.username }}: {{ SentProfile.currency_amount }}
+                         {{ Money.name }}
+                                                                <!--note: currently gets very currency without filter-->
+                        <img src="{{ Money.file.url }}" style="border-radius: 50px; width: 25px; height: 25px; margin-top: 10px;">
+
+                    </h2>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="layout">
+        <h2>Dealer Hand</h2>
+        <div class="wrapper">
             <div class="cards" id="dealer">
-              {% for card in dealer_hand.cards.all %}
-                <div class="card">
-                  {% if card.is_hidden %}
-                    Hidden
-                  {% else %}
-                    {{ card }}
-                  {% endif %}
-                </div>
-              {% endfor %}
             </div>
-
-
-          </div>
-          <h2>Player Hand</h2>
-          <div class="wrapper">
+        </div>
+        <h2>Player Hand</h2>
+        <div class="wrapper">
             <div class="cards" id="player">
-              {% for card in player_hand.cards.all %}
-                <div class="card">{{ card }}</div>
-              {% endfor %}
             </div>
-          </div>
-            <form method="post" action="{% url 'showcase:hit' %}">
-                {% csrf_token %}
-                {{ hit_stand_form.as_p }}
-                <button type="submit" id="hit-button">Hit</button>
-                <button type="submit" id="stand-button">Stand</button>
-                </form>
+        </div>
+        <div class="wrapper">
+            <div class="container" id="button-container">
+                <button id="hit">Hit</button>
+                <button id="pass">Pass</button>
+            </div>
+        </div>
+        <div class="background" id="notice">
+        <div class="notice">
+            <p></p>
+            <button id="next-hand">Deal Next Hand</button>
+        </div>
+        </div>
+    </div>
+<form method="POST" class="post">
+    {% csrf_token %}
+    {{ wager_form.as_p }}
+    <button type="submit">Place Wager</button>
+</form>
 
+    <script src="{% static 'css/js/chests.js' %}"></script>
+</body>
 
-          <div class="background" id="notice">
-          <div class="notice">
-              <p></p>
-              <button id="next-hand">Deal Next Hand</button>
-          </div>
-          </div>
-      </div>
-      <script>
-document.getElementById("hit-button").addEventListener("click", function() {
-    this.form.action = "{% url 'showcase:hit' %}";
-});
-
-document.getElementById("stand-button").addEventListener("click", function() {
-    this.form.action = "{% url 'showcase:stand' %}";
-    // Optionally submit the form manually:
-    // this.form.submit();
-});
-
-
-</script>
-
-  </body>
-
-  </html>
+</html>

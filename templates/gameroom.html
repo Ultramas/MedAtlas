@@ -1,0 +1,360 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" contant="width=device-width, initial-scale=1">
+        <title>Luxg Gaming</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/gameroom.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/gaming.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/normalize.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/gameanimate.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/gamefontawesome.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/gameflex-slider.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/gameowl.css' %}">
+
+        <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+        </head>
+
+        <body>
+            <header>
+                <div class="header-img">
+                   <a href="#"><img src="imgs/logo.png"></a>
+                </div>
+                <div class="nav">
+                    <ul>
+                        <li class="active"><a href="index.html">Home</a></li>
+                        <li><a href="shop.html">Our Shop</a></li>
+                        <li><a href="product-detail.html">Product Details</a></li>
+                        <li><a href="contact.html#">Contact Us</a></li>
+                        <li class="sign"><a href="#">SIGN IN</a></li>
+                    </ul>
+                </div>
+                <div class="bx bx-menu" id="menu-icon"></div>
+            </header>
+            <!--Banner-->
+            <div class="banner">
+                <div class="one">
+                    <div class="container">
+                        <div class="right">
+                            <div class="banner-img">
+                                <img src="imgs/banner-image.jpg">
+                                <div class="img-txt">
+                                    <span class="price">$22</span>
+                                    <span class="offer">-40%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="left">
+                            <div class="banner-txt">
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 1 %}
+                                <h5>{{BackgroundImage.text}}</h5>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 2 %}
+                                <h1>{{BackgroundImage.text}}</h1>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 3 %}
+                                <p>{{BackgroundImage.text}}</p>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+                            </div>
+                            <form>
+                                <input type="text" placeholder="Type Something">
+                            <button>SEARCH NOW</button>
+                            </form>
+                        </div>
+                     </div>
+                </div>
+             </div>
+             <!--feature-->
+             <div class="feature">
+                <div class="two">
+                    <div class="cont">
+                        <div class="box">
+                            <div class="image">
+                            <img src="imgs/featured-01.png">
+                        </div>
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 4 %}
+                            <h4>{{BackgroundImage.text}}</h4>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+                        </div>
+                        <div class="box">
+                        <div class="image">
+                            <img src="imgs/featured-02.png">
+                        </div>
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 5 %}
+                            <h4>{{BackgroundImage.text}}</h4>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+                        </div>
+                        <div class="box">
+                         <div class="image">
+                            <img src="imgs/featured-03.png">
+                        </div>
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 6 %}
+                            <h4>{{BackgroundImage.text}}</h4>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+                        </div>
+                        <div class="box">
+                        <div class="image">
+                            <img src="imgs/featured-04.png">
+                        </div>
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 7 %}
+                            <h4>{{BackgroundImage.text}}</h4>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+                        </div>
+                    </div>
+                </div>
+             </div>
+             <!--gamws-->
+             <div class="games">
+                <div class="container">
+                    <div class="txt">
+                        <div class="left">
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 8 %}
+                            <h4 class="h4-class">{{BackgroundImage.text}}</h4>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 9 %}
+                            <h2 class="h2-class">{{BackgroundImage.text}}</h2>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+                        </div>
+                        <div class="right">
+                            <a href="shop.html" >VIEW ALL</a>
+                        </div>
+                    </div>
+                    <div class="boxs">
+                        <div class="box">
+                            <div class="image">
+                                <img src="imgs/trending-01.jpg">
+                            </div>
+                            <div class="offer">
+                                <p class="off-one">$28</p>
+                                <p class="off-two">$20</p>
+                            </div>
+                                <div class="txt-box">
+                                    <div class="txxt">
+                                        <span class="span-box">Action</span>
+                                        <h6 class="h6-box">Assasin Creed</h6>
+                                    </div>
+                                    <i class="fa fa-shopping-bag"></i>
+                                </div>
+                        </div>
+                        <div class="box">
+                            <div class="image">
+                                <img src="imgs/trending-02.jpg">
+                            </div>
+                            <div class="offer">
+                                <p>$44</p>
+                            </div>
+                                <div class="txt-box">
+                                    <div class="txxt">
+                                        <span class="span-box">Action</span>
+                                        <h6 class="h6-box">Assasin Creed</h6>
+                                    </div>
+                                    <i class="fa fa-shopping-bag"></i>
+                                </div>
+                        </div>
+                        <div class="box">
+                            <div class="image">
+                                <img src="imgs/trending-03.jpg">
+                            </div>
+                            <div class="offer">
+                                <p class="off-one">$64</p>
+                                <p class="off-two">$44</p>
+                            </div>
+                                <div class="txt-box">
+                                    <div class="txxt">
+                                        <span class="span-box">Action</span>
+                                        <h6 class="h6-box">Assasin Creed</h6>
+                                    </div>
+                                    <i class="fa fa-shopping-bag"></i>
+                                </div>
+                        </div>
+                        <div class="box">
+                            <div class="image">
+                                <img src="imgs/trending-04.jpg">
+                            </div>
+                            <div class="offer">
+                                <p>$32</p>
+                            </div>
+                                <div class="txt-box">
+                                    <div class="txxt">
+                                        <span class="span-box">Action</span>
+                                        <h6 class="h6-box">Assasin Creed</h6>
+                                    </div>
+                                    <i class="fa fa-shopping-bag"></i>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+             </div>
+             <!--top Games-->
+             <div class="top-games">
+                <div class="container">
+                    <div class="txt">
+                        <div class="left">
+                            <h4 class="h4-class">TOP GAMES</h4>
+                            <h2 class="h2-class">Most Played</h2>
+                        </div>
+                        <div class="right">
+                            <a href="shop.html" class="link-class">VIEW ALL</a>
+                        </div>
+                    </div>
+                    <div class="boxs">
+                        <div class="box">
+                            <div class="img-box">
+                                <img src="imgs/top-game-01.jpg">
+                            </div>
+                            <div class="txt-box">
+                                <span>Advanced</span>
+                                <h5>Assasin Creed</h5>
+                            </div>
+                            <a href="#" class="link-class">EXPLORE</a>
+                        </div>
+                        <div class="box">
+                            <div class="img-box">
+                                <img src="imgs/top-game-02.jpg">
+                            </div>
+                            <div class="txt-box">
+                                <span>Advanced</span>
+                                <h5>Assasin Creed</h5>
+                            </div>
+                            <a href="#" class="link-class">EXPLORE</a>
+                        </div>
+                        <div class="box">
+                            <div class="img-box">
+                                <img src="imgs/top-game-03.jpg">
+                            </div>
+                            <div class="txt-box">
+                                <span>Advanced</span>
+                                <h5>Assasin Creed</h5>
+                            </div>
+                            <a href="#" class="link-class">EXPLORE</a>
+                        </div>
+                        <div class="box">
+                            <div class="img-box">
+                                <img src="imgs/top-game-04.jpg">
+                            </div>
+                            <div class="txt-box">
+                                <span>Advanced</span>
+                                <h5>Assasin Creed</h5>
+                            </div>
+                            <a href="#" class="link-class">EXPLORE</a>
+                        </div>
+                        <div class="box">
+                            <div class="img-box">
+                                <img src="imgs/top-game-05.jpg">
+                            </div>
+                            <div class="txt-box">
+                                <span>Advanced</span>
+                                <h5>Assasin Creed</h5>
+                            </div>
+                            <a href="#" class="link-class">EXPLORE</a>
+                        </div>
+                        <div class="box">
+                            <div class="img-box">
+                                <img src="imgs/top-game-06.jpg">
+                            </div>
+                            <div class="txt-box">
+                                <span>Advanced</span>
+                                <h5>Assasin Creed</h5>
+                            </div>
+                            <a href="#" class="link-class">EXPLORE</a>
+                        </div>
+                    </div>
+                </div>
+             </div>
+             <!--categories-->
+             <div class="categories">
+                <div class="container">
+                    <div class="cat-txt">
+                        <h6>PokeTrove Treasure Room</h6>
+                        <h1>Featured Chests</h1>
+                    </div>
+                    <div class="cat-boxs">
+                        <div class="box">
+                            <h4>Action</h4>
+                            <img src="imgs/categories-01.jpg">
+                        </div>
+                        <div class="box">
+                            <h4>Action</h4>
+                            <img src="imgs/categories-02.jpg">
+                        </div>
+                        <div class="box">
+                            <h4>Action</h4>
+                            <img src="imgs/categories-03.jpg">
+                        </div>
+                        <div class="box">
+                            <h4>Action</h4>
+                            <img src="imgs/categories-04.jpg">
+                        </div>
+                        <div class="box">
+                            <h4>Action</h4>
+                            <img src="imgs/categories-05.jpg">
+                        </div>
+                    </div>
+                </div>
+             </div>
+             <div class="news">
+                <div class="container">
+                    <div class="left">
+                        <h5>OUR SHOP</h5>
+                        <h3>Go Pre-Order Buy & Get Best <span>Prices</span> For You!</h3>
+                        <p>Lorem ipsum dolor consectetur adipiscing, sed do eiusmod tempor incididunt.</p>
+                        <div class="link"><a href="#" class="link-class">SHOP NOW</a></div>
+                    </div>
+                    <div class="right">
+                        <h5>NEWSLETTER</h5>
+                        <h3>Get Up To $100 Off Just Buy <span>Subscribe</span> News letter!</h3>
+                        <form>
+                            <input ype="text" placeholder="Your email...">
+                            <button>SUBSCRIBE NOW</button>
+                        </form>
+                    </div>
+                </div>
+             </div>
+             <div class="footer">
+                <p>Copyright &copy; 2048 LUGX Gaming Company. All rights reserved.    Design: TemplateMo</p>
+             </div>
+            <script src="main.js">
+            </script>
+        </body>
+</html>

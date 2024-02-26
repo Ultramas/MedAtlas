@@ -1,0 +1,70 @@
+
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{user.username}}'s Friend Requests</title>
+      {% if current_theme %}
+    {% if current_theme.file %}
+        <style>
+            body {
+        background-image: url("{{ current_theme.file.url }}");
+        background-size: cover;
+        background-attachment: fixed;
+            }
+        </style>
+    {% else %}
+        <p>Error: Current theme does not have an image.</p>
+    {% endif %}
+{% else %}
+    <p>Error: No current theme found.</p>
+{% endif %}
+</head>
+<body>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<h1>Incoming Friend Requests:</h1>
+{% for request in pending_requests %}
+    <p>{{ request.sender.username }} wants to be friends!</p>
+    <a href="{% url 'showcase:accept_friend_request' request.id %}">Accept</a>
+    <a href="{% url 'showcase:decline_friend_request' request.id %}">Decline</a>
+{% endfor %}
+
+<h1>Outgoing Friend Requests:</h1>
+{% for request in outgoing_requests %}
+    <p style="color: black;">You sent a friend request to {{ request.receiver.username }}.</p>
+{% endfor %}
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+  setInterval(function(){
+   $.ajax({
+      url: '/friend_requests',
+      headers: {'X-Requested-With': 'XMLHttpRequest'},
+      success: function(data) {
+        $('#friendRequestForm').html(data);
+      }
+    });
+  }, 5000); // specify the interval in milliseconds, e.g., 5000 for 5 seconds
+});
+</script>
+
+
+</body>
+</html>
+{% endblock %}

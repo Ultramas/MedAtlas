@@ -1,5 +1,7 @@
+import string
 import uuid
 from uuid import uuid4
+from venv import logger
 
 from PIL import Image
 # from django.db.models.signals import post_save
@@ -108,6 +110,7 @@ LEVEL = (
     ('L', 'Legendary'),
     ('U', 'Ultimate'),
 )
+
 PRACTICE = (
     ('P', 'Practice'),
     ('R', 'Real'),
@@ -119,6 +122,24 @@ MEMBERSHIP_TIER = (
     ('E', 'Emerald'),
     ('D', 'Diamond'),
     ('?', '???'),
+)
+
+BLACKJACK_OUTCOME = (
+    ('W', 'Win'),
+    ('L', 'Lose'),
+    ('D', 'Draw'),
+    ('B', 'BlackJack'),
+)
+
+GAMETYPE = (
+    ('T', 'Traditional'),
+    ('C', 'Club'),
+)
+
+GAMEHUB_CHOICES = (
+    ('F', 'Featured'),
+    ('P', 'Popular'),
+    ('N', 'New'),
 )
 
 
@@ -318,6 +339,73 @@ class PollQuestion(models.Model):
     class Meta:
         verbose_name = "Poll Question"
         verbose_name_plural = "Poll Questions"
+
+
+class Inventory(models.Model):
+    """Model for sharing ideas and getting user feedback"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200, verbose_name="Inventory Name",
+                            help_text="Name your inventory. Leave blank to use (your name)'s inventory", blank=True,
+                            null=True)
+    image = models.ImageField(help_text='Inventory Image.')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.user)
+
+    def save(self, *args, **kwargs):
+        if not self.name:
+            self.name = f"{self.user}'s inventory"
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Player Inventory"
+        verbose_name_plural = "Player Inventories"
+
+
+class InventoryObject(models.Model):
+    """Model for sharing ideas and getting user feedback"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, blank=True, null=True)
+    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    choice_text = models.CharField(max_length=200, verbose_name='Choice Text', blank=True, null=True)
+    image = models.ImageField(blank=True, null=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.user) + "'s " + str(self.choice)
+
+    def save(self, *args, **kwargs):
+        if self.choice:
+            self.choice_text = self.choice.choice_text
+            self.image = self.choice.file
+            self.image_length = self.choice.image_length
+            self.image_width = self.choice.image_width
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Player Inventory Object"
+        verbose_name_plural = "Player Inventory Objects"
 
 
 class Vote(models.Model):
@@ -1084,7 +1172,8 @@ class CurrencyMarket(models.Model):
     slug = models.SlugField()
     unit_ratio = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     deal = models.BooleanField(default=False)
-    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, blank=True, null=True)  # can use for cataloging products
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, blank=True,
+                             null=True)  # can use for cataloging products
     flavor_text = models.CharField(max_length=200)
     file = models.FileField(null=True, verbose_name='Sprite')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -1131,7 +1220,8 @@ class CurrencyOrder(models.Model):
     ref_code = models.CharField(max_length=20, blank=True, null=True)
     slug = models.SlugField()
     items = models.OneToOneField(CurrencyMarket, on_delete=models.CASCADE)
-    itemhistory = models.ForeignKey(CurrencyMarket, on_delete=models.CASCADE, verbose_name="Order history", null=True, related_name='currency_item_history')
+    itemhistory = models.ForeignKey(CurrencyMarket, on_delete=models.CASCADE, verbose_name="Order history", null=True,
+                                    related_name='currency_item_history')
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField(blank=True, null=True)
     ordered = models.BooleanField(default=False)
@@ -1227,7 +1317,7 @@ class CurrencyFullOrder(models.Model):
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField()
     ordered = models.BooleanField(default=False)
-    #billing_address = models.ForeignKey('Address', related_name='billing-address', on_delete=models.SET_NULL,
+    # billing_address = models.ForeignKey('Address', related_name='billing-address', on_delete=models.SET_NULL,
     #                                    blank=True, null=True)
     payment = models.ForeignKey('Payment', on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, blank=True, null=True)
@@ -1288,68 +1378,38 @@ class CurrencyFullOrder(models.Model):
         verbose_name_plural = "Total Currency Orders"
 
 
-class Card(models.Model):
-    RANK_CHOICES = (
-        ('A', 'Ace'),
-        ('2', '2'),
-        ('3', '3'),
-        ('4', '4'),
-        ('5', '5'),
-        ('6', '6'),
-        ('7', '7'),
-        ('8', '8'),
-        ('9', '9'),
-        ('10', '10'),
-        ('J', 'Jack'),
-        ('Q', 'Queen'),
-        ('K', 'King'),
-    )
-    SUIT_CHOICES = (
-        ('♠', 'Spades'),
-        ('♥', 'Hearts'),
-        ('♦', 'Diamonds'),
-        ('♣', 'Clubs'),
-    )
-
-    rank = models.CharField(max_length=2, choices=RANK_CHOICES)
-    suit = models.CharField(max_length=1, choices=SUIT_CHOICES)
-    card_design = models.ImageField(blank=True, null=True)
-    is_hidden = models.BooleanField(default=False)
-
+class GameHub(models.Model):
+    name = models.CharField(max_length=200, verbose_name="Game Name")
+    type = models.CharField(choices=GAMETYPE, max_length=1, blank=True, null=True)
+    filter = models.CharField(choices=GAMEHUB_CHOICES, max_length=1, blank=True, null=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return f"{self.rank}{self.suit}"
+        return str(self.name)
+
+    class Meta:
+        verbose_name = "Game Hub"
+        verbose_name_plural = "Game Hub"
 
 
-class Hand(models.Model):
-    cards = models.ManyToManyField(Card)
-    is_hidden = models.BooleanField(default=False)
+class BlackJack(models.Model):
+    name = models.CharField(max_length=200, verbose_name="BlackJack Game Name")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return ", ".join([str(card) for card in self.cards.all()])
+        return str(self.name)
 
-    def get_value(self):
-        total_value = 0
-        has_ace = False
-
-        for card in self.cards.all():
-            if card.rank in ['J', 'Q', 'K']:
-                card_value = 10
-            elif card.rank == 'A':
-                has_ace = True
-                card_value = 11  # Initially assume 11 for Ace
-            else:
-                # Convert numeric ranks to integers
-                card_value = int(card.rank)
-
-            total_value += card_value
-
-        # Adjust Ace value if necessary to avoid busting:
-        while has_ace and total_value > 21:
-            total_value -= 10  # Change Ace value to 1
-            has_ace = False  # Only adjust once per Ace
-
-        return total_value
+    class Meta:
+        verbose_name = "BlackJack Game"
+        verbose_name_plural = "BlackJack Games"
 
 
 class SellerApplication(models.Model):
@@ -1357,7 +1417,8 @@ class SellerApplication(models.Model):
     last_name = models.CharField(max_length=100)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     age = models.DateField(verbose_name='Date of birth')
-    identification = models.FileField(help_text="Please provide a valid government-issued id (Passport, Driver's License, Birth Certificate, etc)")
+    identification = models.FileField(
+        help_text="Please provide a valid government-issued id (Passport, Driver's License, Birth Certificate, etc)")
     email = models.EmailField(help_text="Please input your email", unique=True)
     email_verified = models.BooleanField(default=False)
 
@@ -2023,7 +2084,6 @@ class Titled(models.Model):
         super().save(*args, **kwargs)
 
 
-
 class Meme(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
                              verbose_name="Meme Creator")
@@ -2588,7 +2648,7 @@ class BanAppealBackgroundImage(models.Model):
 #    verbose_name = "Background Image"
 #    verbose_name_plural = "Background Images"
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete, pre_delete
 
 # class PublicProfile(models.Model):
 # user = models.OneToOneField(User, related_name='user', on_delete=models.CASCADE)
@@ -2612,15 +2672,92 @@ from django.db.models.signals import post_save
 
 from django.contrib.auth import get_user_model
 
-
 # link the profiledetails page to settings
+from django.db.models import Q
 
 
-# Create your models here.
+def get_friends(self):
+    from .models import FriendRequest  # Import here to avoid circular import
+    accepted_friend_requests = FriendRequest.objects.filter(
+        Q(sender=self, status=FriendRequest.ACCEPTED) | Q(receiver=self, status=FriendRequest.ACCEPTED))
+    friends = set()
+    for friend_request in accepted_friend_requests:
+        if friend_request.sender == self:
+            friends.add(friend_request.receiver)
+        else:
+            friends.add(friend_request.sender)
+    print('friends here')
+    return friends
+
+
+# Add the get_friends method to the User model
+User.add_to_class('get_friends', get_friends)
+
+
+class FriendRequest(models.Model):
+    PENDING = 0
+    ACCEPTED = 1
+    DECLINED = 2
+
+    STATUS_CHOICES = (
+        (PENDING, 'Pending'),
+        (ACCEPTED, 'Accepted'),
+        (DECLINED, 'Declined'),
+    )
+
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_requests')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_requests')
+    status = models.IntegerField(choices=STATUS_CHOICES, default=PENDING)
+
+    def __str__(self):
+        return f'{self.sender.username} -> {self.receiver.username}: {self.get_status_display()}'
+
+    def get_profile_url(self, current_user):
+        if current_user == self.sender or current_user == self.receiver:
+            profile = ProfileDetails.objects.filter(user=current_user).first()
+            if profile:
+                return reverse('showcase:profile', args=[str(profile.pk)])
+
+    # Handle the case where the current user is neither the sender nor the receiver
+
+    class Meta:
+        verbose_name = "Friend Request"
+        verbose_name_plural = "Friend Requests"
+        unique_together = ('sender', 'receiver')
+
+
+class Friend(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    friend = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friends')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.user) + " is friends with " + str(self.friend) + "!"
+
+    @receiver(post_save, sender=FriendRequest)
+    def handle_friend_request(sender, instance, created, **kwargs):
+        if instance.status == FriendRequest.ACCEPTED:
+            Friend.objects.get_or_create(user=instance.sender, friend=instance.receiver)
+        elif instance.status == FriendRequest.DECLINED:
+            Friend.objects.filter(
+                (Q(user=instance.sender) & Q(friend=instance.receiver)) |
+                (Q(user=instance.receiver) & Q(friend=instance.sender))
+            ).delete()
+
+    post_save.connect(handle_friend_request, sender=FriendRequest)
+
+    class Meta:
+        unique_together = ('user', 'friend')
+
+
 class Room(models.Model):
     name = models.CharField(max_length=1000)
     signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='room',
                                        verbose_name="Room Creator")
+
+    time = models.DateTimeField(default=timezone.now, blank=True)
+    public = models.BooleanField(default=False, verbose_name="Make Public?")
+    logo = models.FileField(blank=True, null=True, verbose_name="Logo")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2632,6 +2769,26 @@ class Room(models.Model):
             return str(self.name)
         else:
             return str('Guest')
+
+    def user_can_join(self, user):
+        if self.public:
+            print('public server')
+            return True
+        else:
+            print('private server')
+            # Only allow signed-in users to join if the room is not public
+            if user.is_authenticated:
+                # Allow the room creator to join the room
+                if self.signed_in_user == user:
+                    return True
+
+                # Check if there's an accepted friend request between the user and the room creator
+                return FriendRequest.objects.filter(
+                    Q(sender=self.signed_in_user, receiver=user, status=FriendRequest.ACCEPTED) |
+                    Q(sender=user, receiver=self.signed_in_user, status=FriendRequest.ACCEPTED)
+                ).exists()
+            else:
+                return False
 
     def get_absolute_url(self):
         # Construct the URL for the room detail page
@@ -2654,7 +2811,7 @@ class Message(models.Model):
                                        verbose_name="User")
     room = models.CharField(max_length=1000000)
     message_number = models.PositiveIntegerField(default=0, editable=False)
-    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    file = models.FileField(upload_to='images/', null=True, blank=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
                                                verbose_name="image length")
@@ -2668,7 +2825,10 @@ class Message(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return str(self.value)
+        if self.value:
+            return str(self.value) + " in " + str(self.room)
+        else:
+            return "blank message in " + str(self.room)
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -2929,6 +3089,54 @@ class UserProfile(models.Model):
         verbose_name_plural = "User Profiles"
 
 
+from django.db.models import signals
+from django.db.transaction import atomic
+
+
+class Wager(models.Model):
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    amount = models.IntegerField(verbose_name='Bet Amount')
+    outcome = models.CharField(max_length=1, choices=BLACKJACK_OUTCOME, default=None, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        print('bet: ' + str(self.amount))
+        print('currency: ' + str(self.user_profile.currency_amount))
+        with atomic():
+            # Check for negative bets and insufficient funds
+            if self.amount <= 0:
+                print('put a positive amount')
+                raise ValidationError("Bet amount must be positive.")
+            if self.user_profile.currency_amount < self.amount:
+                print('insufficient funds')
+                raise ValidationError("Insufficient funds for this bet. You have {}, but the bet is {}.".format(
+                    self.user_profile.currency_amount, self.amount))
+
+            # Deduct amount from user currency (within atomic block)
+            self.user_profile.currency_amount -= self.amount
+            self.user_profile.save()  # Save user profile first for potential integrity checks
+
+            # Save wager after user profile (for cleaner error handling)
+            super().save(*args, **kwargs)
+
+    def resolve(self, outcome):
+        self.outcome = outcome
+        win_multiplier = 1.5 if outcome == 'B' else 1.0  # Handle Blackjack bonus
+        if outcome in ('W', 'B'):  # Update currency only on wins (including Blackjack)
+            self.user_profile.currency_amount += self.amount * win_multiplier
+        elif outcome == 'D':  # Refund on ties
+            self.user_profile.currency_amount += self.amount
+        self.user_profile.save()
+        self.save()
+
+
+# Connect pre-save signal to print `self.amount` before atomic block
+def print_amount_before_save(sender, instance, **kwargs):
+    print("Wager amount before atomic block:", instance.amount)
+
+
+signals.pre_save.connect(print_amount_before_save, sender=Wager)
+
 """class Settings(models.Model):
  username = models.OneToOneField(User, on_delete=models.CASCADE)
  #password =
@@ -3044,6 +3252,9 @@ class EBackgroundImage(models.Model):
         verbose_name_plural = "Ecommerce Background Images"
 
 
+from django.utils.crypto import get_random_string
+
+
 class TradeItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=100)
@@ -3083,15 +3294,37 @@ class TradeItem(models.Model):
         verbose_name_plural = "Trade Items"
 
 
+class TradeOfferManager(models.Manager):
+    def get_queryset(self, request):
+        return super().get_queryset().select_related('trade_items').filter(trade_items__user=request.user)
+
+
+from django.utils.text import slugify
+
+
 class TradeOffer(models.Model):
+    PENDING = 0
+    ACCEPTED = 1
+    DECLINED = 2
+
+    TRADE_STATUS = (
+        (PENDING, 'Pending'),
+        (ACCEPTED, 'Accepted'),
+        (DECLINED, 'Declined')
+    )
+    title = models.CharField(max_length=100, help_text="Name of your trade offer.")
     trade_items = models.ManyToManyField(TradeItem)
     estimated_trading_value = models.DecimalField(
         help_text="Estimated Market Price of Trade Item (will be displayed to potential traders)", decimal_places=2,
-        max_digits=4)
+        max_digits=12)
     message = models.CharField(max_length=2000, blank=True, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Trader')
-    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Receiver')
+    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Receiver', blank=True,
+                              null=True, help_text="Optional", verbose_name="Recipient")
+    trade_status = models.IntegerField(choices=TRADE_STATUS, default=PENDING)
+    slug = models.SlugField(unique=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    quantity = models.IntegerField(default=1)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -3100,17 +3333,191 @@ class TradeOffer(models.Model):
 
     def __str__(self):
         item_titles = ", ".join([item.title for item in self.trade_items.all()])
-        return f'Transaction: {item_titles} between {self.user1.username} and {self.user2.username}'
-
-    def __str__(self):
-        if self.user:
-            return self.trade_item + " by " + self.user.username
+        if self.user and self.user2:
+            return f'Offer: {item_titles} between {self.user.username} and {self.user2.username}'
+        elif self.user:
+            return f'Offer: {item_titles} offered by {self.user.username}'
         else:
-            return self.trade_item + " by PokeTrove"
+            return f'Offer: {item_titles} fulfilled by PokeTrove'
+
+    def get_profile_url(self):
+        return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
+
+    def get_absolute_url(self):
+
+        return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
+
+    def save(self, *args, **kwargs):
+        # Check if the trade_status has been set to ACCEPTED
+        if self.trade_status == self.ACCEPTED and self.pk is not None:
+            # Create a new Trade object
+            trade = Trade.objects.create()  # Create a new Trade instance
+
+            # Add this TradeOffer instance to the trade's trade_offers
+            trade.trade_offers.add(self)
+
+            # Add the users involved in this TradeOffer to the trade's users
+            trade.users.add(self.user)
+            if self.user2:
+                trade.users.add(self.user2)
+
+            # Access the related tradeoffer and set user2
+            if self.offered_trade_items:
+                trade_offer = self.offered_trade_items
+                user = trade_offer.user
+                self.user2 = user
+
+            # Generate a unique slug
+            if not self.slug:
+                slug = trade_offer.slug
+                self.slug = slug
+
+            # If it's a new instance, set the wanted_trade_items based on the related offer's items
+            if self.pk is None:
+                related_offer = self.offered_trade_items
+                trade_items = related_offer.trade_items.all()
+                self.wanted_trade_items.set(trade_items)
+
+            trade.save()
+
+        super().save(*args, **kwargs)
+
+    def get_trade_item_details(self):
+        details = []
+        for item in self.trade_items.all():
+            detail = {
+                'title': item.title,
+                'category': item.category,
+                'specialty': item.specialty,
+                'condition': item.condition,
+                'label': item.label,
+                'description': item.description,
+                'image': item.image.url if item.image else None,
+            }
+            details.append(detail)
+        return details
 
     class Meta:
         verbose_name = "Trade Offer"
         verbose_name_plural = "Trade Offers"
+
+
+class RespondingTradeOffer(models.Model):
+    PENDING = 0
+    ACCEPTED = 1
+    DECLINED = 2
+
+    TRADE_STATUS = (
+        (PENDING, 'Pending'),
+        (ACCEPTED, 'Accepted'),
+        (DECLINED, 'Declined')
+    )
+    wanted_trade_items = models.ManyToManyField(TradeItem)
+    offered_trade_items = models.ForeignKey(TradeOffer, on_delete=models.CASCADE, blank=True, null=True)
+    estimated_trading_value = models.DecimalField(
+        help_text="Estimated Market Price of Trade Item (will be displayed to potential traders)", decimal_places=2,
+        max_digits=12)
+    message = models.CharField(max_length=2000, blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Dealer', blank=True, null=True)
+    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Recipient', blank=True,
+                              null=True, help_text="Optional", verbose_name="Recipient")
+    slug = models.SlugField(unique=True, editable=False, blank=True, null=True)
+    trade_status = models.IntegerField(choices=TRADE_STATUS, default=PENDING)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    quantity = models.IntegerField(default=1)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
+
+    def __str__(self):
+        item_titles = ", ".join([item.title for item in self.offered_trade_items.all()])
+        if self.user and self.user2:
+            return f'Offer: {item_titles} between {self.user.username} and {self.user2.username}'
+        elif self.user:
+            return f'Offer: {item_titles} offered by {self.user.username}'
+        else:
+            return f'Offer: {item_titles} fulfilled by PokeTrove'
+
+    def get_profile_url(self):
+        return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
+
+    def get_absolute_url(self):
+
+        return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
+
+    def save(self, *args, **kwargs):
+        # Check if the trade_status has been set to ACCEPTED
+        if self.trade_status == self.ACCEPTED and self.pk is not None:
+            # Create a new Trade object
+            trade = Trade.objects.create()  # Create a new Trade instance
+
+            # Add this TradeOffer instance to the trade's trade_offers
+            trade.trade_offers.add(self)
+
+            # Add the users involved in this TradeOffer to the trade's users
+            trade.users.add(self.user)
+            if self.user2:
+                trade.users.add(self.user2)
+            if not self.slug:
+                self.slug = TradeOffer.slug
+            # Access the related tradeoffer and set user2
+            if self.offered_trade_items:
+                self.user2 = self.offered_trade_items.user
+
+            if self.pk is None:  # Check if it's a new instance
+                # Access the related TradeOffer
+                related_offer = self.offered_trade_items  # Assuming a ForeignKey field named trade_offer
+
+                # Set the wanted_trade_items based on the related offer's items
+                self.wanted_trade_items.set(related_offer.trade_items.all())
+
+            trade.save()
+
+        super().save(*args, **kwargs)
+
+    def get_trade_item_details(self):
+        details = []
+        for item in self.trade_items.all():
+            detail = {
+                'title': item.title,
+                'category': item.category,
+                'specialty': item.specialty,
+                'condition': item.condition,
+                'label': item.label,
+                'description': item.description,
+                'image': item.image.url if item.image else None,
+            }
+            details.append(detail)
+        return details
+
+    class Meta:
+        verbose_name = "Trade Offer Response"
+        verbose_name_plural = "Response Trade Offer Responses"
+
+
+class Trade(models.Model):
+    trade_offers = models.ManyToManyField(TradeOffer)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='traders')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
+
+    def __str__(self):
+        offer_titles = " & ".join([str(offer) for offer in self.trade_offers.all()])
+        user_names = " & ".join([user.username for user in self.users.all()])
+        return f'{offer_titles} by {user_names}'
+
+    def get_profile_url(self):
+        return [reverse('showcase:profile', args=[str(user.pk)]) for user in self.users.all()]
+
+    class Meta:
+        verbose_name = "Trade"
+        verbose_name_plural = "Trades"
 
 
 class ChatBackgroundImage(models.Model):
@@ -4346,4 +4753,3 @@ class ProfileDetails(models.Model):
     class Meta:
         verbose_name = "Account Profile"
         verbose_name_plural = "Account Profiles"
-

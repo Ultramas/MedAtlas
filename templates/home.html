@@ -1,23 +1,41 @@
-
-{% extends 'base.html' %}
+{% extends 'chatbase.html' %}
 {% load static %}
 
-
-
 {% block content %}
-
 
     {% for ChatBackgroundImage in Titles %}
       {% if ChatBackgroundImage.page == 'home.html' %}
         <title>{{ ChatBackgroundImage.overtitle }}</title>
       {% endif %}
-  {% endfor %}
-
-
-
-
+    {% endfor %}
 
 <html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.friend-list {
+  float: left;
+  position: fixed;
+  width: 200px; /* Adjust as needed */
+  background-color: #f1f1f1; /* Or desired color */
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.chat-area {
+  margin-left: 220px; /* Adjust based on friend list width */
+}
+
+/* Styles for friend list elements (username headers) */
+.friend-list h2 {
+  /* Add desired styles */
+}
+
+/* Styles for chat interface elements within .chat-area */
+.chat-area {
+  /* Add desired styles */
+}
+
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
@@ -126,14 +144,24 @@
       {% endif %}
 {% endfor %}
 
-<div class = home>
-  <br>
-<br>
-<br>
-   <div class = "interface">
-  <div align="center">
-    <h2 class = "tip">Quantum Chat Interface</h2>
+<div class="home">
+  <div class="friend-list">
+    {% for Friend in Friends %}
+      <h2>{{ Friend.user }}</h2>
+    {% empty %}
+      <h2>No friends found.</h2>
+    {% endfor %}
   </div>
+
+  <div class="chat-area">
+    <br>
+    <br>
+    <br>
+    <div class = "interface">
+      <div align="center">
+        <h2 class = "tip">Quantum Chat Interface</h2>
+      </div>
+
    </div>
 
   <div class="container">

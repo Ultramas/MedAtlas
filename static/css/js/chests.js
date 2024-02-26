@@ -81,27 +81,67 @@ const showNotice = (text) => {
 
 }
 
+
 const determineWinner = async () => {
-    let playerValue = await calcHandValue(playerHand);
-    let dealerValue = await calcHandValue(dealerHand);
-    let text = `
+  let playerValue = await calcHandValue(playerHand);
+  let dealerValue = await calcHandValue(dealerHand);
+  let text = `
 Your hand is ${playerHand} with a value of ${playerValue}.
 The dealers hand is ${dealerHand} with a value of ${dealerValue}.
-${playerValue > dealerValue ? "<em>You win!</em>" : "<em>Dealer Wins!</em>"}
-    `
-    showNotice(text)
+`;
+
+
+  // Call updateWager with extracted and predefined wageId
+  updateWager(currentWagerId, outcome); // Pass wagerId and outcome
+  let outcome;
+  console.log("playerValue before log and call:", playerValue);
+  console.log("dealerValue before log and call:", dealerValue);
+  console.log("playerValue:", playerValue, "dealerValue:", dealerValue);
+  if (playerValue > dealerValue) {
+    text += "<em>You win!</em>";
+    outcome = "PLAYER_WIN";
+  } else {
+    text += "<em>Dealer Wins!</em>";
+    outcome = "DEALER_WIN";
+  }
+
+  showNotice(text);
+};
+
+// Define the updateWager function (use the version with Django integration explained previously)
+function updateWager(wagerId, outcome) {
+  console.log("updateWager called with wagerId:", wagerId, "and outcome:", outcome);
+  $.ajax({
+    url: '/update_wager/', // Replace with your Django view URL
+    type: 'POST',
+    data: {
+      'wager_id': /* Retrieve wager ID from game state */,
+      'outcome': outcome,
+    },
+    success: function(response) {
+      console.log("Currency updated:", response);
+    },
+    error: function(error) {
+      console.error("Error updating currency:", error);
+    }
+  });
 }
+determineWinner(outcome);
 
 const hitDealer = async () => {
     const hiddenCard = dealer.children[0];
     hiddenCard.classList.remove('back');
     hiddenCard.innerHTML = dealerHand[0];
 
+    // Add the delay here:
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+
+
     let handValue = await calcHandValue(dealerHand);
 
     while (handValue <= 16) {
         // Delay before drawing the next card
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+        await new Promise(resolve => setTimeout(resolve, 500)); // 1 second delay
 
         const card = await chooseRandomCard();
         dealerHand.push(card);
@@ -112,13 +152,20 @@ const hitDealer = async () => {
         handValue = await calcHandValue(dealerHand);
     }
 
+    let noticeText;
+
     if (handValue === 21) {
-        showNotice("Dealer has 21! Dealer wins!")
+        noticeText = "Dealer has 21! Dealer wins!";
     } else if (handValue > 21) {
-        showNotice("Dealer bust! You win!")
+        noticeText = "Dealer bust! You win!";
     } else {
-        determineWinner()
+        determineWinner();
+        return; // Exit the function if winner is determined by comparison
     }
+
+    // Delay before showing the notice:
+    await new Promise(resolve => setTimeout(() => showNotice(noticeText), 0500));
+
 };
 
 
@@ -136,8 +183,22 @@ const hitPlayer = async () => {
         hitDealer();  // Trigger dealer's turn directly
     }
     else {
+        const bustOverlay = document.createElement("div");
+        bustOverlay.style.position = "absolute";
+        bustOverlay.style.top = 0;
+        bustOverlay.style.left = 0;
+        bustOverlay.style.width = "100%";
+        bustOverlay.style.height = "100%";
+        bustOverlay.style.backgroundColor = "rgba(0, 0, 0, 0)";
+        bustOverlay.style.pointerEvents = "none";
+
+        document.body.appendChild(bustOverlay);
+
         let text = `Bust! Your hand is ${playerHand} with a value of ${handValue}.`
+        await new Promise(resolve => setTimeout(resolve, 50)); // Wait for 0.05 seconds
+        setTimeout(() => document.body.removeChild(bustOverlay), 500);
         showNotice(text)
+
     }
 }
 
@@ -178,3 +239,25 @@ nextHand.addEventListener('click', play)
 
 shuffleDecks(3)
 play()
+
+
+
+function fetchUserCurrency() {
+    $.ajax({
+        url: "/api/user/currency/", // Replace with your API endpoint URL
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            displayCurrency(data.currency_amount, data.currency_symbol);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            // Handle errors gracefully
+            console.error("Error fetching user currency:", errorThrown);
+        }
+    });
+}
+
+function displayCurrency(amount, symbol) {
+    $("#currency-amount").text(amount.toLocaleString());
+    $("#currency-symbol").text(symbol);
+}
