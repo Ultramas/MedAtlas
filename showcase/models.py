@@ -3257,7 +3257,7 @@ from django.utils.crypto import get_random_string
 
 class TradeItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=100, blank=True, null=True)
     fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
@@ -3347,55 +3347,6 @@ class TradeOffer(models.Model):
 
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
 
-    def save(self, *args, **kwargs):
-        # Check if the trade_status has been set to ACCEPTED
-        if self.trade_status == self.ACCEPTED and self.pk is not None:
-            # Create a new Trade object
-            trade = Trade.objects.create()  # Create a new Trade instance
-
-            # Add this TradeOffer instance to the trade's trade_offers
-            trade.trade_offers.add(self)
-
-            # Add the users involved in this TradeOffer to the trade's users
-            trade.users.add(self.user)
-            if self.user2:
-                trade.users.add(self.user2)
-
-            # Access the related tradeoffer and set user2
-            if self.offered_trade_items:
-                trade_offer = self.offered_trade_items
-                user = trade_offer.user
-                self.user2 = user
-
-            # Generate a unique slug
-            if not self.slug:
-                slug = trade_offer.slug
-                self.slug = slug
-
-            # If it's a new instance, set the wanted_trade_items based on the related offer's items
-            if self.pk is None:
-                related_offer = self.offered_trade_items
-                trade_items = related_offer.trade_items.all()
-                self.wanted_trade_items.set(trade_items)
-
-            trade.save()
-
-        super().save(*args, **kwargs)
-
-    def get_trade_item_details(self):
-        details = []
-        for item in self.trade_items.all():
-            detail = {
-                'title': item.title,
-                'category': item.category,
-                'specialty': item.specialty,
-                'condition': item.condition,
-                'label': item.label,
-                'description': item.description,
-                'image': item.image.url if item.image else None,
-            }
-            details.append(detail)
-        return details
 
     class Meta:
         verbose_name = "Trade Offer"
@@ -3431,66 +3382,6 @@ class RespondingTradeOffer(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
 
-    def __str__(self):
-        item_titles = ", ".join([item.title for item in self.offered_trade_items.all()])
-        if self.user and self.user2:
-            return f'Offer: {item_titles} between {self.user.username} and {self.user2.username}'
-        elif self.user:
-            return f'Offer: {item_titles} offered by {self.user.username}'
-        else:
-            return f'Offer: {item_titles} fulfilled by PokeTrove'
-
-    def get_profile_url(self):
-        return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
-
-    def get_absolute_url(self):
-
-        return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
-
-    def save(self, *args, **kwargs):
-        # Check if the trade_status has been set to ACCEPTED
-        if self.trade_status == self.ACCEPTED and self.pk is not None:
-            # Create a new Trade object
-            trade = Trade.objects.create()  # Create a new Trade instance
-
-            # Add this TradeOffer instance to the trade's trade_offers
-            trade.trade_offers.add(self)
-
-            # Add the users involved in this TradeOffer to the trade's users
-            trade.users.add(self.user)
-            if self.user2:
-                trade.users.add(self.user2)
-            if not self.slug:
-                self.slug = TradeOffer.slug
-            # Access the related tradeoffer and set user2
-            if self.offered_trade_items:
-                self.user2 = self.offered_trade_items.user
-
-            if self.pk is None:  # Check if it's a new instance
-                # Access the related TradeOffer
-                related_offer = self.offered_trade_items  # Assuming a ForeignKey field named trade_offer
-
-                # Set the wanted_trade_items based on the related offer's items
-                self.wanted_trade_items.set(related_offer.trade_items.all())
-
-            trade.save()
-
-        super().save(*args, **kwargs)
-
-    def get_trade_item_details(self):
-        details = []
-        for item in self.trade_items.all():
-            detail = {
-                'title': item.title,
-                'category': item.category,
-                'specialty': item.specialty,
-                'condition': item.condition,
-                'label': item.label,
-                'description': item.description,
-                'image': item.image.url if item.image else None,
-            }
-            details.append(detail)
-        return details
 
     class Meta:
         verbose_name = "Trade Offer Response"

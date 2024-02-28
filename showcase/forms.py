@@ -942,7 +942,7 @@ from .models import RespondingTradeOffer, TradeOffer
 class RespondingTradeOfferForm(forms.ModelForm):
     class Meta:
         model = RespondingTradeOffer
-        fields = ['offered_trade_items', 'message']
+        fields = ['message']
 
 
 
