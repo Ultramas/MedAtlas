@@ -36,8 +36,54 @@
   <h2 class="banh" style="background: none;
   color: rgba(255, 255, 255, 0.637);
   text-shadow: 10px 10px 20px rgba(0, 0, 0, 0.2);">New Trading Item</h2>
-        {% csrf_token %}
-        {{ form.as_p }}
+{% csrf_token %}
+    {{ form.non_field_errors }}
+    <div>
+        {{ form.title.errors }}
+        <label for="{{ form.title.id_for_label }}">Title:</label>
+        {{ form.title }}
+    </div>
+    <div>
+        <br>
+        {{ form.category.errors }}
+        <label for="{{ form.category.id_for_label }}">Category:</label>
+        {{ form.category }}
+    </div>
+    <div>
+        <br>
+        {{ form.specialty.errors }}
+        <label for="{{ form.specialty.id_for_label }}">Specialty:</label>
+        {{ form.specialty }}
+    </div>
+    <div>
+        <br>
+        {{ form.condition.errors }}
+        <label for="{{ form.condition.id_for_label }}">Condition:</label>
+        {{ form.condition }}
+    </div>
+    <div>
+        <br>
+        {{ form.slug.errors }}
+        <label for="{{ form.slug.id_for_label }}">Slug:</label>
+        {{ form.slug }}
+    </div>
+    <div>
+        <br>
+        {{ form.status.errors }}
+        <label for="{{ form.status.id_for_label }}">Status:</label>
+        {{ form.status }}
+    </div>
+    <div>
+        <br>
+        {{ form.description.errors }}
+        <label for="{{ form.description.id_for_label }}">Description:</label>
+        <div style="justify-content: center; display: flex; margin-left: auto; margin-right: auto;">{{ form.description }}</div>
+    </div>
+    <div>
+        <br>
+        {{ form.image.errors }}
+        <label for="{{ form.image.id_for_label }}">Image:</label>
+        <div style="justify-content: center; display: flex; margin-left: auto; margin-right: auto;"> {{ form.image }}</div>
     <button class="btn btn-success my-3" type="submit">List Item</button>
     </form>
     <br>
