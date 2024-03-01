@@ -3348,16 +3348,6 @@ class TradeOffer(models.Model):
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-                print("Title:", self.title)  # Print the title
-                self.slug = slugify(self.title)
-                print("Slug after slugify:", self.slug)  # Print the slug after slugify
-
-                while TradeOffer.objects.filter(slug=self.slug).exists():
-                    print("Slug already exists. Regenerating...")
-                    self.slug = f"{self.slug}-{get_random_string(length=32)}"
-                    print("Slug after regeneration:", self.slug)  # Print the slug after regeneration
-
         # Check if the trade_status has been set to ACCEPTED
         if self.trade_status == self.ACCEPTED and self.pk is not None:
             # Create a new Trade object
@@ -3377,6 +3367,10 @@ class TradeOffer(models.Model):
                 user = trade_offer.user
                 self.user2 = user
 
+            # Generate a unique slug
+            if not self.slug:
+                slug = trade_offer.slug
+                self.slug = slug
 
             # If it's a new instance, set the wanted_trade_items based on the related offer's items
             if self.pk is None:
@@ -3418,14 +3412,13 @@ class RespondingTradeOffer(models.Model):
         (ACCEPTED, 'Accepted'),
         (DECLINED, 'Declined')
     )
-    wanted_trade_items = models.ForeignKey(TradeOffer, on_delete=models.CASCADE, blank=True, null=True)
-    offered_trade_items = models.ManyToManyField(TradeItem)
+    wanted_trade_items = models.ManyToManyField(TradeItem)
+    offered_trade_items = models.ForeignKey(TradeOffer, on_delete=models.CASCADE, blank=True, null=True)
     estimated_trading_value = models.DecimalField(
         help_text="Estimated Market Price of Trade Item (will be displayed to potential traders)", decimal_places=2,
         max_digits=12)
     message = models.CharField(max_length=2000, blank=True, null=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Dealer', blank=True, null=True,
-                             verbose_name="Dealer")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Dealer', blank=True, null=True)
     user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Recipient', blank=True,
                               null=True, help_text="Optional", verbose_name="Recipient")
     slug = models.SlugField(unique=True, editable=False, blank=True, null=True)
@@ -3439,8 +3432,13 @@ class RespondingTradeOffer(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
 
     def __str__(self):
-        item_titles = " ".join(self.offered_trade_items.values_list('title', flat=True))
-        return f"<{self.__class__.__name__}: {self.title} - {item_titles}>"
+        item_titles = ", ".join([item.title for item in self.offered_trade_items.all()])
+        if self.user and self.user2:
+            return f'Offer: {item_titles} between {self.user.username} and {self.user2.username}'
+        elif self.user:
+            return f'Offer: {item_titles} offered by {self.user.username}'
+        else:
+            return f'Offer: {item_titles} fulfilled by PokeTrove'
 
     def get_profile_url(self):
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
@@ -3450,18 +3448,6 @@ class RespondingTradeOffer(models.Model):
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
 
     def save(self, *args, **kwargs):
-
-        if self.offered_trade_items:
-            # Check if the user2 field in the related TradeOffer model is not None
-            if self.offered_trade_items.user2:
-                # Set the user field value in RespondingTradeOffer to the user2 field value
-                self.user = self.offered_trade_items.user2
-        if self.offered_trade_items:
-            if not self.user2:  # Only update if user2 is not already set
-                self.user2 = self.offered_trade_items.first().user
-                print("sent trade offer to initial trader")
-
-
         # Check if the trade_status has been set to ACCEPTED
         if self.trade_status == self.ACCEPTED and self.pk is not None:
             # Create a new Trade object
@@ -3477,6 +3463,9 @@ class RespondingTradeOffer(models.Model):
             if not self.slug:
                 self.slug = TradeOffer.slug
             # Access the related tradeoffer and set user2
+            if self.offered_trade_items:
+                self.user2 = self.offered_trade_items.user
+
             if self.pk is None:  # Check if it's a new instance
                 # Access the related TradeOffer
                 related_offer = self.offered_trade_items  # Assuming a ForeignKey field named trade_offer
@@ -3505,7 +3494,7 @@ class RespondingTradeOffer(models.Model):
 
     class Meta:
         verbose_name = "Trade Offer Response"
-        verbose_name_plural = "Trade Offer Responses"
+        verbose_name_plural = "Response Trade Offer Responses"
 
 
 class Trade(models.Model):
