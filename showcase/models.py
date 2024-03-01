@@ -3439,8 +3439,9 @@ class RespondingTradeOffer(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
 
     def __str__(self):
-        item_titles = " ".join(self.offered_trade_items.values_list('title', flat=True))
-        return f"<{self.__class__.__name__}: {self.title} - {item_titles}>"
+        # Assuming TradeItem's __str__ returns non-recursive information
+        item_titles = " ".join([str(item) for item in self.offered_trade_items.all()])
+        return f"<{self.__class__.__name__}: {self.slug} - {item_titles}>"
 
     def get_profile_url(self):
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
@@ -3450,17 +3451,16 @@ class RespondingTradeOffer(models.Model):
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
 
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Save the instance first
 
-        if self.offered_trade_items:
-            # Check if the user2 field in the related TradeOffer model is not None
-            if self.offered_trade_items.user2:
-                # Set the user field value in RespondingTradeOffer to the user2 field value
-                self.user = self.offered_trade_items.user2
-        if self.offered_trade_items:
-            if not self.user2:  # Only update if user2 is not already set
-                self.user2 = self.offered_trade_items.first().user
-                print("sent trade offer to initial trader")
-
+        if self.offered_trade_items.all():
+            # Assuming the first related TradeItem has the user2 field
+            first_trade_item = self.offered_trade_items.first()
+            if first_trade_item and first_trade_item.user2:
+                self.user = first_trade_item.user2
+                if not self.user2:
+                    self.user2 = first_trade_item.user
+                    print("sent trade offer to initial trader")
 
         # Check if the trade_status has been set to ACCEPTED
         if self.trade_status == self.ACCEPTED and self.pk is not None:
