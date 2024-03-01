@@ -1,19 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<form method="post">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    {{ form.offered_trade_items.errors }}
-    {{ form.offered_trade_items.label_tag }} {{ form.offered_trade_items }}
-    {{ form.message.errors }}
-    {{ form.message.label_tag }} {{ form.message }}
-    <input type="submit" value="Submit">
-</form>
+{% extends 'contactbase.html' %}
+{% load static %}
 
+{% block content %}
+<html>
+<head>
+    {% for ContactViewe in Titles %}
+      {% if ContactViewe.page == 'contact.html' %}
+    <title>{{ ContactViewe.overtitle }}</title>
+      {% endif %}
+    {% endfor %}
+</head>
+<body style="background: linear-gradient(rgba(0, 23, 45), rgba(34, 20, 64))">
+{% for ContactViewe in Logo %}
+        {% if ContactViewe.page == 'contact.html' %}
+        <a class="logo" href="{{ContactViewe.hyperlink}}">
+          <img class="imageicon" src="{{ContactViewe.logocover.url}}"
+                alt="{{ContactViewe.alternate}}" style="length: {{ContactViewe.length_for_resize}}px; width: {{ContactViewe.width_for_resize}}px; position: fixed;"></a>
+        {% endif %}
+{% endfor %}
+
+{% for ContactViewe in Background %}
+{% if ContactViewe.page == "contact.html" %}
+<div class="mx-auto my-4 text-center" style="background-image: url({{ContactViewe.cover.url}}); background-size: cover;">
+    {% endif %}
+    {% endfor %}
+
+
+<br>
+<br>
+<br>
+<br>
+
+<div class="container" style="height: 110vh;">
+
+    <form method="post" style="background: linear-gradient(-45deg, rgba(134, 20, 64), rgba(200, 143, 45)); padding: 50px; border-radius: 50px; height: 100vh; margin-bottom: 5%; justify-content: center; "enctype="multipart/form-data" class="post">
+  <h2 class="banh" style="background: none;
+  color: rgba(255, 255, 255, 0.637);
+  text-shadow: 10px 10px 20px rgba(0, 0, 0, 0.2);">Trade Offer</h2>
+
+{% csrf_token %}
+{{ form.non_field_errors }}
+
+<div style="display: flex; justify-content: center;">
+        <br>
+    {{ form.estimated_trading_value.errors }}
+    {{ form.estimated_trading_value.label_tag }}
+    {{ form.estimated_trading_value }}
+</div>
+
+<div>
+    {{ form.offered_trade_items.errors }}
+    {{ form.filtered_offered_trade_items }}
+
+    {{ form.offered_trade_items }}
+</div>
+        <br>
+        <br>
+
+<div>
+    {{ form.message.errors }}
+    {{ form.message.label_tag }}
+    {{ form.message }}
+</div>
+        <br>
+
+    <button class="btn btn-success my-3" type="submit">Submit Trade Request</button>
+    </form>
+    <br>
+       <br>   <br>   <br>
+       <br>   <br>   <br>   <br>
+
+
+</div>
+</div>
+
+
+     <script src="{% static 'css/js/featuredproductscript.js' %}"></script>
+     <script src="{% static 'css/js.featuredproductscript2.js' %}"></script>
+     <script src="{% static 'css/js.darkmode.js' %}"></script>
+     <script src="{% static 'css/js/navbar.js' %}"></script>
+     <script src="{% static 'css/js/scroll.js' %}"></script>
+     <script src="{% static 'css/js/cover.js' %}"></script>
+     <script src="{% static 'css/js/autochat.js' %}"></script>
 </body>
 </html>
+{% endblock content %}
+

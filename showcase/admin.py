@@ -378,7 +378,7 @@ admin.site.register(TradeOffer, TradeOfferAdmin)
 class RespondingTradeOfferAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Trade Offer Information - Categorial Description', {
-            'fields': ('wanted_trade_items', 'estimated_trading_value', 'user', 'user2', 'trade_status', 'message', 'quantity'),
+            'fields': ('offered_trade_items', 'wanted_trade_items', 'estimated_trading_value', 'user', 'user2', 'trade_status', 'message', 'quantity'),
             'classes': ('collapse',),
         }),
         ('Trade Offer Information - Technical Description', {
@@ -390,6 +390,7 @@ class RespondingTradeOfferAdmin(admin.ModelAdmin):
 
 
 admin.site.register(RespondingTradeOffer, RespondingTradeOfferAdmin)
+
 
 class ProfileAdmin(admin.ModelAdmin):
     fieldsets = (

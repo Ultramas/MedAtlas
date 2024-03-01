@@ -82,7 +82,8 @@
 					    {% endif %}
 						{% endif %}
 						{% endfor %}
-						<h2 style="display: flex; text-align: center; margin-left: 15%;"><span class="orange-text"> PokeTrove </span> <div style="color: white; opacity: 0.5;">Trading Central</div> </h2>
+
+						<h2 style="display: flex; text-align: center; margin-left: 15%; margin-top: 20px;"><span class="orange-text"> PokeTrove </span> <div style="color: white; opacity: 0.5;">Trading Central</div> </h2>
 					</div>
 				</div>
 			</div>
@@ -119,15 +120,20 @@
 						<button type="submit" class="cart-btn" style="padding: 20px; border-radius: 30px; background-color: orange;"><i class="fas fa-shopping-cart"></i>Contact Trader</button>
 					</form>
 
-{% for trade_offer in TradeOffers %}
-        <a href="{% url 'showcase:responsetradeitems' trade_offer.slug %}">
-						<button type="submit" class="cart-btn" style="padding: 20px; margin-left: 10px; border-radius: 30px; background-color: orange;"><i class="fas fa-shopping-cart"></i>Set Trade</button>
-					</a>
-{% endfor %}
+
+
+    <a href="{% url 'showcase:responsetradeitems' TradeOffer.slug %}">
+        <button type="submit" class="cart-btn" style="padding: 20px; margin-left: 10px; border-radius: 30px; background-color: orange;">
+            <i class="fas fa-shopping-cart"></i>Set Trade {{trade_offer.title}}
+        </button>
+    </a>
 					</div>
+						<br>
+						<br>
+						<br>
 
 
-			<div class="tradeoffering" style="border: 10px red; display: flex;">
+			<div class="tradeoffering" style="border: 10px red; display: flex; margin-top: 16px; ">
         {% for TradeOffer in TradeOffer.trade_items.all %}
             <div class="col-lg-4 col-md-6 text-center strawberry">
                 <div class="single-product-item">

@@ -3006,6 +3006,19 @@ class TradeItemCreateView(ListView):
         tradeoffering = RespondingTradeOffer.objects.filter(is_active=1)
         context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
 
+        trade_offers = TradeOffer.objects.filter(is_active=1)
+
+
+        slug = self.kwargs.get('slug')
+
+        # Check if a valid slug is provided
+        if slug:
+            # Retrieve all feedback objects with the same slug
+            trade_objects = TradeOffer.objects.filter(slug=slug)
+
+            # Add the feedback_objects to the context
+            context['TradeOffered'] = trade_objects
+
         return context
 
 
@@ -3075,14 +3088,27 @@ class ResponseTradeOfferCreateView(CreateView):
     template_name = 'responsetradeitems.html'
     success_url = '/directedtradeoffers/'
 
-    def get(self, request, *args, **kwargs):
-        print(f"Slug: {kwargs['slug']}")
-        return super().get(request, *args, **kwargs)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def post(self, request, *args, **kwargs):
+        form = RespondingTradeOfferForm(request.POST, user=request.user)
+        if request.method == 'POST':
+            if form.is_valid():
+                trade_request = form.save(commit=False)
+                trade_request.user = request.user
+                form.save()
+                return redirect(self.success_url)
+        form.fields['offered_trade_items'].queryset = TradeItem.objects.filter(user=request.user)
+        context = {'form': form}
+        return render(request, self.template_name, context)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        related_offer = get_object_or_404(TradeOffer, slug=self.kwargs['slug'])  # Ensure related_offer exists
-
+        related_offer = get_object_or_404(TradeOffer, slug=self.kwargs['slug'])
+        context['form'] = RespondingTradeOfferForm(user=self.request.user)
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -3090,9 +3116,10 @@ class ResponseTradeOfferCreateView(CreateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['TradeOffer'] = TradeOffer.objects.filter(is_active=1)
+        context['filtered_offered_trade_items'] = context['form'].fields['offered_trade_items'].queryset.filter(
+            user=self.request.user)
 
         return context
-
 
 @method_decorator(login_required, name='dispatch')
 class FriendRequestsView(View):

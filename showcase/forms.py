@@ -939,13 +939,28 @@ from django import forms
 from .models import RespondingTradeOffer, TradeOffer
 
 
+from django.contrib.auth.decorators import login_required
+
+# forms.py
+from django import forms
+from .models import TradeItem, RespondingTradeOffer
+
+
+
+from .fields import UserRestrictedModelMultipleChoiceField
+
 class RespondingTradeOfferForm(forms.ModelForm):
+    offered_trade_items = UserRestrictedModelMultipleChoiceField(user=None, required=False)
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        self.fields['offered_trade_items'].queryset = TradeItem.objects.filter(user=user)
+        self.fields['offered_trade_items'].user = user
+
     class Meta:
         model = RespondingTradeOffer
-        fields = ['offered_trade_items', 'message']
-
-
-
+        fields = ['estimated_trading_value', 'offered_trade_items', 'message']
 
 from django.utils import timezone
 

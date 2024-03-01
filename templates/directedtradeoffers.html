@@ -45,7 +45,11 @@
 
 <h1>Outgoing Trade Offers:</h1>
 {% for request in outgoing_requests %}
-    <p style="color: black;">You sent a trade request to {{ request.user2.username }}.</p>
+{% if request.user.username %}
+    <p style="color: black;">You sent a trade request to {{ request.user.username }}.</p>
+{% else %}
+    <p style="color: black;">Your trade offer was listed successfully!</p>
+{% endif %}
 {% endfor %}
 
 
