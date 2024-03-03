@@ -3343,9 +3343,12 @@ class TradeOffer(models.Model):
     def get_profile_url(self):
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
 
+    def get_profile_url2(self):
+        return reverse('showcase:responsetradeitems', args=[str(self.slug)])
+
     def get_absolute_url(self):
 
-        return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
+        return reverse('showcase:directedtradeoffers', args=[str(self.slug)])
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -3357,6 +3360,12 @@ class TradeOffer(models.Model):
                     print("Slug already exists. Regenerating...")
                     self.slug = f"{self.slug}-{get_random_string(length=32)}"
                     print("Slug after regeneration:", self.slug)  # Print the slug after regeneration
+
+        # If it's a new instance, set the wanted_trade_items based on the related offer's items
+        if self.pk is None:
+            print('new trade offer')
+            related_offer = self.wanted_trade_items
+            self.wanted_trade_items.set(related_offer)
 
         # Check if the trade_status has been set to ACCEPTED
         if self.trade_status == self.ACCEPTED and self.pk is not None:
@@ -3380,6 +3389,7 @@ class TradeOffer(models.Model):
 
             # If it's a new instance, set the wanted_trade_items based on the related offer's items
             if self.pk is None:
+                print('new trade offer')
                 related_offer = self.offered_trade_items
                 trade_items = related_offer.trade_items.all()
                 self.wanted_trade_items.set(trade_items)
@@ -3439,9 +3449,8 @@ class RespondingTradeOffer(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
 
     def __str__(self):
-        # Assuming TradeItem's __str__ returns non-recursive information
-        item_titles = " ".join([str(item) for item in self.offered_trade_items.all()])
-        return f"<{self.__class__.__name__}: {self.slug} - {item_titles}>"
+        item_titles = " ".join([item.__str__() for item in self.offered_trade_items.all()])
+        return f"{self.slug} - {item_titles}"
 
     def get_profile_url(self):
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
@@ -3456,11 +3465,21 @@ class RespondingTradeOffer(models.Model):
         if self.offered_trade_items.all():
             # Assuming the first related TradeItem has the user2 field
             first_trade_item = self.offered_trade_items.first()
-            if first_trade_item and first_trade_item.user2:
-                self.user = first_trade_item.user2
-                if not self.user2:
-                    self.user2 = first_trade_item.user
+            if first_trade_item and first_trade_item.user:
+                self.user = first_trade_item.user
+                if not self.user:
+                    self.user = first_trade_item.user
                     print("sent trade offer to initial trader")
+
+        if self.slug is None and self.wanted_trade_items:
+            self.slug = self.wanted_trade_items.slug
+
+        if self.pk is None:  # Check if it's a new instance
+            # Access the related TradeOffer
+            related_offer = self.offered_trade_items  # Assuming a ForeignKey field named trade_offer
+
+            # Set the wanted_trade_items based on the related offer's items
+            self.wanted_trade_items.set(related_offer.trade_items.all())
 
         # Check if the trade_status has been set to ACCEPTED
         if self.trade_status == self.ACCEPTED and self.pk is not None:

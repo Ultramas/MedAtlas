@@ -49,11 +49,18 @@
 </div>
 
 <div>
+
     {{ form.offered_trade_items.errors }}
+    {{ form.offered_trade_items.label_tag }}
+    <br>
+    <input type="hidden" name="tradeoffer_slug" value="{{ tradeoffer.slug }}">
+
     {{ form.filtered_offered_trade_items }}
 
     {{ form.offered_trade_items }}
 </div>
+    <br>
+    {{ form.wanted_trade_items }}
         <br>
         <br>
 

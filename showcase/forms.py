@@ -2,6 +2,7 @@ from datetime import timezone, timedelta, date
 from urllib import request
 
 from django import forms
+from django.shortcuts import get_object_or_404
 
 from mysite import settings
 from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme, TradeOffer, \
@@ -949,6 +950,7 @@ from .models import TradeItem, RespondingTradeOffer
 
 from .fields import UserRestrictedModelMultipleChoiceField
 
+
 class RespondingTradeOfferForm(forms.ModelForm):
     offered_trade_items = UserRestrictedModelMultipleChoiceField(user=None, required=False)
 
@@ -960,7 +962,7 @@ class RespondingTradeOfferForm(forms.ModelForm):
 
     class Meta:
         model = RespondingTradeOffer
-        fields = ['estimated_trading_value', 'offered_trade_items', 'message']
+        fields = ['estimated_trading_value', 'offered_trade_items', 'wanted_trade_items', 'message']
 
 from django.utils import timezone
 

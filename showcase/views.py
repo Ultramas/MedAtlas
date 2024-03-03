@@ -3093,22 +3093,35 @@ class ResponseTradeOfferCreateView(CreateView):
         kwargs['user'] = self.request.user
         return kwargs
 
+    def get_form_instance(self):
+        form = self.form_class(self.request.POST or None, user=self.request.user)
+        form.fields['offered_trade_items'].queryset = TradeItem.objects.filter(user=self.request.user)
+        return form
+
     def post(self, request, *args, **kwargs):
-        form = RespondingTradeOfferForm(request.POST, user=request.user)
         if request.method == 'POST':
+            form = self.get_form_instance()
             if form.is_valid():
                 trade_request = form.save(commit=False)
                 trade_request.user = request.user
                 form.save()
-                return redirect(self.success_url)
-        form.fields['offered_trade_items'].queryset = TradeItem.objects.filter(user=request.user)
-        context = {'form': form}
+
+                # Save the RespondingTradeOffer instance first
+                trade_request.save()
+
+                # Now you can access the related TradeOffer instance
+                trade_request.user2 = trade_request.wanted_trade_items.user
+                trade_request.save()
+
+                return redirect('showcase:directedtradeoffers')
+
+        context = {'form': self.get_form_instance()}
         return render(request, self.template_name, context)
 
     def get_context_data(self, **kwargs):
+        self.object_list = self.get_queryset()
         context = super().get_context_data(**kwargs)
-        related_offer = get_object_or_404(TradeOffer, slug=self.kwargs['slug'])
-        context['form'] = RespondingTradeOfferForm(user=self.request.user)
+        context['form'] = self.get_form_instance()  # Add the form to the context
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -3116,10 +3129,9 @@ class ResponseTradeOfferCreateView(CreateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['TradeOffer'] = TradeOffer.objects.filter(is_active=1)
-        context['filtered_offered_trade_items'] = context['form'].fields['offered_trade_items'].queryset.filter(
-            user=self.request.user)
 
         return context
+
 
 @method_decorator(login_required, name='dispatch')
 class FriendRequestsView(View):
@@ -5298,6 +5310,8 @@ class PlayerInventoryView(FormMixin, ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
         context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user)
+        context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
+        context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
         return context
 
 
@@ -5463,17 +5477,33 @@ class TradeOffersView(View):
         context.update({'pending_requests': pending_requests, 'outgoing_requests': outgoing_requests})
         return render(request, 'pendingtrades.html', context)
 
+from django.http import JsonResponse
 
 @method_decorator(login_required, name='dispatch')
 class DirectedTradeOfferView(View):
+
+    def is_ajax(self, request):
+        return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+
     def get(self, request, *args, **kwargs):
         # Get all pending friend requests for the current user
         pending_requests = TradeOffer.objects.filter(user2=request.user, trade_status=TradeOffer.PENDING)
         outgoing_requests = TradeOffer.objects.filter(user=request.user, trade_status=TradeOffer.PENDING)
 
+        response_pending_requests = RespondingTradeOffer.objects.filter(user2=request.user, trade_status=RespondingTradeOffer.PENDING)
+        response_outgoing_requests = RespondingTradeOffer.objects.filter(user=request.user, trade_status=RespondingTradeOffer.PENDING)
+
+
         context = {}
+        context.update({
+            'pending_requests': pending_requests,
+            'outgoing_requests': outgoing_requests,
+            'response_pending_requests': response_pending_requests,
+            'response_outgoing_requests': response_outgoing_requests
+        })
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['request'] = request  # Pass the request object to the context
         current_user = request.user
 
         newprofile = TradeOffer.objects.filter(user=current_user.id, is_active=1)
@@ -5488,12 +5518,22 @@ class DirectedTradeOfferView(View):
                 newprofile.newprofile_profile_picture_url = profile.avatar.url
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
-        if is_ajax(request):
+        responsetradeoffers = RespondingTradeOffer.objects.filter(user=self.request.user, is_active=1)
+        context['ResponseTrade'] = responsetradeoffers
+
+        for responsetradeoffer in context['ResponseTrade']:
+            user = responsetradeoffer.user
+            if user:
+                responsetradeoffer.responsetradeoffer_trade_url = responsetradeoffer.get_profile_url2()
+                responsetradeoffer.save()  # Don't forget to save the changes
+
+        if self.is_ajax(request):
             context.update({'pending_requests': pending_requests, 'outgoing_requests': outgoing_requests})
             return render(request, 'directedtradeoffers.html', context)
 
         context.update({'pending_requests': pending_requests, 'outgoing_requests': outgoing_requests})
         return render(request, 'directedtradeoffers.html', context)
+
 
 
 @login_required
