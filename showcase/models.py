@@ -3343,6 +3343,9 @@ class TradeOffer(models.Model):
     def get_profile_url(self):
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
 
+    def get_profile_url2(self):
+        return reverse('showcase:responsetradeitems', args=[str(self.slug)])
+
     def get_absolute_url(self):
 
         return reverse('showcase:directedtradeoffers', args=[str(self.slug)])
