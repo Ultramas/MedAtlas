@@ -386,7 +386,7 @@ class RespondingTradeOfferAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
-    readonly_fields = ('timestamp',)
+    readonly_fields = ('slug', 'timestamp',)
 
 
 admin.site.register(RespondingTradeOffer, RespondingTradeOfferAdmin)

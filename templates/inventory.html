@@ -1,5 +1,5 @@
 {% load static %}
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
@@ -190,6 +190,53 @@
 
 			</div>
 
+
+			<!-- product section -->
+	<div class="product-section mt-150 mb-150">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 offset-lg-2 text-center">
+					<div class="section-title">
+						<h3><span class="orange-text">My</span> Trade Inventory</h3>
+						{% for BackgroundImage in TextFielde %}
+						{% if BackgroundImage.page == "inventory.html" %}
+						{% if BackgroundImage.section == 1 %}
+						<p>{{BackgroundImage.text}}</p>
+					    {% endif %}
+						{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			{% for TradeItem in TradeItems %}
+			<div class="row" style="display: flex; max-width: 100%;">
+				<div class="col-lg-4 col-md-6 text-center">
+					<div class="single-product-item">
+						<div class="product-image">
+							<a href="single-product.html">
+								<img src="{{TradeItem.image.url}}" style="width: 600px; height: 200px;">
+							</a>
+						</div>
+						<h3>{{TradeItem.title}}</h3>
+
+                 <p class="product-price">
+                        <span style="">{{TradeItem.condition}}</span> </p>
+                        <span style="">{{TradeItem.description}}</span> </p>
+						 <a href="{{ product.get_profile_url }}" class="cart-btn"><i class="fas fa-shopping-cart"></i>Remove From Trade Inventory</a></a>
+
+					</div>
+				</div>
+				{% endfor %}
+
+			</div>
+				</div>
+		</div>
+		</div>
+	</div>
+	<!-- end product section -->
+
+
 			<div class="row">
 				<div class="container">
 					<div class="row">
@@ -207,8 +254,6 @@
 					</div>
 				</div>
 			</div>
-		</div>
-	</div>
 	<!-- end latest news -->
 
 	<!-- PokeTrove Logos carousel -->
@@ -306,7 +351,7 @@
 							<li>34/8, East Hukupara, Gifirtok, Sadan.</li>
 							<li><a href="{% url 'showcase:contact' %}" target='_blank' style="text-decoration: none;">IntelleXCompany1@gmail.com</a></li>
 							<li>+00 111 222 3333</li>
-                            <li><a href="{% url 'showcase:home' %}" target='_blank' style="text-decoration: none;">Live Communitiies</li>
+                            <li><a href="{% url 'showcase:home' %}" target='_blank' style="text-decoration: none;">Live Communitiies</a></li>
 						</ul>
 					</div>
 				</div>
