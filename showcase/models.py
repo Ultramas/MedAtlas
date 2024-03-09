@@ -3463,8 +3463,6 @@ class RespondingTradeOffer(models.Model):
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # Save the Trade instance first to get an ID
-
         if self.pk is None:  # Check if it's a new instance
             # Check if a responding trade offer already exists for the same user and trade offer
             existing_offer = RespondingTradeOffer.objects.filter(
@@ -3475,6 +3473,8 @@ class RespondingTradeOffer(models.Model):
             # If an existing offer exists, delete it before saving the new one
             if existing_offer:
                 existing_offer.delete()
+
+        super().save(*args, **kwargs)  # Save the instance first
 
         if self.offered_trade_items.all():
             # Assuming the first related TradeItem has the user2 field
@@ -3488,65 +3488,26 @@ class RespondingTradeOffer(models.Model):
         if self.slug is None and self.wanted_trade_items:
             self.slug = self.wanted_trade_items.slug
 
+        if self.trade_status == self.ACCEPTED:
+            trade = Trade.objects.create(
+                # order_number=self.order_number,
+                responding_trade_offers=self,
+                is_active=self.is_active,
+            )
+            trade.trade_items.set(self.wanted_trade_items.trade_items.all() | self.offered_trade_items.all())
+            trade.users.set([self.user, self.user2])
+
+            # Set the wanted_trade_items based on the related offer's items
+            trade.trade_offers.set(self.wanted_trade_items.all())
+
+        super().save(*args, **kwargs)
+
         if self.pk is None:  # Check if it's a new instance
             # Access the related TradeOffer
             related_offer = self.offered_trade_items  # Assuming a ForeignKey field named trade_offer
 
             # Set the wanted_trade_items based on the related offer's items
             self.wanted_trade_items.set(related_offer.trade_items.all())
-
-        # Check if the trade_status has been set to ACCEPTED
-        if self.trade_status == self.ACCEPTED and self.pk is not None:
-            if not self.id:  # If the Trade instance does not have an id (i.e., it's a new instance)
-                trade = Trade.objects.create()  # Create a new Trade instance
-                self.trade = trade  # Set the trade field of the RespondingTradeOffer instance to the new Trade instance
-            else:
-                trade = Trade.objects.create()  # Create a new Trade instance only when self.id exists
-            trade.save()  # Save the Trade instance to the database
-
-            if self.offered_trade_items:
-                for offer in self.trade_offers:
-                    trade_offer = TradeOffer.objects.create(
-                        trade=self.trade,
-                        offer=offer,
-                        user=self.user,
-                        status=self.status,
-                        created_at=self.created_at,
-                        updated_at=self.updated_at,
-                    )
-                    trade_offer.save()
-
-            # Add this TradeOffer instance to the trade's trade_offers
-            for trade_item in self.offered_trade_items.all():
-                trade.trade_items.add(trade_item)
-
-            if self.wanted_trade_items:
-
-                # Add the related wanted_trade_items to the trade's trade_offers
-                trade.trade_offers.add(self.wanted_trade_items)
-
-            # Add the users involved in this TradeOffer to the trade's users
-            trade.users.add(self.user)
-            if self.user2:
-                trade.users.add(self.user2)
-
-            trade.save()
-
-            # Add the users involved in this TradeOffer to the trade's users
-            trade.users.add(self.user)
-            if self.user2:
-                trade.users.add(self.user2)
-            if not self.slug:
-                self.slug = TradeOffer.slug
-            # Access the related tradeoffer and set user2
-            if self.pk is None:  # Check if it's a new instance
-                # Access the related TradeOffer
-                related_offer = self.offered_trade_items  # Assuming a ForeignKey field named trade_offer
-
-                # Set the wanted_trade_items based on the related offer's items
-                self.wanted_trade_items.set(related_offer.trade_items.all())
-
-            trade.save()
 
             trading_label = TradeShippingLabel.objects.create()
 
@@ -3593,7 +3554,7 @@ class RespondingTradeOffer(models.Model):
 class Trade(models.Model):
     trade_offers = models.ManyToManyField(TradeOffer)
     trade_items = models.ManyToManyField(TradeItem)
-    responding_trade_offers = models.ManyToManyField(RespondingTradeOffer)
+    responding_trade_offers = models.ForeignKey(RespondingTradeOffer, on_delete=models.CASCADE)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='traders')
     timestamp = models.DateTimeField(auto_now_add=True)
     is_active = models.IntegerField(default=1,
@@ -3607,11 +3568,10 @@ class Trade(models.Model):
             return f"{self.pk}: {self.title} ({offer_titles})"""
 
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
         if self.pk is None:  # Check if it's a new instance
             if self.trade_offers:
-
-                related_offer = self.trade_offers
-                # Set the wanted_trade_items based on the related offer's items
+                related_offer = self.trade_offers.first()  # Get the first related offer
                 self.trade_items.set(related_offer.trade_items.all())
         super().save(*args, **kwargs)
 
