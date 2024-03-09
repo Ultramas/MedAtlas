@@ -3438,7 +3438,7 @@ class RespondingTradeOffer(models.Model):
                              verbose_name="Dealer")
     user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Recipient', blank=True,
                               null=True, help_text="Optional", verbose_name="Recipient")
-    slug = models.SlugField(unique=True, editable=False, blank=True, null=True)
+    slug = models.SlugField(blank=True, null=True)
     trade_status = models.IntegerField(choices=TRADE_STATUS, default=PENDING)
     timestamp = models.DateTimeField(auto_now_add=True)
     quantity = models.IntegerField(default=1)
@@ -3463,7 +3463,18 @@ class RespondingTradeOffer(models.Model):
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # Save the instance first
+        super().save(*args, **kwargs)  # Save the Trade instance first to get an ID
+
+        if self.pk is None:  # Check if it's a new instance
+            # Check if a responding trade offer already exists for the same user and trade offer
+            existing_offer = RespondingTradeOffer.objects.filter(
+                user=self.user,
+                wanted_trade_items=self.wanted_trade_items
+            ).first()
+
+            # If an existing offer exists, delete it before saving the new one
+            if existing_offer:
+                existing_offer.delete()
 
         if self.offered_trade_items.all():
             # Assuming the first related TradeItem has the user2 field
@@ -3486,11 +3497,40 @@ class RespondingTradeOffer(models.Model):
 
         # Check if the trade_status has been set to ACCEPTED
         if self.trade_status == self.ACCEPTED and self.pk is not None:
-            # Create a new Trade object
-            trade = Trade.objects.create()  # Create a new Trade instance
+            if not self.id:  # If the Trade instance does not have an id (i.e., it's a new instance)
+                trade = Trade.objects.create()  # Create a new Trade instance
+                self.trade = trade  # Set the trade field of the RespondingTradeOffer instance to the new Trade instance
+            else:
+                trade = Trade.objects.create()  # Create a new Trade instance only when self.id exists
+            trade.save()  # Save the Trade instance to the database
+
+            if self.offered_trade_items:
+                for offer in self.trade_offers:
+                    trade_offer = TradeOffer.objects.create(
+                        trade=self.trade,
+                        offer=offer,
+                        user=self.user,
+                        status=self.status,
+                        created_at=self.created_at,
+                        updated_at=self.updated_at,
+                    )
+                    trade_offer.save()
 
             # Add this TradeOffer instance to the trade's trade_offers
-            trade.trade_offers.add(self)
+            for trade_item in self.offered_trade_items.all():
+                trade.trade_items.add(trade_item)
+
+            if self.wanted_trade_items:
+
+                # Add the related wanted_trade_items to the trade's trade_offers
+                trade.trade_offers.add(self.wanted_trade_items)
+
+            # Add the users involved in this TradeOffer to the trade's users
+            trade.users.add(self.user)
+            if self.user2:
+                trade.users.add(self.user2)
+
+            trade.save()
 
             # Add the users involved in this TradeOffer to the trade's users
             trade.users.add(self.user)
@@ -3507,6 +3547,26 @@ class RespondingTradeOffer(models.Model):
                 self.wanted_trade_items.set(related_offer.trade_items.all())
 
             trade.save()
+
+            trading_label = TradeShippingLabel.objects.create()
+
+            # Access the related RespondingTradeOffer
+            related_offer = self.offered_trade_items  # Assuming a ForeignKey field
+
+            # Access the related user
+            related_user = related_offer.user
+
+            # Check for UserProfile2 instance
+            if hasattr(related_user, 'userprofile2'):
+                # UserProfile2 exists for the related user
+                # Proceed with desired actions, e.g., accessing profile data
+                print("UserProfile2 exists for the related user")
+                # Example: Access a field from the UserProfile2 instance
+                profile_data = related_user.userprofile2.field_name
+            else:
+                # UserProfile2 does not exist
+                print("UserProfile2 does not exist for the related user")
+                # Handle the situation accordingly
 
         super().save(*args, **kwargs)
 
@@ -3532,6 +3592,8 @@ class RespondingTradeOffer(models.Model):
 
 class Trade(models.Model):
     trade_offers = models.ManyToManyField(TradeOffer)
+    trade_items = models.ManyToManyField(TradeItem)
+    responding_trade_offers = models.ManyToManyField(RespondingTradeOffer)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='traders')
     timestamp = models.DateTimeField(auto_now_add=True)
     is_active = models.IntegerField(default=1,
@@ -3540,10 +3602,18 @@ class Trade(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
 
-    def __str__(self):
-        offer_titles = " & ".join([str(offer) for offer in self.trade_offers.all()])
-        user_names = " & ".join([user.username for user in self.users.all()])
-        return f'{offer_titles} by {user_names}'
+    """ def __str__(self):
+            offer_titles = " & ".join([str(offer.pk) for offer in self.trade_offers.all()])
+            return f"{self.pk}: {self.title} ({offer_titles})"""
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:  # Check if it's a new instance
+            if self.trade_offers:
+
+                related_offer = self.trade_offers
+                # Set the wanted_trade_items based on the related offer's items
+                self.trade_items.set(related_offer.trade_items.all())
+        super().save(*args, **kwargs)
 
     def get_profile_url(self):
         return [reverse('showcase:profile', args=[str(user.pk)]) for user in self.users.all()]
@@ -4368,13 +4438,15 @@ class FileBase(models.Model):
 
 
 class UserProfile2(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='ship_profile')
     first_name = models.CharField(max_length=100, default='')
     last_name = models.CharField(max_length=100, default='')
     description = models.CharField(max_length=100, default='')
+    address = models.CharField(max_length=250, blank=True, null=True)
     city = models.CharField(max_length=100, default='')
-    country = models.CharField(max_length=100, default='')
-    phone = models.IntegerField(default=0)
+    state = models.CharField(max_length=100, default='')
+    zip_code = models.CharField(max_length=5, default=00000)
+    phone_number = models.CharField(default='000-000-0000', max_length=12)
     profile_picture = models.ImageField(upload_to='profile_image', null=True, blank=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -4382,9 +4454,27 @@ class UserProfile2(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+    def __str__(self):
+        return str(self.user) + "'s shipping profile"
+
     class Meta:
-        verbose_name = "Edit Profile"
-        verbose_name_plural = "Edit Profiles"
+        verbose_name = "Shipping Profile"
+        verbose_name_plural = "Shipping Profiles"
+        unique_together = ('user', 'id',)
+
+    def save(self, *args, **kwargs):
+        try:
+            # Check if existing profile exists for the current user
+            existing_profile = UserProfile2.objects.get(user=self.user)
+            # If found, delete it before saving the new data
+            if existing_profile:
+                existing_profile.delete()
+                print("Previous shipping profile deleted successfully.")
+        except UserProfile2.DoesNotExist:
+            # No existing profile found, proceed with normal save
+            pass
+
+        super().save(*args, **kwargs)
 
 
 def create_profile(sender, **kwargs):
@@ -4393,6 +4483,48 @@ def create_profile(sender, **kwargs):
 
 
 post_save.connect(create_profile, sender=User)
+
+
+class TradeShippingLabel(models.Model):
+    trade_offer = models.ForeignKey(TradeOffer, on_delete=models.CASCADE)
+    responding_trade_offer = models.ForeignKey(RespondingTradeOffer, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=100, default='')
+    last_name = models.CharField(max_length=100, default='')
+    description = models.CharField(max_length=100, default='')
+    address = models.CharField(max_length=250, blank=True, null=True)
+    city = models.CharField(max_length=100, default='')
+    state = models.CharField(max_length=100, default='')
+    zip_code = models.CharField(max_length=5, default=00000)
+    phone_number = models.CharField(default='000-000-0000', max_length=12)
+    profile_picture = models.ImageField(upload_to='profile_image', null=True, blank=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.user) + "'s shipping profile"
+
+    class Meta:
+        verbose_name = "Trade Shipping Profile"
+        verbose_name_plural = "Trade Shipping Profiles"
+        unique_together = ('user', 'id',)
+
+    def save(self, *args, **kwargs):
+        try:
+            # Check if existing profile exists for the current user
+            existing_profile = TradeShippingLabel.objects.get(user=self.user)
+            # If found, delete it before saving the new data
+            if existing_profile:
+                existing_profile.delete()
+                print("Previous shipping profile deleted successfully.")
+        except UserProfile2.DoesNotExist:
+            # No existing profile found, proceed with normal save
+            pass
+
+        super().save(*args, **kwargs)
 
 
 class Feedback(models.Model):

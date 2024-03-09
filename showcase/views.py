@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import ListView
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
-    InventoryObject, Inventory, Trade, TradeOffer, FriendRequest, Friend, RespondingTradeOffer
+    InventoryObject, Inventory, Trade, TradeOffer, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -94,7 +94,7 @@ from .models import AdminPages
 # from .models import Background2aImage
 from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, SellerApplicationForm, \
     MemeForm, CurrencyCheckoutForm, CurrencyPaymentForm, CurrencyPaypalPaymentForm, HitStandForm, WagerForm, \
-    DirectedTradeOfferForm, FriendRequestForm, RespondingTradeOfferForm
+    DirectedTradeOfferForm, FriendRequestForm, RespondingTradeOfferForm, ShippingForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -147,7 +147,6 @@ from django.contrib.auth.models import User
 from .models import Blog
 from .models import BlogHeader
 from .models import BlogFilter
-from .models import UserProfile2
 from django.views.generic.edit import FormMixin
 
 import pdb
@@ -2735,6 +2734,60 @@ class DonateBaseView(ListView):
         return context
 
 
+class ShippingBackgroundView(FormMixin, LoginRequiredMixin, ListView):
+    model = UserProfile2
+    template_name = "shippingform.html"
+    form_class = ShippingForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = ShippingForm(user=self.request.user)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        return context
+
+    # @login_required
+    def post(self, request, *args, **kwargs):
+        form = ShippingForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Shipping fields updated successfully.')
+            return redirect('showcase:tradingcentral')
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            return render(request, "shippingform.html", {'form': form})
+
+
+class PrintShippingLabelView(LoginRequiredMixin, ListView):
+    model = TradeShippingLabel
+    template_name = "printandship.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Label'] = TradeShippingLabel.objects.filter(is_active=1)
+
+        return context
+
+
 class MemberBaseView(ListView):
     template_name = "memberbase.html"
     model = LogoBase
@@ -3104,6 +3157,13 @@ class ResponseTradeOfferCreateView(CreateView):
             if form.is_valid():
                 trade_request = form.save(commit=False)
                 trade_request.user = request.user
+
+                # Check if a RespondingTradeOffer with the same slug and user already exists
+                existing_offer = RespondingTradeOffer.objects.filter(slug=trade_request.slug, user=request.user).first()
+                if existing_offer:
+                    # If it does, delete the existing offer
+                    existing_offer.delete()
+
                 form.save()
 
                 # Save the RespondingTradeOffer instance first
@@ -5558,11 +5618,21 @@ def decline_trade(request, request_id):
 @login_required
 def accept_response_trade(request, request_id):
     trade_offer = get_object_or_404(RespondingTradeOffer, id=request_id)
-    print('trade offer acceptance')
+
+    # Check user permissions
     if request.user != trade_offer.user2 or not trade_offer.user2:
         raise PermissionDenied
-    trade_offer.trade_status = RespondingTradeOffer.ACCEPTED
-    trade_offer.save()
+
+    # Update the responding trade offer status
+    RespondingTradeOffer.objects.filter(id=request_id).update(trade_status=RespondingTradeOffer.ACCEPTED)
+
+    # Create a new Trade object and establish relationships if necessary
+    wanted_trade_offer = trade_offer.wanted_trade_items
+    if wanted_trade_offer and not Trade.objects.filter(trade_offers__in=[wanted_trade_offer]).exists():
+        trade = Trade.objects.create()
+        trade.trade_offers.add(wanted_trade_offer)
+        trade.users.add(trade_offer.user, trade_offer.user2)
+
     messages.success(request, 'You have accepted the trade offer.')
     return redirect('showcase:mytrades')
 
@@ -5575,6 +5645,7 @@ def decline_response_trade(request, request_id):
     trade_offer.save()
     messages.success(request, 'You have declined the trade offer.')
     return redirect('showcase:mytrades')
+
 
 
 class TradeHistory(ListView):

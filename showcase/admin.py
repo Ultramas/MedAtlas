@@ -3,7 +3,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
     Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket, SellerApplication, Meme, \
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
-    FriendRequest, Friend, RespondingTradeOffer
+    FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -96,10 +96,24 @@ class UserProfile2Admin(admin.ModelAdmin):
             'fields': ('user', 'first_name', 'last_name')
         }),
         ('Edit Profile Image Information - Attributes', {
-            'fields': ('description', 'city', 'country', 'phone', 'profile_picture', 'is_active',)
+            'fields': ('description', 'city', 'state', 'phone_number', 'profile_picture', 'is_active',)
         }),
     )
     pass
+
+
+class TradeShippingLabelAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Trade Shipping Label Information - Personal Information', {
+            'fields': ('user', 'first_name', 'last_name')
+        }),
+        ('Trade Shipping Label Information - Attributes', {
+            'fields': ('description', 'address', 'city', 'state', 'zip_code', 'phone_number', 'profile_picture', 'is_active',)
+        }),
+    )
+
+
+admin.site.register(TradeShippingLabel, TradeShippingLabelAdmin)
 
 
 class categoryAdmin(admin.ModelAdmin):

@@ -137,6 +137,33 @@ class ProfileForm(forms.ModelForm):
         fields = '__all__'"""
 
 
+class ShippingForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile2
+        fields = ('address', 'city', 'state', 'phone_number', 'profile_picture')
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(ShippingForm, self).__init__(*args, **kwargs)
+        self.fields['phone_number'].required = False
+        self.fields['profile_picture'].required = False
+        self.user = user
+
+    def save(self, commit=True):
+        user_profile = super().save(commit=False)
+        user_profile.city = self.cleaned_data['city']
+        user_profile.state = self.cleaned_data['state']
+        user_profile.phone_number = self.cleaned_data['phone_number']
+        user_profile.profile_picture = self.cleaned_data['profile_picture']
+        if commit:
+            if hasattr(self.user, 'userprofile2') and self.user.userprofile2.exists():
+                user_profile.save()
+            else:
+                user_profile.user = self.user
+                user_profile.save()
+        return user_profile
+
+
 class StaffJoin(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Lemon Sauce'}))
     role = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'What role are you applying for?'}))

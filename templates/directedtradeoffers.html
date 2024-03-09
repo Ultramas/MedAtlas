@@ -55,6 +55,7 @@
 <h1>Incoming Trade Offer Responses:</h1>
 {% for RespondingTradeOffer in response_pending_requests %}
     {% if RespondingTradeOffer.user2 %}
+
 <a href="{% url 'showcase:accept_response_trade' RespondingTradeOffer.id %}">Accept Trade</a>
 
 <a href="{% url 'showcase:decline_response_trade' RespondingTradeOffer.id  %}">Decline Trade</a>
@@ -70,7 +71,7 @@
     {% if RespondingTradeOffer.user2 %}
         <p style="color: black;">You sent a response trade request to {{ RespondingTradeOffer.user2.username }}.</p>
     {% else %}
-        <p style="color: black;">Your response trade offer was listed successfully!</p>
+        <p style="color: black;">Your response trade offer was not listed. Please specify a recipient</p>
     {% endif %}
 {% endfor %}
 
