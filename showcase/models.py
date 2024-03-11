@@ -3511,11 +3511,6 @@ class RespondingTradeOffer(models.Model):
                 self.user = first_trade_item.user
                 print("sent trade offer to initial trader")
 
-        # If it's a new instance, set the wanted_trade_items based on the related offer's items
-        if self.pk is None:
-            print('new trade offer')
-            related_offer = self.wanted_trade_items
-            self.wanted_trade_items.set(related_offer)
 
         if self.slug is None and self.wanted_trade_items:
             self.slug = self.wanted_trade_items.slug
@@ -3578,7 +3573,8 @@ class RespondingTradeOffer(models.Model):
 
 class Trade(models.Model):
     trade_offers = models.ManyToManyField(TradeOffer)
-    responding_trade_offers = models.ManyToManyField(RespondingTradeOffer)
+    responding_trade_offers = models.ManyToManyField('RespondingTradeOffer', related_name="responding_trades", blank=True
+    )
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='traders')
     timestamp = models.DateTimeField(auto_now_add=True)
     is_active = models.IntegerField(default=1,
