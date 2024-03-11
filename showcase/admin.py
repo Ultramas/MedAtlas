@@ -367,6 +367,7 @@ class TradeAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('timestamp',)
+    list_display = ('timestamp', 'is_active')
 
 
 admin.site.register(Trade, TradeAdmin)
@@ -401,6 +402,7 @@ class RespondingTradeOfferAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('slug', 'timestamp',)
+    list_display = ('wanted_trade_items', 'slug', 'timestamp', 'trade_status')
 
 
 admin.site.register(RespondingTradeOffer, RespondingTradeOfferAdmin)
