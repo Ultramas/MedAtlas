@@ -1817,6 +1817,37 @@ class NewsBackgroundView(BaseView):
 
         return context
 
+class SingleNewsView(DetailView):
+    model = NewsFeed
+    paginate_by = 10
+    template_name = "singlenews.html"
+
+    def get_object(self):
+        slug = self.kwargs.get("slug")  # Get slug from URL parameters
+        if slug:
+            return get_object_or_404(NewsFeed, slug=slug)  # Retrieve profile or raise 404 for invalid slug
+        return None  # Handle case where no slug is provided (optional
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['NewsBackgroundImage'] = NewsBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['News'] = NewsFeed.objects.all()
+
+        newprofile = NewsFeed.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
 
 class NewsCreatePostView(CreateView):
     model = NewsBackgroundImage
@@ -2783,7 +2814,7 @@ class PrintShippingLabelView(LoginRequiredMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Label'] = TradeShippingLabel.objects.filter(is_active=1)
+        context['Label'] = TradeShippingLabel.objects.filter(is_active=1, user=self.request.user)
 
         return context
 
@@ -3879,6 +3910,8 @@ class BackgroundView(FormMixin, BaseView):
         context['About'] = Event.objects.filter(page=self.template_name, is_active=1)
         context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
         context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         print(FaviconBase.objects.all())
         print(213324)
         # Retrieve the signed-in user's profile and profile picture URL

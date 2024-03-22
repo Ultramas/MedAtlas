@@ -65,7 +65,7 @@
         </div>
     </div>
     <!--PreLoader Ends-->
-	
+
 	<!-- header -->
 	<div class="top-header-area" id="sticker">
 		<div class="container">
@@ -88,43 +88,36 @@
 						<!-- menu start -->
 						<nav class="main-menu">
 							<ul>
-								<li class="current-list-item"><a href="#">Home</a>
+							  {% for column in Header %}
+
+      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
 									<ul class="sub-menu">
-										<li><a href="index.html">Static Home</a></li>
-										<li><a href="index_2.html">Slider Home</a></li>
+										{% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% else %}
+              {% if row.opennew %}
+										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
 									</ul>
-								</li>
-								<li><a href="about.html">About</a></li>
-								<li><a href="#">Pages</a>
-									<ul class="sub-menu">
-										<li><a href="404.html">404 page</a></li>
-										<li><a href="about.html">About</a></li>
-										<li><a href="cart.html">Cart</a></li>
-										<li><a href="checkout.html">Check Out</a></li>
-										<li><a href="contact.html">Contact</a></li>
-										<li><a href="news.html">News</a></li>
-										<li><a href="shop.html">Shop</a></li>
-									</ul>
-								</li>
-								<li><a href="news.html">News</a>
-									<ul class="sub-menu">
-										<li><a href="news.html">News</a></li>
-										<li><a href="single-news.html">Single News</a></li>
-									</ul>
-								</li>
-								<li><a href="contact.html">Contact</a></li>
-								<li><a href="shop.html">Shop</a>
-									<ul class="sub-menu">
-										<li><a href="shop.html">Shop</a></li>
-										<li><a href="checkout.html">Check Out</a></li>
-										<li><a href="single-product.html">Single Product</a></li>
-										<li><a href="cart.html">Cart</a></li>
-									</ul>
+        {% endfor %}
 								</li>
 								<li>
 									<div class="header-icons">
-										<a class="shopping-cart" href="cart.html"><i class="fas fa-shopping-cart"></i></a>
-										<a class="mobile-hide search-bar-icon" href="#"><i class="fas fa-search"></i></a>
+										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
+											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
+										</a>
+										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
 									</div>
 								</li>
 							</ul>
@@ -138,6 +131,7 @@
 		</div>
 	</div>
 	<!-- end header -->
+
 
 	<!-- search area -->
 	<div class="search-area">
@@ -157,7 +151,7 @@
 		</div>
 	</div>
 	<!-- end search arewa -->
-	
+
 	<!-- breadcrumb-section -->
 {% for ContactViewe in Background %}
 {% if ContactViewe.page == "contact.html" %}
@@ -183,8 +177,8 @@
 			<div class="row">
 				<div class="col-lg-8 mb-5 mb-lg-0">
 					<div class="form-title">
-						<h2>Have you any question?</h2>
-						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur, ratione! Laboriosam est, assumenda. Perferendis, quo alias quaerat aliquid. Corporis ipsum minus voluptate? Dolore, esse natus!</p>
+						<h2>Contact Us</h2>
+						<p>We strive to respond within 1 business day or less. </p>
 					</div>
 				 	<div id="form_status"></div>
 					<div class="contact-form">
@@ -212,16 +206,43 @@
 				<div class="col-lg-4">
 					<div class="contact-form-wrap">
 						<div class="contact-form-box">
-							<h4><i class="fas fa-map"></i> Shop Address</h4>
-							<p>34/8, East Hukupara <br> Gifirtok, Sadan. <br> Country Name</p>
+							<h4>
+
+						{% for BackgroundImage in Image %}
+						{% if BackgroundImage.image_position == 1 %}
+								{% if BackgroundImage.page == 'contact.html' %}
+							<img src="{{ BackgroundImage.image.url }}" style="width: 25px; length: 25px;">
+							{% endif %}
+							{% endif %}
+							{% endfor %}
+								Shop Address</h4>
+							<p>To Be Added <br> Sacramento, California. <br>United States</p>
 						</div>
 						<div class="contact-form-box">
-							<h4><i class="far fa-clock"></i> Shop Hours</h4>
-							<p>MON - FRIDAY: 8 to 9 PM <br> SAT - SUN: 10 to 8 PM </p>
+							<h4>
+
+						{% for BackgroundImage in Image %}
+						{% if BackgroundImage.image_position == 2 %}
+								{% if BackgroundImage.page == 'contact.html' %}
+							<img src="{{ BackgroundImage.image.url }}" style="width: 25px; length: 25px;">
+							{% endif %}
+							{% endif %}
+							{% endfor %}
+								Live Chat Support Hours</h4>
+							<p>MONDAY - FRIDAY: 8 to 9 PM <br> SATURDAY - SUNDAY: 10 to 8 PM </p>
 						</div>
 						<div class="contact-form-box">
-							<h4><i class="fas fa-address-book"></i> Contact</h4>
-							<p>Phone: +00 111 222 3333 <br> Email: support@fruitkha.com</p>
+							<h4>
+
+						{% for BackgroundImage in Image %}
+						{% if BackgroundImage.image_position == 3 %}
+								{% if BackgroundImage.page == 'contact.html' %}
+							<img src="{{ BackgroundImage.image.url }}" style="width: 25px; length: 25px;">
+							{% endif %}
+							{% endif %}
+							{% endfor %}
+								Contact</h4>
+							<p>Phone: To Be Added <br> Email: poketrovecompany@gmail.com</p>
 						</div>
 					</div>
 				</div>
@@ -235,7 +256,15 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-12 text-center">
-					<p> <i class="fas fa-map-marker-alt"></i> Find Our Location</p>
+					<p>
+							{% for BackgroundImage in Image %}
+						{% if BackgroundImage.image_position == 4 %}
+								{% if BackgroundImage.page == 'contact.html' %}
+							<img src="{{ BackgroundImage.image.url }}" style="width: 35px; length: 35px;">
+							{% endif %}
+							{% endif %}
+							{% endfor %}
+						Find Our Location</p>
 				</div>
 			</div>
 		</div>
@@ -248,36 +277,43 @@
 	</div>
 	<!-- end google map section -->
 
-
 	<!-- footer -->
 	<div class="footer-area">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-3 col-md-6">
 					<div class="footer-box about-widget">
-						<h2 class="widget-title">About us</h2>
-						<p>Ut enim ad minim veniam perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae.</p>
+						<h2 class="widget-title">About Us</h2>
+                            {% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 15 %}
+							<p>{{BackgroundImage.text}}</p>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6">
 					<div class="footer-box get-in-touch">
-						<h2 class="widget-title">Get in Touch</h2>
+						<h2 class="widget-title">Join Our Community! </h2>
 						<ul>
-							<li>34/8, East Hukupara, Gifirtok, Sadan.</li>
-							<li>support@fruitkha.com</li>
-							<li>+00 111 222 3333</li>
+							<li>Address To Be Added</li>
+							<li><a href="{% url 'showcase:contact' %}" target='_blank' style="text-decoration: none;">PokeTroveCompany@gmail.com</a></li>
+							<li>Number To Be Added</li>
+							<li><a href="{% url 'showcase:home' %}" target='_blank' style="text-decoration: none;">Find Your Community</a></li>
 						</ul>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6">
 					<div class="footer-box pages">
 						<h2 class="widget-title">Pages</h2>
+						<br>
 						<ul>
-							<li><a href="index.html">Home</a></li>
-							<li><a href="about.html">About</a></li>
-							<li><a href="services.html">Shop</a></li>
-							<li><a href="news.html">News</a></li>
-							<li><a href="contact.html">Contact</a></li>
+							<li><a href="{% url 'showcase:index' %}">Home</a></li>
+							<li><a href="{% url 'showcase:about' %}">About</a></li>
+							<li><a href="{% url 'showcase:ehome' %}">Shop</a></li>
+							<li><a href="{% url 'showcase:newsfeed' %}">News</a></li>
+							<li><a href="{% url 'showcase:contact' %}">Contact</a></li>
 						</ul>
 					</div>
 				</div>
@@ -285,9 +321,20 @@
 					<div class="footer-box subscribe">
 						<h2 class="widget-title">Subscribe</h2>
 						<p>Subscribe to our mailing list to get the latest updates.</p>
-						<form action="index.html">
-							<input type="email" placeholder="Email">
-							<button type="submit"><i class="fas fa-paper-plane"></i></button>
+						<form method="post" action="">
+
+							<div class="form-row" style="display: flex;">
+								<p style="width: 75%; height: 200%;">{{ form.message }}</p>
+							<input type="submit" value="Submit">
+							</div>
+						</form>
+    						{% csrf_token %}
+							{{ form.email }}
+
+							<button type="submit"><img src="{% static 'css/images/sendemailairplane.png' %}" style="width: 30px; height: 15px; margin-top: 15px;"></button>
+													<br>
+							</div>
+							I agree to the Terms & Conditions: {{ form.confirmation }}
 						</form>
 					</div>
 				</div>
@@ -295,22 +342,26 @@
 		</div>
 	</div>
 	<!-- end footer -->
-	
+
 	<!-- copyright -->
-	<div class="copyright">
+	<div class="copyright" style="margin-bottom: -10%;">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-6 col-md-12">
-					<p>Copyrights &copy; 2019 - <a href="https://imransdesign.com/">Imran Hossain</a>,  All Rights Reserved.</p>
+					{% for BackgroundImage in BaseCopyrightTextFielded %}
+					{% if BackgroundImage.page == "index.html" %}
+					<p>{{BackgroundImage.copyright}}</p>
+					{% endif %}
+					{% endfor %}
 				</div>
 				<div class="col-lg-6 text-right col-md-12">
 					<div class="social-icons">
 						<ul>
-							<li><a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a></li>
-							<li><a href="#" target="_blank"><i class="fab fa-twitter"></i></a></li>
-							<li><a href="#" target="_blank"><i class="fab fa-instagram"></i></a></li>
-							<li><a href="#" target="_blank"><i class="fab fa-linkedin"></i></a></li>
-							<li><a href="#" target="_blank"><i class="fab fa-dribbble"></i></a></li>
+					{% for BackgroundImage in Social %}
+					{% if BackgroundImage.page == "index.html" %}
+							<li><a href="{{BackgroundImage.hyperlink}}" target="_blank"><img src="{{BackgroundImage.icon.url}}" alt="{{ BackgroundImage.alternate }}" style="width: 30px; height: 30px;"></a></li>
+					{% endif %}
+					{% endfor %}
 						</ul>
 					</div>
 				</div>
@@ -318,7 +369,7 @@
 		</div>
 	</div>
 	<!-- end copyright -->
-	
+
 	<!-- jquery -->
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
      <script src="{% static 'css/js/main.js' %}"></script>
@@ -330,6 +381,6 @@
      <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
      <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
      <script src="{% static 'css/js/sticker.js' %}"></script>
-	
+
 </body>
 </html>

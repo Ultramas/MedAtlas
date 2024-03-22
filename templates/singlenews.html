@@ -1,0 +1,25 @@
+<h1>{{ object.title }}</h1>
+<p>{{ object.description }}</p>
+
+<div class="profile-details">
+  <span class="author">
+    <i class="fas fa-user"></i> {{ object.name }}
+  </span>
+  <span class="date">
+    <i class="fas fa-calendar"></i> {{ object.date_and_time }}
+  </span>
+  <span class="category">
+    <i class="fas fa-folder"></i> {{ object.category }}
+  </span>
+</div>
+
+<img src="{{ object.image.url }}" alt="Profile Image" class="profile-image">
+
+{% if object.related_objects.all %}
+  <h2>Related Profiles</h2>
+  <ul>
+    {% for related_profile in object.related_objects.all %}
+      <li><a href="{% url 'singlenews' related_profile.slug %}">{{ related_profile.title }}</a></li>
+    {% endfor %}
+  </ul>
+{% endif %}

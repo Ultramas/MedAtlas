@@ -96,7 +96,7 @@ class UserProfile2Admin(admin.ModelAdmin):
             'fields': ('user', 'first_name', 'last_name')
         }),
         ('Edit Profile Image Information - Attributes', {
-            'fields': ('description', 'city', 'state', 'phone_number', 'profile_picture', 'is_active',)
+            'fields': ('description','address', 'address2', 'city', 'state', 'phone_number', 'profile_picture', 'is_active',)
         }),
     )
     pass
@@ -865,7 +865,10 @@ class ItemAdmin(admin.ModelAdmin):
             'classes': ('collapse',),  # Open by default
         }),
         ('Item Information - Image Display', {
-            'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize', 'is_active',),
+            'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize', 'image2', 'image_length2', 'image_width2', 'length_for_resize2', 'width_for_resize2',
+                       'image3', 'image_length3', 'image_width3', 'length_for_resize3', 'width_for_resize3', 'image4', 'image_length4', 'image_width4', 'length_for_resize4', 'width_for_resize4',
+                       'image5', 'image_length5', 'image_width5', 'length_for_resize5', 'width_for_resize5', 'is_active',
+                       ),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Item Information - Related Items', {
@@ -1102,10 +1105,11 @@ class NewsFeedAdmin(admin.ModelAdmin):
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Advertisement Base  Information - Attributes', {
-            'fields': ('slug', 'date_and_time', 'position', 'is_active',),
+            'fields': ('slug', 'position', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
     )
+    readonly_fields = ('date_and_time',)
 
     class Media:
         js = ('admin-collapse-default.js',)  # Include the custom JavaScript file

@@ -216,7 +216,7 @@ environ.Env.read_env()
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'  # new
-# DEFAULT_FROM_EMAIL='intellexcompany1@gmail.com'
+# DEFAULT_FROM_EMAIL='poketrovecompany@gmail.com'
 EMAIL_HOST=env('EMAIL_HOST')  # new
 EMAIL_HOST_USER=env('EMAIL_HOST_USER')  # new
 EMAIL_HOST_PASSWORD=env('EMAIL_HOST_PASSWORD')  # new

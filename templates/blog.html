@@ -69,6 +69,35 @@ a.page-link:hover {
     border: 2px solid silver;
 }
 
+/* Hide the sub-menu by default */
+.sub-menu {
+    display: none;
+}
+
+li:hover .sub-menu {
+    display: block;
+}
+
+li {
+    position: relative;
+}
+@keyframes dropdown {
+    0% { top: 0; }
+    100% { top: 100%; }
+}
+
+.sub-menu {
+    position: absolute;
+    width: 200px;
+    background-image: var(--gradient-2);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    top: 0; /* Start from the top of the parent */
+    left: 0; /* Align it to the left of the parent */
+    animation: dropdown 1s forwards; /* Apply the animation */
+}
+
 
 </style>
 </head>
@@ -107,28 +136,35 @@ a.page-link:hover {
 
         <ul class="navbar-list">
 
+          {% for column in Header %}
           <li>
-            <a href="#home" class="navbar-link hover-1" data-nav-toggler>Home</a>
-          </li>
-
-          <li>
-            <a href="#topics" class="navbar-link hover-1" data-nav-toggler>Topics</a>
-          </li>
-
-          <li>
-            <a href="#featured" class="navbar-link hover-1" data-nav-toggler>Featured Post</a>
-          </li>
-
-          <li>
-            <a href="#recent" class="navbar-link hover-1" data-nav-toggler>Recent Post</a>
-          </li>
-
-          <li>
-            <a href="#" class="navbar-link hover-1" data-nav-toggler>Contact</a>
-          </li>
-
+            <a href="#{{ column.section }}" class="navbar-link hover-1" data-nav-toggler>{{ column.text }}</a>
+            <ul class="sub-menu" style="border-radius: 10px;">
+            {% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
+                <br>
+              {% else %}
+										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
+                 <br>
+              {% endif %}
+            {% else %}
+              {% if row.opennew %}
+										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
+                 <br>
+              {% else %}
+										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
+                 <br>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+									</ul>
+</li>
+        {% endfor %}
         </ul>
-
         <div class="navbar-bottom">
 
           <div class="profile-card">
@@ -138,7 +174,6 @@ a.page-link:hover {
               <p class="card-title">Hello {{user.username}}!</p>
 
               <p class="card-subtitle">
-                You have 3 new messages
               </p>
             </div>
           </div>
@@ -174,8 +209,6 @@ a.page-link:hover {
         </div>
 
         <p class="copyright-text">
-          Copyright 2022 © Wren - Personal Blog Template.
-          Developed by codewithsadee
         </p>
 
       </nav>

@@ -1110,7 +1110,7 @@ class FeedForm(forms.ModelForm):
 
 class EmailForm(forms.ModelForm):
     email = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Email'}))
+        attrs={'placeholder': 'Email', 'style': 'height: 50px;'}))
 
     class Meta:
         model = EmailField

@@ -59,43 +59,36 @@
 						<!-- menu start -->
 						<nav class="main-menu">
 							<ul>
-								<li class="current-list-item"><a href="#">Home</a>
+							  {% for column in Header %}
+
+      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
 									<ul class="sub-menu">
-										<li><a href="index.html">Static Home</a></li>
-										<li><a href="index_2.html">Slider Home</a></li>
+										{% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% else %}
+              {% if row.opennew %}
+										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
 									</ul>
-								</li>
-								<li><a href="about.html">About</a></li>
-								<li><a href="#">Pages</a>
-									<ul class="sub-menu">
-										<li><a href="404.html">404 page</a></li>
-										<li><a href="about.html">About</a></li>
-										<li><a href="cart.html">Cart</a></li>
-										<li><a href="checkout.html">Check Out</a></li>
-										<li><a href="contact.html">Contact</a></li>
-										<li><a href="news.html">News</a></li>
-										<li><a href="shop.html">Shop</a></li>
-									</ul>
-								</li>
-								<li><a href="news.html">News</a>
-									<ul class="sub-menu">
-										<li><a href="news.html">News</a></li>
-										<li><a href="single-news.html">Single News</a></li>
-									</ul>
-								</li>
-								<li><a href="contact.html">Contact</a></li>
-								<li><a href="shop.html">Shop</a>
-									<ul class="sub-menu">
-										<li><a href="shop.html">Shop</a></li>
-										<li><a href="checkout.html">Check Out</a></li>
-										<li><a href="single-product.html">Single Product</a></li>
-										<li><a href="cart.html">Cart</a></li>
-									</ul>
+        {% endfor %}
 								</li>
 								<li>
 									<div class="header-icons">
-										<a class="shopping-cart" href="cart.html"><i class="fas fa-shopping-cart"></i></a>
-										<a class="mobile-hide search-bar-icon" href="#"><i class="fas fa-search"></i></a>
+										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
+											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
+										</a>
+										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
 									</div>
 								</li>
 							</ul>
@@ -163,8 +156,8 @@
 						<div class="news-text-box">
 							<h3><a href="single-news.html">{{newprofile.title}}</a></h3>
 							<p class="blog-meta">
-								<span class="author"><i class="fas fa-user"></i> {{ newprofile.user }} </span>
-								<span class="date"><i class="fas fa-calendar"></i> {{newprofile.date_and_time}} </span>
+								<span class="author"><img src="{% static 'css/images/user-solid.svg' %}" style="width: 11px; height: 11px; color: white; margin-right: 10px;"> {{ newprofile.user }} </span>
+								<span class="date"><img src="{% static 'css/images/calendar-solid.svg' %}" style="width: 11px; height: 11px; color: white; margin-right: 10px;"> {{newprofile.date_and_time}} </span>
 								<br>
 							</p>
 							{% with description=newprofile.description %}
@@ -178,7 +171,6 @@
 						{% endwith %}
 						<ul style="width: 100%;">
 								<span class="author" style="display: flex; align-items: center;">
-									<i class="fas fa-user"></i>
 									{% if newprofile.newprofile_profile_picture_url %}
 									<a href="{{ newprofile.newprofile_profile_url }}">
 										<img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
@@ -192,7 +184,7 @@
 						</ul>
 
 							<br>
-							<a href="single-news.html" class="read-more-btn">Read More <i class="fas fa-angle-right"></i></a>
+							<a href="single-news.html" class="read-more-btn">Read More <img src="{% static 'css/images/angle-right.png' %}" style="width: 11px; height: 11px; color: white; margin-right: 10px;"></a>
 
 						</div>
 					</div>

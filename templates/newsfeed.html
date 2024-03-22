@@ -56,46 +56,40 @@
         {% endfor %}
 						<!-- logo -->
 
+
 						<!-- menu start -->
 						<nav class="main-menu">
 							<ul>
-								<li class="current-list-item"><a href="#">Home</a>
+							  {% for column in Header %}
+
+      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
 									<ul class="sub-menu">
-										<li><a href="index.html">Static Home</a></li>
-										<li><a href="index_2.html">Slider Home</a></li>
+										{% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% else %}
+              {% if row.opennew %}
+										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
 									</ul>
-								</li>
-								<li><a href="about.html">About</a></li>
-								<li><a href="#">Pages</a>
-									<ul class="sub-menu">
-										<li><a href="404.html">404 page</a></li>
-										<li><a href="about.html">About</a></li>
-										<li><a href="cart.html">Cart</a></li>
-										<li><a href="checkout.html">Check Out</a></li>
-										<li><a href="contact.html">Contact</a></li>
-										<li><a href="news.html">News</a></li>
-										<li><a href="shop.html">Shop</a></li>
-									</ul>
-								</li>
-								<li><a href="news.html">News</a>
-									<ul class="sub-menu">
-										<li><a href="news.html">News</a></li>
-										<li><a href="single-news.html">Single News</a></li>
-									</ul>
-								</li>
-								<li><a href="contact.html">Contact</a></li>
-								<li><a href="shop.html">Shop</a>
-									<ul class="sub-menu">
-										<li><a href="shop.html">Shop</a></li>
-										<li><a href="checkout.html">Check Out</a></li>
-										<li><a href="single-product.html">Single Product</a></li>
-										<li><a href="cart.html">Cart</a></li>
-									</ul>
+        {% endfor %}
 								</li>
 								<li>
 									<div class="header-icons">
-										<a class="shopping-cart" href="cart.html"><i class="fas fa-shopping-cart"></i></a>
-										<a class="mobile-hide search-bar-icon" href="#"><i class="fas fa-search"></i></a>
+										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
+											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
+										</a>
+										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
 									</div>
 								</li>
 							</ul>
@@ -158,10 +152,10 @@
 
 				<div class="col-lg-4 col-md-6">
 					<div class="single-latest-news">
-						<a href="single-news.html">
+						<a href="{{newprofile.get_profile_url2}}">
 							<div class="latest-news-bg news-bg-1" style="background: url({{newprofile.image.url}}); background-size: cover;"></div></a>
 						<div class="news-text-box">
-							<h3><a href="single-news.html">{{newprofile.title}}</a></h3>
+							<h3><a href="{{newprofile.get_profile_url2}}">{{newprofile.title}}</a></h3>
 							<p class="blog-meta">
 								<span class="author"><i class="fas fa-user"></i> {{ newprofile.category }} </span>
 								<span class="date"><i class="fas fa-calendar"></i> {{newprofile.date_and_time}} </span>
@@ -192,7 +186,7 @@
 						</ul>
 
 							<br>
-							<a href="single-news.html" class="read-more-btn">Read More <i class="fas fa-angle-right"></i></a>
+							<a href="{{newprofile.get_profile_url2}}" class="read-more-btn">Read More <i class="fas fa-angle-right"></i></a>
 
 						</div>
 					</div>
@@ -293,7 +287,6 @@
 		</div>
 	</div>
 	<!-- end logo carousel -->
-
 	<!-- footer -->
 	<div class="footer-area">
 		<div class="container">
@@ -301,10 +294,10 @@
 				<div class="col-lg-3 col-md-6">
 					<div class="footer-box about-widget">
 						<h2 class="widget-title">About Us</h2>
-                            {% for NewsBackgroundImage in TextFielde %}
-							{% if NewsBackgroundImage.page == "newsfeed.html" %}
-							{% if NewsBackgroundImage.section == 1 %}
-							<p>{{NewsBackgroundImage.text}}</p>
+                            {% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 15 %}
+							<p>{{BackgroundImage.text}}</p>
 						  	{% endif %}
 							{% endif %}
 							{% endfor %}
@@ -314,16 +307,17 @@
 					<div class="footer-box get-in-touch">
 						<h2 class="widget-title">Join Our Community! </h2>
 						<ul>
-							<li>34/8, East Hukupara, Gifirtok, Sadan.</li>
-							<li><a href="{% url 'showcase:contact' %}" target='_blank' style="text-decoration: none;">IntelleXCompany1@gmail.com</a></li>
-							<li>+00 111 222 3333</li>
-                            <li><a href="{% url 'showcase:home' %}" target='_blank' style="text-decoration: none;">Live Communitiies</li>
+							<li>Address To Be Added</li>
+							<li><a href="{% url 'showcase:contact' %}" target='_blank' style="text-decoration: none;">PokeTroveCompany@gmail.com</a></li>
+							<li>Number To Be Added</li>
+							<li><a href="{% url 'showcase:home' %}" target='_blank' style="text-decoration: none;">Find Your Community</a></li>
 						</ul>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6">
 					<div class="footer-box pages">
 						<h2 class="widget-title">Pages</h2>
+						<br>
 						<ul>
 							<li><a href="{% url 'showcase:index' %}">Home</a></li>
 							<li><a href="{% url 'showcase:about' %}">About</a></li>
@@ -341,7 +335,7 @@
     						{% csrf_token %}
 							{{ form.email }}
 
-							<button type="submit"><i class="fas fa-paper-plane"></i></button>
+							<button type="submit"><img src="{% static 'css/images/sendemailairplane.png' %}" style="width: 30px; height: 15px; margin-top: 15px;"></button>
 													<br>
 							I agree to the Terms & Conditions: {{ form.confirmation }}
 						</form>
@@ -353,24 +347,24 @@
 	<!-- end footer -->
 
 	<!-- copyright -->
-	<div class="copyright">
+	<div class="copyright" style="margin-bottom: -10%;">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-6 col-md-12">
-					{% for NewsBackgroundImage in BaseCopyrightTextFielded %}
-					{% if NewsBackgroundImage.page == "newsfeed.html" %}
-					<p>{{NewsBackgroundImage.copyright}}</p>
+					{% for BackgroundImage in BaseCopyrightTextFielded %}
+					{% if BackgroundImage.page == "index.html" %}
+					<p>{{BackgroundImage.copyright}}</p>
 					{% endif %}
 					{% endfor %}
 				</div>
 				<div class="col-lg-6 text-right col-md-12">
 					<div class="social-icons">
 						<ul>
-							<li><a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a></li>
-							<li><a href="#" target="_blank"><i class="fab fa-twitter"></i></a></li>
-							<li><a href="#" target="_blank"><i class="fab fa-instagram"></i></a></li>
-							<li><a href="#" target="_blank"><i class="fab fa-linkedin"></i></a></li>
-							<li><a href="#" target="_blank"><i class="fab fa-dribbble"></i></a></li>
+					{% for BackgroundImage in Social %}
+					{% if BackgroundImage.page == "index.html" %}
+							<li><a href="{{BackgroundImage.hyperlink}}" target="_blank"><img src="{{BackgroundImage.icon.url}}" alt="{{ BackgroundImage.alternate }}" style="width: 30px; height: 30px;"></a></li>
+					{% endif %}
+					{% endfor %}
 						</ul>
 					</div>
 				</div>
@@ -378,7 +372,6 @@
 		</div>
 	</div>
 	<!-- end copyright -->
-
 	<!-- jquery -->
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
      <script src="{% static 'css/js/main.js' %}"></script>

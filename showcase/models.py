@@ -710,7 +710,7 @@ class NewsFeed(models.Model):
     name = models.CharField(max_length=100,
                             help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
     title = models.TextField(help_text='Write the news headline here.', verbose_name="News Headline")
-    slug = models.SlugField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True, null=True)
     category = models.CharField(max_length=200, help_text='Please let us know what form of news this is.')
     description = models.TextField(help_text='Write the news here.')
     image = models.ImageField(help_text='Please provide a cover image for the news.')
@@ -720,7 +720,7 @@ class NewsFeed(models.Model):
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
-    date_and_time = models.DateTimeField(null=True, verbose_name="time and date")
+    date_and_time = models.DateTimeField(null=True, verbose_name="time and date", auto_now_add=True)
     position = models.IntegerField(verbose_name="Image Position", default=1)
     anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
     is_active = models.IntegerField(default=1,
@@ -737,6 +737,11 @@ class NewsFeed(models.Model):
         verbose_name_plural = "News Feed"
 
     def save(self, *args, **kwargs):
+        if not self.slug:
+                print("Name:", self.name)  # Print the title
+                self.slug = slugify(self.name)
+                print("Slug after slugify:", self.slug)  # Print the slug after slugify
+
         if not self.pk:
             # Get the associated ProfileDetails for the user
             profile = ProfileDetails.objects.filter(user=self.user).first()
@@ -756,6 +761,11 @@ class NewsFeed(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
+    def get_profile_url2(self):
+        news = NewsFeed.objects.filter(user=self.user, slug=self.slug).first()
+        if news:
+            return reverse('showcase:singlenews', args=[str(news.slug)])
 
 
 class StaffProfile(models.Model):
@@ -2028,6 +2038,47 @@ class ContributorBackgroundImage(models.Model):
         verbose_name_plural = "Contributors Background Images"
 
 
+class UserProfile2(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='ship_profile')
+    first_name = models.CharField(max_length=100, default='')
+    last_name = models.CharField(max_length=100, default='')
+    description = models.CharField(max_length=100, default='')
+    address = models.CharField(max_length=250, blank=True, null=True)
+    address2 = models.CharField(max_length=250, blank=True, null=True)
+    city = models.CharField(max_length=100, default='')
+    state = models.CharField(max_length=100, default='')
+    zip_code = models.CharField(max_length=5, default=00000)
+    phone_number = models.CharField(default='000-000-0000', max_length=12)
+    profile_picture = models.ImageField(upload_to='profile_image', null=True, blank=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.user) + "'s shipping profile"
+
+    class Meta:
+        verbose_name = "Shipping Profile"
+        verbose_name_plural = "Shipping Profiles"
+        unique_together = ('user', 'id',)
+
+    def save(self, *args, **kwargs):
+        try:
+            # Check if existing profile exists for the current user
+            existing_profile = UserProfile2.objects.get(user=self.user)
+            # If found, delete it before saving the new data
+            if existing_profile:
+                existing_profile.delete()
+                print("Previous shipping profile deleted successfully.")
+        except UserProfile2.DoesNotExist:
+            # No existing profile found, proceed with normal save
+            pass
+
+        super().save(*args, **kwargs)
+
+
 class SettingsBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -3193,6 +3244,42 @@ class Item(models.Model):
                                               verbose_name="image width")
     length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
     width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
+    image2 = models.ImageField(blank=True, null=True, verbose_name="Second image")
+    image_length2 = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width2 = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    length_for_resize2 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Length")
+    width_for_resize2 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Width")
+    image3 = models.ImageField(blank=True, null=True, verbose_name="Third image")
+    image_length3 = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                                help_text='Original length of the advertisement (use for original ratio).',
+                                                verbose_name="image length")
+    image_width3 = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original width of the advertisement (use for original ratio).',
+                                               verbose_name="image width")
+    length_for_resize3 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Length")
+    width_for_resize3 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Width")
+    image4 = models.ImageField(blank=True, null=True, verbose_name="Fourth image")
+    image_length4 = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                                help_text='Original length of the advertisement (use for original ratio).',
+                                                verbose_name="image length")
+    image_width4 = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original width of the advertisement (use for original ratio).',
+                                               verbose_name="image width")
+    length_for_resize4 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Length")
+    width_for_resize4 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Width")
+    image5 = models.ImageField(blank=True, null=True, verbose_name="Fifth image")
+    image_length5 = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                                help_text='Original length of the advertisement (use for original ratio).',
+                                                verbose_name="image length")
+    image_width5 = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original width of the advertisement (use for original ratio).',
+                                               verbose_name="image width")
+    length_for_resize5 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Length")
+    width_for_resize5 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Width")
     # hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
     relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
     is_active = models.IntegerField(default=1,
@@ -3413,8 +3500,6 @@ class TradeOffer(models.Model):
         verbose_name_plural = "Trade Offers"
 
 
-
-
 class TradeShippingLabel(models.Model):
     trade_offer = models.ForeignKey(TradeOffer, on_delete=models.CASCADE)
     #responding_trade_offer = models.OneToOneField(RespondingTradeOffer, on_delete=models.CASCADE)
@@ -3423,6 +3508,7 @@ class TradeShippingLabel(models.Model):
     last_name = models.CharField(max_length=100, default='')
     description = models.CharField(max_length=100, default='')
     address = models.CharField(max_length=250, blank=True, null=True)
+    address2 = models.CharField(max_length=250, blank=True, null=True, help_text="Optional")
     city = models.CharField(max_length=100, default='')
     state = models.CharField(max_length=100, default='')
     zip_code = models.CharField(max_length=5, default=00000)
@@ -3511,7 +3597,6 @@ class RespondingTradeOffer(models.Model):
                 self.user = first_trade_item.user
                 print("sent trade offer to initial trader")
 
-
         if self.slug is None and self.wanted_trade_items:
             self.slug = self.wanted_trade_items.slug
 
@@ -3535,6 +3620,14 @@ class RespondingTradeOffer(models.Model):
                 user=self.user2,
                 first_name=userprofile.first_name if userprofile else '',
                 last_name=userprofile.last_name if userprofile else '',
+                address=userprofile.address if userprofile else '',
+                address2=userprofile.address2 if userprofile else '',
+                city=userprofile.city if userprofile else '',
+                state=userprofile.state if userprofile else '',
+                zip_code=userprofile.zip_code if userprofile else '',
+                phone_number=userprofile.phone_number if userprofile else '',
+
+
                 # Set other fields as needed
             )
         if self.pk is not None and self.trade_status == self.ACCEPTED:
@@ -3573,10 +3666,17 @@ class RespondingTradeOffer(models.Model):
 
 class Trade(models.Model):
     trade_offers = models.ManyToManyField(TradeOffer)
-    responding_trade_offers = models.ManyToManyField('RespondingTradeOffer', related_name="responding_trades", blank=True
-    )
+    responding_trade_offers = models.ManyToManyField('RespondingTradeOffer', related_name="responding_trades", blank=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='traders')
+    trade_user = models.ForeignKey(UserProfile2, on_delete=models.CASCADE, blank=True, null=True,
+                             verbose_name="Dealer", related_name='dealer_trades')
+
+    trade_user2 = models.ForeignKey(UserProfile2, on_delete=models.CASCADE, blank=True,
+                              null=True, help_text="Optional", verbose_name="Recipient",
+                              related_name='recipient_trades')
     timestamp = models.DateTimeField(auto_now_add=True)
+    slug = models.SlugField()
+    printed = models.BooleanField(default=False)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -3587,6 +3687,14 @@ class Trade(models.Model):
         offer_titles = " & ".join([str(offer) for offer in self.trade_offers.all()])
         user_names = " & ".join([user.username for user in self.users.all()])
         return f'{offer_titles} by {user_names}'
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            # Generate a random UUID
+            random_uuid = uuid.uuid4()
+            # Create a slug from the UUID and assign it to the slug field
+            self.slug = slugify(random_uuid)
+        super().save(*args, **kwargs)
 
     def get_profile_url(self):
         return [reverse('showcase:profile', args=[str(user.pk)]) for user in self.users.all()]
@@ -4409,45 +4517,6 @@ class State(models.Model):
 class FileBase(models.Model):
     file_field = models.FileField(blank=True, null=True, verbose_name="File Field")
 
-
-class UserProfile2(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='ship_profile')
-    first_name = models.CharField(max_length=100, default='')
-    last_name = models.CharField(max_length=100, default='')
-    description = models.CharField(max_length=100, default='')
-    address = models.CharField(max_length=250, blank=True, null=True)
-    city = models.CharField(max_length=100, default='')
-    state = models.CharField(max_length=100, default='')
-    zip_code = models.CharField(max_length=5, default=00000)
-    phone_number = models.CharField(default='000-000-0000', max_length=12)
-    profile_picture = models.ImageField(upload_to='profile_image', null=True, blank=True)
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
-
-    def __str__(self):
-        return str(self.user) + "'s shipping profile"
-
-    class Meta:
-        verbose_name = "Shipping Profile"
-        verbose_name_plural = "Shipping Profiles"
-        unique_together = ('user', 'id',)
-
-    def save(self, *args, **kwargs):
-        try:
-            # Check if existing profile exists for the current user
-            existing_profile = UserProfile2.objects.get(user=self.user)
-            # If found, delete it before saving the new data
-            if existing_profile:
-                existing_profile.delete()
-                print("Previous shipping profile deleted successfully.")
-        except UserProfile2.DoesNotExist:
-            # No existing profile found, proceed with normal save
-            pass
-
-        super().save(*args, **kwargs)
 
 
 def create_profile(sender, **kwargs):

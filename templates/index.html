@@ -27,7 +27,21 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+<script>
+	$(document).ready(function() {
+    $('.popup-youtube').magnificPopup({
+        type: 'iframe',
+        mainClass: 'mfp-fade',
+        removalDelay: 160,
+        preloader: false,
+        fixedContentPos: false
+    });
+});
 
+</script>
 <style>
 .hero-area {
     position: relative;
@@ -46,6 +60,19 @@
 .container {
     position: relative;
     z-index: 2;
+}
+
+.cart-btn{
+  background-image: url("{% static 'css/images/fireimage.png' %}"); /* Default image */
+  image-width: 100px;
+  image-height: 100px;
+  background-size: cover; /* Ensure image covers the button */
+  position: relative; /* Needed for proper stacking */
+}
+
+.cart-btn:hover {
+  background-image: url("{% static 'css/images/invertedfireimage.png' %}"); /* Hover image path */
+  opacity: 1; /* Ensure hover image is fully visible */
 }
 
 
@@ -106,43 +133,36 @@ window.onscroll = function() {
 						<!-- menu start -->
 						<nav class="main-menu">
 							<ul>
-								<li class="current-list-item"><a href="#">Home</a>
+							  {% for column in Header %}
+
+      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
 									<ul class="sub-menu">
-										<li><a href="index.html">Static Home</a></li>
-										<li><a href="index_2.html">Slider Home</a></li>
+										{% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% else %}
+              {% if row.opennew %}
+										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
 									</ul>
-								</li>
-								<li><a href="about.html">About</a></li>
-								<li><a href="#">Pages</a>
-									<ul class="sub-menu">
-										<li><a href="404.html">404 page</a></li>
-										<li><a href="about.html">About</a></li>
-										<li><a href="cart.html">Cart</a></li>
-										<li><a href="checkout.html">Check Out</a></li>
-										<li><a href="contact.html">Contact</a></li>
-										<li><a href="news.html">News</a></li>
-										<li><a href="shop.html">Shop</a></li>
-									</ul>
-								</li>
-								<li><a href="news.html">News</a>
-									<ul class="sub-menu">
-										<li><a href="news.html">News</a></li>
-										<li><a href="single-news.html">Single News</a></li>
-									</ul>
-								</li>
-								<li><a href="contact.html">Contact</a></li>
-								<li><a href="shop.html">Shop</a>
-									<ul class="sub-menu">
-										<li><a href="shop.html">Shop</a></li>
-										<li><a href="checkout.html">Check Out</a></li>
-										<li><a href="single-product.html">Single Product</a></li>
-										<li><a href="cart.html">Cart</a></li>
-									</ul>
+        {% endfor %}
 								</li>
 								<li>
 									<div class="header-icons">
-										<a class="shopping-cart" href="cart.html"><i class="fas fa-shopping-cart"></i></a>
-										<a class="mobile-hide search-bar-icon" href="#"><i class="fas fa-search"></i></a>
+										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
+											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
+										</a>
+										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
 									</div>
 								</li>
 							</ul>
@@ -239,10 +259,17 @@ window.onscroll = function() {
 
 			<div class="row">
 				<div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
-					<div class="list-box d-flex align-items-center">
 						<div class="list-icon">
-							<i class="fas fa-shipping-fast"></i>
+
+						{% for BackgroundImage in Image %}
+						{% if BackgroundImage.image_position == 1 %}
+								{% if BackgroundImage.page == 'index.html' %}
+							<img src="{{ BackgroundImage.image.url }}" style="width: 100px; height: 100px;">
+							{% endif %}
+							{% endif %}
+							{% endfor %}
 						</div>
+					<div class="list-box d-flex align-items-center">
 						<div class="content">
 							{% for BackgroundImage in TextFielde %}
 							{% if BackgroundImage.page == "index.html" %}
@@ -264,10 +291,16 @@ window.onscroll = function() {
 					</div>
 				</div>
 				<div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
-					<div class="list-box d-flex align-items-center">
 						<div class="list-icon">
-							<i class="fas fa-phone-volume"></i>
+							{% for BackgroundImage in Image %}
+							{% if BackgroundImage.image_position == 2 %}
+								{% if BackgroundImage.page == 'index.html' %}
+							<img src="{{ BackgroundImage.image.url }}" style="length: 100px; width: 100px;">
+							{% endif %}
+							{% endif %}
+							{% endfor %}
 						</div>
+					<div class="list-box d-flex align-items-center">
 						<div class="content">
 							{% for BackgroundImage in TextFielde %}
 							{% if BackgroundImage.page == "index.html" %}
@@ -288,10 +321,16 @@ window.onscroll = function() {
 					</div>
 				</div>
 				<div class="col-lg-4 col-md-6">
-					<div class="list-box d-flex justify-content-start align-items-center">
 						<div class="list-icon">
-							<i class="fas fa-sync"></i>
+							{% for BackgroundImage in Image %}
+							{% if BackgroundImage.image_position == 3 %}
+								{% if BackgroundImage.page == 'index.html' %}
+							<img src="{{ BackgroundImage.image.url }}" style="length: 100px; width: 100px;">
+							{% endif %}
+							{% endif %}
+							{% endfor %}
 						</div>
+					<div class="list-box d-flex justify-content-start align-items-center">
 						<div class="content">
 							{% for BackgroundImage in TextFielde %}
 							{% if BackgroundImage.page == "index.html" %}
@@ -341,11 +380,12 @@ window.onscroll = function() {
 				<div class="col-lg-4 col-md-6 text-center">
 					<div class="single-product-item">
 						<div class="product-image">
-							<a href="single-product.html">
+							<a href="{{ product.get_profile_url }}">
 								<img src="{{product.image.url}}" alt="{{ product.image.url }}">
 							</a>
 						</div>
 						<h3>{{product.title}}</h3>
+
 
                  {% if product.discount_price %}
                  <p class="product-price">
@@ -355,19 +395,20 @@ window.onscroll = function() {
                     {% else %}
                         {{ product.price }}
                     {% endif %} </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn"><i class="fas fa-shopping-cart"></i> Add to Cart</a></a>
+						 <a href="{{ product.get_profile_url }}" class="cart-btn">
+                                  <div class="cart-btn-fire"></div>Check It Out!</a>
 
 						 {% else %}
 						 <p class="product-price"> ${{ product.price }} </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn"><i class="fas fa-shopping-cart"></i> Add to Cart</a></a>
+						 <a href="{{ product.get_profile_url }}" class="cart-btn">
+                                  <div class="cart-btn-fire"></div> Check It Out!</a>
 
 						{% endif %}
 					</div>
 				</div>
 				{% endfor %}
 
-			</div>
-		</div>
+
 	</div>
 	<!-- end product section -->
 
@@ -518,10 +559,10 @@ window.onscroll = function() {
 			<div class="row">
 				<div class="col-lg-6 col-md-12">
 						{% for BackgroundImage in Image %}
-						{% if BackgroundImage.image_position == 1 %}
+						{% if BackgroundImage.image_position == 4 %}
 					<div class="abt-bg" style="background: url({{ BackgroundImage.image.url }}); background-size: cover;">
+					<a href="{{ BackgroundImage.hyperlink }}" class="video-play-btn popup-youtube"><img src="{% static 'css/images/play-button-arrowhead.png' %}" style="width: 25px; length: 25px; margin-top: 30px;"></a>
 
-						<a href="{{ BackgroundImage.file.url }}" class="video-play-btn popup-youtube"><i class="fas fa-play"></i></a>
 					</div>
 						{% endif %}
 						{% endfor %}
@@ -545,7 +586,7 @@ window.onscroll = function() {
 					  	{% endif %}
 						{% endif %}
 						{% endfor %}
-						<a href="about.html" class="boxed-btn mt-4">About Us</a>
+						<a href="about" class="boxed-btn mt-4">About Us</a>
 					</div>
 				</div>
 			</div>
@@ -620,10 +661,10 @@ window.onscroll = function() {
 	{% for newprofile in Profiles %}
 				<div class="col-lg-4 col-md-6">
 					<div class="single-latest-news">
-						<a href="single-news.html">
+						<a href="{{newprofile.get_profile_url2}}">
 							<div class="latest-news-bg news-bg-1" style="background: url({{newprofile.image.url}}); background-size: cover;"></div></a>
 						<div class="news-text-box">
-							<h3><a href="single-news.html">{{newprofile.title}}</a></h3>
+							<h3><a href="{{newprofile.get_profile_url2}}">{{newprofile.title}}</a></h3>
 							<p class="blog-meta">
 								<span class="author"><i class="fas fa-user"></i> {{ newprofile.category }} </span>
 								<span class="date"><i class="fas fa-calendar"></i> {{newprofile.date_and_time}} </span>
@@ -654,7 +695,7 @@ window.onscroll = function() {
 						</ul>
 
 							<br>
-							<a href="single-news.html" class="read-more-btn">Read More <i class="fas fa-angle-right"></i></a>
+							<a href="{{newprofile.get_profile_url2}}" class="read-more-btn">Read More <i class="fas fa-angle-right"></i></a>
 
 						</div>
 					</div>
@@ -682,42 +723,6 @@ window.onscroll = function() {
 					<div class="logo-carousel-inner">
 						{% for BackgroundImage in Image %}
 						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.image_position == 2 %}
-						<div class="single-logo-item">
-							<a href="{{ BackgroundImage.hyperlink }}">
-							<img src="{{ BackgroundImage.image.url }}" alt="">
-							</a>
-						</div>
-						{% endif %}
-						{% endif %}
-						{% endfor %}
-
-						{% for BackgroundImage in Image %}
-						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.image_position == 3 %}
-						<div class="single-logo-item">
-							<a href="{{ BackgroundImage.hyperlink }}">
-							<img src="{{ BackgroundImage.image.url }}" alt="">
-							</a>
-						</div>
-						{% endif %}
-						{% endif %}
-						{% endfor %}
-
-						{% for BackgroundImage in Image %}
-						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.image_position == 4 %}
-						<div class="single-logo-item">
-							<a href="{{ BackgroundImage.hyperlink }}">
-							<img src="{{ BackgroundImage.image.url }}" alt="">
-							</a>
-						</div>
-						{% endif %}
-						{% endif %}
-						{% endfor %}
-
-						{% for BackgroundImage in Image %}
-						{% if BackgroundImage.page == 'index.html' %}
                   		{% if BackgroundImage.image_position == 5 %}
 						<div class="single-logo-item">
 							<a href="{{ BackgroundImage.hyperlink }}">
@@ -731,6 +736,42 @@ window.onscroll = function() {
 						{% for BackgroundImage in Image %}
 						{% if BackgroundImage.page == 'index.html' %}
                   		{% if BackgroundImage.image_position == 6 %}
+						<div class="single-logo-item">
+							<a href="{{ BackgroundImage.hyperlink }}">
+							<img src="{{ BackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
+
+						{% for BackgroundImage in Image %}
+						{% if BackgroundImage.page == 'index.html' %}
+                  		{% if BackgroundImage.image_position == 7 %}
+						<div class="single-logo-item">
+							<a href="{{ BackgroundImage.hyperlink }}">
+							<img src="{{ BackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
+
+						{% for BackgroundImage in Image %}
+						{% if BackgroundImage.page == 'index.html' %}
+                  		{% if BackgroundImage.image_position == 8 %}
+						<div class="single-logo-item">
+							<a href="{{ BackgroundImage.hyperlink }}">
+							<img src="{{ BackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
+
+						{% for BackgroundImage in Image %}
+						{% if BackgroundImage.page == 'index.html' %}
+                  		{% if BackgroundImage.image_position == 9 %}
 						<div class="single-logo-item">
 							<a href="{{ BackgroundImage.hyperlink }}">
 							<img src="{{ BackgroundImage.image.url }}" alt="">
@@ -766,16 +807,17 @@ window.onscroll = function() {
 					<div class="footer-box get-in-touch">
 						<h2 class="widget-title">Join Our Community! </h2>
 						<ul>
-							<li>34/8, East Hukupara, Gifirtok, Sadan.</li>
-							<li><a href="{% url 'showcase:contact' %}" target='_blank' style="text-decoration: none;">IntelleXCompany1@gmail.com</a></li>
-							<li>+00 111 222 3333</li>
-                            <li><a href="{% url 'showcase:home' %}" target='_blank' style="text-decoration: none;">Live Communitiies</li>
+							<li>Address To Be Added</li>
+							<li><a href="{% url 'showcase:contact' %}" target='_blank' style="text-decoration: none;">PokeTroveCompany@gmail.com</a></li>
+							<li>Number To Be Added</li>
+							<li><a href="{% url 'showcase:home' %}" target='_blank' style="text-decoration: none;">Find Your Community</a></li>
 						</ul>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6">
 					<div class="footer-box pages">
 						<h2 class="widget-title">Pages</h2>
+						<br>
 						<ul>
 							<li><a href="{% url 'showcase:index' %}">Home</a></li>
 							<li><a href="{% url 'showcase:about' %}">About</a></li>
@@ -793,11 +835,10 @@ window.onscroll = function() {
     						{% csrf_token %}
 							{{ form.email }}
 
-							<button type="submit"><i class="fas fa-paper-plane"></i></button>
+							<button type="submit" style="height: 50px;"><img src="{% static 'css/images/sendemailairplane.png' %}" style="width: 30px; height: 16px; "></button>
 													<br>
 							I agree to the Terms & Conditions: {{ form.confirmation }}
 						</form>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -818,11 +859,11 @@ window.onscroll = function() {
 				<div class="col-lg-6 text-right col-md-12">
 					<div class="social-icons">
 						<ul>
-							<li><a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a></li>
-							<li><a href="#" target="_blank"><i class="fab fa-twitter"></i></a></li>
-							<li><a href="#" target="_blank"><i class="fab fa-instagram"></i></a></li>
-							<li><a href="#" target="_blank"><i class="fab fa-linkedin"></i></a></li>
-							<li><a href="#" target="_blank"><i class="fab fa-dribbble"></i></a></li>
+					{% for BackgroundImage in Social %}
+					{% if BackgroundImage.page == "index.html" %}
+							<li><a href="{{BackgroundImage.hyperlink}}" target="_blank"><img src="{{BackgroundImage.icon.url}}" alt="{{ BackgroundImage.alternate }}" style="width: 30px; height: 30px;"></a></li>
+					{% endif %}
+					{% endfor %}
 						</ul>
 					</div>
 				</div>
