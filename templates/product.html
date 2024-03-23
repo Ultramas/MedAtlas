@@ -187,7 +187,7 @@ img.hover-shadow {
 </div>
 
 <div id="myModal" class="modal">
-  <span class="close cursor" onclick="closeModal()">&times;</span>
+  <span class="close cursor" onclick="closeModal()" style="margin-top: 150px; margin-right: 220px;">&times;</span>
 
 <br>
 <br>
@@ -331,7 +331,7 @@ function showSlides(n) {
         </a>
     {% else %}
         <!-- Placeholder image or default avatar -->
-        <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
+                   <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;"><h5 style="color: white; margin-left: 10px;">Anonymous Seller</h5>
     {% endif %}
     <p style="color: white; margin-left: 10px; font-size: 20px;">{{ object.user.username }}</p>
 </div>

@@ -9,6 +9,13 @@
 
   <!--route to a single css file-->
 <head>
+{% if user.is_staff %}
+
+{% else %}
+    <meta http-equiv="refresh" content="0; URL={% url 'showcase:comingsoon' %}">
+{% endif %}
+
+
   <meta ch  arset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">

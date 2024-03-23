@@ -219,6 +219,7 @@ urlpatterns = [
     # path('contact/', TemplateView.as_view(template_name='email.html'), name='contact'),
     path('emaildone/', TemplateView.as_view(template_name='emaildone.html'), name='emaildone'),
     path('ao/', TemplateView.as_view(template_name='ao.html'), name='ao'),
+    path('comingsoon/', TemplateView.as_view(template_name='comingsoon.html'), name='comingsoon'),
     path('contributors/', views.ContributorBackgroundView.as_view(), name='contributors'),
     path('mantenience/', TemplateView.as_view(template_name='mantenience.html'), name='mantenience'),
     path('cost/', TemplateView.as_view(template_name='cost.html'), name='cost'),
