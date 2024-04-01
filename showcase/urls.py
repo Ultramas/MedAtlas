@@ -19,7 +19,7 @@ from django.urls import path, include, re_path
 from django.views.generic.base import TemplateView
 from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, BlogSearchResultsView, \
     currency_remove_from_cart, currency_add_to_cart, currency_reduce_quantity_item, submit_seller_application, \
-    PlaceWagerView, update_wager, SendFriendRequestView
+    PlaceWagerView, update_wager, SendFriendRequestView, FriendSearchResultsView
 
 # remove this:
 # from . import settings
@@ -286,6 +286,7 @@ urlpatterns = [
     path('quantumentangling/', TemplateView.as_view(template_name='quantumentangling.html'), name='quantumentangling'),
     path('featuredproducts/', TemplateView.as_view(template_name='featuredproducts.html'), name='featuredproducts'),
     path('ecommercesearch/', EcommerceSearchResultsView.as_view(), name='ecommercesearch_results'),
+    path('friendssearchresultview/', views.friendlysearchresultview, name='friendssearchresultview'),
     path('blogsearch/', BlogSearchResultsView.as_view(), name='blogsearch_results'),
     path('i2/', TemplateView.as_view(template_name='i2.html'), name='i2'),
 
@@ -333,9 +334,10 @@ urlpatterns = [
     path('pack_home/', views.ShufflerBackgroundView.as_view(), name='pack_home'),
     path('pokespinner/', views.InventoryView.as_view(), name='pokespinner'),
     path('pokechests/', views.InventoryView.as_view(), name='pokechests'),
-    path('chests/', views.ChestBackgroundView.as_view(), name='chests'),
-    path('gamehub/', views.GameHubView.as_view(), name='gamehub'),
-    path('gameroom/', views.GameRoomView.as_view(), name='gameoom'),
+    path('blackjack/', views.ChestBackgroundView.as_view(), name='blackjack'),
+    path('gamehub/<slug:slug>/', views.GameHubView.as_view(), name='gamehub'), #game hub with a single game hub
+    path('gameroom/<slug:slug>/', views.GameRoomView.as_view(), name='gameroom'), #game room with a single game genre (possibly multiple games)
+    path('game/<slug:slug>/', views.GameRoomView.as_view(), name='game'), #game with a single game
     path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
     path('inventory/', views.PlayerInventoryView.as_view(), name='inventory'),
     path('update_wager/<int:wager_id>/', update_wager, name='update_wager'),

@@ -115,7 +115,6 @@ function updateWager(wagerId, outcome) {
     url: '/update_wager/', // Replace with your Django view URL
     type: 'POST',
     data: {
-      'wager_id': /* Retrieve wager ID from game state */,
       'outcome': outcome,
     },
     success: function(response) {

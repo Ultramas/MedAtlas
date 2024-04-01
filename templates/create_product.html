@@ -104,7 +104,7 @@
   <br>
   <br>
   <br>
-<div class="post2v">
+<div class="post2v" style="min-height: 72%;">
 
             <div class = "boedy">
   <div class="containereatede">
@@ -113,11 +113,48 @@
                 </div>
      <br>
      <br>
- <form method="POST" enctype="multipart/form-data" class="post">
+<form method="POST">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form.title.label_tag }} {{ form.title }}
+    <br>
+    {{ form.price.label_tag }} {{ form.price }}
+    {{ form.discount_price.label_tag }} {{ form.discount_price }}
+    {{ form.specialty.label_tag }} {{ form.specialty }}
+    <br>
+    <br>
+    {{ form.label.label_tag }} {{ form.label }}
+    <br>
+    <br>
+    {{ form.slug.label_tag }} {{ form.slug }}
+    {{ form.description.label_tag }} {{ form.description }}
+    {{ form.image.label_tag }} {{ form.image }}
 
+    <div id="extraImages" style="display: none;">
+        {{ form.image2.label_tag }} {{ form.image2 }}
+        {{ form.image3.label_tag }} {{ form.image3 }}
+        {{ form.image4.label_tag }} {{ form.image4 }}
+        {{ form.image5.label_tag }} {{ form.image5 }}
+    </div>
+
+    <button type="button" id="toggleButton" onclick="toggleExtraImages()" style="justify-content: center; margin-left: auto; margin-right: auto; display: flex;">Show Extra Images</button>
     <button type="submit">Submit</button>
+</form>
+
+<script>
+function toggleExtraImages() {
+    var x = document.getElementById("extraImages");
+    var btn = document.getElementById("toggleButton");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+        btn.innerHTML = "Hide Extra Images";
+    } else {
+        x.style.display = "none";
+        btn.innerHTML = "Show Extra Images";
+    }
+}
+</script>
+
+
            <div class="drops">
                <!--fix the drop classes in style-->
         <div class="drop drop-1"></div>

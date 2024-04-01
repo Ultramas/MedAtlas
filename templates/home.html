@@ -1,44 +1,17 @@
-{% extends 'chatbase.html' %}
 {% load static %}
 
-{% block content %}
-
-    {% for ChatBackgroundImage in Titles %}
-      {% if ChatBackgroundImage.page == 'home.html' %}
-        <title>{{ ChatBackgroundImage.overtitle }}</title>
-      {% endif %}
-    {% endfor %}
-
+<!DOCTYPE html>
 <html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-.friend-list {
-  float: left;
-  position: fixed;
-  width: 200px; /* Adjust as needed */
-  background-color: #f1f1f1; /* Or desired color */
-  padding: 10px;
-  border: 1px solid #ddd;
-}
+	<head>
+		<title>Chat</title>
+		<!-- Bootstrap -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" >
+		<!-- Font awesome -->
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" >
+		<!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/chathome.css' %}">
 
-.chat-area {
-  margin-left: 220px; /* Adjust based on friend list width */
-}
-
-/* Styles for friend list elements (username headers) */
-.friend-list h2 {
-  /* Add desired styles */
-}
-
-/* Styles for chat interface elements within .chat-area */
-.chat-area {
-  /* Add desired styles */
-}
-
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
+		<style>
 .interface{
   text-align: center;
   justify-content: center;
@@ -122,71 +95,193 @@
     float: left;
     color: #999;
   }
+button[type="submit"] {
+    background-color: rgba(0, 0, 0, 0.4);
+    color: white;
+    height: 35px;
+    margin-right: 0px;
+    margin-top: 8px;
+    border: none;
 
+    padding: 0 10px;  /* Adjust padding as needed */
+    border-radius: 0px 8px 8px 0px; /* Top-left, Top-right, Bottom-right, Bottom-left */
+    cursor: pointer;
+}
       </style>
-</head>
-<body>
-    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
-        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
-        {% for ChatBackgroundImage in Logo %}
-        {% if ChatBackgroundImage.page == 'home.html' %}
 
-        <a class="logo" href="{{ChatBackgroundImage.hyperlink}}">
-          <img class="imageicon" src="{{ChatBackgroundImage.logocover.url}}"
-                alt="{{ChatBackgroundImage.alternate}}" style="length: {{ChatBackgroundImage.length_for_resize}}px; width: {{ChatBackgroundImage.width_for_resize}}px;"></a>
-        {% endif %}
-        {% endfor %}
-    </div>
+	</head>
+	<body>
+		<div class="container-fluid h-100">
+			<div class="row justify-content-center h-100">
+				<div class="col-md-4 col-xl-3 chat"><div class="card mb-sm-3 mb-md-0 contacts_card">
+					<div class="card-header">
+                        <form action="{% url 'showcase:home' %}" method="get">
+                            <div class="input-group">
+                                <input type="text" placeholder="Search..." name="search" class="form-control search" style="height: 35px;">
+                                <div class="input-group-prepend">
+                                    <button type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+					</div>
+					<div class="card-body contacts_body">
+            <ul class="contacts">
 
-{% for ChatBackgroundImage in Background %}
-{% if ChatBackgroundImage.page == 'home.html' %}
-  <div style="background: url('{{ChatBackgroundImage.cover.url}}'); background-size: cover;">
-      {% endif %}
-{% endfor %}
+  {% if search_results %}
+     {% for friend in search_results %}
 
-<div class="home">
-  <div class="friend-list">
-    {% for Friend in Friends %}
-      <h2>{{ Friend.user }}</h2>
-    {% empty %}
-      <h2>No friends found.</h2>
+     									{% if friend.currently_active %}
+                <a href="{{friend.get_profile_url2}}">
+              <li class="active" style="padding-top: 12px;">
+                  {% else %}
+                  <li>
+                  {% endif %}
+          <div class="d-flex bd-highlight">
+              <div class="img_cont">
+                  {% if friend.profile_picture_url %}
+
+                      <a href="{{ friend.profile_url }}">
+                          <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
+                      <span class="online_icon"></span>
+                      </a>
+                  {% endif %}
+              </div>
+              <div class="user_info">
+                  <span>{{ friend.username }}</span>
+                  {% if friend.online == True %}
+                      <p>Online</p>
+                  {% else %}
+                      <p>Offline</p>
+                  {% endif %}
+              </div>
+          </div>
+      </li>
+</a>
     {% endfor %}
-  </div>
+{% else %}
+  {% for friend in item_list %}
 
-  <div class="chat-area">
-    <br>
-    <br>
-    <br>
-    <div class = "interface">
-      <div align="center">
-        <h2 class = "tip">Quantum Chat Interface</h2>
-      </div>
+                <a href="{{friend.get_profile_url2}}">
+      <li class="active">
+          <div class="d-flex bd-highlight">
+              <div class="img_cont">
+                  {% if friend.profile_picture_url %}
+                      <a href="{{ friend.profile_url }}">
+                          <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
+                      <span class="online_icon"></span>
+                      </a>
+                  {% endif %}
+              </div>
+              <div class="user_info">
+                  <span>{{ friend.username }}</span>
+                  {% if friend.online == True %}
+                      <p>Online</p>
+                  {% else %}
+                      <p>Offline</p>
+                  {% endif %}
+              </div>
+          </div>
+      </li>
+                </a>
+              {% empty %}
+                  {% for friend in friends_data %}
+                <a href="{{friend.get_profile_url2}}">
+									{% if friend.currently_active %}
+              <li class="active" style="padding-top: 12px;">
+                  {% else %}
+                  <li>
+                  {% endif %}
+          <div class="d-flex bd-highlight">
+              <div class="img_cont">
+                  {% if friend.profile_picture_url %}
+                      <a href="{{ friend.profile_url }}">
+                          <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
+                      <span class="online_icon"></span>
+                      </a>
+                  {% endif %}
+              </div>
+              <div class="user_info">
+                  <span>{{ friend.username }}</span>
+                  {% if friend.online == True %}
+                      <p>Online</p>
+                  {% else %}
+                      <p>Offline</p>
+                  {% endif %}
+              </div>
+          </div>
+                </li></a>
+  {% empty %}
+      <h2>No friends found.</h2>
+  {% endfor %}
+  {% endfor %}
+{% endif %}
+            </ul>
+          </div>
 
-   </div>
+				</div></div>
+				<div class="col-md-8 col-xl-6 chat">
+					<div class="card">
+						<div class="card-header msg_head">
+							<div class="d-flex bd-highlight">
+							{% for newprofile in Profiles %}
+								<div class="img_cont">
+									{% if newprofile.newprofile_profile_picture_url %}
+									<img src="{{ newprofile.newprofile_profile_picture_url }}" class="rounded-circle user_img">
+									{% else %}
+									<!-- Placeholder image or default avatar -->
+									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px; class="rounded-circle user_img">
+									{% endif %}
+									<span class="online_icon"></span>
+								</div>
+							{% endfor %}
 
-  <div class="container">
+								<div class="user_info">
 
-    <div class = "room">
+									<span>{{user.username}}</span>
+									<p>My Communities</p>
+								</div>
+								<div class="video_cam">
+									<span><i class="fas fa-video"></i></span>
+									<span><i class="fas fa-phone"></i></span>
+								</div>
+							</div>
+							<span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+							<div class="action_menu">
+								<ul>
+									<li><i class="fas fa-user-circle"></i> View profile</li>
+									<li><i class="fas fa-users"></i> Add to close friends</li>
+									<li><i class="fas fa-plus"></i> Add to group</li>
+									<li><i class="fas fa-ban"></i> Block</li>
+								</ul>
+							</div>
+						</div>
+						<div class="card-body msg_card_body">
+							<div class="d-flex justify-content-start mb-4">
+								    <div class = "room">
       <form id="post-form" method="POST" action="checkview">
           {% csrf_token %}
-          <label>Room Name</label>
-          <input type="text" name="room_name" id="room_name" width="100px" />
-          <label>Username</label>
+		  <label style="text-align: center;"><b style="color: white;">Room Name</b></label>
+          <input style="text-align: center;" type="text" name="room_name" id="room_name" width="100px" />
+          <label style="margin-top: 20px;"><b style="color: white;">Username</b></label>
           <input type="text" name="username" id="username" width="100px" />
-          <input type="submit" value="Quantum Teleport To Room">
+          <input type="submit" value="Enter Room">
       </form>
     </div>
   </div>
-</div>
-</div>
-</body>
-
-
-    <script src="{% static 'css/js/script.js' %}"></script>
-    <script src="{% static 'css/js.darkmode.js' %}"></script>
-    <script src="{% static 'css/js/navbar.js' %}"></script>
-    <script src="{% static 'css/js/scroll.js' %}"></script>
-
+  </div>
+  </div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	<!-- JQuery -->
+     <script type="text/javascript" src="{% static 'css/js/chat.js' %}"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	</body>
 </html>
 
-{% endblock content %}

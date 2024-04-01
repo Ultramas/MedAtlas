@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import ListView
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
-    InventoryObject, Inventory, Trade, TradeOffer, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel
+    InventoryObject, Inventory, Trade, TradeOffer, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -653,6 +653,7 @@ class votingview(ListView):
         return Vote.objects.all()
 """
 
+
 class partnerview(ListView):
     paginate_by = 10
     template_name = 'partners.html'
@@ -920,7 +921,7 @@ class ImageCarouselView(BaseView):
         return context
 
 
-#class BackgroundView(FormMixin, BaseView):
+# class BackgroundView(FormMixin, BaseView):
 #    model = BackgroundImage
 #    form_class = EmailForm
 #    template_name = "index.html"
@@ -980,12 +981,12 @@ class ImageCarouselView(BaseView):
 #        context['Email'] = EmailField.objects.filter(is_active=1)
 #        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
 #        context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
-        # context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
+# context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
 #        print(FaviconBase.objects.all())
 #        print(213324)
 #        # Retrieve the signed-in user's profile and profile picture URL
 
-        # Retrieve the items
+# Retrieve the items
 #        product = Item.objects.filter(is_active=1)
 
 #        context['Products'] = product
@@ -1017,7 +1018,7 @@ class ImageCarouselView(BaseView):
 #        context['News'] = NewsFeed.objects.all()
 
 #        newprofile = NewsFeed.objects.filter(is_active=1)
-        # Retrieve the author's profile avatar
+# Retrieve the author's profile avatar
 
 #        context['Profiles'] = newprofile
 
@@ -1030,7 +1031,7 @@ class ImageCarouselView(BaseView):
 
 #        feedback_objects = Feedback.objects.filter(slug=slug)
 
-        # Add the feedback_objects to the context
+# Add the feedback_objects to the context
 #        context['Feed'] = feedback_objects
 
 #        for feedback_objects in context['Feed']:
@@ -1142,7 +1143,132 @@ class ChatBackgroundView(BaseView):
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+
+        current_user = self.request.user
+        newprofile = UserProfile2.objects.filter(is_active=1, user=current_user)
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        onlineprofile = Friend.objects.filter(is_active=1, user=current_user)
+
+        context['OnlineProfiles'] = onlineprofile
+
+        for onlineprofile in context['OnlineProfiles']:
+            friend = onlineprofile.friend
+            activeprofile = ProfileDetails.objects.filter(user=friend).first()
+            if activeprofile:
+                onlineprofile.author_profile_picture_url = profile.avatar.url
+                onlineprofile.friend_profile_picture_url = activeprofile.avatar.url
+                onlineprofile.author_profile_url = onlineprofile.get_profile_url()
+                onlineprofile.friend_name = onlineprofile.friend.username
+                print('activeprofile exists')
+
+        friends = Friend.objects.filter(user=self.request.user)
+
+        # Prepare a list to hold the friends' data
+        friends_data = []
+
+        for friend in friends:
+            # Get the friend's profile
+            profile = ProfileDetails.objects.filter(user=friend.friend).first()
+
+            if profile:
+                # Add the friend's data to the list
+                friends_data.append({
+                    'username': friend.friend.username,
+                    'profile_picture_url': profile.avatar.url,
+                    'profile_url': reverse('showcase:profile', args=[str(profile.pk)]),
+                    'currently_active': friend.currently_active,
+                })
+
+        # Add the friends' data to the context
+        context['friends_data'] = friends_data
+
+        search_term = self.request.GET.get('search', '')
+        if search_term:
+            context = self.search_friends(context)  # Call search_friends if search term exists
+
         return context
+
+    def search_friends(self, context):
+        search_term = self.request.GET.get('search', '')
+        if search_term:
+            item_list = Friend.objects.filter(
+                Q(friend__username__icontains=search_term)
+            ).prefetch_related('friend')  # Prefetch the friend object
+
+            # Prepare a list to hold the searched friends' data
+            search_results_data = []
+            current_user = self.request.user
+
+            for friend in item_list:
+
+                profile = ProfileDetails.objects.filter(user=friend.friend).first()
+
+                if profile:
+                    search_results_data.append({
+                        'username': friend.friend.username,
+                        'profile_picture_url': profile.avatar.url if profile else None,
+                        # Handle cases where profile might be missing
+                        'profile_url': reverse('showcase:profile', args=[str(profile.pk)]),
+                        'currently_active': friend.currently_active,
+                    })
+                    print('the friend does have a profile')
+                else:
+                    # Handle cases where profile details might be missing (optional)
+                    search_results_data.append({
+                        'username': friend.friend.username,
+                        'profile_picture_url': None,  # Set to None or a default image URL
+                        'profile_url': reverse('showcase:profile', args=[str(friend.friend.pk)]),
+                        'currently_active': friend.currently_active,
+                    })
+                    print('no profile on the friend')
+
+            context['search_results'] = search_results_data  # Update context with search results data
+        else:
+            context['search_results'] = []  # Empty list if no search
+
+        return context
+
+
+from django.views.generic import ListView
+
+
+class FriendSearchResultsView(ListView):
+    model = Friend
+    template_name = 'friendssearchresultview.html'
+
+    def get_queryset(self):
+        search_term = self.request.GET.get('search', '')  # Get the search term (default empty string)
+        if search_term:
+            item_list = Friend.objects.filter(
+                Q(friend_username__icontains=search_term)  # Filter on friend's username
+            )
+            print('item_list contains' + str(item_list))
+        else:
+            item_list = Friend.objects.none()  # Return an empty queryset if no search term
+            print('item_list is empty')
+        return item_list
+
+from django.shortcuts import render
+
+def friendlysearchresultview(request):
+  search_term = request.GET.get('search', '')
+  if search_term:
+    item_list = Friend.objects.filter(
+        Q(friend__username__icontains=search_term)
+    )
+  else:
+    item_list = Friend.objects.none()
+  context = {'item_list': item_list}  # Add item_list to context
+  return render(request, 'friendssearchresultview.html', context)  # Render the template
 
 
 class SupportChatBackgroundView(BaseView):
@@ -1172,6 +1298,8 @@ class PlaceWagerView(FormView):
 
 
 from django.core.exceptions import ValidationError
+
+
 @csrf_exempt
 def update_wager(request, wager_id):
     if request.method == 'POST':
@@ -1195,7 +1323,7 @@ def update_wager(request, wager_id):
 
 class ChestBackgroundView(BaseView):
     model = UserProfile
-    template_name = "chests.html"
+    template_name = "blackjack.html"
 
     def post(self, request, *args, **kwargs):
         form = WagerForm(request.POST, user_profile=request.user.user_profile)
@@ -1203,7 +1331,64 @@ class ChestBackgroundView(BaseView):
             wager = form.save(commit=False)
             wager.user_profile = request.user.user_profile
             wager.save()
-            return redirect('showcase:chests')  # replace with your actual view name
+            # Return the wager id to the client
+            return JsonResponse({'wager_id': wager.id})
+        else:
+            # If the form is not valid, re-render the page with the form errors
+            return self.get(request, *args, **kwargs)
+
+    @csrf_exempt  # Handle CSRF if needed
+    def update_wager(request):
+        if request.method == 'POST':
+            wager_id = request.POST.get('wager_id')
+            outcome = request.POST.get('outcome')
+            try:
+                wager = Wager.objects.get(id=wager_id)
+                wager.resolve(outcome)
+                return JsonResponse({'status': 'success'})
+            except Wager.DoesNotExist:
+                return JsonResponse({'error': 'Wager not found.'}, status=404)
+            except Exception as e:
+                return JsonResponse({'error': str(e)}, status=500)
+        else:
+            return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['wager_form'] = WagerForm()
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+
+class PokeChestBackgroundView(BaseView):
+    model = UserProfile
+    template_name = "pokechests.html"
+
+    def post(self, request, *args, **kwargs):
+        form = WagerForm(request.POST, user_profile=request.user.user_profile)
+        if form.is_valid():
+            wager = form.save(commit=False)
+            wager.user_profile = request.user.user_profile
+            wager.save()
+            return redirect('showcase:blackjack')  # replace with your actual view name
         else:
             # If the form is not valid, re-render the page with the form errors
             return self.get(request, *args, **kwargs)
@@ -1283,7 +1468,7 @@ class GameHubView(BaseView):
         else:
             messages.error(request, "Form submission invalid")
             print("there was an error in registering the email")
-            return render(request, "blog.html", {'form': form})
+            return render(request, "gamehub.html", {'form': form})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1293,20 +1478,8 @@ class GameHubView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
         context['Money'] = Currency.objects.filter(is_active=1).first()
-        context['Game'] = GameHub.objects.filter(is_active=1).first()
+        context['Game'] = GameHub.objects.filter(is_active=1)
         context['form'] = EmailForm()
-
-        newprofile = UpdateProfile.objects.filter(is_active=1)
-        # Retrieve the author's profile avatar
-
-        context['Profiles'] = newprofile
-
-        for newprofile in context['Profiles']:
-            user = newprofile.user
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
         return context
 
@@ -1325,7 +1498,7 @@ class GameRoomView(BaseView):
         else:
             messages.error(request, "Form submission invalid")
             print("there was an error in registering the email")
-            return render(request, "blog.html", {'form': form})
+            return render(request, "gameroom.html", {'form': form})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1336,11 +1509,10 @@ class GameRoomView(BaseView):
         context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['Game'] = GameHub.objects.filter(is_active=1).first()
+        context['GameRoom'] = Game.objects.filter(is_active=1).first()
         context['form'] = EmailForm()
 
-        newprofile = UpdateProfile.objects.filter(is_active=1)
-        # Retrieve the author's profile avatar
-
+        newprofile = Game.objects.filter(is_active=1)
         context['Profiles'] = newprofile
 
         for newprofile in context['Profiles']:
@@ -1817,6 +1989,7 @@ class NewsBackgroundView(BaseView):
 
         return context
 
+
 class SingleNewsView(DetailView):
     model = NewsFeed
     paginate_by = 10
@@ -1848,6 +2021,7 @@ class SingleNewsView(DetailView):
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
         return context
+
 
 class NewsCreatePostView(CreateView):
     model = NewsBackgroundImage
@@ -2040,8 +2214,115 @@ class RoomView(TemplateView):
                 messages.user_profile_picture_url = profile.avatar.url
                 messages.user_profile_url = messages.get_profile_url()
 
+        current_user = self.request.user
+        newprofile = UserProfile2.objects.filter(is_active=1, user=current_user)
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        onlineprofile = Friend.objects.filter(is_active=1, user=current_user).order_by('-last_messaged')
+        current_highlighted_profile = Friend.objects.filter(is_active=1, user=current_user)
+
+        context['OnlineProfiles'] = onlineprofile
+        context['CurrentProfiles'] = current_highlighted_profile
+
+        for onlineprofile in context['OnlineProfiles']:
+            friend = onlineprofile.friend
+            activeprofile = ProfileDetails.objects.filter(user=friend).first()
+            if activeprofile:
+                onlineprofile.author_profile_picture_url = profile.avatar.url
+                onlineprofile.author_profile_url = onlineprofile.get_profile_url()
+                onlineprofile.friend_profile_picture_url = profile.avatar.url
+                onlineprofile.friend_profile_picture_url = onlineprofile.get_profile_url()
+                onlineprofile.friend_name = onlineprofile.friend.username
+                print('activeprofile exists')
+
+
+        # Retrieve the author's profile avatar
+        blog_posts = Blog.objects.filter(status=1).order_by('-created_on')
+
+        context['BlogPosts'] = blog_posts
+
+        for onlineprofile in context['CurrentProfiles']:
+            friend = onlineprofile.friend
+            activeprofile = ProfileDetails.objects.filter(user=friend).first()
+            if activeprofile:
+                onlineprofile.author_profile_picture_url = profile.avatar.url
+                onlineprofile.friend_profile_picture_url = profile.avatar.url  # Add this line
+                onlineprofile.author_profile_url = onlineprofile.get_profile_url()
+                onlineprofile.friend_name = onlineprofile.friend.username
+                print('currentfriendprofile exists')
+
+        friends = Friend.objects.filter(user=self.request.user)
+
+        # Prepare a list to hold the friends' data
+        friends_data = []
+
+        for friend in friends:
+            # Get the friend's profile
+            profile = ProfileDetails.objects.filter(user=friend.friend).first()
+
+            if profile:
+                # Add the friend's data to the list
+                friends_data.append({
+                    'username': friend.friend.username,
+                    'profile_picture_url': profile.avatar.url,
+                    'profile_url': reverse('showcase:profile', args=[str(profile.pk)]),
+                    'currently_active': friend.currently_active,
+                })
+
+        # Add the friends' data to the context
+        context['friends_data'] = friends_data
+
+        search_term = self.request.GET.get('search', '')
+        if search_term:
+            context = self.search_friends(context)  # Call search_friends if search term exists
+
         return context
 
+    def search_friends(self, context):
+        search_term = self.request.GET.get('search', '')
+        if search_term:
+            item_list = Friend.objects.filter(
+                Q(friend__username__icontains=search_term)
+            ).prefetch_related('friend')  # Prefetch the friend object
+
+            # Prepare a list to hold the searched friends' data
+            search_results_data = []
+            current_user = self.request.user
+
+            for friend in item_list:
+
+                profile = ProfileDetails.objects.filter(user=friend.friend).first()
+
+                if profile:
+                    search_results_data.append({
+                        'username': friend.friend.username,
+                        'profile_picture_url': profile.avatar.url if profile else None,
+                        # Handle cases where profile might be missing
+                        'profile_url': reverse('showcase:profile', args=[str(profile.pk)]),
+                    })
+                    print('the friend does have a profile')
+                else:
+                    # Handle cases where profile details might be missing (optional)
+                    search_results_data.append({
+                        'username': friend.friend.username,
+                        'profile_picture_url': None,  # Set to None or a default image URL
+                        'profile_url': reverse('showcase:profile', args=[str(friend.friend.pk)]),
+                    })
+                    print('no profile on the friend')
+
+            context['search_results'] = search_results_data  # Update context with search results data
+        else:
+            context['search_results'] = []  # Empty list if no search
+
+        return context
 
 def room(request, room):
     username = request.GET.get('username')
@@ -3092,7 +3373,6 @@ class TradeItemCreateView(ListView):
 
         trade_offers = TradeOffer.objects.filter(is_active=1)
 
-
         slug = self.kwargs.get('slug')
 
         # Check if a valid slug is provided
@@ -3344,8 +3624,8 @@ def contact_trader(request, trade_offer_id):
 
     # Check if there's an accepted friend request between the current user and the trade offer creator
     if not FriendRequest.objects.filter(
-        Q(sender=trade_offer.user, receiver=current_user, status=FriendRequest.ACCEPTED) |
-        Q(sender=current_user, receiver=trade_offer.user, status=FriendRequest.ACCEPTED)
+            Q(sender=trade_offer.user, receiver=current_user, status=FriendRequest.ACCEPTED) |
+            Q(sender=current_user, receiver=trade_offer.user, status=FriendRequest.ACCEPTED)
     ).exists():
         # If not, create a new friend request with status pending
         FriendRequest.objects.create(sender=current_user, receiver=trade_offer.user, status=FriendRequest.PENDING)
@@ -3354,7 +3634,8 @@ def contact_trader(request, trade_offer_id):
         room = Room.objects.filter(signed_in_user__in=[current_user, trade_offer.user], public=False).first()
         if not room:
             # If not, create a new private room
-            room = Room.objects.create(name=f'Private room: {current_user.username} and {trade_offer.user.username}', signed_in_user=current_user, public=False)
+            room = Room.objects.create(name=f'Private room: {current_user.username} and {trade_offer.user.username}',
+                                       signed_in_user=current_user, public=False)
 
         # Redirect to the room page
         return redirect(room.get_absolute_url())
@@ -3890,7 +4171,6 @@ class BackgroundView(FormMixin, BaseView):
             return render(request, "index.html", {'form': form})
             return redirect('showcase:index')
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -3903,6 +4183,7 @@ class BackgroundView(FormMixin, BaseView):
             "advertisement_position")
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by("image_position")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['FeaturedGame'] = Game.objects.filter(is_active=1, filter='F')
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['Email'] = EmailField.objects.filter(is_active=1)
@@ -3959,7 +4240,6 @@ class BackgroundView(FormMixin, BaseView):
                 newprofile.newprofile_profile_picture_url = profile.avatar.url
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
-
         feed = Feedback.objects.filter(is_active=1).order_by('-timestamp')
 
         context['FeedBacking'] = feed
@@ -3974,6 +4254,7 @@ class BackgroundView(FormMixin, BaseView):
                 print(user)
 
         return context
+
 
 def dynamic_css(request):
     background_objects = BackgroundImageBase.objects.filter(page='index').order_by("position")
@@ -4497,6 +4778,7 @@ class AboutBackgroundView(BaseView):
         self.object_list = self.get_queryset()  # Add this line
         context = self.get_context_data(**kwargs)  # Call get_context_data here
         return render(request, "about.html", {'form': form, **context})
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
@@ -5535,6 +5817,7 @@ class PosteView(FormMixin, ListView):
             messages.error(request, form.errors)
             return render(request, "vote.html", {'form': form})
 
+
 def is_ajax(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
@@ -5543,7 +5826,8 @@ def is_ajax(request):
 class TradeOffersView(View):
     def get(self, request, *args, **kwargs):
         # Get all pending friend requests for the current user
-        pending_requests = TradeOffer.objects.select_related('trade_items').filter(user2=request.user, status=TradeOffer.PENDING)
+        pending_requests = TradeOffer.objects.select_related('trade_items').filter(user2=request.user,
+                                                                                   status=TradeOffer.PENDING)
         outgoing_requests = TradeOffer.objects.filter(user=request.user, status=TradeOffer.PENDING)
 
         context = {}
@@ -5570,7 +5854,9 @@ class TradeOffersView(View):
         context.update({'pending_requests': pending_requests, 'outgoing_requests': outgoing_requests})
         return render(request, 'pendingtrades.html', context)
 
+
 from django.http import JsonResponse
+
 
 @method_decorator(login_required, name='dispatch')
 class DirectedTradeOfferView(View):
@@ -5583,9 +5869,10 @@ class DirectedTradeOfferView(View):
         pending_requests = TradeOffer.objects.filter(user2=request.user, trade_status=TradeOffer.PENDING)
         outgoing_requests = TradeOffer.objects.filter(user=request.user, trade_status=TradeOffer.PENDING)
 
-        response_pending_requests = RespondingTradeOffer.objects.filter(user2=request.user, trade_status=RespondingTradeOffer.PENDING)
-        response_outgoing_requests = RespondingTradeOffer.objects.filter(user=request.user, trade_status=RespondingTradeOffer.PENDING)
-
+        response_pending_requests = RespondingTradeOffer.objects.filter(user2=request.user,
+                                                                        trade_status=RespondingTradeOffer.PENDING)
+        response_outgoing_requests = RespondingTradeOffer.objects.filter(user=request.user,
+                                                                         trade_status=RespondingTradeOffer.PENDING)
 
         context = {}
         context.update({
@@ -5626,7 +5913,6 @@ class DirectedTradeOfferView(View):
         return render(request, 'directedtradeoffers.html', context)
 
 
-
 @login_required
 def accept_trade(request, request_id):
     trade_offer = get_object_or_404(TradeOffer, id=request_id)
@@ -5638,6 +5924,7 @@ def accept_trade(request, request_id):
     messages.success(request, 'You have accepted the trade offer.')
     return redirect('showcase:mytrades')
 
+
 @login_required
 def decline_trade(request, request_id):
     trade_offer = get_object_or_404(TradeOffer, id=request_id)
@@ -5647,6 +5934,7 @@ def decline_trade(request, request_id):
     trade_offer.save()
     messages.success(request, 'You have declined the trade offer.')
     return redirect('showcase:mytrades')
+
 
 @login_required
 def accept_response_trade(request, request_id):
@@ -5669,6 +5957,7 @@ def accept_response_trade(request, request_id):
     messages.success(request, 'You have accepted the trade offer.')
     return redirect('showcase:mytrades')
 
+
 @login_required
 def decline_response_trade(request, request_id):
     trade_offer = get_object_or_404(RespondingTradeOffer, id=request_id)
@@ -5678,7 +5967,6 @@ def decline_response_trade(request, request_id):
     trade_offer.save()
     messages.success(request, 'You have declined the trade offer.')
     return redirect('showcase:mytrades')
-
 
 
 class TradeHistory(ListView):
@@ -6880,6 +7168,7 @@ class CurrencyPaypalFormView(FormView):
             'no_shipping': '1',
         }
 
+
 @allow_guest_user
 def currency_add_to_cart(request, slug):
     item = get_object_or_404(CurrencyMarket, slug=slug)
@@ -6937,8 +7226,8 @@ def currency_remove_from_cart(request, slug):
         order = order_qs[0]
         if order.items.filter(item__slug=item.slug).exists():
             order_item = CurrencyOrder.objects.filter(item=item,
-                                                  user=request.user,
-                                                  ordered=False)[0]
+                                                      user=request.user,
+                                                      ordered=False)[0]
             order_item.delete()
             messages.info(
                 request, "Item \"" + order_item.item.title +
@@ -6951,6 +7240,7 @@ def currency_remove_from_cart(request, slug):
         # add message doesnt have order
         messages.info(request, "You do not seem to have an order currently")
         return redirect("showcase:product", slug=slug)
+
 
 def currency_get_coupon(request, code):
     try:
@@ -6981,7 +7271,6 @@ class CurrencyAddCouponView(View):
                 return redirect("showcase:currencycheckout")
 
 
-
 def index(request):
     return redirect('showcase')
 
@@ -6994,8 +7283,8 @@ def currency_reduce_quantity_item(request, slug):
         order = order_qs[0]
         if order.items.filter(item__slug=item.slug).exists():
             order_item = CurrencyOrder.objects.filter(item=item,
-                                                  user=request.user,
-                                                  ordered=False)[0]
+                                                      user=request.user,
+                                                      ordered=False)[0]
             if order_item.quantity > 1:
                 order_item.quantity -= 1
                 order_item.save()
@@ -7010,8 +7299,6 @@ def currency_reduce_quantity_item(request, slug):
         # add message doesnt have order
         messages.info(request, "You do not have an Order")
         return redirect("showcase:order-summary")
-
-
 
 
 # users/views.py
@@ -7065,11 +7352,11 @@ def currency_reduce_quantity_item(request, slug):
 
 import stripe
 
-stripe.api_key = "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"
+stripe.api_key = "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"
 
 stripe.Source.create(type='ach_credit_transfer',
                      currency='usd',
-                     owner={'email': 'Ultramaster123456@gmail.com'})
+                     owner={'email': 'PokeTroveCompany6@gmail.com'})
 
 
 class HomeView(ListView):
@@ -8340,6 +8627,7 @@ class DonationsView(ListView):
 
         return context
 
+
 from django.http import JsonResponse
 from .models import UserProfile
 
@@ -8487,7 +8775,6 @@ class SellerApplicationView(FormMixin, LoginRequiredMixin, ListView):
             recipent_list = [application.email, ]
             send_mail(subject, message, email_from, recipent_list)
 
-
             # Save device id in session for later verification
             request.session['device_id'] = device.id
 
@@ -8500,6 +8787,7 @@ import base64
 from django.http import HttpResponse
 from PIL import Image
 import io
+
 
 def submit_seller_application(request):
     if request.method == 'POST':
@@ -8533,7 +8821,8 @@ def submit_seller_application(request):
             request.session['device_id'] = device.id
 
             # Pass the base64-encoded string to the template
-            return render(request, 'submit_application.html', {'form': form, 'qr_code_data_url': f'data:image/png;base64,{base64_image}'})
+            return render(request, 'submit_application.html',
+                          {'form': form, 'qr_code_data_url': f'data:image/png;base64,{base64_image}'})
     else:
         form = SellerApplicationForm()
 

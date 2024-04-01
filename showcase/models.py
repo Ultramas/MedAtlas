@@ -4,7 +4,7 @@ from uuid import uuid4
 from venv import logger
 
 from PIL import Image
-# from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete, pre_delete
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
@@ -94,11 +94,22 @@ HEAT = (
     ('E', 'Explosive'),
 )
 
+#relative level, based on chest costy
+COLOR = (
+    ('Gra', 'Gray'),
+    ('Gre', 'Green'),
+    ('Y', 'Yellow'),
+    ('O', 'Orange'),
+    ('R', 'Red'),
+    ('B', 'Black'),
+)
+
 PRIVACY = (
     ('PUB', 'Public'),
     ('PRI', 'Private'),
 )
 
+#absolute level, regardless of chest
 LEVEL = (
     ('C', 'Common'),
     ('U', 'Uncommon'),
@@ -279,6 +290,7 @@ class Choice(models.Model):
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
     votes = models.IntegerField(default=0)
+    value = models.IntegerField(default=0)
     category = models.CharField(max_length=100,
                                 help_text='Category of choice (Pokemon, trainers, etc.).')
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
@@ -305,7 +317,7 @@ class Choice(models.Model):
     nodes = models.IntegerField(help_text="Number of the choice included", blank=True, null=True, )
     value = models.DecimalField(max_digits=12, decimal_places=2, help_text="Value of item in Rubicoins.", blank=True,
                                 null=True, verbose_name="Value (Rubicoins)")
-    number = models.IntegerField(help_text="Position in rarity (ordered by value)")
+    number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1388,10 +1400,12 @@ class CurrencyFullOrder(models.Model):
         verbose_name_plural = "Total Currency Orders"
 
 
-class GameHub(models.Model):
-    name = models.CharField(max_length=200, verbose_name="Game Name")
-    type = models.CharField(choices=GAMETYPE, max_length=1, blank=True, null=True)
-    filter = models.CharField(choices=GAMEHUB_CHOICES, max_length=1, blank=True, null=True)
+class ShuffleType(models.Model):
+    name = models.CharField(default="Pack Opening", max_length=200)
+    type = models.CharField(choices=SHUFFLE_CHOICES, default='L',
+                            max_length=1)  # skill-based are usually reserved for tournament-type scenarios
+    circumstance = models.CharField(choices=AVALIABLE_CHOICES, default='OP', max_length=3)
+    game_mode = models.CharField(choices=GAME_MODE, default="STP", max_length=3)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1402,8 +1416,150 @@ class GameHub(models.Model):
         return str(self.name)
 
     class Meta:
+        verbose_name = "Shuffle Type"
+        verbose_name_plural = "Shuffle Types"
+
+
+class Shuffler(models.Model):
+    """Used for voting on different new ideas"""
+    question = models.ForeignKey(PollQuestion, on_delete=models.CASCADE)
+    choice_text = models.CharField(max_length=200)
+    file = models.FileField(null=True, verbose_name='File')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    choices = models.ManyToManyField(Choice, blank=True)
+    category = models.CharField(max_length=100,
+                                help_text='Type the category of product getting shuffled.')
+    heat = models.CharField(choices=HEAT, max_length=2, blank=True, null=True)
+    shuffletype = models.ForeignKey(ShuffleType, on_delete=models.CASCADE, blank=True, null=True,
+                                    verbose_name="Shuffle Type")
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    demonstration = models.CharField(choices=PRACTICE, max_length=2, blank=True, null=True)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    cost = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True, default=0.0)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.question)
+
+    # Signal receiver function
+    @receiver(post_save, sender=Choice)
+    def update_shuffler(sender, instance, **kwargs):
+        shufflers = Shuffler.objects.filter(choices=instance)
+        for shuffler in shufflers:
+            shuffler.tier = instance.tier
+            shuffler.rarity = instance.rarity
+            shuffler.value = instance.value
+            shuffler.number = instance.number
+            shuffler.save()
+
+    class Meta:
+        verbose_name = "Shuffle Choice"
+        verbose_name_plural = "Shuffle Choices"
+
+
+class GameHub(models.Model):
+    name = models.CharField(max_length=200, verbose_name="Game Hub Name")
+    type = models.CharField(choices=GAMETYPE, max_length=1, blank=True, null=True)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    filter = models.CharField(choices=GAMEHUB_CHOICES, max_length=1, blank=True, null=True)
+    description = models.CharField(max_length=2000)
+    slug = models.SlugField(max_length=200, unique=True, blank=True, null=True)
+    date_and_time = models.DateTimeField(null=True, verbose_name="date and time", auto_now_add=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.name)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    class Meta:
         verbose_name = "Game Hub"
         verbose_name_plural = "Game Hub"
+
+
+class Game(models.Model):
+    name = models.CharField(max_length=200, verbose_name="Game Name")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True) #game creator
+    cost = models.IntegerField(default=0)
+    discount_cost = models.IntegerField(blank=True, null=True)
+    type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    cards = models.ForeignKey(Shuffler, on_delete=models.CASCADE)
+    slug = models.SlugField(max_length=200, unique=True, blank=True, null=True)
+    filter = models.CharField(choices=GAMEHUB_CHOICES, max_length=1, blank=True, null=True)
+    player_made = models.BooleanField(default=True)
+    date_and_time = models.DateTimeField(null=True, verbose_name="date and time", auto_now_add=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.name)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+    def get_profile_url2(self):
+        return reverse('showcase:game', args=[str(self.slug)])
+
+    class Meta:
+        verbose_name = "Game"
+        verbose_name_plural = "Games"
+
+
+class Outcome(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="player")
+    value = models.IntegerField(blank=True, null=True)
+    ratio = models.IntegerField(blank=True, null=True)
+    type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    game_creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="creator")
+    nonce = models.DecimalField(max_digits=6, decimal_places=0)
+    date_and_time = models.DateTimeField(null=True, verbose_name="date and time", auto_now_add=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.user + self.game + self.date_and_time)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        if not self.cost:
+            self.cost = self.game.cards.choices.value
+        if not self.game_creator:
+            self.game_creator = self.game.user
+        super().save(*args, **kwargs)
 
 
 class BlackJack(models.Model):
@@ -2064,6 +2220,11 @@ class UserProfile2(models.Model):
         verbose_name_plural = "Shipping Profiles"
         unique_together = ('user', 'id',)
 
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
     def save(self, *args, **kwargs):
         try:
             # Check if existing profile exists for the current user
@@ -2699,7 +2860,6 @@ class BanAppealBackgroundImage(models.Model):
 #    verbose_name = "Background Image"
 #    verbose_name_plural = "Background Images"
 
-from django.db.models.signals import post_save, post_delete, pre_delete
 
 # class PublicProfile(models.Model):
 # user = models.OneToOneField(User, related_name='user', on_delete=models.CASCADE)
@@ -2775,30 +2935,6 @@ class FriendRequest(models.Model):
         verbose_name = "Friend Request"
         verbose_name_plural = "Friend Requests"
         unique_together = ('sender', 'receiver')
-
-
-class Friend(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    friend = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friends')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return str(self.user) + " is friends with " + str(self.friend) + "!"
-
-    @receiver(post_save, sender=FriendRequest)
-    def handle_friend_request(sender, instance, created, **kwargs):
-        if instance.status == FriendRequest.ACCEPTED:
-            Friend.objects.get_or_create(user=instance.sender, friend=instance.receiver)
-        elif instance.status == FriendRequest.DECLINED:
-            Friend.objects.filter(
-                (Q(user=instance.sender) & Q(friend=instance.receiver)) |
-                (Q(user=instance.receiver) & Q(friend=instance.sender))
-            ).delete()
-
-    post_save.connect(handle_friend_request, sender=FriendRequest)
-
-    class Meta:
-        unique_together = ('user', 'friend')
 
 
 class Room(models.Model):
@@ -2896,7 +3032,25 @@ class Message(models.Model):
             if profile:
                 self.position = profile.position
 
+        super().save(*args, **kwargs)  # Call the original save method first
+
+        # Update the Friend instances associated with the signed_in_user and friend fields
+        if self.signed_in_user and self.room:
+            # Get the Friend instances associated with the signed_in_user and friend fields
+            friends = Friend.objects.filter(
+                (Q(user=self.signed_in_user) & Q(friend__username=self.room)) |
+                (Q(user__username=self.room) & Q(friend=self.signed_in_user))
+            )
+
+            # Update the Friend instances with the latest message and the date
+            for friend in friends:
+                friend.latest_messages = self
+                friend.last_messaged = self.date
+                friend.save(update_fields=['latest_messages', 'last_messaged'])
+
         super().save(*args, **kwargs)
+
+
 
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
@@ -2913,6 +3067,7 @@ class Message(models.Model):
 
         return final_url
 
+
         """
    def _get_current_user(self):
        # Logic to retrieve the currently signed-in user
@@ -2928,7 +3083,78 @@ class Message(models.Model):
 
 # is_active is new
 
-# Create your models here.
+
+class Friend(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    friend = models.ForeignKey(User, on_delete=models.CASCADE, related_name='friends')
+    friend_username = models.CharField(max_length=500, blank=True, null=True)
+    latest_messages = models.ForeignKey(Message, blank=True, null=True, on_delete=models.CASCADE)
+    last_messaged = models.DateTimeField(blank=True, null=True)
+    currently_active = models.BooleanField(default=False) #are you currently on the person's chat profile
+    created_at = models.DateTimeField(auto_now_add=True)
+    online = models.BooleanField(default=False)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.user) + " is friends with " + str(self.friend) + "!"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Call the original save method first
+        if self.currently_active:
+            # Update the currently_active field for all instances with the same user field, except for this instance
+            Friend.objects.exclude(pk=self.pk).filter(user=self.user).update(currently_active=False)
+        self.friend_username = self.friend.username
+        latest_message_queryset = Message.objects.filter(Q(signed_in_user=self.user) | Q(signed_in_user=self.friend))
+        latest_message = latest_message_queryset.order_by('-date').first()
+        if latest_message:
+            self.latest_messages = latest_message
+            self.last_messaged = latest_message.date
+        super().save(*args, **kwargs)  # Save the model again with the updated field (optional)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.friend).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+    def get_profile_url2(self):
+        # Construct the URL for the room detail page
+        if self.name == '':
+            return reverse("showcase:room", kwargs={'room': ''})
+
+        room_url = reverse("showcase:room", kwargs={'room': self.name})
+
+        # Construct the query parameters with the username
+        final_url = f"{room_url}?username={self.name}"
+
+        return final_url
+
+    @receiver(post_save, sender=FriendRequest)
+    def handle_friend_request(sender, instance, created, **kwargs):
+        if instance.status == FriendRequest.ACCEPTED:
+            Friend.objects.get_or_create(user=instance.sender, friend=instance.receiver)
+        elif instance.status == FriendRequest.DECLINED:
+            Friend.objects.filter(
+                (Q(user=instance.sender) & Q(friend=instance.receiver)) |
+                (Q(user=instance.receiver) & Q(friend=instance.sender))
+            ).delete()
+
+    post_save.connect(handle_friend_request, sender=FriendRequest)
+
+    class Meta:
+        unique_together = ('user', 'friend')
+
+def update_friend_username(sender, instance, created, **kwargs):
+    if created:  # Check if a new object is created
+        instance.friend_username = instance.friend.username
+        instance.save()  # Save the model again with the updated field
+
+post_save.connect(update_friend_username, sender=Friend)
+
+
 class SupportChat(models.Model):
     name = models.CharField(max_length=1000)
     signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
@@ -3196,6 +3422,7 @@ signals.pre_save.connect(print_amount_before_save, sender=Wager)
  class Meta:
      verbose_name_plural = "Settings"
      """
+
 from django.db.models.signals import pre_save
 
 from django.http import JsonResponse
@@ -4609,24 +4836,6 @@ def set_slug(sender, instance, *args, **kwargs):
         instance.slug = instance.item.slug
 
 
-class ShuffleType(models.Model):
-    name = models.CharField(default="Pack Opening", max_length=200)
-    type = models.CharField(choices=SHUFFLE_CHOICES, default='L',
-                            max_length=1)  # skill-based are usually reserved for tournament-type scenarios
-    circumstance = models.CharField(choices=AVALIABLE_CHOICES, default='OP', max_length=3)
-    game_mode = models.CharField(choices=GAME_MODE, default="STP", max_length=3)
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
-
-    def __str__(self):
-        return str(self.name)
-
-    class Meta:
-        verbose_name = "Shuffle Type"
-        verbose_name_plural = "Shuffle Types"
 
 
 class PlayerVersusPlayer(models.Model):
@@ -4648,52 +4857,6 @@ class PlayerVersusPlayer(models.Model):
     class Meta:
         verbose_name = "Player Versus Player"
         verbose_name_plural = "Player Versus Players"
-
-
-class Shuffler(models.Model):
-    """Used for voting on different new ideas"""
-    question = models.ForeignKey(PollQuestion, on_delete=models.CASCADE)
-    choice_text = models.CharField(max_length=200)
-    file = models.FileField(null=True, verbose_name='File')
-    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                               help_text='Original length of the advertisement (use for original ratio).',
-                                               verbose_name="image length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                              help_text='Original width of the advertisement (use for original ratio).',
-                                              verbose_name="image width")
-    choices = models.ManyToManyField(Choice, blank=True)
-    category = models.CharField(max_length=100,
-                                help_text='Type the category of product getting shuffled.')
-    heat = models.CharField(choices=HEAT, max_length=2, blank=True, null=True)
-    shuffletype = models.ForeignKey(ShuffleType, on_delete=models.CASCADE, blank=True, null=True,
-                                    verbose_name="Shuffle Type")
-    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
-    demonstration = models.CharField(choices=PRACTICE, max_length=2, blank=True, null=True)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    cost = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True, default=0.0)
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
-
-    def __str__(self):
-        return str(self.question)
-
-    # Signal receiver function
-    @receiver(post_save, sender=Choice)
-    def update_shuffler(sender, instance, **kwargs):
-        shufflers = Shuffler.objects.filter(choices=instance)
-        for shuffler in shufflers:
-            shuffler.tier = instance.tier
-            shuffler.rarity = instance.rarity
-            shuffler.value = instance.value
-            shuffler.number = instance.number
-            shuffler.save()
-
-    class Meta:
-        verbose_name = "Shuffle Choice"
-        verbose_name_plural = "Shuffle Choices"
 
 
 import random
@@ -4896,6 +5059,11 @@ class ProfileDetails(models.Model):
         from django.urls import reverse
 
         return reverse('showcase:profile', kwargs={'pk': self.pk})
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
 
     def add_currency(self, amount):
         self.currency_amount += amount

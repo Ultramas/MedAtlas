@@ -197,7 +197,7 @@ window.onscroll = function() {
 	<!-- end search area -->
 
 
-<div class="hero-area hero-bg">>
+<div class="hero-area hero-bg">
         {% for BackgroundImage in Background %}
             {% if BackgroundImage.page == "index.html" %}
                 {% if BackgroundImage.position == 1 %}
@@ -354,8 +354,72 @@ window.onscroll = function() {
 
             </div>
 		</div>
-	</div>
 	<!-- end features list section -->
+
+	<!-- chests section -->
+        {% for BackgroundImage in Background %}
+            {% if BackgroundImage.page == "index.html" %}
+                {% if BackgroundImage.position == 2 %}
+	<div class="product-section mt-150 mb-150" style="background: url('{{BackgroundImage.image.url}}'); background-size: cover;">
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 offset-lg-2 text-center">
+					<div class="section-title">
+						<br>
+						<br>
+						<h3><span class="orange-text">Featured</span> Games</h3>
+						{% for BackgroundImage in TextFielde %}
+						{% if BackgroundImage.page == "index.html" %}
+						{% if BackgroundImage.section == 11 %}
+						<p>{{BackgroundImage.text}}</p>
+					    {% endif %}
+						{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				      {% for Game in FeaturedGame %}
+				<div class="col-lg-4 col-md-6 text-center">
+					<div class="single-product-item">
+						<div class="product-image">
+							<a href="{{ Game.get_profile_url }}">
+								<img src="{{Game.image.url}}" alt="{{ Game.image.url }}">
+							</a>
+						</div>
+						<h3>{{Game.name}}</h3>
+
+
+                 {% if Game.discount_cost %}
+                 <p class="product-price">
+					 {% if Game.discount_cost %}
+                        <span style="text-decoration: line-through;">{{ Game.cost }}💎</span>
+                        {{ Game.discount_cost }}💎
+                    {% else %}
+                        {{ Game.cost }}💎
+                    {% endif %} </p>
+						 <a href="{{ product.get_profile_url }}" class="cart-btn">
+                                  <div class="cart-btn-fire"></div>Check It Out!</a>
+
+						 {% else %}
+						 <p class="product-price"> {{ Game.cost }}💎 </p>
+						 <a href="{{ Game.get_profile_url }}" class="cart-btn">
+                                  <div class="cart-btn-fire"></div> Check It Out!</a>
+
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+      </div>
+				{% endfor %}
+
+
+	<!-- end chests section -->
 
 	<!-- product section -->
 	<div class="product-section mt-150 mb-150">
@@ -366,7 +430,7 @@ window.onscroll = function() {
 						<h3><span class="orange-text">PokeTrove</span> Marketplace</h3>
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
-						{% if BackgroundImage.section == 11 %}
+						{% if BackgroundImage.section == 12 %}
 						<p>{{BackgroundImage.text}}</p>
 					    {% endif %}
 						{% endif %}
@@ -408,6 +472,8 @@ window.onscroll = function() {
 				</div>
 				{% endfor %}
 
+		</div>
+	</div>
 
 	</div>
 	<!-- end product section -->
@@ -573,7 +639,7 @@ window.onscroll = function() {
 						<h2>We are <span class="orange-text">PokeTrove</span></h2>
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
-						{% if BackgroundImage.section == 12 %}
+						{% if BackgroundImage.section == 13 %}
 						<p>{{BackgroundImage.text}}</p>
 					  	{% endif %}
 						{% endif %}
@@ -581,7 +647,7 @@ window.onscroll = function() {
 
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
-						{% if BackgroundImage.section == 13 %}
+						{% if BackgroundImage.section == 14 %}
 						<p>{{BackgroundImage.text}}</p>
 					  	{% endif %}
 						{% endif %}
@@ -645,7 +711,7 @@ window.onscroll = function() {
 						<h3><span class="orange-text">Our</span> News</h3>
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
-						{% if BackgroundImage.section == 14 %}
+						{% if BackgroundImage.section == 15 %}
 						<p>{{BackgroundImage.text}}</p>
 					  	{% endif %}
 						{% endif %}
@@ -713,6 +779,7 @@ window.onscroll = function() {
 			</div>
 		</div>
 	</div>
+</div>
 	<!-- end latest news -->
 
 	<!-- trending communities carousel -->
@@ -796,7 +863,7 @@ window.onscroll = function() {
 						<h2 class="widget-title">About Us</h2>
                             {% for BackgroundImage in TextFielde %}
 							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 15 %}
+							{% if BackgroundImage.section == 16 %}
 							<p>{{BackgroundImage.text}}</p>
 						  	{% endif %}
 							{% endif %}

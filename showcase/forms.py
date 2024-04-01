@@ -901,7 +901,7 @@ from django.core.exceptions import ValidationError
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
-        fields = ('title', 'price', 'discount_price', 'specialty', 'label', 'slug', 'description', 'image')
+        fields = ('title', 'price', 'discount_price', 'specialty', 'label', 'slug', 'description', 'image', 'image2', 'image3', 'image4', 'image5')
         widgets = {
             # 'slug': forms.TextInput(attrs={'readonly': 'readonly'})
         }

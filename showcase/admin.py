@@ -3,7 +3,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
     Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket, SellerApplication, Meme, \
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
-    FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel
+    FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -434,11 +434,12 @@ admin.site.register(FriendRequest, FriendRequestAdmin)
 class FriendAdmin(admin.ModelAdmin):
    fieldsets = (
        ('Room Information', {
-           'fields': ('user', 'friend', ),
+           'fields': ('user', 'friend', 'friend_username', 'latest_messages', 'last_messaged', 'currently_active', 'created_at', 'online', 'is_active',),
            'classes': ('collapse-open',),
        }),
    )
    readonly_fields = ('created_at',)
+
 
 admin.site.register(Friend, FriendAdmin)
 
@@ -478,13 +479,25 @@ admin.site.register(UserProfile2, UserProfile2Admin)
 class GameHubAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Game Hub Information - Categorial Description', {
-            'fields': ('name', 'type', 'filter', 'is_active',),
+            'fields': ('name', 'type', 'image', 'filter', 'description', 'slug', 'is_active',),
             'classes': ('collapse',),
         }),
     )
 
 
 admin.site.register(GameHub, GameHubAdmin)
+
+
+class GameAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Game Information - Categorial Description', {
+            'fields': ('name', 'user', 'type', 'cost', 'image', 'cards', 'slug', 'filter', 'player_made', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+
+
+admin.site.register(Game, GameAdmin)
 
 
 class BlackJackAdmin(admin.ModelAdmin):
@@ -819,16 +832,15 @@ admin.site.register(OrderItemField, OrderItemFieldAdmin)
 
 
 class RoomAdmin(admin.ModelAdmin):
-    fieldsets = (
-        ('Room Information', {
-            'fields': ('name', 'signed_in_user'),
-            'classes': ('collapse-open',),
-        }),
-    )
+   fieldsets = (
+       ('Room Information', {
+           'fields': ('name', 'signed_in_user', 'public', 'logo', 'is_active'),
+           'classes': ('collapse-open',),
+       }),
+   )
 
 
 admin.site.register(Room, RoomAdmin)
-
 
 class StoreViewTypeAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -1385,18 +1397,18 @@ admin.site.register(ImageCarousel, ImageCarouselAdmin)
 
 
 class MessageAdmin(admin.ModelAdmin):
-    fieldsets = (
-        ('Message Information - Categorial Descriptions', {
-            'fields': ('value', 'user', 'signed_in_user', 'room',)
-        }),
-        ('Message Information - Image Display', {
-            'fields': ('image', 'image_length', 'image_width',)
-        }),
-        ('Message Information - Attributes', {
-            'fields': ('is_active',)
-        }),
-    )
-    readonly_fields = ('message_number',)
+   fieldsets = (
+       ('Message Information - Categorial Descriptions', {
+           'fields': ('value', 'user', 'signed_in_user', 'room',)
+       }),
+       ('Message Information - Image Display', {
+           'fields': ('file', 'image_length', 'image_width',)
+       }),
+       ('Message Information - Attributes', {
+           'fields': ('date', 'is_active',)
+       }),
+   )
+   readonly_fields = ('message_number',)
 
 
 admin.site.register(Message, MessageAdmin)
@@ -1462,6 +1474,24 @@ class SupportThreadAdmin(admin.ModelAdmin):
 
 
 admin.site.register(SupportLine, SupportThreadAdmin)
+
+
+class OutcomeAdmin(admin.ModelAdmin):
+   fieldsets = (
+       ('Message Information - Categorial Descriptions', {
+           'fields': ('user', 'value', 'ratio', 'type', 'color',)
+       }),
+       ('Message Information - Image Display', {
+           'fields': ('image', 'image_length', 'image_width',)
+       }),
+       ('Message Information - Attributes', {
+           'fields': ('nonce', 'is_active',)
+       }),
+   )
+   readonly_fields = ('date_and_time',)
+
+
+admin.site.register(Outcome, OutcomeAdmin)
 
 
 class BanAppealAdmin(admin.ModelAdmin):

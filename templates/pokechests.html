@@ -1,176 +1,26 @@
-{% extends 'spinbase.html' %}
-{% load static %}
-{% block content %}
 
+<!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="style.css">
-	<title>Lucky Spin</title>
-  <style>
-    *{
-      padding: 0;
-      margin: 0;
-      box-sizing: border-box;
-    }
-    body{
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      min-height: 100vh;
-      background: #00beac;
-    }
-    .containerty{
-      height: 350px;
-      width: 350px;
-      background: #4ed4c6;
-      position: relative;
-      border-radius: 50%;
-      overflow: hidden;
-      box-shadow: 0 0 10px gray;
-      transition: 3s all;
-    }
-    .containerty div{
-      height: 50%;
-      width: 200px;
-      clip-path: polygon(100% 0,50% 100%, 0 0);
-      transform: translateX(-50%);
-      transform-origin: bottom;
-      position: absolute;
-      left: 21%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      font-family: monospace;
-      font-weight: 1000;
-      color:#008276;
-       writing-mode: vertical-rl;
-    }.containerty .option{
-      transform: rotate(0deg);
-    }
-
-    .mid{
-      height: 25px;
-      width: 25px;
-      border-radius: 50%;
-      position: absolute;
-      background: #008276;
-    }
-    #spin{
-      height: 60px;
-      width: 200px;
-      background: #4ed4c6;
-      position: absolute;
-      margin-top: 600px;
-      font-size: 30px;
-      color: white;
-      font-weight: 1000;
-      letter-spacing: 4px;
-      border: 1px solid white;
-      cursor: pointer;
-      box-shadow: 0 5px 10px gray;
-      transition: 0.2s all;
-    }
-    #spin:hover{
-      box-shadow: none;
-    }
-    .stoper{
-      height: 50px;
-      width: 40px;
-      background: #ffd600;
-      position: absolute;
-      clip-path: polygon(100% 0,50% 100%, 0 0);
-      margin-top: -350px;
-    }
-
-
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animated Chest</title>
+<link rel="stylesheet" href="style.css">
 </head>
-<body style="">
-{% for Shuffler in Shuffle %}
-<h1 style="position: absolute; margin-top: -30%;">{{Shuffler.question}}</h1>
-<br>
-
-                    <div class="segment">
-                        <img src="{{ Shuffler.file.url }}" alt="{{ Shuffler.choice_text }}" style="width: 70px; height: 120px;"></div>
-                {% endfor %}
-            </div>
-
-		<span class="mid"></span>
-		<button id="spin">Open</button>
-		<div class="stoper"></div>
-    {% endif %}
-{% endfor %}
-  <script>
-    let containerty = document.querySelector(".containerty");
-    let btn = document.getElementById("spin");
-    let number = Math.ceil(Math.random() * 10000);
-
-    let options = document.querySelectorAll(".containerty div").length;
-    let degree = 360 / options;
-
-    for (let i = 0; i < options; i++) {
-      document.querySelectorAll(".containerty div")[i].style.transform = `rotate(${degree * i}deg)`;
-    }
-
- let nonce = Math.floor(Math.random() * 1000000);
-let prize;
-
-// Adjust the conditions to divide the nonce into eight ranges
-for (let i = 0; i < options; i++) {
-  if (nonce >= (1000000/options)*i && nonce < (1000000/options)*(i+1)) {
-    prize = i+1;
-  }
-}
-
-// Map the prizes to labels
-let prizeToLabel = {
-  1: 'a',
-  2: 'b',
-  3: 'c',
-  4: 'd',
-  5: 'e',
-  6: 'f',
-  7: 'g',
-  8: 'h'
-};
-
-let prizeLabel = prizeToLabel[prize];
-
-    let flash = document.querySelector(".containerty div");
-
-    // Add a transitionend event listener to the containerty
-    containerty.addEventListener('transitionend', function() {
-      // Enable the button when the spinning ends
-      btn.disabled = false;
-    });
-
-    btn.onclick = function () {
-      // Disable the button when it is clicked
-      btn.disabled = true;
-
-      containerty.style.transform = "rotate(" + number + "deg)";
-      number += Math.ceil(Math.random() * 10000);
-    }
-
-
-  </script>
-
-     <script src="{% static 'css/js/featuredproductscript.js' %}"></script>
-     <script src="{% static 'css/js.featuredproductscript2.js' %}"></script>
-     <script src="{% static 'css/js.darkmode.js' %}"></script>
-     <script src="{% static 'css/js/navbar.js' %}"></script>
-     <script src="{% static 'css/js/scroll.js' %}"></script>
-     <script src="{% static 'css/js/cover.js' %}"></script>
-     <script src="{% static 'css/js/autochat.js' %}"></script>
-     <script src="{% static 'css/js/pokespinner.js' %}"></script>
-</div>
+<body>
+<div class="chest">
+  <div class="lid"></div>
+  <div class="body"></div>
+  <div class="card">
+    <div class="card-inner">
+      <div class="front"></div> 
+      <!-- Front Side Content -->
+      <div class="back"></div>
+      <!-- Back Side Content  -->
+    </div>
+    </div>
+    </div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
-
-{% endblock content %}
-
-
-
