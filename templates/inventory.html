@@ -30,6 +30,11 @@
 
 </head>
 <body>
+{% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+      {{ message }}
+    </div>
+  {% endfor %}
 
 <!--PreLoader-->
   <div class="loader">
@@ -141,8 +146,7 @@
 			<div class="row">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="breadcrumb-text">
-						<p>Organic Information</p>
-						<h1>News Article</h1>
+						<p>PokeTrove INC</p>
 					</div>
 				</div>
 			</div>
@@ -150,54 +154,20 @@
 	</div>
 	<!-- end breadcrumb section -->
 
-	<!-- latest news -->
-	<div class="latest-news mt-150 mb-150">
-		<div class="container">
-			<div class="row">
-					{% for Inventory in Stockpile %}
-
-
-				<div class="col-lg-4 col-md-6">
-					<div class="single-latest-news">
-						<a href="single-news.html">
-							<div class="latest-news-bg news-bg-1" style="background: url({{newprofile.image.url}}); background-size: cover;"></div></a>
-						<div class="news-text-box">
-							<h3><a href="single-news.html">{{Inventory.choice_text}}</a></h3>
-							<p class="blog-meta">
-								<span class="author"><i class="fas fa-user"></i> {{ Inventory.category }} </span>
-								<span class="date"><i class="fas fa-calendar"></i> {{Inventory.date_and_time}} </span>
-								<br>
-							</p>
-							{% with description=newprofile.description %}
-							<p class="excerpt">
-								{% if description|length > 200 %}
-									{{ description|slice:":200" }}...
-								{% else %}
-									{{ description }}
-								{% endif %}
-							</p>
-						{% endwith %}
-						<ul style="width: 100%;">
-						</ul>
-
-							<br>
-							<a href="single-news.html" class="read-more-btn">Read More <i class="fas fa-angle-right"></i></a>
-
-						</div>
-					</div>
-				</div>
-					{% endfor %}
-
-			</div>
-
-
 			<!-- product section -->
 	<div class="product-section mt-150 mb-150">
+		{% for currency in Money %}
+		{% if currency.position == 1 %}
+			<h3 style="display: flex; justify-content: right; margin-right: 100px;">{{ SentProfile.user.username }}: {{ SentProfile.currency_amount }}
+                        {{ currency.name }}</h3>
+		{% endif %}
+		{% endfor %}
+
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="section-title">
-						<h3><span class="orange-text">My</span> Trade Inventory</h3>
+						<h3><span class="orange-text">My</span> Inventory</h3>
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "inventory.html" %}
 						{% if BackgroundImage.section == 1 %}
@@ -209,25 +179,36 @@
 				</div>
 			</div>
 
-			{% for TradeItem in TradeItems %}
-			<div class="row" style="display: flex; max-width: 100%;">
-				<div class="col-lg-4 col-md-6 text-center">
-					<div class="single-product-item">
-						<div class="product-image">
-							<a href="single-product.html">
-								<img src="{{TradeItem.image.url}}" style="width: 600px; height: 200px;">
-							</a>
-						</div>
-						<h3>{{TradeItem.title}}</h3>
+			{% for Inventory in StockObject %}
+<div class="row" style="display: flex; max-width: 100%;">
+    <div class="col-lg-4 col-md-6 text-center">
+       <div class="single-product-item">
+          <div class="product-image">
+             <a href="single-product.html">
+                <img src="{{ Inventory.image.url }}" style="width: 600px; height: 200px;">
+             </a>
+          </div>
+          <h3>{{ Inventory.choice.choice_text }}</h3>  <p class="product-price">
+                     <span style="">{{ Inventory.condition }}</span> </p>
+                     <span style="">{{ Inventory.description }}</span> </p>
+           <form action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post">
+               {% csrf_token %}
+        		{{ form.as_p }}
+               <button type="submit" class="cart-btn">Sell For {{Inventory.price}} 💎</button>
+           </form>
+		   <form method="post" action="{% url 'showcase:withdraw_inventory_object' Inventory.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Withdraw Card</button>
+		   </form>
+       </div>
+    </div>
+	{% empty %}
+	<img src="{% static 'css/images/broke.gif' %}" alt="broke buddy" style="display-content: flex; margin-left: auto; margin-right: auto; width: 500px; height: 500px;">
+    <br>
+	<h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
+	{% endfor %}
 
-                 <p class="product-price">
-                        <span style="">{{TradeItem.condition}}</span> </p>
-                        <span style="">{{TradeItem.description}}</span> </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn"><i class="fas fa-shopping-cart"></i>Remove From Trade Inventory</a></a>
 
-					</div>
-				</div>
-				{% endfor %}
 
 			</div>
 				</div>

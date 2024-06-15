@@ -14,6 +14,52 @@
          <title>{{ BusinessMailingView.overtitle }}</title>
       {% endif %}
     {% endfor %}
+       <style>
+        .advertisement-image {
+            position: absolute;
+            left: {{ advertising.x_position }}px;
+            top: {{ advertising.y_position }}px;
+        }
+        .boedy{
+      display: flex;
+      justify-content: center;
+        }
+
+    /* DEMO-SPECIFIC STYLES */
+    .containereatede h1 {
+      font-family: 'Playfair Display', serif;
+      overflow: hidden; /* Ensures the content is not revealed until the animation */
+      border-right: .15em solid red; /* The typewriter cursor */
+      white-space: nowrap; /* Keeps the content on a single line */
+      margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+      letter-spacing: .0em; /* Adjust as needed */
+      animation:
+        typing 3.5s steps(30, end),
+        blink-caret .5s step-end infinite;
+    }
+
+    /* The typing effect */
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+
+    /* The typewriter cursor effect */
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      35% { border-color: rgba(255, 255, 255, 0.637)}
+    }
+
+    .post2v {
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    border: 2px solid grey;
+    background: rgba(255, 255, 255, 0.5);
+    }
+
+        </style>
 </head>
 <body>
 {% for BusinessMailingView in Logo %}
@@ -50,8 +96,14 @@
 <br>
   <br>
 <br>
+  <br>  <br>
+  <br>  <br>
   <br>
+    <div class="post2v">
+
+  <div class="containereatede">
     <div class="mx-auto my-4 text-center">
+
         <h1>Contact A Customer</h1>
     </div>
     <div class="container">
@@ -62,7 +114,10 @@
         </form>
     </div>
 </div>
-
+</div>
+  <br>
+  <br>  <br>
+  <br>
 
    <!--Custom JS-->
     <script src="{% static 'css/js/script.js' %}"></script>

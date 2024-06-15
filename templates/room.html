@@ -10,24 +10,281 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" >
 		<!-- CSS -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/chathome.css' %}">
-	</head>
-
 <style>
 
 button[type="submit"] {
     background-color: rgba(0, 0, 0, 0.4);
     color: white;
     height: 35px;
+    margin-top: 20px;
     margin-right: 0px;
     margin-top: 0px;
     border: none;
-
+    box-shadow: none;
     padding: 0 10px;  /* Adjust padding as needed */
     border-radius: 0px 8px 8px 0px; /* Top-left, Top-right, Bottom-right, Bottom-left */
     cursor: pointer;
 }
 
+button[type="submit"]:hover {
+    transition-duration: 0.5s;
+    display: inline-block;
+    padding: 5 5px;
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: none;
+    border-radius: 15px;
+    }
 </style>
+
+
+{% for room in rooms_with_logo_same_name %}
+    <title>{{ room.name }}</title>
+{% endfor %}
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+.chat-container {
+  background-color: rgba(0, 0, 0, 0);
+  border-radius: 5px;
+  padding: 20px;
+  max-width: 800px;
+  padding: 0 20px;
+  margin: 0 auto; /* This centers the element horizontally */
+  background-color: #f1f1f1;
+}
+
+.chat-container .message {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.chat-container .avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.chat-container .message .message-content {
+  flex-grow: 1;
+  background-color: #f7f7f7;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.chat-container .message .message-content .sender {
+  font-weight: bold;
+}
+
+.chat-container .message .message-content .time {
+  font-size: 12px;
+  color: #999;
+}
+
+.chat-input {
+  background-color: #f7f7f7;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.chat-input input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.chat-input input[type="submit"] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.username-room{
+background-color: rgba(102, 102, 102, 0.06);
+margin-bottom: 22px;
+  border-radius: 5px;
+padding-top: 36px;
+padding-bottom: 52px;
+    }
+
+.combined-input {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+#file-label {
+    position: absolute;
+    right: 1px;
+    top: 50%;
+    background: rgba(255, 215, 0, 1);
+    padding: 6.5px;
+    border-radius: 4px;
+    transform: translateY(-62%);
+    cursor: pointer;
+}
+
+</style>
+    <link rel='stylesheet' type='text/css' media='screen' href="{% static 'css/lightbox.css' %}">
+    {% if current_theme %}
+    {% if current_theme.file %}
+        <style>
+            body {
+        background-image: url("{{ current_theme.file.url }}");
+        background-size: cover;
+        background-attachment: fixed;
+            }
+        </style>
+    {% else %}
+        <p>Error: Current theme does not have an image.</p>
+    {% endif %}
+{% else %}
+{% endif %}
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+
+<section class="gt_section-77035 gt_animation-zoom-out-left gt_animated" data-name="Header" style="height: auto;"> <div class="gt_header"> <div class="gt_flex gt_logo"> <div class="icon_when_scroll"> <div class="icon_when_scroll_content">  </div> </div> <div class="logo_header">
+
+
+    <div class = "navbarx">
+
+   <ul>
+  {% for column in Header %}
+    <div class="dropdown">
+      <a href="#{{ column.section }}" class="glass">{{ column.text }}</a>
+      <div class="dropdown-content">
+        {% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+                <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a>
+              {% else %}
+                <a href="{{ profile_url }}">{{ row.text }}</a>
+              {% endif %}
+            {% else %}
+              {% if row.opennew %}
+                <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
+              {% else %}
+                <a href="{{ row.url }}">{{ row.text }}</a>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</ul>
+
+    </div>
+
+
+      </div>
+
+  </div>
+<nav class="show">
+     <div  onclick="navToggle(this)" class="bell"></div>
+     <div onclick="navToggle(this)" class="hamburger">
+       <div class="bun"></div>
+       <div class="bun"></div>
+       <div class="bun"></div>
+     </div>
+
+{% if FeaturedNavigation %}
+    {% for BaseView in FeaturedNavigation %}
+    {% if BaseView.position == 1 %}
+    <h2 class="navtext">{{BaseView.default_header}}</h2>
+    {% endif %}
+    {% if BaseView.text %}
+
+            {% if BaseView.url == 'http://127.0.0.1:8000/profile' %}
+              {% if BaseView.opennew %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{profile_url}}" target="_blank">{{BaseView.text}}</a>
+                </div>
+              {% else %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{profile_url}}">{{BaseView.text}}</a>
+                </div>
+              {% endif %}
+            {% else %}
+              {% if BaseView.opennew %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{BaseView.url}}" target="_blank">{{BaseView.text}}</a>
+                </div>
+              {% else %}
+                <div class="navItem10" style="justify-content: center;">
+                  <a href="{{BaseView.url}}">{{BaseView.text}}</a>
+                </div>
+              {% endif %}
+            {% endif %}
+
+    {% endif %}
+    {% if BaseView.image %}
+<div class="metaclass1e" style="padding-top: 10%; font-size: 10px; text-align: left;
+    justify-content: left;
+    object-position: right;">
+    <a href="{{BaseView.url}}">
+         <img src="{{BaseView.image.url}}" width="150px" height="150px" style="border-radius: 50px;" alt="{{BaseView.url}}">
+      </a>
+</div>
+
+    {% endif %}
+
+    {% endfor %}
+    {% else %}
+<h2 class="navtext">PokeTrove</h2>
+    <div class="navItem"><a href="/">Home</a></div>
+     <div class="navItem2"><a href="/about/">About Us</a></div>
+     <div class="navItem3"><a href="/home/" target="_blank">Community</a></div>
+     <!--<div class="navItem10"><a href = "/perks/">Member Perks</a></li></div>-->
+     <div class="navItem4"><a href="/admin/" target="_blank">Administration</a></div>
+     <div class="navItem8"><a href="/ehome/">Store</a></div>
+     <div class="navItem11"><a href="/accounts/logout/">Logout</a></div>
+<br>
+<br>
+
+<div class="metaclass1">
+    <a href="https://discord.gg/g43uGbURUz">
+         <img alt="Qries" src="../static/css/images/MC.png" width="280" height="150">
+      </a>
+
+</div>
+</nav>
+    </div>
+    {% endif %}
+</section>
+
+
+
+
+  {% block javascript %}
+    <script src="{% static 'css/js/script.js' %}"></script>
+    <script src="{% static 'css/js/darkmode.js' %}"></script>
+    <script src="{% static 'css/js/navbar.js' %}"></script>
+    <script src="{% static 'css/js/scroll.js' %}"></script>
+    <script src="{% static 'css/js/cover.js' %}"></script>
+  {% endblock javascript %}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
 
 <script>
 $(document).ready(function(){
@@ -139,16 +396,17 @@ $(document).on('submit', '#post-form', function(e) {
 </script>
 
 <script>
-  // Scroll to the bottom of the chat container
-  function scrollToBottom() {
-    var chatContainer = document.querySelector('.chat-container');
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+function scrollToBottom() {
+  const chatContainer = document.querySelector('.chat-container'); // Replace with your actual selector
+  if (chatContainer) {
+    setTimeout(() => {
+      chatContainer.scrollTop = chatContainer.scrollHeight - chatContainer.clientHeight;
+    }, 10); // Add a slight delay (adjust as needed)
   }
+}
 
-  // Scroll to the bottom after page refresh
-  window.onload = function () {
-    scrollToBottom();
-  };
+// Call scrollToBottom on page load and after receiving new messages
+scrollToBottom();
 </script>
 
     <script src="{% static 'css/js/script.js' %}"></script>
@@ -202,7 +460,15 @@ $(document).ready(function(){
 {% endfor %}
 
 
-  <div class="username-room">
+  <div class="username-room">{% for room in rooms_with_logo_same_name %}
+        {% if room.logo %}
+            <img src="{{ room.logo.url }}" alt="{{ room.name }} logo" style="width: 22vh; height: 14.5vh; padding: 0px; margin-top: -40px;">
+        {% else %}
+            <p></p>
+        {% endif %}
+{% endfor %}
+
+
   <h1 style="text-align: center; margin-top: 150px; margin-bottom: -170px; color: rgba(255, 255, 255, 0.5); ">{{username}} - {{room}}</h1>
 
 </div>
@@ -216,7 +482,7 @@ $(document).ready(function(){
                             <div class="input-group">
                                 <input type="text" placeholder="Search..." name="search" class="form-control search" style="height: 35px;">
                                 <div class="input-group-prepend">
-                                    <button type="submit">
+                                    <button type="submit" style="margin-left: 0px; margin-top: 5px;">
                                         <i class="fas fa-search"></i>
                                     </button>
                                 </div>
@@ -239,7 +505,7 @@ $(document).ready(function(){
               <div class="img_cont">
                   {% if friend.profile_picture_url %}
 
-                      <a href="{{ friend.profile_url }}">
+                      <a href="{{ friend.user_profile_url }}">
                           <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
                       <span class="online_icon"></span>
                       </a>
@@ -269,7 +535,7 @@ $(document).ready(function(){
           <div class="d-flex bd-highlight">
               <div class="img_cont">
                   {% if friend.profile_picture_url %}
-                      <a href="{{ friend.profile_url }}">
+                      <a href="{{ friend.user_profile_url }}">
                           <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
                       <span class="online_icon"></span>
                       </a>
@@ -287,7 +553,7 @@ $(document).ready(function(){
       </li>
               {% empty %}
                   {% for friend in friends_data %}
-              									{% if friend.currently_active %}
+                  {% if friend.currently_active %}
               <li class="active" style="padding-top: 12px;">
                   {% else %}
                   <li>
@@ -295,7 +561,7 @@ $(document).ready(function(){
           <div class="d-flex bd-highlight">
               <div class="img_cont">
                   {% if friend.profile_picture_url %}
-                      <a href="{{ friend.profile_url }}">
+                      <a href="{{ friend.user_profile_url }}">
                           <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
                       <span class="online_icon"></span>
                       </a>
@@ -316,18 +582,7 @@ $(document).ready(function(){
   {% endfor %}
   {% endfor %}
 {% endif %}
-						<li>
-							<div class="d-flex bd-highlight">
-								<div class="img_cont">
-									<img src="https://2.bp.blogspot.com/-8ytYF7cfPkQ/WkPe1-rtrcI/AAAAAAAAGqU/FGfTDVgkcIwmOTtjLka51vineFBExJuSACLcBGAs/s320/31.jpg" class="rounded-circle user_img">
-									<span class="online_icon offline"></span>
-								</div>
-								<div class="user_info">
-									<span>Chaymae Naim</span>
-									<p>Left 7 mins ago</p>
-								</div>
-							</div>
-						</li>
+
 
 						</ul>
 					</div>
@@ -340,9 +595,9 @@ $(document).ready(function(){
 								<div class="img_cont">
 
 						{% for friend in friends_data %}
-									{% if friend.currently_active %}
-    					{% if friend.profile_picture_url %}
-                        <a href="{{ friend.profile_url }}">
+                            {% if friend.currently_active %}
+    					        {% if friend.profile_picture_url %}
+                        <a href="{{ friend.user_profile_url }}">
            				 	<img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
 									<span class="online_icon"></span>
 						</a>
@@ -360,7 +615,7 @@ $(document).ready(function(){
 								</div>
 
 								<div class="user_info">
-						{% for Friend in Friends %} <!--remember to filter by selected friend--
+						            {% for Friend in Friends %}
 									<span>{{Friend.friend}}</span>
 									<p>1767 Messages</p>
 									{% endfor %}
@@ -381,134 +636,9 @@ $(document).ready(function(){
 							</div>
 						</div>
 						<div class="card-body msg_card_body">
-<head>
 
-{% for room in rooms_with_logo_same_name %}
-    <title>{{ room.name }}</title>
-{% endfor %}
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-
-.chat-container {
-  background-color: rgba(0, 0, 0, 0);
-  border-radius: 5px;
-  padding: 20px;
-  max-width: 800px;
-  padding: 0 20px;
-  margin: 0 auto; /* This centers the element horizontally */
-  background-color: #f1f1f1;
-}
-
-.chat-container .message {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
-
-.chat-container .avatar img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-.chat-container .message .message-content {
-  flex-grow: 1;
-  background-color: #f7f7f7;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-.chat-container .message .message-content .sender {
-  font-weight: bold;
-}
-
-.chat-container .message .message-content .time {
-  font-size: 12px;
-  color: #999;
-}
-
-.chat-input {
-  background-color: #f7f7f7;
-  padding: 20px;
-  border-radius: 5px;
-}
-
-.chat-input input[type="text"] {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 5px;
-  box-sizing: border-box;
-}
-
-.chat-input input[type="submit"] {
-  width: 100%;
-  background-color: #4CAF50;
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.username-room{
-background-color: rgba(102, 102, 102, 0.06);
-margin-bottom: 22px;
-  border-radius: 5px;
-padding-top: 36px;
-padding-bottom: 1px;
-    }
-
-.combined-input {
-    position: relative;
-    display: inline-block;
-    width: 100%;
-}
-
-#file-label {
-    position: absolute;
-    right: 1px;
-    top: 50%;
-    background: rgba(255, 215, 0, 1);
-    padding: 6.5px;
-    border-radius: 4px;
-    transform: translateY(-62%);
-    cursor: pointer;
-}
-
-</style>
-    <link rel='stylesheet' type='text/css' media='screen' href="{% static 'css/lightbox.css' %}">
-    {% if current_theme %}
-    {% if current_theme.file %}
-        <style>
-            body {
-        background-image: url("{{ current_theme.file.url }}");
-        background-size: cover;
-        background-attachment: fixed;
-            }
-        </style>
-    {% else %}
-        <p>Error: Current theme does not have an image.</p>
-    {% endif %}
-{% else %}
-    <p>Theme not set. Want to set a theme?</p>
-{% endif %}
-<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-</head>
-<body>
     <div class="column three mobile-twelve section_header_logo vertical-align-middle"
         style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
-
-{% for room in rooms_with_logo_same_name %}
-        {% if room.logo %}
-            <img src="{{ room.logo.url }}" alt="{{ room.name }} logo" style="width: 150px; height: 80px; padding:  5px;">
-        {% else %}
-            <p></p>
-        {% endif %}
-{% endfor %}
 
 
     </div>
@@ -664,44 +794,7 @@ function preloadImages(urls) {
 
 
   </div>
-</body>
 
-<script type="text/javascript">
-$(document).on('submit', '#post-form', function(e) {
-  e.preventDefault();
-
-  // Create a new FormData object to send both text and file data
-  var formData = new FormData();
-  formData.append('username', $('#username').val());
-  formData.append('room_id', $('#room_id').val());
-  formData.append('room_name', $('#room_name').val());
-  formData.append('message', $('#message').val());
-  formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
-
-  // Append the file input to the FormData object if a file is selected
-  var fileInput = $('#file')[0];
-  if (fileInput.files.length > 0) {
-    formData.append('file', fileInput.files[0]);
-  }
-
-  $.ajax({
-    type: 'POST',
-    url: '/home/send',
-    data: formData,
-    contentType: false,  // Prevent jQuery from setting a content type
-    processData: false,  // Prevent jQuery from processing the data
-    success: function(data) {
-       // Handle the success response here
-    }
-  });
-
-  // Clear the message input and file input
-  document.getElementById('message').value = '';
-  document.getElementById('file').value = ''; // Reset the file input
-
-  // Add further handling if needed
-});
-</script>
 
 <script>
   // Scroll to the bottom of the chat container

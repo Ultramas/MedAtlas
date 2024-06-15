@@ -177,8 +177,8 @@ $(document).ready(function(){
   });
   preloadImages(avatarUrls);
 
-  // Load and display messages every second
-  setInterval(loadAndDisplayMessages, 1000);
+  // Load and display messages every half-second
+  setInterval(loadAndDisplayMessages, 500);
 });
 
 // Preload images
@@ -222,5 +222,6 @@ function preloadImages(urls) {
 </body>
 
 </html>
+{% debug %}
 
 {% endblock content %}

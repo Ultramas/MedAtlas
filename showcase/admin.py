@@ -3,7 +3,8 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
     Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket, SellerApplication, Meme, \
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
-    FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome
+    FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
+    UploadACard, InviteCode, OfficialShipping, Withdraw
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -57,6 +58,8 @@ from .models import PartnerBackgroundImage
 from .models import WhyBackgroundImage
 from .models import SettingsBackgroundImage
 from .models import PerksBackgroundImage
+from .models import DegeneratePlaylistLibrary
+from .models import DegeneratePlaylist
 from .models import FaviconBase
 from .models import LogoBase
 from .models import BackgroundImageBase
@@ -234,10 +237,22 @@ class StaffApplicationAdmin(admin.ModelAdmin):
 admin.site.register(StaffApplication, StaffApplicationAdmin)
 
 
+class CardCategoryAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Card Category Application Information - Categorial Description', {
+            'fields': ('category', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+
+
+admin.site.register(CardCategory, CardCategoryAdmin)
+
+
 class PartnerApplicationAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Partner Application Information - Categorial Description', {
-            'fields': ('name', 'category', 'description', 'server_invite', 'is_active',),
+            'fields': ('user', 'name', 'category', 'multi_category', 'description', 'resume', 'requirement_check', 'policy_check', 'voucher',),
             'classes': ('collapse',),
         }),
     )
@@ -337,6 +352,17 @@ class CurrencyFullOrderAdmin(admin.ModelAdmin):
 
 
 admin.site.register(CurrencyFullOrder, CurrencyFullOrderAdmin)
+
+
+class EndowmentAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Endowment Information', {
+            'fields': ('user', 'target', 'order', 'is_active',)
+        }),
+    )
+
+
+admin.site.register(Endowment, EndowmentAdmin)
 
 
 class TradeItemAdmin(admin.ModelAdmin):
@@ -466,7 +492,7 @@ admin.site.register(SettingsModel, SettingsAdmin)
 class UserProfileAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Partner Application Information - Categorial Description', {
-            'fields': ('user', 'stripe_customer_id', 'one_click_purchasing', 'currency', 'currency_amount', 'is_active',),
+            'fields': ('user', 'stripe_customer_id', 'one_click_purchasing', 'currency', 'level', 'currency_amount', 'is_active',),
             'classes': ('collapse',),
         }),
     )
@@ -488,10 +514,20 @@ class GameHubAdmin(admin.ModelAdmin):
 admin.site.register(GameHub, GameHubAdmin)
 
 
+class GameChoiceInline(admin.StackedInline):
+    model = Choice
+    extra = 1
+
+
 class GameAdmin(admin.ModelAdmin):
+    inlines = [GameChoiceInline]
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+
     fieldsets = (
         ('Game Information - Categorial Description', {
-            'fields': ('name', 'user', 'type', 'cost', 'image', 'cards', 'slug', 'filter', 'player_made', 'is_active',),
+            'fields': ('name', 'user', 'type', 'cost', 'image', 'power_meter', 'slug', 'filter', 'player_made', 'is_active',),
             'classes': ('collapse',),
         }),
     )
@@ -695,6 +731,36 @@ class PaymentAdmin(admin.ModelAdmin):
 
 admin.site.register(Payment, PaymentAdmin)
 
+
+class DegeneratePlaylistLibraryAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Degenerate Playist Library Information - Categorial Description', {
+            'fields': ('user', 'title', 'category', 'artist', 'audio_file', 'audio_img', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('created_at',)
+
+
+admin.site.register(DegeneratePlaylistLibrary, DegeneratePlaylistLibraryAdmin)
+
+
+class DegeneratePlaylistAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Degenerate Playist Information - Categorial Description', {
+            'fields': ('user', 'song', 'artist', 'audio_file', 'audio_img', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('created_at',)
+
+
+admin.site.register(DegeneratePlaylist, DegeneratePlaylistAdmin)
+
+
+
+
+
 from django.contrib import messages
 from .models import State
 
@@ -834,13 +900,26 @@ admin.site.register(OrderItemField, OrderItemFieldAdmin)
 class RoomAdmin(admin.ModelAdmin):
    fieldsets = (
        ('Room Information', {
-           'fields': ('name', 'signed_in_user', 'public', 'logo', 'is_active'),
+           'fields': ('name', 'signed_in_user', 'members', 'public', 'logo', 'is_active'),
            'classes': ('collapse-open',),
        }),
    )
 
 
 admin.site.register(Room, RoomAdmin)
+
+
+class OfficialShippingAdmin(admin.ModelAdmin):
+   fieldsets = (
+       ('Room Information', {
+           'fields': ('user', 'street_address', 'apartment_address', 'country', 'zip', 'status', 'is_active'),
+           'classes': ('collapse-open',),
+       }),
+   )
+
+
+admin.site.register(OfficialShipping, OfficialShippingAdmin)
+
 
 class StoreViewTypeAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -869,7 +948,7 @@ admin.site.register(ItemFilter, ItemFilterAdmin)
 class ItemAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Item Information - Categorial Descriptions', {
-            'fields': ('title', 'category', 'label', 'slug', 'description', 'specialty',),
+            'fields': ('user', 'title', 'category', 'label', 'slug', 'description', 'specialty',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Item Information - Prices', {
@@ -897,6 +976,30 @@ class ItemAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Item, ItemAdmin)
+
+
+class UploadACardAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Item Information - Categorial Descriptions', {
+            'fields': ('user', 'name', 'image', 'public', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+
+admin.site.register(UploadACard, UploadACardAdmin)
+
+
+class InviteCodeAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Item Information - Categorial Descriptions', {
+            'fields': ('code','user', 'created_at', 'permalink', 'expire_time', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+
+admin.site.register(InviteCode, InviteCodeAdmin)
 
 
 class LogoBaseAdmin(admin.ModelAdmin):
@@ -1246,7 +1349,7 @@ admin.site.register(CurrencyMarket, CurrencyMarketAdmin)
 class SellerApplicationAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Seller Application Information - Categorial Descriptions', {
-            'fields': ('user', 'age', 'email', 'email_verified',),
+            'fields': ('user', 'age', 'email', 'email_verified', 'accepted'),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Seller Application Information - Image Display', {
@@ -1309,13 +1412,27 @@ admin.site.register(Inventory, InventoryAdmin)
 class InventoryObjectAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Inventory Application Information - Categorial Description', {
-            'fields': ('user', 'inventory', 'choice', 'choice_text', 'image', 'image_length', 'image_width', 'is_active',),
+            'fields': ('user', 'inventory', 'choice', 'choice_text', 'currency', 'price', 'trade_locked', 'image', 'image_length', 'image_width', 'is_active',),
             'classes': ('collapse',),
         }),
     )
 
 
 admin.site.register(InventoryObject, InventoryObjectAdmin)
+
+
+class WithdrawAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Withdraws - Categorial Description', {
+            'fields': ('user', 'cards', 'number_of_cards', 'shipping_state', 'fees', 'status', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('date_and_time',)
+
+
+admin.site.register(Withdraw, WithdrawAdmin)
+
 
 class AdministrationTaskAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -1747,6 +1864,17 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ProfileDetails, ProfileDetailsAdmin)
+
+
+class ExperienceAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Level Information', {
+            'fields': ('user', 'name', 'is_active',)
+        }),
+    )
+
+
+admin.site.register(Experience, ExperienceAdmin)
 
 
 class LevelAdmin(admin.ModelAdmin):

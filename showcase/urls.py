@@ -19,7 +19,8 @@ from django.urls import path, include, re_path
 from django.views.generic.base import TemplateView
 from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, BlogSearchResultsView, \
     currency_remove_from_cart, currency_add_to_cart, currency_reduce_quantity_item, submit_seller_application, \
-    PlaceWagerView, update_wager, SendFriendRequestView, FriendSearchResultsView
+    PlaceWagerView, update_wager, SendFriendRequestView, FriendSearchResultsView, GameCategorySearchResultsView, \
+    GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView
 
 # remove this:
 # from . import settings
@@ -153,6 +154,7 @@ urlpatterns = [
     # works at the cost of the post display
     path('blog/', views.PostList.as_view(), name='blog'),
     # works at the cost of the blog display
+    path('makeacard/', views.UploadACardView.as_view(), name='makeacard'),
     path('users/', views.UserBackgroundView.as_view(), name='users'),
     path('pollquestions/', views.PollQuestionsView.as_view(), name='pollquestions'),
     path('<int:question_id>/polldetail', views.PollDetailView.as_view(), name='polldetail'),
@@ -160,6 +162,7 @@ urlpatterns = [
     path('<int:question_id>/pollvote/', views.PollingView.as_view(), name='pollvote'),
     path('voting/', views.votingview.as_view(), name='voting'),
     path('partners/', views.PartnerBackgroundView.as_view(), name='partners'),
+    path('partnerapplication/', views.PartnerApplicationView.as_view(), name='partnerapplication'),
     path('policy/', views.PolicyView.as_view(), name='policy'),
     path('termsandconditions/', views.TermsAndConditionsView.as_view(), name='termsandconditions'),
     # path('newsfeed/', views.newsfeedview.as_view(), name='newsfeed'),
@@ -170,6 +173,7 @@ urlpatterns = [
     path('eventmore/<slug:slug>/', views.EventBackgroundView.as_view(), name='eventmore'),
     # path('blog/', views.BlogBackgroundView, name='blog'),
     path('featuredproducts/', views.Featured.as_view(), name='featuredproducts'),
+    path('create_chest/', views.CreateChestView.as_view(), name='create_chest'),
     # path('post_edit/', views.post_new, name='post_edit'),
     path('vote/', views.PosteView.as_view(), name='vote'),
     # path('share/, views.post, name='share'),
@@ -198,6 +202,8 @@ urlpatterns = [
     path('supportchat/', views.SupportChatBackgroundView.as_view(), name='supportchat'),
     path('privateroom/', TemplateView.as_view(template_name='privateroom.html'), name='privateroom'),
     path('search/', SearchResultsView.as_view(), name='search_results'),
+    path('gamehubsearchresults/', GameCategorySearchResultsView.as_view(), name='gamehubsearchresults'),
+    path('gamesearchresults/', GameSearchResultsView.as_view(), name='gamesearchresults'),
     # path('', TemplateView.as_view(template_name='index.html'), name = 'index'),
     path('website/', TemplateView.as_view(template_name='website.html'), name='website'),
     path('css/style.css', TemplateView.as_view(template_name='style.css',content_type='text/css')),
@@ -279,6 +285,10 @@ urlpatterns = [
     path('giveaways/', TemplateView.as_view(template_name='giveaways.html'), name='giveaways'),
     path('hostgiveaway/', TemplateView.as_view(template_name='hostgiveaway.html'), name='hostgiveaway'),
     # path('changelog/', ChangelogView.as_view(), name='changelog'),
+    path('generate-invite/', views.generate_invite_link, name='generate_invite'),
+    path('create-invite-link/', views.generate_invite_link, name='create_invite_link'),
+    path('create_withdraw/', views.CreateWithdrawView.as_view(), name='create_withdraw'),
+    path('withdraws/', views.WithdrawView.as_view(), name='withdraws'),
     path('blogbase/', BlogBaseView.as_view(), name='blogbase'),
     path('base/', BaseView.as_view(), name='base'),
     path('spinbase/', BaseView.as_view(), name='spinbase'),
@@ -288,6 +298,8 @@ urlpatterns = [
     path('ecommercesearch/', EcommerceSearchResultsView.as_view(), name='ecommercesearch_results'),
     path('friendssearchresultview/', views.friendlysearchresultview, name='friendssearchresultview'),
     path('blogsearch/', BlogSearchResultsView.as_view(), name='blogsearch_results'),
+    path('commerce/', CommerceExchangeView.as_view(), name='commerce'),
+    path('pagesearch/', views.PageSearchResultsView.as_view(), name='pagesearch'),
     path('i2/', TemplateView.as_view(template_name='i2.html'), name='i2'),
 
     # might try to switch to using slug filter format like the below comment rather than primary key filter format
@@ -320,10 +332,10 @@ urlpatterns = [
     path('createtradeoffer/', views.TradeOfferCreateView.as_view(), name='createtradeoffer'),
     path('tradingcentral/', views.TradeItemCreateView.as_view(), name='tradingcentral'),
     path('mytrades/', views.TradeHistory.as_view(), name='mytrades'),
-    path('tradeitems/', views.TradeBackgroundView.as_view(), name='tradeitems'),
     path('shippingform/', views.ShippingBackgroundView.as_view(), name='shippingform'),
     path('printandship/', views.PrintShippingLabelView.as_view(), name='printandship'),
     path('printandship/<slug:slug>', views.PrintShippingLabelView.as_view(), name='printandship'),
+    path('contact_trader/<trade_item_id>/', views.contact_trader, name='contact_trader'),
     path('responsetradeitems/<slug:slug>', views.ResponseTradeOfferCreateView.as_view(), name='responsetradeitems'),
     path('accept_trade/<int:request_id>/', views.accept_trade, name='accept_trade'),
     path('decline_trade/<int:request_id>/', views.decline_trade, name='decline_trade'),
@@ -331,15 +343,20 @@ urlpatterns = [
     path('decline_response_trade/<int:request_id>/', views.decline_response_trade, name='decline_response_trade'),
     path('directedtradeoffers/', views.DirectedTradeOfferView.as_view(), name='directedtradeoffers'),
     path('directedtradeoffers/<int:trade_item_id>/', views.DirectedTradeOfferView.as_view(), name='directedtradeoffers'),
+    path('secretroome/', views.SecretRoomView.as_view(), name='secretroome'),
     path('pack_home/', views.ShufflerBackgroundView.as_view(), name='pack_home'),
     path('pokespinner/', views.InventoryView.as_view(), name='pokespinner'),
-    path('pokechests/', views.InventoryView.as_view(), name='pokechests'),
+    path('pokechests/', views.PokeChestBackgroundView.as_view(), name='pokechests'),
     path('blackjack/', views.ChestBackgroundView.as_view(), name='blackjack'),
     path('gamehub/<slug:slug>/', views.GameHubView.as_view(), name='gamehub'), #game hub with a single game hub
     path('gameroom/<slug:slug>/', views.GameRoomView.as_view(), name='gameroom'), #game room with a single game genre (possibly multiple games)
-    path('game/<slug:slug>/', views.GameRoomView.as_view(), name='game'), #game with a single game
+    path('game/<slug:slug>/', views.GameChestBackgroundView.as_view(), name='game'), #game with a single game
     path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
     path('inventory/', views.PlayerInventoryView.as_view(), name='inventory'),
+    path('tradeinventory/', views.PlayerInventoryView.as_view(), name='tradeinventory'),
+    path('inventory/<int:pk>/sell/',  views.PlayerInventoryView.as_view(), name='sell_inventory_object'),
+    path('inventory/<int:pk>/withdraw/',  views.PlayerInventoryView.as_view(),
+         name='withdraw_inventory_object'),
     path('update_wager/<int:wager_id>/', update_wager, name='update_wager'),
     path('place_wager/', PlaceWagerView.as_view(), name='place_wager'),
     path('lotteries/', views.LotteryBackgroundView.as_view(), name='lotteries'),
@@ -430,6 +447,7 @@ urlpatterns = [
     # path('supportchat/<str:room>/', views.room, name='room'),
     path('user.username/<str:room>/', views.room, name='room'), #causes admistration redirection on messages' "view on site"
     path('home/<str:room>/', views.RoomView.as_view(), name='room'),
+    path('create_room', views.NewRoomSettingsView.as_view(), name='create_room'),
     path('supportchat/checkview', views.supportcheckview, name='supportcheckview'),
     path('supportchat/send', views.supportsend, name='supportsend'),
     #path('supportgetMessages/room/', views.supportgetMessages, name='supportgetMessages'),

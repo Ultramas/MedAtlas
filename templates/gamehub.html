@@ -145,6 +145,15 @@
 	<!-- end breadcrumb section -->
 <!-- latest news -->
 <div class="latest-news mt-150 mb-150">
+    <div class="search" style="margin-left: 90%;">
+
+      <form class="searchbar" action="{% url 'showcase:gamehubsearchresults' %}" method="get" style="border-radius: 30px;">
+        <input name="q" type="text" placeholder="Search Categories..." style="border-radius: 30px; margin-top: -500px; margin-right: 50px; ">
+      </form>
+      <br>
+      <br>
+    </div>
+
     <div class="container">
         <div class="row">
             {% for gamehub in Game %}
@@ -154,7 +163,9 @@
                         <div class="latest-news-bg news-bg-1" style="background: url({{ gamehub.image.url }}); background-size: cover;"></div>
                     </a>
                     <div class="news-text-box" style="border-radius: 5px;">
+						 <a href="{% url 'showcase:gameroom' gamehub.slug %}">
                         <h3>{{ gamehub.name }}</h3>
+						 </a>
                         <p class="blog-meta">
                             <span class="author"><i class="fas fa-user"></i> {{ gamehub.get_type_display }} </span>
                             <span class="date"><i class="fas fa-calendar"></i> {{ gamehub.date_and_time|date }} </span>
@@ -200,7 +211,6 @@
 			</div>
 		</div>
 	</div>
-	<!-- end latest news -->
 
 	<!-- PokeTrove Logos carousel -->
 	<div class="logo-carousel-section">

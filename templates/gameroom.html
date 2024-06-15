@@ -164,7 +164,14 @@
 
 	<!-- latest news -->
 	<div class="latest-news mt-150 mb-150">
+    <div class="search" style="margin-left: 80%; position: fixed;">
 
+      <form class="searchbar" action="{% url 'showcase:gamesearchresults' %}" method="get" style="border-radius: 30px;">
+        <input name="q" type="text" placeholder="Search Categories..." style="border-radius: 30px;">
+      </form>
+      <br>
+      <br>
+    </div>
 
 	<!-- PokeTrove Hits Carousel -->
 	<div class="logo-carousel-section">
@@ -236,7 +243,7 @@
 			</div>
 		</div>
 	</div>
-	<!-- end logo carousel -->
+	<!-- end hits carousel -->
 		<br>
 		<br>
 		<br>
@@ -244,14 +251,16 @@
 
 		<div class="container">
 			<div class="row">
-					{% for newprofile in Profiles %}
+{% for newprofile in Profiles %}
 
 						<a href="{{newprofile.get_profile_url2}}">
 				<div class="col-lg-4 col-md-6" style="border-radius: 10px;">
 					<div class="single-latest-news" style="background: url({{newprofile.image.url}}); background-size: cover; width: 350px; height: 455px; border-radius: 10px;">
 							<div class="latest-news-bg news-bg-1" style="background: rgba(0, 0, 0, 0); margin-top: 15%;"></div>
-						<div class="news-text-box" style="border-radius: 5px; background-color: rgba(0, 0, 0, 0.3)">
-							<h3><a href="{{newprofile.get_profile_url2}}">{{newprofile.title}}</a></h3>
+
+  <div class="news-text-box" style="border-radius: 5px; background-color: rgba(0, 0, 0, 0.3)">
+
+							<h3>{{newprofile.title}}</h3>
 
 							{% with description=newprofile.description %}
 							<p class="excerpt">
@@ -264,17 +273,18 @@
 						{% endwith %}
 									<h3 style="margin-left: 15px; font-size: 30px; color: white; margin-top: -30px;">{{ newprofile.name }}</h3>
 									<h6 style="margin-left: 15px; font-size: 18px; color: white;">{{ newprofile.cost }} 💎</h6>
-						<ul style="width: 100%;">
+	  <br>
+						<ul style="width: 100%; display: flex;">
 								<span class="author" style="display: flex; align-items: center;">
 									{% if newprofile.newprofile_profile_picture_url %}
 									<a href="{{ newprofile.newprofile_profile_url }}">
-										<img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="40" height="40" style="border-radius: 50px; margin-right: 20px;">
+										<img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="40" height="40" style="border-radius: 50px; margin-right: 0px; margin-top: -10px;">
 									</a>
 									{% else %}
 									<!-- Placeholder image or default avatar -->
 									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="40" height="40" style="border-radius: 50px;">
 									{% endif %}
-									<h6 style="margin-left: 15px; color: white;">{{ newprofile.user }}</h6>
+									<h6 style="margin-left: 5px; color: white;">{{ newprofile.user }}</h6>
 								</span>
 						</ul>
 
@@ -347,7 +357,7 @@
     						{% csrf_token %}
 							{{ form.email }}
 
-							<button type="submit"><img src="{% static 'css/images/sendemailairplane.png' %}" style="width: 30px; height: 15px; margin-top: 15px;"></button>
+							<button type="submit"><img src="{% static 'css/images/sendemailairplane.png' %}" style="width: 30px; height: 15px; "></button>
 													<br>
 							I agree to the Terms & Conditions: {{ form.confirmation }}
 						</form>

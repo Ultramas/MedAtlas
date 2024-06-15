@@ -92,8 +92,8 @@
 
                     {% for feedback_objects in Feed %}
 
+<div class="feedback" style="justify-content: center; display: flex; flex-direction: column; margin-left: 45%;">
                                 {% if feedback_objects.newprofile_profile_picture_url %}
-
                                   <a href="{{ feedback_objects.newprofile_profile_url }}">
                                      <img src="{{ feedback_objects.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
                                   </a>
@@ -101,7 +101,6 @@
                                    <!-- Placeholder image or default avatar -->
                                   <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
                                 {% endif %}
-
 
     <!-- Display user profile picture and username -->
     <a href="{{ feedback_objects.newprofile_profile_url }}">
@@ -228,13 +227,14 @@
         {% endif %}
     </ul>
 {% endfor %}
-{% endif %}
-</div>
+{% endif %}</div>
 
     <!-- Display feedback comment -->
     <h3>{{ feedback_objects.comment }}</h3>
 
                                 {% endfor %}
+</div>
+</div>
 </div>
 <br>
 <br>

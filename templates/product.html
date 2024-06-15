@@ -322,7 +322,7 @@ function showSlides(n) {
 
             <p class="lead font-weight-bold">{{ object.item_name }}</p>
 <ul>
-              {% if object.user.username != 'PokeTrove' %}
+              {% if object.user.username %}
 
               <div style="display: flex; align-items: center;">
     {% if object.user.profiledetails.avatar.url %}

@@ -133,7 +133,7 @@ button[type="submit"] {
      {% for friend in search_results %}
 
      									{% if friend.currently_active %}
-                <a href="{{friend.get_profile_url2}}">
+                <a href="{{friend.user_profile_url}}">
               <li class="active" style="padding-top: 12px;">
                   {% else %}
                   <li>
@@ -142,7 +142,7 @@ button[type="submit"] {
               <div class="img_cont">
                   {% if friend.profile_picture_url %}
 
-                      <a href="{{ friend.profile_url }}">
+                      <a href="{{friend.user_profile_url}}">
                           <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
                       <span class="online_icon"></span>
                       </a>
@@ -163,12 +163,12 @@ button[type="submit"] {
 {% else %}
   {% for friend in item_list %}
 
-                <a href="{{friend.get_profile_url2}}">
+                <a href="{{friend.user_profile_url}}">
       <li class="active">
           <div class="d-flex bd-highlight">
               <div class="img_cont">
                   {% if friend.profile_picture_url %}
-                      <a href="{{ friend.profile_url }}">
+                      <a href="{{friend.user_profile_url}}">
                           <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
                       <span class="online_icon"></span>
                       </a>
@@ -187,7 +187,7 @@ button[type="submit"] {
                 </a>
               {% empty %}
                   {% for friend in friends_data %}
-                <a href="{{friend.get_profile_url2}}">
+                <a href="{{friend.user_profile_url}}">
 									{% if friend.currently_active %}
               <li class="active" style="padding-top: 12px;">
                   {% else %}
@@ -196,7 +196,7 @@ button[type="submit"] {
           <div class="d-flex bd-highlight">
               <div class="img_cont">
                   {% if friend.profile_picture_url %}
-                      <a href="{{ friend.profile_url }}">
+                      <a href="{{friend.user_profile_url}}">
                           <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
                       <span class="online_icon"></span>
                       </a>

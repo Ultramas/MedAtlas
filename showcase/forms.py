@@ -1,12 +1,15 @@
 from datetime import timezone, timedelta, date
 from urllib import request
 
+import self
 from django import forms
+from django.forms import inlineformset_factory
 from django.shortcuts import get_object_or_404
 
 from mysite import settings
 from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme, TradeOffer, \
-    FriendRequest
+    FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
+    Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -14,6 +17,7 @@ from .models import PartnerApplication
 from .models import PunishmentAppeal
 from .models import BanAppeal
 from .models import ReportIssue
+from .models import Shuffler
 from .models import NewsFeed
 from .models import StaffProfile
 from .models import Event
@@ -43,12 +47,12 @@ from .models import MegaBackgroundImage
 from .models import EventBackgroundImage
 from .models import NewsBackgroundImage
 from .models import BaseCopyrightTextField
+from .models import Battle
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
 # from .models import ProfileTwo
 # from .models import PublicProfile
-
 users = User.objects.filter()
 
 
@@ -90,6 +94,11 @@ class BusinessContactForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Your name.'}))
+    description = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Your profile description.'}))
+
     class Meta:
         model = UpdateProfile
         fields = ('name', 'description', 'image')
@@ -100,6 +109,13 @@ class PostForm(forms.ModelForm):
 
 
 class Postit(forms.ModelForm):
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Your name.'}))
+    category = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Choose a category you want your idea to affect.'}))
+    description = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Please share any ideas you may have.'}))
+
     class Meta:
         model = Idea
         fields = ('name', 'category', 'description', 'image')
@@ -168,34 +184,47 @@ class StaffJoin(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Lemon Sauce'}))
     role = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'What role are you applying for?'}))
     I_have_no_strikes_on_my_account_currently = forms.BooleanField()
-    Why_do_you_want_to_apply_for_staff = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Tell us why you want to be a Accomfort Staff Member. Be descriptive.'}))
-    How_do_you_think_you_can_make_MC_better = forms.CharField(
+    Why_do_you_want_to_apply_for_staff = forms.CharField(
         widget=forms.TextInput(
-            attrs={'placeholder': 'Tell us what you will do to make Accomfort better as a staff member.'}))
-    I_confirm_that_I_have_read_all_the_staff_requirements_and_meet_all_of_them = forms.BooleanField()
+            attrs={'placeholder': 'Tell us why you want to be a Accomfort Staff Member. Be descriptive.'}),
+        label='Why do you want to apply for staff?'
+    )
+    How_do_you_think_you_can_make_PokeTrove_better = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'placeholder': 'Tell us what you will do to make Accomfort better as a staff member.'}),
+        label='How do you think you can make PokeTrove better?'
+    )
+    I_confirm_that_I_have_read_all_the_staff_requirements_and_meet_all_of_them = forms.BooleanField(
+        label='I confirm that I have read all the staff requirements and meet all of them'
+    )
 
     class Meta:
         model = StaffApplication
         fields = ('name', 'role', 'I_have_no_strikes_on_my_account_currently',
                   'Why_do_you_want_to_apply_for_staff',
-                  'How_do_you_think_you_can_make_MC_better',
+                  'overall_time_check', 'previous_role_time_check',
+                  'How_do_you_think_you_can_make_PokeTrove_better',
                   'I_confirm_that_I_have_read_all_the_staff_requirements_and_meet_all_of_them')
 
 
 class Server_Partner(forms.ModelForm):
-    name = forms.CharField(max_length=100, help_text='Your server name goes here.')
-    category = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Pick a category you feel your server represents (gaming, community, etc).'}))
-    description = forms.CharField(help_text='Describe your server. Tell potential members why they should join.')
-    server_invite = forms.URLField(help_text='Idea your server invite link here.')
-
     class Meta:
         model = PartnerApplication
-        fields = '__all__'
+        fields = (
+            'user', 'name', 'category', 'multi_category', 'description', 'resume', 'requirement_check', 'policy_check',
+            'voucher',)
 
 
 class SupportForm(forms.ModelForm):
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Your name.'}))
+    category = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Please let us know what type of issue you are dealing with.'}))
+    issue = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Describe your issue in detail. We will get back to you ASAP.'}))
+    additional_comments = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Put any additional comments you may have here.'}))
+
     class Meta:
         model = Support
         fields = ('name', 'category', 'issue', 'Additional_comments', 'image',)
@@ -268,10 +297,81 @@ class CommentForm(forms.ModelForm):
         fields = 'post', 'name', 'email', 'body', 'active'
 
 
+from django import forms
+from django.forms import inlineformset_factory
+from .models import Game, Choice
+
+
+class GameForm(forms.ModelForm):
+    class Meta:
+        model = Game
+        fields = ['name', 'cost', 'discount_cost', 'type', 'image', 'filter',]
+
+
+class CardUploading(forms.ModelForm):
+    class Meta:
+        model = Choice
+        fields = 'choice_text', 'file', 'category', 'tier', 'rarity', 'number_of_choice', 'total_number_of_choice', 'value', 'number'
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(CardUploading, self).__init__(*args, **kwargs)
+
+ChoiceFormSet = inlineformset_factory(Game, Choice, form=CardUploading, extra=1)
+
+
+class BattleCreationForm(forms.ModelForm):
+    class Meta:
+        model = Battle
+        fields = ['battle_name', 'chests', 'min_human_participants']  # Adjust fields as needed
+        widgets = {
+            'participants': forms.SelectMultiple(attrs={'disabled': True}),  # Disable participant selection
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # Ensure a price is set based on chest price (logic outside of form)
+        # ... (Implement your price calculation based on chest price)
+        cleaned_data['price'] = calculated_price
+
+        return cleaned_data
+
+
+class BattleJoinForm(forms.Form):
+    battle = forms.ModelChoiceField(queryset=Battle.objects.all())
+
+    def clean(self):
+        cleaned_data = super().clean()
+        battle = cleaned_data.get('battle')
+        if battle.participants.count() >= battle.participants.limit_choices_to.limit_value:
+            raise forms.ValidationError('This battle has reached the maximum participant limit.')
+        return cleaned_data
+
+
+class AddTradeForm(forms.ModelForm):
+    class Meta:
+        model = InventoryObject
+        fields = ('trade_locked',)
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(AddTradeForm, self).__init__(*args, **kwargs)
+        if user:
+            self.fields['add_trade_item'].queryset = InventoryObject.objects.filter(user=user)
+
+
+class Trade_In_Form(forms.ModelForm):
+    class Meta:
+        model = Trade_In_Cards
+        fields = ('card_name', 'card_image', 'card_condition',)
+
+
 # class EditProfileForm(forms.Form):
 # username = forms.CharField()
 # about_me = forms.CharField(widget=forms.Textarea())
 # image = forms.ImageField(required=False)
+
+
 
 class SettingsForm(forms.ModelForm):
     class Meta:
@@ -457,7 +557,38 @@ class NewsBackgroundImagery(forms.ModelForm):
         fields = '__all__'
 
 
-from django import forms
+class RoomSettings(forms.ModelForm):
+    class Meta:
+        model = Room
+        fields = ['public', 'logo']
+
+
+class UploadCardsForm(forms.ModelForm):
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Name of the card.'}))
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(UploadCardsForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = UploadACard
+        fields = ('name', 'image', 'public',)
+
+
+class InviteCodeForm(forms.ModelForm):
+  class Meta:
+    model = InviteCode
+    fields = ['code', 'user', 'expire_time', 'permalink']  # Assuming these are your fields
+
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    # Get the current user if logged in
+    user = self.request.user
+    if user.is_authenticated:
+      self.initial['user'] = user
+
+
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 
@@ -495,7 +626,7 @@ class CheckoutForm(forms.Form):
 class CouponForm(forms.Form):
     code = forms.CharField(widget=forms.TextInput(attrs={
         'class': 'form-control',
-        'placeholder': 'Promo code',
+        'placeholder': 'Promo Code',
         'aria-label': 'Recipient\'s username',
         'aria-describedby': 'basic-addon2'
     }))
@@ -554,8 +685,116 @@ class CurrencyPaypalPaymentForm(forms.Form):
     use_default = forms.BooleanField(required=False)
 
 
+from .models import Withdraw
+
+
+from django import forms
+from .models import Withdraw, InventoryObject
+
+
+class WithdrawForm(forms.ModelForm):
+    selected_cards = forms.ModelMultipleChoiceField(
+        queryset=InventoryObject.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True
+    )
+
+    class Meta:
+        model = Withdraw
+        fields = ['number_of_cards', 'shipping_state', 'fees', 'status', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['selected_cards'].queryset = InventoryObject.objects.filter(user=user)
+
+
+class DegeneratePlaylistForm(forms.ModelForm):
+    class Meta:
+        model = DegeneratePlaylist
+        fields = ['user', 'song', 'audio_file', 'audio_img', 'is_active', ]
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['song'].queryset = DegeneratePlaylistLibrary.objects.filter(user=user)
+
+
+class TradeProposalForm(forms.ModelForm):
+    class Meta:
+        model = TradeOffer
+        fields = ['title', 'trade_items', 'estimated_trading_value', 'user2', 'message', 'quantity', ]
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(TradeProposalForm, self).__init__(*args, **kwargs)
+        if user:
+            self.fields['trade_items'].queryset = TradeItem.objects.filter(user=user)
+
+
+class ExchangePrizesForm(forms.ModelForm):
+
+    class Meta:
+        model = CommerceExchange
+        fields = ['usercard', 'prize',] # Adjust fields as needed
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # Get the user from kwargs (if provided)
+        super(ExchangePrizesForm, self).__init__(*args, **kwargs)
+        if user:
+            self.fields['usercard'].queryset = InventoryObject.objects.filter(user=user)
+
+
+from .models import Endowment
+
+
+class EndowmentForm(forms.Form):
+    #target = forms.ModelChoiceField(queryset=User.objects.exclude(pk=1))  # Exclude the superuser (with pk=1)
+    target = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'Name of Endowed Individual'}))  # Exclude the superuser (with pk=1)
+
+    class Meta:
+        model = Endowment
+        fields = ['user', 'target', 'order']
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        #get the current order
+
+        # Set initial values for target and user (optional, adjust as needed)
+        self.initial['user'] = self.request.user
+        self.initial['target'] = User.objects.exclude(pk=self.request.user.pk).first()
+
+    def clean_user(self):
+        username = self.cleaned_data['user']
+        try:
+            user = User.objects.get(username=username)
+            return user
+        except User.DoesNotExist:
+            raise forms.ValidationError('Invalid username. Please enter a valid user.')
+
+    def save(self, commit=True):
+        instance = Endowment(user=self.cleaned_data['user'], target=self.cleaned_data['target'], order=self.cleaned_data['order'])
+
+        if commit:
+            instance.save()
+
+        return instance
+
+
 class HitStandForm(forms.Form):
     action = forms.ChoiceField(choices=[('hit', 'Hit'), ('stand', 'Stand')], label='Action')
+
+
+class CreateChest(forms.ModelForm):
+    class Meta:
+        model = Shuffler
+        fields = ('question', 'choice_text', 'file', 'choices', 'category', 'heat', 'shuffletype', 'demonstration',
+                  'total_number_of_choice', 'cost',)
+        readonly_fields = ('mfg_date',)
 
 
 from .models import SellerApplication
@@ -901,7 +1140,10 @@ from django.core.exceptions import ValidationError
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
-        fields = ('title', 'price', 'discount_price', 'specialty', 'label', 'slug', 'description', 'image', 'image2', 'image3', 'image4', 'image5')
+        fields = (
+            'title', 'price', 'discount_price', 'specialty', 'label', 'slug', 'description', 'image', 'image2',
+            'image3',
+            'image4', 'image5')
         widgets = {
             # 'slug': forms.TextInput(attrs={'readonly': 'readonly'})
         }
@@ -966,14 +1208,11 @@ class FriendRequestAcceptanceForm(forms.ModelForm):
 from django import forms
 from .models import RespondingTradeOffer, TradeOffer
 
-
 from django.contrib.auth.decorators import login_required
 
 # forms.py
 from django import forms
 from .models import TradeItem, RespondingTradeOffer
-
-
 
 from .fields import UserRestrictedModelMultipleChoiceField
 
@@ -990,6 +1229,7 @@ class RespondingTradeOfferForm(forms.ModelForm):
     class Meta:
         model = RespondingTradeOffer
         fields = ['estimated_trading_value', 'offered_trade_items', 'wanted_trade_items', 'message']
+
 
 from django.utils import timezone
 

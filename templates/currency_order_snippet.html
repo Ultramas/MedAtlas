@@ -1,4 +1,6 @@
 
+{% load crispy_forms_tags %}
+
 <div class="col-md-12 mb-4">
     <br><br>
     <h4 class="d-felex justify-content-between align-items-center mb-3">
@@ -34,10 +36,22 @@
 {% endif %}
     </li>
 
+
     <li class="list-group-item d-flex justify-content-between">
         <span>Total (USD)</span>
         <strong>${{ order.get_total_price }}</strong>
     </li>
+                <li>
+<form method="POST" class="card-body">
+    {% csrf_token %}
+    <h3 style="color: white;">Endowment Details</h3>
+    <hr>
+    {% crispy endowmentform %}
+    <hr class="mb-4">
+    <button class="btn btn-primary btn-lg btn-block" type="submit">Bestow Gift</button>
+</form>
+
+        </li>
     </ul>
 
     {% if DISPLAY_COUPON_FORM %}

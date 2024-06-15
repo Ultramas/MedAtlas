@@ -2,12 +2,16 @@ from urllib import request
 
 import django
 import self
+from django.contrib.messages import get_messages
 from django.db import transaction
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
+
+from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
-    InventoryObject, Inventory, Trade, TradeOffer, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game
+    InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
+    Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -94,7 +98,8 @@ from .models import AdminPages
 # from .models import Background2aImage
 from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, SellerApplicationForm, \
     MemeForm, CurrencyCheckoutForm, CurrencyPaymentForm, CurrencyPaypalPaymentForm, HitStandForm, WagerForm, \
-    DirectedTradeOfferForm, FriendRequestForm, RespondingTradeOfferForm, ShippingForm
+    DirectedTradeOfferForm, FriendRequestForm, RespondingTradeOfferForm, ShippingForm, EndowmentForm, UploadCardsForm, \
+    RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, GameForm, CardUploading, GameForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -1186,6 +1191,7 @@ class ChatBackgroundView(BaseView):
                     'profile_picture_url': profile.avatar.url,
                     'profile_url': reverse('showcase:profile', args=[str(profile.pk)]),
                     'currently_active': friend.currently_active,
+                    'user_profile_url' : friend.get_profile_url2()
                 })
 
         # Add the friends' data to the context
@@ -1417,6 +1423,69 @@ class PokeChestBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
         context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['games'] = Game.objects.filter(is_active=1)  # Queryset of active games
+        context['wager_form'] = WagerForm()
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+
+class GameChestBackgroundView(BaseView):
+    model = UserProfile
+    template_name = "game.html"
+
+    def post(self, request, *args, **kwargs):
+        form = WagerForm(request.POST, user_profile=request.user.user_profile)
+        if form.is_valid():
+            wager = form.save(commit=False)
+            wager.user_profile = request.user.user_profile
+            wager.save()
+            return redirect('showcase:blackjack')  # replace with your actual view name
+        else:
+            # If the form is not valid, re-render the page with the form errors
+            return self.get(request, *args, **kwargs)
+
+    def range(request):
+        nodes = models.IntegerField(help_text="Number of the choice included", blank=True, null=True)
+        context = {'range': range(1, nodes + 1)}
+        return render(request, 'game.html', context)
+
+    @csrf_exempt  # Handle CSRF if needed
+    def update_wager(request):
+        if request.method == 'POST':
+            wager_id = request.POST.get('wager_id')
+            outcome = request.POST.get('outcome')
+            try:
+                wager = Wager.objects.get(id=wager_id)
+                wager.resolve(outcome)
+                return JsonResponse({'status': 'success'})
+            except Wager.DoesNotExist:
+                return JsonResponse({'error': 'Wager not found.'}, status=404)
+            except Exception as e:
+                return JsonResponse({'error': str(e)}, status=500)
+        else:
+            return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['games'] = Game.objects.filter(is_active=1)  # Queryset of active games
         context['wager_form'] = WagerForm()
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
@@ -2082,6 +2151,42 @@ class ContentBackgroundView(BaseView):
         return context
 
 
+class PartnerApplicationView(FormMixin, LoginRequiredMixin, ListView):
+    model = PartnerApplication
+    template_name = "partnerapplication.html"
+    form_class = Server_Partner
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        return context
+
+    # @login_required
+    def post(self, request, *args, **kwargs):
+        form = Server_Partner(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            return redirect('showcase:partners')
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            return render(request, "partnerapplication.html", {'form': form})
+
+
+
+
 class PartnerBackgroundView(BaseView):
     model = PartnerBackgroundImage
     template_name = "partners.html"
@@ -2187,7 +2292,12 @@ class RoomView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        room_name = self.kwargs['room']  # assuming 'room' is the room name passed in the URL
+        rooms_with_logo_same_name = Room.objects.filter(name=room_name).exclude(logo='')
+        context['rooms_with_logo_same_name'] = rooms_with_logo_same_name
         room = self.kwargs['room']
+
         username = self.request.GET.get('username')
         room_details = Room.objects.get(name=room)
         profile_details = ProfileDetails.objects.filter(user__username=username).first()
@@ -2199,7 +2309,6 @@ class RoomView(TemplateView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['username'] = username
-        context['room'] = room
         context['room_details'] = room_details
         context['profile_details'] = profile_details
 
@@ -2259,7 +2368,7 @@ class RoomView(TemplateView):
                 onlineprofile.friend_name = onlineprofile.friend.username
                 print('currentfriendprofile exists')
 
-        friends = Friend.objects.filter(user=self.request.user)
+        friends = Friend.objects.filter(user=self.request.user).order_by('last_messaged')
 
         # Prepare a list to hold the friends' data
         friends_data = []
@@ -2267,6 +2376,7 @@ class RoomView(TemplateView):
         for friend in friends:
             # Get the friend's profile
             profile = ProfileDetails.objects.filter(user=friend.friend).first()
+            friend_pk = self.request.GET.get('friend_pk')
 
             if profile:
                 # Add the friend's data to the list
@@ -2275,7 +2385,13 @@ class RoomView(TemplateView):
                     'profile_picture_url': profile.avatar.url,
                     'profile_url': reverse('showcase:profile', args=[str(profile.pk)]),
                     'currently_active': friend.currently_active,
+                    'user_profile_url' : friend.get_profile_url2()
                 })
+            if friend_pk and int(friend_pk) == friend.pk:  # Check if PK matches
+                print('setting currently active')
+                friend.currently_active = True
+                friend.save()  # Update the friend's currently_active field
+                return redirect('showcase:room', room=room)  # Redirect back to the room URL
 
         # Add the friends' data to the context
         context['friends_data'] = friends_data
@@ -2324,6 +2440,7 @@ class RoomView(TemplateView):
 
         return context
 
+
 def room(request, room):
     username = request.GET.get('username')
 
@@ -2348,16 +2465,21 @@ def checkview(request):
     room = request.POST['room_name']
     username = request.POST['username']
 
+    request.session['room_name'] = room
+    request.session['username'] = username
+
+    # Check if room exists in the database
     if Room.objects.filter(name=room).exists():
         return redirect('/home/' + room + '/?username=' + username)
     else:
+        # Create room and assign user if authenticated
         new_room = Room.objects.create(name=room)
         signed_in_user = request.user
         print('the room owner is ' + str(signed_in_user))
-        # Assuming there's a room associated with the provided name\
         new_room.signed_in_user = signed_in_user if signed_in_user.is_authenticated else None
         new_room.save()
-        return redirect('/home/' + room + '/?username=' + username)
+        # Redirect to create_room page after successful creation (assuming it exists)
+        return redirect('showcase:create_room')  # Assuming you have a URL pattern named 'create_room'
 
 
 def send(request):
@@ -2406,8 +2528,47 @@ def get_profile_url(message):
 from django.http import JsonResponse
 
 
+class NewRoomSettingsView(LoginRequiredMixin, TemplateView):
+    template_name = "create_room.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        room_name = self.request.session.get('room_name')
+        username = self.request.session.get('username')
+
+        room = Room.objects.filter(name=room_name).first()
+        form = RoomSettings(instance=room)  # replace with your actual form class
+
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['form'] = form
+        context['room'] = room
+        # add other context variables as needed
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        room_name = self.request.session.get('room_name')
+        username = self.request.session.get('username')
+        room = Room.objects.filter(name=room_name).first()
+        form = RoomSettings(request.POST, request.FILES, instance=room)  # replace with your actual form class
+
+        if form.is_valid():
+            form.save()
+            return redirect(f'{reverse("showcase:room", kwargs={"room": room_name})}?username={username}')
+
+        return render(request, self.template_name, {'form': form})
+
+
 def getMessages(request, room):
-    room_details = Room.objects.get(name=room)
+    try:
+        room_details = Room.objects.get(name=room)
+        # Rest of your code to retrieve messages and prepare data
+    except Room.DoesNotExist:
+        # Handle case where the room doesn't exist yet (e.g., return an empty response or retry logic)
+        return JsonResponse({'messages': []})  # Empty message list
+        # Alternatively, you could implement retry logic or redirect to an error page.
+
     messages = Message.objects.filter(room=room)
 
     # Prepare the messages data to be sent in the AJAX response
@@ -2417,19 +2578,22 @@ def getMessages(request, room):
         if profile_details:
             user_profile_url = message.get_profile_url()  # Get the user_profile_url for each message
             avatar_url = profile_details.avatar.url
-
         else:
             # Set a default avatar URL or path in case the user doesn't have an avatar
             user_profile_url = ('/home/' + room + '/?username=' + request.user.username)
             avatar_url = staticfiles_storage.url('css/images/a.jpg')
-        messages_data.append({
+
+        message_data = {
             'user_profile_url': user_profile_url,
             'avatar_url': avatar_url,
             'user': message.user,
             'value': message.value,
             'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
             'message_number': message.message_number,
-        })
+            'file': message.file.url if message.file else None,
+        }
+
+        messages_data.append(message_data)
 
     return JsonResponse({'messages': messages_data})
 
@@ -2445,6 +2609,12 @@ def supportroom(request):
         'room_details': room_details,
         'profile_details': profile_details,
     })
+
+
+def index(request):
+    generalmessages = Message.objects.filter(room='GeneralChatMessages').order_by('-date')
+    messages = SupportMessage.objects.filter(room=request.user.username).order_by('-timestamp')
+    return render(request, 'index.html', {'messages': messages})
 
 
 def supportchat(request):
@@ -3368,6 +3538,7 @@ class TradeItemCreateView(ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['TradeItems'] = TradeItem.objects.filter(is_active=1)
         context['TradeOffers'] = TradeOffer.objects.filter(is_active=1)
+        context['Friends'] = Friend.objects.filter(user=self.request.user, is_active=1)
         tradeoffering = RespondingTradeOffer.objects.filter(is_active=1)
         context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
 
@@ -3445,6 +3616,16 @@ class TradeOfferCreateView(CreateView):
 
         return context
 
+def contact_trader(self, request, trade_item_id):
+    trade_item = get_object_or_404(TradeItem, id=trade_item_id)
+    current_user = request.user
+
+    # Create a room with the current user and the trade item's user
+    room = trade_item.create_room(current_user)
+
+    # Redirect to the room view with the room name and current user
+    return redirect('showcase:room', room=room.name, username=current_user.username)
+
 
 class ResponseTradeOfferCreateView(CreateView):
     model = RespondingTradeOffer
@@ -3502,6 +3683,19 @@ class ResponseTradeOfferCreateView(CreateView):
         context['TradeOffer'] = TradeOffer.objects.filter(is_active=1)
 
         return context
+
+
+@login_required
+def contact_trader(request):
+    trade_item_id = request.pk
+    trade_item = get_object_or_404(TradeItem, id=trade_item_id)
+    current_user = request.user
+
+    # Create a room with the current user and the trade item's user
+    room = trade_item.create_room(current_user)
+
+    # Redirect to the room view with the room name and current user
+    return redirect('showcase:room', room=room.name, username=current_user.username)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -3600,7 +3794,7 @@ class SendFriendRequestView(View):
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
         else:
             # Handle the case where the form is not valid
-            messages.error(request, "There was an error with your submission.")
+            messages.error(request, "Please send a friend request to the trader to continue.")
             return render(request, 'send_friend_request.html', {'form': form})
 
     def get(self, request):
@@ -3735,7 +3929,6 @@ class SupportRoomView(TemplateView):
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-
         context['room'] = signed_in_user
         context['profile_details'] = profile_details
 
@@ -4173,10 +4366,13 @@ class BackgroundView(FormMixin, BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        signed_in_user = self.request.user
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['messages'] = SupportMessage.objects.filter(room=self.request.user.username).order_by('-date')
+        context['friendmessages'] = Message.objects.filter(room=self.request.user.username).order_by('-date')
         context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by(
             "carouselposition")
         context['Advertisement'] = AdvertisementBase.objects.filter(page=self.template_name, is_active=1).order_by(
@@ -4191,6 +4387,8 @@ class BackgroundView(FormMixin, BaseView):
         context['About'] = Event.objects.filter(page=self.template_name, is_active=1)
         context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
         context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
+        context['username'] = signed_in_user  # Set 'username' to the extracted 'signed_in_user'
+        context['room'] = signed_in_user
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         print(FaviconBase.objects.all())
@@ -4226,19 +4424,42 @@ class BackgroundView(FormMixin, BaseView):
                 events.hyperlink = eventful.get_profile_url()
                 events.description = eventful.description
 
-        context['News'] = NewsFeed.objects.all()
-
         newprofile = NewsFeed.objects.filter(is_active=1)
         # Retrieve the author's profile avatar
 
-        context['Profiles'] = newprofile
+        context['News'] = newprofile
 
-        for newprofile in context['Profiles']:
+        for newprofile in context['News']:
             user = newprofile.user
             profile = ProfileDetails.objects.filter(user=user).first()
             if profile:
                 newprofile.newprofile_profile_picture_url = profile.avatar.url
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        feed = Feedback.objects.filter(is_active=1).order_by('-timestamp')
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['Profiles'] = userprofile
+        else:
+            context['Profiles'] = None
+
+        if context['Profiles'] == None:
+            # Create a new object with the necessary attributes
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['Profiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         feed = Feedback.objects.filter(is_active=1).order_by('-timestamp')
 
@@ -4253,7 +4474,45 @@ class BackgroundView(FormMixin, BaseView):
                 feed.feedback_profile_url = feed.get_profile_url()
                 print(user)
 
+        # Retrieve the author's profile avatar
+        # Retrieve the messages
+        messages = SupportMessage.objects.all().order_by('-date')
+
+        context['Messanger'] = messages
+
+        # Create a list to store formatted message data
+        messages_data = []
+
+        for messages in context['Messanger']:
+            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
+
+            # Create a dictionary to store message data including profile information
+            message_data = {
+                'user_profile_picture_url': profile.avatar.url if profile else '',
+                'user_profile_url': messages.get_profile_url(),
+                'user': messages.signed_in_user,
+                'value': messages.value,
+                'date': messages.date,
+            }
+
+            messages_data.append(message_data)
+
+        # Assign the list of formatted message data to the context
+        context['Messanger'] = messages_data
         return context
+
+def indexsupportroom(request, signed_in_user):
+    return render(request, 'index.html', {
+        'username': username,
+        'supportroom': supportroom,
+        'signed_in_user': signed_in_user,
+        'room_details': room_details,
+        'profile_details': profile_details,
+        'Logo': Logo,
+        'Header': Header,
+        'Dropdown': DropDown,
+    })
+
 
 
 def dynamic_css(request):
@@ -5047,6 +5306,40 @@ class NewsCreatePostView(CreateView):
     success_url = reverse_lazy("newsfeed")
 
 
+class UploadACardView(FormMixin, LoginRequiredMixin, ListView):
+    model = UploadACard
+    template_name = "makeacard.html"
+    form_class = UploadCardsForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        return context
+
+    # @login_required
+    def post(self, request, *args, **kwargs):
+        form = UploadCardsForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            return redirect('showcase:index')
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            return render(request, "makeacard.html", {'form': form})
+
+
 class DonorView(BaseView):
     model = DonorBackgroundImage
     template_name = "donors.html"
@@ -5669,9 +5962,176 @@ class InventoryView(FormMixin, ListView):
         return context
 
 
-class PlayerInventoryView(FormMixin, ListView):
+class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
     model = InventoryObject
     template_name = "inventory.html"
+    form_class = AddTradeForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
+        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+        context['Money'] = Currency.objects.filter(is_active=1)
+        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user)
+        context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
+        context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
+        return context
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        action = self.request.POST.get('action')
+        pk = self.request.POST.get('pk')
+
+        if action == 'sell':
+            return self.sell_inventory_object(request, pk)
+        elif action == 'withdraw':
+            return self.withdraw_inventory_object(request, pk)
+
+    def sell_inventory_object(self, request, pk):
+        inventory_object = get_object_or_404(InventoryObject, pk=pk)
+
+        # Check if user owns the inventory object
+        if inventory_object.user != request.user:
+            return render(request, 'inventory.html', {'message': 'You cannot sell items you do not own!'})
+
+        # Update InventoryObject
+        inventory_object.user = None
+        inventory_object.inventory = None
+        inventory_object.save()
+
+        # Update UserProfile's currency_amount
+        user_profile = request.user.user_profile
+        user_profile.currency_amount += inventory_object.price
+        user_profile.save()
+
+        messages.success(request, f"Successfully sold {inventory_object.choice} for {inventory_object.price}{inventory_object.currency}!")
+
+        return redirect('tradeinventory')
+
+    def withdraw_inventory_object(self, request, pk):
+        inventory_object = get_object_or_404(InventoryObject, pk=pk)
+
+        # Check if user owns the inventory object
+        if inventory_object.user != request.user:
+            return render(request, 'inventory.html', {'message': 'You cannot withdraw items you do not own!'})
+
+        # Update InventoryObject
+        inventory_object.user = None
+        inventory_object.inventory = None
+        inventory_object.save()
+
+        # Handle withdrawal logic
+        user = request.user
+
+        with transaction.atomic():
+            # Query for an active withdrawal with fewer than 25 cards
+            withdraw = Withdraw.objects.filter(user=user, is_active=1, number_of_cards__lt=25).first()
+
+            if withdraw:
+                # Update existing withdrawal
+                withdraw.cards.add(inventory_object)
+            else:
+                # Create a new withdrawal
+                withdraw = Withdraw.objects.create(user=user)
+                withdraw.cards.add(inventory_object)
+
+            # Update number of cards after adding the inventory object
+            withdraw.number_of_cards = withdraw.cards.count()
+            withdraw.save()
+
+        messages.success(request, f"Successfully withdrawn {inventory_object.choice}!")
+
+        return redirect('tradeinventory')
+
+class CreateChestView(FormView):
+    template_name = "create_chest.html"
+    form_class = GameForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['game_form'] = GameForm(self.request.POST, self.request.FILES)
+            context['formset'] = ChoiceFormSet(self.request.POST, self.request.FILES)
+        else:
+            context['game_form'] = GameForm()
+            context['formset'] = ChoiceFormSet()
+
+        # Add other context data as needed
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['PrizePool'] = PrizePool.objects.all()
+        context['Shuffle'] = Shuffler.objects.filter(is_active=1).order_by("category")
+        return context
+
+    def post(self, request, *args, **kwargs):
+        game_form = GameForm(request.POST, request.FILES)
+        formset = ChoiceFormSet(request.POST, request.FILES)
+
+        if not game_form.is_valid():
+            print("Game Form Errors:", game_form.errors)
+        if not formset.is_valid():
+            print("Formset Management Form:", formset.management_form.errors)
+            for form in formset:
+                print("Form errors:", form.errors)
+
+        if game_form.is_valid() and formset.is_valid():
+            game = game_form.save()
+            choices = formset.save(commit=False)
+            for choice in choices:
+                choice.game = game
+                choice.save()
+            return redirect('game_detail', pk=game.pk)  # Adjust redirect as needed
+        else:
+            return self.render_to_response(self.get_context_data(game_form=game_form, formset=formset))
+
+
+from django.forms import inlineformset_factory
+from django.shortcuts import render, redirect
+from .models import Game, Choice
+from .forms import GameForm, ChoiceFormSet
+from django.shortcuts import render, redirect
+from .models import Game, Choice
+from .forms import GameForm, ChoiceFormSet
+
+
+class SecretRoomView(LoginRequiredMixin, FormMixin, ListView):
+    model = SecretRoom
+    template_name = "secretrooms.html"
+    form_class = PosteForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
+        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+        context['Money'] = Currency.objects.filter(is_active=1)
+        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user)
+        context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
+        context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
+        return context
+
+
+class TradeInventoryView(FormMixin, ListView):
+    model = InventoryObject
+    template_name = "tradeinventory.html"
     form_class = PosteForm
 
     def get_context_data(self, **kwargs):
@@ -6217,6 +6677,65 @@ class BlogSearchResultsView(ListView):
         return context
 
 
+class GameCategorySearchResultsView(ListView):
+    model = GameHub
+    template_name = 'gamehubsearchresults.html'
+
+    def get_queryset(self):
+        print(1234)
+        query = self.request.GET.get('q')
+        game_category_list = GameHub.objects.filter(
+            Q(name__icontains=query) | Q(slug__icontains=query))
+
+        all_list = {
+            "game_category_list": game_category_list,
+        }
+        print(234)
+        print(all_list)
+
+        return (all_list)
+
+
+class GameSearchResultsView(ListView):
+    model = Game
+    template_name = 'gamesearchresults.html'
+
+    def get_queryset(self):
+        print(1234)
+        query = self.request.GET.get('q')
+        game_list = Game.objects.filter(
+            Q(name__icontains=query) | Q(slug__icontains=query))
+
+        all_list = {
+            "game_list": game_list,
+        }
+        print(234)
+        print(all_list)
+
+        return (all_list)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+
+        newprofile = Game.objects.filter(is_active=1)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
 from django.views.generic import ListView
 from django.db.models import Q
 from showcase.models import City, Vote, UpdateProfile, Idea, PartnerApplication, SearchResult
@@ -6314,37 +6833,202 @@ class SearchResultsView(ListView):
         return context
 
 
-class EcommerceSearchResultsView(ListView):
-    model = Item
-    template_name = 'ecommercesearch_results.html'
+class PageSearchResultsView(ListView):
+    model = NavBar
+    template_name = 'index.html'
 
     def get_queryset(self):
-        query = self.request.GET.get('q')
+        query = self.request.GET.get('search_query')
+        search_type = self.request.GET.get('search_type')
         search_lists = []
 
-        item_list = Item.objects.filter(
-            Q(title__icontains=query) | Q(slug__icontains=query))
+        if search_type == "text":
+            nav_list = NavBar.objects.filter(
+                Q(text__icontains=query))
+        elif search_type == "url":
+            if query.startswith(("http://", "https://")):
+                # Try to extract the path from the URL
+                url_path = urllib.parse.urlparse(query).path
+                nav_list = NavBar.objects.filter(url__icontains=url_path)
+            else:
+                # Handle invalid URL format
+                nav_list = None  # Or display an error message
+        else:
+            # Handle invalid search type
+            nav_list = None
 
-        # Pass the queryset directly as 'item_list'
-        context = {
-            "item_list": item_list,
+        all_list = {
+            "nav_list": nav_list,
         }
+        return all_list
 
-        return context
+    def post(self, request, *args, **kwargs):
+        search_query = request.POST.get('search_query')
+        search_type = request.POST.get('search_type')
+
+        if search_type == "text":
+            nav_list = NavBar.objects.filter(
+                Q(text__icontains=search_query))
+        elif search_type == "url":
+            # Handle URL search (you might need additional logic here)
+            if query.startswith(("http://", "https://")):
+                # Try to extract the path from the URL
+                url_path = urllib.parse.urlparse(query).path
+                nav_list = NavBar.objects.filter(url__icontains=url_path)
+            else:
+                # Handle invalid URL format (optional: display error message)
+                nav_list = None
+        else:
+            # Handle invalid search type (optional: display error message)
+            nav_list = None
+
+        if nav_list:  # If a matching navbar item is found
+            redirect_url = nav_list.first().url
+            return redirect(redirect_url)  # Redirect to the URL
+        else:
+            # No matching results found (optional: display message)
+            return render(request, 'search_results.html',
+                          {'message': 'No matching results found.'})  # Render search results template
+
+    def get(self, request, *args, **kwargs):
+        # Handle GET requests (for initial search and potential redirection)
+        response = super().get(request, *args, **kwargs)  # Get search results
+        context = response.context  # Access the context data
+
+        if context['nav_list']:  # If a matching navbar item is found
+            # Get the URL from the first matching navbar item
+            redirect_url = context['nav_list'].first().url
+            return redirect(redirect_url)  # Redirect to the URL
+        else:
+            # Handle no matching results (display message or keep default behavior)
+            return response  # Return the original response (search results)
+
+
+class CreateWithdrawView(LoginRequiredMixin, CreateView):
+    model = Withdraw
+    form_class = WithdrawForm
+    template_name = "create_withdraw.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        return context
 
-        # settings to alter the username & password
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def my_cards(request):
+        if request.user.is_authenticated:
+            # Filter Withdraws where the current user is included and fetch related cards
+            withdraws = Withdraw.objects.filter(user=request.user).prefetch_related('cards')
+        else:
+            withdraws = None  # Handle non-authenticated users (optional)
+
+        context = {'withdraws': withdraws}
+        return render(request, 'my_cards.html', context)
+
+    def post(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            form = WithdrawForm(request.POST)
+            if form.is_valid():
+                form.instance.user = request.user
+                # Assuming 'selected_cards' is a list of selected card IDs from your template
+                selected_cards = request.POST.getlist('selected_cards')  # Get selected card IDs from POST data
+
+                # Save the Withdraw instance first (without M2M)
+                withdraw = form.save()
+
+                # Now set the selected cards to the 'cards' M2M field
+                withdraw.cards.set(selected_cards)
+
+                # Finally, save the complete instance to persist the M2M relation
+                withdraw.save()
+
+                messages.success(request, 'Form submitted successfully.')
+                return redirect('showcase:withdraws')  # Redirect to your desired URL
+            else:
+                messages.error(request, "Form submission invalid")
+                return render(request, "create_withdraw.html", {'form': form})
+        else:
+            form = WithdrawForm()
+            return render(request, "create_withdraw.html", {'form': form})
+
+
+class WithdrawView(LoginRequiredMixin, ListView):
+    model = Withdraw
+    template_name = "withdraws.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+
+        newprofile = Withdraw.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
         return context
+
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            # Filter completed withdrawals for the current user
+            return Withdraw.objects.filter(user=self.request.user)
+        else:
+            return Withdraw.objects.none()
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import InviteCode
+from .forms import InviteCodeForm
+from secrets import token_urlsafe
+
+def generate_unique_code(room_name):
+  """Generates a unique alphanumeric code with the room name prefix"""
+  while True:
+    # Generate a random 16-character alphanumeric string
+    code_suffix = token_urlsafe(16)
+    # Combine room name (if provided) and code suffix with a separator (e.g., underscore)
+    code = f"{room_name}_{code_suffix}" if room_name else code_suffix
+
+    # Check for uniqueness in the InviteCode model
+    if not InviteCode.objects.filter(code=code).exists():
+      return code
+
+@login_required
+def generate_invite_link(request):
+  if request.method == 'POST':
+    form = InviteCodeForm(request.POST)
+    if form.is_valid():
+      # Generate unique code
+      code = generate_unique_code()  # Replace with your code generation function
+      invite_code, created = InviteCode.objects.get_or_create(user=request.user, code=code)
+      invite_link = f"https://your_app.com/join/{invite_code.code}"
+      return render(request, 'invite_link.html', {'invite_link': invite_link})
+  else:
+    form = InviteCodeForm()
+  return render(request, 'generate_invite.html', {'form': form})
+
+# Function to generate a unique random alphanumeric code (replace with your implementation)
 
 
 # class ProductSearchResultsView(ListView):
@@ -6519,6 +7203,81 @@ class BanAppealBackgroundView(FormMixin, ListView):
             messages.error(request, 'Form submission failed to register, please try again.')
             messages.error(request, form.errors)
             return render(request, "banappeals.html", {'form': form})
+
+
+class CommerceExchangeView(CreateView):
+    model = CommerceExchange
+    template_name = "commerce.html"
+    form_class = ExchangePrizesForm
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        self.object_list = self.get_queryset()
+        context = super().get_context_data(**kwargs)
+        form = ExchangePrizesForm(self.request.POST or None, user=self.request.user)
+        context['form'] = form  # Add the form to the context
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(
+            is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(
+            is_active=1).order_by('position')
+        context['form'] = self.get_form()
+        return context
+
+
+class ExchangePrizesView(FormMixin, ListView):
+    model = ExchangePrize
+    template_name = "commerce.html"
+    form = ExchangePrizesForm
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BanAppealBackgroundImage'] = BanAppealBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(
+            is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(
+            is_active=1).order_by('position')
+        context['BanAppeal'] = BanAppeal.objects.all()
+        return context
+
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST":
+            form = ExchangePrizesForm(request.POST, request.FILES)
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.save()
+                messages.success(request, 'Form submitted successfully.')
+                return redirect('showcase:commerce')
+            else:
+                print(form.errors)
+                print(form.non_field_errors())
+                print(form.cleaned_data)
+                messages.error(request, "Form submission invalid")
+                return render(request, "commerce.html", {'form': form})
+        else:
+            form = ExchangePrizesForm()
+            messages.error(request, 'Form submission failed to register, please try again.')
+            messages.error(request, form.errors)
+            return render(request, "commerce.html", {'form': form})
 
 
 class IssueBackgroundView(FormMixin, ListView):
@@ -6758,6 +7517,8 @@ class PostDetailView(View):
         return render(request, self.template_name, context)
 
 
+
+
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
@@ -6842,6 +7603,7 @@ class CurrencyCheckoutView(EBaseView):
             context = self.get_context_data()
             context['form'] = form
             context['couponform'] = CouponForm()
+            context['endowmentform'] = EndowmentForm(request=self.request)
             context['order'] = order
             context['DISPLAY_COUPON_FORM'] = True
             return render(self.request, "currencycheckout.html", context)
@@ -6885,6 +7647,8 @@ class CurrencyPaymentView(EBaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
+        endowment_form = EndowmentForm(request=self.request)  # Pass the request object to the form
+        context['endowmentform'] = endowment_form
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
 
         return context
