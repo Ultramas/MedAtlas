@@ -6,7 +6,7 @@ from venv import logger
 from PIL import Image
 from django.db.models.signals import post_save, post_delete, pre_delete
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser, Permission
 from django.db import models
 from django.db.models import Max, F, Count
 from django.dispatch import receiver
@@ -546,7 +546,7 @@ class Monstrosity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     monstrositys_name = models.CharField(max_length=200)
     level = models.IntegerField()
-    
+
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -554,10 +554,9 @@ class Monstrosity(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
 
-
 class Experience(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=200)
+    amount = models.IntegerField()
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -565,7 +564,7 @@ class Experience(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return str(self.user) + ": " + str(self.experience) + " EXP"
+        return str(self.user) + ": " + str(self.amount) + " EXP"
 
     class Meta:
         verbose_name = "Experience"
@@ -575,7 +574,7 @@ class Experience(models.Model):
 class Level(models.Model):
     level = models.IntegerField(default=1)
     level_name = models.CharField(max_length=200)
-    experience = models.ForeignKey(Experience, on_delete=models.CASCADE)
+    experience = models.ForeignKey(Experience, on_delete=models.CASCADE, blank=True, null=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -774,6 +773,7 @@ class InventoryObject(models.Model):
     currency = models.ForeignKey(Currency, blank=True, null=True, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     trade_locked = models.BooleanField(verbose_name="Set Tradable?", default=False)
+    condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2, blank=True, null=True)
     image = models.ImageField(blank=True, null=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
@@ -828,6 +828,32 @@ class InventoryObject(models.Model):
                 }
             )
         super().save(*args, **kwargs)
+
+    def move_to_trading(self, title, fees, category, specialty, condition, label, slug, description, image,
+                        image_length, image_width, length_for_resize, width_for_resize):
+        # Ensure the item exists in the inventory
+        if not self.pk:
+            raise ValidationError("Inventory item does not exist.")
+
+        # Create a TradeItem
+        trade_item = TradeItem.objects.create(
+            user=self.user,
+            inventory=self.inventory,
+            currency=self.currency,
+            price=self.price,
+            condition=self.condition,
+            image=self.image,
+            image_length=image_length,
+            image_width=image_width,
+            length_for_resize=length_for_resize,
+            width_for_resize=width_for_resize,
+            is_active=1  # Set the status as active
+        )
+
+        # Optionally, you can also remove the item from the inventory
+        self.delete()
+
+        return trade_item
 
     class Meta:
         verbose_name = "Player Inventory Object"
@@ -944,7 +970,7 @@ class Product(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
     description = models.TextField()
-    # label = models.CharField(choices=LABEL_CHOICES, max_length=1000)  # can use for cataloging products
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default='N')  # can use for cataloging products
     mfg_date = models.DateTimeField(auto_now_add=True)
     rating = models.CharField(max_length=1, choices=[('b', 'Bad'), ('a', 'Average'), ('e', 'Excellent')])
 
@@ -1732,6 +1758,7 @@ class Game(models.Model):
         verbose_name = "Game"
         verbose_name_plural = "Games"
 
+
 class Choice(models.Model):
     """Used for voting on different new ideas"""
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
@@ -1831,34 +1858,43 @@ class Outcome(models.Model):
         super().save(*args, **kwargs)
 
 
-class Battle(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    battle_name = models.CharField(max_length=100, help_text='Your name and tag go here.')
-    chests = models.ManyToManyField(Game)  # If needed
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE) #be sure to make it non-editable & set default to Rubiaces
-    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) #based off price of chests
-    participants = models.ManyToManyField(User, blank=True, related_name='battles',
-                                          limit_choices_to=models.Q(is_bot=True))  # Filter for bots only
+class Robot(models.Model):
+    name = models.CharField(max_length=200)
+    is_bot = models.BooleanField(default=True)
+    image = models.FileField()
 
-    min_human_participants = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)],
-                                                         help_text='Minimum number of human participants required.')  # Set to 0 to allow zero humans
+    def __str__(self):
+        return self.name
+
+
+class BattleParticipant(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_bot = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Battle"
+        verbose_name_plural = "Battles"
+
+
+class Battle(models.Model):
+    battle_name = models.CharField(max_length=100, help_text='Your name and tag go here.', blank=True, null=True)
+    chests = models.ManyToManyField(Game)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    participants = models.ManyToManyField(BattleParticipant, blank=True, related_name='battles', limit_choices_to={'is_bot': False})
+    robots = models.ManyToManyField(Robot, blank=True, related_name='battles', limit_choices_to={'is_bot': True})
+    min_human_participants = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)], help_text='Minimum number of human participants required.')
+    is_active = models.IntegerField(default=1, blank=True, null=True, choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def clean(self):
-        # No validation needed as we allow any number of bot participants
         pass
 
     def __str__(self):
-        return self.battle_name + " submitted by " + str(self.user)
+        return f"{self.battle_name} submitted by {self.user}"
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-
-        # Calculate price based on chest costs and discount_costs
-        total_price = 0
-        for game in self.chests.all():
-            price_to_add = game.discount_cost if game.discount_cost else game.cost
-            total_price += price_to_add
-
+        total_price = sum(game.discount_cost if game.discount_cost else game.cost for game in self.chests.all())
         self.price = total_price
         self.save()  # Save again to update the price field
 
@@ -3725,6 +3761,7 @@ class SupportLine(models.Model):
         verbose_name_plural = "Administration Thread Messages"
 
 
+
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_profile')
     stripe_customer_id = models.CharField(max_length=50, blank=True, null=True)
@@ -3839,7 +3876,7 @@ class Item(models.Model):
     discount_price = models.FloatField(blank=True, null=True)
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
-    label = models.CharField(choices=LABEL_CHOICES, max_length=1000)  # can use for cataloging products
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default='N')  # can use for cataloging products
     slug = models.SlugField()  # might change to automatically get the slug
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
     description = models.TextField()
@@ -3957,7 +3994,7 @@ class TradeItem(models.Model):
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
     condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2)
-    label = models.CharField(choices=LABEL_CHOICES, max_length=1000)  # can use for cataloging products
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default="N")  # can use for cataloging products
     slug = models.SlugField()  # might change to automatically get the slug
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
     description = models.TextField()
@@ -3993,6 +4030,9 @@ class TradeItem(models.Model):
             return new_room
         else:
             return Room.objects.get(name=room_name)
+
+    def delete_trade_item(self):
+        self.delete()
 
     class Meta:
         verbose_name = "Trade Item"
@@ -5497,7 +5537,7 @@ class ProfileDetails(models.Model):
     email = models.EmailField(blank=True, null=True)
     # username = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True, verbose_name="Profile picture")
-    alternate = models.TextField(verbose_name="Alternate text")
+    alternate = models.TextField(verbose_name="Alternate text", null=True, blank=True)
     about_me = models.TextField(blank=True, null=True)
     level = models.ForeignKey(Level, on_delete=models.CASCADE, default="")
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, blank=True, null=True)
