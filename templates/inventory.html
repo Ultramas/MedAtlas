@@ -178,35 +178,49 @@
 					</div>
 				</div>
 			</div>
-
-			{% for Inventory in StockObject %}
-<div class="row" style="display: flex; max-width: 100%;">
-    <div class="col-lg-4 col-md-6 text-center">
-       <div class="single-product-item">
-          <div class="product-image">
-             <a href="single-product.html">
-                <img src="{{ Inventory.image.url }}" style="width: 600px; height: 200px;">
-             </a>
-          </div>
-          <h3>{{ Inventory.choice.choice_text }}</h3>  <p class="product-price">
-                     <span style="">{{ Inventory.condition }}</span> </p>
-                     <span style="">{{ Inventory.description }}</span> </p>
-           <form action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post">
-               {% csrf_token %}
-        		{{ form.as_p }}
-               <button type="submit" class="cart-btn">Sell For {{Inventory.price}} 💎</button>
-           </form>
-		   <form method="post" action="{% url 'showcase:withdraw_inventory_object' Inventory.pk %}">
+{% for Inventory in StockObject %}
+    <div class="row" style="display: flex; max-width: 100%;">
+        <div class="col-lg-4 col-md-6 text-center">
+            <div class="single-product-item">
+                <div class="product-image">
+                    <a href="single-product.html">
+                        <img src="{{ Inventory.image.url }}" style="width: 600px; height: 200px;" alt="Product Image">
+                    </a>
+                </div>
+                <h3>{{ Inventory.choice.choice_text }}</h3>
+                <p class="product-price">
+                    <span>Card Condition: {{ Inventory.condition }}</span>
+                </p>
+                <p>{{ Inventory.description }}</p>
+                <form action="" method="post">
                     {% csrf_token %}
+                    <input type="hidden" name="action" value="sell">
+                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
+                    <button type="submit" class="cart-btn">Sell For {{ Inventory.price }} 💎</button>
+                </form>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="withdraw">
+                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
                     <button type="submit">Withdraw Card</button>
-		   </form>
-       </div>
+                </form>
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="move">
+                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
+					<a href="{% url 'showcase:tradeinventory' %}"></a>
+                    <button type="submit" class="cart-btn">Set Tradable</button>
+                </form>
+            </div>
+        </div>
     </div>
-	{% empty %}
-	<img src="{% static 'css/images/broke.gif' %}" alt="broke buddy" style="display-content: flex; margin-left: auto; margin-right: auto; width: 500px; height: 500px;">
-    <br>
-	<h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
-	{% endfor %}
+{% empty %}
+    <div style="display: flex; flex-direction: column; align-items: center;">
+        <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy" style="width: 500px; height: 500px;">
+        <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
+    </div>
+{% endfor %}
+
 
 
 

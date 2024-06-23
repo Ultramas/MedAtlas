@@ -1811,8 +1811,7 @@ $(document).ready(function() {
     </form>
   </div>
 	  {% else %}
-	      <h1>Agent Holley</h1>
-    <h2>PokeTrove Service Manager</h2>
+	      <h1>PokeTrove General Chat</h1>
   </div>
   <div class="message" style="overflow: auto;">  <span class="username">Guest</span>
 	<h6>Please sign in to see message history!</h6>
@@ -1838,6 +1837,65 @@ $(document).ready(function() {
 
 	</div>
 <!--<div class="bg"></div>-->
+
+
+<script>
+$(document).ready(function(){
+  // Function to load and display messages
+  function loadAndDisplayMessages() {
+    var room = "{{ room }}"; // Replace with the actual value of the room
+
+    $.ajax({
+      type: 'GET',
+      url: "/supportgetMessages/" + room + "/",
+      success: function(response) {
+        console.log(response);
+        $("#display").empty();
+
+        for (var key in response.messages) {
+          var message = response.messages[key];
+
+          var messageHtml = `
+            <div class="message">
+              <a href="${message.user_profile_url}">
+                <img src="${message.avatar_url}" alt="${message.user}">
+              </a>
+              <div class="message-content">
+                <div class="sender">${message.user}</div>
+                <div>${message.value}</div>
+                <div class="time">${message.date}</div>
+              </div>
+            </div>`;
+
+          $("#display").append(messageHtml);
+        }
+      },
+      error: function(response) {
+        alert('An error occurred');
+      }
+    });
+  }
+
+  // Preload avatars (if needed)
+  var avatarUrls = [];
+  $(".message img").each(function() {
+    avatarUrls.push($(this).attr("src"));
+  });
+  preloadImages(avatarUrls);
+
+  // Load and display messages every half-second
+  setInterval(loadAndDisplayMessages, 500);
+});
+
+// Preload images
+function preloadImages(urls) {
+  for (var i = 0; i < urls.length; i++) {
+    var img = new Image();
+    img.src = urls[i];
+  }
+}
+</script>
+
 
 <script type="text/javascript">
   $(document).on('submit','#post-form',function(e){

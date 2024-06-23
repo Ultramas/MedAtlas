@@ -4,7 +4,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket, SellerApplication, Meme, \
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
-    UploadACard, InviteCode, OfficialShipping, Withdraw
+    UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -1875,6 +1875,17 @@ class ExperienceAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Experience, ExperienceAdmin)
+
+
+class TransactionAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Transaction Information', {
+            'fields': ('inventory_object', 'user', 'currency', 'amount', 'is_active',)
+        }),
+    )
+    readonly_fields = ('date',)
+
+admin.site.register(Transaction, TransactionAdmin)
 
 
 class LevelAdmin(admin.ModelAdmin):

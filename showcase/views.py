@@ -11,7 +11,7 @@ from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
-    Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom
+    Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -99,7 +99,7 @@ from .models import AdminPages
 from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, SellerApplicationForm, \
     MemeForm, CurrencyCheckoutForm, CurrencyPaymentForm, CurrencyPaypalPaymentForm, HitStandForm, WagerForm, \
     DirectedTradeOfferForm, FriendRequestForm, RespondingTradeOfferForm, ShippingForm, EndowmentForm, UploadCardsForm, \
-    RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, GameForm, CardUploading, GameForm
+    RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, GameForm, CardUploading, GameForm, MoveToTradeForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -156,7 +156,8 @@ from django.views.generic.edit import FormMixin
 
 import pdb
 from django.core.mail import send_mail, BadHeaderError
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound, \
+    HttpResponseBadRequest
 from .forms import ContactForm
 from .forms import BusinessContactForm
 from .forms import BusinessMailingForm
@@ -4364,6 +4365,9 @@ class BackgroundView(FormMixin, BaseView):
             return render(request, "index.html", {'form': form})
             return redirect('showcase:index')
 
+    def get_queryset(self):
+        # Filter messages where the room is "general"
+        return Message.objects.filter(room="general").order_by('-date')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         signed_in_user = self.request.user
@@ -4499,6 +4503,31 @@ class BackgroundView(FormMixin, BaseView):
 
         # Assign the list of formatted message data to the context
         context['Messanger'] = messages_data
+
+        generalmessages = Message.objects.filter(room="general").order_by('-date')
+
+        # Retrieve filtered general messages
+        general_messages = self.get_queryset()
+
+        # Create a list to store formatted message data
+        messages_data = []
+
+        for message in general_messages:
+            profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+
+            # Create a dictionary to store message data including profile information
+            message_data = {
+                'user_profile_picture_url': profile.avatar.url if profile and profile.avatar else '',
+                'user_profile_url': profile.get_profile_url() if profile else '#',
+                'user': message.signed_in_user,
+                'value': message.value,
+                'date': message.date,
+            }
+
+            messages_data.append(message_data)
+
+        # Assign the list of formatted message data to the context
+        context['GeneralMessenger'] = messages_data
         return context
 
 def indexsupportroom(request, signed_in_user):
@@ -5961,6 +5990,16 @@ class InventoryView(FormMixin, ListView):
         context['Shuffle'] = Shuffler.objects.filter(is_active=1).order_by("category")
         return context
 
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.http import HttpResponse
+from django.views.generic import ListView
+from django.views.generic.edit import FormMixin
+from django.db import transaction
+from django.urls import reverse
+
 
 class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
     model = InventoryObject
@@ -5969,15 +6008,17 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['Background'] = BackgroundImageBase.objects.filter(
-            is_active=1, page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
-        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+        try:
+            context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+        except UserProfile.DoesNotExist:
+            context['SentProfile'] = None
         context['Money'] = Currency.objects.filter(is_active=1)
         context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user)
         context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
@@ -5993,34 +6034,18 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             return self.sell_inventory_object(request, pk)
         elif action == 'withdraw':
             return self.withdraw_inventory_object(request, pk)
-
-    def sell_inventory_object(self, request, pk):
-        inventory_object = get_object_or_404(InventoryObject, pk=pk)
-
-        # Check if user owns the inventory object
-        if inventory_object.user != request.user:
-            return render(request, 'inventory.html', {'message': 'You cannot sell items you do not own!'})
-
-        # Update InventoryObject
-        inventory_object.user = None
-        inventory_object.inventory = None
-        inventory_object.save()
-
-        # Update UserProfile's currency_amount
-        user_profile = request.user.user_profile
-        user_profile.currency_amount += inventory_object.price
-        user_profile.save()
-
-        messages.success(request, f"Successfully sold {inventory_object.choice} for {inventory_object.price}{inventory_object.currency}!")
-
-        return redirect('tradeinventory')
+        elif action == 'move':
+            return self.move_to_trade(request, pk)
+        else:
+            return HttpResponse(status=400)  # Bad request if action is unknown
 
     def withdraw_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
         # Check if user owns the inventory object
         if inventory_object.user != request.user:
-            return render(request, 'inventory.html', {'message': 'You cannot withdraw items you do not own!'})
+            messages.error(request, 'You cannot withdraw items you do not own!')
+            return redirect('showcase:inventory')
 
         # Update InventoryObject
         inventory_object.user = None
@@ -6032,14 +6057,14 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
         with transaction.atomic():
             # Query for an active withdrawal with fewer than 25 cards
-            withdraw = Withdraw.objects.filter(user=user, is_active=1, number_of_cards__lt=25).first()
+            withdraw = Withdraw.objects.filter(user=user, is_active=1, shipping_state='S', number_of_cards__lt=25).first()
 
             if withdraw:
                 # Update existing withdrawal
                 withdraw.cards.add(inventory_object)
             else:
                 # Create a new withdrawal
-                withdraw = Withdraw.objects.create(user=user)
+                withdraw = Withdraw.objects.create(user=user, is_active=1, shipping_state='S')
                 withdraw.cards.add(inventory_object)
 
             # Update number of cards after adding the inventory object
@@ -6047,8 +6072,86 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             withdraw.save()
 
         messages.success(request, f"Successfully withdrawn {inventory_object.choice}!")
+        return redirect('showcase:inventory')  # Ensure the redirect URL is correct
 
-        return redirect('tradeinventory')
+    def sell_inventory_object(self, request, pk):
+        inventory_object = get_object_or_404(InventoryObject, pk=pk)
+
+        # Check if user owns the inventory object
+        if inventory_object.user != request.user:
+            messages.error(request, 'You cannot sell items you do not own!')
+            return redirect('showcase:inventory')
+
+        # Update InventoryObject
+        inventory_object.user = None
+        inventory_object.inventory = None
+
+        with transaction.atomic():
+            # Create the Transaction instance
+            Transaction.objects.create(
+                inventory_object=inventory_object,
+                user=request.user,
+                currency=inventory_object.currency,
+                amount=inventory_object.price
+            )
+
+            # Save the updated InventoryObject
+            inventory_object.save()
+
+            # Update UserProfile's currency_amount
+            user_profile = get_object_or_404(UserProfile, user=request.user)
+            user_profile.currency_amount += inventory_object.price
+            user_profile.save()
+
+        messages.success(request, f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
+        return redirect('showcase:inventory')
+
+
+    def move_to_trade(self, request, pk):
+        inventory_item = get_object_or_404(InventoryObject, pk=pk, user=request.user)
+
+        if request.method == 'POST':
+            form = MoveToTradeForm(request.POST, request.FILES)
+            if form.is_valid():
+                trade_item = inventory_item.move_to_trading(
+                    title=form.cleaned_data['title'],
+                    fees=form.cleaned_data['fees'],
+                    category=form.cleaned_data['category'],
+                    specialty=form.cleaned_data['specialty'],
+                    condition=form.cleaned_data['condition'],
+                    label=form.cleaned_data['label'],
+                    slug=form.cleaned_data['slug'],
+                    description=form.cleaned_data['description'],
+                    image=form.cleaned_data['image'],
+                    image_length=form.cleaned_data['image_length'],
+                    image_width=form.cleaned_data['image_width'],
+                    length_for_resize=form.cleaned_data['length_for_resize'],
+                    width_for_resize=form.cleaned_data['width_for_resize']
+                )
+                return redirect('showcase:tradeitem_detail', trade_item.id)  # Redirect to the TradeItem detail view
+        else:
+            form = MoveToTradeForm()
+
+        return render(request, 'inventory.html', {'form': form, 'inventory_item': inventory_item})
+
+    def remove_trade_object(self, request, pk):
+        trade_item = get_object_or_404(TradeItem, pk=pk)
+
+        if trade_item.user != request.user:
+            messages.error(request, 'You cannot remove tradable items you do not own!')
+            return redirect('showcase:tradeinventory')
+
+        trade_item.user = None
+        trade_item.inventory = None
+        trade_item.save()
+
+        messages.success(request, f"Successfully removed {trade_item.title}!")
+        return redirect('showcase:tradeinventory')
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
 
 class CreateChestView(FormView):
     template_name = "create_chest.html"
@@ -6097,6 +6200,37 @@ class CreateChestView(FormView):
             return self.render_to_response(self.get_context_data(game_form=game_form, formset=formset))
 
 
+
+@login_required
+def move_to_trade(request, inventory_id):
+    inventory_item = get_object_or_404(Inventory, id=inventory_id, user=request.user)
+
+    if request.method == 'POST':
+        form = MoveToTradeForm(request.POST, request.FILES)
+        if form.is_valid():
+            trade_item = inventory_item.move_to_trading(
+                title=form.cleaned_data['title'],
+                fees=form.cleaned_data['fees'],
+                category=form.cleaned_data['category'],
+                specialty=form.cleaned_data['specialty'],
+                condition=form.cleaned_data['condition'],
+                label=form.cleaned_data['label'],
+                slug=form.cleaned_data['slug'],
+                description=form.cleaned_data['description'],
+                image=form.cleaned_data['image'],
+                image_length=form.cleaned_data['image_length'],
+                image_width=form.cleaned_data['image_width'],
+                length_for_resize=form.cleaned_data['length_for_resize'],
+                width_for_resize=form.cleaned_data['width_for_resize']
+            )
+            return redirect('showcase:tradeinventory')  # Redirect to the TradeItem detail view
+
+    else:
+        form = MoveToTradeForm()
+
+    return render(request, 'inventory.html', {'form': form, 'inventory_item': inventory_item})
+
+
 from django.forms import inlineformset_factory
 from django.shortcuts import render, redirect
 from .models import Game, Choice
@@ -6129,7 +6263,19 @@ class SecretRoomView(LoginRequiredMixin, FormMixin, ListView):
         return context
 
 
-class TradeInventoryView(FormMixin, ListView):
+@login_required
+def delete_trade_item(request, item_id):
+    trade_item = get_object_or_404(TradeItem, id=item_id)
+    if trade_item.user == request.user:
+        trade_item.delete()
+        messages.success(request, 'Trade item deleted successfully.')
+        return redirect('showcase:tradeinventory')
+    else:
+        messages.error(request, 'You do not have permission to delete this item.')
+        return redirect('showcase:tradeinventory')
+
+
+class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
     model = InventoryObject
     template_name = "tradeinventory.html"
     form_class = PosteForm
@@ -6148,6 +6294,29 @@ class TradeInventoryView(FormMixin, ListView):
         context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
         context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
         return context
+
+    @method_decorator(login_required)
+    @method_decorator(csrf_exempt)
+    def post(self, request, *args, **kwargs):
+        action = self.request.POST.get('action')
+        pk = self.request.POST.get('pk')
+
+        if action == 'remove':
+            return self.remove_trade_object(request, pk)
+
+        # If no action matches, return an appropriate response
+        return HttpResponse(status=400)
+
+    def remove_trade_object(self, request, pk):
+        trade_item = get_object_or_404(TradeItem, pk=pk)
+
+        if trade_item.user != request.user:
+            messages.error(request, 'You cannot remove tradable items you do not own!')
+            return redirect('showcase:tradeinventory')
+
+        trade_item.delete()
+        messages.success(request, f"Successfully removed {trade_item.title}!")
+        return redirect('showcase:tradeinventory')
 
 
 from .models import LotteryTickets, Lottery

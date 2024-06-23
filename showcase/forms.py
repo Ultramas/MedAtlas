@@ -9,7 +9,8 @@ from django.shortcuts import get_object_or_404
 from mysite import settings
 from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme, TradeOffer, \
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
-    Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice
+    Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
+    SPECIAL_CHOICES
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -347,6 +348,21 @@ class BattleJoinForm(forms.Form):
             raise forms.ValidationError('This battle has reached the maximum participant limit.')
         return cleaned_data
 
+
+class MoveToTradeForm(forms.Form):
+    title = forms.CharField(max_length=100)
+    fees = forms.DecimalField(max_digits=10, decimal_places=2, required=False)
+    category = forms.ChoiceField(choices=CATEGORY_CHOICES)
+    specialty = forms.ChoiceField(choices=SPECIAL_CHOICES, required=False)
+    condition = forms.ChoiceField(choices=CONDITION_CHOICES, initial="M")
+    label = forms.CharField(max_length=1000)
+    slug = forms.SlugField()
+    description = forms.CharField(widget=forms.Textarea)
+    image = forms.ImageField()
+    image_length = forms.IntegerField()
+    image_width = forms.IntegerField()
+    length_for_resize = forms.IntegerField()
+    width_for_resize = forms.IntegerField()
 
 class AddTradeForm(forms.ModelForm):
     class Meta:
