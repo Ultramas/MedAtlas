@@ -1649,8 +1649,7 @@ Bounce
 							{% endif %}
 							{% endfor %}
 
-  </div>
-<div class="chat">
+  </div><div class="chat">
   <div class="chat-title">
 	  {% if user.is_authenticated %}
     <h1>Agent Holley</h1>
@@ -1741,8 +1740,7 @@ $(document).ready(function() {
   </div>
 </div>
 
-
-	<div class="chat-general">
+<div class="chat-general">
   <div class="chat-title">
 	  {% if user.is_authenticated %}
     <h2>PokeTrove General Chat</h2>
@@ -1811,7 +1809,8 @@ $(document).ready(function() {
     </form>
   </div>
 	  {% else %}
-	      <h1>PokeTrove General Chat</h1>
+	      <h1>Agent Holley</h1>
+    <h2>PokeTrove Service Manager</h2>
   </div>
   <div class="message" style="overflow: auto;">  <span class="username">Guest</span>
 	<h6>Please sign in to see message history!</h6>
@@ -1830,6 +1829,7 @@ $(document).ready(function() {
 	  {% endif %}
   </div>
 </div>
+
 
 </section>
 <div class="chat-toggle-button" style="position: fixed; right: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">  <button type="button" onclick="showChatWidget()">...</button>  </div>

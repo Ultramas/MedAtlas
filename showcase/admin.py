@@ -4,7 +4,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket, SellerApplication, Meme, \
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
-    UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction
+    UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -1886,6 +1886,16 @@ class TransactionAdmin(admin.ModelAdmin):
     readonly_fields = ('date',)
 
 admin.site.register(Transaction, TransactionAdmin)
+
+
+class BattleAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Battle Information', {
+            'fields': ('battle_name', 'chests', 'currency', 'price', 'participants', 'robots', 'min_human_participants',)
+        }),
+    )
+
+admin.site.register(Battle, BattleAdmin)
 
 
 class LevelAdmin(admin.ModelAdmin):

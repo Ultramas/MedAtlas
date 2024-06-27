@@ -1442,6 +1442,40 @@ class PokeChestBackgroundView(BaseView):
         return context
 
 
+def find_choice(request):
+    # Generate a random nonce between 0 and 1000000
+    generated_nonce = random.randint(0, 1000000)
+
+    # Query the Choice model to find the choice that includes the generated nonce
+    choice = Choice.objects.filter(lower_nonce__lte=generated_nonce, upper_nonce__gte=generated_nonce).first()
+
+    # Pass the generated nonce and the found choice to the template
+    context = {
+        'generated_nonce': generated_nonce,
+        'choice': choice
+    }
+
+    return render(request, 'choice_detail.html', context)
+
+class FindChoiceView(View):
+    template_name = 'choice_detail.html'
+
+    def get(self, request, *args, **kwargs):
+        # Generate a random nonce between 0 and 1000000
+        generated_nonce = random.randint(0, 1000000)
+
+        # Query the Choice model to find the choice that includes the generated nonce
+        choice = Choice.objects.filter(lower_nonce__lte=generated_nonce, upper_nonce__gte=generated_nonce).first()
+
+        # Pass the generated nonce and the found choice to the template
+        context = {
+            'generated_nonce': generated_nonce,
+            'choice': choice
+        }
+
+        return render(request, self.template_name, context)
+
+
 class GameChestBackgroundView(BaseView):
     model = UserProfile
     template_name = "game.html"
@@ -4341,6 +4375,8 @@ class ImageCarouselView(BaseView):
         return context
 
 
+
+
 class BackgroundView(FormMixin, BaseView):
     model = BackgroundImage
     form_class = EmailForm
@@ -4365,9 +4401,6 @@ class BackgroundView(FormMixin, BaseView):
             return render(request, "index.html", {'form': form})
             return redirect('showcase:index')
 
-    def get_queryset(self):
-        # Filter messages where the room is "general"
-        return Message.objects.filter(room="general").order_by('-date')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         signed_in_user = self.request.user
@@ -4504,31 +4537,34 @@ class BackgroundView(FormMixin, BaseView):
         # Assign the list of formatted message data to the context
         context['Messanger'] = messages_data
 
-        generalmessages = Message.objects.filter(room="general").order_by('-date')
+        # Retrieve the general messages
+        # Retrieve the author's profile avatar
+        # Retrieve the messages
+        general_messages = Message.objects.all().order_by('-date')
 
-        # Retrieve filtered general messages
-        general_messages = self.get_queryset()
+        context['GeneralMessanger'] = general_messages
 
         # Create a list to store formatted message data
         messages_data = []
 
-        for message in general_messages:
-            profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+        for general_messages in context['GeneralMessanger']:
+            profile = ProfileDetails.objects.filter(user=general_messages.signed_in_user).first()
 
             # Create a dictionary to store message data including profile information
             message_data = {
-                'user_profile_picture_url': profile.avatar.url if profile and profile.avatar else '',
-                'user_profile_url': profile.get_profile_url() if profile else '#',
-                'user': message.signed_in_user,
-                'value': message.value,
-                'date': message.date,
+                'user_profile_picture_url': profile.avatar.url if profile else '',
+                'user_profile_url': general_messages.get_profile_url(),
+                'user': general_messages.signed_in_user,
+                'value': general_messages.value,
+                'date': general_messages.date,
             }
 
             messages_data.append(message_data)
 
         # Assign the list of formatted message data to the context
-        context['GeneralMessenger'] = messages_data
+        context['GeneralMessanger'] = messages_data
         return context
+
 
 def indexsupportroom(request, signed_in_user):
     return render(request, 'index.html', {

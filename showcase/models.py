@@ -4,6 +4,7 @@ from uuid import uuid4
 from venv import logger
 
 from PIL import Image
+from decimal import Decimal
 from django.db.models.signals import post_save, post_delete, pre_delete
 from django.conf import settings
 from django.contrib.auth.models import User, AbstractUser, Permission
@@ -1776,7 +1777,7 @@ class Choice(models.Model):
                                 help_text='Category of choice (Pokemon, trainers, etc.).')
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     tier = models.CharField(choices=LEVEL, max_length=1, blank=True, null=True)
-    rarity = models.DecimalField(max_digits=7, decimal_places=4, help_text="Rarity of choice in percent (optional).",
+    rarity = models.DecimalField(max_digits=9, decimal_places=6, help_text="Rarity of choice in percent (optional).",
                                  blank=True, null=True, verbose_name="Rarity (%)") #use the rarity field to determine the amount of times the item pops up
     prizes = models.ForeignKey(PrizePool, on_delete=models.CASCADE, blank=True, null=True)
     shufflers = models.ForeignKey(Shuffler, on_delete=models.CASCADE, blank=True, null=True)
@@ -1799,7 +1800,7 @@ class Choice(models.Model):
         null=True
     )
     nodes = models.IntegerField(help_text="Number of the choice included", blank=True, null=True, )
-    value = models.DecimalField(max_digits=12, decimal_places=2, help_text="Value of item in Rubicoins.", blank=True,
+    value = models.IntegerField(help_text="Value of item in Rubicoins.", blank=True,
                                 null=True, verbose_name="Value (Rubicoins)")
     number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)")
     is_active = models.IntegerField(default=1,
@@ -1812,16 +1813,27 @@ class Choice(models.Model):
     def save(self, *args, **kwargs):
         if self.total_number_of_choice and self.number_of_choice:
             if self.total_number_of_choice != 0:
-                self.rarity = (self.number_of_choice / self.total_number_of_choice) * 100
+                self.rarity = (Decimal(self.number_of_choice) / Decimal(self.total_number_of_choice)) * Decimal(100)
             else:
-                self.rarity = 0
+                self.rarity = Decimal(0)
+
+        if self.lower_nonce is None:
+            self.lower_nonce = random.randint(0, 1000000)
+        if self.upper_nonce is None:
+            self.upper_nonce = random.randint(0, 1000000)
+
         super().save(*args, **kwargs)
 
     def __str__(self):
         if self.prizes:
-            return str(self.choice_text) + ' with prize ' + str(self.prizes)
+            return f"{self.choice_text} with prize {self.prizes}"
         else:
-            return str(self.choice_text)
+            return self.choice_text
+
+    def formatted_rarity(self):
+        if self.rarity is not None:
+            return str(self.rarity).rstrip('0').rstrip('.') if '.' in str(self.rarity) else str(self.rarity)
+        return None
 
     class Meta:
         verbose_name = "Choice"
@@ -1884,8 +1896,11 @@ class Battle(models.Model):
     participants = models.ManyToManyField(BattleParticipant, blank=True, related_name='battles', limit_choices_to={'is_bot': False})
     robots = models.ManyToManyField(Robot, blank=True, related_name='battles', limit_choices_to={'is_bot': True})
     min_human_participants = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)], help_text='Minimum number of human participants required.')
-    is_active = models.IntegerField(default=1, blank=True, null=True, choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
-
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
     def clean(self):
         pass
 
@@ -3985,6 +4000,24 @@ class EBackgroundImage(models.Model):
 
 
 from django.utils.crypto import get_random_string
+
+
+class Transaction(models.Model):
+    inventory_object = models.ForeignKey(InventoryObject, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        if self.user:
+            return str(self.inventory_object) + " by " + str(self.user.username)
+        else:
+            return self.title + " by PokeTrove"
+
+    class Meta:
+        verbose_name = "Transaction"
+        verbose_name_plural = "Transactions"
 
 
 class TradeItem(models.Model):
