@@ -11,7 +11,7 @@ from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
-    Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction
+    Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -1457,6 +1457,7 @@ def find_choice(request):
 
     return render(request, 'choice_detail.html', context)
 
+
 class FindChoiceView(View):
     template_name = 'choice_detail.html'
 
@@ -1475,8 +1476,56 @@ class FindChoiceView(View):
 
         return render(request, self.template_name, context)
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import random
 
-class GameChestBackgroundView(BaseView):
+
+
+@csrf_exempt
+def create_outcome(request):
+    if request.method == 'POST':
+        game_id = request.POST.get('game_id')
+        user = request.user
+
+        print(f"Received POST request with game_id: {game_id}")
+
+        if not game_id:
+            print("Game ID is missing.")
+            return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
+
+        try:
+            game = Game.objects.get(id=game_id)
+            nonce = random.randint(1, 1000000)
+            choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
+
+            if not choices.exists():
+                print(f"No choice found for nonce {nonce}.")
+                return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
+
+            choice = choices.order_by('?').first()  # Select a random choice if multiple choices are found
+
+            outcome = Outcome.objects.create(
+                user=user,
+                game=game,
+                choice=choice,
+                nonce=nonce,
+                value=random.randint(1, 100),  # example value, adjust as needed
+                ratio=random.randint(1, 10)    # example ratio, adjust as needed
+            )
+            print(f"Created outcome with nonce: {outcome.nonce}")
+            return JsonResponse({'status': 'success', 'nonce': outcome.nonce})
+        except Game.DoesNotExist:
+            print("Game not found.")
+            return JsonResponse({'status': 'error', 'message': 'Game not found.'})
+        except Exception as e:
+            print(f"Exception: {str(e)}")
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+
+class GameChestBackgroundView(TemplateView):
     model = UserProfile
     template_name = "game.html"
 
@@ -1491,10 +1540,43 @@ class GameChestBackgroundView(BaseView):
             # If the form is not valid, re-render the page with the form errors
             return self.get(request, *args, **kwargs)
 
-    def range(request):
-        nodes = models.IntegerField(help_text="Number of the choice included", blank=True, null=True)
-        context = {'range': range(1, nodes + 1)}
-        return render(request, 'game.html', context)
+    @csrf_exempt
+    def create_outcome(request):
+        if request.method == 'POST':
+            game_id = request.POST.get('game_id')
+            choice_id = request.POST.get('choice_id')
+            user = request.user
+
+            print(f"Received POST request with game_id: {game_id} and choice_id: {choice_id}")
+
+            if not game_id or not choice_id:
+                return JsonResponse({'status': 'error', 'message': 'Game ID and Choice ID are required.'})
+
+            try:
+                game = Game.objects.get(id=game_id)
+                choice = Choice.objects.get(id=choice_id)
+                nonce = random.randint(0, 1000000)
+                outcome = Outcome.objects.create(
+                    user=user,
+                    game=game,
+                    choice=choice,
+                    nonce=nonce,
+                    value=random.randint(1, 100),  # example value, adjust as needed
+                    ratio=random.randint(1, 10)  # example ratio, adjust as needed
+                )
+                print(f"Created outcome with nonce: {outcome.nonce}")
+                return JsonResponse({'status': 'success', 'nonce': outcome.nonce})
+            except Game.DoesNotExist:
+                print("Game not found.")
+                return JsonResponse({'status': 'error', 'message': 'Game not found.'})
+            except Choice.DoesNotExist:
+                print("Choice not found.")
+                return JsonResponse({'status': 'error', 'message': 'Choice not found.'})
+            except Exception as e:
+                print(f"Exception: {str(e)}")
+                return JsonResponse({'status': 'error', 'message': str(e)})
+
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
     @csrf_exempt  # Handle CSRF if needed
     def update_wager(request):
@@ -1514,18 +1596,16 @@ class GameChestBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+        slug = self.kwargs.get('slug')
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
         context['Money'] = Currency.objects.filter(is_active=1).first()
-        context['games'] = Game.objects.filter(is_active=1)  # Queryset of active games
+        context['games'] = Game.objects.filter(is_active=1, slug=slug)  # Filter games by slug
         context['wager_form'] = WagerForm()
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
-        # Retrieve the author's profile avatar
-
         context['Profiles'] = newprofile
 
         for newprofile in context['Profiles']:
@@ -1536,6 +1616,8 @@ class GameChestBackgroundView(BaseView):
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
         return context
+
+
 
 
 class ChatCreatePostView(CreateView):

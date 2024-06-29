@@ -1835,6 +1835,13 @@ class Choice(models.Model):
             return str(self.rarity).rstrip('0').rstrip('.') if '.' in str(self.rarity) else str(self.rarity)
         return None
 
+    @classmethod
+    def get_choice_by_nonce(cls, nonce):
+        try:
+            return cls.objects.get(Q(lower_nonce__lte=nonce) & Q(upper_nonce__gte=nonce))
+        except cls.DoesNotExist:
+            return None
+
     class Meta:
         verbose_name = "Choice"
         verbose_name_plural = "Choices"
@@ -1842,6 +1849,7 @@ class Choice(models.Model):
 
 class Outcome(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="player")
+    slug = models.SlugField(max_length=200, unique=True, blank=True, null=True)
     value = models.IntegerField(blank=True, null=True)
     ratio = models.IntegerField(blank=True, null=True)
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
@@ -1849,6 +1857,7 @@ class Outcome(models.Model):
     color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     game_creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="creator")
+    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
     nonce = models.DecimalField(max_digits=6, decimal_places=0)
     date_and_time = models.DateTimeField(null=True, verbose_name="date and time", auto_now_add=True)
     is_active = models.IntegerField(default=1,
@@ -1858,13 +1867,13 @@ class Outcome(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return str(self.user + self.game + self.date_and_time)
+        return f'{self.user} {self.game} {self.date_and_time}'
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        if not self.cost:
-            self.cost = self.game.cards.choices.value
+        if not self.slug and self.choice:
+            self.slug = slugify(self.choice)
+        if not self.nonce:
+            self.nonce = random.randint(0, 1000000)  # Set nonce to a random number between 0 and 1,000,000
         if not self.game_creator:
             self.game_creator = self.game.user
         super().save(*args, **kwargs)

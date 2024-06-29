@@ -1,22 +1,65 @@
 {% load static %}
-
 <!--manually count-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prize Picker</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script defer src="script.js"></script>
+     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+     <script src="{% static 'css/js/gamescript.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+ <h2 style="display: flex; flex-direction: row; text-align: center; margin-right: auto; margin-left: auto;">{{ game.name }}</h2>
+    <button class="start" id="start" data-game-id="{{ game.id }}">Spin!</button>
+
+    <script>
+        $(document).ready(function() {
+            console.log("jQuery is loaded.");
+
+            $('#start').on('click', function() {
+                console.log('Button clicked.');
+                var gameId = $(this).data('game-id');
+                var csrfToken = '{{ csrf_token }}';
+
+                console.log('Game ID:', gameId);
+                console.log('CSRF Token:', csrfToken);
+
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "showcase:create_outcome" %}',
+                    data: {
+                        game_id: gameId,
+                        csrfmiddlewaretoken: csrfToken
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            console.log('Nonce:', response.nonce);
+                        } else {
+                            console.error(response.message);
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        });
+    </script>
+
+
+
+
     <script src="scripts/build.js"></script>
     <script src="scripts/start.js"></script>
     <script src="scripts/test.js"></script>
-
-
-    <script>
-        $(".start").click(function (){
+    <style>
+    </style>
+<script>
+    $(".start").click(function (){
 
     $(this).prop('disabled', true);
 
@@ -180,11 +223,19 @@
 
    });
 
-    </script>
+</script>
+
+
 </head>
 <body>
-    <div >
-        <button class="start" id="start"> Spin! </button>
+
+    <div>
+{% for game in games %}
+
+<h2 style="display: flex; flex-direction: row; text-align: center; margin-right: auto; margin-left: auto;">{{ game.name }}</h2>
+<button class="start" id="start" data-game-id="{{ game.id }}" data-choice-id="{{ choice.id }}"> Spin! </button>
+
+
     </div>
     <div class="popup" id="popup">
         <div class="contents">
@@ -201,33 +252,230 @@
     <div class="wrapper">
         <div class="container">
             <div class="slider" id="slider">
-{% for game in games %}
-    <div class="game" style="display: flex; flex-direction: row">
-        <h2>{{ game.name }}</h2>
-        <!--game nonce decides cards displayed in spinner-->
+
         {% for choice in game.choices.all %}
 
-    <p>Generated Nonce: {{ generated_nonce }}</p>
-    {% if choice %}
-        <p>Lower Nonce: {{ choice.lower_nonce }}</p>
-        <p>Upper Nonce: {{ choice.upper_nonce }}</p>
-        <p>Rarity: {{ choice.formatted_rarity }}</p>
-        <!-- Add other fields as needed -->
-    {% else %}
-        <p>No choice found for the generated nonce.</p>
-    {% endif %}
-
-            <div id="Mewtwo" class="cards" style="margin-right: 15px; margin-left: 15px;">
-                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;">
-                <br>
+            <div id="{{choice.choice_text}}" class="cards">
+                <img src="{{ choice.file.url }}" >
                 <h2>{{ choice.value }} 💎</h2>
-
-        <p>{{ choice.choice_text }}</p>
             </div>
+
         {% endfor %}
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+                <div id="Mewtwo" class="cards">
+                    <img src="Mewtwo.png" alt="Mewtwo">
+                </div>
+                <div id="Venusaur" class="cards">
+                    <img src="Venusaur.png" alt="Venusaur">
+                </div>
+                <div id="Charizard" class="cards">
+                    <img src="Charizard.png" alt="Charizard">
+                </div>
+                <div id="Blastoise" class="cards">
+                    <img src="Blastoise.png" alt="Blastoise">
+                </div>
+            </div>
+            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.svg' %}" alt="spinner-arrow">
+        </div>
+
+
+        <!-- Game nonce decides cards displayed in spinner -->
+        <p>Generated Nonce: {{ generated_nonce }}</p>
+        <br>
+        <h2 style="text-align: center;">Loot Drop Table</h2>
+        <br>
+    <div class="game" style="display: flex; flex-direction: row">
 
         {% for choice in game.choices.all %}
-            <div id="Mewtwo" class="cards" style="margin-right: 15px; margin-left: 15px;">
+            <div id="{{choice.choice_text}}" class="cards" style="margin-right: 15px; margin-left: 15px;">
                 <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;">
                 <br>
                 <p>Rarity: {{ choice.formatted_rarity }}%</p>
@@ -238,210 +486,6 @@
     </div>
 {% endfor %}
 
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-            </div>
-            <img id='selector' class="spinner-arrow" src="opener_selector.svg" alt="spinner-arrow">
-        </div>
     </div>
 </body>
 </html>
