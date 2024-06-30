@@ -11,33 +11,46 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
      <script src="{% static 'css/js/gamescript.js' %}"></script>
+    {% csrf_token %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
  <h2 style="display: flex; flex-direction: row; text-align: center; margin-right: auto; margin-left: auto;">{{ game.name }}</h2>
     <button class="start" id="start" data-game-id="{{ game.id }}">Spin!</button>
 
+
+
+    <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+    <script src="{% static 'css/js/gamescript.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <!-- Inline JavaScript -->
+
+
+    <!-- Inline JavaScript -->
     <script>
         $(document).ready(function() {
             console.log("jQuery is loaded.");
-
             $('#start').on('click', function() {
                 console.log('Button clicked.');
                 var gameId = $(this).data('game-id');
                 var csrfToken = '{{ csrf_token }}';
+                var url = "{% url 'showcase:create_outcome' %}";
 
                 console.log('Game ID:', gameId);
                 console.log('CSRF Token:', csrfToken);
+                console.log('URL:', url);
 
                 $.ajax({
                     type: 'POST',
-                    url: '{% url "showcase:create_outcome" %}',
+                    url: url,
                     data: {
-                        game_id: gameId,
                         csrfmiddlewaretoken: csrfToken
                     },
                     success: function(response) {
                         if (response.status === 'success') {
-                            console.log('Nonce:', response.nonce);
+                            console.log('Choices received successfully!');
+                            updateWheelContents(response.choices);
                         } else {
                             console.error(response.message);
                         }
@@ -48,14 +61,50 @@
                 });
             });
         });
+
+        function updateWheelContents(choices) {
+            var slider = $('#slider');
+            slider.empty();  // Clear existing choices
+
+            choices.forEach(function(choice) {
+                var choiceHtml = `
+                    <div class="cards">
+                        <img src="${choice.file_url}" alt="${choice.choice_text}">
+                        <h2>${choice.value} 💎</h2>
+                    </div>
+                `;
+                slider.append(choiceHtml);
+            });
+
+            // Start the spin animation
+            randomizeContents();
+        }
+
+        function randomizeContents() {
+            // Function to randomly change the order of elements
+            $('div#slider').each(function() {
+                var $div_parent = $(this);
+                var $divsArr = $div_parent.children('div.cards');
+                $divsArr.sort(function(a, b) {
+                    var temp = parseInt(Math.random() * 10);
+                    var isOddOrEven = temp % 2;
+                    var isPosOrNeg = temp > 5 ? 1 : -1;
+                    return (isOddOrEven * isPosOrNeg);
+                }).appendTo($div_parent);
+            });
+
+            // Stop randomization after a set time
+            setTimeout(function() {
+                // Implement stopping logic here
+            }, 9000);
+        }
     </script>
 
 
 
-
-    <script src="scripts/build.js"></script>
-    <script src="scripts/start.js"></script>
-    <script src="scripts/test.js"></script>
+    <script src="{% static 'css/js/build.js' %}"></script>
+    <script src="{% static 'css/js/start.js' %}"></script>
+    <script src="{% static 'css/js/test.js' %}"></script>
     <style>
     </style>
 <script>
@@ -230,10 +279,9 @@
 <body>
 
     <div>
-{% for game in games %}
-
-<h2 style="display: flex; flex-direction: row; text-align: center; margin-right: auto; margin-left: auto;">{{ game.name }}</h2>
-<button class="start" id="start" data-game-id="{{ game.id }}" data-choice-id="{{ choice.id }}"> Spin! </button>
+ {% for game in games %}
+            <h2 style="display: flex; flex-direction: row; text-align: center; margin-right: auto; margin-left: auto;">{{ game.name }}</h2>
+            <button class="start" id="start" data-game-id="{{ game.id }}"> Spin! </button>
 
 
     </div>
@@ -261,207 +309,14 @@
             </div>
 
         {% endfor %}
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
+
+                {% for nonce, choice in matching_choices %}
+                    <p>Nonce: {{ nonce }}</p>
+                    <p>Choice: {{ choice.choice_text }}</p>
+                    <p>Value: {{ choice.value }}</p>
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                {% endfor %}
+
             </div>
             <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.svg' %}" alt="spinner-arrow">
         </div>
@@ -485,6 +340,83 @@
         {% endfor %}
     </div>
 {% endfor %}
+
+
+    <!-- Static script files -->
+    <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+    <script src="{% static 'css/js/gamescript.js' %}"></script>
+
+     <script>
+        $(document).ready(function() {
+            console.log("jQuery is loaded.");
+            $('#start').on('click', function() {
+                console.log('Button clicked.');
+                var gameId = $(this).data('game-id');
+                var csrfToken = '{{ csrf_token }}';
+                var url: '{% url "showcase:create_outcome" %}',
+
+                console.log('Game ID:', gameId);
+                console.log('CSRF Token:', csrfToken);
+                console.log('URL:', url);
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: {
+                        csrfmiddlewaretoken: csrfToken
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            console.log('Choices received successfully!');
+                            updateWheelContents(response.choices);
+                        } else {
+                            console.error(response.message);
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        });
+
+        function updateWheelContents(choices) {
+            var slider = $('#slider');
+            slider.empty();  // Clear existing choices
+
+            choices.forEach(function(choice) {
+                var choiceHtml = `
+                    <div class="cards">
+                        <img src="${choice.file_url}" alt="${choice.choice_text}">
+                        <h2>${choice.value} 💎</h2>
+                    </div>
+                `;
+                slider.append(choiceHtml);
+            });
+
+            // Start the spin animation
+            randomizeContents();
+        }
+
+        function randomizeContents() {
+            // Function to randomly change the order of elements
+            $('div#slider').each(function() {
+                var $div_parent = $(this);
+                var $divsArr = $div_parent.children('div.cards');
+                $divsArr.sort(function(a, b) {
+                    var temp = parseInt(Math.random() * 10);
+                    var isOddOrEven = temp % 2;
+                    var isPosOrNeg = temp > 5 ? 1 : -1;
+                    return (isOddOrEven * isPosOrNeg);
+                }).appendTo($div_parent);
+            });
+
+            // Stop randomization after a set time
+            setTimeout(function() {
+                // Implement stopping logic here
+            }, 9000);
+        }
+    </script>
 
     </div>
 </body>

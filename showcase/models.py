@@ -1784,17 +1784,17 @@ class Choice(models.Model):
     number_of_choice = models.IntegerField()
     total_number_of_choice = models.IntegerField(blank=True, null=True) #make it pull from the total_number_of_choice field in the related PrizePool
     lower_nonce = models.DecimalField(
-        max_digits=6,
+        max_digits=7,
         decimal_places=0,
-        validators=[MaxValueValidator(999999), MinValueValidator(0)],
+        validators=[MaxValueValidator(1000000), MinValueValidator(0)],
         help_text="Lower bound nonce of Choice",
         blank=True,
         null=True
     )
     upper_nonce = models.DecimalField(
-        max_digits=6,
+        max_digits=7,
         decimal_places=0,
-        validators=[MaxValueValidator(999999), MinValueValidator(0)],
+        validators=[MaxValueValidator(1000000), MinValueValidator(0)],
         help_text="Upper bound nonce of Choice",
         blank=True,
         null=True
@@ -1868,6 +1868,9 @@ class Outcome(models.Model):
 
     def __str__(self):
         return f'{self.user} {self.game} {self.date_and_time}'
+
+    def generate_nonce(self):
+        return random.randint(0, 1000000)
 
     def save(self, *args, **kwargs):
         if not self.slug and self.choice:

@@ -1476,15 +1476,44 @@ class FindChoiceView(View):
 
         return render(request, self.template_name, context)
 
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-import random
 
+def game_view(request, slug):
+    game = get_object_or_404(Game, slug=slug)
+    outcome = Outcome()
+    if request.method == 'POST':
+        nonces = [random.randint(0, 1000000) for _ in range(3)]
 
+        # Retrieve the game
+        game = Game.objects.get(id=game_id)
+
+        # Find the choices that match the nonces
+        matching_choices = []
+        for nonce in nonces:
+            choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce, game=game)
+            for choice in choices:
+                matching_choices.append((nonce, choice))
+
+        # Randomize the order of choices
+        random.shuffle(matching_choices)
+
+        # Prepare data to return as JSON
+        choices_data = [{
+            'nonce': nonce,
+            'choice_text': choice.choice_text,
+            'value': choice.value,
+            'file_url': choice.file.url
+        } for nonce, choice in matching_choices]
+
+        return JsonResponse({
+            'status': 'success',
+            'choices': choices_data
+        })
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
 @csrf_exempt
-def create_outcome(request):
+def create_outcome(request, slug):
     if request.method == 'POST':
+        print("Received a POST request")
         game_id = request.POST.get('game_id')
         user = request.user
 
@@ -1495,7 +1524,7 @@ def create_outcome(request):
             return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
 
         try:
-            game = Game.objects.get(id=game_id)
+            game = Game.objects.get(id=game_id, slug=slug)
             nonce = random.randint(1, 1000000)
             choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
 
@@ -1510,11 +1539,11 @@ def create_outcome(request):
                 game=game,
                 choice=choice,
                 nonce=nonce,
-                value=random.randint(1, 100),  # example value, adjust as needed
+                value=random.randint(1, 1000000),  # example value, adjust as needed
                 ratio=random.randint(1, 10)    # example ratio, adjust as needed
             )
             print(f"Created outcome with nonce: {outcome.nonce}")
-            return JsonResponse({'status': 'success', 'nonce': outcome.nonce})
+            return JsonResponse({'status': 'success', 'outcome': outcome.id, 'nonce': outcome.nonce})
         except Game.DoesNotExist:
             print("Game not found.")
             return JsonResponse({'status': 'error', 'message': 'Game not found.'})
@@ -1616,8 +1645,6 @@ class GameChestBackgroundView(TemplateView):
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
         return context
-
-
 
 
 class ChatCreatePostView(CreateView):
