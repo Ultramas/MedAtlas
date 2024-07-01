@@ -4484,8 +4484,6 @@ class ImageCarouselView(BaseView):
         return context
 
 
-
-
 class BackgroundView(FormMixin, BaseView):
     model = BackgroundImage
     form_class = EmailForm

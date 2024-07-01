@@ -114,6 +114,35 @@
 	.contented{
 	background: url("{% static 'css/images/blue-message-text-bubble.png' %}");
 	}
+
+	.message-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .messages {
+            width: 45%;
+        }
+        .message {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .message img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .message-content {
+            display: flex;
+            flex-direction: column;
+        }
+        .sender {
+            font-weight: bold;
+        }
+        .time {
+            font-size: 0.8em;
+            color: gray;
+        }
 </style>
 <script>
 window.onscroll = function() {
@@ -1739,6 +1768,7 @@ $(document).ready(function() {
 	  {% endif %}
   </div>
 </div>
+
 
 <div class="chat-general">
   <div class="chat-title">

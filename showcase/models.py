@@ -129,6 +129,8 @@ COLOR = (
     ('O', 'Orange'),
     ('R', 'Red'),
     ('B', 'Black'),
+    ('G', 'Gold'), #subject to change perhaps
+
 )
 
 PRIVACY = (

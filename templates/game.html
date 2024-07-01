@@ -1,4 +1,5 @@
 {% load static %}
+{% load random_nonce %}
 <!--manually count-->
 
 <!DOCTYPE html>
@@ -26,7 +27,63 @@
 
     <!-- Inline JavaScript -->
 
+    <style>
+        .wrapperlootlist {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .game {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .cardslootlist {
+            flex: 1 1 200px; /* Adjust the width as needed */
+            margin: 10px;
+            box-sizing: border-box;
+        }
 
+        .sliderlootlist {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .spinner-arrow {
+            width: 50px;
+            height: 50px;
+            z-index: 10; /* Ensure it's on top */
+        }
+     .cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start; /* Align cards to the start */
+    }
+
+    .individuallootelement {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start; /* Align items to the start */
+        padding: 15px;
+    }
+       .individuallootelement p {
+        margin: 5px 0;
+    }
+
+    .cards {
+        margin-right: 15px;
+        margin-left: 15px;
+        flex: 1 1 200px;
+        margin: 10px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column; /* Align elements vertically */
+        align-items: flex-start; /* Align items to the start */
+        align-items: center;
+    }
+
+</style>
     <!-- Inline JavaScript -->
     <script>
         $(document).ready(function() {
@@ -288,7 +345,7 @@
     <div class="popup" id="popup">
         <div class="contents">
             <span class="close">&times;</span>
-            <div class="text">
+            <div class="text" style="z-index: 5;">
                 <h1> Congratulations! </h1>
                 <h2> You got: </h2>
                 <h1 id="cardname"></h1>
@@ -297,7 +354,7 @@
         </div>
     </div>
 
-    <div class="wrapper">
+     <div class="wrapper">
         <div class="container">
             <div class="slider" id="slider">
 
@@ -323,25 +380,99 @@
 
 
         <!-- Game nonce decides cards displayed in spinner -->
-        <p>Generated Nonce: {{ generated_nonce }}</p>
         <br>
         <h2 style="text-align: center;">Loot Drop Table</h2>
         <br>
-    <div class="game" style="display: flex; flex-direction: row">
+    <div class="game" style="display: flex; flex-direction: row; justify-content: center;" >
 
-        {% for choice in game.choices.all %}
-            <div id="{{choice.choice_text}}" class="cards" style="margin-right: 15px; margin-left: 15px;">
-                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;">
-                <br>
-                <p>Rarity: {{ choice.formatted_rarity }}%</p>
-                <br>
-                <h2>{{ choice.value }} 💎</h2>
-            </div>
-        {% endfor %}
-    </div>
+            <div class="sliderlootlist" id="">
+        {% for choice in game.choices.all reversed %}
+            <div id="{{choice.choice_text}}" class="cards" style="margin-right: 15px; margin-left: 15px; flex: 1 1 200px;
+            margin: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;">
 {% endfor %}
 
-
+                <!--gray-->
+<div class="cards-container">
+    {% for choice in game.choices.all reversed %}
+        <div id="{{ choice.choice_text }}" class="cards">
+            {% with cost_threshold=game.cost %}
+                {% with cost_threshold=cost_threshold|add:"0" %}
+                    {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost|mul:1 cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 %}
+                        {% if cost_threshold_10000 >= choice.value %}
+                            <div class="individuallootelement">
+                                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;" alt="{{ choice.choice_text }}">
+                                <br>
+                                <p>Rarity: {{ choice.formatted_rarity }}%</p>
+                                <br>
+                                <p>{{choice.choice_text}}</p>
+                                <br>
+                                <h2>{{ choice.value }} 💎</h2>
+                            </div>
+                        {% elif cost_threshold_500 >= choice.value > cost_threshold_10000 %}
+                            <div class="individuallootelement">
+                                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;" alt="{{ choice.choice_text }}">
+                                <br>
+                                <p>Rarity: {{ choice.formatted_rarity }}%</p>
+                                <br>
+                                <p>{{choice.choice_text}}</p>
+                                <br>
+                                <h2>{{ choice.value }} 💎</h2>
+                            </div>
+                        {% elif cost_threshold_200 >= choice.value > cost_threshold_500 %}
+                            <div class="individuallootelement">
+                                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;" alt="{{ choice.choice_text }}">
+                                <br>
+                                <p>Rarity: {{ choice.formatted_rarity }}%</p>
+                                <br>
+                                <p>{{choice.choice_text}}</p>
+                                <br>
+                                <h2>{{ choice.value }} 💎</h2>
+                            </div>
+                        {% elif cost_threshold_100 >= choice.value > cost_threshold_200 %}
+                            <div class="individuallootelement">
+                                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;" alt="{{ choice.choice_text }}">
+                                <br>
+                                <p>Rarity: {{ choice.formatted_rarity }}%</p>
+                                <br>
+                                <p>{{choice.choice_text}}</p>
+                                <br>
+                                <h2>{{ choice.value }} 💎</h2>
+                            </div>
+                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
+                            <div class="individuallootelement">
+                                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;" alt="{{ choice.choice_text }}">
+                                <br>
+                                <p>Rarity: {{ choice.formatted_rarity }}%</p>
+                                <br>
+                                <p>{{choice.choice_text}}</p>
+                                <br>
+                                <h2>{{ choice.value }} 💎</h2>
+                            </div>
+                        {% elif choice.value > cost_threshold_80 %}
+                            <div class="individuallootelement">
+                                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;" alt="{{ choice.choice_text }}">
+                                <br>
+                                <p>Rarity: {{ choice.formatted_rarity }}%</p>
+                                <br>
+                                <p>{{choice.choice_text}}</p>
+                                <br>
+                                <h2>{{ choice.value }} 💎</h2>
+                            </div>
+                        {% else %}
+                            <p>This choice does not meet the cost requirement.</p>
+                        {% endif %}
+                    {% endwith %}
+                {% endwith %}
+            {% endwith %}
+        </div>
+    {% endfor %}
+    {% endfor %}
+</div>
+    </div>
     <!-- Static script files -->
     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
     <script src="{% static 'css/js/gamescript.js' %}"></script>
