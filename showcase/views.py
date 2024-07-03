@@ -1554,6 +1554,24 @@ def create_outcome(request, slug):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
 
+def game_view(request, game_id):
+    game = get_object_or_404(Game, id=game_id)
+
+    # Use the discount cost if available, otherwise use the regular cost
+    cost = game.discount_cost if game.discount_cost else game.cost
+
+    context = {
+        'game': game,
+        'cost_threshold_80': cost * 0.8,
+        'cost_threshold_100': cost,
+        'cost_threshold_200': cost * 2,
+        'cost_threshold_500': cost * 5,
+        'cost_threshold_10000': cost * 100,
+    }
+
+    return render(request, 'game.html', context)
+
+
 class GameChestBackgroundView(TemplateView):
     model = UserProfile
     template_name = "game.html"
@@ -1626,6 +1644,7 @@ class GameChestBackgroundView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         slug = self.kwargs.get('slug')
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
@@ -1633,7 +1652,18 @@ class GameChestBackgroundView(TemplateView):
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['games'] = Game.objects.filter(is_active=1, slug=slug)  # Filter games by slug
         context['wager_form'] = WagerForm()
+        game = get_object_or_404(Game, slug=slug)
 
+        cost = game.discount_cost if game.discount_cost else game.cost
+
+        context.update({
+            'game': game,
+            'cost_threshold_80': cost * 0.8,
+            'cost_threshold_100': cost,
+            'cost_threshold_200': cost * 2,
+            'cost_threshold_500': cost * 5,
+            'cost_threshold_10000': cost * 100,
+        })
         newprofile = UpdateProfile.objects.filter(is_active=1)
         context['Profiles'] = newprofile
 
@@ -4508,6 +4538,25 @@ class BackgroundView(FormMixin, BaseView):
             return render(request, "index.html", {'form': form})
             return redirect('showcase:index')
 
+    def send(request):
+        if request.method == 'POST':
+            # Fetch the 'General' room
+            room = get_object_or_404(Room, name='General')
+
+            user = request.user  # Assuming you are using Django's auth system
+            value = request.POST.get('value')
+
+            if value:
+                new_message = Message.objects.create(
+                    room=room,
+                    user=user,
+                    value=value
+                )
+                return JsonResponse({'message': 'Message sent successfully!'}, status=200)
+            else:
+                return JsonResponse({'error': 'Message value is required'}, status=400)
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         signed_in_user = self.request.user
@@ -4647,31 +4696,47 @@ class BackgroundView(FormMixin, BaseView):
         # Retrieve the general messages
         # Retrieve the author's profile avatar
         # Retrieve the messages
-        general_messages = Message.objects.all().order_by('-date')
-
+        general_messages = Message.objects.filter(room="General").order_by('-date')
         context['GeneralMessanger'] = general_messages
 
         # Create a list to store formatted message data
-        messages_data = []
+        messages_data2 = []
 
-        for general_messages in context['GeneralMessanger']:
-            profile = ProfileDetails.objects.filter(user=general_messages.signed_in_user).first()
+        for message in general_messages:
+            profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
 
             # Create a dictionary to store message data including profile information
-            message_data = {
+            message_data2 = {
                 'user_profile_picture_url': profile.avatar.url if profile else '',
-                'user_profile_url': general_messages.get_profile_url(),
-                'user': general_messages.signed_in_user,
-                'value': general_messages.value,
-                'date': general_messages.date,
+                'user_profile_url': message.get_profile_url(),
+                'user': message.signed_in_user,
+                'value': message.value,
+                'date': message.date,
             }
 
-            messages_data.append(message_data)
+            messages_data2.append(message_data2)
 
         # Assign the list of formatted message data to the context
-        context['GeneralMessanger'] = messages_data
+        context['GeneralMessanger'] = messages_data2
         return context
+"""
+@login_required
+def get_general_messages(request, room_name):
+    general_messages = Message.objects.filter(room=room_name).order_by('date')
 
+    messages_data = []
+    for message in general_messages:
+        profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+        message_data = {
+            'user_profile_picture_url': profile.avatar.url if profile else '',
+            'user_profile_url': message.get_profile_url(),
+            'user': message.signed_in_user.username,
+            'value': message.value,
+            'date': message.date.strftime('%Y-%m-%d %H:%M:%S'),
+        }
+        messages_data.append(message_data)
+
+    return JsonResponse({'messages': messages_data})"""
 
 def indexsupportroom(request, signed_in_user):
     return render(request, 'index.html', {

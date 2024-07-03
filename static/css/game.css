@@ -23,7 +23,7 @@
    /* width: 1000px;
    height: 350px; */
    width: 120vh;
-   height: 25vh;
+   height: 37.5vh;
    backdrop-filter: blur(20px);
    overflow: hidden;
 
@@ -43,8 +43,8 @@
 .slider img{
     width: 15vh;
     height: 20vh;
-    margin-top: 2vh;
-    margin-left: 3vh;
+    margin-top: -2vh;
+    margin-left: -0.5vh;
     border: 2px solid;
     border-color: transparent; /*to change later*/
     border-radius: 7px;

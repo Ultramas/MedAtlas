@@ -1719,9 +1719,6 @@ class GameHub(models.Model):
         verbose_name = "Game Hub"
         verbose_name_plural = "Game Hub"
 
-from django.db import models
-from django.contrib.auth.models import User
-
 
 class Game(models.Model):
     name = models.CharField(max_length=200, verbose_name="Game Name")
@@ -1748,6 +1745,32 @@ class Game(models.Model):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
+
+    def get_color(self, choice):
+        cost_threshold_80 = self.cost * 0.8
+        cost_threshold_100 = self.cost
+        cost_threshold_200 = self.cost * 2
+        cost_threshold_500 = self.cost * 5
+        cost_threshold_10000 = self.cost * 100
+        cost_threshold_100000 = self.cost * 1000
+        cost_threshold_100000000 = self.cost * 1000000
+
+        if choice.value >= cost_threshold_100000000:
+            return 'redgold'
+        elif choice.value >= cost_threshold_100000:
+            return 'redblack'
+        elif choice.value >= cost_threshold_10000:
+            return 'black'
+        elif choice.value >= cost_threshold_500:
+            return 'red'
+        elif choice.value >= cost_threshold_200:
+            return 'orange'
+        elif choice.value >= cost_threshold_100:
+            return 'yellow'
+        elif choice.value >= cost_threshold_80:
+            return 'green'
+        else:
+            return 'gray'
 
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.user).first()
@@ -1831,6 +1854,7 @@ class Choice(models.Model):
             return f"{self.choice_text} with prize {self.prizes}"
         else:
             return self.choice_text
+
 
     def formatted_rarity(self):
         if self.rarity is not None:

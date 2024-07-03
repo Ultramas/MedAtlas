@@ -15,11 +15,6 @@
     {% csrf_token %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
- <h2 style="display: flex; flex-direction: row; text-align: center; margin-right: auto; margin-left: auto;">{{ game.name }}</h2>
-    <button class="start" id="start" data-game-id="{{ game.id }}">Spin!</button>
-
-
-
     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
     <script src="{% static 'css/js/gamescript.js' %}"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}">
@@ -31,12 +26,12 @@
         .wrapperlootlist {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: left;
         }
         .game {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: left;
         }
         .cardslootlist {
             flex: 1 1 200px; /* Adjust the width as needed */
@@ -47,7 +42,7 @@
         .sliderlootlist {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: left;
         }
 
         .spinner-arrow {
@@ -80,8 +75,17 @@
         display: flex;
         flex-direction: column; /* Align elements vertically */
         align-items: flex-start; /* Align items to the start */
-        align-items: center;
+        align-items: left;
     }
+.slider img{
+    width: 15vh;
+    height: 20vh;
+    margin-top: -2vh;
+    margin-left: -0.5vh;
+    border: 2px solid;
+    border-color: transparent; /*to change later*/
+    border-radius: 7px;
+}
 
 </style>
     <!-- Inline JavaScript -->
@@ -337,7 +341,10 @@
 
     <div>
  {% for game in games %}
+        <div class="boxes" style="margin-left: 41%; margin-right: 50%; position: absolute;">
+<img src="{{ game.image.url }}" class="game-image" alt="{{ game.name }}">
             <h2 style="display: flex; flex-direction: row; text-align: center; margin-right: auto; margin-left: auto;">{{ game.name }}</h2>
+            </div>
             <button class="start" id="start" data-game-id="{{ game.id }}"> Spin! </button>
 
 
@@ -355,23 +362,69 @@
     </div>
 
      <div class="wrapper">
-        <div class="container">
+        <div class="container" style="height: 37.5vh;">
             <div class="slider" id="slider">
 
-        {% for choice in game.choices.all %}
+{% for choice in game.choices.all %}
+    <div id="{{ choice.choice_text }}" class="cards">
 
-            <div id="{{choice.choice_text}}" class="cards">
-                <img src="{{ choice.file.url }}" >
-                <h2>{{ choice.value }} 💎</h2>
+
+{% with color=game|get_color:choice %}
+            <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
+                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
             </div>
+        {% endwith %}
+        <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
+    </div>
+{% endfor %}
 
-        {% endfor %}
+
+
+
 
                 {% for nonce, choice in matching_choices %}
                     <p>Nonce: {{ nonce }}</p>
                     <p>Choice: {{ choice.choice_text }}</p>
                     <p>Value: {{ choice.value }}</p>
+
+            {% with cost_threshold=game.cost %}
+                {% with cost_threshold=cost_threshold|add:"0" %}
+                    {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost|mul:1 cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 %}
+                        {% if cost_threshold_10000 >= choice.value %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); padding: -10%;">
                     <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_500 >= choice.value > cost_threshold_10000 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_200 >= choice.value > cost_threshold_500 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_100 >= choice.value > cost_threshold_200 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
+                            <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% else %}
+                            <p>This choice does not meet the cost requirement.</p>
+                        {% endif %}
+                    {% endwith %}
+                {% endwith %}
+            {% endwith %}
                 {% endfor %}
 
             </div>
@@ -381,9 +434,11 @@
 
         <!-- Game nonce decides cards displayed in spinner -->
         <br>
-        <h2 style="text-align: center;">Loot Drop Table</h2>
         <br>
-    <div class="game" style="display: flex; flex-direction: row; justify-content: center;" >
+        <br>
+        <br>
+        <h2 style="text-align: center; margin-bottom: -3%;">Loot Drop Table</h2>
+    <div class="game" style="display: flex; flex-direction: row; justify-content: left;" >
 
             <div class="sliderlootlist" id="">
         {% for choice in game.choices.all reversed %}
@@ -392,81 +447,17 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            align-items: center;">
+            align-items: left;">
 {% endfor %}
 
                 <!--gray-->
 <div class="cards-container">
     {% for choice in game.choices.all reversed %}
         <div id="{{ choice.choice_text }}" class="cards">
-            {% with cost_threshold=game.cost %}
-                {% with cost_threshold=cost_threshold|add:"0" %}
-                    {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost|mul:1 cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 %}
-                        {% if cost_threshold_10000 >= choice.value %}
-                            <div class="individuallootelement">
-                                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;" alt="{{ choice.choice_text }}">
-                                <br>
-                                <p>Rarity: {{ choice.formatted_rarity }}%</p>
-                                <br>
-                                <p>{{choice.choice_text}}</p>
-                                <br>
-                                <h2>{{ choice.value }} 💎</h2>
-                            </div>
-                        {% elif cost_threshold_500 >= choice.value > cost_threshold_10000 %}
-                            <div class="individuallootelement">
-                                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;" alt="{{ choice.choice_text }}">
-                                <br>
-                                <p>Rarity: {{ choice.formatted_rarity }}%</p>
-                                <br>
-                                <p>{{choice.choice_text}}</p>
-                                <br>
-                                <h2>{{ choice.value }} 💎</h2>
-                            </div>
-                        {% elif cost_threshold_200 >= choice.value > cost_threshold_500 %}
-                            <div class="individuallootelement">
-                                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;" alt="{{ choice.choice_text }}">
-                                <br>
-                                <p>Rarity: {{ choice.formatted_rarity }}%</p>
-                                <br>
-                                <p>{{choice.choice_text}}</p>
-                                <br>
-                                <h2>{{ choice.value }} 💎</h2>
-                            </div>
-                        {% elif cost_threshold_100 >= choice.value > cost_threshold_200 %}
-                            <div class="individuallootelement">
-                                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;" alt="{{ choice.choice_text }}">
-                                <br>
-                                <p>Rarity: {{ choice.formatted_rarity }}%</p>
-                                <br>
-                                <p>{{choice.choice_text}}</p>
-                                <br>
-                                <h2>{{ choice.value }} 💎</h2>
-                            </div>
-                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
-                            <div class="individuallootelement">
-                                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;" alt="{{ choice.choice_text }}">
-                                <br>
-                                <p>Rarity: {{ choice.formatted_rarity }}%</p>
-                                <br>
-                                <p>{{choice.choice_text}}</p>
-                                <br>
-                                <h2>{{ choice.value }} 💎</h2>
-                            </div>
-                        {% elif choice.value > cost_threshold_80 %}
-                            <div class="individuallootelement">
-                                <img src="{{ choice.file.url }}" style="width: 150px; height: 225px;" alt="{{ choice.choice_text }}">
-                                <br>
-                                <p>Rarity: {{ choice.formatted_rarity }}%</p>
-                                <br>
-                                <p>{{choice.choice_text}}</p>
-                                <br>
-                                <h2>{{ choice.value }} 💎</h2>
-                            </div>
-                        {% else %}
-                            <p>This choice does not meet the cost requirement.</p>
-                        {% endif %}
-                    {% endwith %}
-                {% endwith %}
+          {% with color=game|get_color:choice %}
+                <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%;">
+                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}" style="width: 150px; height: 225px;"></p>
+            </div>
             {% endwith %}
         </div>
     {% endfor %}

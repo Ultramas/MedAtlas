@@ -14,3 +14,8 @@ def mul(value, arg):
         return float(value) * float(arg)
     except (ValueError, TypeError):
         return ''
+
+
+@register.filter
+def get_color(game, choice):
+    return game.get_color(choice)
