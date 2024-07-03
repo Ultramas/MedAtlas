@@ -2656,6 +2656,9 @@ def checkview(request):
         return redirect('showcase:create_room')  # Assuming you have a URL pattern named 'create_room'
 
 
+
+
+
 @login_required  # Ensure the user is authenticated
 def send(request):
     if request.method == 'POST':
@@ -2665,33 +2668,34 @@ def send(request):
         message_type = request.POST.get('message_type')
 
         # Debugging information
-        print(f"Message: {message}, Username: {username}, Room ID: {room_id}, Message Type: {message_type}")
+        print(f"Received POST data - Message: '{message}', Username: {username}, Room ID: {room_id}, Message Type: {message_type}")
 
         if not message:
             return HttpResponse('Message content is missing', status=400)
 
         if message_type == 'general':
             # Create a general message
-            general_message = Message.objects.create(
+            new_message = Message.objects.create(
                 room="General",
                 signed_in_user=request.user,
                 value=message,
                 user=request.user.username
             )
-            general_message.save()
+            print(f"General Message Saved: {new_message}")
         else:
             # Create a support message
-            support_message = SupportMessage.objects.create(
+            new_message = SupportMessage.objects.create(
                 value=message,
                 user=username,
                 room=room_id,
                 signed_in_user=request.user if request.user.is_authenticated else None
             )
-            support_message.save()
+            print(f"Support Message Saved: {new_message}")
 
         return HttpResponse('Message sent successfully')
 
     return HttpResponse('Invalid request method. Please use POST to send a message.')
+
 
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import JsonResponse

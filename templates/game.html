@@ -450,18 +450,21 @@
             align-items: left;">
 {% endfor %}
 
-                <!--gray-->
 <div class="cards-container">
+<p>Nonce: {{ nonce }}</p>
+
     {% for choice in game.choices.all reversed %}
+    {% if nonce >= choice.lower_nonce and nonce <= choice.upper_nonce %}
         <div id="{{ choice.choice_text }}" class="cards">
-          {% with color=game|get_color:choice %}
+            {% with color=game|get_color:choice %}
                 <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%;">
-                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}" style="width: 150px; height: 225px;"></p>
-            </div>
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}" style="width: 150px; height: 225px;"></p>
+                </div>
             {% endwith %}
         </div>
-    {% endfor %}
-    {% endfor %}
+    {% endif %}
+{% endfor %}
+{% endfor %}
 </div>
     </div>
     <!-- Static script files -->
