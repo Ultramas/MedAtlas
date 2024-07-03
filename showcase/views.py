@@ -2656,39 +2656,42 @@ def checkview(request):
         return redirect('showcase:create_room')  # Assuming you have a URL pattern named 'create_room'
 
 
+@login_required  # Ensure the user is authenticated
 def send(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         username = request.POST.get('username')
         room_id = request.POST.get('room_id')
+        message_type = request.POST.get('message_type')
 
-        print(f"message: {message}, username: {username}, room_id: {room_id}")
+        # Debugging information
+        print(f"Message: {message}, Username: {username}, Room ID: {room_id}, Message Type: {message_type}")
 
-        # Check if the user is authenticated
-        if request.user.is_authenticated:
-            # User is authenticated, use their user ID for the message user field
-            new_message = Message.objects.create(
+        if not message:
+            return HttpResponse('Message content is missing', status=400)
+
+        if message_type == 'general':
+            # Create a general message
+            general_message = Message.objects.create(
+                room="General",
+                signed_in_user=request.user,
                 value=message,
-                user=username,
-                room=room_id,
-                signed_in_user=request.user  # Set the signed_in_user to the authenticated user
+                user=request.user.username
             )
-            new_message.save()
+            general_message.save()
         else:
-            # User is not authenticated, use the provided username for the message user field
-            new_message = Message.objects.create(
+            # Create a support message
+            support_message = SupportMessage.objects.create(
                 value=message,
                 user=username,
                 room=room_id,
+                signed_in_user=request.user if request.user.is_authenticated else None
             )
-            new_message.save()
+            support_message.save()
 
-        # Return a response indicating the message was sent successfully
         return HttpResponse('Message sent successfully')
 
-    # If the request method is not POST, handle the appropriate response here
     return HttpResponse('Invalid request method. Please use POST to send a message.')
-
 
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import JsonResponse
@@ -4702,16 +4705,16 @@ class BackgroundView(FormMixin, BaseView):
         # Create a list to store formatted message data
         messages_data2 = []
 
-        for message in general_messages:
-            profile = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+        for general_message in general_messages:
+            profile = ProfileDetails.objects.filter(user=general_message.signed_in_user).first()
 
             # Create a dictionary to store message data including profile information
             message_data2 = {
                 'user_profile_picture_url': profile.avatar.url if profile else '',
-                'user_profile_url': message.get_profile_url(),
-                'user': message.signed_in_user,
-                'value': message.value,
-                'date': message.date,
+                'user_profile_url': general_message.get_profile_url(),
+                'user': general_message.signed_in_user,
+                'value': general_message.value,
+                'date': general_message.date,
             }
 
             messages_data2.append(message_data2)
