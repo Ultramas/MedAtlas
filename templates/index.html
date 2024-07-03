@@ -1775,10 +1775,6 @@ Bounce
   </div>
 </div>
 <script type="text/javascript">
-  function scrollToBottom() {
-    var chatDisplay = document.getElementById('display');
-    chatDisplay.scrollTop = chatDisplay.scrollHeight;
-  }
 
   $(document).on('submit', '#post-form', function(e) {
     e.preventDefault();
@@ -1894,11 +1890,9 @@ Bounce
 <!--support chat-->
 <script>
 $(document).ready(function(){
-  var lastMessageCount = 0;
-
   // Function to load and display messages
   function loadAndDisplayMessages() {
-    var room = "{{ room }}"; // Replace with the actual value of the room
+    var room = 'General'; // Fetch messages from the 'General' room
 
     $.ajax({
       type: 'GET',
@@ -1907,9 +1901,7 @@ $(document).ready(function(){
         console.log(response);
         $("#display").empty();
 
-        var messageCount = 0;
         for (var key in response.messages) {
-          messageCount++;
           var message = response.messages[key];
 
           var messageHtml = `
@@ -1927,23 +1919,12 @@ $(document).ready(function(){
           $("#display").append(messageHtml);
         }
 
-        if (messageCount > lastMessageCount) {
-          setTimeout(scrollToBottom, 600);
-        }
-        lastMessageCount = messageCount;
       },
       error: function(response) {
         alert('An error occurred');
       }
     });
   }
-
-  // Preload avatars (if needed)
-  var avatarUrls = [];
-  $(".message img").each(function() {
-    avatarUrls.push($(this).attr("src"));
-  });
-  preloadImages(avatarUrls);
 
   // Load and display messages every half-second
   setInterval(loadAndDisplayMessages, 500);
@@ -1962,6 +1943,7 @@ function scrollToBottom() {
   var chatDisplay = document.getElementById('display');
   chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
+
 </script>
 
 
@@ -2013,10 +1995,6 @@ function scrollToBottom() {
 </div>
 
 <script type="text/javascript">
-  function scrollToBottom() {
-    var chatDisplay = document.getElementById('display');
-    chatDisplay.scrollTop = chatDisplay.scrollHeight;
-  }
 
   $(document).on('submit', '#post-form', function(e) {
     e.preventDefault();
