@@ -190,6 +190,7 @@ urlpatterns = [
     #####
     path('supportissues/', views.supportview.as_view(), name='supportissues'),
     path('', views.BackgroundView.as_view(), name='index'),
+    path('', views.generalsend, name='index'),
     path('ehome/', views.EBackgroundView.as_view(), name='ehome'),
     path('item_category/', views.get_items_by_category, name='item_category'),
     path('storeviewtypesnippet/', views.StoreView.as_view(), name='storeviewtypesnippet'),
@@ -351,7 +352,7 @@ urlpatterns = [
     path('gamehub/<slug:slug>/', views.GameHubView.as_view(), name='gamehub'), #game hub with a single game hub
     path('gameroom/<slug:slug>/', views.GameRoomView.as_view(), name='gameroom'), #game room with a single game genre (possibly multiple games)
     path('game/<slug:slug>/', views.GameChestBackgroundView.as_view(), name='game'), #game with a single game
-    path('create_outcome/', views.create_outcome, name='create_outcome'),
+    path('create_outcome/slug/', views.create_outcome, name='create_outcome'),
     path('spin/<int:game_id>/', views.game_view, name='game_view'),
     path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
     path('inventory/', views.PlayerInventoryView.as_view(), name='inventory'),

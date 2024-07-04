@@ -1983,8 +1983,8 @@ function scrollToBottom() {
       <form id="post-form">
         {% csrf_token %}
         <input type="hidden" name="username" id="username" value="{{ username }}">
-	    <input type="hidden" id="message_type" name="message_type" value="general">
-        <input type="hidden" name="room_name" id="room_name" value="{{ room }}">
+	    <input type="hidden" id="message_type" name="message_type" value="General">
+        <input type="hidden" name="room_name" id="room_name" value="General">
         <input type="text" name="general_message" id="general_message" width="100px" placeholder="Type your message...">
         <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
       </form>
@@ -1996,26 +1996,31 @@ function scrollToBottom() {
   <button type="button" onclick="showChatWidget2()">...</button>
 </div>
 
-<form id="post-form" method="post">
-    {% csrf_token %}
-    <input type="hidden" id="username" value="{{ user.username }}">
-    <input type="hidden" id="room_name" value="{{ room }}">
-    <textarea id="message" name="message" placeholder="Type your message here..."></textarea>
-    <button type="submit">Send</button>
-</form>
 
+<div id="messages">
+    {% for message in GeneralMessanger %}
+    <div class="message">
+        <img src="{{ message.user_profile_picture_url }}" alt="{{ message.user }}">
+        <p>{{ message.user }}: {{ message.value }}</p>
+        <span>{{ message.date }}</span>
+    </div>
+    {% endfor %}
+</div>
 
 <script type="text/javascript">
 $(document).on('submit', '#post-form', function(e) {
     e.preventDefault();
-    console.log('Index message submitted'); // Log when form is submitted
+    console.log('Message form submitted'); // Log when form is submitted
 
     let messageContent = $('#message').val().trim();
-    let roomId = $('#room_name').val();
-    let messageType = roomId === 'General' ? 'general' : 'support';
+    let username = $('#username').val();
+    let roomId = $('#room_name').val();  // Ensure room ID is set correctly
+    let messageType = $('#message_type').val();  // Get the message type from the hidden field
 
     console.log('Message Content:', messageContent);  // Log the message content
     console.log('Room ID:', roomId);  // Log the room ID
+    console.log('Username:', username); // Log the username
+    console.log('Message Type:', messageType); // Log the message type
 
     if (!messageContent) {
         alert('Message cannot be empty');
@@ -2026,7 +2031,7 @@ $(document).on('submit', '#post-form', function(e) {
         type: 'POST',
         url: '{% url "showcase:send" %}', // Use Django's URL template tag
         data: {
-            username: $('#username').val(),
+            username: username,
             room_id: roomId,
             message: messageContent,
             message_type: messageType,
@@ -2041,8 +2046,8 @@ $(document).on('submit', '#post-form', function(e) {
             console.error('Error:', error); // Log error
         }
     });
-    $('#message').va
-
+    $('#message').val(''); // Clear the input field after submitting
+});
 
 $(document).ready(function(){
     // Function to load and display general messages
@@ -2094,7 +2099,6 @@ function preloadImages(urls) {
         img.src = urls[i];
     }
 }
-
 </script>
 
 {% endif %}

@@ -2656,10 +2656,7 @@ def checkview(request):
         return redirect('showcase:create_room')  # Assuming you have a URL pattern named 'create_room'
 
 
-
-
-
-@login_required  # Ensure the user is authenticated
+@login_required
 def send(request):
     if request.method == 'POST':
         message = request.POST.get('message')
@@ -2674,9 +2671,10 @@ def send(request):
             return HttpResponse('Message content is missing', status=400)
 
         if message_type == 'general':
+            room_id = "General"  # Override room_id for general messages
             # Create a general message
             new_message = Message.objects.create(
-                room="General",
+                room=room_id,
                 signed_in_user=request.user,
                 value=message,
                 user=request.user.username
@@ -2695,7 +2693,6 @@ def send(request):
         return HttpResponse('Message sent successfully')
 
     return HttpResponse('Invalid request method. Please use POST to send a message.')
-
 
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import JsonResponse
@@ -4521,6 +4518,50 @@ class ImageCarouselView(BaseView):
         return context
 
 
+def index(request):
+    general_messages = Message.objects.filter(room="General").order_by('-date')
+    context = {'GeneralMessanger': general_messages}
+    return render(request, 'index.html', context)
+
+
+@login_required
+def generalsend(request):
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        username = request.POST.get('username')
+        room_id = request.POST.get('room_id')
+        message_type = request.POST.get('message_type')
+
+        # Debugging information
+        print(f"Received POST data - Message: '{message}', Username: {username}, Room ID: {room_id}, Message Type: {message_type}")
+
+        if not message:
+            return HttpResponse('Message content is missing', status=400)
+
+        if message_type == 'general':
+            room_id = "General"  # Override room_id for general messages
+            # Create a general message
+            new_message = Message.objects.create(
+                room=room_id,
+                signed_in_user=request.user,
+                value=message,
+                user=request.user.username
+            )
+            print(f"General Message Saved: {new_message}")
+        else:
+            # Create a support message
+            new_message = SupportMessage.objects.create(
+                value=message,
+                user=username,
+                room=room_id,
+                signed_in_user=request.user if request.user.is_authenticated else None
+            )
+            print(f"Support Message Saved: {new_message}")
+
+        return HttpResponse('Message sent successfully')
+
+    return HttpResponse('Invalid request method. Please use POST to send a message.')
+
 class BackgroundView(FormMixin, BaseView):
     model = BackgroundImage
     form_class = EmailForm
@@ -4545,24 +4586,44 @@ class BackgroundView(FormMixin, BaseView):
             return render(request, "index.html", {'form': form})
             return redirect('showcase:index')
 
+    @login_required
     def send(request):
         if request.method == 'POST':
-            # Fetch the 'General' room
-            room = get_object_or_404(Room, name='General')
+            message = request.POST.get('message')
+            username = request.POST.get('username')
+            room_id = request.POST.get('room_id')
+            message_type = request.POST.get('message_type')
 
-            user = request.user  # Assuming you are using Django's auth system
-            value = request.POST.get('value')
+            # Debugging information
+            print(
+                f"Received POST data - Message: '{message}', Username: {username}, Room ID: {room_id}, Message Type: {message_type}")
 
-            if value:
+            if not message:
+                return HttpResponse('Message content is missing', status=400)
+
+            if message_type == 'general':
+                room_id = "General"  # Override room_id for general messages
+                # Create a general message
                 new_message = Message.objects.create(
-                    room=room,
-                    user=user,
-                    value=value
+                    room=room_id,
+                    signed_in_user=request.user,
+                    value=message,
+                    user=request.user.username
                 )
-                return JsonResponse({'message': 'Message sent successfully!'}, status=200)
+                print(f"General Message Saved: {new_message}")
             else:
-                return JsonResponse({'error': 'Message value is required'}, status=400)
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
+                # Create a support message
+                new_message = SupportMessage.objects.create(
+                    value=message,
+                    user=username,
+                    room=room_id,
+                    signed_in_user=request.user if request.user.is_authenticated else None
+                )
+                print(f"Support Message Saved: {new_message}")
+
+            return HttpResponse('Message sent successfully')
+
+        return HttpResponse('Invalid request method. Please use POST to send a message.')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -4676,55 +4737,43 @@ class BackgroundView(FormMixin, BaseView):
 
         # Retrieve the author's profile avatar
         # Retrieve the messages
+
+        # Messages
         messages = SupportMessage.objects.all().order_by('-date')
-
         context['Messanger'] = messages
-
-        # Create a list to store formatted message data
         messages_data = []
 
-        for messages in context['Messanger']:
-            profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
-
-            # Create a dictionary to store message data including profile information
+        for message in context['Messanger']:
+            profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
             message_data = {
-                'user_profile_picture_url': profile.avatar.url if profile else '',
-                'user_profile_url': messages.get_profile_url(),
-                'user': messages.signed_in_user,
-                'value': messages.value,
-                'date': messages.date,
+                'user_profile_picture_url': profile_details.avatar.url if profile_details else '',
+                'user_profile_url': message.get_profile_url(),
+                'user': message.signed_in_user,
+                'value': message.value,
+                'date': message.date,
             }
-
             messages_data.append(message_data)
 
-        # Assign the list of formatted message data to the context
         context['Messanger'] = messages_data
 
-        # Retrieve the general messages
-        # Retrieve the author's profile avatar
-        # Retrieve the messages
+        # General Messages
         general_messages = Message.objects.filter(room="General").order_by('-date')
         context['GeneralMessanger'] = general_messages
-
-        # Create a list to store formatted message data
-        messages_data2 = []
+        general_messages_data = []
 
         for general_message in general_messages:
-            profile = ProfileDetails.objects.filter(user=general_message.signed_in_user).first()
-
-            # Create a dictionary to store message data including profile information
-            message_data2 = {
-                'user_profile_picture_url': profile.avatar.url if profile else '',
+            profile_details = ProfileDetails.objects.filter(user=general_message.signed_in_user).first()
+            general_message_data = {
+                'user_profile_picture_url': profile_details.avatar.url if profile_details else '',
                 'user_profile_url': general_message.get_profile_url(),
                 'user': general_message.signed_in_user,
                 'value': general_message.value,
                 'date': general_message.date,
             }
+            general_messages_data.append(general_message_data)
 
-            messages_data2.append(message_data2)
+        context['GeneralMessanger'] = general_messages_data
 
-        # Assign the list of formatted message data to the context
-        context['GeneralMessanger'] = messages_data2
         return context
 """
 @login_required
