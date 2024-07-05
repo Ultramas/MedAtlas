@@ -5838,77 +5838,45 @@ from django.shortcuts import get_object_or_404
 
 def supportgetMessages(request, signed_in_user, **kwargs):
     # Check if the user is authenticated
-    if request.user.is_authenticated:
-        signed_in_user = request.user
-    else:
-        signed_in_user = None
+    if not request.user.is_authenticated:
+        return JsonResponse({'messages': []})
+
     try:
         chat_room = SupportChat.objects.get(signed_in_user__username=signed_in_user)
     except SupportChat.DoesNotExist:
         # Create a new chat room if it doesn't exist
         chat_room = SupportChat(signed_in_user=request.user)
         chat_room.save()
-    page_name = request.GET.get('page_name', '')
-    if page_name == 'index.html':
-        print('the page is index.html')
-        # Check if the requesting user is the creator of the room or an administrator
-        if request.user == chat_room.signed_in_user or request.user.is_staff:
-            messages = SupportMessage.objects.filter(room=chat_room)
-            messages_data = []
 
-            for message in messages:
-                user_str = str(message.signed_in_user) if message.signed_in_user else 'Support Request'
-                user_profile_url = ''  # Initialize user_profile_url
-                profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+    # Check if the requesting user is the creator of the room or an administrator
+    if request.user == chat_room.signed_in_user or request.user.is_staff:
+        messages = SupportMessage.objects.filter(room=chat_room)
+        messages_data = []
 
-                if message.signed_in_user and profile_details:
-                    user_profile_url = profile_details.get_absolute_url()  # Get the user_profile_url for each message
-                if profile_details:
-                    avatar_url = profile_details.avatar.url  # Get the avatar URL
-                else:
-                    avatar_url = staticfiles_storage.url('css/images/a.jpg')  # Default avatar URL
+        for message in messages:
+            user_str = str(message.signed_in_user) if message.signed_in_user else 'Support Request'
+            user_profile_url = ''  # Initialize user_profile_url
+            profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
 
-                messages_data.append({
-                    'user_profile_url': user_profile_url,
-                    'avatar_url': avatar_url,
-                    'user': user_str,
-                    'value': message.value,
-                    'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
-                })
+            if message.signed_in_user and profile_details:
+                user_profile_url = profile_details.get_absolute_url()  # Get the user_profile_url for each message
+            if profile_details:
+                avatar_url = profile_details.avatar.url  # Get the avatar URL
+            else:
+                avatar_url = staticfiles_storage.url('css/images/a.jpg')  # Default avatar URL
 
-            return JsonResponse({'messages': messages_data})
-        else:
-            return JsonResponse({'messages': []})
+            messages_data.append({
+                'user_profile_url': user_profile_url,
+                'avatar_url': avatar_url,
+                'user': user_str,
+                'value': message.value,
+                'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
+            })
+
+        return JsonResponse({'messages': messages_data})
     else:
-        print('you are accessing another page')
-        # Check if the requesting user is the creator of the room or an administrator
-        if request.user == chat_room.signed_in_user or request.user.is_staff:
-            messages = SupportMessage.objects.filter(room=chat_room)
-            messages_data = []
+        return HttpResponseForbidden("You do not have permission to access this chat room")
 
-            for message in messages:
-                user_str = str(message.signed_in_user) if message.signed_in_user else 'Support Request'
-                user_profile_url = ''  # Initialize user_profile_url
-                profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
-
-                if message.signed_in_user and profile_details:
-                    user_profile_url = profile_details.get_absolute_url()  # Get the user_profile_url for each message
-                if profile_details:
-                    avatar_url = profile_details.avatar.url  # Get the avatar URL
-                else:
-                    avatar_url = staticfiles_storage.url('css/images/a.jpg')  # Default avatar URL
-
-                messages_data.append({
-                    'user_profile_url': user_profile_url,
-                    'avatar_url': avatar_url,
-                    'user': user_str,
-                    'value': message.value,
-                    'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
-                })
-
-            return JsonResponse({'messages': messages_data})
-        else:
-            return JsonResponse({'messages': []})
 
 
 """def supportgetMessages(request, **kwargs):
