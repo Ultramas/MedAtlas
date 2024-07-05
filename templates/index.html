@@ -1847,7 +1847,7 @@ Bounce
 
   <div class="message-box">
     <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
-      <form id="post-form">
+      <form id="post-form" method="post" action="{% url 'showcase:supportsend' %}">
         {% csrf_token %}
         <input type="hidden" name="username" id="username" value="{{ username }}">
         <input type="hidden" name="room_name" id="room_name" value="{{ room }}">
@@ -1876,7 +1876,7 @@ Bounce
   <div class="message-box">
 
 <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
-	<form id="post-form">
+      <form id="post-form" method="post" action="{% url 'showcase:supportsend' %}">
       {% csrf_token %}
       <input type="hidden" name="username" id="username" value="{{ username }}">
       <input type="hidden" name="room_name" id="room_name" value="{{room}}" />
@@ -1968,7 +1968,7 @@ function scrollToBottom() {
   <div class="chat2-title">
 	  {% if user.is_authenticated %}
 <script type="text/javascript">
-$(document).on('submit', '#post-form', function(e) {
+$(document).on('submit', '#general-post-form', function(e) {
     e.preventDefault();
     console.log('Message form submitted'); // Log when form is submitted
 
@@ -1987,7 +1987,7 @@ $(document).on('submit', '#post-form', function(e) {
         return;
     }
 
-$(document).on('submit', '#post-form', function(e) {
+$(document).on('submit', '#general-post-form', function(e) {
     e.preventDefault();
     console.log('General message submitted'); // Log when form is submitted
     $.ajax({
@@ -2011,8 +2011,16 @@ $(document).on('submit', '#post-form', function(e) {
     });
     document.getElementById('message').value = ''; // Clear the input field after submitting
 });
-
 $(document).ready(function(){
+    // Set the room ID based on the page name
+    let pageName = $('#page_named').val();
+    let roomId;
+
+    if (pageName === 'general') {
+        roomId = 'General';
+    }
+    $('#room_id').val(roomId);
+
     // Function to load and display general messages
     function loadAndDisplayGeneralMessages() {
         $.ajax({
@@ -2087,12 +2095,12 @@ function preloadImages(urls) {
 
 <div class="message-box">
     <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
-        <form id="post-form" method="post" action="{% url 'showcase:send' %}">
+        <form id="general-post-form" method="post" action="{% url 'showcase:send' %}">
             {% csrf_token %}
             <input type="hidden" name="username" id="username" value="{{ username }}">
             <input type="hidden" id="message_type" name="message_type" value="general">
             <input type="hidden" name="room_name" id="room_name" value="General">
-    		<input type="hidden" name="page_name" id="page_named" value="index.html">
+    		<input type="hidden" name="page_name" id="page_name" value="index.html">
             <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
             <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
         </form>

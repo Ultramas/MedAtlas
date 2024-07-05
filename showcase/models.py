@@ -3394,26 +3394,21 @@ class Room(models.Model):
         return final_url
 
 
+from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import User
+
 class Message(models.Model):
     value = models.CharField(max_length=1000000)
     date = models.DateTimeField(default=timezone.now, blank=True)
     user = models.CharField(max_length=1000000, verbose_name="Username")
-    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='messages',
-                                       verbose_name="User")
+    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='messages', verbose_name="User")
     room = models.CharField(max_length=1000000)
     message_number = models.PositiveIntegerField(default=0, editable=False)
     file = models.FileField(upload_to='images/', null=True, blank=True)
-    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                               help_text='Original length of the advertisement (use for original ratio).',
-                                               verbose_name="image length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                              help_text='Original width of the advertisement (use for original ratio).',
-                                              verbose_name="image width")
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100, help_text='Original length of the advertisement (use for original ratio).', verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100, help_text='Original width of the advertisement (use for original ratio).', verbose_name="image width")
+    is_active = models.IntegerField(default=1, blank=True, null=True, help_text='1->Active, 0->Inactive', choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
         if self.value:
@@ -3424,11 +3419,11 @@ class Message(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             # Get the current maximum message number
-            max_message_number = Message.objects.aggregate(max_message_number=models.Max('message_number'))[
-                                     'max_message_number'] or 0
+            max_message_number = Message.objects.aggregate(max_message_number=models.Max('message_number'))['max_message_number'] or 0
 
             # Increment the maximum message number to get the new message number
             self.message_number = max_message_number + 1
+
             # Get the associated ProfileDetails for the donor
             profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
 
@@ -3465,7 +3460,6 @@ class Message(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
     def get_absolute_url(self):
-
         # Construct the URL for the room detail page
         room_url = reverse("showcase:room", kwargs={'room': str(self.room)})
 

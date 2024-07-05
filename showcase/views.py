@@ -4521,42 +4521,54 @@ def index(request):
     return render(request, 'index.html', context)
 
 
-@login_required
+from django.http import HttpResponse
+from .models import Message
+
 def send(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         username = request.POST.get('username')
         room_id = request.POST.get('room_id')
-        message_type = request.POST.get('message_type')
+        page_name = request.POST.get('page_name')  # Extract page_name from the POST data
 
-        # Debugging information
-        print(f"Received POST data - Message: '{message}', Username: {username}, Room ID: {room_id}, Message Type: {message_type}")
+        # Check if the page is index.html and set room_id to "General"
+        if page_name == 'index.html':
+            room_id = 'General'
 
-        if not message:
-            return HttpResponse('Message content is missing', status=400)
+        print(f"message: {message}, username: {username}, room_id: {room_id}, page_name: {page_name}")
+        print('this is a community-sent message')
 
-        if message_type == 'general':
-            room_id = "General"  # Override room_id for general messages
-            # Create a general message
-            new_message = Message.objects.create(
-                room=room_id,
-                signed_in_user=request.user,
-                value=message,
-                user=request.user.username
-            )
-            print(f"General Message Saved: {new_message}")
+        # Check if the user is authenticated
+        if request.user.is_authenticated:
+            if room_id:
+                print('room id exists!')
+                # User is authenticated, use their user ID for the message user field
+                new_message = Message.objects.create(
+                    value=message,
+                    user=username,
+                    room=room_id,
+                    signed_in_user=request.user  # Set the signed_in_user to the authenticated user
+                )
+            else:
+                print('room id will be set to general.')
+                new_message = Message.objects.create(
+                    value=message,
+                    user=username,
+                    room='General',
+                    signed_in_user=request.user  # Set the signed_in_user to the authenticated user
+                )
         else:
-            # Create a support message
-            new_message = SupportMessage.objects.create(
+            # User is not authenticated, use the provided username for the message user field
+            new_message = Message.objects.create(
                 value=message,
                 user=username,
                 room=room_id,
-                signed_in_user=request.user if request.user.is_authenticated else None
             )
-            print(f"Support Message Saved: {new_message}")
 
+        # Return a response indicating the message was sent successfully
         return HttpResponse('Message sent successfully')
 
+    # If the request method is not POST, handle the appropriate response here
     return HttpResponse('Invalid request method. Please use POST to send a message.')
 
 
