@@ -3502,7 +3502,6 @@ class DegeneratePlaylistLibrary(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
-
   class Meta:
     verbose_name = "Degenerate Playist Library"
     verbose_name_plural = "Degenerate Playist Libraries"

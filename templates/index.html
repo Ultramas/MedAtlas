@@ -1754,30 +1754,12 @@ Bounce
   </div><div class="chat">
   <div class="chat-title">
   {% if user.is_authenticated %}
-    <h1>Agent Holley</h1>
-    <h2>PokeTrove Service Manager</h2>
-  </div>
-  <div class="message" style="overflow: auto;">
-    <h2>{{ username }}</h2>
-    <div id="display" class="chat-messages" style="height: 400px; overflow-y: scroll;"></div>
-  </div>
-
-  <div class="message-box">
-    <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
-      <form id="post-form">
-        {% csrf_token %}
-        <input type="hidden" name="username" id="username" value="{{ username }}">
-        <input type="hidden" name="room_name" id="room_name" value="{{ room }}">
-        <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
-        <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
-      </form>
-    </div>
-  </div>
-</div>
+	  <input type="hidden" name="page_named" id="page_named" value="index.html">
 <script type="text/javascript">
 
   $(document).on('submit', '#post-form', function(e) {
     e.preventDefault();
+    var pageName = $('#page_named').val();
     console.log('Index support message submitted'); // Log when form is submitted
     $.ajax({
       type: 'POST',
@@ -1855,8 +1837,36 @@ Bounce
     }
   }
 </script>
+    <h1>Agent Holley</h1>
+    <h2>PokeTrove Service Manager</h2>
+  </div>
+  <div class="message" style="overflow: auto;">
+    <h2>{{ username }}</h2>
+    <div id="display" class="chat-messages" style="height: 400px; overflow-y: scroll;"></div>
+  </div>
+
+  <div class="message-box">
+    <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
+      <form id="post-form">
+        {% csrf_token %}
+        <input type="hidden" name="username" id="username" value="{{ username }}">
+        <input type="hidden" name="room_name" id="room_name" value="{{ room }}">
+        <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
+   	    <input type="hidden" name="page_name" id="page_named" value="index.html">
+        <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
+      </form>
+    </div>
+  </div>
+</div>
 
 	  {% else %}
+	  <input type="hidden" name="page_named" id="page_named" value="index.html">
+	<script type="text/javascript">
+
+  $(document).on('submit', '#post-form', function(e) {
+    e.preventDefault();
+    var pageName = $('#page_named').val();
+	</script>
 	      <h1>Agent Holley</h1>
     <h2>PokeTrove Service Manager</h2>
   </div>
@@ -1871,6 +1881,7 @@ Bounce
       <input type="hidden" name="username" id="username" value="{{ username }}">
       <input type="hidden" name="room_name" id="room_name" value="{{room}}" />
       <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
+      <input type="hidden" name="page_name" id="page_named" value="index.html">
       <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
     </form>
   </div>
@@ -1956,57 +1967,6 @@ function scrollToBottom() {
 <div class="chat2" >
   <div class="chat2-title">
 	  {% if user.is_authenticated %}
-    <h5>PokeTrove Community</h5>
-    <br>
-    <h6> PokeTrove General Chat  </h6>
-  </div>
-  <div class="message" style="overflow: auto;">
-    <h2>{{ username }}</h2>
-    <div id="display" class="chat-messages" style="height: 400px; overflow-y: scroll;">
-      {% for message in GeneralMessanger %}
-        <div class="message">
-          <a href="{{ message.user_profile_url }}">
-            <img src="{{ message.user_profile_picture_url }}" alt="{{ message.user }}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-          </a>
-          <div class="message-content" style="padding: 5px;">
-            <div class="sender">{{ message.user }}</div>
-            <div>{{ message.value }}</div>
-            <div class="time">{{ message.date }}</div>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
-
-  <div class="message-box">
-    <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
-      <form id="post-form">
-        {% csrf_token %}
-        <input type="hidden" name="username" id="username" value="{{ username }}">
-	    <input type="hidden" id="message_type" name="message_type" value="General">
-        <input type="hidden" name="room_name" id="room_name" value="General">
-        <input type="text" name="general_message" id="general_message" width="100px" placeholder="Type your message...">
-        <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
-      </form>
-    </div>
-  </div>
-</div>
-</section>
-<div class="chat2-toggle-button" style="position: fixed; left: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
-  <button type="button" onclick="showChatWidget2()">...</button>
-</div>
-
-
-<div id="messages">
-    {% for message in GeneralMessanger %}
-    <div class="message">
-        <img src="{{ message.user_profile_picture_url }}" alt="{{ message.user }}">
-        <p>{{ message.user }}: {{ message.value }}</p>
-        <span>{{ message.date }}</span>
-    </div>
-    {% endfor %}
-</div>
-
 <script type="text/javascript">
 $(document).on('submit', '#post-form', function(e) {
     e.preventDefault();
@@ -2027,14 +1987,17 @@ $(document).on('submit', '#post-form', function(e) {
         return;
     }
 
+$(document).on('submit', '#post-form', function(e) {
+    e.preventDefault();
+    console.log('General message submitted'); // Log when form is submitted
     $.ajax({
         type: 'POST',
         url: '{% url "showcase:send" %}', // Use Django's URL template tag
         data: {
-            username: username,
-            room_id: roomId,
-            message: messageContent,
-            message_type: messageType,
+            username: $('#username').val(),
+            room_name: $('#room_name').val(),
+            message: $('#message').val(),
+            message_type: 'general',
             csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
         },
         success: function(data) {
@@ -2046,7 +2009,7 @@ $(document).on('submit', '#post-form', function(e) {
             console.error('Error:', error); // Log error
         }
     });
-    $('#message').val(''); // Clear the input field after submitting
+    document.getElementById('message').value = ''; // Clear the input field after submitting
 });
 
 $(document).ready(function(){
@@ -2100,6 +2063,59 @@ function preloadImages(urls) {
     }
 }
 </script>
+    <h5>PokeTrove Community</h5>
+    <br>
+    <h6> PokeTrove General Chat  </h6>
+  </div>
+  <div class="message" style="overflow: auto;">
+    <h2>{{ username }}</h2>
+    <div id="display" class="chat-messages" style="height: 400px; overflow-y: scroll;">
+      {% for message in GeneralMessanger %}
+        <div class="message">
+          <a href="{{ message.user_profile_url }}">
+            <img src="{{ message.user_profile_picture_url }}" alt="{{ message.user }}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
+          </a>
+          <div class="message-content" style="padding: 5px;">
+            <div class="sender">{{ message.user }}</div>
+            <div>{{ message.value }}</div>
+            <div class="time">{{ message.date }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+<div class="message-box">
+    <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
+        <form id="post-form" method="post" action="{% url 'showcase:send' %}">
+            {% csrf_token %}
+            <input type="hidden" name="username" id="username" value="{{ username }}">
+            <input type="hidden" id="message_type" name="message_type" value="general">
+            <input type="hidden" name="room_name" id="room_name" value="General">
+    		<input type="hidden" name="page_name" id="page_named" value="index.html">
+            <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
+            <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
+        </form>
+    </div>
+</div>
+
+
+</section>
+<div class="chat2-toggle-button" style="position: fixed; left: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
+  <button type="button" onclick="showChatWidget2()">...</button>
+</div>
+
+
+<div id="messages">
+    {% for message in GeneralMessanger %}
+    <div class="message">
+        <img src="{{ message.user_profile_picture_url }}" alt="{{ message.user }}">
+        <p>{{ message.user }}: {{ message.value }}</p>
+        <span>{{ message.date }}</span>
+    </div>
+    {% endfor %}
+</div>
+
 
 {% endif %}
 

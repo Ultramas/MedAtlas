@@ -2666,12 +2666,12 @@ def send(request):
 
         # Debugging information
         print(f"Received POST data - Message: '{message}', Username: {username}, Room ID: {room_id}, Message Type: {message_type}")
-
         if not message:
             return HttpResponse('Message content is missing', status=400)
 
         if message_type == 'general':
             room_id = "General"  # Override room_id for general messages
+            print('general message')
             # Create a general message
             new_message = Message.objects.create(
                 room=room_id,
@@ -2682,6 +2682,7 @@ def send(request):
             print(f"General Message Saved: {new_message}")
         else:
             # Create a support message
+            print('not a general message')
             new_message = SupportMessage.objects.create(
                 value=message,
                 user=username,
@@ -2741,23 +2742,19 @@ class NewRoomSettingsView(LoginRequiredMixin, TemplateView):
 def getMessages(request, room):
     try:
         room_details = Room.objects.get(name=room)
-        # Rest of your code to retrieve messages and prepare data
     except Room.DoesNotExist:
         # Handle case where the room doesn't exist yet (e.g., return an empty response or retry logic)
         return JsonResponse({'messages': []})  # Empty message list
-        # Alternatively, you could implement retry logic or redirect to an error page.
 
     messages = Message.objects.filter(room=room)
 
-    # Prepare the messages data to be sent in the AJAX response
     messages_data = []
     for message in messages:
         profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
         if profile_details:
-            user_profile_url = message.get_profile_url()  # Get the user_profile_url for each message
+            user_profile_url = message.get_profile_url()
             avatar_url = profile_details.avatar.url
         else:
-            # Set a default avatar URL or path in case the user doesn't have an avatar
             user_profile_url = ('/home/' + room + '/?username=' + request.user.username)
             avatar_url = staticfiles_storage.url('css/images/a.jpg')
 
@@ -2774,7 +2771,6 @@ def getMessages(request, room):
         messages_data.append(message_data)
 
     return JsonResponse({'messages': messages_data})
-
 
 def supportroom(request):
     username = request.user.username
@@ -2845,6 +2841,7 @@ def supportsend(request):
         # signed_in_user = request.POST.get('signed_in_user')
 
         print(f"message: {message}, username: {username}, room_name: {username}")
+        print('this is where it is from')
         # print(f"profile: {profile}")
         # Check if the user is authenticated
         if request.user.is_authenticated:
@@ -4525,7 +4522,7 @@ def index(request):
 
 
 @login_required
-def generalsend(request):
+def send(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         username = request.POST.get('username')
@@ -4562,6 +4559,7 @@ def generalsend(request):
 
     return HttpResponse('Invalid request method. Please use POST to send a message.')
 
+
 class BackgroundView(FormMixin, BaseView):
     model = BackgroundImage
     form_class = EmailForm
@@ -4591,37 +4589,24 @@ class BackgroundView(FormMixin, BaseView):
         if request.method == 'POST':
             message = request.POST.get('message')
             username = request.POST.get('username')
-            room_id = request.POST.get('room_id')
+            room_name = request.POST.get('room_name')
             message_type = request.POST.get('message_type')
-
-            # Debugging information
-            print(
-                f"Received POST data - Message: '{message}', Username: {username}, Room ID: {room_id}, Message Type: {message_type}")
 
             if not message:
                 return HttpResponse('Message content is missing', status=400)
 
             if message_type == 'general':
-                room_id = "General"  # Override room_id for general messages
-                # Create a general message
+                room_name = "General"  # Override room_name for general messages
                 new_message = Message.objects.create(
-                    room=room_id,
+                    room=room_name,
                     signed_in_user=request.user,
                     value=message,
                     user=request.user.username
                 )
-                print(f"General Message Saved: {new_message}")
+                return HttpResponse('Message sent successfully')
             else:
-                # Create a support message
-                new_message = SupportMessage.objects.create(
-                    value=message,
-                    user=username,
-                    room=room_id,
-                    signed_in_user=request.user if request.user.is_authenticated else None
-                )
-                print(f"Support Message Saved: {new_message}")
-
-            return HttpResponse('Message sent successfully')
+                # Handle other message types, if any
+                return HttpResponse('Unsupported message type', status=400)
 
         return HttpResponse('Invalid request method. Please use POST to send a message.')
 
@@ -5853,44 +5838,77 @@ from django.shortcuts import get_object_or_404
 
 def supportgetMessages(request, signed_in_user, **kwargs):
     # Check if the user is authenticated
-    if not request.user.is_authenticated:
-        return HttpResponseForbidden("You do not have permission to access this chat room")
-
+    if request.user.is_authenticated:
+        signed_in_user = request.user
+    else:
+        signed_in_user = None
     try:
         chat_room = SupportChat.objects.get(signed_in_user__username=signed_in_user)
     except SupportChat.DoesNotExist:
         # Create a new chat room if it doesn't exist
         chat_room = SupportChat(signed_in_user=request.user)
         chat_room.save()
+    page_name = request.GET.get('page_name', '')
+    if page_name == 'index.html':
+        print('the page is index.html')
+        # Check if the requesting user is the creator of the room or an administrator
+        if request.user == chat_room.signed_in_user or request.user.is_staff:
+            messages = SupportMessage.objects.filter(room=chat_room)
+            messages_data = []
 
-    # Check if the requesting user is the creator of the room or an administrator
-    if request.user == chat_room.signed_in_user or request.user.is_staff:
-        messages = SupportMessage.objects.filter(room=chat_room)
-        messages_data = []
+            for message in messages:
+                user_str = str(message.signed_in_user) if message.signed_in_user else 'Support Request'
+                user_profile_url = ''  # Initialize user_profile_url
+                profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
 
-        for message in messages:
-            user_str = str(message.signed_in_user) if message.signed_in_user else 'Support Request'
-            user_profile_url = ''  # Initialize user_profile_url
-            profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+                if message.signed_in_user and profile_details:
+                    user_profile_url = profile_details.get_absolute_url()  # Get the user_profile_url for each message
+                if profile_details:
+                    avatar_url = profile_details.avatar.url  # Get the avatar URL
+                else:
+                    avatar_url = staticfiles_storage.url('css/images/a.jpg')  # Default avatar URL
 
-            if message.signed_in_user and profile_details:
-                user_profile_url = profile_details.get_absolute_url()  # Get the user_profile_url for each message
-            if profile_details:
-                avatar_url = profile_details.avatar.url  # Get the avatar URL
-            else:
-                avatar_url = staticfiles_storage.url('css/images/a.jpg')  # Default avatar URL
+                messages_data.append({
+                    'user_profile_url': user_profile_url,
+                    'avatar_url': avatar_url,
+                    'user': user_str,
+                    'value': message.value,
+                    'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
+                })
 
-            messages_data.append({
-                'user_profile_url': user_profile_url,
-                'avatar_url': avatar_url,
-                'user': user_str,
-                'value': message.value,
-                'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
-            })
-
-        return JsonResponse({'messages': messages_data})
+            return JsonResponse({'messages': messages_data})
+        else:
+            return JsonResponse({'messages': []})
     else:
-        return HttpResponseForbidden("You do not have permission to access this chat room")
+        print('you are accessing another page')
+        # Check if the requesting user is the creator of the room or an administrator
+        if request.user == chat_room.signed_in_user or request.user.is_staff:
+            messages = SupportMessage.objects.filter(room=chat_room)
+            messages_data = []
+
+            for message in messages:
+                user_str = str(message.signed_in_user) if message.signed_in_user else 'Support Request'
+                user_profile_url = ''  # Initialize user_profile_url
+                profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+
+                if message.signed_in_user and profile_details:
+                    user_profile_url = profile_details.get_absolute_url()  # Get the user_profile_url for each message
+                if profile_details:
+                    avatar_url = profile_details.avatar.url  # Get the avatar URL
+                else:
+                    avatar_url = staticfiles_storage.url('css/images/a.jpg')  # Default avatar URL
+
+                messages_data.append({
+                    'user_profile_url': user_profile_url,
+                    'avatar_url': avatar_url,
+                    'user': user_str,
+                    'value': message.value,
+                    'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
+                })
+
+            return JsonResponse({'messages': messages_data})
+        else:
+            return JsonResponse({'messages': []})
 
 
 """def supportgetMessages(request, **kwargs):
