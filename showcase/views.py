@@ -2765,6 +2765,7 @@ def getMessages(request, room):
 
     return JsonResponse({'messages': messages_data})
 
+
 def supportroom(request):
     username = request.user.username
     room_details = SupportChat.objects.get(name=username)
@@ -4546,6 +4547,7 @@ def send(request):
                 user=username,
                 room=room_id
             )
+            new_message.save()
         # Return a success response
         return HttpResponse('Message sent successfully')
 
