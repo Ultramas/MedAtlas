@@ -4524,51 +4524,38 @@ def index(request):
 from django.http import HttpResponse
 from .models import Message
 
+
 def send(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         username = request.POST.get('username')
-        room_id = request.POST.get('room_id')
-        page_name = request.POST.get('page_name')  # Extract page_name from the POST data
-
-        # Check if the page is index.html and set room_id to "General"
-        if page_name == 'index.html':
-            room_id = 'General'
+        page_name = request.POST.get('page_name')
+        room_id = request.POST.get('room_id') if page_name != 'index.html' else 'General'
 
         print(f"message: {message}, username: {username}, room_id: {room_id}, page_name: {page_name}")
         print('this is a community-sent message')
 
-        # Check if the user is authenticated
         if request.user.is_authenticated:
-            if room_id:
-                print('room id exists!')
-                # User is authenticated, use their user ID for the message user field
-                new_message = Message.objects.create(
-                    value=message,
-                    user=username,
-                    room=room_id,
-                    signed_in_user=request.user  # Set the signed_in_user to the authenticated user
-                )
-            else:
-                print('room id will be set to general.')
-                new_message = Message.objects.create(
-                    value=message,
-                    user=username,
-                    room='General',
-                    signed_in_user=request.user  # Set the signed_in_user to the authenticated user
-                )
-        else:
-            # User is not authenticated, use the provided username for the message user field
             new_message = Message.objects.create(
                 value=message,
                 user=username,
                 room=room_id,
+                signed_in_user=request.user
+            )
+        else:
+            new_message = Message.objects.create(
+                value=message,
+                user=username,
+                room=room_id
             )
 
-        # Return a response indicating the message was sent successfully
+            new_message.save()
+        # Redirect to index.html if the request came from there
+        if page_name == 'index.html':
+            return HttpResponseRedirect(reverse('showcase:index'))  # Adjust 'index' to your URL name for the index page
+
         return HttpResponse('Message sent successfully')
 
-    # If the request method is not POST, handle the appropriate response here
     return HttpResponse('Invalid request method. Please use POST to send a message.')
 
 
@@ -4754,7 +4741,7 @@ class BackgroundView(FormMixin, BaseView):
         context['Messanger'] = messages_data
 
         # General Messages
-        general_messages = Message.objects.filter(room="General").order_by('-date')
+        general_messages = Message.objects.filter(room="General").order_by('date')
         context['GeneralMessanger'] = general_messages
         general_messages_data = []
 

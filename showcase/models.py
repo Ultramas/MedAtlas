@@ -3398,6 +3398,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 
+
 class Message(models.Model):
     value = models.CharField(max_length=1000000)
     date = models.DateTimeField(default=timezone.now, blank=True)
@@ -3412,47 +3413,39 @@ class Message(models.Model):
 
     def __str__(self):
         if self.value:
-            return str(self.value) + " in " + str(self.room)
+            return f"{self.value} in {self.room}"
         else:
-            return "blank message in " + str(self.room)
+            return f"blank message in {self.room}"
 
     def save(self, *args, **kwargs):
         if not self.pk:
             # Get the current maximum message number
-            max_message_number = Message.objects.aggregate(max_message_number=models.Max('message_number'))['max_message_number'] or 0
-
+            max_message_number = Message.objects.aggregate(max_message_number=Max('message_number'))['max_message_number'] or 0
             # Increment the maximum message number to get the new message number
             self.message_number = max_message_number + 1
 
             # Get the associated ProfileDetails for the donor
             profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
 
-            # Set the position to the position value from the associated ProfileDetails
-            if profile:
+            # Set the position to the position value from the associated ProfileDetails if it exists
+            if profile and hasattr(self, 'position'):
                 self.position = profile.position
 
         super().save(*args, **kwargs)
 
         # Update the Friend instances associated with the signed_in_user and friend fields
         if self.signed_in_user and self.room:
-            print("Filtering Friends...")
             # Get the Friend instances associated with the signed_in_user and friend fields
             friends = Friend.objects.filter(
                 (Q(user=self.signed_in_user) & Q(friend__username=self.room)) |
                 (Q(user__username=self.room) & Q(friend=self.signed_in_user))
             )
 
-            print(f"Found {friends.count()} friends.")
-
             # Update the Friend instances with the latest message and the date
             for friend in friends:
-                print("Updating Friend instance:")
-                print(friend)
                 friend.latest_messages = self
                 friend.last_messaged = self.date
                 friend.save(update_fields=['latest_messages', 'last_messaged'])
-
-        super().save(*args, **kwargs)
 
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
@@ -3462,10 +3455,8 @@ class Message(models.Model):
     def get_absolute_url(self):
         # Construct the URL for the room detail page
         room_url = reverse("showcase:room", kwargs={'room': str(self.room)})
-
         # Construct the query parameters
         final_url = f"{room_url}?username={self.signed_in_user.username}"
-
         return final_url
 
 
