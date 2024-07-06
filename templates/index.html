@@ -2011,65 +2011,7 @@ $(document).on('submit', '#general-post-form', function(e) {
     });
     document.getElementById('message').value = ''; // Clear the input field after submitting
 });
-$(document).ready(function(){
-    // Set the room ID based on the page name
-    let pageName = $('#page_named').val();
-    let roomId;
 
-    if (pageName === 'general') {
-        roomId = 'General';
-    }
-    $('#room_id').val(roomId);
-
-    // Function to load and display general messages
-    function loadAndDisplayGeneralMessages() {
-        $.ajax({
-            type: 'GET',
-            url: "/getMessages/General/",
-            success: function(response) {
-                console.log(response);
-                $("#display-general").empty();
-
-                response.general_message.forEach(function(general_message) {
-                    var messageHtml2 = `
-                      <div class="message">
-                        <a href="${general_message.user_profile_url}">
-                          <img src="${general_message.avatar_url}" alt="${general_message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-                        </a>
-                        <div class="message-content" style="padding: 5px;">
-                          <div class="sender">${general_message.user}</div>
-                          <div>${general_message.value}</div>
-                          <div class="time">${general_message.date}</div>
-                        </div>
-                      </div>`;
-
-                    $("#display-general").append(messageHtml2);
-                });
-            },
-            error: function(response) {
-                alert('An error occurred');
-            }
-        });
-    }
-
-    // Preload avatars (if needed)
-    var avatarUrls = [];
-    $(".general_message img").each(function() {
-        avatarUrls.push($(this).attr("src"));
-    });
-    preloadImages(avatarUrls);
-
-    // Load and display general messages every half-second
-    setInterval(loadAndDisplayGeneralMessages, 500);
-});
-
-// Preload images function
-function preloadImages(urls) {
-    for (var i = 0; i < urls.length; i++) {
-        var img = new Image();
-        img.src = urls[i];
-    }
-}
 </script>
     <h5>PokeTrove Community</h5>
     <br>
@@ -2107,7 +2049,7 @@ function preloadImages(urls) {
     </div>
 </div>
 
-
+</div>
 </section>
 <div class="chat2-toggle-button" style="position: fixed; left: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
   <button type="button" onclick="showChatWidget2()">...</button>
