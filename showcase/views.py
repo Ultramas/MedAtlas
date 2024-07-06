@@ -4548,11 +4548,11 @@ def send(request):
                 room=room_id
             )
             new_message.save()
-        # Return a success response
-        return HttpResponse('Message sent successfully')
+        return JsonResponse({'message': 'Message sent successfully'})
 
     # Handle invalid request methods
     return HttpResponse('Invalid request method. Please use POST to send a message.')
+
 
 class BackgroundView(FormMixin, BaseView):
     model = BackgroundImage
