@@ -2656,43 +2656,36 @@ def checkview(request):
         return redirect('showcase:create_room')  # Assuming you have a URL pattern named 'create_room'
 
 
-@login_required
 def send(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         username = request.POST.get('username')
-        room_id = request.POST.get('room_id')
-        message_type = request.POST.get('message_type')
+        room_id = request.POST.get('room_name')  # Get the room name from the POST request
+        page_name = request.POST.get('page_name')
 
-        # Debugging information
-        print(f"Received POST data - Message: '{message}', Username: {username}, Room ID: {room_id}, Message Type: {message_type}")
-        if not message:
-            return HttpResponse('Message content is missing', status=400)
+        if page_name == 'index.html':
+            room_id = 'General'
 
-        if message_type == 'general':
-            room_id = "General"  # Override room_id for general messages
-            print('general message')
-            # Create a general message
+        print(f"message: {message}, username: {username}, room_id: {room_id}, page_name: {page_name}")
+        print('This is a community-sent message')
+
+        if request.user.is_authenticated:
             new_message = Message.objects.create(
-                room=room_id,
-                signed_in_user=request.user,
-                value=message,
-                user=request.user.username
-            )
-            print(f"General Message Saved: {new_message}")
-        else:
-            # Create a support message
-            print('not a general message')
-            new_message = SupportMessage.objects.create(
                 value=message,
                 user=username,
-                room=room_id,
-                signed_in_user=request.user if request.user.is_authenticated else None
+                room=Room.objects.get(name=room_id),  # Assign the room object to the room field
+                signed_in_user=request.user
             )
-            print(f"Support Message Saved: {new_message}")
-
+        else:
+            new_message = Message.objects.create(
+                value=message,
+                user=username,
+                room=Room.objects.get(name=room_id)  # Assign the room object to the room field
+            )
+        # Return a success response
         return HttpResponse('Message sent successfully')
 
+    # Handle invalid request methods
     return HttpResponse('Invalid request method. Please use POST to send a message.')
 
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -4525,15 +4518,20 @@ from django.http import HttpResponse
 from .models import Message
 
 
+
+@csrf_exempt  # Add this decorator to allow POST requests without CSRF token for testing purposes
 def send(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         username = request.POST.get('username')
+        room_id = request.POST.get('room_id')
         page_name = request.POST.get('page_name')
-        room_id = request.POST.get('room_id') if page_name != 'index.html' else 'General'
+
+        if page_name == 'index.html':
+            room_id = 'General'
 
         print(f"message: {message}, username: {username}, room_id: {room_id}, page_name: {page_name}")
-        print('this is a community-sent message')
+        print('This is a community-sent message')
 
         if request.user.is_authenticated:
             new_message = Message.objects.create(
@@ -4548,16 +4546,11 @@ def send(request):
                 user=username,
                 room=room_id
             )
-
-            new_message.save()
-        # Redirect to index.html if the request came from there
-        if page_name == 'index.html':
-            return HttpResponseRedirect(reverse('showcase:index'))  # Adjust 'index' to your URL name for the index page
-
+        # Return a success response
         return HttpResponse('Message sent successfully')
 
+    # Handle invalid request methods
     return HttpResponse('Invalid request method. Please use POST to send a message.')
-
 
 class BackgroundView(FormMixin, BaseView):
     model = BackgroundImage

@@ -1766,7 +1766,7 @@ Bounce
       url: '{% url "showcase:supportsend" %}', // Use Django's URL template tag
       data: {
         username: $('#username').val(),
-        room_name: $('#room_name').val(),
+        room_id: $('#room_name').val(),
         message: $('#message').val(),
         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
       },
@@ -1782,60 +1782,7 @@ Bounce
     document.getElementById('message').value = '';
   });
 
-  $(document).ready(function(){
-    // Function to load and display general messages
-    function loadAndDisplayGeneralMessages() {
-      var room = "{{ room }}"; // Replace with the actual value of the room
 
-      $.ajax({
-        type: 'GET',
-        url: "/getMessages/" + room + "/", // Assuming this URL is correct for general messages
-        success: function(response) {
-          console.log(response);
-          $("#display-general").empty();
-
-          for (var key in response.general_message) {
-            var general_message = response.general_message[key];
-
-            var messageHtml = `
-              <div class="message">
-                <a href="${general_message.user_profile_url}" >
-                  <img src="${general_message.avatar_url}" alt="${general_message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-                </a>
-                <div class="message-content" style="padding: 5px;">
-                  <div class="sender">${general_message.user}</div>
-                  <div>${general_message.value}</div>
-                  <div class="time">${general_message.date}</div>
-                </div>
-              </div>`;
-
-            $("#display-general").append(messageHtml);
-          }
-        },
-        error: function(response) {
-          alert('An error occurred');
-        }
-      });
-    }
-
-    // Preload avatars (if needed)
-    var avatarUrls = [];
-    $(".message img").each(function() {
-      avatarUrls.push($(this).attr("src"));
-    });
-    preloadImages(avatarUrls);
-
-    // Load and display general messages every half-second
-    setInterval(loadAndDisplayGeneralMessages, 500);
-  });
-
-  // Preload images function
-  function preloadImages(urls) {
-    for (var i = 0; i < urls.length; i++) {
-      var img = new Image();
-      img.src = urls[i];
-    }
-  }
 </script>
     <h1>Agent Holley</h1>
     <h2>PokeTrove Service Manager</h2>
@@ -1982,10 +1929,6 @@ $(document).on('submit', '#general-post-form', function(e) {
     console.log('Username:', username); // Log the username
     console.log('Message Type:', messageType); // Log the message type
 
-    if (!messageContent) {
-        alert('Message cannot be empty');
-        return;
-    }
 </script>
 
 	  <script>
@@ -1993,79 +1936,83 @@ $(document).on('submit', '#general-post-form', function(e) {
     console.log('Event listener triggered!'); // Add this line
     e.preventDefault();
     console.log('General message submitted'); // Log when form is submitted
-    $.ajax({
-        type: 'POST',
-        url: '{% url "showcase:send" %}', // Use Django's URL template tag
-        data: {
-            username: $('#username').val(),
-            room_name: $('#room_name').val(),
-            message: $('#message').val(),
-            message_type: 'general',
-            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-        },
-        success: function(data) {
-            console.log('Message sent successfully:', data); // Log success response
-            setTimeout(scrollToBottom, 600); // Add a slight delay to ensure DOM is updated
-            loadAndDisplayMessages(); // Reload messages after posting
-        },
-        error: function(xhr, status, error) {
-            console.error('Error:', error); // Log error
-        }
-    });
+	$.ajax({
+		type: 'POST',
+		url: '{% url "showcase:send" %}',
+		data: {
+			username: $('#username').val(),
+			room_name: $('#room_name').val(),  // Send the room_name field
+			message: $('#message').val().trim(),
+			message_type: 'general',
+			page_name: $('#page_name').val(),  // Send the page_name field
+			csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+		},
+		success: function(data) {
+			console.log('Message sent successfully:', data);
+			setTimeout(scrollToBottom, 600);
+			loadAndDisplayMessages();
+		},
+		error: function(xhr, status, error) {
+			console.error('Error:', error);
+		}
+	});
     document.getElementById('message').value = ''; // Clear the input field after submitting
 });
 
-$(document).ready(function(){
-
+  $(document).ready(function(){
     // Function to load and display general messages
     function loadAndDisplayGeneralMessages() {
-        $.ajax({
-            type: 'GET',
-            url: "/getMessages/General/",
-            success: function(response) {
-                console.log(response);
-                $("#display-general").empty();
+      var room = "{{ room }}"; // Replace with the actual value of the room
 
-                response.general_message.forEach(function(general_message) {
-                    var messageHtml2 = `
-                      <div class="message">
-                        <a href="${general_message.user_profile_url}">
-                          <img src="${general_message.avatar_url}" alt="${general_message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-                        </a>
-                        <div class="message-content" style="padding: 5px;">
-                          <div class="sender">${general_message.user}</div>
-                          <div>${general_message.value}</div>
-                          <div class="time">${general_message.date}</div>
-                        </div>
-                      </div>`;
+      $.ajax({
+        type: 'GET',
+        url: "/getMessages/general/", // Assuming this URL is correct for general messages
+        success: function(response) {
+          console.log(response);
+          $("#display-general").empty();
 
-                    $("#display-general").append(messageHtml2);
-                });
-            },
-            error: function(response) {
-                alert('An error occurred');
-            }
-        });
+          for (var key in response.general_message) {
+            var general_message = response.general_message[key];
+
+            var messageHtml2 = `
+              <div class="message">
+                <a href="${general_message.user_profile_url}" >
+                  <img src="${general_message.avatar_url}" alt="${general_message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
+                </a>
+                <div class="message-content" style="padding: 5px;">
+                  <div class="sender">${general_message.user}</div>
+                  <div>${general_message.value}</div>
+                  <div class="time">${general_message.date}</div>
+                </div>
+              </div>`;
+
+            $("#display-general").append(messageHtml2);
+          }
+        },
+        error: function(response) {
+          alert('An error occurred');
+        }
+      });
     }
 
     // Preload avatars (if needed)
     var avatarUrls = [];
-    $(".general_message img").each(function() {
-        avatarUrls.push($(this).attr("src"));
+    $(".message img").each(function() {
+      avatarUrls.push($(this).attr("src"));
     });
     preloadImages(avatarUrls);
 
     // Load and display general messages every half-second
     setInterval(loadAndDisplayGeneralMessages, 500);
-});
+  });
 
-// Preload images function
-function preloadImages(urls) {
+  // Preload images function
+  function preloadImages(urls) {
     for (var i = 0; i < urls.length; i++) {
-        var img = new Image();
-        img.src = urls[i];
+      var img = new Image();
+      img.src = urls[i];
     }
-}
+  }
 </script>
     <h5>PokeTrove Community</h5>
     <br>
@@ -2084,10 +2031,10 @@ function preloadImages(urls) {
             {% csrf_token %}
             <input type="hidden" name="username" id="username" value="{{ username }}">
             <input type="hidden" id="message_type" name="message_type" value="general">
-            <input type="hidden" name="room_name" id="room_name" value="General">
-    		<input type="hidden" name="page_name" id="page_name" value="index.html">
-            <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
-            <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
+			<input type="hidden" id="room_name" value="General">
+			<input type="hidden" id="page_name" value="index.html">
+            <input type="text" id="general_message" name="general_message" width="100px" placeholder="Type your message...">
+			<input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
         </form>
     </div>
 </div>
