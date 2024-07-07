@@ -1754,7 +1754,35 @@ Bounce
   </div><div class="chat">
   <div class="chat-title">
   {% if user.is_authenticated %}
+	  <input type="hidden" name="page_named" id="page_named" value="index.html">
+<script type="text/javascript">
 
+  $(document).on('submit', '#post-form', function(e) {
+    e.preventDefault();
+    var pageName = $('#page_named').val();
+    console.log('Index support message submitted'); // Log when form is submitted
+    $.ajax({
+      type: 'POST',
+      url: '{% url "showcase:supportsend" %}', // Use Django's URL template tag
+      data: {
+        username: $('#username').val(),
+        room_name: $('#room_name').val(),
+        message: $('#message').val(),
+        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+      },
+      success: function(data) {
+        // Handle success
+        setTimeout(scrollToBottom, 600); // Add a slight delay to ensure DOM is updated
+        loadAndDisplayMessages(); // Reload messages after posting
+      },
+      error: function(xhr, status, error) {
+        console.error('Error:', error); // Log error
+      }
+    });
+    document.getElementById('message').value = '';
+  });
+
+</script>
     <h1>Agent Holley</h1>
     <h2>PokeTrove Service Manager</h2>
   </div>
@@ -1885,88 +1913,115 @@ function scrollToBottom() {
 <div class="chat2" >
   <div class="chat2-title">
 	  {% if user.is_authenticated %}
-  <input type="hidden" name="page_name" id="page_name" value="index.html">
 <script type="text/javascript">
-
-  $(document).on('submit', '#post-form', function(e) {
+$(document).on('submit', '#general-post-form', function(e) {
     e.preventDefault();
-    var pageName = $('#page_named').val();
-    console.log('Index support message submitted'); // Log when form is submitted
-    $.ajax({
-      type: 'POST',
-      url: '{% url "showcase:supportsend" %}', // Use Django's URL template tag
-      data: {
-        username: $('#username').val(),
-        room_name: $('#room_name').val(),
-        message: $('#message').val(),
-        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-      },
-      success: function(data) {
-        // Handle success
-        setTimeout(scrollToBottom, 600); // Add a slight delay to ensure DOM is updated
-        loadAndDisplayMessages(); // Reload messages after posting
-      },
-      error: function(xhr, status, error) {
-        console.error('Error:', error); // Log error
-      }
-    });
-    document.getElementById('message').value = '';
-  });
 
-  $(document).ready(function(){
+    var formData = new FormData();
+    formData.append('username', $('#username').val());
+    formData.append('room_id', $('#room_id').val()); // Ensure this is correctly set in your HTML
+    formData.append('room_name', $('#room_name').val()); // Ensure this is correctly set in your HTML
+    formData.append('message', $('#message-input').val()); // Ensure correct ID for message input
+    formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+    formData.append('page_name', $('#page_name').val()); // Ensure this is correctly set in your HTML
+
+    var fileInput = $('#file')[0];
+    if (fileInput && fileInput.files.length > 0) {
+        formData.append('file', fileInput.files[0]);
+    }
+
+    $.ajax({
+        type: 'POST',
+        url: '{% url "showcase:send" %}', // Use Django's URL template tag
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            if (response.status === 'success') {
+                // Handle success response
+                console.log('Message sent successfully:', response.message);
+                loadAndDisplayGeneralMessages();  // Reload messages after posting
+            } else {
+                // Handle non-successful response (if needed)
+                console.error('Error:', response.message);
+                // Optionally, display an error message to the user
+            }
+        },
+        error: function(xhr, status, error) {
+            // Handle AJAX errors
+            console.error('Error:', error);
+
+            // Example: Handle specific validation errors
+            if (xhr.responseJSON && xhr.responseJSON.status === 'error') {
+                var errors = xhr.responseJSON.errors;
+                if (errors) {
+                    // Display error messages to the user
+                    console.error('Validation Errors:', errors);
+                }
+            } else {
+                // Handle other types of errors
+                console.error('Unknown Error:', status, error);
+            }
+        }
+    });
+
+    // Clear input fields after form submission
+    $('#message-input').val('');
+    $('#file').val('');
+});
+
+
+$(document).ready(function(){
+
     // Function to load and display general messages
     function loadAndDisplayGeneralMessages() {
-      var room = "{{ room }}"; // Replace with the actual value of the room
+        $.ajax({
+            type: 'GET',
+            url: "/getMessages/General/",
+            success: function(response) {
+                console.log(response);
+                $("#display-general").empty();
 
-      $.ajax({
-        type: 'GET',
-        url: "/getMessages/" + room + "/", // Assuming this URL is correct for general messages
-        success: function(response) {
-          console.log(response);
-          $("#display-general").empty();
+                response.general_message.forEach(function(general_message) {
+                    var messageHtml2 = `
+                      <div class="message">
+                        <a href="${general_message.user_profile_url}">
+                          <img src="${general_message.avatar_url}" alt="${general_message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
+                        </a>
+                        <div class="message-content" style="padding: 5px;">
+                          <div class="sender">${general_message.user}</div>
+                          <div>${general_message.value}</div>
+                          <div class="time">${general_message.date}</div>
+                        </div>
+                      </div>`;
 
-          for (var key in response.general_message) {
-            var general_message = response.general_message[key];
-
-            var messageHtml = `
-              <div class="message">
-                <a href="${general_message.user_profile_url}" >
-                  <img src="${general_message.avatar_url}" alt="${general_message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-                </a>
-                <div class="message-content" style="padding: 5px;">
-                  <div class="sender">${general_message.user}</div>
-                  <div>${general_message.value}</div>
-                  <div class="time">${general_message.date}</div>
-                </div>
-              </div>`;
-
-            $("#display-general").append(messageHtml);
-          }
-        },
-        error: function(response) {
-          alert('An error occurred');
-        }
-      });
+                    $("#display-general").append(messageHtml2);
+                });
+            },
+            error: function(response) {
+                alert('An error occurred');
+            }
+        });
     }
 
     // Preload avatars (if needed)
     var avatarUrls = [];
-    $(".message img").each(function() {
-      avatarUrls.push($(this).attr("src"));
+    $(".general_message img").each(function() {
+        avatarUrls.push($(this).attr("src"));
     });
     preloadImages(avatarUrls);
 
     // Load and display general messages every half-second
     setInterval(loadAndDisplayGeneralMessages, 500);
-  });
+});
 
-  // Preload images function
-  function preloadImages(urls) {
+// Preload images function
+function preloadImages(urls) {
     for (var i = 0; i < urls.length; i++) {
-      var img = new Image();
-      img.src = urls[i];
+        var img = new Image();
+        img.src = urls[i];
     }
-  }
+}
 </script>
     <h5>PokeTrove Community</h5>
     <br>
@@ -1975,18 +2030,7 @@ function scrollToBottom() {
   <div class="message" style="overflow: auto;">
     <h2>{{ username }}</h2>
     <div id="display" class="chat-messages" style="height: 400px; overflow-y: scroll;">
-      {% for message in GeneralMessanger %}
-        <div class="message">
-          <a href="{{ message.user_profile_url }}">
-            <img src="{{ message.user_profile_picture_url }}" alt="{{ message.user }}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-          </a>
-          <div class="message-content" style="padding: 5px;">
-            <div class="sender">{{ message.user }}</div>
-            <div>{{ message.value }}</div>
-            <div class="time">{{ message.date }}</div>
-          </div>
-        </div>
-      {% endfor %}
+
     </div>
   </div>
 
@@ -1997,14 +2041,14 @@ function scrollToBottom() {
             <input type="hidden" name="username" id="username" value="{{ username }}">
             <input type="hidden" id="message_type" name="message_type" value="general">
             <input type="hidden" name="room_name" id="room_name" value="General">
-            <input type="hidden" name="page_name" id="page_name" value="index.html">
+    		<input type="hidden" name="page_name" id="page_name" value="index.html">
             <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
             <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
         </form>
     </div>
 </div>
-
 </div>
+
 </section>
 <div class="chat2-toggle-button" style="position: fixed; left: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
   <button type="button" onclick="showChatWidget2()">...</button>
@@ -2012,6 +2056,13 @@ function scrollToBottom() {
 
 
 <div id="messages">
+    {% for message in GeneralMessanger %}
+    <div class="message">
+        <img src="{{ message.user_profile_picture_url }}" alt="{{ message.user }}">
+        <p>{{ message.user }}: {{ message.value }}</p>
+        <span>{{ message.date }}</span>
+    </div>
+    {% endfor %}
 </div>
 
 

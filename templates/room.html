@@ -713,77 +713,100 @@ $(document).ready(function(){
 <br>
 
 
+<script type="text/javascript">
+$(document).ready(function() {
+    console.log("Document is ready");
 
-<script>
-$(document).ready(function(){
-  // Preload avatars
-  var avatarUrls = [];
-  $(".message img").each(function() {
-    avatarUrls.push($(this).attr("src"));
-  });
+    // Function to load and display messages
+    function loadAndDisplayGeneralMessages() {
+        console.log("Loading and displaying messages");
+        $.ajax({
+            type: 'GET',
+            url: '/getMessages/General/',
+            success: function(response) {
+                console.log("Messages fetched successfully:", response);
+                $("#display-general").empty();
+                response.messages.forEach(function(message) {
+                    var messageHtml = `
+                        <div class="message">
+                            <a href="${message.user_profile_url}">
+                                <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
+                            </a>
+                            <div class="message-content" style="padding: 5px;">
+                                <div class="sender">${message.user}</div>
+                                <div>${message.value}</div>
+                                <div class="time">${message.date}</div>
+                            </div>
+                        </div>`;
+                    $("#display-general").append(messageHtml);
+                });
+            },
+            error: function(response) {
+                console.error("Error fetching messages:", response);
+                alert('An error occurred while fetching messages.');
+            }
+        });
+    }
 
-  preloadImages(avatarUrls);
+    // Function to send message via AJAX
+    $(document).on('submit', '#general-post-form', function(e) {
+        e.preventDefault(); // Prevent default form submission
+        console.log("Form submitted");
 
-  setInterval(function(){
-    var room = "{{ room }}"; // Replace with the actual value of the room
+        let messageContent = $('#message').val().trim();
+        let username = $('#username').val();
+        let roomId = $('#room_name').val();
+        let pageName = $('#page_name').val();
+        let csrfToken = $('input[name=csrfmiddlewaretoken]').val();
 
-    $.ajax({
-      type: 'GET',
-      url : "/getMessages/" + room + "/",
-      success: function(response){
-        console.log(response);
-        $("#display").empty();
-        for (var key in response.messages) {
-          var message = response.messages[key];
-          var user_profile_url = message.user_profile_url;
-          var avatar_url = message.avatar_url; // Store avatar_url in a separate variable
-          var user = message.user; // Store user in a separate variable
-          var value = message.value; // Store value in a separate variable
-          var imageUrl = message.file; // Store file_url in a separate variable
-          var date = message.date; // Store date in a separate variable
-          var message_number = message.message_number;
+        console.log("Message Content:", messageContent);
+        console.log("Username:", username);
+        console.log("Room ID:", roomId);
+        console.log("Page Name:", pageName);
 
-          console.log(user_profile_url);
-          var messageHtml = `
-            <div class="message" id="#${message_number}">
-              <a href="${user_profile_url}">
-                <img style="width: 40px; height: 40px; border-radius: 50px;" src="${avatar_url}" alt="${user}">
-              </a>
-              <div class="message-content">
-                <div class="sender">${user}</div>
-                <div>${value}</div>`;
-
-                if (imageUrl) {  // Check if imageUrl exists
-                    messageHtml += `<a href="${imageUrl}" data-lightbox="image-1"><img id="myImg" style="max-width: 600px; max-height: 600px;" src="${imageUrl}" alt="Uploaded file"></a>`;
-                }
-
-
-          messageHtml += `
-                <div class="time">${date}</div>
-              </div>
-            </div>`;
-
-          console.log(user_profile_url);
-          $("#display").append(messageHtml);
+        if (!messageContent) {
+            alert('Message cannot be empty');
+            return;
         }
-      },
-      error: function(response){
-        alert('An error occurred');
-      }
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url "showcase:send" %}', // Use Django's URL template tag
+            data: {
+                username: username,
+                room_id: roomId,
+                message: messageContent,
+                csrfmiddlewaretoken: csrfToken,
+                page_name: pageName
+            },
+            success: function(data) {
+                console.log('Message sent successfully:', data); // Log success response
+                $('#message').val('');  // Clear the input field after submitting
+                loadAndDisplayGeneralMessages(); // Reload messages after posting
+            },
+            error: function(xhr, status, error) {
+                console.error('Error sending message:', error); // Log error
+            }
+        });
     });
-  }, 0500);
+
+    // Load and display messages initially and then every 500 milliseconds
+    loadAndDisplayGeneralMessages();
+    setInterval(loadAndDisplayGeneralMessages, 500);
+    console.log("Message loading set to every 500ms");
 });
 
-// Preload images
+// Preload images function
 function preloadImages(urls) {
-  for (var i = 0; i < urls.length; i++) {
-    var img = new Image();
-    img.src = urls[i];
-  }
+    console.log("Preloading images");
+    for (var i = 0; i < urls.length; i++) {
+        var img = new Image();
+        img.src = urls[i];
+        console.log("Image preloaded:", urls[i]);
+    }
 }
-
-
 </script>
+
 
 
     <script src="{% static 'css/js/script.js' %}"></script>

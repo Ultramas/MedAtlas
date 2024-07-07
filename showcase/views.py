@@ -2656,37 +2656,46 @@ def checkview(request):
         return redirect('showcase:create_room')  # Assuming you have a URL pattern named 'create_room'
 
 
+
 def send(request):
     if request.method == 'POST':
+        # Handle form submission
         message = request.POST.get('message')
         username = request.POST.get('username')
-        room_id = request.POST.get('room_name')  # Get the room name from the POST request
+        room_id = request.POST.get('room_name')  # Adjust as needed
         page_name = request.POST.get('page_name')
 
-        if page_name == 'index.html':
-            room_id = 'General'
+        # Example form validation
+        if not message:
+            return JsonResponse({'status': 'error', 'errors': {'message': 'This field is required.'}})
 
-        print(f"message: {message}, username: {username}, room_id: {room_id}, page_name: {page_name}")
-        print('This is a community-sent message')
+        # Process message creation
+        try:
+            if request.user.is_authenticated:
+                # Handle authenticated user
+                new_message = Message.objects.create(
+                    value=message,
+                    user=username,
+                    room=Room.objects.get(name=room_id),
+                    signed_in_user=request.user
+                )
+            else:
+                # Handle anonymous user
+                new_message = Message.objects.create(
+                    value=message,
+                    user=username,
+                    room=Room.objects.get(name=room_id)
+                )
 
-        if request.user.is_authenticated:
-            new_message = Message.objects.create(
-                value=message,
-                user=username,
-                room=Room.objects.get(name=room_id),  # Assign the room object to the room field
-                signed_in_user=request.user
-            )
-        else:
-            new_message = Message.objects.create(
-                value=message,
-                user=username,
-                room=Room.objects.get(name=room_id)  # Assign the room object to the room field
-            )
-        # Return a success response
-        return HttpResponse('Message sent successfully')
+            if page_name == 'index.html':
+                return redirect('showcase:index')
+            else:
+                return JsonResponse({'status': 'success', 'message': 'Message sent successfully'})
 
-    # Handle invalid request methods
-    return HttpResponse('Invalid request method. Please use POST to send a message.')
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})  # Handle exceptions
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import JsonResponse
@@ -4519,8 +4528,7 @@ from django.http import HttpResponse
 from .models import Message
 
 
-
-@csrf_exempt  # Add this decorator to allow POST requests without CSRF token for testing purposes
+@csrf_exempt
 def send(request):
     if request.method == 'POST':
         message = request.POST.get('message')
@@ -4550,7 +4558,6 @@ def send(request):
             new_message.save()
         return JsonResponse({'message': 'Message sent successfully'})
 
-    # Handle invalid request methods
     return HttpResponse('Invalid request method. Please use POST to send a message.')
 
 
