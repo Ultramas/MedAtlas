@@ -597,7 +597,7 @@ window.onscroll = function() {
 									" {{BackgroundImage.comment}} "
 								</p>
 								<div class="last-icon">
-									<i class="fas fa-quote-right"></i>
+									<h6>→</h6>
 								</div>
 							</div>
 						</div>
@@ -751,7 +751,7 @@ window.onscroll = function() {
 						</ul>
 
 							<br>
-							<a href="{{newprofile.get_profile_url2}}" class="read-more-btn">Read More <i class="fas fa-angle-right"></i></a>
+							<a href="{{newprofile.get_profile_url2}}" class="read-more-btn">Read More → </a>
 
 						</div>
 					</div>
@@ -1971,57 +1971,6 @@ $(document).on('submit', '#general-post-form', function(e) {
 });
 
 
-$(document).ready(function(){
-
-    // Function to load and display general messages
-    function loadAndDisplayGeneralMessages() {
-        $.ajax({
-            type: 'GET',
-            url: "/getMessages/General/",
-            success: function(response) {
-                console.log(response);
-                $("#display-general").empty();
-
-                response.general_message.forEach(function(general_message) {
-                    var messageHtml2 = `
-                      <div class="message">
-                        <a href="${general_message.user_profile_url}">
-                          <img src="${general_message.avatar_url}" alt="${general_message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-                        </a>
-                        <div class="message-content" style="padding: 5px;">
-                          <div class="sender">${general_message.user}</div>
-                          <div>${general_message.value}</div>
-                          <div class="time">${general_message.date}</div>
-                        </div>
-                      </div>`;
-
-                    $("#display-general").append(messageHtml2);
-                });
-            },
-            error: function(response) {
-                alert('An error occurred');
-            }
-        });
-    }
-
-    // Preload avatars (if needed)
-    var avatarUrls = [];
-    $(".general_message img").each(function() {
-        avatarUrls.push($(this).attr("src"));
-    });
-    preloadImages(avatarUrls);
-
-    // Load and display general messages every half-second
-    setInterval(loadAndDisplayGeneralMessages, 500);
-});
-
-// Preload images function
-function preloadImages(urls) {
-    for (var i = 0; i < urls.length; i++) {
-        var img = new Image();
-        img.src = urls[i];
-    }
-}
 </script>
     <h5>PokeTrove Community</h5>
     <br>
@@ -2037,11 +1986,11 @@ function preloadImages(urls) {
 <div class="message-box">
     <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
         <form id="general-post-form" method="post" action="{% url 'showcase:send' %}">
-            {% csrf_token %}
-            <input type="hidden" name="username" id="username" value="{{ username }}">
-            <input type="hidden" id="message_type" name="message_type" value="general">
-            <input type="hidden" name="room_name" id="room_name" value="General">
-    		<input type="hidden" name="page_name" id="page_name" value="index.html">
+    <input type="hidden" id="username" name="username" value="{{ request.user.username }}">
+    <input type="hidden" id="room_id" name="room_id" value="General">
+    <input type="hidden" id="room_name" name="room_name" value="General">
+    <input type="hidden" id="page_name" name="page_name" value="index.html">
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
             <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
             <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
         </form>
@@ -2055,15 +2004,6 @@ function preloadImages(urls) {
 </div>
 
 
-<div id="messages">
-    {% for message in GeneralMessanger %}
-    <div class="message">
-        <img src="{{ message.user_profile_picture_url }}" alt="{{ message.user }}">
-        <p>{{ message.user }}: {{ message.value }}</p>
-        <span>{{ message.date }}</span>
-    </div>
-    {% endfor %}
-</div>
 
 
 {% endif %}

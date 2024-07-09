@@ -173,16 +173,28 @@ img.hover-shadow {
     <img src="{{item.image.url}}" style="width:35; height: 35%;" onclick="openModal();currentSlide(1)" class="hover-shadow cursor">
   </div>
   <div class="column" style="width: 15%;">
+    {% if item.image2 %}
     <img src="{{item.image2.url}}" style="width:35; height: 35%;" onclick="openModal();currentSlide(2)" class="hover-shadow cursor">
+    {% endif %}
   </div>
   <div class="column" style="width: 15%;">
+
+      {% if item.image3 %}
     <img src="{{item.image3.url}}" style="width:35; height: 35%;" onclick="openModal();currentSlide(3)" class="hover-shadow cursor">
+      {% endif %}
   </div>
+
   <div class="column" style="width: 15%;">
+
+      {% if item.image4 %}
     <img src="{{item.image4.url}}" style="width:35; height: 35%;" onclick="openModal();currentSlide(4)" class="hover-shadow cursor">
+      {% endif %}
   </div>
   <div class="column" style="width: 15%;">
+
+    {% if item.image5 %}
     <img src="{{item.image5.url}}" style="width:35; height: 35%;" onclick="openModal();currentSlide(5)" class="hover-shadow cursor">
+    {% endif %}
   </div>
 </div>
 
@@ -202,22 +214,32 @@ img.hover-shadow {
 
     <div class="mySlides">
       <div class="numbertext">2 / 5</div>
+      {% if item.image2 %}
       <img src="{{item.image2.url}}" style="width:50%; height: 70%; background: none;">
+      {% endif %}
     </div>
 
     <div class="mySlides">
       <div class="numbertext">3 / 5</div>
+      {% if item.image3 %}
       <img src="{{item.image3.url}}" style="width:50%; height: 70%; background: none;">
+      {% endif %}
     </div>
 
     <div class="mySlides">
       <div class="numbertext">4 / 5</div>
+
+      {% if item.image4 %}
       <img src="{{item.image4.url}}" style="width:50%; height: 70%; background: none;">
+      {% endif %}
     </div>
 
     <div class="mySlides">
       <div class="numbertext">5 / 5</div>
+
+      {% if item.image5 %}
       <img src="{{item.image5.url}}" style="width:50%; height: 70%; background: none;">
+      {% endif %}
     </div>
 
     <a class="prev" onclick="plusSlides(-1)" style="color: white;">&#10094;</a>
@@ -232,16 +254,24 @@ img.hover-shadow {
       <img class="demo cursor" src="{{item.image.url}}" style="width: 50%; height: 90%; background: none;" onclick="currentSlide(1)" alt="{{item.title}} 1">
     </div>
     <div class="column" style="padding-right: -200px;">
+      {% if item.image2 %}
       <img class="demo cursor" src="{{item.image2.url}}" style="width: 50%; height: 90%; background: none;" onclick="currentSlide(2)" alt="{{item.title}} 2">
+      {% endif %}
     </div>
     <div class="column" style="padding-right: -200px;">
+      {% if item.image3 %}
       <img class="demo cursor" src="{{item.image3.url}}" style="width: 50%; height: 90%; background: none;" onclick="currentSlide(3)" alt="{{item.title}} 3">
+      {% endif %}
     </div>
     <div class="column" style="padding-right: -200px;">
+      {% if item.image4 %}
       <img class="demo cursor" src="{{item.image4.url}}" style="width: 50%; height: 90%; background: none;" onclick="currentSlide(4)" alt="{{item.title}} 4">
+      {% endif %}
     </div>
     <div class="column" style="padding-right: -200px;">
+      {% if item.image5 %}
       <img class="demo cursor" src="{{item.image5.url}}" style="width: 50%; height: 90%; background: none;" onclick="currentSlide(5)" alt="{{item.title}} 5">
+      {% endif %}
     </div>
       </div>
 

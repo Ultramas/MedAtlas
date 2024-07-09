@@ -10,7 +10,7 @@ from mysite import settings
 from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme, TradeOffer, \
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
-    SPECIAL_CHOICES
+    SPECIAL_CHOICES, QuickItem
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -1157,9 +1157,7 @@ class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
         fields = (
-            'title', 'price', 'discount_price', 'specialty', 'label', 'slug', 'description', 'image', 'image2',
-            'image3',
-            'image4', 'image5')
+            'title', 'price', 'discount_price', 'specialty', 'label', 'slug', 'description', 'image')
         widgets = {
             # 'slug': forms.TextInput(attrs={'readonly': 'readonly'})
         }
@@ -1184,6 +1182,12 @@ class ItemForm(forms.ModelForm):
         cleaned_data['fees'] = fees
 
         return cleaned_data
+
+
+class QuickItemForm(forms.ModelForm):
+    class Meta:
+        model = QuickItem
+        fields = ['image', 'image_length', 'image_width']
 
 
 from .models import TradeItem

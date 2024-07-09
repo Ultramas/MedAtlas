@@ -2656,46 +2656,52 @@ def checkview(request):
         return redirect('showcase:create_room')  # Assuming you have a URL pattern named 'create_room'
 
 
-
+@csrf_exempt
 def send(request):
     if request.method == 'POST':
-        # Handle form submission
         message = request.POST.get('message')
         username = request.POST.get('username')
-        room_id = request.POST.get('room_name')  # Adjust as needed
+        room_id = request.POST.get('room_id')
         page_name = request.POST.get('page_name')
 
-        # Example form validation
-        if not message:
-            return JsonResponse({'status': 'error', 'errors': {'message': 'This field is required.'}})
+        if page_name == 'index.html':
+            room_id = 'General'
 
-        # Process message creation
+        logger.debug(f"message: {message}, username: {username}, room_id: {room_id}, page_name: {page_name}")
+        print(f"message: {message}, username: {username}, room_id: {room_id}, page_name: {page_name}")
+        print('This is a community-sent message')
+
+        try:
+            room = Room.objects.get(name=room_id)
+        except Room.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Room does not exist.'})
+
+        if not message:
+            return JsonResponse({'status': 'error', 'message': 'Message is required.'})
+
         try:
             if request.user.is_authenticated:
-                # Handle authenticated user
                 new_message = Message.objects.create(
                     value=message,
                     user=username,
-                    room=Room.objects.get(name=room_id),
+                    room=room.name,  # Save the room name as a string
                     signed_in_user=request.user
                 )
             else:
-                # Handle anonymous user
                 new_message = Message.objects.create(
                     value=message,
                     user=username,
-                    room=Room.objects.get(name=room_id)
+                    room=room.name  # Save the room name as a string
                 )
+            new_message.save()
 
-            if page_name == 'index.html':
-                return redirect('showcase:index')
-            else:
-                return JsonResponse({'status': 'success', 'message': 'Message sent successfully'})
-
+            return JsonResponse({'status': 'success', 'message': 'Message sent successfully'})
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})  # Handle exceptions
+            print(f"Error saving message: {e}")
+            return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
 
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import JsonResponse
@@ -2741,15 +2747,14 @@ class NewRoomSettingsView(LoginRequiredMixin, TemplateView):
         return render(request, self.template_name, {'form': form})
 
 
+
 def getMessages(request, room):
     try:
         room_details = Room.objects.get(name=room)
     except Room.DoesNotExist:
-        # Handle case where the room doesn't exist yet (e.g., return an empty response or retry logic)
-        return JsonResponse({'messages': []})  # Empty message list
+        return JsonResponse({'messages': []})
 
-    messages = Message.objects.filter(room=room)
-
+    messages = Message.objects.filter(room=room_details)
     messages_data = []
     for message in messages:
         profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
@@ -2757,7 +2762,7 @@ def getMessages(request, room):
             user_profile_url = message.get_profile_url()
             avatar_url = profile_details.avatar.url
         else:
-            user_profile_url = ('/home/' + room + '/?username=' + request.user.username)
+            user_profile_url = f'/home/{room}/?username={request.user.username}'
             avatar_url = staticfiles_storage.url('css/images/a.jpg')
 
         message_data = {
@@ -2769,10 +2774,13 @@ def getMessages(request, room):
             'message_number': message.message_number,
             'file': message.file.url if message.file else None,
         }
-
         messages_data.append(message_data)
 
     return JsonResponse({'messages': messages_data})
+
+
+
+
 
 
 def supportroom(request):
@@ -4528,38 +4536,78 @@ from django.http import HttpResponse
 from .models import Message
 
 
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import redirect
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.views.decorators.csrf import csrf_exempt
+from .models import Message, Room, ProfileDetails
+import logging
+
+
+logger = logging.getLogger(__name__)
 @csrf_exempt
+def generalsend(request):
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        username = request.POST.get('username')
+
+        print(f"message: {message}, username: {username}")
+        print('This is a community-sent message')
+
+        if not message:
+            return JsonResponse({'status': 'error', 'message': 'Message is required.'})
+
+        try:
+            if request.user.is_authenticated:
+                new_message = Message.objects.create(
+                    value=message,
+                    user=username,
+                    signed_in_user=request.user
+                )
+            new_message.save()
+
+            return JsonResponse({'status': 'success', 'message': 'Message sent successfully'})
+        except Exception as e:
+            print(f"Error saving message: {e}")
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+
+
+
 def send(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         username = request.POST.get('username')
         room_id = request.POST.get('room_id')
-        page_name = request.POST.get('page_name')
 
-        if page_name == 'index.html':
-            room_id = 'General'
+        print(f"message: {message}, username: {username}, room_id: {room_id}")
 
-        print(f"message: {message}, username: {username}, room_id: {room_id}, page_name: {page_name}")
-        print('This is a community-sent message')
-
+        # Check if the user is authenticated
         if request.user.is_authenticated:
+            # User is authenticated, use their user ID for the message user field
             new_message = Message.objects.create(
                 value=message,
                 user=username,
                 room=room_id,
-                signed_in_user=request.user
+                signed_in_user=request.user  # Set the signed_in_user to the authenticated user
             )
+            new_message.save()
         else:
+            # User is not authenticated, use the provided username for the message user field
             new_message = Message.objects.create(
                 value=message,
                 user=username,
-                room=room_id
+                room=room_id,
             )
             new_message.save()
-        return JsonResponse({'message': 'Message sent successfully'})
 
+        # Return a response indicating the message was sent successfully
+        return HttpResponse('Message sent successfully')
+
+    # If the request method is not POST, handle the appropriate response here
     return HttpResponse('Invalid request method. Please use POST to send a message.')
-
 
 class BackgroundView(FormMixin, BaseView):
     model = BackgroundImage
@@ -4584,32 +4632,6 @@ class BackgroundView(FormMixin, BaseView):
             print(form.cleaned_data)
             return render(request, "index.html", {'form': form})
             return redirect('showcase:index')
-
-    @login_required
-    def send(request):
-        if request.method == 'POST':
-            message = request.POST.get('message')
-            username = request.POST.get('username')
-            room_name = request.POST.get('room_name')
-            message_type = request.POST.get('message_type')
-
-            if not message:
-                return HttpResponse('Message content is missing', status=400)
-
-            if message_type == 'general':
-                room_name = "General"  # Override room_name for general messages
-                new_message = Message.objects.create(
-                    room=room_name,
-                    signed_in_user=request.user,
-                    value=message,
-                    user=request.user.username
-                )
-                return HttpResponse('Message sent successfully')
-            else:
-                # Handle other message types, if any
-                return HttpResponse('Unsupported message type', status=400)
-
-        return HttpResponse('Invalid request method. Please use POST to send a message.')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

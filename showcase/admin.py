@@ -4,7 +4,8 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket, SellerApplication, Meme, \
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
-    UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant
+    UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
+    GeneralMessage
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -149,6 +150,11 @@ class ChoiceInLine(admin.TabularInline):
 
 class Prizes(admin.TabularInline):
     model = PrizePool
+    extra = 1
+
+
+class QuickItemInLine(admin.TabularInline):
+    model = QuickItem
     extra = 1
 
 
@@ -946,6 +952,7 @@ admin.site.register(ItemFilter, ItemFilterAdmin)
 
 
 class ItemAdmin(admin.ModelAdmin):
+    inlines = [QuickItemInLine]
     fieldsets = (
         ('Item Information - Categorial Descriptions', {
             'fields': ('user', 'title', 'category', 'label', 'slug', 'description', 'specialty',),
@@ -956,10 +963,7 @@ class ItemAdmin(admin.ModelAdmin):
             'classes': ('collapse',),  # Open by default
         }),
         ('Item Information - Image Display', {
-            'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize', 'image2', 'image_length2', 'image_width2', 'length_for_resize2', 'width_for_resize2',
-                       'image3', 'image_length3', 'image_width3', 'length_for_resize3', 'width_for_resize3', 'image4', 'image_length4', 'image_width4', 'length_for_resize4', 'width_for_resize4',
-                       'image5', 'image_length5', 'image_width5', 'length_for_resize5', 'width_for_resize5', 'is_active',
-                       ),
+            'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Item Information - Related Items', {
@@ -976,6 +980,18 @@ class ItemAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Item, ItemAdmin)
+
+
+class QuickItemAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Quick Item Information - Categorial Descriptions', {
+            'fields': ('user', 'item', 'price', 'discount_price', 'image', 'image_length', 'image_width', 'quantity', 'is_active',),
+            'classes': ('collapse-open',),  # Open by default
+        }),
+    )
+
+
+admin.site.register(QuickItem, QuickItemAdmin)
 
 
 class UploadACardAdmin(admin.ModelAdmin):
@@ -1560,6 +1576,22 @@ class SupportInterfaceAdmin(admin.ModelAdmin):
 
 admin.site.register(SupportInterface, SupportInterfaceAdmin)
 
+
+class GeneralMessageAdmin(admin.ModelAdmin):
+   fieldsets = (
+       ('General Information - Categorial Descriptions', {
+           'fields': ('value', 'user', 'signed_in_user',)
+       }),
+       ('General Information - Image Display', {
+           'fields': ('file', 'image_length', 'image_width',)
+       }),
+       ('General Information - Attributes', {
+           'fields': ('date', 'is_active',)
+       }),
+   )
+
+
+admin.site.register(GeneralMessage, GeneralMessageAdmin)
 
 class SocialMediaAdmin(admin.ModelAdmin):
     fieldsets = (

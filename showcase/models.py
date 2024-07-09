@@ -288,7 +288,7 @@ class UpdateProfile(models.Model):
 
 
 class Currency(models.Model):
-    name = models.CharField(default='Rubiaces', max_length=200)
+    name = models.CharField(default='Rubies', max_length=200)
     flavor_text = models.CharField(max_length=200)
     file = models.FileField(null=True, verbose_name='Sprite')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -3473,6 +3473,48 @@ class Message(models.Model):
 """
 
 
+class GeneralMessage(models.Model):
+    value = models.CharField(max_length=1000000)
+    date = models.DateTimeField(default=timezone.now, blank=True)
+    user = models.CharField(max_length=1000000, verbose_name="Username")
+    signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='generalmessages', verbose_name="User")
+    file = models.FileField(upload_to='images/', null=True, blank=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100, help_text='Original length of the advertisement (use for original ratio).', verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100, help_text='Original width of the advertisement (use for original ratio).', verbose_name="image width")
+    is_active = models.IntegerField(default=1, blank=True, null=True, help_text='1->Active, 0->Inactive', choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        if self.value:
+            return f"{self.value} in {self.room}"
+        else:
+            return f"blank message in {self.room}"
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Get the current maximum message number
+            max_message_number = Message.objects.aggregate(max_message_number=Max('message_number'))['max_message_number'] or 0
+            # Increment the maximum message number to get the new message number
+            self.message_number = max_message_number + 1
+
+            # Get the associated ProfileDetails for the donor
+            profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
+
+            # Set the position to the position value from the associated ProfileDetails if it exists
+            if profile and hasattr(self, 'position'):
+                self.position = profile.position
+
+        super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+    class Meta:
+        verbose_name = "General Message"
+        verbose_name_plural = "General Messages"
+
+
 class DegeneratePlaylistLibrary(models.Model):
   user = models.ForeignKey(User, on_delete=models.CASCADE)
   title = models.CharField(max_length=100)
@@ -3905,6 +3947,8 @@ class ItemFilter(models.Model):
         verbose_name_plural = "Item Filters"
 
 
+
+
 class Item(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=100)
@@ -3926,42 +3970,9 @@ class Item(models.Model):
                                               verbose_name="image width")
     length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
     width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
-    image2 = models.ImageField(blank=True, null=True, verbose_name="Second image")
-    image_length2 = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                               help_text='Original length of the advertisement (use for original ratio).',
-                                               verbose_name="image length")
-    image_width2 = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                              help_text='Original width of the advertisement (use for original ratio).',
-                                              verbose_name="image width")
-    length_for_resize2 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Length")
-    width_for_resize2 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Width")
-    image3 = models.ImageField(blank=True, null=True, verbose_name="Third image")
-    image_length3 = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                                help_text='Original length of the advertisement (use for original ratio).',
-                                                verbose_name="image length")
-    image_width3 = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                               help_text='Original width of the advertisement (use for original ratio).',
-                                               verbose_name="image width")
-    length_for_resize3 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Length")
-    width_for_resize3 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Width")
-    image4 = models.ImageField(blank=True, null=True, verbose_name="Fourth image")
-    image_length4 = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                                help_text='Original length of the advertisement (use for original ratio).',
-                                                verbose_name="image length")
-    image_width4 = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                               help_text='Original width of the advertisement (use for original ratio).',
-                                               verbose_name="image width")
-    length_for_resize4 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Length")
-    width_for_resize4 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Width")
-    image5 = models.ImageField(blank=True, null=True, verbose_name="Fifth image")
-    image_length5 = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                                help_text='Original length of the advertisement (use for original ratio).',
-                                                verbose_name="image length")
-    image_width5 = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                               help_text='Original width of the advertisement (use for original ratio).',
-                                               verbose_name="image width")
-    length_for_resize5 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Length")
-    width_for_resize5 = models.PositiveIntegerField(default=100, blank=True, null=True, verbose_name="Resized Width")
+    image = models.ImageField()
+    multi_listing = models.BooleanField(default=False)
+    quantity = models.IntegerField(default=1)
     # hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
     relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
     is_active = models.IntegerField(default=1,
@@ -3998,6 +4009,55 @@ class Item(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
+
+from django.db import models
+from django.conf import settings
+
+
+class QuickItem(models.Model):
+    title = models.CharField(max_length=100, blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    item = models.ForeignKey(Item, related_name='images', on_delete=models.CASCADE)
+    price = models.FloatField(blank=True, null=True)
+    discount_price = models.FloatField(blank=True, null=True)
+    image = models.ImageField(upload_to='images/')
+    image_length = models.PositiveIntegerField(
+        blank=True, null=True, default=100,
+        help_text='Original length of the advertisement (use for original ratio).',
+        verbose_name="image length"
+    )
+    image_width = models.PositiveIntegerField(
+        blank=True, null=True, default=100,
+        help_text='Original width of the advertisement (use for original ratio).',
+        verbose_name="image width"
+    )
+    quantity = models.IntegerField(default=1)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
+
+    def __str__(self):
+        if self.user:
+            return self.title + " by " + self.user.username
+        else:
+            return self.title + " by PokeTrove"
+
+    def number(self):
+        count = QuickItem.objects.filter(item=self.item).count()
+        number = count + 1
+        return number
+
+    def save(self, *args, **kwargs):
+        if not self.title:
+            self.title = f"Picture {self.number()}"
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Quick Item"
+        verbose_name_plural = "Quick Items"
 
 
 class EBackgroundImage(models.Model):
@@ -5597,7 +5657,7 @@ class ProfileDetails(models.Model):
     level = models.ForeignKey(Level, on_delete=models.CASCADE, default="")
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    currency_amount = models.DecimalField(max_digits=10, decimal_places=1, default=0.0)
+    currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     seller = models.BooleanField(default=False, null=True)
     position = models.UUIDField(
         default=uuid.uuid4,
