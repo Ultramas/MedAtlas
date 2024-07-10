@@ -1,0 +1,123 @@
+<script>
+</script>
+<section class="avenue2-messenger" id="chatwidget2">
+<div class="chat2" >
+  <div class="chat2-title">
+	  {% if user.is_authenticated %}
+<script type="text/javascript">
+$(document).on('submit', '#general-post-form', function(e) {
+    e.preventDefault();
+
+    var formData = new FormData();
+    formData.append('username', $('#username').val());
+    formData.append('room_id', $('#room_id').val()); // Ensure this is correctly set in your HTML
+    formData.append('room_name', $('#room_name').val()); // Ensure this is correctly set in your HTML
+    formData.append('message', $('#message-input').val()); // Ensure correct ID for message input
+    formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+    formData.append('page_name', $('#page_name').val()); // Ensure this is correctly set in your HTML
+
+    var fileInput = $('#file')[0];
+    if (fileInput && fileInput.files.length > 0) {
+        formData.append('file', fileInput.files[0]);
+    }
+
+    $.ajax({
+        type: 'POST',
+        url: '{% url "showcase:generalsend" %}', // Use Django's URL template tag
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            if (response.status === 'success') {
+                // Handle success response
+                console.log('Message sent successfully:', response.message);
+                loadAndDisplayGeneralMessages();  // Reload messages after posting
+            } else {
+                // Handle non-successful response (if needed)
+                console.error('Error:', response.message);
+                // Optionally, display an error message to the user
+            }
+        },
+        error: function(xhr, status, error) {
+            // Handle AJAX errors
+            console.error('Error:', error);
+
+            // Example: Handle specific validation errors
+            if (xhr.responseJSON && xhr.responseJSON.status === 'error') {
+                var errors = xhr.responseJSON.errors;
+                if (errors) {
+                    // Display error messages to the user
+                    console.error('Validation Errors:', errors);
+                }
+            } else {
+                // Handle other types of errors
+                console.error('Unknown Error:', status, error);
+            }
+        }
+    });
+
+    // Clear input fields after form submission
+    $('#message-input').val('');
+    $('#file').val('');
+});
+
+
+</script>
+    <h5>PokeTrove Community</h5>
+    <br>
+    <h6> PokeTrove General Chat  </h6>
+  </div>
+  <div class="message" style="overflow: auto;">
+    <h2>{{ username }}</h2>
+    <div id="display" class="chat-messages" style="height: 400px; overflow-y: scroll;">
+
+    </div>
+  </div>
+
+<div class="message-box">
+    <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
+        <form id="general-post-form" method="post" action="{% url 'showcase:generalsend' %}">
+    <input type="hidden" id="username" name="username" value="{{ request.user.username }}">
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
+            <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
+        </form>
+    </div>
+</div>
+</div>
+
+
+
+
+def send(request):
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        username = request.POST.get('username')
+        room_id = request.POST.get('room_id')
+
+        print(f"message: {message}, username: {username}, room_id: {room_id}")
+
+        # Check if the user is authenticated
+        if request.user.is_authenticated:
+            # User is authenticated, use their user ID for the message user field
+            new_message = Message.objects.create(
+                value=message,
+                user=username,
+                room=room_id,
+                signed_in_user=request.user  # Set the signed_in_user to the authenticated user
+            )
+            new_message.save()
+        else:
+            # User is not authenticated, use the provided username for the message user field
+            new_message = Message.objects.create(
+                value=message,
+                user=username,
+                room=room_id,
+            )
+            new_message.save()
+
+        # Return a response indicating the message was sent successfully
+        return HttpResponse('Message sent successfully')
+
+    # If the request method is not POST, handle the appropriate response here
+    return HttpResponse('Invalid request method. Please use POST to send a message.')

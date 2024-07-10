@@ -463,6 +463,8 @@ urlpatterns = [
 
     path('supportinterface/checkview', views.supportlinecheckview, name='supportlinecheckview'),
     path('supportinterface/send', views.supportlinesend, name='supportlinesend'),
+    path('generalsend/', views.generalsend, name='generalsend'),
+    path('getGeneralMessages/', views.getGeneralMessages, name='getGeneralMessages'),
     path('forbiddenaccess/', views.forbidden_access, name='forbiddenaccess'),
 
     path('send_friend_request/', SendFriendRequestView.as_view(), name='send_friend_request'),

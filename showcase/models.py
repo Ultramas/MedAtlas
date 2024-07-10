@@ -3481,13 +3481,15 @@ class GeneralMessage(models.Model):
     file = models.FileField(upload_to='images/', null=True, blank=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100, help_text='Original length of the advertisement (use for original ratio).', verbose_name="image length")
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100, help_text='Original width of the advertisement (use for original ratio).', verbose_name="image width")
+    message_number = models.PositiveIntegerField(default=0, editable=False)
+    cutoff = models.IntegerField(default=0)
     is_active = models.IntegerField(default=1, blank=True, null=True, help_text='1->Active, 0->Inactive', choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
         if self.value:
-            return f"{self.value} in {self.room}"
+            return f"{self.value} "
         else:
-            return f"blank message in {self.room}"
+            return f"blank message "
 
     def save(self, *args, **kwargs):
         if not self.pk:

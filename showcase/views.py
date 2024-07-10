@@ -11,7 +11,7 @@ from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
-    Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome
+    Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -2747,7 +2747,6 @@ class NewRoomSettingsView(LoginRequiredMixin, TemplateView):
         return render(request, self.template_name, {'form': form})
 
 
-
 def getMessages(request, room):
     try:
         room_details = Room.objects.get(name=room)
@@ -2777,10 +2776,6 @@ def getMessages(request, room):
         messages_data.append(message_data)
 
     return JsonResponse({'messages': messages_data})
-
-
-
-
 
 
 def supportroom(request):
@@ -2852,7 +2847,7 @@ def supportsend(request):
         # signed_in_user = request.POST.get('signed_in_user')
 
         print(f"message: {message}, username: {username}, room_name: {username}")
-        print('this is where it is from')
+        print('the support chat is where it is from')
         # print(f"profile: {profile}")
         # Check if the user is authenticated
         if request.user.is_authenticated:
@@ -4543,37 +4538,60 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Message, Room, ProfileDetails
 import logging
 
+def getGeneralMessages(request):
+    messages = GeneralMessage.objects.all()
+    messages_data = []
 
-logger = logging.getLogger(__name__)
+    for message in messages:
+        profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+        if profile_details:
+            user_profile_url = message.get_profile_url()
+            avatar_url = profile_details.avatar.url
+        else:
+            user_profile_url = 'index.html'
+            avatar_url = static('css/images/a.jpg')
+
+        message_data = {
+            'user_profile_url': user_profile_url,
+            'avatar_url': avatar_url,
+            'user': message.user,
+            'value': message.value,
+            'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
+            'message_number': message.message_number,
+            'file': message.file.url if message.file else None,
+        }
+        messages_data.append(message_data)
+
+    return JsonResponse({'messages': messages_data})
+
+
 @csrf_exempt
 def generalsend(request):
     if request.method == 'POST':
-        message = request.POST.get('message')
+        generalmessage = request.POST.get('message')
         username = request.POST.get('username')
 
-        print(f"message: {message}, username: {username}")
+        print(f"message: {generalmessage}, username: {username}")
         print('This is a community-sent message')
 
-        if not message:
-            return JsonResponse({'status': 'error', 'message': 'Message is required.'})
+        if not generalmessage:
+            return JsonResponse({'status': 'error', 'generalmessage': 'Message is required.'})
 
         try:
             if request.user.is_authenticated:
-                new_message = Message.objects.create(
-                    value=message,
+                new_message = GeneralMessage.objects.create(
+                    value=generalmessage,
                     user=username,
                     signed_in_user=request.user
                 )
             new_message.save()
 
-            return JsonResponse({'status': 'success', 'message': 'Message sent successfully'})
+            return JsonResponse({'status': 'success', 'generalmessage': 'Message sent successfully'})
         except Exception as e:
             print(f"Error saving message: {e}")
-            return JsonResponse({'status': 'error', 'message': str(e)})
+            return JsonResponse({'status': 'error', 'generalmessage': str(e)})
 
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-
-
+    return JsonResponse({'status': 'error', 'generalmessage': 'Invalid request method.'})
 
 
 def send(request):

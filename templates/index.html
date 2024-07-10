@@ -1720,8 +1720,8 @@ Bounce
 
 		</style>
 
-<section class="avenue-messenger" id="chatwidget">
-  <div class="menu">
+<section class="avenue2-messenger" id="chatwidget2">
+	<div class="menu">
    <div class="items"><span>
      <a href="#" title="Minimize">&mdash;</a><br>
 <!--
@@ -1740,277 +1740,256 @@ Bounce
 </div>
 
   </div>
-  <div class="agent-face">
-    <div class="half">
-
-		{% for BackgroundImage in Image %}
-		{% if BackgroundImage.image_position == 10 %}
-				{% if BackgroundImage.page == 'index.html' %}
-     <img class="agent circle" src="{{ BackgroundImage.image.url }}" alt="PokeTrove Customer Service Manager"></div>
-						  	{% endif %}
-							{% endif %}
-							{% endfor %}
-
-  </div><div class="chat">
-  <div class="chat-title">
-  {% if user.is_authenticated %}
-	  <input type="hidden" name="page_named" id="page_named" value="index.html">
-<script type="text/javascript">
-
-  $(document).on('submit', '#post-form', function(e) {
-    e.preventDefault();
-    var pageName = $('#page_named').val();
-    console.log('Index support message submitted'); // Log when form is submitted
-    $.ajax({
-      type: 'POST',
-      url: '{% url "showcase:supportsend" %}', // Use Django's URL template tag
-      data: {
-        username: $('#username').val(),
-        room_name: $('#room_name').val(),
-        message: $('#message').val(),
-        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-      },
-      success: function(data) {
-        // Handle success
-        setTimeout(scrollToBottom, 600); // Add a slight delay to ensure DOM is updated
-        loadAndDisplayMessages(); // Reload messages after posting
-      },
-      error: function(xhr, status, error) {
-        console.error('Error:', error); // Log error
-      }
-    });
-    document.getElementById('message').value = '';
-  });
-
-</script>
-    <h1>Agent Holley</h1>
-    <h2>PokeTrove Service Manager</h2>
-  </div>
-  <div class="message" style="overflow: auto;">
-    <h2>{{ username }}</h2>
-    <div id="display" class="chat-messages" style="height: 400px; overflow-y: scroll;"></div>
-  </div>
-
-  <div class="message-box">
-    <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
-      <form id="post-form" method="post" action="{% url 'showcase:supportsend' %}">
-        {% csrf_token %}
-        <input type="hidden" name="username" id="username" value="{{ username }}">
-        <input type="hidden" name="room_name" id="room_name" value="{{ room }}">
-        <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
-   	    <input type="hidden" name="page_name" id="page_named" value="index.html">
-        <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
-      </form>
-    </div>
-  </div>
-</div>
-
-	  {% else %}
-	  <input type="hidden" name="page_named" id="page_named" value="index.html">
-	<script type="text/javascript">
-
-  $(document).on('submit', '#post-form', function(e) {
-    e.preventDefault();
-    var pageName = $('#page_named').val();
-	</script>
-	      <h1>Agent Holley</h1>
-    <h2>PokeTrove Service Manager</h2>
-  </div>
-  <div class="message" style="overflow: auto;">  <span class="username">Hello Guest!</span>
-	<h6>Please sign in to see support message history!</h6>
-	  </div>
-  <div class="message-box">
-
-<div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
-      <form id="post-form" method="post" action="{% url 'showcase:supportsend' %}">
-      {% csrf_token %}
-      <input type="hidden" name="username" id="username" value="{{ username }}">
-      <input type="hidden" name="room_name" id="room_name" value="{{room}}" />
-      <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
-      <input type="hidden" name="page_name" id="page_named" value="index.html">
-      <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
-    </form>
-  </div>
-	  {% endif %}
-  </div>
-</div>
-
-
-
 </section>
-<div class="chat-toggle-button" style="position: fixed; right: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">  <button type="button" onclick="showChatWidget()">...</button>  </div>
 
+<section class="avenue-messenger" id="chatwidget">
+    <div class="chat2">
+        <div class="chat2-title">
+            {% if user.is_authenticated %}
+                <h5>PokeTrove Support Line</h5>
+                <br>
+                <h6>Agent Holley</h6>
+            </div>
+            <div class="message" style="overflow: auto;">
+                <h2>{{ request.user.username }}</h2>
+                <div id="display-support" class="chat-messages" style="height: 400px; overflow-y: scroll;"></div>
+            </div>
+            <div class="message-box">
+                <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
+                    <form id="support-post-form" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" id="support-username" name="username" value="{{ request.user.username }}">
+                        <input type="hidden" name="room_name" id="support-room_name" value="{{ room }}">
+                        <input type="text" name="message" id="support-message" width="100px" placeholder="Type your message...">
+                        <input type="hidden" name="page_name" id="support-page_named" value="index.html">
+                        <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <h5>Guest User</h5>
+            <br>
+            <h6>Please sign in to participate in the chat.</h6>
+        {% endif %}
+    </div>
+</section>
 
+	<div class="chat-toggle-button" style="position: fixed; right: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
+		<button type="button" onclick="showChatWidget()">...</button>
 	</div>
-<!--<div class="bg"></div>-->
 
-<!--support chat-->
-<script>
-$(document).ready(function(){
-  // Function to load and display messages
-  function loadAndDisplayMessages() {
-    var room = 'General'; // Fetch messages from the 'General' room
-
-    $.ajax({
-      type: 'GET',
-      url: "/supportgetMessages/" + room + "/",
-      success: function(response) {
-        console.log(response);
-        $("#display").empty();
-
-        for (var key in response.messages) {
-          var message = response.messages[key];
-
-          var messageHtml = `
-            <div class="message">
-              <a href="${message.user_profile_url}" >
-                <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-              </a>
-              <div class="message-content" style="padding: 5px;">
-                <div class="sender">${message.user}</div>
-                <div>${message.value}</div>
-                <div class="time">${message.date}</div>
-              </div>
-            </div>`;
-
-          $("#display").append(messageHtml);
-        }
-
-      },
-      error: function(response) {
-        alert('An error occurred');
-      }
-    });
-  }
-
-  // Load and display messages every half-second
-  setInterval(loadAndDisplayMessages, 500);
-});
-
-// Preload images
-function preloadImages(urls) {
-  for (var i = 0; i < urls.length; i++) {
-    var img = new Image();
-    img.src = urls[i];
-  }
-}
-
-// Function to scroll to the bottom of the chat display
-function scrollToBottom() {
-  var chatDisplay = document.getElementById('display');
-  chatDisplay.scrollTop = chatDisplay.scrollHeight;
-}
-
-</script>
-
-
-
-
-<!-- General Chat -->
-<script>
-</script>
-<section class="avenue2-messenger" id="chatwidget2">
-<div class="chat2" >
-  <div class="chat2-title">
-	  {% if user.is_authenticated %}
-<script type="text/javascript">
-$(document).on('submit', '#general-post-form', function(e) {
-    e.preventDefault();
-
-    var formData = new FormData();
-    formData.append('username', $('#username').val());
-    formData.append('room_id', $('#room_id').val()); // Ensure this is correctly set in your HTML
-    formData.append('room_name', $('#room_name').val()); // Ensure this is correctly set in your HTML
-    formData.append('message', $('#message-input').val()); // Ensure correct ID for message input
-    formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
-    formData.append('page_name', $('#page_name').val()); // Ensure this is correctly set in your HTML
-
-    var fileInput = $('#file')[0];
-    if (fileInput && fileInput.files.length > 0) {
-        formData.append('file', fileInput.files[0]);
-    }
-
-    $.ajax({
-        type: 'POST',
-        url: '{% url "showcase:send" %}', // Use Django's URL template tag
-        data: formData,
-        contentType: false,
-        processData: false,
-        success: function(response) {
-            if (response.status === 'success') {
-                // Handle success response
-                console.log('Message sent successfully:', response.message);
-                loadAndDisplayGeneralMessages();  // Reload messages after posting
-            } else {
-                // Handle non-successful response (if needed)
-                console.error('Error:', response.message);
-                // Optionally, display an error message to the user
-            }
-        },
-        error: function(xhr, status, error) {
-            // Handle AJAX errors
-            console.error('Error:', error);
-
-            // Example: Handle specific validation errors
-            if (xhr.responseJSON && xhr.responseJSON.status === 'error') {
-                var errors = xhr.responseJSON.errors;
-                if (errors) {
-                    // Display error messages to the user
-                    console.error('Validation Errors:', errors);
-                }
-            } else {
-                // Handle other types of errors
-                console.error('Unknown Error:', status, error);
-            }
-        }
-    });
-
-    // Clear input fields after form submission
-    $('#message-input').val('');
-    $('#file').val('');
-});
-
-
-</script>
-    <h5>PokeTrove Community</h5>
-    <br>
-    <h6> PokeTrove General Chat  </h6>
-  </div>
-  <div class="message" style="overflow: auto;">
-    <h2>{{ username }}</h2>
-    <div id="display" class="chat-messages" style="height: 400px; overflow-y: scroll;">
-
-    </div>
-  </div>
-
-<div class="message-box">
-    <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
-        <form id="general-post-form" method="post" action="{% url 'showcase:send' %}">
-    <input type="hidden" id="username" name="username" value="{{ request.user.username }}">
-    <input type="hidden" id="room_id" name="room_id" value="General">
-    <input type="hidden" id="room_name" name="room_name" value="General">
-    <input type="hidden" id="page_name" name="page_name" value="index.html">
-    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-            <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
-            <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
-        </form>
-    </div>
-</div>
-</div>
-
-</section>
 <div class="chat2-toggle-button" style="position: fixed; left: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
   <button type="button" onclick="showChatWidget2()">...</button>
 </div>
-
-
-
-
-{% endif %}
-
 </div>
 
-</div>
+<!-- General Chat -->
+<section class="avenue2-messenger" id="chatwidget2">
+    <div class="chat2">
+        <div class="chat2-title">
+            {% if user.is_authenticated %}
+                <h5>PokeTrove Community</h5>
+                <br>
+                <h6>PokeTrove General Chat</h6>
+            </div>
+            <div class="message" style="overflow: auto;">
+                <h2>{{ request.user.username }}</h2>
+                <div id="display-general" class="chat-messages" style="height: 400px; overflow-y: scroll;"></div>
+            </div>
+            <div class="message-box">
+                <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
+                    <form id="general-post-form" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" id="general-username" name="username" value="{{ request.user.username }}">
+                        <input type="text" name="message" id="general-message" width="100px" placeholder="Type your message...">
+                        <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <h5>Guest User</h5>
+            <br>
+            <h6>Please sign in to participate in the chat.</h6>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+$(document).ready(function() {
+    // Function to load and display support messages
+    function loadAndDisplaySupportMessages() {
+        var room = 'General'; // Fetch messages from the 'General' room
+
+        $.ajax({
+            type: 'GET',
+            url: "/supportgetMessages/" + room + "/",
+            success: function(response) {
+                console.log(response);
+                $("#display-support").empty();
+
+                for (var key in response.messages) {
+                    var message = response.messages[key];
+
+                    var messageHtml = `
+                        <div class="message">
+                            <a href="${message.user_profile_url}" >
+                                <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
+                            </a>
+                            <div class="message-content" style="padding: 5px;">
+                                <div class="sender">${message.user}</div>
+                                <div>${message.value}</div>
+                                <div class="time">${message.date}</div>
+                            </div>
+                        </div>`;
+
+                    $("#display-support").append(messageHtml);
+                }
+            },
+            error: function(response) {
+                alert('An error occurred');
+            }
+        });
+    }
+
+    // Function to load and display general messages
+    function loadAndDisplayGeneralMessages() {
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'showcase:getGeneralMessages' %}",
+            success: function(response) {
+                console.log(response);
+                $("#display-general").empty();
+
+                for (var key in response.messages) {
+                    var message = response.messages[key];
+                    var messageHtml = `
+                        <div class="message">
+                            <a href="${message.user_profile_url}">
+                                <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
+                            </a>
+                            <div class="message-content">
+                                <div class="sender">${message.user}</div>
+                                <div>${message.value}</div>
+                                <div class="time">${message.date}</div>
+                            </div>
+                        </div>`;
+                    $("#display-general").append(messageHtml);
+                }
+            },
+            error: function(response) {
+                alert('An error occurred');
+            }
+        });
+    }
+
+    // Load and display messages every half-second
+    setInterval(loadAndDisplaySupportMessages, 500);
+    setInterval(loadAndDisplayGeneralMessages, 500);
+
+    // Handle support message form submission via AJAX
+    $(document).on('submit', '#support-post-form', function(e) {
+        e.preventDefault();
+        console.log('Support message submitted');
+
+        var username = $('#support-username').val();
+        var room_name = $('#support-room_name').val();
+        var message = $('#support-message').val();
+
+        if (!message.trim()) {
+            alert('Message cannot be empty');
+            return;
+        }
+
+        console.log(`Sending message: ${message}, username: ${username}, room_name: ${room_name}`);
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'showcase:supportsend' %}",
+            data: {
+                username: username,
+                room_name: room_name,
+                message: message,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+            },
+            success: function(data) {
+                if (data.status === 'success') {
+                    $('#support-message').val('');
+                    loadAndDisplaySupportMessagesAndScroll();
+                } else {
+                    $('#support-message').val('');
+                    loadAndDisplaySupportMessagesAndScroll();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    });
+
+    // Handle general message form submission via AJAX
+    $(document).on('submit', '#general-post-form', function(e) {
+        e.preventDefault();
+        console.log('General message submitted');
+
+        var username = $('#general-username').val();
+        var message = $('#general-message').val();
+
+        if (!message.trim()) {
+            alert('Message cannot be empty');
+            return;
+        }
+
+        console.log(`Sending message: ${message}, username: ${username}`);
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'showcase:generalsend' %}",
+            data: {
+                username: username,
+                message: message,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+            },
+            success: function(data) {
+                if (data.status === 'success') {
+                    $('#general-message').val('');
+                    loadAndDisplayGeneralMessagesAndScroll();
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    });
+});
+
+// Function to load and display support messages and then scroll to bottom
+function loadAndDisplaySupportMessagesAndScroll() {
+    loadAndDisplaySupportMessages();
+    setTimeout(function() {
+        console.log("Before scrollToBottom: ", $('#display-support').scrollTop(), $('#display-support')[0].scrollHeight);
+        scrollToBottom('display-support');
+        console.log("After scrollToBottom: ", $('#display-support').scrollTop(), $('#display-support')[0].scrollHeight);
+    }, 600); // Add a slight delay to ensure DOM is updated
+}
+
+// Function to load and display general messages and then scroll to bottom
+function loadAndDisplayGeneralMessagesAndScroll() {
+    loadAndDisplayGeneralMessages();
+    setTimeout(function() {
+        scrollToBottom('display-general');
+    }, 600); // Add a slight delay to ensure DOM is updated
+}
+
+// Function to scroll to the bottom of the chat display
+function scrollToBottom(elementId) {
+    var chatDisplay = document.getElementById(elementId);
+    console.log("Scrolling to bottom of element: ", elementId);
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+}
+</script>
+
     <script src="js/index.js"></script>
 	<script src="{% static 'css/js/script.js' %}"></script>
 <script src="{% static 'css/js/darkmode.js' %}"></script>
