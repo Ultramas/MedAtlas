@@ -1439,46 +1439,43 @@ Bounce
   color: #232323;
 }
 
-.avenue2-messenger {
-  opacity: 1;
-  border-radius: 20px;
-  height: calc(100% - 60px) !important;
-  max-height: 460px !important;
-  min-height: 220px !important;
-  width: 320px;
-  /*  transform: translateY(0);
-    -webkit-transform: translateY(0);
-    -moz-transform: translateY(0);
-  */
-  background: rgba(255, 255, 255, 0.9);
-  position: fixed;
-  left: 20px;
-  bottom: 20px;
-  margin: auto;
-  z-index: 10;
-  box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
-  /*  transform: translateX(300px);*/
-  -webkit-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
-  -moz-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
-}
 
-.avenue2-messenger div.agent-face {
-  position: absolute;
-  left: 0;
-  top: -50px;
-  right: 0;
-  margin: auto;
-  width: 101px;
-  height: 50px;
-  background: transparent;
-  z-index: 12;
-}
 
-.avenue2-messenger div {
-  font-size: 14px;
-  color: #232323;
-}
+        .avenue2-messenger {
+            /*display: none;*/ /*either always or never hidden*/
+            opacity: 1;
+            border-radius: 20px;
+            height: calc(100% - 60px) !important;
+            max-height: 460px !important;
+            min-height: 220px !important;
+            width: 320px;
+            background: rgba(255, 255, 255, 0.9);
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+            margin: auto;
+            z-index: 10;
+            box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
+            -webkit-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
+            -moz-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
+        }
 
+        .avenue2-messenger div.agent-face {
+            position: absolute;
+            left: 0;
+            top: -50px;
+            right: 0;
+            margin: auto;
+            width: 101px;
+            height: 50px;
+            background: transparent;
+            z-index: 12;
+        }
+
+        .avenue2-messenger div {
+            font-size: 14px;
+            color: #232323;
+        }
 
 .close {
   display: block;
@@ -2007,8 +2004,8 @@ function showChatWidget() {
 }
 
 function showChatWidget2() {
-  var popup = document.getElementById("chatwidget2");
-  popup.style.display = popup.style.display === "none" ? "block" : "none";
+    var popup = document.getElementById("chatwidget2");
+    popup.style.display = (popup.style.display === "none" || popup.style.display === "") ? "block" : "none";
 }
 </script>
 

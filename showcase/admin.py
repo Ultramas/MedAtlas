@@ -962,6 +962,10 @@ class ItemAdmin(admin.ModelAdmin):
             'fields': ('price', 'discount_price',),
             'classes': ('collapse',),  # Open by default
         }),
+        ('Item Information - Currency Prices', {
+            'fields': ('currency_price', 'discount_currency_price',),
+            'classes': ('collapse',),  # Open by default
+        }),
         ('Item Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize', 'is_active',),
             'classes': ('collapse-open',),  # Open by default

@@ -212,11 +212,28 @@ $(document).ready(function() {
                 </h5>
                 <h4 class="font-weight-bold blue-text">
                   <strong>
-                    ${% if item.discount_price %}
-                      {{ item.discount_price }}
-                    {% else %}
-                      {{ item.price }}
-                    {% endif %}
+
+                                 {% if item.price %}
+
+            {% if item.discount_price %}
+              <span class="mr-1" style="">
+              <del>${{ item.price }}</del>
+              </span>
+              <span style="">${{ item.discount_price }}</span>
+            {% else %}
+             <span style=";">${{ item.price }}</span>
+            {% endif %}
+
+            {% else %}
+            {% if item.discount_currency_price %}
+              <span class="mr-1" style="">
+              <del>💎{{ item.currency_price }}</del>
+              </span>
+              <span style="">💎{{ item.discount_currency_price }}</span>
+            {% else %}
+              <del>${{ item.currency_price }}</del>
+            {% endif %}
+            {% endif %}
                   </strong>
                 </h4>
                   {% if item.user %}

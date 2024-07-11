@@ -9,11 +9,17 @@
     {% for order_item in order.items.all %}
     <li class="list-group-item d-flex justify-content-between lh-condensed">
         <div>
-        <h6 class="my-0">{{ order_item.quantity }}x {{ order_item.item.title}}</h6>
-        <small class="text-muted">{{ order_item.item.description}}</small>
+            <h6 class="my-0">{{ order_item.quantity }}x {{ order_item.item.title}}</h6>
+            <small class="text-muted">{{ order_item.item.description}}</small>
         </div>
-        <span class="text-muted">${{ order_item.get_final_price }}</span>
-    </li>        
+        {% if order_item.item.price is not None %}
+            <span class="text-muted">${{ order_item.get_final_price }}</span>
+        {% elif order_item.item.currency_price is not None %}
+            <span class="text-muted">💎 {{ order_item.get_final_currency_price }} </span>
+        {% else %}
+            <span class="text-muted">Price not available</span>
+        {% endif %}
+    </li>
     {% endfor %}
     {% if order.coupon %}
     <li class="list-group-item d-flex justify-content-between bg-light">
@@ -35,9 +41,15 @@
     </li>
       
     <li class="list-group-item d-flex justify-content-between">
-        <span>Total (USD)</span>
-        <strong>${{ order.get_total_price }}</strong>
-    </li>    
+        {% if order.get_total_price %}
+            <span>Total (USD)</span>
+            <strong>${{ order.get_total_price }}</strong>
+        {% endif %}
+        {% if order.get_total_currency_price %}
+            <span>Total (Rubies)</span>
+            <strong>💎{{ order.get_total_currency_price }}</strong>
+        {% endif %}
+    </li>
     </ul>
   
     {% if DISPLAY_COUPON_FORM %}

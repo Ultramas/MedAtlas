@@ -410,12 +410,22 @@ class CurrencyOrder(models.Model):
         super(CurrencyOrder, self).save(*args, **kwargs)
 
     def get_total_item_price(self):
-        if self.items.discount_price:
-            return self.quantity * self.get_discount_item_price()
-        return self.quantity * self.items.price
+        if self.item.price:
+            if self.item.discount_price:
+                return self.quantity * self.get_discount_item_price()
+            return self.quantity * self.item.price
+
+    def get_total_currency_price(self):
+        if self.item.currency_price:
+            if self.item.discount_currency_price:
+                return self.quantity * self.get_discount_item_currency_price()
+            return self.quantity * self.item.currency_price
 
     def get_discount_item_price(self):
-        return self.quantity * self.items.discount_price
+        return self.quantity * self.item.discount_price
+
+    def get_discount_item_currency_price(self):
+        return self.quantity * self.item.discount_currency_price
 
     def get_amount_saved(self):
         return self.get_total_item_price() - self.get_discount_item_price()
@@ -435,18 +445,35 @@ class CurrencyOrder(models.Model):
 
     def get_total_price(self):
         total = 0
-        total += self.items.price  # or another field representing the item's price
-        if self.coupon:
-            if self.coupon.percentDollars:
-                total *= 1 - (0.01 * self.coupon.amount)
-            else:
-                total -= self.coupon.amount
-        return total
+        for order_item in self.items.all():
+            if order_item.item.price:
+                total += order_item.get_final_price()
+                if self.coupon:
+                    if self.coupon.percentDollars:
+                        total *= 1 - (0.01 * self.coupon.amount)
+                    else:
+                        total -= self.coupon.amount
+            return total
+
+    def get_total_currency_price(self):
+        currency_total = 0
+        for order_item in self.items.all():
+            if order_item.item.currency_price():
+                currency_total += order_item.get_final_currency_price()
+                # no coupons on currency items-yet-because currency can be given out in codes
+            return currency_total
 
     def get_final_price(self):
-        if self.items.discount_price:
-            return self.get_discount_item_price()
-        return self.get_total_item_price()
+        if self.item.price is not None:
+            return self.quantity * self.item.price
+        elif self.item.currency_price is not None:
+            return self.quantity * self.item.currency_price
+        return 0  # or handle this case appropriately
+
+    def get_final_currency_price(self):
+        if self.items.discount_currency_price:
+            return self.get_discount_item_currency_price()
+        return self.get_total_currency_item_price()
 
     def get_profile_url(self):
         return reverse('showcase:profile', args=[str(self.slug)])
@@ -496,12 +523,23 @@ class CurrencyFullOrder(models.Model):
         return self.user.username
 
     def get_final_price(self):
-        if self.items.discount_price:
-            return self.get_discount_item_price()
-        return self.get_total_item_price()
+        if self.item.price is not None:
+            return self.quantity * self.item.price
+        elif self.item.currency_price is not None:
+            return self.quantity * self.item.currency_price
+        return 0  # or handle this case appropriately
+
+    def get_final_currency_price(self):
+        if self.items.discount_currency_price:
+            return self.get_discount_item_currency_price()
+        return self.get_total_currency_item_price()
+
 
     def get_discount_item_price(self):
-        return self.item.discount_price
+        return self.quantity * self.item.discount_price
+
+    def get_discount_item_currency_price(self):
+        return self.quantity * self.item.discount_currency_price
 
     def get_amount_saved(self):
         return self.get_total_item_price() - self.get_discount_item_price()
@@ -509,13 +547,22 @@ class CurrencyFullOrder(models.Model):
     def get_total_price(self):
         total = 0
         for order_item in self.items.all():
-            total += order_item.get_final_price()
-        if self.coupon:
-            if self.coupon.percentDollars:
-                total *= 1 - (0.01 * self.coupon.amount)
-            else:
-                total -= self.coupon.amount
-        return total
+            if order_item.item.price:
+                total += order_item.get_final_price()
+                if self.coupon:
+                    if self.coupon.percentDollars:
+                        total *= 1 - (0.01 * self.coupon.amount)
+                    else:
+                        total -= self.coupon.amount
+            return total
+
+    def get_total_currency_price(self):
+        currency_total = 0
+        for order_item in self.items.all():
+            if order_item.item.currency_price():
+                currency_total += order_item.get_final_currency_price()
+                #no coupons on currency items-yet-because currency can be given out in codes
+            return currency_total
 
     def get_profile_url(self):
         return reverse('showcase:profile', args=[str(self.slug)])
@@ -701,7 +748,7 @@ class Shuffler(models.Model):
     demonstration = models.CharField(choices=PRACTICE, max_length=2, blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
     total_number_of_choice = models.IntegerField()
-    cost = models.DecimalField(max_digits=10, decimal_places=1, blank=True, null=True, default=0.0)
+    cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, default=0.0)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1824,7 +1871,7 @@ class Choice(models.Model):
         blank=True,
         null=True
     )
-    nodes = models.IntegerField(help_text="Number of the choice included", blank=True, null=True, )
+    nodes = models.IntegerField(help_text="Number of the choice included", blank=True, null=True, verbose_name="Quantity Displayed")
     value = models.IntegerField(help_text="Value of item in Rubicoins.", blank=True,
                                 null=True, verbose_name="Value (Rubicoins)")
     number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)")
@@ -3949,14 +3996,15 @@ class ItemFilter(models.Model):
         verbose_name_plural = "Item Filters"
 
 
-
-
 class Item(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=100)
-    price = models.FloatField()
+    price = models.DecimalField(max_digits=16, decimal_places=2, blank=True, null=True)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True, blank=True) #generally set it to the first one avaliable
+    currency_price = models.IntegerField(blank=True, null=True)
     fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    discount_price = models.FloatField(blank=True, null=True)
+    discount_price = models.DecimalField(max_digits=16, decimal_places=2, blank=True, null=True)
+    discount_currency_price = models.IntegerField(blank=True, null=True)
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
     label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default='N')  # can use for cataloging products
@@ -3998,7 +4046,17 @@ class Item(models.Model):
     def get_remove_from_cart_url(self):
         return reverse("showcase:remove-from-cart", kwargs={'slug': self.slug})
 
+    def clean(self):
+        # Ensure that either price or currency_price is provided
+        if not self.price and not self.currency_price:
+            raise ValidationError('Either price or currency price must be provided.')
+
     def save(self, *args, **kwargs):
+        # Set the default currency to the first instance of Currency if not already set
+        if not self.currency:
+            first_currency = Currency.objects.first()
+            if first_currency:
+                self.currency = first_currency
         if not self.slug:
             slug = self.slug
         super().save(*args, **kwargs)
@@ -4669,12 +4727,23 @@ class OrderItem(models.Model):
         return f"{self.quantity} of {self.item.title}"
 
     def get_total_item_price(self):
-        if self.item.discount_price:
-            return self.quantity * self.get_discount_item_price()
-        return self.quantity * self.item.price
+        if self.item.price:
+            if self.item.discount_price:
+                return self.quantity * self.get_discount_item_price()
+            return self.quantity * self.item.price
+
+    def get_total_item_currency_price(self):
+        if self.item.currency_price:
+            if self.item.discount_currency_price:
+                return self.quantity * self.get_discount_item_currency_price()
+            return self.quantity * self.item.currency_price
 
     def get_discount_item_price(self):
         return self.quantity * self.item.discount_price
+
+    def get_discount_item_currency_price(self):
+        return self.quantity * self.item.discount_currency_price
+
 
     def get_amount_saved(self):
         return self.get_total_item_price() - self.get_discount_item_price()
@@ -4683,6 +4752,11 @@ class OrderItem(models.Model):
         if self.item.discount_price:
             return self.get_discount_item_price()
         return self.get_total_item_price()
+
+    def get_final_currency_price(self):
+        if self.item.discount_currency_price:
+            return self.get_discount_item_currency_price()
+        return self.get_total_item_currency_price()
 
     # used to get the url of the item
     def get_profile_url(self):
@@ -4944,13 +5018,21 @@ class Order(models.Model):
     def get_total_price(self):
         total = 0
         for order_item in self.items.all():
-            total += order_item.get_final_price()
-        if self.coupon:
-            if self.coupon.percentDollars:
-                total *= 1 - (0.01 * self.coupon.amount)
-            else:
-                total -= self.coupon.amount
-        return total
+            if order_item.item.price:
+                total += order_item.get_final_price()
+                if self.coupon:
+                    if self.coupon.percentDollars:
+                        total *= 1 - (0.01 * self.coupon.amount)
+                    else:
+                        total -= self.coupon.amount
+            return total
+
+    def get_total_currency_price(self):
+        currency_total = 0
+        for order_item in self.items.all():
+            if order_item.item.currency_price:
+                currency_total += order_item.get_final_currency_price()
+        return currency_total
 
     def get_profile_url(self):
         return reverse('showcase:profile', args=[str(self.slug)])

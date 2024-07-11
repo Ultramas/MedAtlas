@@ -1477,14 +1477,24 @@ class FindChoiceView(View):
         return render(request, self.template_name, context)
 
 
-def game_view(request, slug):
-    game = get_object_or_404(Game, slug=slug)
-    outcome = Outcome()
-    if request.method == 'POST':
-        nonces = [random.randint(0, 1000000) for _ in range(3)]
+def generate_nonce():
+    return random.randint(1, 1000000)
 
-        # Retrieve the game
-        game = Game.objects.get(id=game_id)
+
+def game_view(request, game_id):
+    game = get_object_or_404(Game, id=game_id)
+    nonce = random.randint(0, 1000000)
+    choices = Choice.objects.filter(game=game, lower_nonce__lte=nonce, upper_nonce__gte=nonce)
+
+    context = {
+        'game': game,
+        'choices': choices,
+        'nonce': nonce,
+    }
+
+    if request.method == 'POST':
+        # Generate multiple nonces dynamically
+        nonces = [random.randint(0, 1000000) for _ in range(100)]  # Adjust the range as needed
 
         # Find the choices that match the nonces
         matching_choices = []
@@ -1508,7 +1518,12 @@ def game_view(request, slug):
             'status': 'success',
             'choices': choices_data
         })
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+    # Initial nonce generation for the template
+    nonce = random.randint(1, 1000000)
+    return render(request, 'game_template.html', {'game': game, 'nonce': nonce})
+
+
 
 @csrf_exempt
 def create_outcome(request, slug):
@@ -1517,14 +1532,14 @@ def create_outcome(request, slug):
         game_id = request.POST.get('game_id')
         user = request.user
 
-        print(f"Received POST request with game_id: {game_id}")
+        print(f"Received POST request with game_id: {game_id} and slug: {slug}")
 
         if not game_id:
             print("Game ID is missing.")
             return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
 
         try:
-            game = Game.objects.get(id=game_id, slug=slug)
+            game = Game.objects.get(id=game_id, slug=slug)  # Use slug to find the game
             nonce = random.randint(1, 1000000)
             choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
 
@@ -8187,6 +8202,7 @@ class CurrencyPaymentView(EBaseView):
                     userprofile.save()
 
             amount = int(order.get_total_price() * 100)
+            currency_amount = int(order.get_total_currency_price())
 
             try:
                 if use_default or save:

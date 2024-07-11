@@ -1,7 +1,5 @@
 {% load static %}
 {% load random_nonce %}
-<!--manually count-->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,18 +8,9 @@
     <title>Prize Picker</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-     <script src="{% static 'css/js/gamescript.js' %}"></script>
-    {% csrf_token %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
     <script src="{% static 'css/js/gamescript.js' %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-    <!-- Inline JavaScript -->
-
+    {% csrf_token %}
     <style>
         .wrapperlootlist {
             display: flex;
@@ -34,480 +23,94 @@
             justify-content: left;
         }
         .cardslootlist {
-            flex: 1 1 200px; /* Adjust the width as needed */
+            flex: 1 1 200px;
             margin: 10px;
             box-sizing: border-box;
         }
-
         .sliderlootlist {
             display: flex;
             flex-wrap: wrap;
             justify-content: left;
         }
-
         .spinner-arrow {
             width: 50px;
             height: 50px;
-            z-index: 10; /* Ensure it's on top */
+            z-index: 10;
         }
-     .cards-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-start; /* Align cards to the start */
-    }
-
-    .individuallootelement {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start; /* Align items to the start */
-        padding: 15px;
-    }
-       .individuallootelement p {
-        margin: 5px 0;
-    }
-
-    .cards {
-        margin-right: 15px;
-        margin-left: 15px;
-        flex: 1 1 200px;
-        margin: 10px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column; /* Align elements vertically */
-        align-items: flex-start; /* Align items to the start */
-        align-items: left;
-    }
-.slider img{
-    width: 15vh;
-    height: 20vh;
-    margin-top: -2vh;
-    margin-left: -0.5vh;
-    border: 2px solid;
-    border-color: transparent; /*to change later*/
-    border-radius: 7px;
-}
-
-</style>
-    <!-- Inline JavaScript -->
-    <script>
-        $(document).ready(function() {
-            console.log("jQuery is loaded.");
-            $('#start').on('click', function() {
-                console.log('Button clicked.');
-                var gameId = $(this).data('game-id');
-                var csrfToken = '{{ csrf_token }}';
-                var url = "{% url 'showcase:create_outcome' %}";
-
-                console.log('Game ID:', gameId);
-                console.log('CSRF Token:', csrfToken);
-                console.log('URL:', url);
-
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: {
-                        csrfmiddlewaretoken: csrfToken
-                    },
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            console.log('Choices received successfully!');
-                            updateWheelContents(response.choices);
-                        } else {
-                            console.error(response.message);
-                        }
-                    },
-                    error: function(error) {
-                        console.error('Error:', error);
-                    }
-                });
-            });
-        });
-
-        function updateWheelContents(choices) {
-            var slider = $('#slider');
-            slider.empty();  // Clear existing choices
-
-            choices.forEach(function(choice) {
-                var choiceHtml = `
-                    <div class="cards">
-                        <img src="${choice.file_url}" alt="${choice.choice_text}">
-                        <h2>${choice.value} 💎</h2>
-                    </div>
-                `;
-                slider.append(choiceHtml);
-            });
-
-            // Start the spin animation
-            randomizeContents();
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
         }
-
-        function randomizeContents() {
-            // Function to randomly change the order of elements
-            $('div#slider').each(function() {
-                var $div_parent = $(this);
-                var $divsArr = $div_parent.children('div.cards');
-                $divsArr.sort(function(a, b) {
-                    var temp = parseInt(Math.random() * 10);
-                    var isOddOrEven = temp % 2;
-                    var isPosOrNeg = temp > 5 ? 1 : -1;
-                    return (isOddOrEven * isPosOrNeg);
-                }).appendTo($div_parent);
-            });
-
-            // Stop randomization after a set time
-            setTimeout(function() {
-                // Implement stopping logic here
-            }, 9000);
+        .individuallootelement {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 15px;
         }
-    </script>
-
-
-
-    <script src="{% static 'css/js/build.js' %}"></script>
-    <script src="{% static 'css/js/start.js' %}"></script>
-    <script src="{% static 'css/js/test.js' %}"></script>
-    <style>
-    </style>
-<script>
-    $(".start").click(function (){
-
-    $(this).prop('disabled', true);
-
-    // randomize
-    let randomizeFlag = true; // Flag to track randomization
-
-    // Function to randomly change the order of elements
-    function randomizeContents() {
-        if (randomizeFlag) {
-            $('div#slider').each(function(){
-
-                var $div_parent = $(this);
-                var $divsArr = $div_parent.children('div.cards');
-                $divsArr.sort(function(a,b){
-                    var temp = parseInt(Math.random() * 10);
-                    var isOddOrEven = temp % 2;
-                    var isPosOrNeg = temp > 5 ? 1 : -1;
-                    return (isOddOrEven * isPosOrNeg);
-                }).appendTo($div_parent);
-            }
-            );
-
-            // Call randomizeContents recursively
-            setTimeout(randomizeContents, 2000); // Randomize again after 4.5 seconds
+        .individuallootelement p {
+            margin: 5px 0;
         }
-    }
-
-    // Call randomizeContents initially
-    randomizeContents();
-
-    // Stop randomization after 9 seconds
-    setTimeout(() => {
-        randomizeFlag = false;
-    }, 2000);
-
-
-   // slide
-   const scrollers= document.querySelectorAll('.slider');
-
-   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-         addAnimation();
-   }
-
-   function addAnimation(){
-         scrollers.forEach(scroller => {
-             scroller.setAttribute('data-animated', true);
-         });
-   };
-
-   const scrollerInner=document.querySelector('.slider');
-   const scrollerContent= Array.from(scrollerInner.children);
-
-
-
-   scrollerContent.forEach(item =>{
-         const duplicatedItem= item.cloneNode(true);
-         duplicatedItem.setAttribute('aria-hidden', true);
-         scrollerInner.appendChild(duplicatedItem);
-   })
-
-
-
-
-   //   popupbox
-
-     setTimeout(function() {
-         popup.style.display = 'block';
-       }, 9000);
-
-       const closeButton = document.querySelector('.close');
-
-       closeButton.addEventListener('click', function() {
-         popup.style.display = 'none';
-   });
-
-
-   // yougot: indicator
-
-   const div1 = document.getElementById('Mewtwo');
-   const div2 = document.getElementById('Venusaur');
-   const div3 = document.getElementById('Charizard');
-   const div4 = document.getElementById('Blastoise');
-   const div5 = document.getElementById('selector');
-   let Touching = 'A New Pokemon!';
-
-
-
-
-   function findTouchingDivs() {
-       const divs = document.querySelectorAll('.card');
-       const touchingDivs = [];
-
-       for (let i = 0; i < divs.length; i++) {
-         const div1 = divs[i];
-
-         for (let j = i + 1; j < divs.length; j++) {
-           const div2 = divs[j];
-
-           const rect1 = div1.getBoundingClientRect();
-           const rect2 = div2.getBoundingClientRect();
-
-           if (!(rect1.right < rect2.left ||
-                 rect1.left > rect2.right ||
-                 rect1.bottom < rect2.top ||
-                 rect1.top > rect2.bottom)) {
-             touchingDivs.push([div1, div2]);
-           }
-         }
-       }
-
-
-     }
-
-    //  // Listen for the animation end event on the slider
-    //  slider.addEventListener('stopAnimation', function() {
-    //    // Find touching divs after the animation ends
-       const touchingDivs = findTouchingDivs();
-    //    console.log(touchingDivs);
-
-    //    // Update the UI or perform other actions based on the result
-    //  });
-
-
-
-
-     if (findTouchingDivs(div5, div1)) {
-         console.log('Mewtwo is selected');
-         console.log('ID of Div 1:', div1.id);
-         Touching='Mewtwo'
-     } else {
-         console.log('Mewtwo is not selected');
-     };
-
-     if (findTouchingDivs(div5, div2)) {
-         console.log('Venusaur is selected');
-         console.log('ID of Div 2:', div2.id);
-         Touching='Venusaur'
-     } else {
-         console.log('Venusaur is not selected');};
-
-   if (findTouchingDivs(div5, div3)) {
-         console.log('Charizard is selected');
-         console.log('ID of Div 3:', div3.id);
-         Touching='Charizard'
-     } else {
-         console.log('Charizard is not selected');};
-
-   if (findTouchingDivs(div5, div4)) {
-         console.log('Blastoise is selected');
-         console.log('ID of Div 4:', div4.id);
-         Touching='Blastoise'
-     } else {
-         console.log('Blastoise is not selected');};
-
-         document.getElementById('cardname').innerHTML = Touching;
-
-         setTimeout(function stopAnimation() {
-            slider.style.animationPlayState = 'paused';
-            return touchingDivs;
-          }, 9000); // Stop after 9 seconds (adjustable)
-
-   });
-
-</script>
-
-
-</head>
-<body>
-
-    <div>
- {% for game in games %}
-        <div class="boxes" style="margin-left: 41%; margin-right: 50%; position: absolute;">
-<img src="{{ game.image.url }}" class="game-image" alt="{{ game.name }}">
-            <h2 style="display: flex; flex-direction: row; text-align: center; margin-right: auto; margin-left: auto;">{{ game.name }}</h2>
-            </div>
-            <button class="start" id="start" data-game-id="{{ game.id }}"> Spin! </button>
-
-
-    </div>
-    <div class="popup" id="popup">
-        <div class="contents">
-            <span class="close">&times;</span>
-            <div class="text" style="z-index: 5;">
-                <h1> Congratulations! </h1>
-                <h2> You got: </h2>
-                <h1 id="cardname"></h1>
-            </div>
-
-        </div>
-    </div>
-
-     <div class="wrapper">
-        <div class="container" style="height: 37.5vh;">
-            <div class="slider" id="slider">
-
-{% for choice in game.choices.all %}
-    <div id="{{ choice.choice_text }}" class="cards">
-
-
-{% with color=game|get_color:choice %}
-            <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
-                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-            </div>
-        {% endwith %}
-        <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
-    </div>
-{% endfor %}
-
-
-
-
-
-                {% for nonce, choice in matching_choices %}
-                    <p>Nonce: {{ nonce }}</p>
-                    <p>Choice: {{ choice.choice_text }}</p>
-                    <p>Value: {{ choice.value }}</p>
-
-            {% with cost_threshold=game.cost %}
-                {% with cost_threshold=cost_threshold|add:"0" %}
-                    {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost|mul:1 cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 %}
-                        {% if cost_threshold_10000 >= choice.value %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); padding: -10%;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_500 >= choice.value > cost_threshold_10000 %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); padding: 6%;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_200 >= choice.value > cost_threshold_500 %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); padding: 6%;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_100 >= choice.value > cost_threshold_200 %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); padding: 6%;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); padding: 6%;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
-                            <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); padding: 6%;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% else %}
-                            <p>This choice does not meet the cost requirement.</p>
-                        {% endif %}
-                    {% endwith %}
-                {% endwith %}
-            {% endwith %}
-                {% endfor %}
-
-            </div>
-            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.svg' %}" alt="spinner-arrow">
-        </div>
-
-
-        <!-- Game nonce decides cards displayed in spinner -->
-        <br>
-        <br>
-        <br>
-        <br>
-        <h2 style="text-align: center; margin-bottom: -3%;">Loot Drop Table</h2>
-    <div class="game" style="display: flex; flex-direction: row; justify-content: left;" >
-
-            <div class="sliderlootlist" id="">
-        {% for choice in game.choices.all reversed %}
-            <div id="{{choice.choice_text}}" class="cards" style="margin-right: 15px; margin-left: 15px; flex: 1 1 200px;
+        .cards {
+            margin-right: 15px;
+            margin-left: 15px;
+            flex: 1 1 200px;
             margin: 10px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            align-items: left;">
-{% endfor %}
+            align-items: flex-start;
+            align-items: left;
+        }
+        .slider img {
+            width: 15vh;
+            height: 20vh;
+            margin-top: -2vh;
+            margin-left: -0.5vh;
+            border: 2px solid;
+            border-color: transparent;
+            border-radius: 7px;
+        }
+    </style>
+ $(document).ready(function() {
+    console.log("jQuery is loaded.");
+    $('#start').on('click', function() {
+        console.log('Button clicked.');
+        var gameSlug = $(this).data('game-slug');  // Assuming the slug is stored in a data attribute
+        var gameId = $(this).data('game-id');  // Assuming the game ID is stored in a data attribute
+        var csrfToken = '{{ csrf_token }}';
+        var url = "{% url 'showcase:create_outcome' slug=game.slug %}".replace('dummy_slug', gameSlug);
 
-<div class="cards-container">
-<p>Nonce: {{ nonce }}</p>
+        console.log('Game Slug:', gameSlug);
+        console.log('Game ID:', gameId);
+        console.log('CSRF Token:', csrfToken);
+        console.log('URL:', url);
 
-    {% for choice in game.choices.all reversed %}
-    {% if nonce >= choice.lower_nonce and nonce <= choice.upper_nonce %}
-        <div id="{{ choice.choice_text }}" class="cards">
-            {% with color=game|get_color:choice %}
-                <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}" style="width: 150px; height: 225px;"></p>
-                </div>
-            {% endwith %}
-        </div>
-    {% endif %}
-{% endfor %}
-{% endfor %}
-</div>
-    </div>
-    <!-- Static script files -->
-    <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-    <script src="{% static 'css/js/gamescript.js' %}"></script>
-
-     <script>
-        $(document).ready(function() {
-            console.log("jQuery is loaded.");
-            $('#start').on('click', function() {
-                console.log('Button clicked.');
-                var gameId = $(this).data('game-id');
-                var csrfToken = '{{ csrf_token }}';
-                var url: '{% url "showcase:create_outcome" %}',
-
-                console.log('Game ID:', gameId);
-                console.log('CSRF Token:', csrfToken);
-                console.log('URL:', url);
-
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: {
-                        csrfmiddlewaretoken: csrfToken
-                    },
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            console.log('Choices received successfully!');
-                            updateWheelContents(response.choices);
-                        } else {
-                            console.error(response.message);
-                        }
-                    },
-                    error: function(error) {
-                        console.error('Error:', error);
-                    }
-                });
-            });
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                csrfmiddlewaretoken: csrfToken,
+                game_id: gameId  // Send game_id in request data
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    console.log('Outcome created successfully!');
+                    // Handle success case here
+                } else {
+                    console.error(response.message);
+                }
+            },
+            error: function(error) {
+                console.error('Error:', error);
+            }
         });
+    });
+});
 
         function updateWheelContents(choices) {
             var slider = $('#slider');
-            slider.empty();  // Clear existing choices
+            slider.empty();
 
             choices.forEach(function(choice) {
                 var choiceHtml = `
@@ -519,12 +122,10 @@
                 slider.append(choiceHtml);
             });
 
-            // Start the spin animation
             randomizeContents();
         }
 
         function randomizeContents() {
-            // Function to randomly change the order of elements
             $('div#slider').each(function() {
                 var $div_parent = $(this);
                 var $divsArr = $div_parent.children('div.cards');
@@ -536,13 +137,98 @@
                 }).appendTo($div_parent);
             });
 
-            // Stop randomization after a set time
             setTimeout(function() {
-                // Implement stopping logic here
+                console.log("Stop the wheel");
             }, 9000);
         }
-    </script>
+</head>
+<body>
+    <div>
+        {% for game in games %}
+        <div class="boxes" style="margin-left: 41%; margin-right: 50%; position: absolute;">
+            <img src="{{ game.image.url }}" class="game-image" alt="{{ game.name }}">
+            <h2 style="display: flex; flex-direction: row; text-align: center; margin-right: auto; margin-left: auto;">{{ game.name }}</h2>
+        </div>
+        <p>Random Nonce: {{ nonce }}</p>
+        <button class="start" id="start" data-game-slug="{{ game.slug }}">Spin!</button>
+<script>
+  $(document).ready(function() {
+    console.log("jQuery is loaded.");
+    $('#start').on('click', function() {
+        console.log('Button clicked.');
+        var gameSlug = $(this).data('game-slug');
+        var csrfToken = '{{ csrf_token }}';
+        var url = "{% url 'showcase:create_outcome' slug='dummy_slug' %}".replace('dummy_slug', gameSlug);
 
+        console.log('Game Slug:', gameSlug);
+        console.log('CSRF Token:', csrfToken);
+        console.log('URL:', url);
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                csrfmiddlewaretoken: csrfToken,
+                game_slug: gameSlug // Include the slug in the request data
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    console.log('Choices received successfully!');
+                    updateWheelContents(response.choices);
+                } else {
+                    console.error(response.message);
+                }
+            },
+            error: function(error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+});
+
+</script>
+
+
+        {% endfor %}
+    </div>
+
+    <div class="popup" id="popup">
+        <div class="contents">
+            <span class="close">&times;</span>
+            <div class="text" style="z-index: 5;">
+                <h1>Congratulations!</h1>
+                <h2>You got:</h2>
+                <h1 id="cardname"></h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrapper">
+        <div class="container" style="height: 37.5vh;">
+            <div class="slider" id="slider">
+                {% for choice in choices %}
+                <div id="{{ choice.choice_text }}" class="cards">
+                    {% with color=game|get_color:choice %}
+                    <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
+                        <img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}">
+                    </div>
+                    {% endwith %}
+                    <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
+                </div>
+                {% endfor %}
+            </div>
+            <img id="selector" class="spinner-arrow" src="{% static 'css/images/opener_selector.svg' %}" alt="spinner-arrow">
+        </div>
+
+        <h2 style="text-align: center; margin-bottom: -3%;">Loot Drop Table</h2>
+        <div class="game" style="display: flex; flex-direction: row; justify-content: left;">
+            <div class="sliderlootlist" id="">
+                {% for choice in choices reversed %}
+                <div id="{{ choice.choice_text }}" class="cards" style="margin-right: 15px; margin-left: 15px; flex: 1 1 200px; margin: 10px; box-sizing: border-box; display: flex; flex-direction: column; align-items: left;">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </body>
 </html>

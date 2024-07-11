@@ -254,7 +254,7 @@ img.hover-shadow {
       <img class="demo cursor" src="{{item.image.url}}" style="width: 50%; height: 90%; background: none;" onclick="currentSlide(1)" alt="{{item.title}} 1">
     </div>
     <div class="column" style="padding-right: -200px;">
-      {% if item.image2 %}
+      {% if item.image2 %} <!--make sure it returns the quickitems-->
       <img class="demo cursor" src="{{item.image2.url}}" style="width: 50%; height: 90%; background: none;" onclick="currentSlide(2)" alt="{{item.title}} 2">
       {% endif %}
     </div>
@@ -338,6 +338,7 @@ function showSlides(n) {
             </div>
 
             <p class="lead">
+            {% if object.price %}
 
             {% if object.discount_price %}
               <span class="mr-1" style="color: white;">
@@ -348,6 +349,17 @@ function showSlides(n) {
              <span style="color: white;">${{ object.price }}</span>
             {% endif %}
 
+            {% else %}
+            {% if object.discount_currency_price %}
+              <span class="mr-1" style="color: white;">
+              <del>💎{{ object.currency_price }}</del>
+              </span>
+              <span style="color: white;">💎{{ object.discount_currency_price }}</span> <!--consider either only allowing inventory
+              purchases or creating a second currency to embody the necessary currency rather than Rubies-->
+            {% else %}
+              <del>${{ object.currency_price }}</del>
+            {% endif %}
+            {% endif %}
             </p>
 
             <p class="lead font-weight-bold">{{ object.item_name }}</p>
