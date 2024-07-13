@@ -410,16 +410,20 @@ class CurrencyOrder(models.Model):
         super(CurrencyOrder, self).save(*args, **kwargs)
 
     def get_total_item_price(self):
-        if self.item.price:
-            if self.item.discount_price:
-                return self.quantity * self.get_discount_item_price()
-            return self.quantity * self.item.price
+        if self.items.discount_price:
+            return self.quantity * self.get_discount_item_price()
+        return self.quantity * self.items.price
 
-    def get_total_currency_price(self):
-        if self.item.currency_price:
-            if self.item.discount_currency_price:
-                return self.quantity * self.get_discount_item_currency_price()
-            return self.quantity * self.item.currency_price
+    def get_total_item_currency_price(self):
+        if self.items.discount_currency_price:
+            return self.quantity * self.get_discount_item_currency_price()
+        return self.quantity * self.items.currency_price
+
+    def get_item_price(self):
+        return self.quantity * self.item.price
+
+    def get_item_currency_price(self):
+        return self.quantity * self.item.currency_price
 
     def get_discount_item_price(self):
         return self.quantity * self.item.discount_price
@@ -428,7 +432,10 @@ class CurrencyOrder(models.Model):
         return self.quantity * self.item.discount_currency_price
 
     def get_amount_saved(self):
-        return self.get_total_item_price() - self.get_discount_item_price()
+        return self.get_item_price() - self.get_discount_item_price()
+
+    def get_currency_amount_saved(self):
+        return self.get_item_currency_price() - self.get_discount_item_currency_price()
 
     def currency_get_add_to_cart_url(self):
         return reverse("showcase:currency-add-to-cart", kwargs={'slug': self.slug})
@@ -534,6 +541,11 @@ class CurrencyFullOrder(models.Model):
             return self.get_discount_item_currency_price()
         return self.get_total_currency_item_price()
 
+    def get_item_price(self):
+        return self.quantity * self.item.price
+
+    def get_item_currency_price(self):
+        return self.quantity * self.item.currency_price
 
     def get_discount_item_price(self):
         return self.quantity * self.item.discount_price
@@ -542,7 +554,10 @@ class CurrencyFullOrder(models.Model):
         return self.quantity * self.item.discount_currency_price
 
     def get_amount_saved(self):
-        return self.get_total_item_price() - self.get_discount_item_price()
+        return self.get_item_price() - self.get_discount_item_price()
+
+    def get_currency_amount_saved(self):
+        return self.get_item_price() - self.get_discount_item_currency_price()
 
     def get_total_price(self):
         total = 0
@@ -4727,16 +4742,20 @@ class OrderItem(models.Model):
         return f"{self.quantity} of {self.item.title}"
 
     def get_total_item_price(self):
-        if self.item.price:
-            if self.item.discount_price:
-                return self.quantity * self.get_discount_item_price()
-            return self.quantity * self.item.price
+        if self.item.discount_price:
+            return self.quantity * self.get_discount_item_price()
+        return self.quantity * self.item.price
 
     def get_total_item_currency_price(self):
-        if self.item.currency_price:
-            if self.item.discount_currency_price:
-                return self.quantity * self.get_discount_item_currency_price()
-            return self.quantity * self.item.currency_price
+        if self.item.discount_currency_price:
+            return self.quantity * self.get_discount_item_currency_price()
+        return self.quantity * self.item.currency_price
+
+    def get_item_price(self):
+        return self.quantity * self.item.price
+
+    def get_item_currency_price(self):
+        return self.quantity * self.item.currency_price
 
     def get_discount_item_price(self):
         return self.quantity * self.item.discount_price
@@ -4744,9 +4763,11 @@ class OrderItem(models.Model):
     def get_discount_item_currency_price(self):
         return self.quantity * self.item.discount_currency_price
 
-
     def get_amount_saved(self):
-        return self.get_total_item_price() - self.get_discount_item_price()
+        return self.get_item_price() - self.get_discount_item_price()
+
+    def get_currency_amount_saved(self):
+        return self.get_item_currency_price() - self.get_discount_item_currency_price()
 
     def get_final_price(self):
         if self.item.discount_price:

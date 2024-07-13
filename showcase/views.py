@@ -1481,15 +1481,17 @@ def generate_nonce():
     return random.randint(1, 1000000)
 
 
-def game_view(request, game_id):
-    game = get_object_or_404(Game, id=game_id)
-    nonce = random.randint(0, 1000000)
-    choices = Choice.objects.filter(game=game, lower_nonce__lte=nonce, upper_nonce__gte=nonce)
 
+def game_view(request, slug):
+    game = get_object_or_404(Game, slug=slug)
     context = {
         'game': game,
-        'choices': choices,
-        'nonce': nonce,
+        'games': Game.objects.all(),
+        'cost_threshold_80': game.cost * 0.8,
+        'cost_threshold_100': game.cost,
+        'cost_threshold_200': game.cost * 2,
+        'cost_threshold_500': game.cost * 5,
+        'cost_threshold_10000': game.cost * 100,
     }
 
     if request.method == 'POST':
@@ -1555,7 +1557,8 @@ def create_outcome(request, slug):
                 choice=choice,
                 nonce=nonce,
                 value=random.randint(1, 1000000),  # example value, adjust as needed
-                ratio=random.randint(1, 10)    # example ratio, adjust as needed
+                ratio=random.randint(1, 10),    # example ratio, adjust as needed
+                type=game.type  # Ensure you provide the type_id or type related to the game
             )
             print(f"Created outcome with nonce: {outcome.nonce}")
             return JsonResponse({'status': 'success', 'outcome': outcome.id, 'nonce': outcome.nonce})
@@ -1567,7 +1570,6 @@ def create_outcome(request, slug):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-
 
 def game_view(request, game_id):
     game = get_object_or_404(Game, id=game_id)
@@ -1603,42 +1605,52 @@ class GameChestBackgroundView(TemplateView):
             return self.get(request, *args, **kwargs)
 
     @csrf_exempt
-    def create_outcome(request):
+    def create_outcome(request, slug):
         if request.method == 'POST':
+            print("Received a POST request")
             game_id = request.POST.get('game_id')
-            choice_id = request.POST.get('choice_id')
             user = request.user
 
-            print(f"Received POST request with game_id: {game_id} and choice_id: {choice_id}")
+            print(f"Received POST request with game_id: {game_id} and slug: {slug}")
 
-            if not game_id or not choice_id:
-                return JsonResponse({'status': 'error', 'message': 'Game ID and Choice ID are required.'})
+            if not game_id:
+                print("Game ID is missing.")
+                return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
 
             try:
-                game = Game.objects.get(id=game_id)
-                choice = Choice.objects.get(id=choice_id)
-                nonce = random.randint(0, 1000000)
+                game = Game.objects.get(id=game_id, slug=slug)
+                nonce = random.randint(1, 1000000)
+                choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
+
+                if not choices.exists():
+                    print(f"No choice found for nonce {nonce}.")
+                    return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
+
+                choice = choices.order_by('?').first()
+
                 outcome = Outcome.objects.create(
                     user=user,
                     game=game,
                     choice=choice,
                     nonce=nonce,
-                    value=random.randint(1, 100),  # example value, adjust as needed
-                    ratio=random.randint(1, 10)  # example ratio, adjust as needed
+                    value=random.randint(1, 1000000),
+                    ratio=random.randint(1, 10),
+                    type=game.type
                 )
                 print(f"Created outcome with nonce: {outcome.nonce}")
-                return JsonResponse({'status': 'success', 'nonce': outcome.nonce})
+                choices_data = list(choices.values('id', 'choice_text', 'value', 'file_url'))
+                return JsonResponse(
+                    {'status': 'success', 'outcome': outcome.id, 'nonce': outcome.nonce, 'choices': choices_data,
+                     'selected_choice': {'id': choice.id, 'choice_text': choice.choice_text}})
             except Game.DoesNotExist:
                 print("Game not found.")
                 return JsonResponse({'status': 'error', 'message': 'Game not found.'})
-            except Choice.DoesNotExist:
-                print("Choice not found.")
-                return JsonResponse({'status': 'error', 'message': 'Choice not found.'})
             except Exception as e:
                 print(f"Exception: {str(e)}")
                 return JsonResponse({'status': 'error', 'message': str(e)})
 
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
 
     @csrf_exempt  # Handle CSRF if needed
     def update_wager(request):

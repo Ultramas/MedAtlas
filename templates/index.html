@@ -518,7 +518,8 @@ window.onscroll = function() {
 						<h3>{{product.title}}</h3>
 
 
-                 {% if product.discount_price %}
+                 {% if product.price %}
+					 {% if product.discount_price %}
                  <p class="product-price">
 					 {% if product.discount_price %}
                         <span style="text-decoration: line-through;">${{ product.price }}</span>
@@ -534,6 +535,24 @@ window.onscroll = function() {
 						 <a href="{{ product.get_profile_url }}" class="cart-btn">
                                   <div class="cart-btn-fire"></div> Check It Out!</a>
 
+						{% endif %}
+						{% else %}
+						 {% if product.discount_currency_price %}
+                 <p class="product-price">
+						                 {% if product.discount_currency_price %}
+                        <span style="text-decoration: line-through;">💎{{ product.currency_price }}</span>
+                        💎{{ product.discount_currency_price }}
+                    {% else %}
+                        💎{{ product.currency_price }}
+                    {% endif %} </p>
+						 <a href="{{ product.get_profile_url }}" class="cart-btn">
+                                  <div class="cart-btn-fire"></div>Check It Out!</a>
+
+						 {% else %}
+						 <p class="product-price"> 💎{{ product.currency_price }} </p>
+						 <a href="{{ product.get_profile_url }}" class="cart-btn">
+                                  <div class="cart-btn-fire"></div> Check It Out!</a>
+						{% endif %}
 						{% endif %}
 					</div>
 				</div>

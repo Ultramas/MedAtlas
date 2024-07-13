@@ -38,10 +38,10 @@
                 {% endif %}
                 {% else %}
                 {% if order_item.item.discount_currency_price %}
-                    <del style="color: white;">${{ order_item.item.currency_price}}</del>
-                    ${{ order_item.item.discount_currency_price }}
+                    <del style="color: white;">💎{{ order_item.item.currency_price}}</del>
+                    💎{{ order_item.item.discount_currency_price }}
                 {% else %}
-                    ${{ order_item.item.currency_price}}
+                    💎{{ order_item.item.currency_price}}
                 {% endif %}
             {% endif %}
 
@@ -54,17 +54,18 @@
             <td>
                 {% if order_item.item.price %}
                 {% if order_item.item.discount_price %}
-                    <del style="color: white;">${{ order_item.item.price}}</del>
-                    ${{ order_item.item.discount_price }}
+                    <span style="color: white;"> ${{ order_item.get_discount_item_price }}</span>
+                    <span class="badge badge-success" style="color: white;" >Saved ${{ order_item.get_amount_saved }}</span>
                 {% else %}
-                    ${{ order_item.item.price}}
+                   <span style="color: white;"> ${{ order_item.get_total_item_price}}</span>
                 {% endif %}
                 {% else %}
                 {% if order_item.item.discount_currency_price %}
-                    <del style="color: white;">💎{{ order_item.item.currency_price}}</del>
-                    💎{{ order_item.item.discount_currency_price }}
+                <span style="color: white;">💎{{ order_item.get_discount_item_currency_price}}sdvfxbc</span>
+
+                    <span class="badge badge-success" style="color: white;" >Saved 💎{{ order_item.get_currency_amount_saved }}</span>
                 {% else %}
-                    💎{{ order_item.item.currency_price}}
+                    💎{{ order_item.item.get_total_currency_price}}
                 {% endif %}
             {% endif %}
              <a href="{% url 'showcase:remove-from-cart' order_item.item.slug %}">
@@ -92,14 +93,14 @@
             <td colspan="4" style="color: white;"><b>Total Order Price</b></td>
             <td style="color: white;">${{ object.get_total_price }}</td>
         </tr>
+
+        {% endif %}
          <tr>
             <td colspan="5">
                 <a href="{% url 'showcase:checkout' %}" class="btn btn-warning float-right ml-2" style="color: black;">Checkout</a>
                 <a href="{% url 'showcase:ehome' %}" class="btn btn-primary float-right" style="color: white;">Continue Shopping</a>
             </td>
         </tr>
-
-        {% endif %}
 
         </tbody>
     </table>
