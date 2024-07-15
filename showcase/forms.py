@@ -618,15 +618,12 @@ PAYMENT_CHOICES = (
 class CheckoutForm(forms.Form):
     shipping_address = forms.CharField(required=False)
     shipping_address2 = forms.CharField(required=False)
-    shipping_country = CountryField(blank_label='(select country)').formfield(required=False,
-                                                                              widget=CountrySelectWidget(attrs={
-                                                                                  'class': 'custom-select d-block w-100', }))
+    shipping_country = CountryField(blank_label='(select country)').formfield(required=False, widget=CountrySelectWidget(attrs={'class': 'custom-select d-block w-100'}))
     shipping_zip = forms.CharField(required=False)
 
     billing_address = forms.CharField(required=False)
     billing_address2 = forms.CharField(required=False)
-    billing_country = CountryField(blank_label='(select country)').formfield(required=False, widget=CountrySelectWidget(
-        attrs={'class': 'custom-select d-block w-100', }))
+    billing_country = CountryField(blank_label='(select country)').formfield(required=False, widget=CountrySelectWidget(attrs={'class': 'custom-select d-block w-100'}))
     billing_zip = forms.CharField(required=False)
 
     same_billing_address = forms.BooleanField(required=False)
@@ -636,7 +633,13 @@ class CheckoutForm(forms.Form):
     use_default_billing = forms.BooleanField(required=False)
 
     payment_option = forms.ChoiceField(
-        widget=forms.RadioSelect, choices=PAYMENT_CHOICES)
+        widget=forms.RadioSelect, choices=PAYMENT_CHOICES, required=True)
+
+    def __init__(self, *args, **kwargs):
+        all_items_currency_based = kwargs.pop('all_items_currency_based', False)
+        super(CheckoutForm, self).__init__(*args, **kwargs)
+        if all_items_currency_based:
+            self.fields['payment_option'].required = False
 
 
 class CouponForm(forms.Form):
@@ -676,8 +679,24 @@ class PaypalPaymentForm(forms.Form):
 
 
 class CurrencyCheckoutForm(forms.Form):
-    payment_option = forms.ChoiceField(
-        widget=forms.RadioSelect, choices=PAYMENT_CHOICES)
+    shipping_address = forms.CharField(required=False)
+    shipping_address2 = forms.CharField(required=False)
+    shipping_country = CountryField(blank_label='(select country)').formfield(required=False,
+                                                                              widget=CountrySelectWidget(attrs={
+                                                                                  'class': 'custom-select d-block w-100', }))
+    shipping_zip = forms.CharField(required=False)
+
+    billing_address = forms.CharField(required=False)
+    billing_address2 = forms.CharField(required=False)
+    billing_country = CountryField(blank_label='(select country)').formfield(required=False, widget=CountrySelectWidget(
+        attrs={'class': 'custom-select d-block w-100', }))
+    billing_zip = forms.CharField(required=False)
+
+    same_billing_address = forms.BooleanField(required=False)
+    set_default_shipping = forms.BooleanField(required=False)
+    use_default_shipping = forms.BooleanField(required=False)
+    set_default_billing = forms.BooleanField(required=False)
+    use_default_billing = forms.BooleanField(required=False)
 
 
 class CurrencyPaymentForm(forms.Form):

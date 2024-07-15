@@ -455,12 +455,7 @@ class CurrencyOrder(models.Model):
         for order_item in self.items.all():
             if order_item.item.price:
                 total += order_item.get_final_price()
-                if self.coupon:
-                    if self.coupon.percentDollars:
-                        total *= 1 - (0.01 * self.coupon.amount)
-                    else:
-                        total -= self.coupon.amount
-            return total
+        return total
 
     def get_total_currency_price(self):
         currency_total = 0
@@ -469,6 +464,15 @@ class CurrencyOrder(models.Model):
                 currency_total += order_item.get_final_currency_price()
                 # no coupons on currency items-yet-because currency can be given out in codes
             return currency_total
+
+    def deduct_currency_amount(self):
+        profile = ProfileDetails.objects.get(user=self.user)
+        total_currency_price = self.get_total_currency_price()
+        if profile.currency_amount >= total_currency_price:
+            profile.currency_amount -= total_currency_price
+            profile.save()
+        else:
+            raise ValueError("Not enough currency")
 
     def get_final_price(self):
         if self.item.price is not None:
@@ -564,12 +568,7 @@ class CurrencyFullOrder(models.Model):
         for order_item in self.items.all():
             if order_item.item.price:
                 total += order_item.get_final_price()
-                if self.coupon:
-                    if self.coupon.percentDollars:
-                        total *= 1 - (0.01 * self.coupon.amount)
-                    else:
-                        total -= self.coupon.amount
-            return total
+        return total
 
     def get_total_currency_price(self):
         currency_total = 0
@@ -578,6 +577,16 @@ class CurrencyFullOrder(models.Model):
                 currency_total += order_item.get_final_currency_price()
                 #no coupons on currency items-yet-because currency can be given out in codes
             return currency_total
+
+    def deduct_currency_amount(self):
+        profile = ProfileDetails.objects.get(user=self.user)
+        total_currency_price = self.get_total_currency_price()
+        if profile.currency_amount >= total_currency_price:
+            profile.currency_amount -= total_currency_price
+            profile.save()
+        else:
+            raise ValueError("Not enough currency")
+
 
     def get_profile_url(self):
         return reverse('showcase:profile', args=[str(self.slug)])
@@ -4774,6 +4783,7 @@ class OrderItem(models.Model):
             return self.get_discount_item_price()
         return self.get_total_item_price()
 
+
     def get_final_currency_price(self):
         if self.item.discount_currency_price:
             return self.get_discount_item_currency_price()
@@ -5041,12 +5051,7 @@ class Order(models.Model):
         for order_item in self.items.all():
             if order_item.item.price:
                 total += order_item.get_final_price()
-                if self.coupon:
-                    if self.coupon.percentDollars:
-                        total *= 1 - (0.01 * self.coupon.amount)
-                    else:
-                        total -= self.coupon.amount
-            return total
+        return total
 
     def get_total_currency_price(self):
         currency_total = 0
@@ -5054,6 +5059,15 @@ class Order(models.Model):
             if order_item.item.currency_price:
                 currency_total += order_item.get_final_currency_price()
         return currency_total
+
+    def deduct_currency_amount(self):
+        profile = ProfileDetails.objects.get(user=self.user)
+        total_currency_price = self.get_total_currency_price()
+        if profile.currency_amount >= total_currency_price:
+            profile.currency_amount -= total_currency_price
+            profile.save()
+        else:
+            raise ValueError("Not enough currency")
 
     def get_profile_url(self):
         return reverse('showcase:profile', args=[str(self.slug)])

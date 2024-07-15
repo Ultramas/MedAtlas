@@ -21,8 +21,10 @@
       <div class="row">
         <div class="col-md-8 mb-4">
           <div class="card">
-            <form method="POST" class="card-body">
+
+            <form method="POST" class="card-body"  action="{% url 'showcase:checkout' %}">
               {% csrf_token %}
+              {{ form.non_field_errors }}
 
               <h3>Shipping Address</h3>
 
@@ -206,21 +208,53 @@
     </script>
               -->
 
-              <div class="d-block my-3">
-                {% for value, name in form.fields.payment_option.choices %}
-                <div class="custom-control custom-radio">
-                  <input id="{{ name }}" name="payment_option" value="{{ value }}" type="radio" class="custom-control-input" required>
-                  <label class="custom-control-label" for="{{ name }}">{{ name }}</label>
-                </div>
-                {% endfor %}
-                <!--keep operating until alternate payment methods are avaliable-->
+
+    <h3>Payment Options</h3>
+    <div class="d-block my-3">
+        {% for value, name in form.fields.payment_option.choices %}
+        <div class="custom-control custom-radio">
+            <input id="{{ name }}" name="payment_option" value="{{ value }}" type="radio" class="custom-control-input" required>
+            <label class="custom-control-label" for="{{ name }}">{{ name }}</label>
+        </div>
+        {% endfor %}
+    </div>
 
 
+    <hr class="mb-4">
+    <button type="submit" class="btn btn-primary btn-lg btn-block" >Continue To Payment</button>
 
-              </div>
+  <script>
+      document.getElementById('checkout-form').onsubmit = function() {
+        const selectedOption = document.querySelector('input[name="payment_option"]:checked');
+        if (selectedOption) {
+            const paymentOption = selectedOption.value;
+            // Set the action based on selected payment option
+            if (paymentOption === 'stripe') {
+                this.action = "{% url 'showcase:payment' payment_option='stripe' %}";
+            } else if (paymentOption === 'paypal') {
+                this.action = "{% url 'showcase:payment' payment_option='paypal' %}";
+            } else if (paymentOption === 'card') {
+                this.action = "{% url 'showcase:payment' payment_option='card' %}";
+            }
+        }
+    };
 
-              <hr class="mb-4">
-              <button class="btn btn-primary btn-lg btn-block" href="/http://127.0.0.1:8000/payment/card/">Continue To Payment</button>
+    function submitPaymentForm() {
+      const selectedOption = document.querySelector('input[name="payment_option"]:checked');
+      if (selectedOption) {
+        const paymentOption = selectedOption.value;
+        const form = document.getElementById('payment-form');
+        if (form) {
+          form.action = `/payment/${paymentOption}/`;
+          form.submit();
+        } else {
+          console.error('Form with id "payment-form" not found.');
+        }
+      } else {
+        alert('Please select a payment option.');
+      }
+    }
+  </script>
               <!--<button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>-->
 
             </form>

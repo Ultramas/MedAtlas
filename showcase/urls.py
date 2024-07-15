@@ -372,7 +372,7 @@ urlpatterns = [
     path('currency-add-to-cart/<slug>/', currency_add_to_cart, name='currency-add-to-cart'),
     path('currency-remove-from-cart/<slug>/', currency_remove_from_cart, name='currency-remove-from-cart'),
     path('currency-reduce-quantity-item/<slug>/', currency_reduce_quantity_item, name='currency-reduce-quantity-item'),
-    path('currencycheckout/', views.CurrencyCheckoutView.as_view(), name='currencycheckout'),
+    #path('checkout/', views.CurrencyCheckoutView.as_view(), name='currencycheckout'),
     path('currencypayment/<payment_option>/', views.CurrencyPaymentView.as_view(), name='currencypayment'),
     path('under_construction/', TemplateView.as_view(template_name='under_construction.html'), name='under_construction'),
 
