@@ -4084,6 +4084,8 @@ class Item(models.Model):
                 self.currency = first_currency
         if not self.slug:
             slug = self.slug
+        if not self.price and not self.discount_price:
+            self.is_currency_based = True
         super().save(*args, **kwargs)
 
     def get_profile_url(self):

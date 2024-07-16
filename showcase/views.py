@@ -8669,6 +8669,17 @@ class OrderSummaryView(EBaseView):
             messages.warning(self.request, "You do not have an active order")
             return redirect("showcase:ehome")
 
+def check_and_deduct_currency(user, amount_required):
+    try:
+        profile = ProfileDetails.objects.get(user=user)
+        if profile.currency_amount < amount_required:
+            return False, profile.currency_amount  # Insufficient funds
+        profile.currency_amount -= amount_required
+        profile.save()
+        return True, profile.currency_amount  # Sufficient funds and deduction successful
+    except ProfileDetails.DoesNotExist:
+        return False, 0  # User profile not found
+
 
 class CheckoutView(EBaseView):
     model = CheckoutBackgroundImage
@@ -8682,7 +8693,6 @@ class CheckoutView(EBaseView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context.update(kwargs)
         return context
-
 
     def get(self, *args, **kwargs):
         try:
@@ -8714,16 +8724,24 @@ class CheckoutView(EBaseView):
             if form.is_valid():
                 if form.fields['payment_option'].widget.is_hidden:
                     print('hidden formats')  # Debug print
-                    order.deduct_currency_amount()
-                    return redirect('showcase:index')
 
-                try:
+                    # Calculate the total currency amount required for the order
+                    total_order_currency_amount = sum(
+                        item.item.currency_price for item in OrderItem.objects.filter(order=order))
+
+                    # Check and deduct currency
+                    sufficient_funds, remaining_amount = check_and_deduct_currency(request.user,
+                                                                                   total_order_currency_amount)
+                    if not sufficient_funds:
+                        messages.warning(request, "You do not have enough currency to complete this order.")
+                        context = self.get_context_data(form=form)
+                        context['order'] = order
+                        return redirect('showcase:currencymarket')
+
+                    # Deduct the currency amount from the order
                     order.deduct_currency_amount()
-                except ValueError as e:
-                    messages.warning(request, str(e))
-                    context = self.get_context_data(form=form)
-                    context['order'] = order
-                    return render(request, self.template_name, context)
+
+                    return redirect('showcase:index')
             else:
                 print("Form errors:", form.errors)  # Debug print
                 messages.warning(request, "Form is not valid. Please correct the errors below.")
@@ -8732,6 +8750,7 @@ class CheckoutView(EBaseView):
                 return render(request, self.template_name, context)
 
             use_default_shipping = form.cleaned_data.get('use_default_shipping')
+            order.deduct_currency_amount()
             if use_default_shipping:
                 address_qs = Address.objects.filter(user=self.request.user, address_type='S', default=True)
                 if address_qs.exists():
