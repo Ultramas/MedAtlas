@@ -640,6 +640,7 @@ class CheckoutForm(forms.Form):
         super(CheckoutForm, self).__init__(*args, **kwargs)
         if all_items_currency_based:
             self.fields['payment_option'].required = False
+            self.fields['payment_option'].widget = forms.HiddenInput()
 
 
 class CouponForm(forms.Form):

@@ -61,7 +61,7 @@
                 {% endif %}
                 {% else %}
                 {% if order_item.item.discount_currency_price %}
-                <span style="color: white;">💎{{ order_item.get_discount_item_currency_price}}sdvfxbc</span>
+                <span style="color: white;">💎{{ order_item.get_discount_item_currency_price}}</span>
 
                     <span class="badge badge-success" style="color: white;" >Saved 💎{{ order_item.get_currency_amount_saved }}</span>
                 {% else %}
@@ -92,6 +92,13 @@
         <tr>
             <td colspan="4" style="color: white;"><b>Total Order Price</b></td>
             <td style="color: white;">${{ object.get_total_price }}</td>
+        </tr>
+
+        {% endif %}
+        {% if object.get_total_currency_price %}
+        <tr>
+            <td colspan="4" style="color: white;"><b>Total Exchange Cost (💎)</b></td>
+            <td style="color: white;">💎{{ object.get_total_currency_price }}</td>
         </tr>
 
         {% endif %}

@@ -209,6 +209,7 @@
               -->
 
 
+    {% if not form.payment_option.is_hidden %}
     <h3>Payment Options</h3>
     <div class="d-block my-3">
         {% for value, name in form.fields.payment_option.choices %}
@@ -218,6 +219,7 @@
         </div>
         {% endfor %}
     </div>
+    {% endif %}
 
 
     <hr class="mb-4">

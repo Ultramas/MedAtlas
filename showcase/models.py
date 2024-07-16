@@ -4026,6 +4026,7 @@ class Item(models.Model):
     price = models.DecimalField(max_digits=16, decimal_places=2, blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True, blank=True) #generally set it to the first one avaliable
     currency_price = models.IntegerField(blank=True, null=True)
+    is_currency_based = models.BooleanField(default=False)
     fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     discount_price = models.DecimalField(max_digits=16, decimal_places=2, blank=True, null=True)
     discount_currency_price = models.IntegerField(blank=True, null=True)

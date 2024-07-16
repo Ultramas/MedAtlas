@@ -8676,16 +8676,20 @@ class CheckoutView(EBaseView):
 
     def get_context_data(self, **kwargs):
         context = {}
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context.update(kwargs)
         return context
+
 
     def get(self, *args, **kwargs):
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
-            form = CheckoutForm()
+            all_items_currency_based = self.are_all_items_currency_based(order)
+            print(f'all_items_currency_based: {all_items_currency_based}')  # Debug print
+            form = CheckoutForm(all_items_currency_based=all_items_currency_based)
             context = self.get_context_data(form=form, couponform=CouponForm(), order=order, DISPLAY_COUPON_FORM=True)
 
             shipping_address_qs = Address.objects.filter(user=self.request.user, address_type='S', default=True)
@@ -8702,10 +8706,17 @@ class CheckoutView(EBaseView):
             return redirect("showcase:checkout")
 
     def post(self, request, *args, **kwargs):
-        form = CheckoutForm(request.POST or None)
         try:
             order = Order.objects.get(user=request.user, ordered=False)
+            all_items_currency_based = self.are_all_items_currency_based(order)
+            form = CheckoutForm(request.POST or None, all_items_currency_based=all_items_currency_based)
+            print(f'Form valid: {form.is_valid()}')  # Debug print
             if form.is_valid():
+                if form.fields['payment_option'].widget.is_hidden:
+                    print('hidden formats')  # Debug print
+                    order.deduct_currency_amount()
+                    return redirect('showcase:index')
+
                 try:
                     order.deduct_currency_amount()
                 except ValueError as e:
@@ -8714,11 +8725,12 @@ class CheckoutView(EBaseView):
                     context['order'] = order
                     return render(request, self.template_name, context)
             else:
-                print("Form errors:", form.errors)
+                print("Form errors:", form.errors)  # Debug print
                 messages.warning(request, "Form is not valid. Please correct the errors below.")
                 context = self.get_context_data(form=form)
                 context['order'] = order
                 return render(request, self.template_name, context)
+
             use_default_shipping = form.cleaned_data.get('use_default_shipping')
             if use_default_shipping:
                 address_qs = Address.objects.filter(user=self.request.user, address_type='S', default=True)
@@ -8727,7 +8739,7 @@ class CheckoutView(EBaseView):
                     order.shipping_address = shipping_address
                     order.save()
                 else:
-                    messages.info(self.request, "No default shipping address available")
+                    messages.info(request, "No default shipping address available")
                     return redirect('showcase:checkout')
             else:
                 shipping_address1 = form.cleaned_data.get('shipping_address')
@@ -8806,7 +8818,6 @@ class CheckoutView(EBaseView):
             payment_option = form.cleaned_data.get('payment_option')
             return redirect('showcase:payment', payment_option=payment_option)
 
-            # Log form errors to console for debugging
             print(form.errors)
             messages.warning(self.request, "Form is not valid. Please correct the errors below.")
             context = self.get_context_data(form=form, order=order)
@@ -8820,13 +8831,15 @@ class CheckoutView(EBaseView):
             context = self.get_context_data(form=form)
             return render(self.request, self.template_name, context)
 
+    def are_all_items_currency_based(self, order):
+        return all(order_item.item.is_currency_based for order_item in OrderItem.objects.filter(order=order))
+
     def is_valid_form(self, values):
         valid = True
         for field in values:
             if field == '':
                 valid = False
         return valid
-
 
 from paypalrestsdk import Payment as PayPalPayment
 
