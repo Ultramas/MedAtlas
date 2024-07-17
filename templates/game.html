@@ -23,16 +23,6 @@
     <!-- Inline JavaScript -->
 
     <style>
-        .slider img {
-            width: 15vh;
-            height: 20vh;
-            margin-top: -2vh;
-            margin-left: -0.5vh;
-            border: 2px solid;
-            border-color: transparent; /*to change later*/
-            border-radius: 7px;
-        }
-
         .wrapperlootlist {
             display: flex;
             flex-wrap: wrap;
@@ -87,95 +77,90 @@
         align-items: flex-start; /* Align items to the start */
         align-items: left;
     }
-
+.slider img{
+    width: 15vh;
+    height: 20vh;
+    margin-top: -2vh;
+    margin-left: -0.5vh;
+    border: 2px solid;
+    border-color: transparent; /*to change later*/
+    border-radius: 7px;
+}
 
 </style>
     <!-- Inline JavaScript -->
-<script>
-    $(document).ready(function() {
-        console.log("jQuery is loaded.");
-        $('#start').on('click', function() {
-            console.log('Button clicked.');
-            var gameId = $(this).data('game-id');
-            var slug = $(this).data('slug'); // Get the slug from the data attribute
-            var csrfToken = '{{ csrf_token }}';
-            var url = '{% url "showcase:create_outcome" "SLUG_PLACEHOLDER" %}'.replace('SLUG_PLACEHOLDER', slug);
+    <script>
+        $(document).ready(function() {
+            console.log("jQuery is loaded.");
+            $('#start').on('click', function() {
+                console.log('Button clicked.');
+                var gameId = $(this).data('game-id');
+                var slug = $(this).data('slug'); // Get the slug from the data attribute
+                var csrfToken = '{{ csrf_token }}';
+                var url = '{% url "showcase:create_outcome" "SLUG_PLACEHOLDER" %}'.replace('SLUG_PLACEHOLDER', slug);
 
-            console.log('Game ID:', gameId);
-            console.log('CSRF Token:', csrfToken);
-            console.log('URL:', url);
+                console.log('Game ID:', gameId);
+                console.log('CSRF Token:', csrfToken);
+                console.log('URL:', url);
 
-            $.ajax({
-                type: 'POST',
-                url: url,
-                data: {
-                    csrfmiddlewaretoken: csrfToken,
-                    game_id: gameId
-                },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        console.log('Outcome created successfully!');
-                        updateWheelContents(response.choices, response.selected_choice);
-                    } else {
-                        console.error(response.message);
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: {
+                        csrfmiddlewaretoken: csrfToken
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            console.log('Choices received successfully!');
+                            updateWheelContents(response.choices);
+                        } else {
+                            console.error(response.message);
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error:', error);
                     }
-                },
-                error: function(error) {
-                    console.error('Error:', error);
-                }
+                });
             });
         });
-    });
 
-    function updateWheelContents(choices, selectedChoice) {
-        var slider = $('#slider');
-        slider.empty();  // Clear existing choices
+        function updateWheelContents(choices) {
+            var slider = $('#slider');
+            slider.empty();  // Clear existing choices
 
-        choices.forEach(function(choice) {
-            var choiceHtml = `
-                <div id="${choice.choice_text}" class="cards">
-                    <div class="lootelement" style="background: url({% static 'css/images/'|add:choice.color|add:'.png' %}); padding: 6%; margin-left: 22px;">
-                        <p><img src="${choice.file_url}" alt="${choice.choice_text}"></p>
+            choices.forEach(function(choice) {
+                var choiceHtml = `
+                    <div class="cards">
+                        <img src="${choice.file_url}" alt="${choice.choice_text}">
+                        <h2>${choice.value} 💎</h2>
                     </div>
-                    <h2 style="margin-left: 22px;">${choice.value} 💎</h2>
-                </div>
-            `;
-            slider.append(choiceHtml);
-        });
+                `;
+                slider.append(choiceHtml);
+            });
 
-        // Log the slider contents for debugging
-        console.log("Updated slider contents:", slider.html());
+            // Start the spin animation
+            randomizeContents();
+        }
 
-        // Start the spin animation
-        randomizeContents(selectedChoice);
-    }
+        function randomizeContents() {
+            // Function to randomly change the order of elements
+            $('div#slider').each(function() {
+                var $div_parent = $(this);
+                var $divsArr = $div_parent.children('div.cards');
+                $divsArr.sort(function(a, b) {
+                    var temp = parseInt(Math.random() * 10);
+                    var isOddOrEven = temp % 2;
+                    var isPosOrNeg = temp > 5 ? 1 : -1;
+                    return (isOddOrEven * isPosOrNeg);
+                }).appendTo($div_parent);
+            });
 
-function randomizeContents(selectedChoice) {
-    $('div#slider').each(function() {
-        var $div_parent = $(this);
-        var $divsArr = $div_parent.children('div.cards');
-        $divsArr.sort(function(a, b) {
-            var temp = parseInt(Math.random() * 10);
-            var isOddOrEven = temp % 2;
-            var isPosOrNeg = temp > 5 ? 1 : -1;
-            return (isOddOrEven * isPosOrNeg);
-        }).appendTo($div_parent);
-    });
-
-    setTimeout(function() {
-        highlightSelectedChoice(selectedChoice);
-    }, 9000); // Adjust time as needed
-}
-
-function highlightSelectedChoice(selectedChoice) {
-    var slider = $('#slider');
-    var selectedElement = slider.find(`div[id="${selectedChoice.choice_text}"]`);
-    selectedElement.css('border', '2px solid red'); // Highlight the selected choice
-}
-
-</script>
-
-
+            // Stop randomization after a set time
+            setTimeout(function() {
+                // Implement stopping logic here
+            }, 9000);
+        }
+    </script>
 
 
 
@@ -357,11 +342,42 @@ function highlightSelectedChoice(selectedChoice) {
 
     <div>
  {% for game in games %}
-        <div class="boxes" style="margin-left: 41%; margin-right: 50%; position: absolute;">
-<img src="{{ game.image.url }}" class="game-image" alt="{{ game.name }}">
-            <h2 style="display: flex; flex-direction: row; text-align: center; margin-right: auto; margin-left: auto;">{{ game.name }}</h2>
-            </div>
-            <button id="start" data-game-id="{{ game.id }}" data-slug="{{ game.slug }}">Spin!</button>
+<div class="boxes" style="margin-left: 41%; margin-right: 50%; position: absolute;">
+    <img src="{{ game.image.url }}" class="game-image" alt="{{ game.name }}">
+    <h2 style="display: flex; flex-direction: row; text-align: center; margin-right: auto; margin-left: auto;">{{ game.name }}</h2>
+</div>
+<button class="start" id="start" data-game-id="{{ game.id }}" data-slug="{{ game.slug }}"> Spin! </button>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#start').on('click', function() {
+            var gameId = $(this).data('game-id');
+            var slug = $(this).data('slug');
+            var csrfToken = '{{ csrf_token }}';
+            var url = '{% url "showcase:create_outcome" "SLUG_PLACEHOLDER" %}'.replace('SLUG_PLACEHOLDER', slug);
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                    'game_id': gameId,
+                    'csrfmiddlewaretoken': csrfToken
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Outcome created with nonce: ' + response.nonce);
+                        /*can be deleted if necessary*/
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function(response) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+    });
+</script>
 
 
 
@@ -378,23 +394,23 @@ function highlightSelectedChoice(selectedChoice) {
         </div>
     </div>
 
-<div class="wrapper">
-    <div class="container" style="height: 37.5vh;">
-        <div class="slider" id="slider">
-            {% for choice in game.choices.all %}
-                <div id="{{ choice.choice_text }}" class="cards">
-                    {% with color=game|get_color:choice %}
-                        <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
-                            <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                        </div>
-                    {% endwith %}
-                    <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
-                </div>
-            {% endfor %}
-        </div>
-        <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.svg' %}" alt="spinner-arrow">
+     <div class="wrapper">
+        <div class="container" style="height: 37.5vh;">
+            <div class="slider" id="slider">
+
+{% for choice in game.choices.all %}
+    <div id="{{ choice.choice_text }}" class="cards">
+
+
+{% with color=game|get_color:choice %}
+            <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
+                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+            </div>
+        {% endwith %}
+        <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
     </div>
-</div>
+{% endfor %}
+
 
 
 
@@ -488,7 +504,79 @@ function highlightSelectedChoice(selectedChoice) {
     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
     <script src="{% static 'css/js/gamescript.js' %}"></script>
 
-            </div>
+     <script>
+        $(document).ready(function() {
+            console.log("jQuery is loaded.");
+            $('#start').on('click', function() {
+                console.log('Button clicked.');
+                var gameId = $(this).data('game-id');
+                var csrfToken = '{{ csrf_token }}';
+                var slug = $(this).data('slug'); // Get the slug from the data attribute
+                var csrfToken = '{{ csrf_token }}';
+                var url = '{% url "showcase:create_outcome" "SLUG_PLACEHOLDER" %}'.replace('SLUG_PLACEHOLDER', slug);
+
+                console.log('Game ID:', gameId);
+                console.log('CSRF Token:', csrfToken);
+                console.log('URL:', url);
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: {
+                        csrfmiddlewaretoken: csrfToken
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            console.log('Choices received successfully!');
+                            updateWheelContents(response.choices);
+                        } else {
+                            console.error(response.message);
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        });
+
+        function updateWheelContents(choices) {
+            var slider = $('#slider');
+            slider.empty();  // Clear existing choices
+
+            choices.forEach(function(choice) {
+                var choiceHtml = `
+                    <div class="cards">
+                        <img src="${choice.file_url}" alt="${choice.choice_text}">
+                        <h2>${choice.value} 💎</h2>
+                    </div>
+                `;
+                slider.append(choiceHtml);
+            });
+
+            // Start the spin animation
+            randomizeContents();
+        }
+
+        function randomizeContents() {
+            // Function to randomly change the order of elements
+            $('div#slider').each(function() {
+                var $div_parent = $(this);
+                var $divsArr = $div_parent.children('div.cards');
+                $divsArr.sort(function(a, b) {
+                    var temp = parseInt(Math.random() * 10);
+                    var isOddOrEven = temp % 2;
+                    var isPosOrNeg = temp > 5 ? 1 : -1;
+                    return (isOddOrEven * isPosOrNeg);
+                }).appendTo($div_parent);
+            });
+
+            // Stop randomization after a set time
+            setTimeout(function() {
+                // Implement stopping logic here
+            }, 9000);
+        }
+    </script>
 
     </div>
 </body>

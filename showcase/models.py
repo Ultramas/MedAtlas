@@ -5,6 +5,8 @@ from venv import logger
 
 from PIL import Image
 from decimal import Decimal
+
+from autoslug import AutoSlugField
 from django.db.models.signals import post_save, post_delete, pre_delete
 from django.conf import settings
 from django.contrib.auth.models import User, AbstractUser, Permission
@@ -1946,7 +1948,7 @@ class Choice(models.Model):
 
 class Outcome(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="player")
-    slug = models.SlugField(max_length=200, unique=True, blank=True, null=True)
+    slug = AutoSlugField(populate_from='nonce', unique=True)
     value = models.IntegerField(blank=True, null=True)
     ratio = models.IntegerField(blank=True, null=True)
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)

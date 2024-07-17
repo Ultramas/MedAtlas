@@ -1590,8 +1590,24 @@ def game_view(request, game_id):
 
 
 class GameChestBackgroundView(TemplateView):
-    model = UserProfile
     template_name = "game.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        slug = self.kwargs.get('slug')
+        game = get_object_or_404(Game, slug=slug)
+        choices = Choice.objects.filter(game=game)
+
+        choices_with_nonce = []
+        for choice in choices:
+            nonce = random.randint(1, 1000000)
+            choices_with_nonce.append({'choice': choice, 'nonce': nonce})
+
+        context.update({
+            'choices_with_nonce': choices_with_nonce,
+            'game': game,
+        })
+        return context
 
     def post(self, request, *args, **kwargs):
         form = WagerForm(request.POST, user_profile=request.user.user_profile)
@@ -1604,8 +1620,8 @@ class GameChestBackgroundView(TemplateView):
             # If the form is not valid, re-render the page with the form errors
             return self.get(request, *args, **kwargs)
 
-    @csrf_exempt
-    def create_outcome(request, slug):
+    @method_decorator(csrf_exempt)
+    def create_outcome(self, request, slug):
         if request.method == 'POST':
             print("Received a POST request")
             game_id = request.POST.get('game_id')
@@ -1650,7 +1666,6 @@ class GameChestBackgroundView(TemplateView):
                 return JsonResponse({'status': 'error', 'message': str(e)})
 
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-
 
     @csrf_exempt  # Handle CSRF if needed
     def update_wager(request):
