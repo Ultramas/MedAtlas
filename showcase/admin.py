@@ -1638,7 +1638,7 @@ class OutcomeAdmin(admin.ModelAdmin):
            'fields': ('image', 'image_length', 'image_width',)
        }),
        ('Message Information - Attributes', {
-           'fields': ('nonce', 'is_active',)
+           'fields': ('game', 'game_creator', 'choice', 'nonce', 'is_active',)
        }),
    )
    readonly_fields = ('date_and_time',)

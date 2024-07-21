@@ -1571,6 +1571,7 @@ def create_outcome(request, slug):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
+
 def game_view(request, game_id):
     game = get_object_or_404(Game, id=game_id)
 
@@ -1589,6 +1590,22 @@ def game_view(request, game_id):
     return render(request, 'game.html', context)
 
 
+def game_detail(request, game_id):
+    game = Game.objects.get(id=game_id)
+    choice_nonce_list = []
+
+    for choice in game.choices.all():
+        nonce = random.randint(0, 1000000)
+        choice_nonce_list.append((choice, nonce))
+        print(f"Choice: {choice.choice_text}, Nonce: {nonce}, Range: {choice.lower_nonce} - {choice.upper_nonce}")
+        logger.info(f"Choice: {choice.choice_text}, Nonce: {nonce}, Range: {choice.lower_nonce} - {choice.upper_nonce}")
+
+    return render(request, 'game_detail.html', {
+        'game': game,
+        'choice_nonce_list': choice_nonce_list,
+    })
+
+
 class GameChestBackgroundView(TemplateView):
     template_name = "game.html"
 
@@ -1597,6 +1614,9 @@ class GameChestBackgroundView(TemplateView):
         slug = self.kwargs.get('slug')
         game = get_object_or_404(Game, slug=slug)
         choices = Choice.objects.filter(game=game)
+        print([choice.choice_text for choice in choices])  # Print the choice texts
+        context['game'] = game
+        context['choices'] = choices
 
         choices_with_nonce = []
         for choice in choices:
@@ -1620,8 +1640,8 @@ class GameChestBackgroundView(TemplateView):
             # If the form is not valid, re-render the page with the form errors
             return self.get(request, *args, **kwargs)
 
-    @method_decorator(csrf_exempt)
-    def create_outcome(self, request, slug):
+    @csrf_exempt
+    def create_outcome(request, slug):
         if request.method == 'POST':
             print("Received a POST request")
             game_id = request.POST.get('game_id')
@@ -1634,7 +1654,7 @@ class GameChestBackgroundView(TemplateView):
                 return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
 
             try:
-                game = Game.objects.get(id=game_id, slug=slug)
+                game = Game.objects.get(id=game_id, slug=slug)  # Use slug to find the game
                 nonce = random.randint(1, 1000000)
                 choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
 
@@ -1642,22 +1662,19 @@ class GameChestBackgroundView(TemplateView):
                     print(f"No choice found for nonce {nonce}.")
                     return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
 
-                choice = choices.order_by('?').first()
+                choice = choices.order_by('?').first()  # Select a random choice if multiple choices are found
 
                 outcome = Outcome.objects.create(
                     user=user,
                     game=game,
                     choice=choice,
                     nonce=nonce,
-                    value=random.randint(1, 1000000),
-                    ratio=random.randint(1, 10),
-                    type=game.type
+                    value=random.randint(1, 1000000),  # example value, adjust as needed
+                    ratio=random.randint(1, 10),  # example ratio, adjust as needed
+                    type=game.type  # Ensure you provide the type_id or type related to the game
                 )
                 print(f"Created outcome with nonce: {outcome.nonce}")
-                choices_data = list(choices.values('id', 'choice_text', 'value', 'file_url'))
-                return JsonResponse(
-                    {'status': 'success', 'outcome': outcome.id, 'nonce': outcome.nonce, 'choices': choices_data,
-                     'selected_choice': {'id': choice.id, 'choice_text': choice.choice_text}})
+                return JsonResponse({'status': 'success', 'outcome': outcome.id, 'nonce': outcome.nonce})
             except Game.DoesNotExist:
                 print("Game not found.")
                 return JsonResponse({'status': 'error', 'message': 'Game not found.'})
@@ -1667,8 +1684,53 @@ class GameChestBackgroundView(TemplateView):
 
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
-    @csrf_exempt  # Handle CSRF if needed
-    def update_wager(request):
+
+    @csrf_exempt
+    def layoutspinner(request, slug):
+        if request.method == 'POST':
+            print("Received a POST request")
+            game_id = request.POST.get('game_id')
+            user = request.user
+
+            print(f"Received POST request with game_id: {game_id} and slug: {slug}")
+
+            if not game_id:
+                print("Game ID is missing.")
+                return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
+
+            try:
+                game = Game.objects.get(id=game_id, slug=slug)  # Use slug to find the game
+                nonce = random.randint(1, 1000000)
+                choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
+
+                if not choices.exists():
+                    print(f"No choice found for nonce {nonce}.")
+                    return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
+
+                choice = choices.order_by('?').first()  # Select a random choice if multiple choices are found
+
+                outcome = Outcome.objects.create(
+                    user=user,
+                    game=game,
+                    choice=choice,
+                    nonce=nonce,
+                    value=random.randint(1, 1000000),  # example value, adjust as needed
+                    ratio=random.randint(1, 10),  # example ratio, adjust as needed
+                    type=game.type  # Ensure you provide the type_id or type related to the game
+                )
+                print(f"Created outcome with nonce: {outcome.nonce}")
+                return JsonResponse({'status': 'success', 'outcome': outcome.id, 'nonce': outcome.nonce})
+            except Game.DoesNotExist:
+                print("Game not found.")
+                return JsonResponse({'status': 'error', 'message': 'Game not found.'})
+            except Exception as e:
+                print(f"Exception: {str(e)}")
+                return JsonResponse({'status': 'error', 'message': str(e)})
+
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+    @csrf_exempt
+    def update_wager(self, request):
         if request.method == 'POST':
             wager_id = request.POST.get('wager_id')
             outcome = request.POST.get('outcome')
@@ -1717,8 +1779,8 @@ class GameChestBackgroundView(TemplateView):
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
         return context
-
-
+    
+    
 class ChatCreatePostView(CreateView):
     model = ChatBackgroundImage
     form_class = ChatBackgroundImagery

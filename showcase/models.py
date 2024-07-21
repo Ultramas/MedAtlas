@@ -1928,11 +1928,11 @@ class Choice(models.Model):
         else:
             return self.choice_text
 
-
     def formatted_rarity(self):
         if self.rarity is not None:
             return str(self.rarity).rstrip('0').rstrip('.') if '.' in str(self.rarity) else str(self.rarity)
         return None
+
 
     @classmethod
     def get_choice_by_nonce(cls, nonce):
@@ -1953,6 +1953,12 @@ class Outcome(models.Model):
     ratio = models.IntegerField(blank=True, null=True)
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
     color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     game_creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="creator")
@@ -1966,7 +1972,7 @@ class Outcome(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return f'{self.user} {self.game} {self.date_and_time}'
+        return f'{self.user} - {self.game} - {self.choice} - Nonce: {self.nonce} - {self.date_and_time}'
 
     def generate_nonce(self):
         return random.randint(0, 1000000)
@@ -1979,6 +1985,58 @@ class Outcome(models.Model):
         if not self.game_creator:
             self.game_creator = self.game.user
         super().save(*args, **kwargs)
+
+
+class SpinnerChoiceRenders(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="game_player")
+    slug = AutoSlugField(populate_from='nonce', unique=True)
+    value = models.IntegerField(blank=True, null=True)
+    ratio = models.IntegerField(blank=True, null=True)
+    type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    game_creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="game_creator")
+    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    nonce = models.DecimalField(max_digits=6, decimal_places=0)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return f'{self.user} - {self.game} - {self.choice} - Nonce: {self.nonce}'
+
+    def generate_nonce(self):
+        return random.randint(0, 1000000)
+
+    def save(self, *args, **kwargs):
+        if not self.slug and self.choice:
+            self.slug = slugify(self.choice)
+        if not self.nonce:
+            self.nonce = random.randint(0, 1000000)  # Set nonce to a random number between 0 and 1,000,000
+        if not self.game_creator:
+            self.game_creator = self.game.user
+        super().save(*args, **kwargs)
+        SpinnerChoiceRenders.objects.create(
+            user=self.user,
+            value=self.value,
+            ratio=self.ratio,
+            type=self.type,
+            image=self.image,
+            color=self.color,
+            game=self.game,
+            game_creator=self.game_creator,
+            nonce=self.nonce,
+            is_active=self.is_active,
+        )
 
 
 class Robot(models.Model):
@@ -4035,10 +4093,10 @@ class Item(models.Model):
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
     label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default='N')  # can use for cataloging products
-    slug = models.SlugField()  # might change to automatically get the slug
+    slug = models.SlugField(unique=True, blank=True, null=True)  # might change to automatically get the slug
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
     description = models.TextField()
-    image = models.ImageField()
+    image = models.FileField()
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
                                                verbose_name="image length")
@@ -5826,9 +5884,16 @@ class ProfileDetails(models.Model):
         if created:
             default_level = Level.objects.first()  # or set this to whatever you want the default to be
             default_currency = Currency.objects.first()  # or set this to whatever you want the default to be
-            ProfileDetails.objects.create(user=instance, currency=default_currency, level=default_level)
+            profile = 'static/css/images/a.jpg'
+            ProfileDetails.objects.create(user=instance, currency=default_currency, level=default_level, avatar=profile)
 
     post_save.connect(create_user_profile, sender=User)
+
+    def save(self, *args, **kwargs):
+        if not self.avatar:
+            self.avatar = 'static/css/images/a.jpg'
+            print('saved the profile avatar to default image')
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Account Profile"
