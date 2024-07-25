@@ -11,7 +11,8 @@ from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
-    Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage
+    Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
+    SpinnerChoiceRenders
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -1328,6 +1329,39 @@ def update_wager(request, wager_id):
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+def create_spinner_choice_render_automatically(request):
+    nonce = random.randint(0, 1000000)
+    choice = Choice.objects.filter(Q(lower_nonce__lte=nonce) & Q(upper_nonce__gte=nonce)).first()
+
+    if choice:
+        game = choice.game  # Assuming the game is related to the choice
+        game_hub = GameHub.objects.first()  # Replace with your logic to select a game hub
+
+        spinner_choice_render = SpinnerChoiceRenders.objects.create(
+            user=choice.user,
+            value=choice.value,
+            ratio=choice.rarity,
+            type=game_hub,
+            image=choice.file,
+            color=choice.color,
+            game=game,
+            choice=choice,
+            nonce=nonce,
+            is_active=1
+        )
+        return redirect('spinner_choice_render_list')
+    else:
+        return render(request, 'error.html', {'message': 'No choice found for the generated nonce'})
+
+def spinner_choice_render_list(request):
+    spinner_choice_renders = SpinnerChoiceRenders.objects.all()
+    return render(request, 'spinner_choice_render_list.html', {'spinner_choice_renders': spinner_choice_renders})
+
+def spinner_choice_render_list(request):
+    spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=self.game)
+    return render(request, 'game.html', {'spinner_choice_renders': spinner_choice_renders})
+
+
 class ChestBackgroundView(BaseView):
     model = UserProfile
     template_name = "blackjack.html"
@@ -1455,11 +1489,11 @@ def find_choice(request):
         'choice': choice
     }
 
-    return render(request, 'choice_detail.html', context)
+    return render(request, 'game.html', context)
 
 
 class FindChoiceView(View):
-    template_name = 'choice_detail.html'
+    template_name = 'game.html'
 
     def get(self, request, *args, **kwargs):
         # Generate a random nonce between 0 and 1000000
@@ -1479,7 +1513,6 @@ class FindChoiceView(View):
 
 def generate_nonce():
     return random.randint(1, 1000000)
-
 
 
 def game_view(request, slug):
@@ -1543,8 +1576,7 @@ def create_outcome(request, slug):
         try:
             game = Game.objects.get(id=game_id, slug=slug)  # Use slug to find the game
             nonce = random.randint(1, 1000000)
-            choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
-
+            choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce, game=game,)
             if not choices.exists():
                 print(f"No choice found for nonce {nonce}.")
                 return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
@@ -1560,7 +1592,7 @@ def create_outcome(request, slug):
                 ratio=random.randint(1, 10),    # example ratio, adjust as needed
                 type=game.type  # Ensure you provide the type_id or type related to the game
             )
-            print(f"Created outcome with nonce: {outcome.nonce}")
+            print(f"Created outcome with nonce: {outcome.nonce} & game {outcome.game}")
             return JsonResponse({'status': 'success', 'outcome': outcome.id, 'nonce': outcome.nonce})
         except Game.DoesNotExist:
             print("Game not found.")
@@ -1590,6 +1622,7 @@ def game_view(request, game_id):
     return render(request, 'game.html', context)
 
 
+#how the choices are rendered in game.html
 def game_detail(request, game_id):
     game = Game.objects.get(id=game_id)
     choice_nonce_list = []
@@ -1612,22 +1645,77 @@ class GameChestBackgroundView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         slug = self.kwargs.get('slug')
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['games'] = Game.objects.filter(is_active=1, slug=slug)  # Filter games by slug
+        context['wager_form'] = WagerForm()
+        game = get_object_or_404(Game, slug=slug)
+
+        cost = game.discount_cost if game.discount_cost else game.cost
+
+        context.update({
+            'game': game,
+            'cost_threshold_80': cost * 0.8,
+            'cost_threshold_100': cost,
+            'cost_threshold_200': cost * 2,
+            'cost_threshold_500': cost * 5,
+            'cost_threshold_10000': cost * 100,
+        })
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
         game = get_object_or_404(Game, slug=slug)
         choices = Choice.objects.filter(game=game)
+        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
         print([choice.choice_text for choice in choices])  # Print the choice texts
         context['game'] = game
         context['choices'] = choices
-
+        context['spinner_choice_renders'] = spinner_choice_renders
         choices_with_nonce = []
         for choice in choices:
             nonce = random.randint(1, 1000000)
-            choices_with_nonce.append({'choice': choice, 'nonce': nonce})
+            if choice.lower_nonce <= nonce <= choice.upper_nonce:
+                choices_with_nonce.append({
+                    'choice': choice,
+                    'nonce': nonce,
+                    'lower_nonce': choice.lower_nonce,
+                    'upper_nonce': choice.upper_nonce,
+                })
 
         context.update({
             'choices_with_nonce': choices_with_nonce,
             'game': game,
         })
+
         return context
+
+    def display_choices(request, game_id, slug):
+        game = get_object_or_404(Game, id=game_id, slug=slug)
+        choices = Choice.objects.filter(game=game)
+
+        # Ensure each choice has a nonce
+        for choice in choices:
+            if choice.lower_nonce is None or choice.upper_nonce is None:
+                choice.lower_nonce = random.randint(0, 1000000)
+                choice.upper_nonce = random.randint(0, 1000000)
+                choice.save()
+
+        return render(request, 'game.html', {'game': game, 'choices': choices})
+
+    # Example usage in a view or any other part of your application
+    def take_spinner_slot(user, game, choice):
+        SpinnerChoiceRenders.take_up_slot(user=user, game=game, choice=choice, value=100, ratio=2, type=game.type,
+                                          image=choice.image.url, color=choice.color)
 
     def post(self, request, *args, **kwargs):
         form = WagerForm(request.POST, user_profile=request.user.user_profile)
@@ -1684,47 +1772,66 @@ class GameChestBackgroundView(TemplateView):
 
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
+    def create_spinner_choice_render_automatically(request):
+        nonce = random.randint(0, 1000000)
+        choice = Choice.objects.filter(Q(lower_nonce__lte=nonce) & Q(upper_nonce__gte=nonce)).first()
+
+        if choice:
+            game = choice.game
+            game_hub = GameHub.objects.first()
+
+            spinner_choice_render = SpinnerChoiceRenders.objects.create(
+                user=choice.user,
+                value=choice.value,
+                ratio=choice.rarity,
+                type=game_hub,
+                image=choice.file,
+                color=choice.color,
+                game=game,
+                choice=choice,
+                nonce=nonce,
+                is_active=1,
+            )
+            return redirect('showcase:game', slug=choice.slug)
+        else:
+            return render(request, 'error.html', {'message': 'No choice found for the generated nonce'})
+
+    def spinner_choice_render_list(request):
+        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=self.game)
+        return render(request, 'game.html', {'spinner_choice_renders': spinner_choice_renders})
 
     @csrf_exempt
     def layoutspinner(request, slug):
         if request.method == 'POST':
-            print("Received a POST request")
             game_id = request.POST.get('game_id')
             user = request.user
 
-            print(f"Received POST request with game_id: {game_id} and slug: {slug}")
-
             if not game_id:
-                print("Game ID is missing.")
                 return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
 
             try:
-                game = Game.objects.get(id=game_id, slug=slug)  # Use slug to find the game
+                game = Game.objects.get(id=game_id, slug=slug)
                 nonce = random.randint(1, 1000000)
                 choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
 
                 if not choices.exists():
-                    print(f"No choice found for nonce {nonce}.")
                     return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
 
-                choice = choices.order_by('?').first()  # Select a random choice if multiple choices are found
+                choice = choices.order_by('?').first()
 
                 outcome = Outcome.objects.create(
                     user=user,
                     game=game,
                     choice=choice,
                     nonce=nonce,
-                    value=random.randint(1, 1000000),  # example value, adjust as needed
-                    ratio=random.randint(1, 10),  # example ratio, adjust as needed
-                    type=game.type  # Ensure you provide the type_id or type related to the game
+                    value=random.randint(1, 1000000),
+                    ratio=random.randint(1, 10),
+                    type=game.type
                 )
-                print(f"Created outcome with nonce: {outcome.nonce}")
                 return JsonResponse({'status': 'success', 'outcome': outcome.id, 'nonce': outcome.nonce})
             except Game.DoesNotExist:
-                print("Game not found.")
                 return JsonResponse({'status': 'error', 'message': 'Game not found.'})
             except Exception as e:
-                print(f"Exception: {str(e)}")
                 return JsonResponse({'status': 'error', 'message': str(e)})
 
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
@@ -1745,40 +1852,6 @@ class GameChestBackgroundView(TemplateView):
         else:
             return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        slug = self.kwargs.get('slug')
-
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
-        context['Money'] = Currency.objects.filter(is_active=1).first()
-        context['games'] = Game.objects.filter(is_active=1, slug=slug)  # Filter games by slug
-        context['wager_form'] = WagerForm()
-        game = get_object_or_404(Game, slug=slug)
-
-        cost = game.discount_cost if game.discount_cost else game.cost
-
-        context.update({
-            'game': game,
-            'cost_threshold_80': cost * 0.8,
-            'cost_threshold_100': cost,
-            'cost_threshold_200': cost * 2,
-            'cost_threshold_500': cost * 5,
-            'cost_threshold_10000': cost * 100,
-        })
-        newprofile = UpdateProfile.objects.filter(is_active=1)
-        context['Profiles'] = newprofile
-
-        for newprofile in context['Profiles']:
-            user = newprofile.user
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
-
-        return context
     
     
 class ChatCreatePostView(CreateView):

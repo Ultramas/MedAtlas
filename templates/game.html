@@ -257,6 +257,35 @@
    let Touching = 'A New Pokemon!';
 
 
+function createOutcome(gameId, slug) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch(`/your-url/${slug}/create_outcome/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+        },
+        body: new URLSearchParams({
+            'game_id': gameId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const choiceText = data.choice_text;
+            document.getElementById('outcomeDisplay').innerText = `Outcome: ${choiceText}`;
+        } else {
+            console.error('Error:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+// Example usage
+createOutcome('some_game_id', 'some_slug');
 
 
    function findTouchingDivs() {
@@ -398,18 +427,21 @@
         <div class="container" style="height: 37.5vh;">
             <div class="slider" id="slider">
 
-{% for choice in game.choices.all %}
-    <div id="{{ choice.choice_text }}" class="cards">
-
-
-{% with color=game|get_color:choice %}
-            <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
-                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-            </div>
-        {% endwith %}
-        <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
-    </div>
+{% for item in choices_with_nonce %}
+    {% with choice=item.choice %}
+        <div id="{{ choice.choice_text }}" class="cards">
+            {% with color=game|get_color:choice %}
+                <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                </div>
+            {% endwith %}
+            <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
+            <p>Nonce: {{ item.nonce }}</p>
+            <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
+        </div>
+    {% endwith %}
 {% endfor %}
+
 
 
 

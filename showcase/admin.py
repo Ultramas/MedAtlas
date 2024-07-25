@@ -1401,7 +1401,7 @@ class ChoiceAdmin(admin.ModelAdmin):
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Choice Information - Attributes', {
-            'fields': ('votes', 'mfg_date', 'rarity', 'is_active', 'number', 'prizes',),
+            'fields': ('votes', 'mfg_date', 'rarity', 'is_active', 'number', 'prizes', 'generated_nonce',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Choice Information - Image Display', {
@@ -1635,7 +1635,7 @@ class OutcomeAdmin(admin.ModelAdmin):
            'fields': ('user', 'value', 'ratio', 'type', 'color',)
        }),
        ('Message Information - Image Display', {
-           'fields': ('image', 'image_length', 'image_width',)
+           'fields': ('file', 'image_length', 'image_width',)
        }),
        ('Message Information - Attributes', {
            'fields': ('game', 'game_creator', 'choice', 'nonce', 'is_active',)

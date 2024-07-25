@@ -15,3 +15,7 @@ register = template.Library()
 def get_view_method(view, method_name, user):
     method = getattr(view, method_name)
     return method(user)
+
+@register.filter(name='zip')
+def zip_lists(a, b):
+    return zip(a, b)
