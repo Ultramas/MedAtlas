@@ -4,4 +4,4 @@ services:
   name: poketrove
   runtime: python
   buildCommand: "./build.sh"
-  startCommand: "python -m gunicorn poketrove.asgi:application -k uvicorn.workers.UvicornWorker
+  startCommand: "python -m gunicorn poketrove.asgi:application -k uvicorn.workers.UvicornWorker"
