@@ -1683,14 +1683,15 @@ class GameChestBackgroundView(TemplateView):
         context['spinner_choice_renders'] = spinner_choice_renders
         choices_with_nonce = []
         for choice in choices:
-            nonce = random.randint(1, 1000000)
-            if choice.lower_nonce <= nonce <= choice.upper_nonce:
-                choices_with_nonce.append({
-                    'choice': choice,
-                    'nonce': nonce,
-                    'lower_nonce': choice.lower_nonce,
-                    'upper_nonce': choice.upper_nonce,
-                })
+            lower_nonce = choice.lower_nonce
+            upper_nonce = choice.upper_nonce
+            nonce = random.randint(lower_nonce, upper_nonce)
+            choices_with_nonce.append({
+                'choice': choice,
+                'nonce': nonce,
+                'lower_nonce': lower_nonce,
+                'upper_nonce': upper_nonce,
+            })
 
         context.update({
             'choices_with_nonce': choices_with_nonce,
