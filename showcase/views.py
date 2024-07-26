@@ -1,4 +1,6 @@
 from urllib import request
+from venv import logger
+from django.db import IntegrityError
 
 import django
 import self
@@ -1681,18 +1683,24 @@ class GameChestBackgroundView(TemplateView):
         context['game'] = game
         context['choices'] = choices
         context['spinner_choice_renders'] = spinner_choice_renders
+        context['game'] = game
+        context['choices'] = choices
+        context['spinner_choice_renders'] = spinner_choice_renders
+
         choices_with_nonce = []
         for choice in choices:
             lower_nonce = choice.lower_nonce
             upper_nonce = choice.upper_nonce
-            nonce = random.randint(lower_nonce, upper_nonce)
-            choices_with_nonce.append({
-                'choice': choice,
-                'nonce': nonce,
-                'lower_nonce': lower_nonce,
-                'upper_nonce': upper_nonce,
-            })
+            nonce = random.randint(0, 1000000)
+            if lower_nonce < nonce <= upper_nonce:
+                choices_with_nonce.append({
+                    'choice': choice,
+                    'nonce': nonce,
+                    'lower_nonce': lower_nonce,
+                    'upper_nonce': upper_nonce,
+                })
 
+        context['choices_with_nonce'] = choices_with_nonce
         context.update({
             'choices_with_nonce': choices_with_nonce,
             'game': game,
@@ -4009,28 +4017,22 @@ class ResponseTradeOfferCreateView(CreateView):
                 trade_request = form.save(commit=False)
                 trade_request.user = request.user
 
-                # Check if a RespondingTradeOffer with the same slug and user already exists
-                existing_offer = RespondingTradeOffer.objects.filter(slug=trade_request.slug, user=request.user).first()
-                if existing_offer:
-                    # If it does, delete the existing offer
-                    existing_offer.delete()
+                try:
+                    trade_request.save()
+                    trade_request.user2 = trade_request.wanted_trade_items.user
+                    trade_request.save()
+                    messages.success(request, "Trade offer submitted successfully.")
+                    return redirect('showcase:directedtradeoffers')
 
-                form.save()
-
-                # Save the RespondingTradeOffer instance first
-                trade_request.save()
-
-                # Now you can access the related TradeOffer instance
-                trade_request.user2 = trade_request.wanted_trade_items.user
-                trade_request.save()
-
-                return redirect('showcase:directedtradeoffers')
+                except IntegrityError as e:
+                    if 'UNIQUE constraint failed: showcase_respondingtradeoffer.slug' in str(e):
+                        messages.warning(request, "You have already submitted a trade offer for this item.")
+                        return redirect('showcase:directedtradeoffers')
 
         context = {'form': self.get_form_instance()}
         return render(request, self.template_name, context)
 
     def get_context_data(self, **kwargs):
-        self.object_list = self.get_queryset()
         context = super().get_context_data(**kwargs)
         context['form'] = self.get_form_instance()  # Add the form to the context
         context['Background'] = BackgroundImageBase.objects.filter(
@@ -4042,7 +4044,6 @@ class ResponseTradeOfferCreateView(CreateView):
         context['TradeOffer'] = TradeOffer.objects.filter(is_active=1)
 
         return context
-
 
 @login_required
 def contact_trader(request):

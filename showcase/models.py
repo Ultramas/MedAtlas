@@ -2028,6 +2028,22 @@ class SpinnerChoiceRenders(models.Model):
     game_creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="game_creator")
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
     nonce = models.DecimalField(max_digits=6, decimal_places=0)
+    lower_nonce = models.DecimalField(
+        max_digits=7,
+        decimal_places=0,
+        validators=[MaxValueValidator(1000000), MinValueValidator(0)],
+        help_text="Lower bound nonce of Choice",
+        blank=True,
+        null=True
+    )
+    upper_nonce = models.DecimalField(
+        max_digits=7,
+        decimal_places=0,
+        validators=[MaxValueValidator(1000000), MinValueValidator(0)],
+        help_text="Upper bound nonce of Choice",
+        blank=True,
+        null=True
+    )
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2039,6 +2055,10 @@ class SpinnerChoiceRenders(models.Model):
 
     def generate_nonce(self):
         return random.randint(0, 1000000)
+        if self.lower_nonce is None:
+            self.lower_nonce = self.choice.lower_nonce
+        if self.upper_nonce is None:
+            self.upper_nonce = self.choice.upper_nonce
 
     def save(self, *args, **kwargs):
         if not self.slug and self.choice:
@@ -4531,6 +4551,8 @@ class RespondingTradeOffer(models.Model):
         (DECLINED, 'Declined')
     )
     wanted_trade_items = models.ForeignKey(TradeOffer, on_delete=models.CASCADE, blank=True, null=True)
+    trade_offer_exists = models.BooleanField(default=False,
+                                        help_text="Indicates if the trade has been completed previously.")
     offered_trade_items = models.ManyToManyField(TradeItem)
     trade_shipping_label = models.ForeignKey(TradeShippingLabel, on_delete=models.CASCADE, null=True, blank=True)
     estimated_trading_value = models.DecimalField(

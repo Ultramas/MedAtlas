@@ -67,11 +67,13 @@
 {% endfor %}
 
 <h1>Outgoing Trade Offer Responses:</h1>
-{% for RespondingTradeOffer in response_outgoing_requests%}
+{% for RespondingTradeOffer in response_outgoing_requests %}
     {% if RespondingTradeOffer.user2 %}
         <p style="color: black;">You sent a response trade request to {{ RespondingTradeOffer.user2.username }}.</p>
+    {% elif RespondingTradeOffer.trade_offer_exists %}
+        <p style="color: black;">The trade has been completed previously, so no recipient is specified.</p>
     {% else %}
-        <p style="color: black;">Your response trade offer was not listed. Please specify a recipient</p>
+        <p style="color: black;">Your response trade offer was not listed. Please specify a recipient.</p>
     {% endif %}
 {% endfor %}
 
