@@ -265,14 +265,14 @@ SOCIAL_AUTH_FACEBOOK_SECRET = 'SOCIAL_AUTH_FACEBOOK_SECRET'
 
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://0.0.0.0:3000'
-    'http://0.0.0.0:8000'
-    'http://127.0.0.1:8000/'
+    'http://0.0.0.0:3000',
+    'http://0.0.0.0:8000',
+    'http://127.0.0.1:8000',
     'https://poketrove-official-website.onrender.com',
     'https://poketrove.org',
     'https://poketrove.net',
-
 ]
+
 
 DEFAULT_PAGINATE_BY = 10
 
