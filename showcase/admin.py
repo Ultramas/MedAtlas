@@ -5,7 +5,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
-    GeneralMessage
+    GeneralMessage, DefaultAvatar
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -1888,6 +1888,19 @@ class FormBaseAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Questionaire, FormBaseAdmin)
+
+
+class DefaultAvatarAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Default Avatar Information - Categorial Descriptions', {
+            'fields': ('default_avatar_name', 'default_avatar',)
+        }),
+        ('Default Avatar Information - Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+
+admin.site.register(DefaultAvatar, DefaultAvatarAdmin)
 
 
 class ProfileDetailsAdmin(admin.ModelAdmin):

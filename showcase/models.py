@@ -5903,8 +5903,8 @@ class Subscription(models.Model):
 
 
 class DefaultAvatar(models.Model):
-    default_avatar_name = models.CharField(max_length=300)
-    default_avatar = models.ImageField()
+    default_avatar_name = models.CharField(max_length=300, blank=True, null=True)
+    default_avatar = models.ImageField(upload_to='images/')
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -5913,6 +5913,11 @@ class DefaultAvatar(models.Model):
 
     def __str__(self):
         return str(self.default_avatar)
+
+    def save(self, *args, **kwargs):
+        if not self.default_avatar_name and self.default_avatar:
+            self.default_avatar_name = self.default_avatar.name
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Default Avatar"

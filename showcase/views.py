@@ -6083,8 +6083,10 @@ def supportgetMessages(request, signed_in_user, **kwargs):
                 user_profile_url = profile_details.get_absolute_url()  # Get the user_profile_url for each message
             if profile_details:
                 avatar_url = profile_details.avatar.url  # Get the avatar URL
-            else:
+            elif default_avatar:
                 avatar_url = default_avatar   # Default avatar URL
+            else:
+                avatar_url = staticfiles_storage.url('css/images/a.jpg')
 
             messages_data.append({
                 'user_profile_url': user_profile_url,
