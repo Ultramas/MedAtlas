@@ -4917,7 +4917,7 @@ class BackgroundView(FormMixin, BaseView):
         if context['Profiles'] == None:
             # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = DefaultAvatar.objects.first()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
         else:
             for userprofile in context['Profiles']:
