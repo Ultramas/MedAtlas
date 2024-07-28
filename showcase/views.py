@@ -14,7 +14,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
-    SpinnerChoiceRenders
+    SpinnerChoiceRenders, DefaultAvatar
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -2948,7 +2948,7 @@ def getMessages(request, room):
             avatar_url = profile_details.avatar.url
         else:
             user_profile_url = f'/home/{room}/?username={request.user.username}'
-            avatar_url = staticfiles_storage.url('css/images/a.jpg')
+            avatar_url = DefaultAvatar.objects.first()
 
         message_data = {
             'user_profile_url': user_profile_url,
@@ -4467,7 +4467,7 @@ def supportlinegetMessages(request, room, **kwargs):
                 avatar_url = profile_details.avatar.url
             else:
                 user_profile_url = f'/supportline/{message.signed_in_user}'
-                avatar_url = staticfiles_storage.url('css/images/a.jpg')
+                avatar_url = DefaultAvatar.objects.first()
 
             messages_data.append({
                 'user_profile_url': user_profile_url,
@@ -4728,7 +4728,7 @@ def getGeneralMessages(request):
             avatar_url = profile_details.avatar.url
         else:
             user_profile_url = 'index.html'
-            avatar_url = static('css/images/a.jpg')
+            avatar_url = DefaultAvatar.objects.first()
 
         message_data = {
             'user_profile_url': user_profile_url,
@@ -4917,7 +4917,7 @@ class BackgroundView(FormMixin, BaseView):
         if context['Profiles'] == None:
             # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_picture_url = DefaultAvatar.objects.first()
             userprofile.newprofile_profile_url = None
         else:
             for userprofile in context['Profiles']:
@@ -6077,13 +6077,14 @@ def supportgetMessages(request, signed_in_user, **kwargs):
             user_str = str(message.signed_in_user) if message.signed_in_user else 'Support Request'
             user_profile_url = ''  # Initialize user_profile_url
             profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+            default_avatar = DefaultAvatar.objects.first()
 
             if message.signed_in_user and profile_details:
                 user_profile_url = profile_details.get_absolute_url()  # Get the user_profile_url for each message
             if profile_details:
                 avatar_url = profile_details.avatar.url  # Get the avatar URL
             else:
-                avatar_url = staticfiles_storage.url('css/images/a.jpg')  # Default avatar URL
+                avatar_url = default_avatar   # Default avatar URL
 
             messages_data.append({
                 'user_profile_url': user_profile_url,

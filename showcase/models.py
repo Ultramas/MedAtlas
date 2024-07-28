@@ -5902,6 +5902,23 @@ class Subscription(models.Model):
         verbose_name_plural = "Subscriptions"
 
 
+class DefaultAvatar(models.Model):
+    default_avatar_name = models.CharField(max_length=300)
+    default_avatar = models.ImageField()
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.default_avatar)
+
+    class Meta:
+        verbose_name = "Default Avatar"
+        verbose_name_plural = "Default Avatars"
+
+
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(blank=True, null=True)
@@ -5957,14 +5974,14 @@ class ProfileDetails(models.Model):
         if created:
             default_level = Level.objects.first()  # or set this to whatever you want the default to be
             default_currency = Currency.objects.first()  # or set this to whatever you want the default to be
-            profile = 'static/css/images/a.jpg'
+            profile = DefaultAvatar.objects.first()
             ProfileDetails.objects.create(user=instance, currency=default_currency, level=default_level, avatar=profile)
 
     post_save.connect(create_user_profile, sender=User)
 
     def save(self, *args, **kwargs):
         if not self.avatar:
-            self.avatar = 'static/css/images/a.jpg'
+            self.avatar = DefaultAvatar.objects.first()
             print('saved the profile avatar to default image')
         super().save(*args, **kwargs)
 
