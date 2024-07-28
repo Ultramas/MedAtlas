@@ -5912,7 +5912,8 @@ class DefaultAvatar(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return str(self.default_avatar)
+        if self.default_avatar_name:
+            return str(self.default_avatar_name)
 
     def save(self, *args, **kwargs):
         if not self.default_avatar_name and self.default_avatar:
@@ -5922,7 +5923,6 @@ class DefaultAvatar(models.Model):
     class Meta:
         verbose_name = "Default Avatar"
         verbose_name_plural = "Default Avatars"
-
 
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -5979,14 +5979,14 @@ class ProfileDetails(models.Model):
         if created:
             default_level = Level.objects.first()  # or set this to whatever you want the default to be
             default_currency = Currency.objects.first()  # or set this to whatever you want the default to be
-            profile = DefaultAvatar.objects.first()
+            profile = 'static/css/images/a.jpg'
             ProfileDetails.objects.create(user=instance, currency=default_currency, level=default_level, avatar=profile)
 
     post_save.connect(create_user_profile, sender=User)
 
     def save(self, *args, **kwargs):
         if not self.avatar:
-            self.avatar = DefaultAvatar.objects.first()
+            self.avatar = 'static/css/images/a.jpg'
             print('saved the profile avatar to default image')
         super().save(*args, **kwargs)
 
