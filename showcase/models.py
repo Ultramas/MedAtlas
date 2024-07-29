@@ -1831,6 +1831,10 @@ class Game(models.Model):
         cost_threshold_100000 = self.cost * 1000
         cost_threshold_100000000 = self.cost * 1000000
 
+        if choice.value is None:
+            # Handle the case where value is None, perhaps by setting a default value
+            choice.value = random.randint(0, 1000000)
+
         if choice.value >= cost_threshold_100000000:
             return 'redgold'
         elif choice.value >= cost_threshold_100000:
@@ -2010,6 +2014,78 @@ class Outcome(models.Model):
         super().save(*args, **kwargs)
 
 
+class Achievements(models.Model):
+    title = models.TextField(verbose_name="Achievement Title")
+    slug = AutoSlugField(populate_from='title', unique=True)
+    value = models.IntegerField(blank=True, null=True)
+    type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    class Meta:
+        verbose_name = "Achievement"
+        verbose_name_plural = "Achievements"
+
+
+class EarnedAchievements(models.Model):
+    achievement = models.ForeignKey(Achievements, on_delete=models.CASCADE)
+    title = models.TextField(verbose_name="Achievement Title")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="earner")
+    slug = AutoSlugField(unique=True)
+    value = models.IntegerField(blank=True, null=True)
+    type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    date_and_time = models.DateTimeField(null=True, verbose_name="date and time", auto_now_add=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def save(self, *args, **kwargs):
+        if not self.value and self.achievement:
+            self.value = self.value
+        if not self.type and self.achievement:
+            self.type = self.achievement.type
+        if not self.image and self.achievement:
+            self.image = self.achievement.image()
+        if not self.slug and self.achievement:
+            self.slug = self.achievement.slug
+        if not self.title and self.achievement:
+            self.title = self.achievement.title
+        if not self.type and self.achievement:
+            self.type = self.achievement.type
+        if not self.image_length and self.achievement:
+            self.image_length = self.achievement.image_length
+        if not self.image_width and self.achievement:
+            self.image_width = self.achievement.image_width
+        if not self.date_and_time:
+            self.date_and_time = timezone.now()
+
+    def __str__(self):
+        return f"{self.title} earned by {self.user}"
+
+    class Meta:
+        verbose_name = "Earned Achievement"
+        verbose_name_plural = "Earned Achievements"
+
+
 class SpinnerChoiceRenders(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="game_player")
     slug = AutoSlugField(populate_from='nonce', unique=True)
@@ -2096,6 +2172,7 @@ class SpinnerChoiceRenders(models.Model):
         instance.save()
         return instance
 
+
 class Robot(models.Model):
     name = models.CharField(max_length=200)
     is_bot = models.BooleanField(default=True)
@@ -2145,6 +2222,24 @@ class Battle(models.Model):
     class Meta:
         verbose_name = "Battle"
         verbose_name_plural = "Battles"
+
+
+class Hits(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.choice)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.choice:
+            self.user = self.choice.user
+        self.save()  # Save again to update the price field
+
+    class Meta:
+        verbose_name = "Hit"
+        verbose_name_plural = "Hits"
 
 
 class SelectRelatedConstraint(object):
@@ -5923,6 +6018,7 @@ class DefaultAvatar(models.Model):
     class Meta:
         verbose_name = "Default Avatar"
         verbose_name_plural = "Default Avatars"
+
 
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

@@ -1650,7 +1650,11 @@ class GameChestBackgroundView(TemplateView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+        try:
+            context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+        except UserProfile.DoesNotExist:
+            # Handle the case where the UserProfile does not exist
+            context['SentProfile'] = None
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['games'] = Game.objects.filter(is_active=1, slug=slug)  # Filter games by slug
         context['wager_form'] = WagerForm()
@@ -1942,6 +1946,28 @@ class GameRoomView(BaseView):
         context['form'] = EmailForm()
 
         newprofile = Game.objects.filter(is_active=1)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+
+class OutcomeHistoryView(BaseView):
+    model = Outcome
+    template_name = "outcomehistory.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Outcome'] = Outcome.objects.filter(is_active=1)
+        context['Game'] = GameHub.objects.filter(is_active=1).first()
+        context['GameRoom'] = Game.objects.filter(is_active=1).first()
+        newprofile = Outcome.objects.filter(is_active=1)
         context['Profiles'] = newprofile
 
         for newprofile in context['Profiles']:

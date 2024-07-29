@@ -5,7 +5,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
-    GeneralMessage, DefaultAvatar
+    GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -566,6 +566,45 @@ class BlackJackWagerAdmin(admin.ModelAdmin):
 
 admin.site.register(Wager, BlackJackWagerAdmin)
 
+
+class AchievementsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Achievement  Information - Categorial Descriptions', {
+            'fields': ('title', 'value','type',)
+        }),
+        ('Achievement Information - Image Display', {
+            'fields': ('image', 'image_length', 'image_width',),
+            'classes': ('collapse',),
+        }),
+        ('Achievement Information - Technical Description', {
+            'fields': ('is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('slug',)
+
+
+admin.site.register(Achievements, AchievementsAdmin)
+
+
+class EarnedAchievementsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Earned Achievement  Information - Categorial Descriptions', {
+            'fields': ('achievement', 'title', 'user', 'value','type',)
+        }),
+        ('Earned Achievement Information - Image Display', {
+            'fields': ('image', 'image_length', 'image_width',),
+            'classes': ('collapse',),
+        }),
+        ('Earned Achievement Information - Technical Description', {
+            'fields': ('is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('slug',)
+
+
+admin.site.register(EarnedAchievements, EarnedAchievementsAdmin)
 
 # admin.site.register(BackgroundImage)
 # admin.site.register(BackgroundImage2a)
