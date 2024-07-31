@@ -14,7 +14,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
-    SpinnerChoiceRenders, DefaultAvatar
+    SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -2020,6 +2020,35 @@ class ClubRoomView(BaseView):
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
         return context
+
+
+class AchievementsView(TemplateView):
+    model = Achievements
+    template_name = "achievements.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user  # Assuming the user is obtained from the request
+        context['TotalAchievements'] = Achievements.objects.filter(is_active=1)
+        context['Achievements'] = Achievements.objects.filter(is_active=1, earned=True)
+        newprofile = Achievements.objects.filter(is_active=1, user=user)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            profile = ProfileDetails.objects.filter(user=newprofile.user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+    def CheckAchievements(self, user):
+        return Achievements.objects.filter(user=user, earned=True, is_active=1)
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        context['CheckedAchievements'] = self.CheckAchievements(request.user)
+        return self.render_to_response(context)
 
 
 class BlogBackgroundView(ListView):
@@ -5128,25 +5157,20 @@ class EBackgroundView(BaseView, FormView):
         context['form'] = EmailForm()
 
         if isinstance(current_user, AnonymousUser):
-            try:
-                user_store_view_type = StoreViewType.objects.filter(is_active=1).first()
-                context['store_view_type_str'] = str(user_store_view_type)
-                context['streamfilter_string'] = f'streamfilter set by {self.request.user.username}'
-                print('store view exists')
-                print(str(user_store_view_type))
-            except StoreViewType.DoesNotExist:
-                user_store_view_type = None
-                print('store view does not exist')
+            context['store_view_type_str'] = 'stream'
+            context['streamfilter_string'] = 'stream filter set by anonymous user'
+            print('store view does not exist, setting to stream for anonymous user')
         else:
             try:
                 user_store_view_type = StoreViewType.objects.get(user=current_user, is_active=1)
                 context['store_view_type_str'] = str(user_store_view_type)
-                context['streamfilter_string'] = f'streamfilter set by {self.request.user.username}'
+                context['streamfilter_string'] = f'stream filter set by {self.request.user.username}'
                 print('store view exists')
                 print(str(user_store_view_type))
             except StoreViewType.DoesNotExist:
-                user_store_view_type = None
-                print('store view does not exist')
+                context['store_view_type_str'] = 'stream'
+                context['streamfilter_string'] = f'stream filter set by {self.request.user.username}'
+                print('store view does not exist, setting to stream for signed-in user')
 
         context['item_filters'] = ItemFilter.objects.filter(is_active=1)
         item_filters = ItemFilter.objects.filter(is_active=1)

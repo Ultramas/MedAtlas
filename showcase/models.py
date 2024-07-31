@@ -2015,10 +2015,14 @@ class Outcome(models.Model):
 
 
 class Achievements(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="achiever")
     title = models.TextField(verbose_name="Achievement Title")
+    description = models.TextField(verbose_name="Description")
     slug = AutoSlugField(populate_from='title', unique=True)
     value = models.IntegerField(blank=True, null=True)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
+    earned = models.BooleanField(default=False)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
@@ -2031,6 +2035,14 @@ class Achievements(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def save(self, *args, **kwargs):
+        # Set the default currency to the first instance of Currency if not already set
+        if not self.currency:
+            first_currency = Currency.objects.first()
+            if first_currency:
+                self.currency = first_currency
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Achievement"

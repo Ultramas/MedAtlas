@@ -345,6 +345,7 @@ urlpatterns = [
     path('directedtradeoffers/<int:trade_item_id>/', views.DirectedTradeOfferView.as_view(), name='directedtradeoffers'),
     path('secretroome/', views.SecretRoomView.as_view(), name='secretroome'),
     path('pack_home/', views.ShufflerBackgroundView.as_view(), name='pack_home'),
+    path('achievements/', views.AchievementsView.as_view(), name='achievements'),
     path('pokespinner/', views.InventoryView.as_view(), name='pokespinner'),
     path('pokechests/', views.PokeChestBackgroundView.as_view(), name='pokechests'),
     path('blackjack/', views.ChestBackgroundView.as_view(), name='blackjack'),

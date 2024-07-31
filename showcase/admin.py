@@ -570,7 +570,7 @@ admin.site.register(Wager, BlackJackWagerAdmin)
 class AchievementsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Achievement  Information - Categorial Descriptions', {
-            'fields': ('title', 'value','type',)
+            'fields': ('title', 'description', 'value','type',)
         }),
         ('Achievement Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',),
