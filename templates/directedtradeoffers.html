@@ -61,6 +61,7 @@
 <a href="{% url 'showcase:decline_response_trade' RespondingTradeOffer.id  %}">Decline Trade</a>
 
         <p style="color: black;">You received a trade request response from {{ RespondingTradeOffer.user.username }}.</p>
+        <!--make sure to show the trade offer received, with a hyperlink to the trade offer-->
     {% else %}
         <p style="color: black;">You received a trade request response.</p>
     {% endif %}
@@ -70,6 +71,7 @@
 {% for RespondingTradeOffer in response_outgoing_requests %}
     {% if RespondingTradeOffer.user2 %}
         <p style="color: black;">You sent a response trade request to {{ RespondingTradeOffer.user2.username }}.</p>
+        <!--make sure to show the trade offer sent, with a hyperlink to the trade offer-->
     {% elif RespondingTradeOffer.trade_offer_exists %}
         <p style="color: black;">The trade has been completed previously, so no recipient is specified.</p>
     {% else %}

@@ -864,7 +864,7 @@ window.onscroll = function() {
 	<!-- end logo carousel -->
 
 	<!-- footer -->
-	<div class="footer-area" style="margin-bottom: -150px;">
+	<div class="footer-area" style="margin-bottom: -450px;">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-3 col-md-6">
@@ -1301,6 +1301,64 @@ Message Box
 }
 
 /*--------------------
+Message 2 Box
+--------------------*/
+.message2-box {
+  flex: 0 1 42px;
+  width: 90%;
+  background: #fff;
+  margin: 2px auto;
+  /*-webkit-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
+  -moz-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
+  box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);*/
+  /*background: rgba(0, 0, 0, 0.3);
+    border-top:1px solid #e3e3e3;*/
+  padding: 10px;
+  position: relative;
+  border-radius: 20px;
+  height: 14px;
+  border: 1px solid #ccc;
+}
+.message2-box .message2-input {
+  background: none;
+  border: none;
+  outline: none !important;
+  resize: none;
+  /* color: rgba(255, 255, 255, .8);*/
+  font-size: 15px;
+  height: 24px;
+  margin: 0;
+  padding-right: 20px;
+  width: 265px;
+  color: #444;
+}
+.message2-box textarea:focus:-webkit-placeholder {
+  color: transparent;
+}
+.message2-box .message2-submit {
+  position: absolute;
+  z-index: 1;
+  top: 9px;
+  right: 10px;
+  color: #4A90E2;
+  border: none;
+  /* background: #c29d5f;*/
+  background: #fff;
+  font-size: 12px;
+  text-transform: uppercase;
+  line-height: 1;
+  padding: 6px 10px;
+  border-radius: 5px;
+  outline: none !important;
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+.message2-box .message2-submit:hover {
+  background: #fff;
+  color: #333;
+}
+
+/*--------------------
 Custom Srollbar
 --------------------*/
 .mCSB_scrollTools {
@@ -1459,25 +1517,24 @@ Bounce
 }
 
 
+.avenue2-messenger {
+    display: none; /* Initially hidden */
+    opacity: 1;
+    border-radius: 20px;
+    height: calc(100% - 60px) !important;
+    max-height: 460px !important;
+    min-height: 220px !important;
+    width: 320px;
+    background: rgba(255, 255, 255, 0.9);
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    margin: auto;
+    z-index: 10;
+    box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
+    -webkit-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
+}
 
-        .avenue2-messenger {
-            /*display: none;*/ /*either always or never hidden*/
-            opacity: 1;
-            border-radius: 20px;
-            height: calc(100% - 60px) !important;
-            max-height: 460px !important;
-            min-height: 220px !important;
-            width: 320px;
-            background: rgba(255, 255, 255, 0.9);
-            position: fixed;
-            left: 20px;
-            bottom: 20px;
-            margin: auto;
-            z-index: 10;
-            box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
-            -webkit-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
-            -moz-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
-        }
 
         .avenue2-messenger div.agent-face {
             position: absolute;
@@ -1801,6 +1858,15 @@ Bounce
 
 <!-- General Chat -->
 <section class="avenue2-messenger" id="chatwidget2">
+    <div class="menu">
+        <div class="items"><span>
+            <a href="#" title="Minimize">&mdash;</a><br>
+            <!--
+            <a href="">enter email</a><br>
+            <a href="">email transcript</a><br>-->
+            <a href="#" title="End Chat">&#10005;</a>
+        </span></div>
+    </div>
     <div class="chat2">
         <div class="chat2-title">
             {% if user.is_authenticated %}
@@ -1808,11 +1874,11 @@ Bounce
                 <br>
                 <h6>PokeTrove General Chat</h6>
             </div>
-            <div class="message" style="overflow: auto;">
+            <div class="message2" style="overflow: auto;">
                 <h2>{{ request.user.username }}</h2>
                 <div id="display-general" class="chat-messages" style="height: 400px; overflow-y: scroll;"></div>
             </div>
-            <div class="message-box">
+            <div class="message2-box">
                 <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
                     <form id="general-post-form" method="post">
                         {% csrf_token %}
@@ -1823,12 +1889,28 @@ Bounce
                 </div>
             </div>
             {% else %}
-            <h5>Guest User</h5>
-            <br>
-            <h6>Please sign in to participate in the chat.</h6>
-        {% endif %}
+                <h5>Guest User</h5>
+                <br>
+                <h6>Please sign in to participate in the chat.</h6>
+            {% endif %}
+        </div>
     </div>
 </section>
+
+<button type="button" onclick="showChatWidget2()">Toggle Chat</button>
+
+<script>
+function showChatWidget2() {
+    var popup = document.getElementById("chatwidget2");
+    if (popup.style.display === "none" || popup.style.display === "") {
+        popup.style.display = "block";
+    } else {
+        popup.style.display = "none";
+    }
+}
+</script>
+
+
 
 <script>
 $(document).ready(function() {
@@ -1879,11 +1961,11 @@ $(document).ready(function() {
                 for (var key in response.messages) {
                     var message = response.messages[key];
                     var messageHtml = `
-                        <div class="message">
+                        <div class="message2">
                             <a href="${message.user_profile_url}">
                                 <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
                             </a>
-                            <div class="message-content">
+                            <div class="message2-content">
                                 <div class="sender">${message.user}</div>
                                 <div>${message.value}</div>
                                 <div class="time">${message.date}</div>
@@ -2020,11 +2102,6 @@ function showMenu() {
 function showChatWidget() {
   var popup = document.getElementById("chatwidget");
   popup.style.display = popup.style.display === "none" ? "block" : "none";
-}
-
-function showChatWidget2() {
-    var popup = document.getElementById("chatwidget2");
-    popup.style.display = (popup.style.display === "none" || popup.style.display === "") ? "block" : "none";
 }
 </script>
 

@@ -14,7 +14,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
-    SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements
+    SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -1909,7 +1909,7 @@ class GameHubView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+        context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['Game'] = GameHub.objects.filter(is_active=1)
         context['form'] = EmailForm()
@@ -8831,19 +8831,25 @@ class ProductView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        item = self.get_object()  # Get the current Item object
+        context['quick_items'] = item.images.all()  # `images` is the related name for QuickItem
         context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        # context['object'] = Item.objects.filter(is_active=1).order_by('slug')  #maybe change to be able to be ordered by different parameters
-        # like slug, price, popularity, type (gold, platinum, emerald, diamond), etc
-        # somehow limited to 3 products on first page, yet products still exist and can be accessed by "view on site"
         return context
 
+
+def product_detail_view(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+    quick_items = item.images.all()  # `images` is the related name for QuickItem
+    context = {
+        'item': item,
+        'quick_items': quick_items,
+    }
+    return render(request, 'product.html', context)
 
 class OrderSummaryView(EBaseView):
     model = OrderBackgroundImage

@@ -167,35 +167,17 @@ img.hover-shadow {
 <br>
 <br>
 
-            <h4 style="color: white;">Gallery</h4>
-<div class="row">
-  <div class="column" style="width: 15%;">
-    <img src="{{item.image.url}}" style="width:35; height: 35%;" onclick="openModal();currentSlide(1)" class="hover-shadow cursor">
-  </div>
-  <div class="column" style="width: 15%;">
-    {% if item.image2 %}
-    <img src="{{item.image2.url}}" style="width:35; height: 35%;" onclick="openModal();currentSlide(2)" class="hover-shadow cursor">
-    {% endif %}
-  </div>
-  <div class="column" style="width: 15%;">
-
-      {% if item.image3 %}
-    <img src="{{item.image3.url}}" style="width:35; height: 35%;" onclick="openModal();currentSlide(3)" class="hover-shadow cursor">
-      {% endif %}
-  </div>
-
-  <div class="column" style="width: 15%;">
-
-      {% if item.image4 %}
-    <img src="{{item.image4.url}}" style="width:35; height: 35%;" onclick="openModal();currentSlide(4)" class="hover-shadow cursor">
-      {% endif %}
-  </div>
-  <div class="column" style="width: 15%;">
-
-    {% if item.image5 %}
-    <img src="{{item.image5.url}}" style="width:35; height: 35%;" onclick="openModal();currentSlide(5)" class="hover-shadow cursor">
-    {% endif %}
-  </div>
+<h4 style="color: white;">Gallery</h4>
+    <div class="row">
+        <div class="column" style="width: 15%;">
+            <img src="{{ item.image.url }}" style="width: 95%; height: 95%;" onclick="openModal();currentSlide(1)" class="hover-shadow cursor">
+        </div>
+        {% for quick_item in quick_items %}
+        <div class="column" style="width: 15%;">
+            <img src="{{ quick_item.image.url }}" style="width:95%; height: 95%;" onclick="openModal();currentSlide({{ forloop.counter|add:1 }})" class="hover-shadow cursor">
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <div id="myModal" class="modal">
@@ -323,7 +305,7 @@ function showSlides(n) {
         <!--Grid column-->
 
         <!--Grid column-->
-        <div class="col-md-6 mb-4" style="padding: 5%;">
+        <div class="col-md-6 mb-4" style="padding: 5%; position: absolute; right: 0; width: 50%; top: 20%;">
 
           <!--Content-->
           <div class="p-4">
@@ -373,7 +355,9 @@ function showSlides(n) {
         </a>
     {% else %}
         <!-- Placeholder image or default avatar -->
-                   <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;"><h5 style="color: white; margin-left: 10px;">Anonymous Seller</h5>
+                   <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;"><h5 style="color: white; margin-left: 10px;">
+
+              </h5>
     {% endif %}
     <p style="color: white; margin-left: 10px; font-size: 20px;">{{ object.user.username }}</p>
 </div>
@@ -400,7 +384,7 @@ function showSlides(n) {
             <a href="{{ object.get_remove_from_cart_url }}" class="btn btn-danger btn-md my-0 p" >Remove From Cart
                 <i class="fas fa-trash ml-1"></i>
             </a>
-           
+
 
           </div>
           <!--Content-->

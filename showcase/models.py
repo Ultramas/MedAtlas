@@ -4272,6 +4272,7 @@ class Item(models.Model):
     discount_price = models.DecimalField(max_digits=16, decimal_places=2, blank=True, null=True)
     discount_currency_price = models.IntegerField(blank=True, null=True)
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
+    type = models.ForeignKey(ItemFilter, on_delete=models.CASCADE, blank=True, null=True)
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
     label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default='N')  # can use for cataloging products
     slug = models.SlugField(unique=True, blank=True, null=True)  # might change to automatically get the slug
@@ -4324,7 +4325,7 @@ class Item(models.Model):
             if first_currency:
                 self.currency = first_currency
         if not self.slug:
-            slug = self.slug
+            slug = slugify(self.title)
         if not self.price and not self.discount_price:
             self.is_currency_based = True
         super().save(*args, **kwargs)
@@ -4540,8 +4541,8 @@ class TradeOffer(models.Model):
         return reverse('showcase:directedtradeoffers', args=[str(self.slug)])
 
     def save(self, *args, **kwargs):
-        if not self.trade_agreement:
-            raise ValidationError("Trade agreement must be true to create a trade offer.")
+       #if not self.trade_agreement:
+       #    raise ValidationError("Trade agreement must be true to create a trade offer.")
         if not self.slug:
             print("Title:", self.title)  # Print the title
             self.slug = slugify(self.title)
@@ -4628,7 +4629,8 @@ class TradeShippingLabel(models.Model):
     class Meta:
         verbose_name = "Trade Shipping Profile"
         verbose_name_plural = "Trade Shipping Profiles"
-        unique_together = ('user', 'id',)
+    unique_together = ('user', 'id',)
+
 
 
 """
@@ -4777,7 +4779,6 @@ class Trade(models.Model):
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='traders')
     trade_user = models.ForeignKey(UserProfile2, on_delete=models.CASCADE, blank=True, null=True,
                                    verbose_name="Dealer", related_name='dealer_trades')
-
     trade_user2 = models.ForeignKey(UserProfile2, on_delete=models.CASCADE, blank=True,
                                     null=True, help_text="Optional", verbose_name="Recipient",
                                     related_name='recipient_trades')
@@ -4809,6 +4810,43 @@ class Trade(models.Model):
     class Meta:
         verbose_name = "Trade"
         verbose_name_plural = "Trades"
+
+
+class TradeContract(models.Model):
+    commission = models.FloatField(default=10)
+    trading_contract = models.TextField()
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.trading_contract)
+
+    class Meta:
+        verbose_name = "Trade Contract"
+        verbose_name_plural = "Trade Contracts"
+
+
+class TradeConfirmation(models.Model):
+    trade = models.ForeignKey(Trade, on_delete=models.CASCADE, related_name='tradeconfirm')
+    trader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='traderconfirm')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE)
+    trade_confirmation = models.BooleanField('I confirm that I agree to these terms & conditions for the trade.', default=False)
+    trading_contract = models.ForeignKey(Trade, on_delete=models.CASCADE, related_name='contract')
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.trader) + "'s confirmed trade with " + str(self.recipient)
+
+    class Meta:
+        verbose_name = "Trade Confirmation"
+        verbose_name_plural = "Trade Confirmations"
 
 
 class ChatBackgroundImage(models.Model):
