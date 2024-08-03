@@ -4272,6 +4272,7 @@ class Item(models.Model):
     discount_price = models.DecimalField(max_digits=16, decimal_places=2, blank=True, null=True)
     discount_currency_price = models.IntegerField(blank=True, null=True)
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
+
     type = models.ForeignKey(ItemFilter, on_delete=models.CASCADE, blank=True, null=True)
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
     label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default='N')  # can use for cataloging products
