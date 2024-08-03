@@ -215,7 +215,6 @@ urlpatterns = [
     path('pricing/', TemplateView.as_view(template_name='pricing.html'), name='pricing'),
     path('whydonate/', views.WhyBackgroundView.as_view(), name='whydonate'),
     path('users/', TemplateView.as_view(template_name='users.html'), name='users'),
-    path('share/', TemplateView.as_view(template_name='share.html'), name='share'),
     #path('events/', TemplateView.as_view(template_name='events.html'), name='events'),
     path('newsfeed/', views.NewsBackgroundView.as_view(), name='newsfeed'),
     path('singlenews/<slug:slug>/', views.SingleNewsView.as_view(), name='singlenews'),
