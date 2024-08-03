@@ -5329,7 +5329,10 @@ class Order(models.Model):
    '''
 
     def __str__(self):
-        return self.user.username
+        if str(self.being_delivered) == 'False':
+            return self.user.username + " " + str(self.items) + " - Not Shipped"
+        else:
+            return self.user.username + " " + str(self.items) + " - Shipped"
 
     def get_total_price(self):
         total = 0
