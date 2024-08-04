@@ -1,7 +1,6 @@
 import string
 import uuid
 from uuid import uuid4
-from venv import logger
 
 from PIL import Image
 from decimal import Decimal
@@ -5027,6 +5026,8 @@ class OrderItem(models.Model):
                                               verbose_name="image width")
     quantity = models.IntegerField(default=1)
     order_date = models.DateTimeField(auto_now_add=True, verbose_name="Order date")
+    orderprice = models.FloatField(blank=True, null=True, verbose_name="Order price")
+    currencyorderprice = models.FloatField(blank=True, null=True, verbose_name="Curency order price")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -5039,11 +5040,13 @@ class OrderItem(models.Model):
     def get_total_item_price(self):
         if self.item.discount_price:
             return self.quantity * self.get_discount_item_price()
+        self.orderprice = self.quantity * self.item.price
         return self.quantity * self.item.price
 
     def get_total_item_currency_price(self):
         if self.item.discount_currency_price:
             return self.quantity * self.get_discount_item_currency_price()
+        self.currencyorderprice = self.quantity * self.item.currency_price
         return self.quantity * self.item.currency_price
 
     def get_item_price(self):
@@ -5296,7 +5299,9 @@ class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
     items = models.ManyToManyField(OrderItem)
-    itemhistory = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name="Order history", null=True)
+    orderprice = models.FloatField(blank=True, null=True, verbose_name="Order price")
+    currencyorderprice = models.FloatField(blank=True, null=True, verbose_name="Currency order price")
+    itemhistory = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name="Order history", blank=True, null=True)
     feedback_url = models.URLField(blank=True)
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField()
@@ -5335,10 +5340,12 @@ class Order(models.Model):
             return self.user.username + " " + str(self.items) + " - Shipped"
 
     def get_total_price(self):
+
         total = 0
         for order_item in self.items.all():
             if order_item.item.price:
                 total += order_item.get_final_price()
+                self.orderprice = total
         return total
 
     def get_total_currency_price(self):
@@ -5346,6 +5353,7 @@ class Order(models.Model):
         for order_item in self.items.all():
             if order_item.item.currency_price:
                 currency_total += order_item.get_final_currency_price()
+                self.currencyorderprice = currency_total
         return currency_total
 
     def deduct_currency_amount(self):

@@ -744,7 +744,7 @@ class CommentAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Order Item Information - Order Outline', {
-            'fields': ('user', 'items', 'itemhistory', 'coupon',),
+            'fields': ('user', 'items', 'itemhistory', 'coupon', 'orderprice', 'currencyorderprice',),
             'classes': ('collapse',),
         }),
         ('Order Item Information - Personal Information', {
@@ -905,7 +905,7 @@ admin.site.unregister(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Order Item Information - Categorial Description', {
-            'fields': ('user', 'ordered', 'quantity', 'item',),
+            'fields': ('user', 'ordered', 'quantity', 'item', 'orderprice', 'currencyorderprice',),
             'classes': ('collapse',),
         }),
         ('Order Item Information - Image Display', {
