@@ -1551,7 +1551,8 @@ div.owl-controls, .owl-controls div {
 
 ----------------------------------------------------------------------------- */
 .list-section {
-  background-color: #f5f5f5;
+  background: rgb(52,72,73);
+background: linear-gradient(0deg, rgba(52,72,73,0.32647653788077735) 0%, rgba(213,213,213,0) 100%);
 }
 
 .list-box {

@@ -1234,9 +1234,20 @@ class TradeProposalForm(forms.ModelForm):
 
 
 class FriendRequestForm(forms.ModelForm):
+    receiver = forms.CharField(widget=forms.TextInput(
+        attrs={'placeholder': 'You can add friends with their username.'}))
+
     class Meta:
         model = FriendRequest
         fields = ['receiver']  # or any other fields you want in the form
+
+    def clean_receiver(self):
+        receiver_username = self.cleaned_data['receiver']
+        try:
+            receiver = User.objects.get(username=receiver_username)
+        except User.DoesNotExist:
+            raise ValidationError("User with this username does not exist.")
+        return receiver
 
 
 class FriendRequestAcceptanceForm(forms.ModelForm):

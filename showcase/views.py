@@ -1909,7 +1909,11 @@ class GameHubView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
+        try:
+            context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
+        except ObjectDoesNotExist:
+            context['SentProfile'] = None  # or some default value
+        """if the user has no profile, allow it anyway"""
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['Game'] = GameHub.objects.filter(is_active=1)
         context['form'] = EmailForm()
@@ -1939,7 +1943,10 @@ class GameRoomView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+        try:
+            context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
+        except ObjectDoesNotExist:
+            context['SentProfile'] = None  # or some default value
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['Game'] = GameHub.objects.filter(is_active=1).first()
         context['GameRoom'] = Game.objects.filter(is_active=1).first()
@@ -4178,6 +4185,7 @@ class FriendlyView(LoginRequiredMixin, View):
                    'DropDown': NavBar.objects.filter(is_active=1).order_by('position')}
         current_user = request.user
 
+        newprofile = Friend.objects.filter(is_active=1)
         context['Profiles'] = newprofile
 
         for newprofile in context['Profiles']:
@@ -7124,6 +7132,12 @@ def decline_response_trade(request, request_id):
 class TradeHistory(ListView):
     model = Trade
     template_name = "mytrades.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            messages.warning(request, 'You must be signed in to access this feature!')
+            return redirect(reverse('showcase:account_login'))  # Ensure this name matches the name in your urls.py
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
 
