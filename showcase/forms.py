@@ -388,7 +388,6 @@ class Trade_In_Form(forms.ModelForm):
 # image = forms.ImageField(required=False)
 
 
-
 class SettingsForm(forms.ModelForm):
     class Meta:
         model = SettingsModel

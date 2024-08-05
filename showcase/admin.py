@@ -5,7 +5,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
-    GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements
+    GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -570,7 +570,7 @@ admin.site.register(Wager, BlackJackWagerAdmin)
 class AchievementsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Achievement  Information - Categorial Descriptions', {
-            'fields': ('title', 'description', 'value','type',)
+            'fields': ('title', 'description', 'value','type', 'currency',)
         }),
         ('Achievement Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',),
@@ -940,6 +940,13 @@ class OrderItemFieldAdmin(admin.ModelAdmin):
 
 
 admin.site.register(OrderItemField, OrderItemFieldAdmin)
+
+
+@admin.register(AdministrationChangeLog)
+class AdministrationChangeLogAdmin(admin.ModelAdmin):
+    list_display = ('model_name', 'object_id', 'change_type', 'timestamp', 'user')
+    search_fields = ('model_name', 'change_type', 'user__username')
+    list_filter = ('model_name', 'change_type', 'timestamp')
 
 
 class RoomAdmin(admin.ModelAdmin):

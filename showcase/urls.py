@@ -20,7 +20,7 @@ from django.views.generic.base import TemplateView
 from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, BlogSearchResultsView, \
     currency_remove_from_cart, currency_add_to_cart, currency_reduce_quantity_item, submit_seller_application, \
     PlaceWagerView, update_wager, SendFriendRequestView, FriendSearchResultsView, GameCategorySearchResultsView, \
-    GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView
+    GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView, changelog_view
 
 # remove this:
 # from . import settings
@@ -513,6 +513,7 @@ urlpatterns = [
     path('charge/', views.charge, name='charge'),
     path('patreoned/<str:args>/', views.PatreonedView.as_view(), name='patreoned'),
     path('accounts/login/', auth_views.LoginView.as_view(), name='account_login'),
+    path('administrationchangelog/', views.changelog_view, name='administrationchangelog'),
     # (r'^accounts/update/(?P<pk>[\-\w]+)/$', views.edit_user, name='account_update'),
     path('support/', views.SupportBackgroundView.as_view(), name="support"),
     path('accounts/change-password/', views.change_password, name="accounts/change-password"),

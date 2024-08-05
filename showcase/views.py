@@ -1146,64 +1146,65 @@ class ChatBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['Friends'] = Friend.objects.filter(user=self.request.user)
+
+        if self.request.user.is_authenticated:
+            context['Friends'] = Friend.objects.filter(user=self.request.user)
+
+            current_user = self.request.user
+            newprofile = UserProfile2.objects.filter(is_active=1, user=current_user)
+            context['Profiles'] = newprofile
+
+            for newprofile in context['Profiles']:
+                user = newprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    newprofile.newprofile_profile_picture_url = profile.avatar.url
+                    newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+            onlineprofile = Friend.objects.filter(is_active=1, user=current_user)
+            context['OnlineProfiles'] = onlineprofile
+
+            for onlineprofile in context['OnlineProfiles']:
+                friend = onlineprofile.friend
+                activeprofile = ProfileDetails.objects.filter(user=friend).first()
+                if activeprofile:
+                    onlineprofile.author_profile_picture_url = profile.avatar.url
+                    onlineprofile.friend_profile_picture_url = activeprofile.avatar.url
+                    onlineprofile.author_profile_url = onlineprofile.get_profile_url()
+                    onlineprofile.friend_name = onlineprofile.friend.username
+                    print('activeprofile exists')
+
+            friends = Friend.objects.filter(user=self.request.user)
+            friends_data = []
+
+            for friend in friends:
+                profile = ProfileDetails.objects.filter(user=friend.friend).first()
+                if profile:
+                    friends_data.append({
+                        'username': friend.friend.username,
+                        'profile_picture_url': profile.avatar.url,
+                        'profile_url': reverse('showcase:profile', args=[str(profile.pk)]),
+                        'currently_active': friend.currently_active,
+                        'user_profile_url': friend.get_profile_url2()
+                    })
+
+            context['friends_data'] = friends_data
+
+            search_term = self.request.GET.get('search', '')
+            if search_term:
+                context = self.search_friends(context)
+        else:
+            context['Friends'] = []
+            context['Profiles'] = []
+            context['OnlineProfiles'] = []
+            context['friends_data'] = []
+            context['search_results'] = []
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
-
-        current_user = self.request.user
-        newprofile = UserProfile2.objects.filter(is_active=1, user=current_user)
-
-        context['Profiles'] = newprofile
-
-        for newprofile in context['Profiles']:
-            user = newprofile.user
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
-
-        onlineprofile = Friend.objects.filter(is_active=1, user=current_user)
-
-        context['OnlineProfiles'] = onlineprofile
-
-        for onlineprofile in context['OnlineProfiles']:
-            friend = onlineprofile.friend
-            activeprofile = ProfileDetails.objects.filter(user=friend).first()
-            if activeprofile:
-                onlineprofile.author_profile_picture_url = profile.avatar.url
-                onlineprofile.friend_profile_picture_url = activeprofile.avatar.url
-                onlineprofile.author_profile_url = onlineprofile.get_profile_url()
-                onlineprofile.friend_name = onlineprofile.friend.username
-                print('activeprofile exists')
-
-        friends = Friend.objects.filter(user=self.request.user)
-
-        # Prepare a list to hold the friends' data
-        friends_data = []
-
-        for friend in friends:
-            # Get the friend's profile
-            profile = ProfileDetails.objects.filter(user=friend.friend).first()
-
-            if profile:
-                # Add the friend's data to the list
-                friends_data.append({
-                    'username': friend.friend.username,
-                    'profile_picture_url': profile.avatar.url,
-                    'profile_url': reverse('showcase:profile', args=[str(profile.pk)]),
-                    'currently_active': friend.currently_active,
-                    'user_profile_url' : friend.get_profile_url2()
-                })
-
-        # Add the friends' data to the context
-        context['friends_data'] = friends_data
-
-        search_term = self.request.GET.get('search', '')
-        if search_term:
-            context = self.search_friends(context)  # Call search_friends if search term exists
 
         return context
 
@@ -1212,38 +1213,33 @@ class ChatBackgroundView(BaseView):
         if search_term:
             item_list = Friend.objects.filter(
                 Q(friend__username__icontains=search_term)
-            ).prefetch_related('friend')  # Prefetch the friend object
+            ).prefetch_related('friend')
 
-            # Prepare a list to hold the searched friends' data
             search_results_data = []
             current_user = self.request.user
 
             for friend in item_list:
-
                 profile = ProfileDetails.objects.filter(user=friend.friend).first()
-
                 if profile:
                     search_results_data.append({
                         'username': friend.friend.username,
                         'profile_picture_url': profile.avatar.url if profile else None,
-                        # Handle cases where profile might be missing
                         'profile_url': reverse('showcase:profile', args=[str(profile.pk)]),
                         'currently_active': friend.currently_active,
                     })
                     print('the friend does have a profile')
                 else:
-                    # Handle cases where profile details might be missing (optional)
                     search_results_data.append({
                         'username': friend.friend.username,
-                        'profile_picture_url': None,  # Set to None or a default image URL
+                        'profile_picture_url': None,
                         'profile_url': reverse('showcase:profile', args=[str(friend.friend.pk)]),
                         'currently_active': friend.currently_active,
                     })
                     print('no profile on the friend')
 
-            context['search_results'] = search_results_data  # Update context with search results data
+            context['search_results'] = search_results_data
         else:
-            context['search_results'] = []  # Empty list if no search
+            context['search_results'] = []
 
         return context
 
@@ -7246,6 +7242,12 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
     template_name = "settings.html"
     success_url = reverse_lazy('showcase:myaccount')
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            messages.warning(request, 'You must be signed in to access this feature!')
+            return redirect(reverse('showcase:account_login'))  # Ensure this name matches the name in your urls.py
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -7289,6 +7291,14 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
         settings_model.save()
 
         return super().form_valid(form)
+
+from django.shortcuts import render
+from .models import AdministrationChangeLog
+
+def changelog_view(request):
+    changelogs = AdministrationChangeLog.objects.all()
+    context = {'changelogs': changelogs}
+    return render(request, 'administrationchangelog.html', context)
 
 
 class HomePageView(TemplateView):

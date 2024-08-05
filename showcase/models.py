@@ -1368,13 +1368,6 @@ class ReportIssue(models.Model):
     def __str__(self):
         return self.issue + " reported by " + str(self.user)
 
-    # class Changelog(models.Model):
-    #  name = models.CharField(max_length = 100, help_text='Your name and tag go here. If you wish to stay anonymous, put "Anonymous".')
-    #  category = models.CharField(max_length = 200, help_text='Please let us know what type of issue this is.')
-    #  issue = models.TextField(help_text='Describe the issue in detail. We will try to get to it as soon as possible.')
-    #  Additional_comments = models.TextField(help_text='Put any additional evidence or comments you may have here.')
-    #  image = models.FileField(help_text='Please put a screenshot of the issue.')
-
     class Meta:
         verbose_name = "Report Issue"
         verbose_name_plural = "Report Issues"
@@ -1394,6 +1387,25 @@ class ReportIssue(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
+
+from django.contrib.auth import get_user_model  # Add this import
+
+
+class AdministrationChangeLog(models.Model):
+    model_name = models.CharField(max_length=100)
+    object_id = models.PositiveIntegerField()
+    change_type = models.CharField(max_length=50)  # e.g., created, updated, deleted
+    changed_data = models.TextField()  # JSON or any other format
+    timestamp = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True)  # Use get_user_model
+
+    def __str__(self):
+        return f"{self.model_name} ({self.change_type})"
+
+    class Meta:
+        verbose_name = "Administration Change Log"
+        verbose_name_plural = "Administration Change Logs"
 
 
 class Support(models.Model):
@@ -3700,7 +3712,6 @@ class BanAppealBackgroundImage(models.Model):
 # user_profile.save()
 # post_save.connect(create_profile, sender=User)
 
-from django.contrib.auth import get_user_model
 
 # link the profiledetails page to settings
 from django.db.models import Q

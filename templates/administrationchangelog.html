@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Change Log</title>
+</head>
+<body>
+    <h1>Change Log</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Model Name</th>
+                <th>Object ID</th>
+                <th>Change Type</th>
+                <th>Timestamp</th>
+                <th>User</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in changelogs %}
+            <tr>
+                <td>{{ log.model_name }}</td>
+                <td>{{ log.object_id }}</td>
+                <td>{{ log.change_type }}</td>
+                <td>{{ log.timestamp }}</td>
+                <td>{{ log.user }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
