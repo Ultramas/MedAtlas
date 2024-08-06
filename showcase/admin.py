@@ -942,11 +942,20 @@ class OrderItemFieldAdmin(admin.ModelAdmin):
 admin.site.register(OrderItemField, OrderItemFieldAdmin)
 
 
-@admin.register(AdministrationChangeLog)
 class AdministrationChangeLogAdmin(admin.ModelAdmin):
-    list_display = ('model_name', 'object_id', 'change_type', 'timestamp', 'user')
-    search_fields = ('model_name', 'change_type', 'user__username')
-    list_filter = ('model_name', 'change_type', 'timestamp')
+    list_display = ('user', 'action', 'model', 'object_id', 'timestamp')
+    list_filter = ('action', 'model', 'timestamp', 'user')
+    search_fields = ('user__username', 'model', 'object_id')
+
+    def has_add_permission(self, request):
+        # Disable adding logs manually
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        # Disable editing logs manually
+        return False
+
+admin.site.register(AdministrationChangeLog, AdministrationChangeLogAdmin)
 
 
 class RoomAdmin(admin.ModelAdmin):

@@ -67,7 +67,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_otp',
     'django_otp.plugins.otp_totp',
-    'showcase',
     'crispy_forms',
     'crispy_bootstrap4',
     'django_private_chat2.apps.DjangoPrivateChat2Config',
@@ -79,6 +78,7 @@ INSTALLED_APPS = [
     'favicon',
     'rest_framework',
     'sslserver',
+    'showcase.apps.ShowcaseConfig',  # Ensure this is the correct path
     # 'django.chatbot',
     # 'chat',
 ]
@@ -104,7 +104,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'showcase.middleware.CurrentUserMiddleware',
+    'showcase.utils.CurrentUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]

@@ -1393,19 +1393,25 @@ from django.contrib.auth import get_user_model  # Add this import
 
 
 class AdministrationChangeLog(models.Model):
-    model_name = models.CharField(max_length=100)
+    ACTION_CHOICES = [
+        ('create', 'Create'),
+        ('update', 'Update'),
+        ('delete', 'Delete'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    action = models.CharField(max_length=6, choices=ACTION_CHOICES)
+    model = models.CharField(max_length=100)
     object_id = models.PositiveIntegerField()
-    change_type = models.CharField(max_length=50)  # e.g., created, updated, deleted
-    changed_data = models.TextField()  # JSON or any other format
-    timestamp = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True)  # Use get_user_model
+    timestamp = models.DateTimeField(default=timezone.now)
+    changes = models.JSONField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.model_name} ({self.change_type})"
+        return f'{self.user} {self.action} {self.model} {self.object_id} at {self.timestamp}'
 
     class Meta:
-        verbose_name = "Administration Change Log"
-        verbose_name_plural = "Administration Change Logs"
+        verbose_name = "Administration Changelog"
+        verbose_name_plural = "Administration Changelogs"
 
 
 class Support(models.Model):

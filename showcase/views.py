@@ -7300,6 +7300,22 @@ def changelog_view(request):
     context = {'changelogs': changelogs}
     return render(request, 'administrationchangelog.html', context)
 
+def get_changes(instance):
+    if not instance.pk:
+        return None
+    old_instance = instance.__class__.objects.get(pk=instance.pk)
+    changes = {}
+    for field in instance._meta.fields:
+        field_name = field.name
+        old_value = getattr(old_instance, field_name)
+        new_value = getattr(instance, field_name)
+        if old_value != new_value:
+            changes[field_name] = {
+                'old': old_value,
+                'new': new_value
+            }
+    return changes
+
 
 class HomePageView(TemplateView):
     template_name = 'index.html'
