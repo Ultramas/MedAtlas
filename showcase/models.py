@@ -4744,6 +4744,7 @@ class TradeShippingLabel(models.Model):
     trade_offer = models.ForeignKey(TradeOffer, on_delete=models.CASCADE)
     # responding_trade_offer = models.OneToOneField(RespondingTradeOffer, on_delete=models.CASCADE)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    shipping_profile = models.ForeignKey(UserProfile2, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100, default='')
     last_name = models.CharField(max_length=100, default='')
     description = models.CharField(max_length=100, default='')
@@ -4761,11 +4762,24 @@ class TradeShippingLabel(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return str(self.user) + "'s shipping profile"
+        return str(self.user) + "'s shipping label"
+
+    def save(self, *args, **kwargs):
+        if self.user.shipping_profile:
+            if not self.first_name:
+                self.first_name = self.user.first_name()
+                self.last_name = self.user.last_name()
+                self.address = self.user.address()
+                self.address2 = self.user.address2()
+                self.city = self.user.city()
+                self.state = self.user.state()
+                self.zip_code = self.user.zip_code()
+                self.phone_number = self.user.phone_number()
+        super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name = "Trade Shipping Profile"
-        verbose_name_plural = "Trade Shipping Profiles"
+        verbose_name = "Trade Shipping Label"
+        verbose_name_plural = "Trade Shipping Labels"
     unique_together = ('user', 'id',)
 
 
@@ -4950,7 +4964,7 @@ class Trade(models.Model):
 
 
 class TradeContract(models.Model):
-    commission = models.FloatField(default=10)
+    commission = models.FloatField(default=10, help_text="(%)")
     trading_contract = models.TextField()
     is_active = models.IntegerField(default=1,
                                     blank=True,

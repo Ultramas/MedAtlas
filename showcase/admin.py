@@ -5,7 +5,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
-    GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog
+    GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -118,6 +118,20 @@ class TradeShippingLabelAdmin(admin.ModelAdmin):
 
 
 admin.site.register(TradeShippingLabel, TradeShippingLabelAdmin)
+
+
+class TradeContractAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Trade Contract Information - Personal Information', {
+            'fields': ('commission', 'trading_contract',)
+        }),
+        ('Trade Contract Information - Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+
+
+admin.site.register(TradeContract, TradeContractAdmin)
 
 
 class categoryAdmin(admin.ModelAdmin):

@@ -19,40 +19,39 @@ def create_profile(sender, instance, created, **kwargs):
 #        profile = Profile(user=user)
 #        profile.save()
 
-
-from .middleware import get_current_user
-
-import json
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from .models import AdministrationChangeLog, Product
-from .middleware import get_current_user
-
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
-from django.contrib.contenttypes.models import ContentType
 from .models import AdministrationChangeLog
-from .utils import get_current_user, get_changes  # Assuming these are defined in utils.py
+from .utils import get_current_user, get_changes
+
+
 
 @receiver(post_save)
 def log_model_save(sender, instance, created, **kwargs):
     if sender == AdministrationChangeLog:
         return
 
-    action = 'create' if created else 'update'
     user = get_current_user()
+    if not user or not isinstance(user, get_user_model()):  # Check if there is no valid user
+        return
+
+    action = 'create' if created else 'update'
     model_name = ContentType.objects.get_for_model(sender).model
     changes = get_changes(instance) if not created else None
 
-    AdministrationChangeLog.objects.create(
-        user=user,
-        action=action,
-        model=model_name,
-        object_id=instance.pk,
-        changes=changes
-    )
+    try:
+        AdministrationChangeLog.objects.create(
+            user=user,
+            action=action,
+            model=model_name,
+            object_id=instance.pk,
+            changes=changes
+        )
+    except ValueError as e:
+        # Log the error or handle it appropriately
+        print(f"Error creating AdministrationChangeLog: {e}")
 
 @receiver(post_delete)
 def log_model_delete(sender, instance, **kwargs):
@@ -60,11 +59,18 @@ def log_model_delete(sender, instance, **kwargs):
         return
 
     user = get_current_user()
+    if not user or not isinstance(user, get_user_model()):  # Check if there is no valid user
+        return
+
     model_name = ContentType.objects.get_for_model(sender).model
 
-    AdministrationChangeLog.objects.create(
-        user=user,
-        action='delete',
-        model=model_name,
-        object_id=instance.pk
-    )
+    try:
+        AdministrationChangeLog.objects.create(
+            user=user,
+            action='delete',
+            model=model_name,
+            object_id=instance.pk
+        )
+    except ValueError as e:
+        # Log the error or handle it appropriately
+        print(f"Error creating AdministrationChangeLog: {e}")
