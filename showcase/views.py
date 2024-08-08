@@ -14,7 +14,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
-    SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem
+    SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -102,7 +102,8 @@ from .models import AdminPages
 from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, SellerApplicationForm, \
     MemeForm, CurrencyCheckoutForm, CurrencyPaymentForm, CurrencyPaypalPaymentForm, HitStandForm, WagerForm, \
     DirectedTradeOfferForm, FriendRequestForm, RespondingTradeOfferForm, ShippingForm, EndowmentForm, UploadCardsForm, \
-    RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, GameForm, CardUploading, GameForm, MoveToTradeForm
+    RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, GameForm, CardUploading, GameForm, MoveToTradeForm, \
+    SpinPreferenceForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -1636,6 +1637,16 @@ def game_detail(request, game_id):
     })
 
 
+def save_spin_preference(request):
+    if request.method == "POST" and request.is_ajax():
+        quick_spin = request.POST.get('quick_spin') == 'true'
+        spinpreference, created = SpinPreference.objects.get_or_create(user=request.user)
+        spinpreference.quick_spin = quick_spin
+        spinpreference.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
+
+
 class GameChestBackgroundView(TemplateView):
     template_name = "game.html"
 
@@ -1686,11 +1697,29 @@ class GameChestBackgroundView(TemplateView):
             if profile:
                 newprofile.newprofile_profile_picture_url = profile.avatar.url
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
+                # Move the SpinPreference handling here
+        try:
+            spinpreference = SpinPreference.objects.get(user=self.request.user)
+        except SpinPreference.DoesNotExist:
+            spinpreference = SpinPreference(user=self.request.user, quick_spin=False)
+            spinpreference.save()
 
-        # Generate a random fixed amount between 50 and 100
-        random_amount = random.randint(50, 100)
+        context['quick_spin'] = spinpreference.quick_spin
+        context['spinpreference'] = spinpreference
+
+        # Initialize the form with spinpreference instance
+        spinform = SpinPreferenceForm(instance=spinpreference)
+        context['spin_preference_form'] = spinform
+
+        # Determine the random amount based on quick_spin preference
+        if spinpreference.quick_spin:
+            random_amount = random.randint(500, 1000)
+        else:
+            random_amount = random.randint(150, 300)
+
         context['random_amount'] = random_amount
         context['range_random_amount'] = range(random_amount)
+        print(str('the random amount is ') + str(random_amount))
 
         # Generate a list of random nonces
         random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
@@ -1731,7 +1760,16 @@ class GameChestBackgroundView(TemplateView):
         SpinnerChoiceRenders.take_up_slot(user=user, game=game, choice=choice, value=100, ratio=2, type=game.type,
                                           image=choice.image.url, color=choice.color)
 
-    def post(self, request, *args, **kwargs):
+    def save_spin_preference(request):
+        if request.method == "POST" and request.is_ajax():
+            quick_spin = request.POST.get('quick_spin') == 'true'
+            spinpreference, created = SpinPreference.objects.get_or_create(user=request.user)
+            spinpreference.quick_spin = quick_spin
+            spinpreference.save()
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False}, status=400)
+
+    def wager(self, request, *args, **kwargs):
         form = WagerForm(request.POST, user_profile=request.user.user_profile)
         if form.is_valid():
             wager = form.save(commit=False)
@@ -1741,6 +1779,15 @@ class GameChestBackgroundView(TemplateView):
         else:
             # If the form is not valid, re-render the page with the form errors
             return self.get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            quick_spin = request.POST.get('quick_spin') == 'true'
+            spinpreference, created = SpinPreference.objects.get_or_create(user=request.user)
+            spinpreference.quick_spin = quick_spin
+            spinpreference.save()
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False}, status=400)
 
     @csrf_exempt
     def create_outcome(request, slug):

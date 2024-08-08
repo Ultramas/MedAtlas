@@ -10,7 +10,7 @@ from mysite import settings
 from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme, TradeOffer, \
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
-    SPECIAL_CHOICES, QuickItem
+    SPECIAL_CHOICES, QuickItem, SpinPreference
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -1415,6 +1415,12 @@ class EmailForm(forms.ModelForm):
 
         # description = forms.CharField(widget = forms.EmailInput
         # (attrs={'placeholder':'Enter your email'}))
+
+
+class SpinPreferenceForm(forms.ModelForm):
+    class Meta:
+        model = SpinPreference
+        fields = ['quick_spin']
 
 
 class QuestionForm(forms.Form):

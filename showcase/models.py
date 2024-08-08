@@ -2126,8 +2126,24 @@ class Choice(models.Model):
         verbose_name_plural = "Choices"
 
 
+class SpinPreference(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="spinpreferer")
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, blank=True, null=True)
+    quick_spin = models.BooleanField(default=False)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    class Meta:
+        verbose_name = "Spin Preference"
+        verbose_name_plural = "Spin Preferences"
+
+
 class Outcome(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="player")
+    quick_spin = models.BooleanField(default=False)
     slug = AutoSlugField(populate_from='nonce', unique=True)
     value = models.IntegerField(blank=True, null=True)
     ratio = models.IntegerField(blank=True, null=True)

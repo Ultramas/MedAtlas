@@ -5,7 +5,8 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
-    GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips
+    GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
+    SpinPreference
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -146,6 +147,20 @@ class BlogTipsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(BlogTips, BlogTipsAdmin)
+
+
+class SpinPreferenceAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Spin Preference Information - Personal Information', {
+            'fields': ('game', 'user', 'quick_spin',)
+        }),
+        ('Spin Preference Information - Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+
+
+admin.site.register(SpinPreference, SpinPreferenceAdmin)
 
 
 class categoryAdmin(admin.ModelAdmin):
