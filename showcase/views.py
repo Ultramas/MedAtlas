@@ -1664,10 +1664,13 @@ class GameChestBackgroundView(TemplateView):
         # Pass the game as a list
         context['game'] = game
 
-
-        try:
-            context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
-        except UserProfile.DoesNotExist:
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+            except UserProfile.DoesNotExist:
+                context['SentProfile'] = None
+        else:
             context['SentProfile'] = None
 
         context['Money'] = Currency.objects.filter(is_active=1).first()
@@ -1698,14 +1701,19 @@ class GameChestBackgroundView(TemplateView):
                 newprofile.newprofile_profile_picture_url = profile.avatar.url
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
                 # Move the SpinPreference handling here
-        try:
-            spinpreference = SpinPreference.objects.get(user=self.request.user)
-        except SpinPreference.DoesNotExist:
-            spinpreference = SpinPreference(user=self.request.user, quick_spin=False)
-            spinpreference.save()
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                spinpreference = SpinPreference.objects.get(user=user)
+            except SpinPreference.DoesNotExist:
+                spinpreference = SpinPreference(user=user, quick_spin=False)
+                spinpreference.save()
 
-        context['quick_spin'] = spinpreference.quick_spin
-        context['spinpreference'] = spinpreference
+            context['quick_spin'] = spinpreference.quick_spin
+            context['spinpreference'] = spinpreference
+        else:
+            context['quick_spin'] = False
+            context['spinpreference'] = None
 
         # Initialize the form with spinpreference instance
         spinform = SpinPreferenceForm(instance=spinpreference)
