@@ -27,6 +27,10 @@ def mul(value, arg):
     except (ValueError, TypeError):
         return ''
 
-@register.filter
+
 def get_color(game, choice):
-    return game.get_color(choice)
+    # Ensure that 'game' is a Game instance and has a get_color method
+    if hasattr(game, 'get_color'):
+        return game.get_color(choice)
+    else:
+        raise ValueError("Expected a Game instance, got something else.")

@@ -1642,30 +1642,41 @@ class GameChestBackgroundView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         slug = self.kwargs.get('slug')
+
+        # Fetch data related to the user and game
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+
+        game = get_object_or_404(Game, slug=slug)
+
+        # Pass the game as a list
+        context['game'] = game
+
+
         try:
             context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
         except UserProfile.DoesNotExist:
-            # Handle the case where the UserProfile does not exist
             context['SentProfile'] = None
+
         context['Money'] = Currency.objects.filter(is_active=1).first()
-        context['games'] = Game.objects.filter(is_active=1, slug=slug)  # Filter games by slug
         context['wager_form'] = WagerForm()
+
         game = get_object_or_404(Game, slug=slug)
+        context['games'] = game
         choices = Choice.objects.filter(game=game)
         spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
-        cost = game.discount_cost if game.discount_cost else game.cost
+        context['spinner_choice_renders'] = spinner_choice_renders
 
+        cost = game.discount_cost if game.discount_cost else game.cost
         context.update({
-            'game': game,
             'cost_threshold_80': cost * 0.8,
             'cost_threshold_100': cost,
             'cost_threshold_200': cost * 2,
             'cost_threshold_500': cost * 5,
             'cost_threshold_10000': cost * 100,
         })
+
         newprofile = UpdateProfile.objects.filter(is_active=1)
         context['Profiles'] = newprofile
 
@@ -1676,44 +1687,29 @@ class GameChestBackgroundView(TemplateView):
                 newprofile.newprofile_profile_picture_url = profile.avatar.url
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
-        game = get_object_or_404(Game, slug=slug)
-        choices = Choice.objects.filter(game=game)
-        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
-        print([choice.choice_text for choice in choices])  # Print the choice texts
-        context['game'] = game
-        context['choices'] = choices
-
-        choices_with_nonce = []
-        for choice in choices:
-            lower_nonce = choice.lower_nonce
-            upper_nonce = choice.upper_nonce
-            nonce = random.randint(0, 1000000)
-            if lower_nonce < nonce <= upper_nonce:
-                choices_with_nonce.append({
-                    'choice': choice,
-                    'nonce': choice.generated_nonce,
-                    'lower_nonce': choice.lower_nonce,
-                    'upper_nonce': choice.upper_nonce,
-                })
-        context['choices_with_nonce'] = choices_with_nonce
-
-        # Generate a random fixed amount between 500 and 1000
+        # Generate a random fixed amount between 50 and 100
         random_amount = random.randint(50, 100)
         context['random_amount'] = random_amount
         context['range_random_amount'] = range(random_amount)
 
-        # Generate a list of random nonces for each iteration
+        # Generate a list of random nonces
         random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
         context['random_nonces'] = random_nonces
 
-        print(random_amount)
+        # Create a list to store choices matched with the generated nonces
+        choices_with_nonce = []
+        for nonce in random_nonces:
+            for choice in choices:
+                if choice.lower_nonce <= nonce <= choice.upper_nonce:
+                    choices_with_nonce.append({
+                        'choice': choice,
+                        'nonce': nonce,
+                        'lower_nonce': choice.lower_nonce,
+                        'upper_nonce': choice.upper_nonce,
+                    })
+                    break  # Exit after finding the first match for this nonce
+
         context['choices_with_nonce'] = choices_with_nonce
-        context.update({
-            'choices_with_nonce': choices_with_nonce,
-            'game': game,
-            'choices': choices,
-            'spinner_choice_renders': spinner_choice_renders,
-        })
 
         return context
 
