@@ -5,7 +5,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
-    GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract
+    GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -132,6 +132,20 @@ class TradeContractAdmin(admin.ModelAdmin):
 
 
 admin.site.register(TradeContract, TradeContractAdmin)
+
+
+class BlogTipsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Blog Tips Information - Personal Information', {
+            'fields': ('tip', 'author', 'updated_on',)
+        }),
+        ('Blog Tips Information - Attributes', {
+            'fields': ('position',)
+        }),
+    )
+
+
+admin.site.register(BlogTips, BlogTipsAdmin)
 
 
 class categoryAdmin(admin.ModelAdmin):

@@ -427,22 +427,23 @@ createOutcome('some_game_id', 'some_slug');
         <div class="container" style="height: 137.5vh;">
             <div class="slider" id="slider">
 
-{% for item in choices_with_nonce %}
-    {% with choice=item.choice %}
-        <div id="{{ choice.choice_text }}" class="cards">
-            {% with color=game|get_color:choice %}
-                <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                </div>
-            {% endwith %}
-            <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
-            <p>Nonce: {{ item.nonce }}</p>
-            <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
-        </div>
-    {% endwith %}
-{% endfor %}
-
-
+                {% for item in choices_with_nonce %}
+                    {% with choice=item.choice %}
+                        {% for nonce in random_nonces %}
+                            <div id="{{ choice.choice_text }}" class="cards">
+                                {% with color=game|get_color:choice %}
+                                    <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
+                                        <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                                    </div>
+                                {% endwith %}
+                                <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
+                                <p>Nonce: {{ nonce }}</p>
+                                <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
+                                <p>Random Amount: {{ random_amount }}</p> <!-- Display the random amount -->
+                            </div>
+                        {% endfor %}
+                    {% endwith %}
+                {% endfor %}
 
 
                 {% for nonce, choice in matching_choices %}

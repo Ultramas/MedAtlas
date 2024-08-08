@@ -1884,6 +1884,28 @@ class Blog(models.Model):
             blog.save()
 
 
+class BlogTips(models.Model):
+    tip = models.TextField(unique=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_tips', blank=True, null=True)
+    updated_on = models.DateTimeField(auto_now=True, verbose_name="updated on: ")
+    position = models.IntegerField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # If the object is being created (not updated)
+            max_position = BlogTips.objects.filter(author=self.author).aggregate(models.Max('position'))['position__max']
+            self.position = (max_position or 0) + 1
+
+        super(BlogTips, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return str(self.tip)
+
+    class Meta:
+        verbose_name = "Blog Tip"
+        verbose_name_plural = "Blog Tips"
+
+
+
 class ShuffleType(models.Model):
     name = models.CharField(default="Pack Opening", max_length=200)
     type = models.CharField(choices=SHUFFLE_CHOICES, default='L',

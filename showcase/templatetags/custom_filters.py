@@ -19,3 +19,14 @@ def get_view_method(view, method_name, user):
 @register.filter(name='zip')
 def zip_lists(a, b):
     return zip(a, b)
+
+@register.filter
+def mul(value, arg):
+    try:
+        return float(value) * float(arg)
+    except (ValueError, TypeError):
+        return ''
+
+@register.filter
+def get_color(game, choice):
+    return game.get_color(choice)

@@ -1526,8 +1526,9 @@ def game_view(request, slug):
     }
 
     if request.method == 'POST':
-        # Generate multiple nonces dynamically
-        nonces = [random.randint(0, 1000000) for _ in range(100)]  # Adjust the range as needed
+        # Generate between 500 and 1000 nonces dynamically
+        num_nonces = random.randint(500, 1000)
+        nonces = [random.randint(0, 1000000) for _ in range(num_nonces)]
 
         # Find the choices that match the nonces
         matching_choices = []
@@ -1555,7 +1556,6 @@ def game_view(request, slug):
     # Initial nonce generation for the template
     nonce = random.randint(1, 1000000)
     return render(request, 'game_template.html', {'game': game, 'nonce': nonce})
-
 
 
 @csrf_exempt
@@ -1619,7 +1619,6 @@ def game_view(request, game_id):
 
     return render(request, 'game.html', context)
 
-
 #how the choices are rendered in game.html
 def game_detail(request, game_id):
     game = Game.objects.get(id=game_id)
@@ -1655,7 +1654,8 @@ class GameChestBackgroundView(TemplateView):
         context['games'] = Game.objects.filter(is_active=1, slug=slug)  # Filter games by slug
         context['wager_form'] = WagerForm()
         game = get_object_or_404(Game, slug=slug)
-
+        choices = Choice.objects.filter(game=game)
+        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
         cost = game.discount_cost if game.discount_cost else game.cost
 
         context.update({
@@ -1682,10 +1682,6 @@ class GameChestBackgroundView(TemplateView):
         print([choice.choice_text for choice in choices])  # Print the choice texts
         context['game'] = game
         context['choices'] = choices
-        context['spinner_choice_renders'] = spinner_choice_renders
-        context['game'] = game
-        context['choices'] = choices
-        context['spinner_choice_renders'] = spinner_choice_renders
 
         choices_with_nonce = []
         for choice in choices:
@@ -1695,15 +1691,28 @@ class GameChestBackgroundView(TemplateView):
             if lower_nonce < nonce <= upper_nonce:
                 choices_with_nonce.append({
                     'choice': choice,
-                    'nonce': nonce,
-                    'lower_nonce': lower_nonce,
-                    'upper_nonce': upper_nonce,
+                    'nonce': choice.generated_nonce,
+                    'lower_nonce': choice.lower_nonce,
+                    'upper_nonce': choice.upper_nonce,
                 })
+        context['choices_with_nonce'] = choices_with_nonce
 
+        # Generate a random fixed amount between 500 and 1000
+        random_amount = random.randint(50, 100)
+        context['random_amount'] = random_amount
+        context['range_random_amount'] = range(random_amount)
+
+        # Generate a list of random nonces for each iteration
+        random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
+        context['random_nonces'] = random_nonces
+
+        print(random_amount)
         context['choices_with_nonce'] = choices_with_nonce
         context.update({
             'choices_with_nonce': choices_with_nonce,
             'game': game,
+            'choices': choices,
+            'spinner_choice_renders': spinner_choice_renders,
         })
 
         return context
@@ -1861,8 +1870,7 @@ class GameChestBackgroundView(TemplateView):
         else:
             return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-    
-    
+
 class ChatCreatePostView(CreateView):
     model = ChatBackgroundImage
     form_class = ChatBackgroundImagery
@@ -3740,6 +3748,7 @@ class PostList(BaseView):
 
         blog_query = Blog.objects.filter(is_active=1)
         paginator = Paginator(blog_query, paginate_by)
+        blog_tips = Blog.objects.filter(is_active=1)
         page_number = self.request.GET.get('page')
         paginated_blog = paginator.get_page(page_number)
 
