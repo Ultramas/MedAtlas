@@ -1562,42 +1562,59 @@ def game_view(request, slug):
 @csrf_exempt
 def create_outcome(request, slug):
     if request.method == 'POST':
-        print("Received a POST request")
-        game_id = request.POST.get('game_id')
-        user = request.user
-
-        print(f"Received POST request with game_id: {game_id} and slug: {slug}")
-
-        if not game_id:
-            print("Game ID is missing.")
-            return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
-
         try:
-            game = Game.objects.get(id=game_id, slug=slug)  # Use slug to find the game
+            game_id = request.POST.get('game_id')
+            user = request.user
+
+            if not game_id:
+                return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
+
+            game = Game.objects.get(id=game_id, slug=slug)
             nonce = random.randint(1, 1000000)
-            choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce, game=game,)
+            choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
+
             if not choices.exists():
-                print(f"No choice found for nonce {nonce}.")
                 return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
 
-            choice = choices.order_by('?').first()  # Select a random choice if multiple choices are found
+            choice = choices.order_by('?').first()
 
-            outcome = Outcome.objects.create(
-                user=user,
-                game=game,
-                choice=choice,
-                nonce=nonce,
-                value=random.randint(1, 1000000),  # example value, adjust as needed
-                ratio=random.randint(1, 10),    # example ratio, adjust as needed
-                type=game.type  # Ensure you provide the type_id or type related to the game
-            )
-            print(f"Created outcome with nonce: {outcome.nonce} & game {outcome.game}")
-            return JsonResponse({'status': 'success', 'outcome': outcome.id, 'nonce': outcome.nonce})
+            color = game.get_color(choice)
+            choice.color = color
+            choice.save()  # Save the updated color to the database
+
+            # Print the selected choice fields to the console
+            print(f"Selected Choice ID: {choice.id}")
+            print(f"Selected Choice Text: {choice.choice_text}")
+            print(f"Selected Choice Color: {choice.color}")
+            print(f"Selected Choice File: {choice.file.url if choice.file else 'No file associated'}")
+
+            outcome_data = {
+                'game': game,
+                'choice': choice,
+                'nonce': nonce,
+                'value': random.randint(1, 1000000),
+                'ratio': random.randint(1, 10),
+                'type': game.type
+            }
+
+            if user.is_authenticated:
+                outcome_data['user'] = user
+
+            outcome = Outcome.objects.create(**outcome_data)
+
+            return JsonResponse({
+                'status': 'success',
+                'outcome': outcome.id,
+                'nonce': outcome.nonce,
+                'choice_id': choice.id,
+                'choice_text': choice.choice_text,
+                'choice_color': choice.color,
+                'choice_file': choice.file.url if choice.file else None
+            })
+
         except Game.DoesNotExist:
-            print("Game not found.")
             return JsonResponse({'status': 'error', 'message': 'Game not found.'})
         except Exception as e:
-            print(f"Exception: {str(e)}")
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
@@ -1701,7 +1718,10 @@ class GameChestBackgroundView(TemplateView):
                 newprofile.newprofile_profile_picture_url = profile.avatar.url
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
                 # Move the SpinPreference handling here
+
         user = self.request.user
+        spinpreference = None  # Initialize spinpreference to ensure it exists
+
         if user.is_authenticated:
             try:
                 spinpreference = SpinPreference.objects.get(user=user)
@@ -1710,18 +1730,24 @@ class GameChestBackgroundView(TemplateView):
                 spinpreference.save()
 
             context['quick_spin'] = spinpreference.quick_spin
-            context['spinpreference'] = spinpreference
         else:
             context['quick_spin'] = False
-            context['spinpreference'] = None
 
-        # Initialize the form with spinpreference instance
-        spinform = SpinPreferenceForm(instance=spinpreference)
+        context['spinpreference'] = spinpreference
+
+        # Initialize the form with spinpreference instance, or None if not authenticated
+        if spinpreference:
+            spinform = SpinPreferenceForm(instance=spinpreference)
+        else:
+            spinform = SpinPreferenceForm()  # Initialize an empty form if spinpreference is None
         context['spin_preference_form'] = spinform
 
-        # Determine the random amount based on quick_spin preference
-        if spinpreference.quick_spin:
-            random_amount = random.randint(500, 1000)
+        if user.is_authenticated:
+            # Determine the random amount based on quick_spin preference
+            if spinpreference.quick_spin:
+                random_amount = random.randint(500, 1000)
+            else:
+                random_amount = random.randint(150, 300)
         else:
             random_amount = random.randint(150, 300)
 
@@ -1800,43 +1826,59 @@ class GameChestBackgroundView(TemplateView):
     @csrf_exempt
     def create_outcome(request, slug):
         if request.method == 'POST':
-            print("Received a POST request")
-            game_id = request.POST.get('game_id')
-            user = request.user
-
-            print(f"Received POST request with game_id: {game_id} and slug: {slug}")
-
-            if not game_id:
-                print("Game ID is missing.")
-                return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
-
             try:
-                game = Game.objects.get(id=game_id, slug=slug)  # Use slug to find the game
+                game_id = request.POST.get('game_id')
+                user = request.user
+
+                if not game_id:
+                    return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
+
+                game = Game.objects.get(id=game_id, slug=slug)
                 nonce = random.randint(1, 1000000)
                 choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
 
                 if not choices.exists():
-                    print(f"No choice found for nonce {nonce}.")
                     return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
 
-                choice = choices.order_by('?').first()  # Select a random choice if multiple choices are found
+                choice = choices.order_by('?').first()
 
-                outcome = Outcome.objects.create(
-                    user=user,
-                    game=game,
-                    choice=choice,
-                    nonce=nonce,
-                    value=random.randint(1, 1000000),  # example value, adjust as needed
-                    ratio=random.randint(1, 10),  # example ratio, adjust as needed
-                    type=game.type  # Ensure you provide the type_id or type related to the game
-                )
-                print(f"Created outcome with nonce: {outcome.nonce}")
-                return JsonResponse({'status': 'success', 'outcome': outcome.id, 'nonce': outcome.nonce})
+                color = game.get_color(choice)
+                choice.color = color
+                choice.save()  # Save the updated color to the database
+
+                # Print the selected choice fields to the console
+                print(f"Selected Choice ID: {choice.id}")
+                print(f"Selected Choice Text: {choice.choice_text}")
+                print(f"Selected Choice Color: {choice.color}")
+                print(f"Selected Choice File: {choice.file.url if choice.file else 'No file associated'}")
+
+                outcome_data = {
+                    'game': game,
+                    'choice': choice,
+                    'nonce': nonce,
+                    'value': random.randint(1, 1000000),
+                    'ratio': random.randint(1, 10),
+                    'type': game.type
+                }
+
+                if user.is_authenticated:
+                    outcome_data['user'] = user
+
+                outcome = Outcome.objects.create(**outcome_data)
+
+                return JsonResponse({
+                    'status': 'success',
+                    'outcome': outcome.id,
+                    'nonce': outcome.nonce,
+                    'choice_id': choice.id,
+                    'choice_text': choice.choice_text,
+                    'choice_color': choice.color,
+                    'choice_file': choice.file.url if choice.file else None
+                })
+
             except Game.DoesNotExist:
-                print("Game not found.")
                 return JsonResponse({'status': 'error', 'message': 'Game not found.'})
             except Exception as e:
-                print(f"Exception: {str(e)}")
                 return JsonResponse({'status': 'error', 'message': str(e)})
 
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
@@ -1964,9 +2006,13 @@ class GameHubView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        try:
-            context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
-        except ObjectDoesNotExist:
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
+            except ObjectDoesNotExist:
+                context['SentProfile'] = None  # or some default value
+        else:
             context['SentProfile'] = None  # or some default value
         """if the user has no profile, allow it anyway"""
         context['Money'] = Currency.objects.filter(is_active=1).first()
@@ -1998,9 +2044,13 @@ class GameRoomView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        try:
-            context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
-        except ObjectDoesNotExist:
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
+            except ObjectDoesNotExist:
+                context['SentProfile'] = None  # or some default value
+        else:
             context['SentProfile'] = None  # or some default value
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['Game'] = GameHub.objects.filter(is_active=1).first()
@@ -5167,27 +5217,23 @@ import urllib.request as url_request
 
 
 def get_items_by_category(category):
+    print(f"Filtering items by category: {category}")  # Debugging line
+
     if category == 'all':
         items = Item.objects.all()
-    elif category == 'gold':
-        items = Item.objects.filter(category='G')
-    elif category == 'platinum':
-        items = Item.objects.filter(category='P')
-    elif category == 'emerald':
-        items = Item.objects.filter(category='E')
-    elif category == 'diamond':
-        items = Item.objects.filter(category='D')
+    elif category.lower() in ['gold', 'platinum', 'emerald', 'diamond']:
+        items = Item.objects.filter(category=category[0].upper())  # Simplified logic
     else:
-        items = Item.objects.all()
+        items = Item.objects.none()  # Return empty queryset if the category is unexpected
+
     return items
 
 
 from django.contrib.auth.models import AnonymousUser
 
-
 class EBackgroundView(BaseView, FormView):
     model = EBackgroundImage
-    template_name = "ehome.html"
+    #template_name = "ehome.html"
     form_class = EmailForm
 
     def get_context_data(self, **kwargs):
@@ -5196,17 +5242,12 @@ class EBackgroundView(BaseView, FormView):
         current_user = self.request.user
         total_items = Item.objects.filter(is_active=1).count()
 
-        # Get the paginate_by value from the form data or settings
         paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
-
         items_query = Item.objects.filter(is_active=1).order_by('price')
         paginator = Paginator(items_query, paginate_by)
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
 
-        # context['items'] = paginated_items
-
-        # context['items'] = Item.objects.filter(is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
@@ -5214,11 +5255,11 @@ class EBackgroundView(BaseView, FormView):
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Image'] = ImageBase.objects.filter(is_active=1, page=self.template_name)
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(page=self.template_name,
-                                                                                    is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(page=self.template_name, is_active=1)
         context['Email'] = EmailField.objects.filter(is_active=1)
         context['store_view_form'] = StoreViewTypeForm()
         context['form'] = EmailForm()
+        context['items'] = paginated_items
 
         if isinstance(current_user, AnonymousUser):
             context['store_view_type_str'] = 'stream'
@@ -5237,37 +5278,30 @@ class EBackgroundView(BaseView, FormView):
                 print('store view does not exist, setting to stream for signed-in user')
 
         context['item_filters'] = ItemFilter.objects.filter(is_active=1)
-        item_filters = ItemFilter.objects.filter(is_active=1)
-        for item_filter in item_filters:
+        for item_filter in context['item_filters']:
             print(str(item_filter))
-        print(context)
-        print('The item filters are:')
-        items_query = Item.objects.filter(is_active=1)
-        paginator = Paginator(items_query, paginate_by)
-        page_number = self.request.GET.get('page')
-        paginated_items = paginator.get_page(page_number)
 
-        context['items'] = paginated_items
+        # Category filtering
+        category = self.request.GET.get('category', 'all')  # Default to 'all' if not provided
+        print(f"Filtering items by category: {category}")
 
-        category = self.request.GET.get('category', 'all')
         categoryitems = self.get_items_by_category(category)
         context['categorizeditems'] = categoryitems
+
         return context
 
     def get_items_by_category(self, category):
+        print(f"Filtering items by category: {category}")  # Debugging line
+
         if category == 'all':
             items = Item.objects.all()
-        elif category == 'gold':
-            items = Item.objects.filter(category='G')
-        elif category == 'platinum':
-            items = Item.objects.filter(category='P')
-        elif category == 'emerald':
-            items = Item.objects.filter(category='E')
-        elif category == 'diamond':
-            items = Item.objects.filter(category='D')
+        elif category.lower() in ['gold', 'platinum', 'emerald', 'diamond']:
+            items = Item.objects.filter(category=category[0].upper())  # Simplified logic
         else:
-            items = Item.objects.all()
+            items = Item.objects.none()  # Return empty queryset if the category is unexpected
+
         return items
+
 
     def post(self, request, *args, **kwargs):
         form = EmailForm(request.POST)
