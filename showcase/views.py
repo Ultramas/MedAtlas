@@ -1582,6 +1582,16 @@ def create_outcome(request, slug):
             choice.color = color
             choice.save()  # Save the updated color to the database
 
+            # Assume `choice` is your selected Choice instance
+            response_data = {
+                'status': 'success',
+                'nonce': nonce,
+                'choice_id': choice.id,
+                'choice_text': choice.choice_text,
+                'choice_color': choice.color,
+                'choice_file': choice.file.url if choice.file else None
+            }
+
             # Print the selected choice fields to the console
             print(f"Selected Choice ID: {choice.id}")
             print(f"Selected Choice Text: {choice.choice_text}")
@@ -1662,6 +1672,20 @@ def save_spin_preference(request):
         spinpreference.save()
         return JsonResponse({'success': True})
     return JsonResponse({'success': False}, status=400)
+
+
+def display_choices(request, game_id, slug):
+    game = get_object_or_404(Game, id=game_id, slug=slug)
+    choices = Choice.objects.filter(game=game)
+
+    # Ensure each choice has a nonce
+    for choice in choices:
+        if choice.lower_nonce is None or choice.upper_nonce is None:
+            choice.lower_nonce = random.randint(0, 1000000)
+            choice.upper_nonce = random.randint(0, 1000000)
+            choice.save()
+
+    return render(request, 'game.html', {'game': game, 'choices': choices})
 
 
 class GameChestBackgroundView(TemplateView):
@@ -1775,6 +1799,16 @@ class GameChestBackgroundView(TemplateView):
         context['choices_with_nonce'] = choices_with_nonce
 
         return context
+
+    # how the choices are rendered in game.html
+    def game_detail(request, slug):
+        game = get_object_or_404(Game, slug=slug)
+        choices = game.choices.all()  # Fetch all related choices
+        context = {
+            'game': game,
+            'choices': choices,
+        }
+        return render(request, 'game.html', context)
 
     def display_choices(request, game_id, slug):
         game = get_object_or_404(Game, id=game_id, slug=slug)
@@ -1962,6 +1996,58 @@ class GameChestBackgroundView(TemplateView):
                 return JsonResponse({'error': str(e)}, status=500)
         else:
             return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
+class EarningAchievement(BaseView):
+    model = Achievements
+    template_name = "chatbackgroundimagechange.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        return context
+
+    def earningachievement(self, achievement_id):
+        achievement = get_object_or_404(Achievements, id=achievement_id)
+        user_profile = get_object_or_404(ProfileDetails, user=self.request.user)
+
+        # Check if the achievement is not already earned
+        if not achievement.earned:
+            # Update the achievement status and associate it with the user
+            achievement.earned = True
+            achievement.user = self.request.user
+            achievement.save()
+
+            # Add the achievement's value to the user's currency amount
+            user_profile.add_currency(achievement.value)
+
+            # Set the currency to the first applicable currency if not already set
+            if not user_profile.currency:
+                first_currency = Currency.objects.first()
+                if first_currency:
+                    user_profile.currency = first_currency
+
+            user_profile.save()
+
+            return JsonResponse({"status": "success", "message": "Achievement earned successfully!"})
+        else:
+            return JsonResponse({"status": "failure", "message": "Achievement has already been earned."})
+
+
+def earningachievement(self, achievement_id):
+    achievement = get_object_or_404(Achievements, id=achievement_id)
+
+    # Check if the achievement is not already earned
+    if not achievement.earned:
+        achievement.earned = True
+        achievement.user = self.request.user
+        achievement.save()
+        return JsonResponse({"status": "success", "message": "Achievement earned successfully!"})
+    else:
+        return JsonResponse({"status": "failure", "message": "Achievement has already been earned."})
 
 
 class ChatCreatePostView(CreateView):

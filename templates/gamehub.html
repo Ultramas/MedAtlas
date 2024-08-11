@@ -29,7 +29,16 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
 
 </head>
-<body>
+ {% for BackgroundImage in Background %}
+            {% if BackgroundImage.page == "gamehub.html" %}
+                {% if BackgroundImage.position == 1 %}
+        234erwad
+	<body style="background: url('{{BackgroundImage.image.url}}'); background-size: cover;">
+    {% else %}
+    <body>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
 
 <!--PreLoader-->
   <div class="loader">
@@ -127,7 +136,7 @@
 {% for GameHub in Background %}
   {% if GameHub.page == "gamehub.html" %}
   {% if GameHub.position == 1 %}
-	<div class="breadcrumb-section breadcrumb-bg" style="background: url({{GameHub.cover.url}}); background-size: cover; min-height: 70vh;">
+	<div class="breadcrumb-section breadcrumb-bg" style="background: url({{GameHub.cover.url}}); background-size: cover;">
         {% endif %}
         {% endif %}
         {% endfor %}
