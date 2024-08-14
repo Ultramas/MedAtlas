@@ -44,6 +44,15 @@
     });
 });
 
+function toggleChatWidget() {
+    var chatWidget = document.getElementById("chatwidget2");
+    if (chatWidget.style.display === "none") {
+        chatWidget.style.display = "block";
+    } else {
+        chatWidget.style.display = "none";
+    }
+}
+
 </script>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 
@@ -1022,17 +1031,129 @@ Chat Title
   text-align: center;
 }
 .chat2-title {
-  flex: 0 1 45px;
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  border-bottom: 1px solid #ccc;
-  color: #777;
-  padding-top: 50px;
-  padding-bottom: 5px;
-  background-color: rgba(245, 245, 245, 1);
-  text-transform: uppercase;
-  text-align: center;
+    flex: 0 1 45px;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    border-bottom: 1px solid #ccc;
+    color: #777;
+    padding-top: 50px;
+    padding-bottom: 5px;
+    background-color: rgba(245, 245, 245, 1);
+    text-transform: uppercase;
+    text-align: center;
+}
+
+/* Style for the avenue2-messenger section */
+.avenue2-messenger {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    width: 320px;
+    max-height: 460px;
+    min-height: 220px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
+    z-index: 10;
+    overflow: hidden; /* Ensure no overflow */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure .chat2e takes up the full space within .avenue2-messenger */
+.chat2e {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    padding: 10px;
+    box-sizing: border-box;
+    color: #232323;
+    overflow-y: auto; /* Ensure it scrolls if needed */
+}
+
+/* Title and message box alignment */
+.chat2e-title, .message2-box {
+    margin-bottom: 10px;
+}
+
+/* Message box styling */
+.message2-box {
+    position: relative;
+    width: 100%;
+}
+
+/* Input styling inside the message box */
+.message2-box input[type="text"] {
+    width: calc(100% - 60px);
+    padding: 10px;
+    border-radius: 5px;
+    height: 20px;
+    border: 1px solid #ccc;
+}
+
+/* Submit button alignment */
+.message-submit {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 36px;
+    background-color: #F28123;
+    color: #051922;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 0 15px;
+}
+
+/* Ensure the chat messages section scrolls properly */
+.chat-messages {
+    height: 100%;
+    overflow-y: scroll;
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+
+/* Message box styling */
+.message2-box {
+    position: absolute;
+    bottom: 10px;
+    width: calc(100% - 20px);
+    left: 10px;
+}
+
+/* Input styling inside the message box */
+.message2-box input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Submit button alignment */
+.message-submit {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 50px;
+    background-color: #F28123;
+    color: #051922;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* Ensure the chat messages section scrolls properly */
+.chat-messages {
+    height: calc(100% - 160px);
+    overflow-y: scroll;
+    padding-right: 10px;
 }
 .chat-title h1,
 .chat-title h2 {
@@ -1280,8 +1401,8 @@ Message Box
 .message-box .message-submit {
   position: absolute;
   z-index: 1;
-  top: 9px;
-  right: 10px;
+  top: 0px;
+  right: 0px;
   color: #4A90E2;
   border: none;
   /* background: #c29d5f;*/
@@ -1316,7 +1437,6 @@ Message 2 Box
   padding: 10px;
   position: relative;
   border-radius: 20px;
-  height: 14px;
   border: 1px solid #ccc;
 }
 .message2-box .message2-input {
@@ -1518,40 +1638,45 @@ Bounce
 
 
 .avenue2-messenger {
-    /*display: none;*/ /* Initially hidden */
-    opacity: 1;
-    border-radius: 20px;
-    height: calc(100% - 60px) !important;
-    max-height: 460px !important;
-    min-height: 220px !important;
-    width: 320px;
-    background: rgba(255, 255, 255, 0.9);
-    position: fixed;
-    left: 20px;
-    bottom: 20px;
-    margin: auto;
-    z-index: 10;
-    box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
-    -webkit-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
+  opacity: 1;
+  border-radius: 20px;
+  height: calc(100% - 60px) !important;
+  max-height: 460px !important;
+  min-height: 220px !important;
+  width: 320px;
+  /*  transform: translateY(0);
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+  */
+  background: rgba(255, 255, 255, 0.9);
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  margin: auto;
+  z-index: 10;
+  box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
+  /*  transform: translateX(300px);*/
+  -webkit-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
+  -moz-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
 }
 
+.avenue2-messenger div.agent-face {
+  position: absolute;
+  left: 0;
+  top: -50px;
+  right: 0;
+  margin: auto;
+  width: 101px;
+  height: 50px;
+  background: transparent;
+  z-index: 12;
+}
 
-        .avenue2-messenger div.agent-face {
-            position: absolute;
-            left: 0;
-            top: -50px;
-            right: 0;
-            margin: auto;
-            width: 101px;
-            height: 50px;
-            background: transparent;
-            z-index: 12;
-        }
+.avenue2-messenger div {
+  font-size: 14px;
+  color: #232323;
+}
 
-        .avenue2-messenger div {
-            font-size: 14px;
-            color: #232323;
-        }
 
 .close {
   display: block;
@@ -1793,49 +1918,30 @@ Bounce
 
 		</style>
 
-<section class="avenue2-messenger" id="chatwidget2">
-	<div class="menu">
-   <div class="items"><span>
-     <a href="#" title="Minimize">&mdash;</a><br>
-<!--
-     <a href="">enter email</a><br>
-     <a href="">email transcript</a><br>-->
-     <a href="#" title="End Chat">&#10005;</a>
-
-     </span></div>
-
-<div class="button" onclick="showMenu()">...</div>
-
-<div id="myPopup" class="popup-menu" style="z-index: 13;">
-  <a href="{% url 'showcase:supportchat' %}">Open Support Chat</a><br>
-  <a href="{% url 'showcase:issues' %}">Create a Ticket</a><br>
-  <a href="{% url 'showcase:contact' %}">Contact Support</a>
-</div>
-
-  </div>
-</section>
 
 <section class="avenue-messenger" id="chatwidget">
     <div class="chat2">
         <div class="chat2-title">
             {% if user.is_authenticated %}
-                <h5>PokeTrove Support Line</h5>
+                <h5>{{ request.user.username }}'s Personal Support Line</h5>
                 <br>
-                <h6>Agent Holley</h6>
+                <h6>Run By Agent Holley</h6>
             </div>
             <div class="message" style="overflow: auto;">
-                <h2>{{ request.user.username }}</h2>
                 <div id="display-support" class="chat-messages" style="height: 400px; overflow-y: scroll;"></div>
             </div>
             <div class="message-box">
-                <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
+                <div class="w" style="margin-top: -10px; display: flex; overflow: hidden; 30px;">
                     <form id="support-post-form" method="post">
                         {% csrf_token %}
                         <input type="hidden" id="support-username" name="username" value="{{ request.user.username }}">
                         <input type="hidden" name="room_name" id="support-room_name" value="{{ room }}">
-                        <input type="text" name="message" id="support-message" width="100px" placeholder="Type your message...">
+                        <input type="text" name="message" id="support-message" width="100px" placeholder="Type your message..." style="border: none; margin-bottom: 0px;height: 20px;">
                         <input type="hidden" name="page_name" id="support-page_named" value="index.html">
-                        <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
+						<input type="submit" class="message-submit" style="margin-left: 220px; height: 20px; overflow: hidden; position: absolute; text-align: center;
+                         line-height: 0px; font-size: 14px; background-color: #F28123; color: #051922; font-weight: 700;
+                         text-transform: uppercase; font-size: 15px; border: none !important; cursor: pointer;
+                         padding: 16px 25px; border-radius: 3px; margin-top: 16px;" value="➤">
                     </form>
                 </div>
             </div>
@@ -1851,40 +1957,32 @@ Bounce
 		<button type="button" onclick="showChatWidget()">...</button>
 	</div>
 
-<div class="chat2-toggle-button" style="position: fixed; left: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
-  <button type="button" onclick="showChatWidget2()">...</button>
+<div class="chat2e-toggle-button" style="position: fixed; left: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
+  <button type="button" onclick="toggleChatWidget()">...</button>
 </div>
+
 </div>
 
 <!-- General Chat -->
-<section class="avenue2-messenger" id="chatwidget2">
-    <div class="menu">
-        <div class="items"><span>
-            <a href="#" title="Minimize">&mdash;</a><br>
-            <!--
-            <a href="">enter email</a><br>
-            <a href="">email transcript</a><br>-->
-            <a href="#" title="End Chat">&#10005;</a>
-        </span></div>
-    </div>
-    <div class="chat2">
+
+<section class="avenue2-messenger" id="chatwidget2" style="margin-left:10px; margin-right: 92%;">
+<div class="chat2">
         <div class="chat2-title">
             {% if user.is_authenticated %}
-                <h5>PokeTrove Community</h5>
+                <h5>{{ request.user.username }} Community</h5>
                 <br>
                 <h6>PokeTrove General Chat</h6>
             </div>
             <div class="message2" style="overflow: auto;">
-                <h2>{{ request.user.username }}</h2>
-                <div id="display-general" class="chat-messages" style="height: 400px; overflow-y: scroll;"></div>
+                <div id="display-general" class="chat-messages" style="height: 400px; overflow-y: scroll; margin-left: 5px;"></div>
             </div>
             <div class="message2-box">
-                <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
+                <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;height: 20px;">
                     <form id="general-post-form" method="post">
                         {% csrf_token %}
                         <input type="hidden" id="general-username" name="username" value="{{ request.user.username }}">
-                        <input type="text" name="message" id="general-message" width="100px" placeholder="Type your message...">
-                        <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
+                        <input type="text" name="message" id="general-message" width="100px" placeholder="Type your message..." style="border: none;">
+                        <input type="submit" class="message-submit" style="margin-top: 15px; display: flex; overflow: hidden;padding: 0px 0px;" value="➤">
                     </form>
                 </div>
             </div>
@@ -1894,10 +1992,8 @@ Bounce
                 <h6>Please sign in to participate in the chat.</h6>
             {% endif %}
         </div>
-    </div>
 </section>
 
-<button type="button" onclick="showChatWidget2()">Toggle Chat</button>
 
 <script>
 function showChatWidget2() {

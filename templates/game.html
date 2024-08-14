@@ -198,7 +198,7 @@
     function savePreference() {
         const slug = "{{ slug }}";  // Ensure slug is correctly retrieved from the template context
         $.ajax({
-            url: "{% url 'showcase:game' slug=slug %}",  // Use the correct URL with slug
+            url: "{% url 'showcase:game' slug=slug %}",
             type: "POST",
             data: {
                 'quick_spin': $('#quick_spin').is(':checked'),
@@ -212,6 +212,7 @@
             }
         });
     }
+
 </script>
 
 <script>
@@ -373,7 +374,6 @@ function createOutcome(gameId, slug) {
  {% for BackgroundImage in Background %}
             {% if BackgroundImage.page == "game.html" %}
                 {% if BackgroundImage.position == 1 %}
-234erwad
 	<body style="background: url('{{BackgroundImage.image.url}}'); background-size: cover;">
     {% else %}
     <body>
@@ -457,25 +457,29 @@ function createOutcome(gameId, slug) {
 	</div>
 	</div>
 	<!-- end header -->
-<div class="breadcrumb-section breadcrumb-bg" style="background: url(/media/images/appletun.png); background-size: cover;">
+{% for GameHub in Background %}
+  {% if GameHub.page == "game.html" %}
+  {% if GameHub.position == 1 %}
+	<div class="breadcrumb-section breadcrumb-bg" style="background: url({{GameHub.cover.url}}); background-size: cover;
+margin-left: 0; margin-right: 0; width: 100%; height: 15vh;">
+        {% endif %}
+        {% endif %}
+        {% endfor %}
 
 
 
-		<div class="container">
 			<div class="row">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="breadcrumb-text">
-						<p>PokeTrove Games</p>
+    <h2 style=" font-size: 30px; color: #F28123;">{{ game.name }}</h2>
 						<h1></h1>
 					</div>
-				</div>
 			</div>
 		</div>
 	</div>
 
 <div class="boxes" style="margin-left: 41%; margin-right: 50%; position: absolute;">
     <img src="{{ game.image.url }}" class="game-image" alt="{{ game.name }}" style="width: 200px; height: 200px; margin-top: 150px;">
-    <h2 style="display: flex; flex-direction: row; text-align: center; margin-right: auto; margin-left: auto;">{{ game.name }}</h2>
     <form id="spin-preference-form" method="post">
     {% csrf_token %}
     <label for="quick_spin">Quick Spin</label>

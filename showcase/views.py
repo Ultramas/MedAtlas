@@ -1688,16 +1688,16 @@ def display_choices(request, game_id, slug):
     return render(request, 'game.html', {'game': game, 'choices': choices})
 
 
-class GameChestBackgroundView(TemplateView):
+class GameChestBackgroundView(BaseView):
     template_name = "game.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         slug = self.kwargs.get('slug')
+        context['slug'] = slug
 
         # Fetch data related to the user and game
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -1799,6 +1799,9 @@ class GameChestBackgroundView(TemplateView):
                     break  # Exit after finding the first match for this nonce
 
         context['choices_with_nonce'] = choices_with_nonce
+
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        print(context['Background'])
 
         return context
 
@@ -3114,7 +3117,7 @@ def send(request):
 
         try:
             room = Room.objects.get(name=room_id)
-        except Room.DoesNotExist:
+        except ObjectDoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Room does not exist.'})
 
         if not message:
@@ -3125,18 +3128,31 @@ def send(request):
                 new_message = Message.objects.create(
                     value=message,
                     user=username,
-                    room=room.name,  # Save the room name as a string
+                    room=room.name,
                     signed_in_user=request.user
                 )
             else:
                 new_message = Message.objects.create(
                     value=message,
                     user=username,
-                    room=room.name  # Save the room name as a string
+                    room=room.name
                 )
             new_message.save()
 
-            return JsonResponse({'status': 'success', 'message': 'Message sent successfully'})
+            # Return only serializable data
+            response_data = {
+                'status': 'success',
+                'message': 'Message sent successfully',
+                'message_data': {
+                    'value': new_message.value,
+                    'user': new_message.user,
+                    'room': new_message.room,
+                    'file_url': new_message.file.url if new_message.file else None,
+                    # You can include other fields that are JSON serializable
+                }
+            }
+
+            return JsonResponse(response_data)
         except Exception as e:
             print(f"Error saving message: {e}")
             return JsonResponse({'status': 'error', 'message': str(e)})
@@ -5001,6 +5017,11 @@ def getGeneralMessages(request):
     return JsonResponse({'messages': messages_data})
 
 
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import GeneralMessage
+
 @csrf_exempt
 def generalsend(request):
     if request.method == 'POST':
@@ -5020,9 +5041,25 @@ def generalsend(request):
                     user=username,
                     signed_in_user=request.user
                 )
+            else:
+                new_message = GeneralMessage.objects.create(
+                    value=generalmessage,
+                    user=username
+                )
             new_message.save()
 
-            return JsonResponse({'status': 'success', 'generalmessage': 'Message sent successfully'})
+            # Prepare the JSON response with only serializable data
+            response_data = {
+                'status': 'success',
+                'generalmessage': 'Message sent successfully',
+                'message_data': {
+                    'value': new_message.value,
+                    'user': new_message.user,
+                    'file_url': new_message.file.url if new_message.file else None,
+                    # Other serializable fields can be added here
+                }
+            }
+            return JsonResponse(response_data)
         except Exception as e:
             print(f"Error saving message: {e}")
             return JsonResponse({'status': 'error', 'generalmessage': str(e)})
@@ -5030,38 +5067,6 @@ def generalsend(request):
     return JsonResponse({'status': 'error', 'generalmessage': 'Invalid request method.'})
 
 
-def send(request):
-    if request.method == 'POST':
-        message = request.POST.get('message')
-        username = request.POST.get('username')
-        room_id = request.POST.get('room_id')
-
-        print(f"message: {message}, username: {username}, room_id: {room_id}")
-
-        # Check if the user is authenticated
-        if request.user.is_authenticated:
-            # User is authenticated, use their user ID for the message user field
-            new_message = Message.objects.create(
-                value=message,
-                user=username,
-                room=room_id,
-                signed_in_user=request.user  # Set the signed_in_user to the authenticated user
-            )
-            new_message.save()
-        else:
-            # User is not authenticated, use the provided username for the message user field
-            new_message = Message.objects.create(
-                value=message,
-                user=username,
-                room=room_id,
-            )
-            new_message.save()
-
-        # Return a response indicating the message was sent successfully
-        return HttpResponse('Message sent successfully')
-
-    # If the request method is not POST, handle the appropriate response here
-    return HttpResponse('Invalid request method. Please use POST to send a message.')
 
 class BackgroundView(FormMixin, BaseView):
     model = BackgroundImage
@@ -5112,6 +5117,7 @@ class BackgroundView(FormMixin, BaseView):
         context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
         context['username'] = signed_in_user  # Set 'username' to the extracted 'signed_in_user'
         context['room'] = signed_in_user
+        context['show_chat'] = True
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         print(FaviconBase.objects.all())
