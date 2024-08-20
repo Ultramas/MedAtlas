@@ -74,3 +74,23 @@ def log_model_delete(sender, instance, **kwargs):
     except ValueError as e:
         # Log the error or handle it appropriately
         print(f"Error creating AdministrationChangeLog: {e}")
+
+from .models import Outcome
+
+@receiver(post_save, sender=Outcome)
+def update_achievement_counters(sender, instance, **kwargs):
+    user = instance.user
+    if not user:
+        return# If there's no associated user, exit# Retrieve all achievements associated with the current user
+    achievements = Achievements.objects.filter(user=user)
+
+    # Update each achievement's counters with the values from the outcome instance for achievement in achievements:
+    achievement.green_counter += instance.green_counter
+    achievement.yellow_counter += instance.yellow_counter
+    achievement.orange_counter += instance.orange_counter
+    achievement.red_counter += instance.red_counter
+    achievement.black_counter += instance.black_counter
+    achievement.gold_counter += instance.gold_counter
+    achievement.redgold_counter += instance.redgold_counter
+
+    achievement.save()

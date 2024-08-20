@@ -4,40 +4,118 @@
     <meta charset="UTF-8">
     <title>Achievements</title>
 </head>
-<body><h1>Achievements</h1>
+<body>
+<br>
+<h1 style="text-align: center;">Achievements</h1>
+<div class="ret" style="border: 1px solid black; border-radius: 50px;">
 <ul>
     {% for achievement in TotalAchievements %}
-        <li class="{% if achievement.earned %}glow{% endif %}">
-            <h2>{{ achievement.title }}</h2>
-            <img src="{{ achievement.image.url }}" alt="{{ achievement.title }}">
-        </li>
-    {% endfor %}
+    {% if user in achievement.user.all %}
+        <div class="image-containere hover-container">
+            <h4>{{ achievement.title }}</h4>
+            <img src="{{ achievement.image.url }}" alt="{{ achievement.title }}" style="width: 100px; height: 100px; border-radius: 10px;">
+        <div class="hover-content">
+            <p>{{ achievement.description }}</p>
+            <p>Value: {{ achievement.value }}</p>
+            <p>Type: {{ achievement.type }}</p>
+        </div>
+        </div>
+    {% else %}
+        <div class="image-container hover-container">
+            <h4>{{ achievement.title }}</h4>
+            <img src="{{ achievement.image.url }}" alt="{{ achievement.title }}" style="width: 100px; height: 100px; border-radius: 10px;">
+         <div class="hover-content">
+            <p>{{ achievement.description }}</p>
+             {% if achievement.currency.name == "Rubies" %}
+            <p>Value: {{ achievement.value }} 💎</p>
+             {% else %}
+            <p>Value: {{ achievement.value }} {{ achievement.currency }} </p>
+             {% endif %}
+            <p>Type: {{ achievement.type }}</p>
+        </div>
+        </div>
+    {% endif %}
+{% endfor %}
+
 </ul>
+</div>
+<style>.hover-container {
+    position: relative;
+    display: inline-block;
+}
 
-<style>
-    .glow {
-        animation: glow 1s ease-in-out infinite alternate;
-    }
+.hover-content {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 110%;
+    width: 200px;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    z-index: 10;
+}
 
-    @keyframes glow {
-        from {
-            box-shadow: 0 0 5px #fff;
-        }
-        to {
-            box-shadow: 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff00ff, 0 0 50px #ff00ff;
-        }
-    }
+.hover-container:hover .hover-content {
+    display: block;
+}
+
+
+    .image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.image-container img {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: grayscale(100%);
+}
+
+.image-container h4 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    font-size: 2em; /* Adjust as needed */
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    z-index: 1;
+}
+
+
+    .image-containere {
+    position: relative;
+    display: inline-block;
+}
+
+.image-containere img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.image-containere h4 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    font-size: 2em; /* Adjust as needed */
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    z-index: 1;
+}
+
 </style>
 
-
-    <h1>Your Achievements</h1>
-    <ul>
-        {% for achievement in Achievements %}
-            <li>
-                <h2>{{ achievement.title }}</h2>
-                <img src="{{ achievement.image.url }}" alt="{{ achievement.title }}">
-            </li>
-        {% endfor %}
-    </ul>
 </body>
 </html>

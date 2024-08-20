@@ -153,6 +153,26 @@ LEVEL = (
     ('U', 'Ultimate'),
 )
 
+AchievementCategory = (
+    ('RS', 'Rubies Spent'),
+    ('TRE', 'Total Rubies Earned '),
+    ('RC', 'Rubies Collected'),
+    ('WS', 'Wheels Spun'),
+    ('GCH', 'Green Cards Hit'),
+    ('YCH', 'Yellow Cards Hit'),
+    ('OCH', 'Orange Cards Hit'),
+    ('RCH', 'Red Cards Hit'),
+    ('BCH', 'Black Cards Hit'),
+    ('GOCH', 'Gold Cards Hit'),
+    ('RGCH', 'Red Gold Cards Hit'),
+    ('BW', 'Battles Won'),
+    ('BL', 'Battles Lost'),
+    ('BD', 'Battles Drawn'),
+    ('FA', 'Friends Added'),
+    ('TCS', 'Total Community Size'),
+    ('O', 'Other'),
+)
+
 PRACTICE = (
     ('P', 'Practice'),
     ('R', 'Real'),
@@ -464,7 +484,17 @@ class ProfileDetails(models.Model):
     level = models.ForeignKey(Level, on_delete=models.CASCADE, default="")
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_currency_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    green_cards_hit = models.IntegerField(blank=True, null=True)
+    yellow_cards_hit = models.IntegerField(blank=True, null=True)
+    orange_cards_hit = models.IntegerField(blank=True, null=True)
+    red_cards_hit = models.IntegerField(blank=True, null=True)
+    black_cards_hit = models.IntegerField(blank=True, null=True)
+    gold_cards_hit = models.IntegerField(blank=True, null=True)
+    red_gold_cards_hit = models.IntegerField(blank=True, null=True)
+    times_subtract_called = models.IntegerField(default=0)
     seller = models.BooleanField(default=False, null=True)
     position = models.UUIDField(
         default=uuid.uuid4,
@@ -495,11 +525,14 @@ class ProfileDetails(models.Model):
 
     def add_currency(self, amount):
         self.currency_amount += amount
+        self.total_currency_amount += amount
         self.save()
 
     def subtract_currency(self, amount):
         if self.currency_amount >= amount:
             self.currency_amount -= amount
+            self.total_currency_spent += amount
+            self.times_subtract_called += 1
             self.save()
         else:
             raise ValueError("Not enough currency")
@@ -2158,6 +2191,13 @@ class Outcome(models.Model):
     color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     game_creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="creator")
+    green_counter = models.IntegerField(blank=True, null=True, default=0)
+    yellow_counter = models.IntegerField(blank=True, null=True, default=0)
+    orange_counter = models.IntegerField(blank=True, null=True, default=0)
+    red_counter = models.IntegerField(blank=True, null=True, default=0)
+    black_counter = models.IntegerField(blank=True, null=True, default=0)
+    gold_counter = models.IntegerField(blank=True, null=True, default=0)
+    redgold_counter = models.IntegerField(blank=True, null=True, default=0)
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
     nonce = models.DecimalField(max_digits=6, decimal_places=0)
     date_and_time = models.DateTimeField(null=True, verbose_name="date and time", auto_now_add=True)
@@ -2186,16 +2226,64 @@ class Outcome(models.Model):
             self.file = self.choice.file
         super().save(*args, **kwargs)
 
+    def get_color(self, choice):
+        cost_threshold_80 = self.game.cost * 0.8
+        cost_threshold_100 = self.game.cost
+        cost_threshold_200 = self.game.cost * 2
+        cost_threshold_500 = self.game.cost * 5
+        cost_threshold_10000 = self.game.cost * 100
+        cost_threshold_100000 = self.game.cost * 1000
+        cost_threshold_100000000 = self.game.cost * 1000000
+
+        if choice.game.value is None:
+            # Handle the case where value is None, perhaps by setting a default value
+            choice.value = random.randint(0, 1000000)
+
+        if choice.game.value >= cost_threshold_100000000:
+            self.redgold_counter += 1
+            return 'redgold'
+        elif choice.game.value >= cost_threshold_100000:
+            self.gold_counter += 1
+            return 'redblack'
+        elif choice.game.value >= cost_threshold_10000:
+            self.black_counter += 1
+            return 'black'
+        elif choice.game.value >= cost_threshold_500:
+            self.red_counter += 1
+            return 'red'
+        elif choice.game.value >= cost_threshold_200:
+            self.orange_counter += 1
+            return 'orange'
+        elif choice.game.value >= cost_threshold_100:
+            self.yellow_counter += 1
+            return 'yellow'
+        elif choice.game.value >= cost_threshold_80:
+            self.green_counter += 1
+            return 'green'
+        else:
+            return 'gray'
+
 
 class Achievements(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="achiever")
+    user = models.ManyToManyField(User, related_name="achiever", blank=True)
     title = models.TextField(verbose_name="Achievement Title")
     description = models.TextField(verbose_name="Description")
     slug = AutoSlugField(populate_from='title', unique=True)
     value = models.IntegerField(blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    rubies_spent = models.IntegerField(blank=True, null=True) #make sure it does not show unless the selected category is RS
+    rubies_collected = models.IntegerField(blank=True, null=True) #make sure it does not show unless the selected category is CRS
+    total_rubies_earned = models.IntegerField(blank=True, null=True) #make sure it does not show unless the selected category is TRS
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
+    category = models.CharField(choices=AchievementCategory, max_length=4, blank=True, null=True)
     earned = models.BooleanField(default=False)
+    green_counter = models.IntegerField(blank=True, null=True, default=0)
+    yellow_counter = models.IntegerField(blank=True, null=True, default=0)
+    orange_counter = models.IntegerField(blank=True, null=True, default=0)
+    red_counter = models.IntegerField(blank=True, null=True, default=0)
+    black_counter = models.IntegerField(blank=True, null=True, default=0)
+    gold_counter = models.IntegerField(blank=True, null=True, default=0)
+    redgold_counter = models.IntegerField(blank=True, null=True, default=0)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
@@ -2209,13 +2297,119 @@ class Achievements(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+    def __str__(self):
+        return f"{self.title}"
+
+    def check_and_add_user(self, user):
+        """
+        Check if the user fulfills the requirements for this achievement and add them to the user field.
+        """
+        # Define the logic for fulfillment of the achievement
+        if self.requirement_fulfilled(user):
+            self.user.add(user)
+            self.earned = True
+            self.save()
+
     def save(self, *args, **kwargs):
         # Set the default currency to the first instance of Currency if not already set
         if not self.currency:
             first_currency = Currency.objects.first()
             if first_currency:
                 self.currency = first_currency
+        if not self.type:
+            first_type = GameHub.objects.first()
+            if first_type:
+                self.type = first_type
+        if self.category == 'RS':
+            rubies_spent = self.rubies_spent
+            self.description = "Spend " + str(self.rubies_spent) + " Rubies"
         super().save(*args, **kwargs)
+
+    def calculate_rubies_spent(self):
+        if self.AchievementCategory == 'RS':
+            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            rubies_spent = profile.total_currency_spent
+            self.rubies = rubies_spent
+            self.description = f"Spend {rubies_spent} Rubies"
+            self.save()
+
+        elif self.AchievementCategory == 'TRE':
+            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            rubies_collected = profile.total_currency_amount
+            self.description = f"Spend {rubies_collected} Rubies"
+            self.save()
+
+        elif self.AchievementCategory == 'RC':
+            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            rubies_spent = profile.currency_spent
+            rubies_collected = profile.total_currency_amount
+            self.rubies = rubies_spent
+            self.description = f"Spend {rubies_collected} Rubies"
+            self.save()
+
+        elif self.AchievementCategory == 'WS':
+            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            rubies_spent = profile.currency_spent
+            rubies_collected = profile.total_currency_amount
+            self.rubies = rubies_spent
+            self.description = f"Spend {rubies_collected} Rubies"
+            self.save()
+
+        elif self.AchievementCategory == 'GCH':
+            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            rubies_spent = profile.currency_spent
+            rubies_collected = profile.total_currency_amount
+            self.rubies = rubies_spent
+            self.description = f"Spend {rubies_collected} Rubies"
+            self.save()
+
+        elif self.AchievementCategory == 'YCH':
+            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            rubies_spent = profile.currency_spent
+            rubies_collected = profile.total_currency_amount
+            self.rubies = rubies_spent
+            self.description = f"Spend {rubies_collected} Rubies"
+            self.save()
+
+        elif self.AchievementCategory == 'OCH':
+            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            rubies_spent = profile.currency_spent
+            rubies_collected = profile.total_currency_amount
+            self.rubies = rubies_spent
+            self.description = f"Hit {rubies_collected} Rubies"
+            self.save()
+
+        elif self.AchievementCategory == 'RCH':
+            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            rubies_spent = profile.currency_spent
+            rubies_collected = profile.total_currency_amount
+            self.rubies = rubies_spent
+            self.description = f"Hit {rubies_collected} Rubies"
+            self.save()
+
+        elif self.AchievementCategory == 'BCH':
+            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            rubies_spent = profile.currency_spent
+            rubies_collected = profile.total_currency_amount
+            self.rubies = rubies_spent
+            self.description = f"Hit {rubies_collected} Rubies"
+            self.save()
+
+        elif self.AchievementCategory == 'GCH':
+            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            rubies_spent = profile.currency_spent
+            rubies_collected = profile.total_currency_amount
+            self.rubies = rubies_spent
+            self.description = f"Hit {rubies_collected} Rubies"
+            self.save()
+
+        elif self.AchievementCategory == 'RGCH':
+            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            rubies_spent = profile.currency_spent
+            rubies_collected = profile.total_currency_amount
+            self.rubies = rubies_spent
+            self.description = f"Hit {rubies_collected} Rubies"
+            self.save()
 
     class Meta:
         verbose_name = "Achievement"
@@ -3947,8 +4141,6 @@ class Message(models.Model):
    #def get_profile_url(self):
    #    return f"http://127.0.0.1:8000/profile/{self.signed_in_user_id}/"
 """
-
-
 class GeneralMessage(models.Model):
     value = models.CharField(max_length=1000000)
     date = models.DateTimeField(default=timezone.now, blank=True)
@@ -3968,25 +4160,22 @@ class GeneralMessage(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        if self.value:
-            return f"{self.value} "
-        else:
-            return f"blank message "
+        return f"{self.value or 'blank message'}"
 
     def save(self, *args, **kwargs):
         if not self.pk:
             # Get the current maximum message number
-            max_message_number = Message.objects.aggregate(max_message_number=Max('message_number'))[
-                                     'max_message_number'] or 0
-            # Increment the maximum message number to get the new message number
+            max_message_number = GeneralMessage.objects.aggregate(max_message_number=Max('message_number'))[
+                'max_message_number'] or 0
             self.message_number = max_message_number + 1
 
-            # Get the associated ProfileDetails for the donor
+            # Get the associated ProfileDetails for the signed-in user
             profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
-
-            # Set the position to the position value from the associated ProfileDetails if it exists
-            if profile and hasattr(self, 'position'):
-                self.position = profile.position
+            if profile:
+                # If `position` is a field in ProfileDetails and needs to be set in GeneralMessage,
+                # it should be added to this model.
+                # self.position = profile.position
+                pass  # Remove this if `position` field is added to GeneralMessage
 
         super().save(*args, **kwargs)
 
@@ -3998,7 +4187,6 @@ class GeneralMessage(models.Model):
     class Meta:
         verbose_name = "General Message"
         verbose_name_plural = "General Messages"
-
 
 class DegeneratePlaylistLibrary(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

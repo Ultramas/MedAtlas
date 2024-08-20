@@ -611,23 +611,48 @@ admin.site.register(Wager, BlackJackWagerAdmin)
 
 
 class AchievementsAdmin(admin.ModelAdmin):
-    fieldsets = (
-        ('Achievement  Information - Categorial Descriptions', {
-            'fields': ('title', 'description', 'value','type', 'currency',)
-        }),
-        ('Achievement Information - Image Display', {
-            'fields': ('image', 'image_length', 'image_width',),
-            'classes': ('collapse',),
-        }),
-        ('Achievement Information - Technical Description', {
-            'fields': ('is_active',),
-            'classes': ('collapse',),
-        }),
-    )
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = (
+            ('Achievement Information - Categorial Descriptions', {
+                'fields': ('user', 'title', 'description', 'value', 'type', 'category', 'currency',)
+            }),
+            ('Achievement Information - Image Display', {
+                'fields': ('image', 'image_length', 'image_width',),
+                'classes': ('collapse',),
+            }),
+            ('Achievement Information - Technical Description', {
+                'fields': ('is_active',),
+                'classes': ('collapse',),
+            }),
+        )
+
+        # Define the base fields for the category type section
+        category_type_fields = []
+
+        # Add fields conditionally based on the selected category
+        if obj:
+            if obj.category == 'RS':
+                category_type_fields = ['rubies_spent']
+            elif obj.category == 'RC':
+                category_type_fields = ['rubies_collected']
+            elif obj.category == 'TRE':
+                category_type_fields = ['total_rubies_earned']
+        else:
+            # Include all fields if obj is None (e.g., when adding a new object)
+            category_type_fields = ['rubies_spent', 'rubies_collected', 'total_rubies_earned']
+
+        # Add the category type section to the fieldsets
+        if category_type_fields:
+            fieldsets += (('Achievement Information - Category Type', {
+                'fields': category_type_fields,
+            }),)
+
+        return fieldsets
+
     readonly_fields = ('slug',)
 
-
 admin.site.register(Achievements, AchievementsAdmin)
+
 
 
 class EarnedAchievementsAdmin(admin.ModelAdmin):

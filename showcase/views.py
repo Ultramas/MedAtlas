@@ -1352,9 +1352,11 @@ def create_spinner_choice_render_automatically(request):
     else:
         return render(request, 'error.html', {'message': 'No choice found for the generated nonce'})
 
+
 def spinner_choice_render_list(request):
     spinner_choice_renders = SpinnerChoiceRenders.objects.all()
     return render(request, 'spinner_choice_render_list.html', {'spinner_choice_renders': spinner_choice_renders})
+
 
 def spinner_choice_render_list(request):
     spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=self.game)
@@ -1647,6 +1649,7 @@ def game_view(request, game_id):
 
     return render(request, 'game.html', context)
 
+
 #how the choices are rendered in game.html
 def game_detail(request, game_id):
     game = Game.objects.get(id=game_id)
@@ -1805,15 +1808,10 @@ class GameChestBackgroundView(BaseView):
 
         return context
 
-    # how the choices are rendered in game.html
     def game_detail(request, slug):
         game = get_object_or_404(Game, slug=slug)
-        choices = game.choices.all()  # Fetch all related choices
-        context = {
-            'game': game,
-            'choices': choices,
-        }
-        return render(request, 'game.html', context)
+        choices = game.choices.all()  # Get all related choices for the game
+        return render(request, 'game_detail.html', {'game': game, 'choices': choices})
 
     def display_choices(request, game_id, slug):
         game = get_object_or_404(Game, id=game_id, slug=slug)
@@ -2005,7 +2003,7 @@ class GameChestBackgroundView(BaseView):
 
 class EarningAchievement(BaseView):
     model = Achievements
-    template_name = "chatbackgroundimagechange.html"
+    template_name = "achievements.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -2235,13 +2233,6 @@ class AchievementsView(TemplateView):
         context['TotalAchievements'] = Achievements.objects.filter(is_active=1)
         context['Achievements'] = Achievements.objects.filter(is_active=1, earned=True)
         newprofile = Achievements.objects.filter(is_active=1, user=user)
-        context['Profiles'] = newprofile
-
-        for newprofile in context['Profiles']:
-            profile = ProfileDetails.objects.filter(user=newprofile.user).first()
-            if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
         return context
 
@@ -5021,7 +5012,6 @@ def getGeneralMessages(request):
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import GeneralMessage
-
 @csrf_exempt
 def generalsend(request):
     if request.method == 'POST':
@@ -5048,7 +5038,7 @@ def generalsend(request):
                 )
             new_message.save()
 
-            # Prepare the JSON response with only serializable data
+            # Prepare the JSON response
             response_data = {
                 'status': 'success',
                 'generalmessage': 'Message sent successfully',
@@ -5065,7 +5055,6 @@ def generalsend(request):
             return JsonResponse({'status': 'error', 'generalmessage': str(e)})
 
     return JsonResponse({'status': 'error', 'generalmessage': 'Invalid request method.'})
-
 
 
 class BackgroundView(FormMixin, BaseView):

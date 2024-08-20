@@ -628,26 +628,30 @@ margin-left: 0; margin-right: 0; width: 100%; height: 15vh;">
     <div class="game" style="display: flex; flex-direction: row; justify-content: left;" >
 
             <div class="sliderlootlist" id="">
-        {% for choice in game.choices.all reversed %}
-            <div id="{{choice.choice_text}}" class="cards" style="margin-right: 15px; margin-left: 15px; flex: 1 1 200px;
-            margin: 10px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: left;">
-{% endfor %}
+    <ul>
+        {% for item in choices_with_nonce %}
+            <li>
+                <strong>{{ item.choice.choice_text }}</strong><br>
+                <img src="{{ item.choice.file.url }}" alt="{{ item.choice.choice_text }}" width="{{ item.choice.image_width }}" height="{{ item.choice.image_length }}"><br>
+                Value: {{ item.choice.value }} Rubicoins<br>
+                Rarity: {{ item.choice.formatted_rarity }}%<br>
+                Votes: {{ item.choice.votes }}<br>
+                Category: {{ item.choice.category }}<br>
+                Tier: {{ item.choice.get_tier_display }}<br>
+                Color: {{ item.choice.get_color_display }}<br>
+            </li>
+        <!--nerd statistics-->
+        <li>
+                Number of Choices: {{ item.choice.number_of_choice }}<br>
+                Total Number of Choices: {{ item.choice.total_number_of_choice }}<br>
+                Nonce: {{ item.nonce }} (within range {{ item.lower_nonce }} - {{ item.upper_nonce }})<br>
+        </li>
+        {% empty %}
+            <li>No choices available for this game.</li>
+        {% endfor %}
+    </ul>
 
-<div class="cards-container">
-<p>Nonce: {{ nonce }}</p>
 
-
-<ul>
-    {% for choice in choices %}
-        <li>{{ choice.choice_text }} - Value: {{ choice.value }} - Color: {{ choice.color }}</li>
-    {% empty %}
-        <li>No choices available for this game.</li>
-    {% endfor %}
-</ul>
 </div>
     </div>
             </div>
