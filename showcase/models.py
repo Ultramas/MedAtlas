@@ -1,5 +1,6 @@
 import string
 import uuid
+from datetime import timedelta
 from uuid import uuid4
 
 from PIL import Image
@@ -308,6 +309,7 @@ class UpdateProfile(models.Model):
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
 
+
 class Experience(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.IntegerField()
@@ -484,7 +486,7 @@ class ProfileDetails(models.Model):
     level = models.ForeignKey(Level, on_delete=models.CASCADE, default="")
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    currency_amount = models.IntegerField(default=0)
     total_currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_currency_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     green_cards_hit = models.IntegerField(blank=True, null=True)
@@ -540,10 +542,28 @@ class ProfileDetails(models.Model):
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
         if created:
-            default_level = Level.objects.first()  # or set this to whatever you want the default to be
-            default_currency = Currency.objects.first()  # or set this to whatever you want the default to be
-            profile = 'static/css/images/a.jpg'
-            ProfileDetails.objects.create(user=instance, currency=default_currency, level=default_level, avatar=profile)
+            # Set default level and currency or customize as needed
+            default_level = Level.objects.first()  # You can specify a default level
+            default_currency = Currency.objects.first()  # You can specify a default currency
+            profile_image = 'static/css/images/a.jpg'
+
+            # Create ProfileDetails instance
+            ProfileDetails.objects.create(
+                user=instance,
+                currency=default_currency,
+                level=default_level,
+                avatar=profile_image
+            )
+
+            # Create Inventory instance
+            Inventory.objects.create(
+                user=instance,
+                name=f"{instance.username}'s Inventory",  # Or customize this
+                image='a.jpg',  # Set to a default image path or leave blank
+                image_length=100,
+                image_width=100,
+                is_active=1,  # Set as active by default
+            )
 
     post_save.connect(create_user_profile, sender=User)
 
@@ -982,7 +1002,7 @@ class Inventory(models.Model):
                 pass  # No existing Inventory, proceed with saving
 
         if not self.name:
-            self.name = f"{self.user}'s inventory"
+            self.name = f"{self.user}'s Inventory"
         super().save(*args, **kwargs)
 
     class Meta:
@@ -997,7 +1017,7 @@ class InventoryObject(models.Model):
     choice = models.ForeignKey('Choice', on_delete=models.CASCADE)
     choice_text = models.CharField(max_length=200, verbose_name='Choice Text', blank=True, null=True)
     currency = models.ForeignKey(Currency, blank=True, null=True, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    price = models.IntegerField(default=0)
     trade_locked = models.BooleanField(verbose_name="Set Tradable?", default=False)
     condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2, blank=True, null=True)
     image = models.ImageField(blank=True, null=True)
@@ -4141,6 +4161,8 @@ class Message(models.Model):
    #def get_profile_url(self):
    #    return f"http://127.0.0.1:8000/profile/{self.signed_in_user_id}/"
 """
+
+
 class GeneralMessage(models.Model):
     value = models.CharField(max_length=1000000)
     date = models.DateTimeField(default=timezone.now, blank=True)
@@ -4187,6 +4209,7 @@ class GeneralMessage(models.Model):
     class Meta:
         verbose_name = "General Message"
         verbose_name_plural = "General Messages"
+
 
 class DegeneratePlaylistLibrary(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -5833,33 +5856,71 @@ class Withdraw(models.Model):
     def __str__(self):
         if self.user:
             if self.number_of_cards == 1:
-                return str(self.user.username) + " withdrew " + str(self.number_of_cards) + " card"
+                card_choices = ", ".join([str(card.choice_text) for card in self.cards.all()])
+                return f"{self.user.username} withdrew {self.number_of_cards} card: {card_choices}"
             else:
-                return str(self.user.username) + " withdrew " + str(self.number_of_cards) + " cards"
+                card_choices = ", ".join([str(card.choice_text) for card in self.cards.all()])
+                return f"{self.user.username} withdrew {self.number_of_cards} cards: {card_choices}"
+
+
+    def __str__(self):
+        if self.user:
+            if self.number_of_cards == 1:
+                card_choices = ", ".join([str(card.choice_text) for card in self.cards.all()])
+                return f"{self.user.username} withdrew {self.number_of_cards} card: {card_choices}"
+            else:
+                card_choices = ", ".join([str(card.choice_text) for card in self.cards.all()])
+                return f"{self.user.username} withdrew {self.number_of_cards} cards: {card_choices}"
 
     def save(self, *args, **kwargs):
-        self.clean()  # Call clean method for validation before saving
+        # Check if there is an open WithdrawClass within the last 48 hours with less than 30 Withdraws
+        current_time = timezone.now()
+        recent_withdraw_class = WithdrawClass.objects.filter(
+            user=self.user,
+            open=True,
+            date_and_time__gte=current_time - timedelta(hours=48),
+        ).annotate(num_withdraws=Count('withdraw')).filter(num_withdraws__lt=30).first()
 
-        super().save(*args, **kwargs)  # Save the withdrawal instance
+        if recent_withdraw_class:
+            # Add this Withdraw to the existing WithdrawClass
+            recent_withdraw_class.withdraw.add(self)
+            recent_withdraw_class.number_of_cards += 1
+            recent_withdraw_class.save()
+        else:
+            # Create a new WithdrawClass
+            new_withdraw_class = WithdrawClass.objects.create(
+                user=self.user,
+                number_of_cards=1,  # This withdraw is the first card
+                shipping_state=self.shipping_state,
+                fees=self.fees,
+                status=self.status,
+                is_active=self.is_active,
+            )
+            new_withdraw_class.withdraw.add(self)
+            new_withdraw_class.save()
 
-        # Update number of cards after saving
-        self.number_of_cards = self.cards.count()
-        self.save()
+        super().save(*args, **kwargs)
 
-        # Update user's card inventory after successful withdrawal
-        if self.pk:  # Ensure the instance has been saved (has a primary key)
-            for card in self.cards.all():
-                # Update user's inventory (remove withdrawn cards)
-                user_inventory = card.userinventory_set.filter(user=self.user).first()
-                if user_inventory:
-                    user_inventory.quantity -= 1
-                    user_inventory.save()
-                    if user_inventory.quantity <= 0:
-                        user_inventory.delete()  # Optionally delete empty inventory entries
+    def get_card_images(self):
+        # Retrieve images from related InventoryObjects
+        images = [card.image.url for card in self.cards.all() if card.image]
+        return images
 
-                # Handle potential inventory update errors (consider logging or raising exceptions)
-                else:
-                    print(f"Warning: Could not update user inventory for card {card.pk} (user {self.user.pk})")
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+    @receiver(pre_delete, sender=InventoryObject)
+    def update_withdraw_on_inventory_object_delete(sender, instance, **kwargs):
+        # When an InventoryObject is deleted, update the associated Withdraw objects
+        withdraws = Withdraw.objects.filter(cards=instance)
+        for withdraw in withdraws:
+            # Before deleting, capture the card's info (choice_text, etc.)
+            # You might want to store this information in the Withdraw model or a related model
+            withdraw.number_of_cards -= 1
+            withdraw.cards.remove(instance)
+            withdraw.save()
 
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.user).first()
@@ -5867,8 +5928,66 @@ class Withdraw(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
     class Meta:
-        verbose_name = 'Withdrawal'
-        verbose_name_plural = 'Withdrawals'
+        verbose_name = 'Withdrawal Card'
+        verbose_name_plural = 'Withdrawal Cards'
+
+
+from django.db.models.signals import m2m_changed
+
+
+class WithdrawClass(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    withdraw = models.ManyToManyField(Withdraw)
+    number_of_cards = models.IntegerField(blank=True, null=True)
+    shipping_state = models.CharField(choices=SHIPPINGSTATUS, max_length=1, default='S')
+    open = models.BooleanField(default=True)
+    fees = models.IntegerField(null=True, blank=True)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    date_and_time = models.DateTimeField(null=True, verbose_name="time and date", auto_now_add=True)
+    status = models.CharField(choices=SHIPPINGSTATUS, max_length=1, default='P')
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this withdraw active?")
+
+    def __str__(self):
+        if self.user:
+            if self.number_of_cards == 1:
+                return f"{self.user.username} withdrew {self.number_of_cards} card"
+            else:
+                return f"{self.user.username} withdrew {self.number_of_cards} cards"
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+    def save(self, *args, **kwargs):
+        # Set the currency to the active one
+        self.currency = Currency.objects.filter(is_active=1).first()
+
+        is_new = self.pk is None
+        super().save(*args, **kwargs)  # Save first to get the pk if it doesn't exist
+
+        # Calculate the number of related Withdraw instances
+        if not self.number_of_cards or not is_new:
+            self.number_of_cards = self.withdraw.count()
+            super().save(update_fields=['number_of_cards'])
+            print(f'set amount to {self.number_of_cards}')
+
+
+@receiver(m2m_changed, sender=WithdrawClass.withdraw.through)
+def update_number_of_cards(sender, instance, **kwargs):
+    if kwargs.get('action') in ['post_add', 'post_remove', 'post_clear']:
+        instance.number_of_cards = instance.withdraw.count()
+        instance.save()
+        print(f'set amount to {instance.number_of_cards}')
+
+
+class Meta:
+    verbose_name = 'Withdrawal Class'
+    verbose_name_plural = 'Withdrawal Classes'
 
 
 class OfficialShipping(models.Model):

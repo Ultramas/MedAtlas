@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
+
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
     SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
     Currency, ShuffleType, PrizePool, Lottery, LotteryTickets, Level, CurrencyMarket, SellerApplication, Meme, \
@@ -6,7 +8,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
-    SpinPreference
+    SpinPreference, WithdrawClass
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -611,48 +613,23 @@ admin.site.register(Wager, BlackJackWagerAdmin)
 
 
 class AchievementsAdmin(admin.ModelAdmin):
-    def get_fieldsets(self, request, obj=None):
-        fieldsets = (
-            ('Achievement Information - Categorial Descriptions', {
-                'fields': ('user', 'title', 'description', 'value', 'type', 'category', 'currency',)
-            }),
-            ('Achievement Information - Image Display', {
-                'fields': ('image', 'image_length', 'image_width',),
-                'classes': ('collapse',),
-            }),
-            ('Achievement Information - Technical Description', {
-                'fields': ('is_active',),
-                'classes': ('collapse',),
-            }),
-        )
-
-        # Define the base fields for the category type section
-        category_type_fields = []
-
-        # Add fields conditionally based on the selected category
-        if obj:
-            if obj.category == 'RS':
-                category_type_fields = ['rubies_spent']
-            elif obj.category == 'RC':
-                category_type_fields = ['rubies_collected']
-            elif obj.category == 'TRE':
-                category_type_fields = ['total_rubies_earned']
-        else:
-            # Include all fields if obj is None (e.g., when adding a new object)
-            category_type_fields = ['rubies_spent', 'rubies_collected', 'total_rubies_earned']
-
-        # Add the category type section to the fieldsets
-        if category_type_fields:
-            fieldsets += (('Achievement Information - Category Type', {
-                'fields': category_type_fields,
-            }),)
-
-        return fieldsets
-
+    fieldsets = (
+        ('Achievement  Information - Categorial Descriptions', {
+            'fields': ('title', 'description', 'value','type', 'currency',)
+        }),
+        ('Achievement Information - Image Display', {
+            'fields': ('image', 'image_length', 'image_width',),
+            'classes': ('collapse',),
+        }),
+        ('Achievement Information - Technical Description', {
+            'fields': ('is_active',),
+            'classes': ('collapse',),
+        }),
+    )
     readonly_fields = ('slug',)
 
-admin.site.register(Achievements, AchievementsAdmin)
 
+admin.site.register(Achievements, AchievementsAdmin)
 
 
 class EarnedAchievementsAdmin(admin.ModelAdmin):
@@ -1573,8 +1550,41 @@ class WithdrawAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('date_and_time',)
 
+    list_display = (
+        'user',
+        'number_of_cards',
+        'shipping_state',
+        'fees',
+        'date_and_time',
+        'status',
+        'is_active',
+        'display_card_images'  # Add this method to list display
+    )
+
+    def display_card_images(self, obj):
+        images = obj.get_card_images()  # Use the method defined in Withdraw model
+        if images:
+            return mark_safe(
+                '<br>'.join([f'<img src="{img}" style="width: 100px; height: auto;" />' for img in images])
+            )
+        return 'No images'
+
+    display_card_images.short_description = 'Card Images'
 
 admin.site.register(Withdraw, WithdrawAdmin)
+
+
+class WithdrawClassAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Withdraw Classes - Categorial Description', {
+            'fields': ('user', 'withdraw', 'number_of_cards', 'fees', 'currency', 'status', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('date_and_time',)
+
+
+admin.site.register(WithdrawClass, WithdrawClassAdmin)
 
 
 class AdministrationTaskAdmin(admin.ModelAdmin):

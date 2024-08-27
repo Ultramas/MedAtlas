@@ -5,7 +5,6 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
 
 	<!-- title -->
   {% for InventoryObject in Titles %}
@@ -45,63 +44,74 @@
     <!--PreLoader Ends-->
 
 	<!-- header -->
-	<div class="top-header-area" id="sticker">
+	<div class="top-header-area" id="sticker" style="background: linear-gradient(rgba(0, 0, 0, 1) 5%, rgba(0,0,0,0));">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-12 col-sm-12 text-center">
 					<div class="main-menu-wrap">
 						<!-- logo -->
-        {% for InventoryObject in Logo %}
-        {% if InventoryObject.page == 'inventory.html' %}
-
-        <a class="logo" href="{{InventoryObject.hyperlink}}">
-          <img class="imageicon" src="{{InventoryObject.logocover.url}}"
-                alt="{{InventoryObject.alternate}}" style="length: {{InventoryObject.length_for_resize}}px; width: {{InventoryObject.width_for_resize}}px;"></a>
-        {% endif %}
-        {% endfor %}
+						<div class="site-logo">
+							<a href="index.html">
+							{% for BackgroundView in Logo %}
+								{% if BackgroundView.page == 'index.html' %}
+								<a class="logo" href="{{BackgroundView.hyperlink}}">
+								  <img class="imageicon" src="{{BackgroundView.logocover.url}}"
+										alt="{{BackgroundView.alternate}}" style="length: {{BackgroundView.length_for_resize}}px; width: {{BackgroundView.width_for_resize}}px;"></a>
+								{% endif %}
+							{% endfor %}
+							</a>
+						</div>
 						<!-- logo -->
 
 						<!-- menu start -->
 						<nav class="main-menu">
 							<ul>
-								<li class="current-list-item"><a href="#">Home</a>
+							  {% for column in Header %}
+
+      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
 									<ul class="sub-menu">
-										<li><a href="index.html">Static Home</a></li>
-										<li><a href="index_2.html">Slider Home</a></li>
+										{% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% else %}
+              {% if row.opennew %}
+										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
 									</ul>
-								</li>
-								<li><a href="about.html">About</a></li>
-								<li><a href="#">Pages</a>
-									<ul class="sub-menu">
-										<li><a href="404.html">404 page</a></li>
-										<li><a href="about.html">About</a></li>
-										<li><a href="cart.html">Cart</a></li>
-										<li><a href="checkout.html">Check Out</a></li>
-										<li><a href="contact.html">Contact</a></li>
-										<li><a href="news.html">News</a></li>
-										<li><a href="shop.html">Shop</a></li>
-									</ul>
-								</li>
-								<li><a href="news.html">News</a>
-									<ul class="sub-menu">
-										<li><a href="news.html">News</a></li>
-										<li><a href="single-news.html">Single News</a></li>
-									</ul>
-								</li>
-								<li><a href="contact.html">Contact</a></li>
-								<li><a href="shop.html">Shop</a>
-									<ul class="sub-menu">
-										<li><a href="shop.html">Shop</a></li>
-										<li><a href="checkout.html">Check Out</a></li>
-										<li><a href="single-product.html">Single Product</a></li>
-										<li><a href="cart.html">Cart</a></li>
-									</ul>
+        {% endfor %}
 								</li>
 								<li>
-									<div class="header-icons">
-										<a class="shopping-cart" href="cart.html"><i class="fas fa-shopping-cart"></i></a>
-										<a class="mobile-hide search-bar-icon" href="#"><i class="fas fa-search"></i></a>
+									<div class="header-icons" style="display: flex; flex-direction: right;">
+										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
+											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
+										</a>
+										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
 									</div>
+
+
+
+								</li>
+								<li style="margin-right: -10%;">
+									{% for userprofile in Profiles %}
+									{% if userprofile.newprofile_profile_picture_url %}
+									<a href="{{ userprofile.newprofile_profile_url }}">
+										<img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
+									</a>
+									{% else %}
+									<!-- Placeholder image or default avatar -->
+									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
+									{% endif %}
+									{% endfor %}
 								</li>
 							</ul>
 						</nav>
@@ -116,23 +126,31 @@
 	<!-- end header -->
 
 	<!-- search area -->
-	<div class="search-area">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-12">
-					<span class="close-btn"><i class="fas fa-window-close"></i></span>
-					<div class="search-bar">
-						<div class="search-bar-tablecell">
-							<h3>Search For:</h3>
-							<input type="text" placeholder="Keywords">
-							<button type="submit">Search <i class="fas fa-search"></i></button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end search area -->
+<div class="search-area">
+    <div class="container">
+       <div class="row">
+          <div class="col-lg-12">
+             <span class="close-btn"><img src=""></i></span>
+             <div class="search-bar">
+                <div class="search-bar-tablecell">
+                   <h3>What are you looking for?</h3>
+                   <form action="{% url 'showcase:pagesearch' %}" method="post">
+                       {% csrf_token %}
+                       <input type="text" name="search_query" placeholder="Keywords">
+                       <select name="search_type">
+                           <option value="text">Text</option>
+                           <option value="url">URL</option>
+                       </select>
+                       <button type="submit">Search <i class="fas fa-search"></i></button>
+                   </form>
+                </div>
+             </div>
+          </div>
+       </div>
+    </div>
+</div>
+
+<!-- end search area -->
 
 	<!-- breadcrumb-section -->
 {% for InventoryObject in Background %}
@@ -156,12 +174,11 @@
 
 			<!-- product section -->
 	<div class="product-section mt-150 mb-150">
-		{% for currency in Money %}
-		{% if currency.position == 1 %}
-			<h3 style="display: flex; justify-content: right; margin-right: 100px;">{{ SentProfile.user.username }}: {{ SentProfile.currency_amount }}
-                        {{ currency.name }}</h3>
-		{% endif %}
-		{% endfor %}
+    {% if profile %}
+        <p><strong>{{ profile.user.username }} </strong>  - {{ profile.currency_amount }} {{ profile.currency.name }}</p>
+    {% else %}
+        <p>No profile information available.</p>
+    {% endif %}
 
 		<div class="container">
 			<div class="row">
@@ -217,6 +234,7 @@
 {% empty %}
     <div style="display: flex; flex-direction: column; align-items: center;">
         <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy" style="width: 500px; height: 500px;">
+		<br>
         <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
     </div>
 {% endfor %}
