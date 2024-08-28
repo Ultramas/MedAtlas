@@ -5839,6 +5839,14 @@ class Refund(models.Model):
         return f"{self.pk}"
 
 
+from django.db.models.signals import m2m_changed
+
+
+from django.db import models
+from django.urls import reverse
+from django.core.exceptions import ValidationError
+
+
 class Withdraw(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     cards = models.ManyToManyField(InventoryObject)
@@ -5847,80 +5855,52 @@ class Withdraw(models.Model):
     fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     date_and_time = models.DateTimeField(null=True, verbose_name="time and date", auto_now_add=True)
     status = models.CharField(choices=SHIPPINGSTATUS, max_length=1, default='P')
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this withdraw active?")
+    is_active = models.BooleanField(default=True, verbose_name="Is this withdraw active?")
 
     def __str__(self):
-        if self.user:
-            if self.number_of_cards == 1:
-                card_choices = ", ".join([str(card.choice_text) for card in self.cards.all()])
-                return f"{self.user.username} withdrew {self.number_of_cards} card: {card_choices}"
-            else:
-                card_choices = ", ".join([str(card.choice_text) for card in self.cards.all()])
-                return f"{self.user.username} withdrew {self.number_of_cards} cards: {card_choices}"
-
-
-    def __str__(self):
-        if self.user:
-            if self.number_of_cards == 1:
-                card_choices = ", ".join([str(card.choice_text) for card in self.cards.all()])
-                return f"{self.user.username} withdrew {self.number_of_cards} card: {card_choices}"
-            else:
-                card_choices = ", ".join([str(card.choice_text) for card in self.cards.all()])
-                return f"{self.user.username} withdrew {self.number_of_cards} cards: {card_choices}"
+        card_choices = ", ".join([str(card.choice_text) for card in self.cards.all()])
+        return f"{self.user.username} withdrew {self.number_of_cards} card{'s' if self.number_of_cards > 1 else ''}: {card_choices}"
 
     def save(self, *args, **kwargs):
-        # Check if there is an open WithdrawClass within the last 48 hours with less than 30 Withdraws
-        current_time = timezone.now()
-        recent_withdraw_class = WithdrawClass.objects.filter(
-            user=self.user,
-            open=True,
-            date_and_time__gte=current_time - timedelta(hours=48),
-        ).annotate(num_withdraws=Count('withdraw')).filter(num_withdraws__lt=30).first()
+        is_new = self.pk is None
 
-        if recent_withdraw_class:
-            # Add this Withdraw to the existing WithdrawClass
-            recent_withdraw_class.withdraw.add(self)
-            recent_withdraw_class.number_of_cards += 1
-            recent_withdraw_class.save()
-        else:
-            # Create a new WithdrawClass
-            new_withdraw_class = WithdrawClass.objects.create(
+        # Save initially to generate primary key if not present
+        super().save(*args, **kwargs)
+
+        # Update the number of cards after saving
+        self.number_of_cards = self.cards.count()
+
+        # If it's a new withdraw and no image is set, set it from the first InventoryObject's image
+        if is_new and not self.image:
+            first_card = self.cards.first()
+            if first_card and first_card.image:
+                self.image = first_card.image.name  # Use the file name
+
+            # Save again to update image and number of cards
+            super().save(update_fields=['number_of_cards', 'image'])
+
+        # Update InventoryObjects and their quantities
+        for card in self.cards.all():
+            inventory_object = InventoryObject.objects.filter(user=self.user, pk=card.pk).first()
+            if inventory_object:
+                inventory_object.quantity -= 1
+                inventory_object.save()
+                if inventory_object.quantity <= 0:
+                    inventory_object.delete()
+
+        if is_new:
+            withdraw_class = WithdrawClass.objects.create(
                 user=self.user,
-                number_of_cards=1,  # This withdraw is the first card
+                number_of_cards=self.number_of_cards,
                 shipping_state=self.shipping_state,
                 fees=self.fees,
                 status=self.status,
                 is_active=self.is_active,
             )
-            new_withdraw_class.withdraw.add(self)
-            new_withdraw_class.save()
-
-        super().save(*args, **kwargs)
+            withdraw_class.withdraw.add(self)
 
     def get_card_images(self):
-        # Retrieve images from related InventoryObjects
-        images = [card.image.url for card in self.cards.all() if card.image]
-        return images
-
-    def get_profile_url(self):
-        profile = ProfileDetails.objects.filter(user=self.user).first()
-        if profile:
-            return reverse('showcase:profile', args=[str(profile.pk)])
-
-    @receiver(pre_delete, sender=InventoryObject)
-    def update_withdraw_on_inventory_object_delete(sender, instance, **kwargs):
-        # When an InventoryObject is deleted, update the associated Withdraw objects
-        withdraws = Withdraw.objects.filter(cards=instance)
-        for withdraw in withdraws:
-            # Before deleting, capture the card's info (choice_text, etc.)
-            # You might want to store this information in the Withdraw model or a related model
-            withdraw.number_of_cards -= 1
-            withdraw.cards.remove(instance)
-            withdraw.save()
+        return [card.image.url for card in self.cards.all() if card.image]
 
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.user).first()
@@ -5932,7 +5912,16 @@ class Withdraw(models.Model):
         verbose_name_plural = 'Withdrawal Cards'
 
 
-from django.db.models.signals import m2m_changed
+@receiver(pre_delete, sender=InventoryObject)
+def update_withdraw_on_inventory_object_delete(sender, instance, **kwargs):
+    # When an InventoryObject is deleted, update the associated Withdraw objects
+    withdraws = Withdraw.objects.filter(cards=instance)
+    for withdraw in withdraws:
+        # Before deleting, capture the card's info (choice_text, etc.)
+        # You might want to store this information in the Withdraw model or a related model
+        withdraw.number_of_cards -= 1
+        withdraw.cards.remove(instance)
+        withdraw.save()
 
 
 class WithdrawClass(models.Model):
@@ -5951,6 +5940,17 @@ class WithdrawClass(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this withdraw active?")
 
+    def save(self, *args, **kwargs):
+        # Ensure the currency is set before saving
+            # Retrieve the first available currency or handle the absence of a currency more gracefully
+        self.currency = Currency.objects.filter(is_active=1).first()
+        print('success to get currency')
+        if not self.currency:
+            print('failure to get currency')
+            raise ValueError("No active Currency available to associate with WithdrawClass.")
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         if self.user:
             if self.number_of_cards == 1:
@@ -5963,31 +5963,17 @@ class WithdrawClass(models.Model):
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
 
-    def save(self, *args, **kwargs):
-        # Set the currency to the active one
-        self.currency = Currency.objects.filter(is_active=1).first()
+    class Meta:
+        verbose_name = 'Withdrawal Class'
+        verbose_name_plural = 'Withdrawal Classes'
 
-        is_new = self.pk is None
-        super().save(*args, **kwargs)  # Save first to get the pk if it doesn't exist
-
-        # Calculate the number of related Withdraw instances
-        if not self.number_of_cards or not is_new:
-            self.number_of_cards = self.withdraw.count()
-            super().save(update_fields=['number_of_cards'])
-            print(f'set amount to {self.number_of_cards}')
 
 
 @receiver(m2m_changed, sender=WithdrawClass.withdraw.through)
 def update_number_of_cards(sender, instance, **kwargs):
     if kwargs.get('action') in ['post_add', 'post_remove', 'post_clear']:
         instance.number_of_cards = instance.withdraw.count()
-        instance.save()
-        print(f'set amount to {instance.number_of_cards}')
-
-
-class Meta:
-    verbose_name = 'Withdrawal Class'
-    verbose_name_plural = 'Withdrawal Classes'
+        instance.save(update_fields=['number_of_cards'])
 
 
 class OfficialShipping(models.Model):

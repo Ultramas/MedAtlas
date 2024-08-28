@@ -364,6 +364,7 @@ class MoveToTradeForm(forms.Form):
     length_for_resize = forms.IntegerField()
     width_for_resize = forms.IntegerField()
 
+
 class AddTradeForm(forms.ModelForm):
     class Meta:
         model = InventoryObject

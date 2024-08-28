@@ -6768,7 +6768,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
                 withdraw.cards.add(inventory_object)
             else:
                 # Create a new withdrawal
-                withdraw = Withdraw.objects.create(user=user, is_active=1, shipping_state='S')
+                withdraw = Withdraw.objects.create(user=user, is_active=1, shipping_state='P')
                 withdraw.cards.add(inventory_object)
 
             # Update number of cards after adding the inventory object
