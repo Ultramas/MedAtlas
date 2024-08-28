@@ -6743,6 +6743,8 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         else:
             return HttpResponse(status=400)  # Bad request if action is unknown
 
+    from django.db import transaction
+
     def withdraw_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
@@ -6751,33 +6753,27 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             messages.error(request, 'You cannot withdraw items you do not own!')
             return redirect('showcase:inventory')
 
-        # Update InventoryObject
-        inventory_object.user = None
-        inventory_object.inventory = None
-        inventory_object.save()
-
-        # Handle withdrawal logic
         user = request.user
 
         with transaction.atomic():
-            # Query for an active withdrawal with fewer than 25 cards
-            withdraw = Withdraw.objects.filter(user=user, is_active=1, shipping_state='S', number_of_cards__lt=25).first()
-
-            if withdraw:
-                # Update existing withdrawal
-                withdraw.cards.add(inventory_object)
-            else:
-                # Create a new withdrawal
+            # Find or create a withdrawal
+            withdraw = Withdraw.objects.filter(user=user, is_active=1, shipping_state='S',
+                                               number_of_cards__lt=25).first()
+            if not withdraw:
                 withdraw = Withdraw.objects.create(user=user, is_active=1, shipping_state='P')
-                withdraw.cards.add(inventory_object)
 
-            # Update number of cards after adding the inventory object
+            # Add inventory object to withdrawal
+            withdraw.cards.add(inventory_object)
             withdraw.number_of_cards = withdraw.cards.count()
             withdraw.save()
 
-        messages.success(request, f"Successfully withdrawn {inventory_object.choice}!")
-        return redirect('showcase:inventory')  # Ensure the redirect URL is correct
+            # Update InventoryObject
+            inventory_object.user = None
+            inventory_object.inventory = None
+            inventory_object.save()
 
+        messages.success(request, f"Successfully withdrawn {inventory_object.choice_text}!")
+        return redirect('showcase:inventory')
     def sell_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
 

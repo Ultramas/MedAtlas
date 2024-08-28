@@ -1544,7 +1544,7 @@ admin.site.register(InventoryObject, InventoryObjectAdmin)
 class WithdrawAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Withdraws - Categorial Description', {
-            'fields': ('user', 'cards', 'number_of_cards', 'shipping_state', 'fees', 'status', 'is_active',),
+            'fields': ('user', 'cards', 'number_of_cards', 'shipping_state', 'fees', 'condition', 'status', 'is_active',),
             'classes': ('collapse',),
         }),
     )
