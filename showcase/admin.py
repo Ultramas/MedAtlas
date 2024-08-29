@@ -1501,7 +1501,7 @@ class ChoiceAdmin(admin.ModelAdmin):
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Choice Information - Attributes', {
-            'fields': ('votes', 'mfg_date', 'rarity', 'is_active', 'number', 'prizes', 'generated_nonce',),
+            'fields': ('votes', 'mfg_date', 'rarity', 'number_of_choice', 'total_number_of_choice', 'value', 'number', 'prizes', 'generated_nonce','is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Choice Information - Image Display', {
@@ -2065,7 +2065,7 @@ class TransactionAdmin(admin.ModelAdmin):
             'fields': ('inventory_object', 'user', 'currency', 'amount', 'is_active',)
         }),
     )
-    readonly_fields = ('date',)
+    readonly_fields = ('date_and_time',)
 
 admin.site.register(Transaction, TransactionAdmin)
 

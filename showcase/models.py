@@ -2098,8 +2098,8 @@ class Choice(models.Model):
     color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
     votes = models.IntegerField(default=0)
     value = models.IntegerField(default=0)
-    category = models.CharField(max_length=100,
-                                help_text='Category of choice (Pokemon, trainers, etc.).')
+    category = models.CharField(max_length=100, help_text='Category of choice (Pokemon, Yu-Gi-Oh, Bakugo, Magic The Gathering, etc.).')
+    subcategory = models.CharField(max_length=200, help_text='Subcategory of choice (Pokemon, trainers, etc.).', blank=True, null=True)
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     tier = models.CharField(choices=LEVEL, max_length=1, blank=True, null=True)
     rarity = models.DecimalField(max_digits=9, decimal_places=6, help_text="Rarity of choice in percent (optional).",
@@ -2107,7 +2107,7 @@ class Choice(models.Model):
                                  verbose_name="Rarity (%)")  # use the rarity field to determine the amount of times the item pops up
     prizes = models.ForeignKey(PrizePool, on_delete=models.CASCADE, blank=True, null=True)
     shufflers = models.ForeignKey(Shuffler, on_delete=models.CASCADE, blank=True, null=True)
-    number_of_choice = models.IntegerField()
+    number_of_choice = models.IntegerField(default=1)
     total_number_of_choice = models.IntegerField(blank=True,
                                                  null=True)  # make it pull from the total_number_of_choice field in the related PrizePool
     lower_nonce = models.DecimalField(
@@ -2139,7 +2139,7 @@ class Choice(models.Model):
                                 verbose_name="Quantity Displayed")
     value = models.IntegerField(help_text="Value of item in Rubicoins.", blank=True,
                                 null=True, verbose_name="Value (Rubicoins)")
-    number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)")
+    number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)", blank=True, null=True, default=1)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2148,6 +2148,8 @@ class Choice(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='choices', null=True, blank=True)
 
     def save(self, *args, **kwargs):
+        if not self.pk:  # Check if this is a new object
+            self.number = Choice.objects.filter(shufflers=self.shufflers).count() + 1
         if self.total_number_of_choice and self.number_of_choice:
             if self.total_number_of_choice != 0:
                 self.rarity = (Decimal(self.number_of_choice) / Decimal(self.total_number_of_choice)) * Decimal(100)
@@ -4813,7 +4815,7 @@ class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateTimeField(auto_now_add=True)
+    date_and_time = models.DateTimeField(auto_now_add=True, null=True, verbose_name='time and date')
 
     def __str__(self):
         if self.user:
