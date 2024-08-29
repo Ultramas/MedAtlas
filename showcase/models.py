@@ -4815,7 +4815,7 @@ class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date_and_time = models.DateTimeField(auto_now_add=True, null=True, verbose_name='time and date')
+    date_and_time = models.DateTimeField(null=True, verbose_name="time and date", auto_now_add=True)
 
     def __str__(self):
         if self.user:
@@ -5905,20 +5905,6 @@ class Withdraw(models.Model):
         self.number_of_cards = self.cards.count()
         super().save(update_fields=['number_of_cards'])
 
-        for card in self.cards.all():
-            inventory_object = InventoryObject.objects.filter(user=self.user, pk=card.pk).first()
-            if inventory_object:
-                self.condition = inventory_object.condition
-                inventory_object.quantity -= 1
-                if inventory_object.quantity <= 0:
-                    inventory_object.delete()
-                else:
-                    inventory_object.save()
-
-                # Store the image from the first card in the withdrawal
-                if is_new and not self.image and inventory_object.image:
-                    self.image = inventory_object.image
-                    super().save(update_fields=['image'])
 
         if is_new:
             withdraw_class = WithdrawClass.objects.create(
