@@ -5900,22 +5900,42 @@ class Withdraw(models.Model):
 
         is_new = self.pk is None
 
-        super().save(*args, **kwargs)
-
-        self.number_of_cards = self.cards.count()
-        super().save(update_fields=['number_of_cards'])
-
-
         if is_new:
-            withdraw_class = WithdrawClass.objects.create(
+            # Create the withdrawal first to ensure ID is generated
+            super().save(*args, **kwargs)
+
+            # Update number of cards
+            self.number_of_cards = self.cards.count()
+            self.save(update_fields=['number_of_cards'])
+
+            # Handle WithdrawClass logic
+            time_threshold = timezone.now() - timedelta(hours=48)
+            withdraw_class = WithdrawClass.objects.annotate(
+                withdraw_count=Count('withdraw')
+            ).filter(
                 user=self.user,
-                number_of_cards=self.number_of_cards,
-                shipping_state=self.shipping_state,
-                fees=self.fees,
-                status=self.status,
-                is_active=self.is_active,
-            )
-            withdraw_class.withdraw.add(self)
+                date_and_time__gte=time_threshold,
+                withdraw_count__lte=29,
+                open=True
+            ).first()
+
+            if withdraw_class:
+                withdraw_class.withdraw.add(self)
+            else:
+                withdraw_class = WithdrawClass.objects.create(
+                    user=self.user,
+                    shipping_state=self.shipping_state,
+                    fees=self.fees,
+                    status=self.status,
+                    is_active=self.is_active,
+                    currency=Currency.objects.filter(is_active=1).first(),
+                    number_of_cards=self.number_of_cards
+                )
+                withdraw_class.withdraw.add(self)
+        else:
+            # Handle updates if not new
+            self.number_of_cards = self.cards.count()
+            super().save(*args, **kwargs)
 
     @receiver(pre_delete, sender=InventoryObject)
     def update_withdraw_on_inventory_object_delete(sender, instance, **kwargs):
