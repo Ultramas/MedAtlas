@@ -423,7 +423,7 @@ class TradeItemAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
         ('Trade Item Information - Technical Description', {
-            'fields': ('fees', 'condition', 'label', 'slug', 'relateditems', 'is_active',),
+            'fields': ('fees', 'value', 'condition', 'label', 'slug', 'relateditems', 'is_active',),
             'classes': ('collapse',),
         }),
         ('Trade Item Information - Image Description', {
@@ -1501,7 +1501,7 @@ class ChoiceAdmin(admin.ModelAdmin):
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Choice Information - Attributes', {
-            'fields': ('votes', 'mfg_date', 'rarity', 'number_of_choice', 'total_number_of_choice', 'value', 'number', 'prizes', 'generated_nonce','is_active',),
+            'fields': ('votes', 'mfg_date', 'rarity', 'condition', 'number_of_choice', 'total_number_of_choice', 'value', 'number', 'prizes', 'generated_nonce','is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Choice Information - Image Display', {
@@ -1591,8 +1591,8 @@ admin.site.register(WithdrawClass, WithdrawClassAdmin)
 
 class ExchangePrizeAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Inventory Application Information - Categorial Description', {
-            'fields': ('prize', 'is_active',),
+        ('Exchange Prize Information - Categorial Description', {
+            'fields': ('prize', 'value', 'currency', 'condition', 'image_length', 'image_width', 'is_active',),
             'classes': ('collapse',),
         }),
     )
@@ -1603,8 +1603,8 @@ admin.site.register(ExchangePrize, ExchangePrizeAdmin)
 
 class CommerceExchangeAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Inventory Application Information - Categorial Description', {
-            'fields': ('user', 'usercard', 'prizes','currency', 'is_active',),
+        ('Commerce Exchange Information - Categorial Description', {
+            'fields': ('user', 'usercard', 'total_usercard_value', 'prizes', 'total_prize_value', 'value_descrepancy', 'currency', 'is_active',),
             'classes': ('collapse',),
         }),
     )

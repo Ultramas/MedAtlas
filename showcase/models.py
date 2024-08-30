@@ -11,7 +11,7 @@ from django.db.models.signals import post_save, post_delete, pre_delete
 from django.conf import settings
 from django.contrib.auth.models import User, AbstractUser, Permission
 from django.db import models
-from django.db.models import Max, F, Count
+from django.db.models import Max, F, Count, Sum
 from django.dispatch import receiver
 from django.forms import CharField
 from django.shortcuts import reverse
@@ -1133,6 +1133,16 @@ class Trade_In_Cards(models.Model):
 
 class ExchangePrize(models.Model):
     prize = models.ForeignKey('Choice', on_delete=models.CASCADE)
+    value = models.IntegerField(blank=True, null=True)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
+    condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2)
+    image = models.ImageField(blank=True, null=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1142,16 +1152,107 @@ class ExchangePrize(models.Model):
     def __str__(self):
         return str(self.prize)
 
+    def save(self, *args, **kwargs):
+        if self.prize:
+            self.choice_text = self.prize.choice_text
+            self.image = self.prize.file
+            self.image_length = self.prize.image_length
+            self.image_width = self.prize.image_width
+            self.price = self.prize.value
+            if self.prize.condition:
+                self.condition = self.prize.condition
+
+        # Set the default currency to the first instance of Currency if not already set
+        if not self.currency:
+            first_currency = Currency.objects.first()
+            if first_currency:
+                self.currency = first_currency
+        if not self.value and self.prize:
+            self.value = self.prize.value
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = "Exchange Prize"
         verbose_name_plural = "Exchange Prizes"
 
 
+class TradeItem(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    title = models.CharField(max_length=100)
+    inventoryobject = models.ForeignKey(InventoryObject, on_delete=models.CASCADE, null=True, blank=True)
+    fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
+    specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
+    condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2)
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default="N")  # can use for cataloging products
+    slug = models.SlugField()  # might change to automatically get the slug
+    status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
+    description = models.TextField()
+    value = models.IntegerField(blank=True, null=True)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    image = models.ImageField()
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the advertisement (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the advertisement (use for original ratio).',
+                                              verbose_name="image width")
+    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
+    # hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
+    relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
+
+    def __str__(self):
+        if self.user:
+            return self.title + " by " + self.user.username
+        else:
+            return self.title + " by PokeTrove"
+
+    def save(self, *args, **kwargs):
+        # Set the default currency to the first instance of Currency if not already set
+        if not self.currency:
+            first_currency = Currency.objects.first()
+            if first_currency:
+                self.currency = first_currency
+        if not self.value and self.inventoryobject:
+            self.value = self.inventoryobject.value
+        super().save(*args, **kwargs)
+
+    def create_room(self, current_user):
+        room_name = f"trade-{self.id}"
+        if not Room.objects.filter(name=room_name).exists():
+            new_room = Room.objects.create(name=room_name)
+            new_room.signed_in_user = current_user
+            new_room.save()
+            return new_room
+        else:
+            return Room.objects.get(name=room_name)
+
+    def delete_trade_item(self):
+        self.delete()
+
+    class Meta:
+        verbose_name = "Trade Item"
+        verbose_name_plural = "Trade Items"
+
+
+class TradeOfferManager(models.Manager):
+    def get_queryset(self, request):
+        return super().get_queryset().select_related('trade_items').filter(trade_items__user=request.user)
+
+
 class CommerceExchange(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    usercard = models.ManyToManyField(InventoryObject)
+    usercard = models.ManyToManyField(TradeItem)
+    total_usercard_value = models.IntegerField(blank=True, null=True)
     prizes = models.ManyToManyField(ExchangePrize)
-    value = models.IntegerField(blank=True, null=True)
+    total_prize_value = models.IntegerField(blank=True, null=True)
+    value_descrepancy = models.IntegerField(blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     is_active = models.IntegerField(default=1,
@@ -1160,12 +1261,41 @@ class CommerceExchange(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+    def __str__(self):
+        # Get the usercards as a comma-separated string of values
+        usercards_list = ", ".join([str(item) for item in self.usercard.all()])
+
+        # Get the prizes as a comma-separated string of values
+        prizes_list = ", ".join([str(item) for item in self.prizes.all()])
+
+        # Return the formatted string
+        return f"{self.user} exchanged [{usercards_list}] for [{prizes_list}]"
+
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
         # Set the default currency to the first instance of Currency if not already set
         if not self.currency:
             first_currency = Currency.objects.first()
             if first_currency:
                 self.currency = first_currency
+        self.total_usercard_value = self.usercard.aggregate(Sum('value'))['value__sum'] or 0
+        self.total_prize_value = self.prizes.aggregate(Sum('value'))['value__sum'] or 0
+        if not self.value_descrepancy:
+            self.value_descrepancy = self.total_usercard_value - self.total_prize_value
+            if self.value_descrepancy < 0:
+                # Prevent save and raise error
+                raise ValidationError(
+                    "The value of your exchange cards needs to be at least the value of the selected prizes.")
+
+            # Add the value of the discrepancy to the user's profile if it's greater than 0
+            if self.value_descrepancy > 0:
+                profile = ProfileDetails.objects.get(user=self.user)
+                profile.currency_amount += self.value_descrepancy
+                profile.save()
+
+            # Save the instance again with updated fields
+            super().save(*args, **kwargs)
+
         super().save(*args, **kwargs)
 
     class Meta:
@@ -2120,6 +2250,7 @@ class Choice(models.Model):
                                  verbose_name="Rarity (%)")  # use the rarity field to determine the amount of times the item pops up
     prizes = models.ForeignKey(PrizePool, on_delete=models.CASCADE, blank=True, null=True)
     shufflers = models.ForeignKey(Shuffler, on_delete=models.CASCADE, blank=True, null=True)
+    condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2, blank=True, null=True)
     number_of_choice = models.IntegerField(default=1)
     total_number_of_choice = models.IntegerField(blank=True,
                                                  null=True)  # make it pull from the total_number_of_choice field in the related PrizePool
@@ -4844,62 +4975,6 @@ class Transaction(models.Model):
         verbose_name = "Transaction"
         verbose_name_plural = "Transactions"
 
-
-class TradeItem(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
-    title = models.CharField(max_length=100)
-    fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
-    specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
-    condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2)
-    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default="N")  # can use for cataloging products
-    slug = models.SlugField()  # might change to automatically get the slug
-    status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
-    description = models.TextField()
-    image = models.ImageField()
-    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                               help_text='Original length of the advertisement (use for original ratio).',
-                                               verbose_name="image length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                              help_text='Original width of the advertisement (use for original ratio).',
-                                              verbose_name="image width")
-    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
-    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
-    # hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
-    relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
-
-    def __str__(self):
-        if self.user:
-            return self.title + " by " + self.user.username
-        else:
-            return self.title + " by PokeTrove"
-
-    def create_room(self, current_user):
-        room_name = f"trade-{self.id}"
-        if not Room.objects.filter(name=room_name).exists():
-            new_room = Room.objects.create(name=room_name)
-            new_room.signed_in_user = current_user
-            new_room.save()
-            return new_room
-        else:
-            return Room.objects.get(name=room_name)
-
-    def delete_trade_item(self):
-        self.delete()
-
-    class Meta:
-        verbose_name = "Trade Item"
-        verbose_name_plural = "Trade Items"
-
-
-class TradeOfferManager(models.Manager):
-    def get_queryset(self, request):
-        return super().get_queryset().select_related('trade_items').filter(trade_items__user=request.user)
 
 
 from django.utils.text import slugify
