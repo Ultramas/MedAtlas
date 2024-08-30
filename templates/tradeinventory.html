@@ -154,39 +154,7 @@
 	<div class="latest-news mt-150 mb-150">
 		<div class="container">
 			<div class="row">
-					{% for Inventory in Stockpile %}
 
-
-				<div class="col-lg-4 col-md-6">
-					<div class="single-latest-news">
-						<a href="single-news.html">
-							<div class="latest-news-bg news-bg-1" style="background: url({{newprofile.image.url}}); background-size: cover;"></div></a>
-						<div class="news-text-box">
-							<h3><a href="single-news.html">{{Inventory.choice_text}}</a></h3>
-							<p class="blog-meta">
-								<span class="author"><i class="fas fa-user"></i> {{ Inventory.category }} </span>
-								<span class="date"><i class="fas fa-calendar"></i> {{Inventory.date_and_time}} </span>
-								<br>
-							</p>
-							{% with description=newprofile.description %}
-							<p class="excerpt">
-								{% if description|length > 200 %}
-									{{ description|slice:":200" }}...
-								{% else %}
-									{{ description }}
-								{% endif %}
-							</p>
-						{% endwith %}
-						<ul style="width: 100%;">
-						</ul>
-
-							<br>
-							<a href="single-news.html" class="read-more-btn">Read More <i class="fas fa-angle-right"></i></a>
-
-						</div>
-					</div>
-				</div>
-					{% endfor %}
 
 			</div>
 
@@ -223,7 +191,15 @@
                  <p class="product-price">
                         <span style="">{{TradeItem.condition}}</span> </p>
                         <span style="">{{TradeItem.description}}</span> </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn"><i class="fas fa-shopping-cart"></i>Remove From Trade Inventory</a></a>
+						 <div class="cart-btn">
+
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="pk" value="{{ TradeItem.pk }}">
+
+                    <button type="submit" class="cart-btn">Remove From Trade Inventory</button>
+				</form></div></a></div>
 
 					</div>
 				</div>

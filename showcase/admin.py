@@ -8,7 +8,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
-    SpinPreference, WithdrawClass
+    SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -1555,6 +1555,7 @@ class WithdrawAdmin(admin.ModelAdmin):
         'number_of_cards',
         'shipping_state',
         'fees',
+        'condition',
         'date_and_time',
         'status',
         'is_active',
@@ -1571,6 +1572,7 @@ class WithdrawAdmin(admin.ModelAdmin):
 
     display_card_images.short_description = 'Card Images'
 
+
 admin.site.register(Withdraw, WithdrawAdmin)
 
 
@@ -1585,6 +1587,31 @@ class WithdrawClassAdmin(admin.ModelAdmin):
 
 
 admin.site.register(WithdrawClass, WithdrawClassAdmin)
+
+
+class ExchangePrizeAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Inventory Application Information - Categorial Description', {
+            'fields': ('prize', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+
+
+admin.site.register(ExchangePrize, ExchangePrizeAdmin)
+
+
+class CommerceExchangeAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Inventory Application Information - Categorial Description', {
+            'fields': ('user', 'usercard', 'prizes','currency', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('mfg_date',)
+
+
+admin.site.register(CommerceExchange, CommerceExchangeAdmin)
 
 
 class AdministrationTaskAdmin(admin.ModelAdmin):

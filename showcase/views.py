@@ -5314,9 +5314,10 @@ def get_items_by_category(category):
 
 from django.contrib.auth.models import AnonymousUser
 
+
 class EBackgroundView(BaseView, FormView):
     model = EBackgroundImage
-    #template_name = "ehome.html"
+    template_name = "ehome.html"
     form_class = EmailForm
 
     def get_context_data(self, **kwargs):
@@ -5325,12 +5326,17 @@ class EBackgroundView(BaseView, FormView):
         current_user = self.request.user
         total_items = Item.objects.filter(is_active=1).count()
 
+        # Get the paginate_by value from the form data or settings
         paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
+
         items_query = Item.objects.filter(is_active=1).order_by('price')
         paginator = Paginator(items_query, paginate_by)
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
 
+        # context['items'] = paginated_items
+
+        # context['items'] = Item.objects.filter(is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
@@ -5338,11 +5344,11 @@ class EBackgroundView(BaseView, FormView):
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Image'] = ImageBase.objects.filter(is_active=1, page=self.template_name)
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(page=self.template_name, is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(page=self.template_name,
+                                                                                    is_active=1)
         context['Email'] = EmailField.objects.filter(is_active=1)
         context['store_view_form'] = StoreViewTypeForm()
         context['form'] = EmailForm()
-        context['items'] = paginated_items
 
         if isinstance(current_user, AnonymousUser):
             context['store_view_type_str'] = 'stream'
@@ -5361,30 +5367,37 @@ class EBackgroundView(BaseView, FormView):
                 print('store view does not exist, setting to stream for signed-in user')
 
         context['item_filters'] = ItemFilter.objects.filter(is_active=1)
-        for item_filter in context['item_filters']:
+        item_filters = ItemFilter.objects.filter(is_active=1)
+        for item_filter in item_filters:
             print(str(item_filter))
+        print(context)
+        print('The item filters are:')
+        items_query = Item.objects.filter(is_active=1)
+        paginator = Paginator(items_query, paginate_by)
+        page_number = self.request.GET.get('page')
+        paginated_items = paginator.get_page(page_number)
 
-        # Category filtering
-        category = self.request.GET.get('category', 'all')  # Default to 'all' if not provided
-        print(f"Filtering items by category: {category}")
+        context['items'] = paginated_items
 
+        category = self.request.GET.get('category', 'all')
         categoryitems = self.get_items_by_category(category)
         context['categorizeditems'] = categoryitems
-
         return context
 
     def get_items_by_category(self, category):
-        print(f"Filtering items by category: {category}")  # Debugging line
-
         if category == 'all':
             items = Item.objects.all()
-        elif category.lower() in ['gold', 'platinum', 'emerald', 'diamond']:
-            items = Item.objects.filter(category=category[0].upper())  # Simplified logic
+        elif category == 'gold':
+            items = Item.objects.filter(category='G')
+        elif category == 'platinum':
+            items = Item.objects.filter(category='P')
+        elif category == 'emerald':
+            items = Item.objects.filter(category='E')
+        elif category == 'diamond':
+            items = Item.objects.filter(category='D')
         else:
-            items = Item.objects.none()  # Return empty queryset if the category is unexpected
-
+            items = Item.objects.all()
         return items
-
 
     def post(self, request, *args, **kwargs):
         form = EmailForm(request.POST)
@@ -6727,6 +6740,29 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user)
         context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
         context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['Profiles'] = userprofile
+        else:
+            context['Profiles'] = None
+
+        if context['Profiles'] == None:
+            # Create a new object with the necessary attributes
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['Profiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
         return context
 
     @method_decorator(login_required)
@@ -6774,6 +6810,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
         messages.success(request, f"Successfully withdrawn {inventory_object.choice_text}!")
         return redirect('showcase:inventory')
+
     def sell_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
@@ -6799,13 +6836,12 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             inventory_object.save()
 
             # Update UserProfile's currency_amount
-            user_profile = get_object_or_404(UserProfile, user=request.user)
+            user_profile = get_object_or_404(ProfileDetails, user=request.user)
             user_profile.currency_amount += inventory_object.price
             user_profile.save()
 
         messages.success(request, f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
         return redirect('showcase:inventory')
-
 
     def move_to_trade(self, request, pk):
         inventory_item = get_object_or_404(InventoryObject, pk=pk, user=request.user)
@@ -6976,9 +7012,9 @@ def delete_trade_item(request, item_id):
 
 
 class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
-    model = InventoryObject
+    model = TradeItem
     template_name = "tradeinventory.html"
-    form_class = PosteForm
+    form_class = MoveToTradeForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -7003,6 +7039,7 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
         if action == 'remove':
             return self.remove_trade_object(request, pk)
+            print('trade item removed from trading inventory!')
 
         # If no action matches, return an appropriate response
         return HttpResponse(status=400)

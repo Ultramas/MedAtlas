@@ -174,13 +174,21 @@
 
 			<!-- product section -->
 	<div class="product-section mt-150 mb-150">
-    {% if profile %}
-        <p><strong>{{ profile.user.username }} </strong>  - {{ profile.currency_amount }} {{ profile.currency.name }}</p>
-    {% else %}
-        <p>No profile information available.</p>
-    {% endif %}
 
 		<div class="container">
+		{% for userprofile in Profiles %}
+		{% if userprofile.newprofile_profile_picture_url %}
+
+		<p style="display: flex;"><a href="{{ userprofile.newprofile_profile_url }}">
+										<img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="35" height="35" style="border-radius: 50px; margin-right: 20px;">
+									</a>
+			<strong>{{ userprofile.user.username }} </strong>  - {{ userprofile.currency_amount }} {{ userprofile.currency.name }}</p>
+
+									{% else %}
+
+        <p>No profile information available.</p>
+			{% endif %}
+									{% endfor %}
 			<div class="row">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="section-title">

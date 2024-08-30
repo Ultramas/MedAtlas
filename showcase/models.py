@@ -1139,6 +1139,9 @@ class ExchangePrize(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
+    def __str__(self):
+        return str(self.prize)
+
     class Meta:
         verbose_name = "Exchange Prize"
         verbose_name_plural = "Exchange Prizes"
@@ -1147,13 +1150,23 @@ class ExchangePrize(models.Model):
 class CommerceExchange(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     usercard = models.ManyToManyField(InventoryObject)
-    prize = models.ForeignKey(ExchangePrize, on_delete=models.CASCADE)
+    prizes = models.ManyToManyField(ExchangePrize)
+    value = models.IntegerField(blank=True, null=True)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def save(self, *args, **kwargs):
+        # Set the default currency to the first instance of Currency if not already set
+        if not self.currency:
+            first_currency = Currency.objects.first()
+            if first_currency:
+                self.currency = first_currency
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Commerce Exchange"
@@ -2239,14 +2252,14 @@ class Outcome(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return f'{self.user} - {self.game} - {self.choice} - Nonce: {self.nonce} - {self.date_and_time}'
+        return f'{self.user} - {self.game} - {self.choice} - Nonce: {self.nonce}  - Color: {self.color} - {self.date_and_time}'
 
     def generate_nonce(self):
         return random.randint(0, 1000000)
 
     def save(self, *args, **kwargs):
-        if not self.color:
-            self.color = self.choice.color
+        if not self.color and self.game:
+            self.color = self.game.choice.color
         if not self.slug and self.choice:
             self.slug = slugify(self.choice)
         if not self.nonce:
@@ -4281,6 +4294,10 @@ class InviteCode(models.Model):
         if self.expire_time is None:
             return True  # No expiry set, so it's valid
         return self.expire_time > timezone.now()
+
+    class Meta:
+        verbose_name = "Invite Code"
+        verbose_name_plural = "Invite Codes"
 
 
 # is_active is new

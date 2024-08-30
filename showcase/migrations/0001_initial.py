@@ -1874,21 +1874,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'User Profile Posts',
             },
         ),
-        migrations.CreateModel(
-            name='Transaction',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('date_and_time', models.DateTimeField(auto_now_add=True, null=True, verbose_name='time and date')),
-                ('currency', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='showcase.currency')),
-                ('inventory_object', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='showcase.inventoryobject')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'verbose_name': 'Transaction',
-                'verbose_name_plural': 'Transactions',
-            },
-        ),
+
         migrations.CreateModel(
             name='TradeShippingLabel',
             fields=[

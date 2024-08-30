@@ -774,7 +774,7 @@ class ExchangePrizesForm(forms.ModelForm):
 
     class Meta:
         model = CommerceExchange
-        fields = ['usercard', 'prize',] # Adjust fields as needed
+        fields = ['usercard', 'prizes',] # Adjust fields as needed
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)  # Get the user from kwargs (if provided)
