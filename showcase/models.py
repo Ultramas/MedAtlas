@@ -10,7 +10,7 @@ from autoslug import AutoSlugField
 from django.db.models.signals import post_save, post_delete, pre_delete
 from django.conf import settings
 from django.contrib.auth.models import User, AbstractUser, Permission
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Max, F, Count, Sum
 from django.dispatch import receiver
 from django.forms import CharField
@@ -1028,6 +1028,8 @@ class InventoryObject(models.Model):
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
+    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -1062,7 +1064,8 @@ class InventoryObject(models.Model):
 
         if self.pk is None and self.user:
             self.inventory = Inventory.objects.get(user=self.user)
-            # After saving the InventoryObject, create a related TradeItem if trade_locked is True
+
+        # After saving the InventoryObject, create a related TradeItem if trade_locked is True
         if self.trade_locked:
             trade_item, created = TradeItem.objects.get_or_create(
                 user=self.user,
@@ -1071,7 +1074,7 @@ class InventoryObject(models.Model):
                     'fees': self.price,
                     'category': self.choice.category,  # Assuming choice has category
                     'specialty': self.choice.specialty,  # Assuming choice has specialty
-                    'condition': self.choice.condition,  # Assuming choice has condition
+                    'condition': self.condition,
                     'label': self.choice.label,  # Assuming choice has label
                     'slug': slugify(self.choice_text),
                     'status': 1,  # Default to publish
@@ -1079,6 +1082,8 @@ class InventoryObject(models.Model):
                     'image': self.image,
                     'image_length': self.image_length,
                     'image_width': self.image_width,
+                    'length_for_resize': self.length_for_resize,
+                    'width_for_resize': self.width_for_resize,
                     'is_active': 1,  # Default to active
                 }
             )
@@ -1093,9 +1098,8 @@ class InventoryObject(models.Model):
         # Create a TradeItem
         trade_item = TradeItem.objects.create(
             user=self.user,
-            inventory=self.inventory,
             currency=self.currency,
-            price=self.price,
+            value=self.price,
             condition=self.condition,
             image=self.image,
             image_length=image_length,
@@ -1214,14 +1218,30 @@ class TradeItem(models.Model):
             return self.title + " by PokeTrove"
 
     def save(self, *args, **kwargs):
-        # Set the default currency to the first instance of Currency if not already set
-        if not self.currency:
-            first_currency = Currency.objects.first()
-            if first_currency:
-                self.currency = first_currency
-        if not self.value and self.inventoryobject:
-            self.value = self.inventoryobject.value
-        super().save(*args, **kwargs)
+        with transaction.atomic():
+            # Set the default currency to the first instance of Currency if not already set
+            if not self.currency:
+                first_currency = Currency.objects.first()
+                if first_currency:
+                    self.currency = first_currency
+            if not self.value and self.inventoryobject:
+                self.value = self.inventoryobject.value
+            if not self.slug:
+                self.slug = slugify(self.title)
+            super().save(*args, **kwargs)
+
+            # Automatically create a TradeOffer instance related to this TradeItem
+            if not TradeOffer.objects.filter(trade_items=self).exists():
+                trade_offer = TradeOffer.objects.create(
+                    title=self.title,
+                    estimated_trading_value=self.value if self.value else 0,
+                    user=self.user,
+                    slug=slugify(self.title),
+                    trade_status=TradeOffer.PENDING,
+                    is_active=self.is_active,
+                )
+                trade_offer.trade_items.add(self)
+                trade_offer.save()
 
     def create_room(self, current_user):
         room_name = f"trade-{self.id}"
@@ -2389,8 +2409,8 @@ class Outcome(models.Model):
         return random.randint(0, 1000000)
 
     def save(self, *args, **kwargs):
-        if not self.color and self.game:
-            self.color = self.game.choice.color
+        if not self.color and self.choice:
+            self.color = self.choice.color
         if not self.slug and self.choice:
             self.slug = slugify(self.choice)
         if not self.nonce:

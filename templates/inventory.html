@@ -229,13 +229,12 @@
                     <input type="hidden" name="pk" value="{{ Inventory.pk }}">
                     <button type="submit">Withdraw Card</button>
                 </form>
-                <form action="" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="move">
-                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
-					<a href="{% url 'showcase:tradeinventory' %}"></a>
-                    <button type="submit" class="cart-btn">Set Tradable</button>
-                </form>
+				<form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post">
+					{% csrf_token %}
+					<input type="hidden" name="action" value="move">
+					<button type="submit" class="cart-btn">Set Tradable</button>
+				</form>
+
             </div>
         </div>
     </div>

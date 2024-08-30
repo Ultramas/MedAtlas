@@ -1264,18 +1264,20 @@ class FriendSearchResultsView(ListView):
             print('item_list is empty')
         return item_list
 
+
 from django.shortcuts import render
 
+
 def friendlysearchresultview(request):
-  search_term = request.GET.get('search', '')
-  if search_term:
-    item_list = Friend.objects.filter(
-        Q(friend__username__icontains=search_term)
-    )
-  else:
-    item_list = Friend.objects.none()
-  context = {'item_list': item_list}  # Add item_list to context
-  return render(request, 'friendssearchresultview.html', context)  # Render the template
+    search_term = request.GET.get('search', '')
+    if search_term:
+        item_list = Friend.objects.filter(
+            Q(friend__username__icontains=search_term)
+        )
+    else:
+        item_list = Friend.objects.none()
+    context = {'item_list': item_list}  # Add item_list to context
+    return render(request, 'friendssearchresultview.html', context)  # Render the template
 
 
 class SupportChatBackgroundView(BaseView):
@@ -1561,7 +1563,6 @@ def game_view(request, slug):
     return render(request, 'game_template.html', {'game': game, 'nonce': nonce})
 
 
-@csrf_exempt
 def create_outcome(request, slug):
     if request.method == 'POST':
         try:
@@ -1571,7 +1572,10 @@ def create_outcome(request, slug):
             if not game_id:
                 return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
 
+            # Retrieve the game by ID and slug
             game = Game.objects.get(id=game_id, slug=slug)
+
+            # Continue with your logic
             nonce = random.randint(1, 1000000)
             choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
 
@@ -1650,7 +1654,7 @@ def game_view(request, game_id):
     return render(request, 'game.html', context)
 
 
-#how the choices are rendered in game.html
+# how the choices are rendered in game.html
 def game_detail(request, game_id):
     game = Game.objects.get(id=game_id)
     choice_nonce_list = []
@@ -2794,8 +2798,6 @@ class PartnerApplicationView(FormMixin, LoginRequiredMixin, ListView):
             return render(request, "partnerapplication.html", {'form': form})
 
 
-
-
 class PartnerBackgroundView(BaseView):
     model = PartnerBackgroundImage
     template_name = "partners.html"
@@ -2961,7 +2963,6 @@ class RoomView(TemplateView):
                 onlineprofile.friend_name = onlineprofile.friend.username
                 print('activeprofile exists')
 
-
         # Retrieve the author's profile avatar
         blog_posts = Blog.objects.filter(status=1).order_by('-created_on')
 
@@ -2994,7 +2995,7 @@ class RoomView(TemplateView):
                     'profile_picture_url': profile.avatar.url,
                     'profile_url': reverse('showcase:profile', args=[str(profile.pk)]),
                     'currently_active': friend.currently_active,
-                    'user_profile_url' : friend.get_profile_url2()
+                    'user_profile_url': friend.get_profile_url2()
                 })
             if friend_pk and int(friend_pk) == friend.pk:  # Check if PK matches
                 print('setting currently active')
@@ -4246,6 +4247,7 @@ class TradeOfferCreateView(CreateView):
 
         return context
 
+
 def contact_trader(self, request, trade_item_id):
     trade_item = get_object_or_404(TradeItem, id=trade_item_id)
     current_user = request.user
@@ -4307,6 +4309,7 @@ class ResponseTradeOfferCreateView(CreateView):
         context['TradeOffer'] = TradeOffer.objects.filter(is_active=1)
 
         return context
+
 
 @login_required
 def contact_trader(request):
@@ -4973,13 +4976,13 @@ def index(request):
 from django.http import HttpResponse
 from .models import Message
 
-
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.decorators.csrf import csrf_exempt
 from .models import Message, Room, ProfileDetails
 import logging
+
 
 def getGeneralMessages(request):
     messages = GeneralMessage.objects.all()
@@ -5008,10 +5011,11 @@ def getGeneralMessages(request):
     return JsonResponse({'messages': messages_data})
 
 
-
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import GeneralMessage
+
+
 @csrf_exempt
 def generalsend(request):
     if request.method == 'POST':
@@ -5232,6 +5236,8 @@ class BackgroundView(FormMixin, BaseView):
         context['GeneralMessanger'] = general_messages_data
 
         return context
+
+
 """
 @login_required
 def get_general_messages(request, room_name):
@@ -5251,6 +5257,7 @@ def get_general_messages(request, room_name):
 
     return JsonResponse({'messages': messages_data})"""
 
+
 def indexsupportroom(request, signed_in_user):
     return render(request, 'index.html', {
         'username': username,
@@ -5262,7 +5269,6 @@ def indexsupportroom(request, signed_in_user):
         'Header': Header,
         'Dropdown': DropDown,
     })
-
 
 
 def dynamic_css(request):
@@ -6328,7 +6334,7 @@ def supportgetMessages(request, signed_in_user, **kwargs):
             if profile_details:
                 avatar_url = profile_details.avatar.url  # Get the avatar URL
             elif default_avatar:
-                avatar_url = default_avatar   # Default avatar URL
+                avatar_url = default_avatar  # Default avatar URL
             else:
                 avatar_url = staticfiles_storage.url('css/images/a.jpg')
 
@@ -6343,7 +6349,6 @@ def supportgetMessages(request, signed_in_user, **kwargs):
         return JsonResponse({'messages': messages_data})
     else:
         return HttpResponseForbidden("You do not have permission to access this chat room")
-
 
 
 """def supportgetMessages(request, **kwargs):
@@ -6707,6 +6712,7 @@ class InventoryView(FormMixin, ListView):
         context['Shuffle'] = Shuffler.objects.filter(is_active=1).order_by("category")
         return context
 
+
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import render, get_object_or_404, redirect
@@ -6725,7 +6731,8 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
         context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -6766,20 +6773,21 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         return context
 
     @method_decorator(login_required)
-    def post(self, request, *args, **kwargs):
+    def post(self, request, pk, *args, **kwargs):
+        # Get the InventoryObject instance by primary key (pk)
+        inventory_object = get_object_or_404(InventoryObject, pk=pk)
+
         action = self.request.POST.get('action')
-        pk = self.request.POST.get('pk')
 
         if action == 'sell':
             return self.sell_inventory_object(request, pk)
         elif action == 'withdraw':
             return self.withdraw_inventory_object(request, pk)
         elif action == 'move':
+            print("Move action triggered")  # Debugging line
             return self.move_to_trade(request, pk)
         else:
             return HttpResponse(status=400)  # Bad request if action is unknown
-
-    from django.db import transaction
 
     def withdraw_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
@@ -6840,35 +6848,43 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             user_profile.currency_amount += inventory_object.price
             user_profile.save()
 
-        messages.success(request, f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
+        messages.success(request,
+                         f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
         return redirect('showcase:inventory')
 
     def move_to_trade(self, request, pk):
-        inventory_item = get_object_or_404(InventoryObject, pk=pk, user=request.user)
+        # Fetch the InventoryObject based on pk
+        inventory_object = get_object_or_404(InventoryObject, pk=pk)
+        # Check if user owns the inventory object
+        if inventory_object.user != request.user:
+            messages.error(request, 'You cannot trade using items you do not own!')
+            return redirect('showcase:inventory')
 
-        if request.method == 'POST':
-            form = MoveToTradeForm(request.POST, request.FILES)
-            if form.is_valid():
-                trade_item = inventory_item.move_to_trading(
-                    title=form.cleaned_data['title'],
-                    fees=form.cleaned_data['fees'],
-                    category=form.cleaned_data['category'],
-                    specialty=form.cleaned_data['specialty'],
-                    condition=form.cleaned_data['condition'],
-                    label=form.cleaned_data['label'],
-                    slug=form.cleaned_data['slug'],
-                    description=form.cleaned_data['description'],
-                    image=form.cleaned_data['image'],
-                    image_length=form.cleaned_data['image_length'],
-                    image_width=form.cleaned_data['image_width'],
-                    length_for_resize=form.cleaned_data['length_for_resize'],
-                    width_for_resize=form.cleaned_data['width_for_resize']
+        user = request.user
+
+        with transaction.atomic():
+            # Find or create a tradeitem
+            tradeitem = TradeItem.objects.filter(user=user, is_active=1).first()
+            if not tradeitem:
+                tradeitem = TradeItem.objects.create(
+                    user=user,
+                    is_active=1,
+                    currency=inventory_object.currency,
+                    value=inventory_object.price,
+                    condition=inventory_object.condition,
+                    image=inventory_object.image,
+                    image_length=inventory_object.image_length,
+                    image_width=inventory_object.image_width,
+                    length_for_resize=inventory_object.length_for_resize,
+                    width_for_resize=inventory_object.width_for_resize,
                 )
-                return redirect('showcase:tradeitem_detail', trade_item.id)  # Redirect to the TradeItem detail view
-        else:
-            form = MoveToTradeForm()
 
-        return render(request, 'inventory.html', {'form': form, 'inventory_item': inventory_item})
+            tradeitem.save()
+
+            # Update InventoryObject
+            inventory_object.delete()
+
+            return HttpResponse(f"TradeItem created with ID: {tradeitem.id}")
 
     def remove_trade_object(self, request, pk):
         trade_item = get_object_or_404(TradeItem, pk=pk)
@@ -6936,10 +6952,36 @@ class CreateChestView(FormView):
             return self.render_to_response(self.get_context_data(game_form=game_form, formset=formset))
 
 
+def move_to_trading(self, **kwargs):
+    valid_fields = {
+        'title': kwargs.get('title'),
+        'fees': kwargs.get('fees'),
+        'category': kwargs.get('category'),
+        'specialty': kwargs.get('specialty'),
+        'condition': kwargs.get('condition'),
+        'label': kwargs.get('label'),
+        'slug': kwargs.get('slug'),
+        'value': kwargs.get('value'),
+        'description': kwargs.get('description'),
+        'image': kwargs.get('image'),
+        'image_length': kwargs.get('image_length'),
+        'image_width': kwargs.get('image_width'),
+        'length_for_resize': kwargs.get('length_for_resize'),
+        'width_for_resize': kwargs.get('width_for_resize'),
+    }
 
-@login_required
-def move_to_trade(request, inventory_id):
-    inventory_item = get_object_or_404(Inventory, id=inventory_id, user=request.user)
+    # Ensure that null/blank values are properly handled
+    valid_fields = {k: v for k, v in valid_fields.items() if v is not None}
+
+    # Create the TradeItem instance
+    trade_item = TradeItem.objects.create(**valid_fields)
+
+    return trade_item
+
+
+@method_decorator(login_required)
+def move_to_trade(self, request, pk):
+    inventory_item = get_object_or_404(InventoryObject, pk=pk, user=request.user)
 
     if request.method == 'POST':
         form = MoveToTradeForm(request.POST, request.FILES)
@@ -6959,8 +7001,7 @@ def move_to_trade(request, inventory_id):
                 length_for_resize=form.cleaned_data['length_for_resize'],
                 width_for_resize=form.cleaned_data['width_for_resize']
             )
-            return redirect('showcase:tradeinventory')  # Redirect to the TradeItem detail view
-
+            return redirect('showcase:tradeitem_detail', trade_item.id)  # Redirect to the TradeItem detail view
     else:
         form = MoveToTradeForm()
 
@@ -7502,13 +7543,16 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
 
         return super().form_valid(form)
 
+
 from django.shortcuts import render
 from .models import AdministrationChangeLog
+
 
 def changelog_view(request):
     changelogs = AdministrationChangeLog.objects.all()
     context = {'changelogs': changelogs}
     return render(request, 'administrationchangelog.html', context)
+
 
 def get_changes(instance):
     if not instance.pk:
@@ -7677,6 +7721,7 @@ class GameSearchResultsView(ListView):
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
         return context
+
 
 from django.views.generic import ListView
 from django.db.models import Q
@@ -7929,7 +7974,6 @@ class WithdrawView(LoginRequiredMixin, ListView):
 
         return context
 
-
     def get_queryset(self):
         if self.request.user.is_authenticated:
             # Filter completed withdrawals for the current user
@@ -7944,31 +7988,34 @@ from .models import InviteCode
 from .forms import InviteCodeForm
 from secrets import token_urlsafe
 
-def generate_unique_code(room_name):
-  """Generates a unique alphanumeric code with the room name prefix"""
-  while True:
-    # Generate a random 16-character alphanumeric string
-    code_suffix = token_urlsafe(16)
-    # Combine room name (if provided) and code suffix with a separator (e.g., underscore)
-    code = f"{room_name}_{code_suffix}" if room_name else code_suffix
 
-    # Check for uniqueness in the InviteCode model
-    if not InviteCode.objects.filter(code=code).exists():
-      return code
+def generate_unique_code(room_name):
+    """Generates a unique alphanumeric code with the room name prefix"""
+    while True:
+        # Generate a random 16-character alphanumeric string
+        code_suffix = token_urlsafe(16)
+        # Combine room name (if provided) and code suffix with a separator (e.g., underscore)
+        code = f"{room_name}_{code_suffix}" if room_name else code_suffix
+
+        # Check for uniqueness in the InviteCode model
+        if not InviteCode.objects.filter(code=code).exists():
+            return code
+
 
 @login_required
 def generate_invite_link(request):
-  if request.method == 'POST':
-    form = InviteCodeForm(request.POST)
-    if form.is_valid():
-      # Generate unique code
-      code = generate_unique_code()  # Replace with your code generation function
-      invite_code, created = InviteCode.objects.get_or_create(user=request.user, code=code)
-      invite_link = f"https://your_app.com/join/{invite_code.code}"
-      return render(request, 'invite_link.html', {'invite_link': invite_link})
-  else:
-    form = InviteCodeForm()
-  return render(request, 'generate_invite.html', {'form': form})
+    if request.method == 'POST':
+        form = InviteCodeForm(request.POST)
+        if form.is_valid():
+            # Generate unique code
+            code = generate_unique_code()  # Replace with your code generation function
+            invite_code, created = InviteCode.objects.get_or_create(user=request.user, code=code)
+            invite_link = f"https://your_app.com/join/{invite_code.code}"
+            return render(request, 'invite_link.html', {'invite_link': invite_link})
+    else:
+        form = InviteCodeForm()
+    return render(request, 'generate_invite.html', {'form': form})
+
 
 # Function to generate a unique random alphanumeric code (replace with your implementation)
 
@@ -8198,7 +8245,6 @@ class ExchangePrizesView(FormMixin, ListView):
             is_active=1).order_by('position')
         context['BanAppeal'] = BanAppeal.objects.all()
         return context
-
 
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
@@ -8459,8 +8505,6 @@ class PostDetailView(View):
         return render(request, self.template_name, context)
 
 
-
-
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
@@ -8528,7 +8572,8 @@ class CurrencyCheckoutView(View):
     def get_context_data(self, **kwargs):
         context = {}
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
         context.update(kwargs)
         return context
 
@@ -8572,6 +8617,7 @@ class CurrencyCheckoutView(View):
             context = self.get_context_data(form=form)
             return render(request, self.template_name, context)
         return redirect("showcase:checkout")
+
 
 from paypalrestsdk import Payment as PayPalPayment
 
@@ -8756,7 +8802,6 @@ class CurrencyPaymentView(EBaseView):
                 print('the value of order is ' + order.ref_code)
                 order.save()
                 messages.success(self.request, "Your order was successful!")
-
 
                 if payment_method == 'paypal':
                     return HttpResponseRedirect(self.process_paypal_payment(order))
@@ -9085,7 +9130,8 @@ class ProductView(DetailView):
         context['quick_items'] = item.images.all()  # `images` is the related name for QuickItem
         context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -9100,6 +9146,7 @@ def product_detail_view(request, item_id):
         'quick_items': quick_items,
     }
     return render(request, 'product.html', context)
+
 
 class OrderSummaryView(EBaseView):
     model = OrderBackgroundImage
@@ -9130,6 +9177,7 @@ class OrderSummaryView(EBaseView):
             messages.warning(self.request, "You do not have an active order")
             return redirect("showcase:ehome")
 
+
 def check_and_deduct_currency(user, amount_required):
     try:
         profile = ProfileDetails.objects.get(user=user)
@@ -9151,7 +9199,8 @@ class CheckoutView(EBaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
         context.update(kwargs)
         return context
 
@@ -9320,6 +9369,7 @@ class CheckoutView(EBaseView):
             if field == '':
                 valid = False
         return valid
+
 
 from paypalrestsdk import Payment as PayPalPayment
 

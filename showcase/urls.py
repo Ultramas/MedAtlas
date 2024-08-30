@@ -358,6 +358,7 @@ urlpatterns = [
     path('inventory/', views.PlayerInventoryView.as_view(), name='inventory'),
     path('inventory/<int:pk>/sell/',  views.PlayerInventoryView.as_view(), name='sell_inventory_object'),
     path('inventory/<int:pk>/withdraw/', views.PlayerInventoryView.as_view(), name='withdraw_inventory_object'),
+    path('inventory/<int:pk>/move/', views.PlayerInventoryView.as_view(), name='move_to_trade'),
     path('tradeinventory/', views.TradeInventoryView.as_view(), name='tradeinventory'),
     path('update_wager/<int:wager_id>/', update_wager, name='update_wager'),
     path('place_wager/', PlaceWagerView.as_view(), name='place_wager'),

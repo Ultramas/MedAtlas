@@ -10,7 +10,7 @@ from mysite import settings
 from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme, TradeOffer, \
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
-    SPECIAL_CHOICES, QuickItem, SpinPreference
+    SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -350,19 +350,24 @@ class BattleJoinForm(forms.Form):
 
 
 class MoveToTradeForm(forms.Form):
-    title = forms.CharField(max_length=100)
+    title = forms.CharField(max_length=100, required=False)
     fees = forms.DecimalField(max_digits=10, decimal_places=2, required=False)
-    category = forms.ChoiceField(choices=CATEGORY_CHOICES)
+    category = forms.ChoiceField(choices=CATEGORY_CHOICES, required=False)
     specialty = forms.ChoiceField(choices=SPECIAL_CHOICES, required=False)
-    condition = forms.ChoiceField(choices=CONDITION_CHOICES, initial="M")
-    label = forms.CharField(max_length=1000)
-    slug = forms.SlugField()
-    description = forms.CharField(widget=forms.Textarea)
-    image = forms.ImageField()
-    image_length = forms.IntegerField()
-    image_width = forms.IntegerField()
-    length_for_resize = forms.IntegerField()
-    width_for_resize = forms.IntegerField()
+    condition = forms.ChoiceField(choices=CONDITION_CHOICES, initial="M", required=False)
+    label = forms.CharField(max_length=1000, required=False)
+    slug = forms.SlugField(required=False)
+    value = forms.IntegerField(required=False)
+    description = forms.CharField(widget=forms.Textarea, required=False)
+    image = forms.ImageField(required=False)
+    image_length = forms.IntegerField(required=False)
+    image_width = forms.IntegerField(required=False)
+    length_for_resize = forms.IntegerField(required=False)
+    width_for_resize = forms.IntegerField(required=False)
+
+    class Meta:
+        model = TradeItem
+        fields = '__all__'
 
 
 class AddTradeForm(forms.ModelForm):

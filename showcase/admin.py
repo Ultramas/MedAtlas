@@ -1532,7 +1532,7 @@ admin.site.register(Inventory, InventoryAdmin)
 class InventoryObjectAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Inventory Application Information - Categorial Description', {
-            'fields': ('user', 'inventory', 'choice', 'choice_text', 'currency', 'price', 'trade_locked', 'image', 'image_length', 'image_width', 'is_active',),
+            'fields': ('user', 'inventory', 'choice', 'choice_text', 'currency', 'price', 'trade_locked', 'image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize', 'is_active',),
             'classes': ('collapse',),
         }),
     )
