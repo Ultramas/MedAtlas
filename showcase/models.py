@@ -1016,6 +1016,7 @@ class InventoryObject(models.Model):
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, blank=True, null=True)
     choice = models.ForeignKey('Choice', on_delete=models.CASCADE)
     choice_text = models.CharField(max_length=200, verbose_name='Choice Text', blank=True, null=True)
+    category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
     currency = models.ForeignKey(Currency, blank=True, null=True, on_delete=models.CASCADE)
     price = models.IntegerField(default=0)
     trade_locked = models.BooleanField(verbose_name="Set Tradable?", default=False)

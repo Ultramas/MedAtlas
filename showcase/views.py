@@ -6852,9 +6852,11 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
                          f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
         return redirect('showcase:inventory')
 
+
     def move_to_trade(self, request, pk):
         # Fetch the InventoryObject based on pk
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
+
         # Check if user owns the inventory object
         if inventory_object.user != request.user:
             messages.error(request, 'You cannot trade using items you do not own!')
@@ -6863,11 +6865,13 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         user = request.user
 
         with transaction.atomic():
-            # Find or create a tradeitem
+            # Find or create a TradeItem
             tradeitem = TradeItem.objects.filter(user=user, is_active=1).first()
             if not tradeitem:
                 tradeitem = TradeItem.objects.create(
                     user=user,
+                    title=inventory_object.choice_text,
+                    category=inventory_object.category,
                     is_active=1,
                     currency=inventory_object.currency,
                     value=inventory_object.price,
@@ -6881,7 +6885,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
             tradeitem.save()
 
-            # Update InventoryObject
+            # Update InventoryObject (e.g., move to trade inventory)
             inventory_object.delete()
 
             return HttpResponse(f"TradeItem created with ID: {tradeitem.id}")
