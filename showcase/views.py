@@ -8,6 +8,7 @@ from django.contrib.messages import get_messages
 from django.db import transaction
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
+from stripe.api_resources import order
 
 from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
@@ -6852,7 +6853,6 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
                          f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
         return redirect('showcase:inventory')
 
-
     def move_to_trade(self, request, pk):
         # Fetch the InventoryObject based on pk
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
@@ -6876,6 +6876,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
                     currency=inventory_object.currency,
                     value=inventory_object.price,
                     condition=inventory_object.condition,
+                    certified=True,
                     image=inventory_object.image,
                     image_length=inventory_object.image_length,
                     image_width=inventory_object.image_width,
@@ -6888,7 +6889,8 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             # Update InventoryObject (e.g., move to trade inventory)
             inventory_object.delete()
 
-            return HttpResponse(f"TradeItem created with ID: {tradeitem.id}")
+            messages.success(request, f"TradeItem created with ID: {tradeitem.id}")
+            return redirect('showcase:tradeinventory')
 
     def remove_trade_object(self, request, pk):
         trade_item = get_object_or_404(TradeItem, pk=pk)
@@ -6902,7 +6904,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         trade_item.save()
 
         messages.success(request, f"Successfully removed {trade_item.title}!")
-        return redirect('showcase:tradeinventory')
+        return redirect('showcase:inventory')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -7085,6 +7087,9 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
         if action == 'remove':
             return self.remove_trade_object(request, pk)
             print('trade item removed from trading inventory!')
+        elif action == 'inventory_remove':
+            return self.existing_inventory_remove_trade_object(request, pk)
+            print('inventory trade item moved from trading inventory to inventory!')
 
         # If no action matches, return an appropriate response
         return HttpResponse(status=400)
@@ -7099,6 +7104,46 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
         trade_item.delete()
         messages.success(request, f"Successfully removed {trade_item.title}!")
         return redirect('showcase:tradeinventory')
+
+    def existing_inventory_remove_trade_object(self, request, pk):
+        trade_item = get_object_or_404(TradeItem, pk=pk)
+
+        if trade_item.user != request.user:
+            messages.error(request, 'You cannot remove tradable items you do not own!')
+            return redirect('showcase:tradeinventory')
+
+        trade_item.user = None
+        trade_item.inventory = None
+        trade_item.save()
+
+        user = request.user
+
+        with transaction.atomic():
+            # Find or create an Inventory Object
+            inventory_object = InventoryObject.objects.filter(user=user, is_active=1).first()
+            if not inventory_object:
+                inventory_object = InventoryObject.objects.create(
+                    user=user,
+                    choice_text=trade_item.title,
+                    category=trade_item.category,
+                    is_active=1,
+                    currency=trade_item.currency,
+                    price=trade_item.value,
+                    condition=trade_item.condition,
+                    image=trade_item.image,
+                    image_length=trade_item.image_length,
+                    image_width=trade_item.image_width,
+                    length_for_resize=trade_item.length_for_resize,
+                    width_for_resize=trade_item.width_for_resize,
+                )
+
+            inventory_object.save()
+
+            # Update InventoryObject (e.g., move to trade inventory)
+            trade_item.delete()
+
+        messages.success(request, f"Successfully removed {trade_item.title}!")
+        return redirect('showcase:inventory')
 
 
 from .models import LotteryTickets, Lottery
@@ -9104,11 +9149,7 @@ def currency_reduce_quantity_item(request, slug):
 
 import stripe
 
-stripe.api_key = "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"
-
-stripe.Source.create(type='ach_credit_transfer',
-                     currency='usd',
-                     owner={'email': 'PokeTroveCompany6@gmail.com'})
+stripe.api_key = "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"
 
 
 class HomeView(ListView):
@@ -9383,16 +9424,11 @@ class PaymentView(EBaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
-
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
         return context
 
     def get(self, *args, **kwargs):
-        # request (self) does not seem to be getting user
         order = Order.objects.get(user=self.request.user, ordered=False)
         if order.billing_address:
             context = self.get_context_data(**kwargs)
@@ -9400,32 +9436,26 @@ class PaymentView(EBaseView):
             context['DISPLAY_COUPON_FORM'] = False
             context['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
             userprofile = User.objects.get(username=self.request.user.username)
-            if hasattr(userprofile, "one_click_purchasing"):
-                # userprofile is probably not linked to database
-                if userprofile.one_click_purchasing:
-                    # fetch the users list
-                    cards = stripe.Customer.list_sources(
-                        userprofile.stripe_customer_id,
-                        limit=3,
-                        object='card'
-                    )
-                    card_list = cards['data']
-                    if len(card_list) > 0:
-                        # update the context with the default card
-                        context.update({
-                            'card': card_list[0]
-                        })
-            else:
-                userprofile.one_click_purchasing = False
-                return render(self.request, "payment.html", context)
-                # Check if PayPal payment method is available
+
+            # Check for one-click purchasing
+            if hasattr(userprofile, "one_click_purchasing") and userprofile.one_click_purchasing:
+                # Fetch user's saved cards
+                cards = stripe.Customer.list_sources(
+                    userprofile.stripe_customer_id,
+                    limit=3,
+                    object='card'
+                )
+                card_list = cards['data']
+                if card_list:
+                    context['card'] = card_list[0]  # Use the first card as default
+
+            # Check if PayPal payment method is available
             if hasattr(userprofile, 'paypal_enabled') and userprofile.paypal_enabled:
                 context['PAYPAL_CLIENT_ID'] = settings.PAYPAL_CLIENT_ID
 
             return render(self.request, "payment.html", context)
         else:
-            messages.warning(
-                self.request, "You have not added a billing address.")
+            messages.warning(self.request, "You have not added a billing address.")
             return redirect("showcase:checkout")
 
     def post(self, *args, **kwargs):
@@ -9435,9 +9465,6 @@ class PaymentView(EBaseView):
         payment_method = self.request.POST.get('payment_method')
 
         if form.is_valid():
-            print(form.cleaned_data)
-            print(form.cleaned_data.get("expiry"))
-
             token = stripe.Token.create(
                 card={
                     "number": form.cleaned_data.get("number"),
@@ -9450,47 +9477,47 @@ class PaymentView(EBaseView):
             use_default = form.cleaned_data.get('use_default')
 
             if save:
-                if userprofile.stripe_customer_id != '' and userprofile.stripe_customer_id is not None:
+                if userprofile.stripe_customer_id:
+                    # Customer already exists
                     customer = stripe.Customer.retrieve(userprofile.stripe_customer_id)
                     customer.sources.create(source=token)
                 else:
+                    # Create a new customer
                     customer = stripe.Customer.create(email=self.request.user.email)
                     customer.sources.create(source=token)
                     userprofile.stripe_customer_id = customer['id']
                     userprofile.one_click_purchasing = True
                     userprofile.save()
 
-            amount = int(order.get_total_price() * 100)
+            # Calculate the order amount in cents
+            amount_in_cents = int(order.get_total_price() * 100)
 
             try:
-                if use_default or save:
-                    # charge the customer because we cannot charge the token more than once
-                    charge = stripe.Charge.create(
-                        amount=amount,  # cents
-                        currency="usd",
-                        customer=userprofile.stripe_customer_id
-                    )
-                    print('the payment went through')
-                else:
-                    # charge once off on the token
-                    charge = stripe.Charge.create(
-                        amount=amount,  # cents
-                        currency="usd",
-                        source=token
-                    )
-                    print('the payment went through')
+                # Create a PaymentIntent
+                payment_intent = stripe.PaymentIntent.create(
+                    amount=amount_in_cents,  # Total amount in cents
+                    currency="usd",
+                    customer=userprofile.stripe_customer_id if (use_default or save) else None,
+                    payment_method_types=['ach_credit_transfer'],
+                    payment_method_data={
+                        'type': 'card',
+                        'card': {
+                            'token': token.id,
+                        }
+                    } if not (use_default or save) else None,
+                )
+                print('The payment went through')
 
-                # create the payment
+                # Handle successful payment
                 payment = Payment()
-                payment.stripe_charge_id = charge['id']
+                payment.stripe_charge_id = payment_intent['id']
                 payment.user = self.request.user
                 payment.amount = order.get_total_price()
                 payment.save()
 
-                # assign the payment to the order
+                # Update the order status
                 order_items = order.items.all()
                 order_items.update(ordered=True)
-                print('your order payment has been updated')
                 for item in order_items:
                     item.save()
 
@@ -9505,53 +9532,21 @@ class PaymentView(EBaseView):
                     return HttpResponseRedirect(self.process_paypal_payment(order))
                 return redirect("showcase:ehome")
 
-            except stripe.error.CardError as e:
-                body = e.json_body
-                err = body.get('error', {})
-                messages.warning(self.request, f"{err.get('message')}")
-                return redirect("showcase:ehome")
-
-            except stripe.error.RateLimitError as e:
-                # Too many requests made to the API too quickly
-                messages.warning(self.request, "Rate limit error")
-                return redirect("showcase:ehome")
-
-            except stripe.error.InvalidRequestError as e:
-                # Invalid parameters were supplied to Stripe's API
-                print(e)
-                print(12345)
-                # print ('stripeToken', stripeToken)
-                messages.warning(self.request, "Invalid parameters")
-                return redirect("/ehome")
-
-            except stripe.error.AuthenticationError as e:
-                # Authentication with Stripe's API failed
-                # (maybe you changed API keys recently)
-                messages.warning(self.request, "Not authenticated")
-                return redirect("/")
-
-            except stripe.error.APIConnectionError as e:
-                # Network communication with Stripe failed
-                messages.warning(self.request, "Network error")
-                return redirect("/ehome")
-
             except stripe.error.StripeError as e:
-                # Display a very generic error to the user, and maybe send
-                # yourself an email
-                messages.warning(
-                    self.request, "Something went wrong. You were not charged. Please try again."
-                )
-                return redirect("/ehome")
+                # Handle Stripe errors
+                body = e.json_body if hasattr(e, 'json_body') else {}
+                err = body.get('error', {})
+                messages.warning(self.request, f"{err.get('message', 'Payment failed')}")
+                return redirect("showcase:ehome")
 
             except Exception as e:
-                # send an email to ourselves
-                messages.warning(
-                    self.request, "A serious error occurred. We have been notified."
-                )
+                # Handle generic exceptions
+                messages.warning(self.request, "A serious error occurred. We have been notified.")
                 return redirect("/ehome")
 
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
+
 
 
 class PayPalExecuteView(View):

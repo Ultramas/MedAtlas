@@ -193,13 +193,24 @@
                         <span style="">{{TradeItem.description}}</span> </p>
 						 <div class="cart-btn">
 
+			{% if TradeItem.certified == True %}
                 <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="inventory_remove">
+                    <input type="hidden" name="pk" value="{{ TradeItem.pk }}">
+
+                    <button type="submit" class="cart-btn">Move To My Inventory</button>
+				</form>
+			 {% else %}
+               <form method="post" action="">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="remove">
                     <input type="hidden" name="pk" value="{{ TradeItem.pk }}">
 
                     <button type="submit" class="cart-btn">Remove From Trade Inventory</button>
-				</form></div></a></div>
+				</form>
+			 {% endif %}
+						 </div></a></div>
 
 					</div>
 				</div>

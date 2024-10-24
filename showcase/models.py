@@ -7,6 +7,7 @@ from PIL import Image
 from decimal import Decimal
 
 from autoslug import AutoSlugField
+from autoslug.utils import generate_unique_slug
 from django.db.models.signals import post_save, post_delete, pre_delete
 from django.conf import settings
 from django.contrib.auth.models import User, AbstractUser, Permission
@@ -1014,7 +1015,7 @@ class InventoryObject(models.Model):
     """Model for sharing ideas and getting user feedback"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, blank=True, null=True)
-    choice = models.ForeignKey('Choice', on_delete=models.CASCADE)
+    choice = models.ForeignKey('Choice', on_delete=models.CASCADE, blank=True, null=True)
     choice_text = models.CharField(max_length=200, verbose_name='Choice Text', blank=True, null=True)
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
     currency = models.ForeignKey(Currency, blank=True, null=True, on_delete=models.CASCADE)
@@ -1192,6 +1193,8 @@ class TradeItem(models.Model):
     label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default="N")  # can use for cataloging products
     slug = models.SlugField()  # might change to automatically get the slug
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
+    certified = models.BooleanField(default=False,
+                                         help_text="If you are applying to become a partner in more than 1 category, talk to Trove.")
     description = models.TextField()
     value = models.IntegerField(blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
@@ -1218,31 +1221,36 @@ class TradeItem(models.Model):
         else:
             return self.title + " by PokeTrove"
 
+    @staticmethod
+    def generate_unique_slug(base_slug, model):
+        slug = slugify(base_slug)
+        unique_slug = slug
+        counter = 1
+        while model.objects.filter(slug=unique_slug).exists():
+            unique_slug = f"{slug}-{counter}"
+            counter += 1
+        return unique_slug
+
     def save(self, *args, **kwargs):
         with transaction.atomic():
-            # Set the default currency to the first instance of Currency if not already set
             if not self.currency:
-                first_currency = Currency.objects.first()
-                if first_currency:
-                    self.currency = first_currency
+                self.currency = Currency.objects.first()
             if not self.value and self.inventoryobject:
                 self.value = self.inventoryobject.value
             if not self.slug:
-                self.slug = slugify(self.title)
+                self.slug = TradeItem.generate_unique_slug(self.title, TradeItem)
             super().save(*args, **kwargs)
 
-            # Automatically create a TradeOffer instance related to this TradeItem
             if not TradeOffer.objects.filter(trade_items=self).exists():
                 trade_offer = TradeOffer.objects.create(
                     title=self.title,
-                    estimated_trading_value=self.value if self.value else 0,
+                    estimated_trading_value=self.value or 0,
                     user=self.user,
-                    slug=slugify(self.title),
+                    slug=self.slug,
                     trade_status=TradeOffer.PENDING,
                     is_active=self.is_active,
                 )
                 trade_offer.trade_items.add(self)
-                trade_offer.save()
 
     def create_room(self, current_user):
         room_name = f"trade-{self.id}"
