@@ -1564,6 +1564,7 @@ def game_view(request, slug):
     return render(request, 'game_template.html', {'game': game, 'nonce': nonce})
 
 
+@csrf_exempt
 def create_outcome(request, slug):
     if request.method == 'POST':
         try:
@@ -1573,10 +1574,7 @@ def create_outcome(request, slug):
             if not game_id:
                 return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
 
-            # Retrieve the game by ID and slug
             game = Game.objects.get(id=game_id, slug=slug)
-
-            # Continue with your logic
             nonce = random.randint(1, 1000000)
             choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
 
@@ -1589,21 +1587,12 @@ def create_outcome(request, slug):
             choice.color = color
             choice.save()  # Save the updated color to the database
 
-            # Assume `choice` is your selected Choice instance
-            response_data = {
-                'status': 'success',
-                'nonce': nonce,
-                'choice_id': choice.id,
-                'choice_text': choice.choice_text,
-                'choice_color': choice.color,
-                'choice_file': choice.file.url if choice.file else None
-            }
-
             # Print the selected choice fields to the console
             print(f"Selected Choice ID: {choice.id}")
             print(f"Selected Choice Text: {choice.choice_text}")
             print(f"Selected Choice Color: {choice.color}")
             print(f"Selected Choice File: {choice.file.url if choice.file else 'No file associated'}")
+            print("the code output comes from the independent create_view")
 
             outcome_data = {
                 'game': game,
@@ -1808,6 +1797,19 @@ class GameChestBackgroundView(BaseView):
 
         context['choices_with_nonce'] = choices_with_nonce
 
+        # Get the game_id from the URL kwargs
+        game_id = self.kwargs.get('slug')
+
+        # Retrieve the Game object
+        game = get_object_or_404(Game, slug=slug)
+
+        # Retrieve related Choice objects
+        choices = Choice.objects.filter(game=game)
+
+        # Add them to the context
+        context['game'] = game
+        context['choices'] = choices
+
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         print(context['Background'])
 
@@ -2004,6 +2006,18 @@ class GameChestBackgroundView(BaseView):
                 return JsonResponse({'error': str(e)}, status=500)
         else:
             return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
+def game_detail(request, game_id):
+    game = get_object_or_404(Game, id=game_id)
+    choices = Choice.objects.filter(game=game)
+
+    context = {
+        'game': game,
+        'choices': choices,
+    }
+
+    return render(request, 'game.html', context)
 
 
 class EarningAchievement(BaseView):
@@ -3140,8 +3154,7 @@ def send(request):
                     'value': new_message.value,
                     'user': new_message.user,
                     'room': new_message.room,
-                    'file_url': new_message.file.url if new_message.file else None,
-                    # You can include other fields that are JSON serializable
+                    'file_url': new_message.file.url if new_message.file and new_message.file.url else None,
                 }
             }
 
@@ -9546,7 +9559,6 @@ class PaymentView(EBaseView):
 
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
-
 
 
 class PayPalExecuteView(View):

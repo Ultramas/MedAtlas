@@ -31,6 +31,214 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
 
 <style>
+	:root {
+    --color-primary: #3498db;
+    --color-secondary: #2ecc71;
+    --color-background: #ecf0f1;
+    --color-text: #2c3e50;
+    --color-text-light: #7f8c8d;
+    --color-border: #bdc3c7;
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    color: var(--color-text);
+    background-color: var(--color-background);
+    margin: 0;
+    padding: 20px;
+}
+
+.trade-offers-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.trade-offer {
+    background-color: #fff;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.trade-offer:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.trade-offer__header {
+    padding: 20px;
+    background-color: var(--color-primary);
+    color: #fff;
+}
+
+.trade-offer__title {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.trade-offer__user {
+    margin: 5px 0 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Hide the trade-offer__actions by default */
+.trade-offer__actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    background-color: #f8f9fa;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Show trade-offer__actions on hover */
+.trade-offer:hover .trade-offer__actions {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn--primary {
+    background-color: var(--color-primary);
+    color: #fff;
+}
+
+.btn--secondary {
+    background-color: var(--color-secondary);
+    color: #fff;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn__icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+}
+
+.trade-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.trade-item {
+    background-color: #fff;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.trade-item:hover {
+    transform: scale(1.03);
+}
+
+.trade-item__image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.trade-item__details {
+    padding: 10px;
+}
+
+.trade-item__title {
+    margin: 0 0 5px;
+    font-size: 1rem;
+}
+
+.trade-item__description {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+}
+
+.trade-item__label {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.label--new {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+.label--primary {
+    background-color: var(--color-primary);
+    color: #fff;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal__content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    max-width: 500px;
+    position: relative;
+}
+
+.modal__close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+@media (max-width: 768px) {
+    .trade-offer__actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
 body {
   font-family: Verdana, sans-serif;
   margin: 0;
@@ -249,77 +457,64 @@ img.hover-shadow {
                 </div>
             </div>
 
-			<div class="row product-lists">
-{% for TradeOffer in TradeOffers %}
-				<div class="individual-trade-listing" style="border: 2px solid #000; border-radius: 50px; padding: 15px; margin-bottom: 15%;">
-    {% if TradeOffer.trade_status == 0 and TradeOffer.user2 == None %}
 
-				<h1 style="display: flex; justify-content: center; color: rgba(255, 255, 255, 0.6);">{{TradeOffer.title}}</h1><br>
-
-				<h3 style="display: flex; justify-content: center; color: rgba(255, 255, 255, 0.6);">By {{TradeOffer.user}}</h3><br>
-					<div class="buttonsonthetradeforms" style="display: flex; justify-content: center; margin-top: 0%;">
-
-{% with Friends|first as Friend %}
-    {% if TradeOffer.user == Friend.friend %}
-        <form method="post" action="{% url 'showcase:index'  %}">
-            {% csrf_token %}
-		    <button type="submit" class="cart-btn" style="padding: 20px; border-radius: 30px; background-color: rgba(0, 0, 0, 0.3); color: rgba(255, 255, 255, 0.7);" onclick="location.href='{% url 'showcase:contact_trader' TradeOffer.id %}'; return false;"><img src="{% static 'css/images/contacts.png' %}" style="width: 30px; height: 25px; color: white; margin-right: 10px;"><b>Contact Trader</b></button>
-        </form>
-    {% else %}
-        <form method="post" action="{% url 'showcase:send_friend_request'  %}">
-            {% csrf_token %}
-            <button type="submit" class="cart-btn" style="padding: 20px; border-radius: 30px; background-color: rgba(0, 0, 0, 0.3); color: rgba(255, 255, 255, 0.7);"><img src="{% static 'css/images/friends.png' %}" style="width: 35px; height: 25px; color: white; margin-right: 10px;"><b>Send Friend Request</b></button>
-        </form>
-    {% endif %}
-{% endwith %}
-
-
-    <a href="{% url 'showcase:responsetradeitems' TradeOffer.slug %}">
-        <button type="submit" class="cart-btn" style="padding: 20px; margin-left: 10px; border-radius: 30px; background-color: rgba(0, 0, 0, 0.3);color: rgba(255, 255, 255, 0.7);">
-			<img src="{% static 'css/images/trades.png' %}" style="width: 30px; height: 25px; color: white; margin-right: 10px;"><b>Set Trade {{trade_offer.title}}</b>
-        </button>
-    </a>
-					</div>
-						<br>
-						<br>
-						<br>
-
-
-			<div class="tradeoffering" style="border: 10px red; display: flex; margin-top: 16px; margin-bottom: 36px; ">
-        {% for TradeOffer in TradeOffer.trade_items.all %}
-            <div class="col-lg-4 col-md-6 text-center strawberry" style="margin-left: 15px; justify-content: center; margin-left: auto; margin-right: auto; display: flex;">
-                <div class="single-product-item">
-										<div class="product-image">
-						<img src="{{ TradeOffer.image.url }}"  style="width: 2500px; height: 400px;" class="card-img-top" alt="{{ TradeOffer.image.url }}" title="{{ TradeOffer.image.url }}">
-
-
+    <main class="trade-offers-container">
+        {% for TradeOffer in TradeOffers %}
+            {% if TradeOffer.trade_status == 0 and TradeOffer.user2 == None %}
+                <article class="trade-offer">
+                    <header class="trade-offer__actions">
+                        {% with Friends|first as Friend %}
+                            {% if TradeOffer.user == Friend.friend %}
+                                <button class="btn btn--primary" data-action="contact" data-trader-id="{{TradeOffer.id}}">
+                                    <img src="{% static 'css/images/contacts.png' %}" alt="" class="btn__icon">
+                                    Contact Trader
+                                </button>
+                            {% else %}
+                                <button class="btn btn--secondary" data-action="friend-request">
+                                    <img src="{% static 'css/images/friends.png' %}" alt="" class="btn__icon">
+                                    Send Friend Request
+                                </button>
+                            {% endif %}
+                        {% endwith %}
+                        <a href="{% url 'showcase:responsetradeitems' TradeOffer.slug %}" class="btn btn--primary">
+                            <img src="{% static 'css/images/trades.png' %}" alt="" class="btn__icon">
+                            Set Trade
+                        </a>
+                    </header>
+                    <div class="trade-offer__header">
+                        <h2 class="trade-offer__title">{{TradeOffer.title}}</h2>
+                        <p class="trade-offer__user">By {{TradeOffer.user}}</p>
                     </div>
-					<div id="product-details-popup-{{ TradeOffer.id }}" class="popup-hidden">
-						<h4 style="color: rgba(255, 255, 255, 0.7);">{{ TradeOffer.title }} by {{ TradeOffer.user|truncatechars:20 }}</h4>
-						<p style="color: white;">{{ TradeOffer.description }}</p>
+                    <div class="trade-items">
+                        {% for Item in TradeOffer.trade_items.all %}
+                            <div class="trade-item" data-item-id="{{Item.id}}">
+                                <img src="{{ Item.image.url }}" alt="{{ Item.title }}" class="trade-item__image">
+                                <div class="trade-item__details">
+                                    <h3 class="trade-item__title">{{ Item.title }}</h3>
+                                    <p class="trade-item__description">{{ Item.description|truncatechars:100 }}</p>
+                                    {% if Item.get_label_display %}
+                                        <span class="trade-item__label {% if Item.get_label_display == 'New' %}label--new{% else %}label--primary{% endif %}">
+                                            {{ Item.get_label_display }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </article>
+            {% endif %}
+        {% endfor %}
+    </main>
 
-                    {% if TradeOffer.get_label_display %}
-                        <span class="badge badge-pill {% if TradeOffer.get_label_display == 'New' %} danger-color {% else %} primary-color {% endif %}">
-                            {{ TradeOffer.get_label_display }}
-                        </span>
-                    {% endif %}
-                    <p class="product-price"><span></span> </p>
+    <div id="itemDetailsModal" class="modal" aria-hidden="true">
+        <div class="modal__content">
+            <button class="modal__close" aria-label="Close modal">&times;</button>
+            <h2 id="modalTitle"></h2>
+            <p id="modalDescription"></p>
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
 
-                    {% if TradeOffer.description %}
-                        <h5 style="padding-left: 5px; padding-right: 5px; color: white;">{{ TradeOffer.description }}</h5>
-                    {% endif %}
-                    <br>
-					</div>
-
-
-                </div>
-            </div>
-        {% endfor %}</div>
-    {% endif %}
-			</div>
-{% endfor %}
-
-			</div>
 
 			<div class="row">
 				<div class="col-lg-12 text-center">
@@ -438,7 +633,62 @@ img.hover-shadow {
      <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
      <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
      <script src="{% static 'css/js/sticker.js' %}"></script>
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('itemDetailsModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDescription = document.getElementById('modalDescription');
+    const modalImage = document.getElementById('modalImage');
+    const closeModal = document.querySelector('.modal__close');
 
+    // Open modal with item details
+    document.querySelectorAll('.trade-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const title = item.querySelector('.trade-item__title').textContent;
+            const description = item.querySelector('.trade-item__description').textContent;
+            const imageSrc = item.querySelector('.trade-item__image').src;
+
+            modalTitle.textContent = title;
+            modalDescription.textContent = description;
+            modalImage.src = imageSrc;
+            modalImage.alt = title;
+
+            modal.style.display = 'block';
+            modal.setAttribute('aria-hidden', 'false');
+        });
+    });
+
+    // Close modal
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        }
+    });
+
+    // Handle button actions
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('click', (event) => {
+            const action = event.currentTarget.dataset.action;
+            const traderId = event.currentTarget.dataset.traderId;
+
+            if (action === 'contact') {
+                // Implement contact trader functionality
+                console.log(`Contacting trader with ID: ${traderId}`);
+            } else if (action === 'friend-request') {
+                // Implement friend request functionality
+                console.log('Sending friend request');
+            }
+        });
+    });
+});
+</script>
 </body>
 </html>
 

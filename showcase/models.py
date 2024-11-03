@@ -1233,7 +1233,8 @@ class TradeItem(models.Model):
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
-            if not self.currency:
+            if not self.currency_id:  # Use `currency_id` to avoid a query if `self.currency` is None
+                # Assign the first available currency if none is set
                 self.currency = Currency.objects.first()
             if not self.value and self.inventoryobject:
                 self.value = self.inventoryobject.value

@@ -33,47 +33,46 @@ $(".start").click(function () {
         randomizeFlag = false;
     }, 9000);
 
-    // AJAX call to create outcome
-    createOutcome(button.data('game-id'), button.data('slug'))
-        .then(data => {
-            if (data.status === 'success') {
-                // Render the response data to the UI
-                renderChoiceDetails(data);
+function createOutcome(gameId, slug) {
+    return $.ajax({
+        url: `/create_outcome/${slug}/`,  // Use the correct endpoint for your route
+        method: 'POST',
+        data: { game_id: gameId },
+        dataType: 'json'
+    });
+}
 
-                // Determine which card is "touching" (if this logic is necessary)
-                const touchingDivs = findTouchingDivs();
-                console.log(touchingDivs);
+// Call the function when needed
+createOutcome(button.data('game-id'), button.data('slug'))
+    .then(data => {
+        console.log('AJAX Response:', data);
+        if (data.status === 'success') {
+            // Display choice details in the template
+            document.getElementById('choice-id').innerText = `Choice ID: ${data.choice_id}`;
+            document.getElementById('choice-text').innerText = `Choice Text: ${data.choice_text}`;
+            document.getElementById('choice-color').innerText = `Choice Color: ${data.choice_color}`;
 
-                // Example logic to handle touching divs and set Touching variable
-                if (findTouchingDivs(div5, div1)) {
-                    console.log('Mewtwo is selected');
-                    Touching = 'Mewtwo';
-                } else if (findTouchingDivs(div5, div2)) {
-                    console.log('Venusaur is selected');
-                    Touching = 'Venusaur';
-                } else if (findTouchingDivs(div5, div3)) {
-                    console.log('Charizard is selected');
-                    Touching = 'Charizard';
-                } else if (findTouchingDivs(div5, div4)) {
-                    console.log('Blastoise is selected');
-                    Touching = 'Blastoise';
-                }
-
-                // Update the final selection on the UI
-                document.getElementById('cardname').innerHTML = Touching;
-
-                // Re-enable the button after the animation finishes
-                button.prop('disabled', false);
-
+            const choiceImage = document.getElementById('choice-file');
+            if (data.choice_file) {
+                choiceImage.src = data.choice_file;
+                choiceImage.style.display = 'block'; // Show image if file URL exists
             } else {
-                console.error('Error:', data.message);
-                button.prop('disabled', false); // Re-enable the button if there's an error
+                choiceImage.style.display = 'none'; // Hide if no file URL
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            button.prop('disabled', false); // Re-enable the button if there's an error
-        });
+
+            // Enable button if needed
+            button.prop('disabled', false);
+        } else {
+            console.error('Error:', data.message);
+            button.prop('disabled', false); // Re-enable button on error
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        button.prop('disabled', false); // Re-enable button on error
+    });
+
+
 
     // Slide animation and duplication logic
     const scrollers = document.querySelectorAll('.slider');
@@ -135,34 +134,18 @@ $(".start").click(function () {
 
 // Function to render the choice details in the UI
 function renderChoiceDetails(choice) {
-    // Update the text fields with the choice data
+    console.log('Rendering Choice:', choice); // Log choice details to verify data
+
     document.getElementById('choice-id').innerText = `Selected Choice ID: ${choice.choice_id || 'N/A'}`;
     document.getElementById('choice-text').innerText = `Selected Choice Text: ${choice.choice_text || 'N/A'}`;
     document.getElementById('choice-color').innerText = `Selected Choice Color: ${choice.choice_color || 'N/A'}`;
 
-    // Handle the image field
     const choiceFileElement = document.getElementById('choice-file');
     if (choice.choice_file) {
-        choiceFileElement.src = choice.choice_file; // Set the image source
-        choiceFileElement.style.display = 'block'; // Display the image if available
+        choiceFileElement.src = choice.choice_file;
+        choiceFileElement.style.display = 'block';
     } else {
-        choiceFileElement.style.display = 'none'; // Hide the image if not available
+        choiceFileElement.style.display = 'none';
     }
 }
 
-// Function to make the AJAX request
-function createOutcome(gameId, slug) {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-    return fetch(`/your-url/${slug}/create_outcome/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrfToken
-        },
-        body: new URLSearchParams({
-            'game_id': gameId
-        })
-    })
-    .then(response => response.json());
-}

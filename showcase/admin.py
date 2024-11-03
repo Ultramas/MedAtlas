@@ -1791,13 +1791,13 @@ admin.site.register(SupportLine, SupportThreadAdmin)
 
 class OutcomeAdmin(admin.ModelAdmin):
    fieldsets = (
-       ('Message Information - Categorial Descriptions', {
+       ('Outcome Information - Categorial Descriptions', {
            'fields': ('user', 'value', 'ratio', 'type', 'color',)
        }),
-       ('Message Information - Image Display', {
+       ('Outcome Information - Image Display', {
            'fields': ('file', 'image_length', 'image_width',)
        }),
-       ('Message Information - Attributes', {
+       ('Outcome Information - Attributes', {
            'fields': ('game', 'game_creator', 'choice', 'nonce', 'is_active',)
        }),
    )

@@ -43,10 +43,14 @@
             flex-wrap: wrap;
             justify-content: left;
         }
+
         .game {
             display: flex;
             flex-wrap: wrap;
-            justify-content: left;
+            justify-content: center;
+            width: 100%:
+            padding: 20px;
+
         }
         .cardslootlist {
             flex: 1 1 200px; /* Adjust the width as needed */
@@ -102,80 +106,110 @@
     border-radius: 7px;
 }
 
-</style>
+        :root {
+            --gold: #FFD700;
+            --dark-gold: #B8860B;
+            --light-gold: #FFF8DC;
+            --background: #1A1A1A;
+        }
+
+
+
+        .containerev {
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            text-align: center;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px var(--gold);
+        }
+
+        .loot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .loot-item {
+            background: linear-gradient(135deg, var(--dark-gold), var(--gold));
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .loot-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .loot-item h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            color: var(--background);
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .loot-item img {
+            width: 25%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .loot-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .loot-details p {
+            margin: 0;
+            color: var(--background);
+        }
+
+        .loot-details strong {
+            color: var(--light-gold);
+        }
+
+        .rarity {
+            font-weight: bold;
+            color: #FF4500;
+        }
+
+        .tier {
+            font-weight: bold;
+            color: #4B0082;
+        }
+
+        .nerd-stats {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            padding: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .nerd-stats p {
+            margin: 0.25rem 0;
+        }
+
+        @media (max-width: 600px) {
+            .loot-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+
     <!-- Inline JavaScript -->
-    <script>
-        $(document).ready(function() {
-            console.log("jQuery is loaded.");
-            $('#start').on('click', function() {
-                console.log('Button clicked.');
-                var gameId = $(this).data('game-id');
-                var slug = $(this).data('slug'); // Get the slug from the data attribute
-                var csrfToken = '{{ csrf_token }}';
-                var url = '{% url "showcase:create_outcome" "SLUG_PLACEHOLDER" %}'.replace('SLUG_PLACEHOLDER', slug);
-
-                console.log('Game ID:', gameId);
-                console.log('CSRF Token:', csrfToken);
-                console.log('URL:', url);
-
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: {
-                        csrfmiddlewaretoken: csrfToken
-                    },
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            console.log('Choices received successfully!');
-                            updateWheelContents(response.choices);
-                        } else {
-                            console.error(response.message);
-                        }
-                    },
-                    error: function(error) {
-                        console.error('Error:', error);
-                    }
-                });
-            });
-        });
-
-        function updateWheelContents(choices) {
-            var slider = $('#slider');
-            slider.empty();  // Clear existing choices
-
-            choices.forEach(function(choice) {
-                var choiceHtml = `
-                    <div class="cards">
-                        <img src="${choice.file_url}" alt="${choice.choice_text}">
-                        <h2>${choice.value} 💎</h2>
-                    </div>
-                `;
-                slider.append(choiceHtml);
-            });
-
-            // Start the spin animation
-            randomizeContents();
-        }
-
-        function randomizeContents() {
-            // Function to randomly change the order of elements
-            $('div#slider').each(function() {
-                var $div_parent = $(this);
-                var $divsArr = $div_parent.children('div.cards');
-                $divsArr.sort(function(a, b) {
-                    var temp = parseInt(Math.random() * 10);
-                    var isOddOrEven = temp % 2;
-                    var isPosOrNeg = temp > 5 ? 1 : -1;
-                    return (isOddOrEven * isPosOrNeg);
-                }).appendTo($div_parent);
-            });
-
-            // Stop randomization after a set time
-            setTimeout(function() {
-                // Implement stopping logic here
-            }, 9000);
-        }
-    </script>
 
 
 
@@ -510,36 +544,6 @@ margin-left: 0; margin-right: 0; width: 100%; height: 15vh;">
 
 <button class="start" id="start" data-game-id="{{ game.id }}" data-slug="{{ game.slug }}"> Spin! </button>
 
-<script type="text/javascript">
-    $(document).ready(function() {
-        $('#start').on('click', function() {
-            var gameId = $(this).data('game-id');
-            var slug = $(this).data('slug');
-            var csrfToken = '{{ csrf_token }}';
-            var url = '{% url "showcase:create_outcome" "SLUG_PLACEHOLDER" %}'.replace('SLUG_PLACEHOLDER', slug);
-
-            $.ajax({
-                type: 'POST',
-                url: url,
-                data: {
-                    'game_id': gameId,
-                    'csrfmiddlewaretoken': csrfToken
-                },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        alert('Outcome created with nonce: ' + response.nonce);
-                        /*can be deleted if necessary*/
-                    } else {
-                        alert('Error: ' + response.message);
-                    }
-                },
-                error: function(response) {
-                    alert('An error occurred. Please try again.');
-                }
-            });
-        });
-    });
-</script>
 
 
 
@@ -556,39 +560,6 @@ margin-left: 0; margin-right: 0; width: 100%; height: 15vh;">
 <p id="choice-color"></p>
 <img id="choice-file" src="" alt="Selected Choice Image" style="display:none;">
 
-<script>
-    fetch('/create_outcome/123/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}',
-        },
-        body: JSON.stringify({
-            game_id: 1,  // Replace with your game ID
-        }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            document.getElementById('choice-id').innerText = `ID: ${data.choice_id}`;
-            document.getElementById('choice-text').innerText = `Text: ${data.choice_text}`;
-            document.getElementById('choice-color').innerText = `Color: ${data.choice_color}`;
-
-            const choiceFile = document.getElementById('choice-file');
-            if (data.choice_file) {
-                choiceFile.src = data.choice_file;
-                choiceFile.style.display = 'block';
-            } else {
-                choiceFile.style.display = 'none';
-            }
-        } else {
-            console.error('Error:', data.message);
-        }
-    })
-    .catch(error => console.error('Error:', error));
-</script>
-
-
                 </div>
                 <h1 id="cardname"></h1>
 
@@ -597,8 +568,8 @@ margin-left: 0; margin-right: 0; width: 100%; height: 15vh;">
         </div>
     </div>
 
-     <div class="wrapper"style="position: absolute;">
-        <div class="container" style="height: 135.5vh; width: 300%;">
+     <div class="wrapper" style="position: absolute;">
+        <div class="container" style="height: 135.5vh; width: 300%; overflow-x: hidden;">
             <div class="slider" id="slider">
 
                 {% for item in choices_with_nonce %}
@@ -674,35 +645,39 @@ margin-left: 0; margin-right: 0; width: 100%; height: 15vh;">
         <br>
         <br>
         <br>
-        <h2 style="text-align: center; margin-bottom: -3%;">Loot Drop Table</h2>
-    <div class="game" style="display: flex; flex-direction: row; justify-content: left;" >
+    <div class="game" style="display: flex; flex-direction: row; justify-content: center; border-radius: 20px;width: 140%;" >
 
-            <div class="sliderlootlist" id="">
-    <ul>
-        {% for item in choices_with_nonce %}
-            <li>
-                <strong>{{ item.choice.choice_text }}</strong><br>
-                <img src="{{ item.choice.file.url }}" alt="{{ item.choice.choice_text }}" width="{{ item.choice.image_width }}" height="{{ item.choice.image_length }}"><br>
-                Value: {{ item.choice.value }} Rubicoins<br>
-                Rarity: {{ item.choice.formatted_rarity }}%<br>
-                Votes: {{ item.choice.votes }}<br>
-                Category: {{ item.choice.category }}<br>
-                Tier: {{ item.choice.get_tier_display }}<br>
-                Color: {{ item.choice.get_color_display }}<br>
-            </li>
-        <!--nerd statistics-->
-        <li>
-                Number of Choices: {{ item.choice.number_of_choice }}<br>
-                Total Number of Choices: {{ item.choice.total_number_of_choice }}<br>
-                Nonce: {{ item.nonce }} (within range {{ item.lower_nonce }} - {{ item.upper_nonce }})<br>
-        </li>
-        {% empty %}
-            <li>No choices available for this game.</li>
-        {% endfor %}
-    </ul>
-
-
-</div>
+        <div class="containerev" style="font-family: 'Lato', sans-serif;
+            background-color: var(--background);
+            color: var(--light-gold);
+            margin: 0;
+            padding: 0; border-radius: 20px;">
+        <h1>Loot Drop Table</h1>
+        <div class="loot-grid" style="padding: 20px; border-radius: 20px;">
+            {% for item in choices %}
+            <div class="loot-item" style="width: 80%;">
+                <h2>{{ item.choice_text }}</h2>
+                <img src="{{ item.file.url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}px" height="{{ item.image_length }}px">
+                <div class="loot-details">
+                    <p><strong>Value:</strong> {{ item.value }} Rubies</p>
+                    <p><strong>Rarity:</strong> <span class="rarity">{{ item.formatted_rarity }}%</span></p>
+                    <p><strong>Category:</strong> {{ item.category }}</p>
+                    {% if item.get_display_tier %}
+                    <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
+                    {% endif %}
+                    <p><strong>Color:</strong> {{ item.get_color_display }}</p>
+                </div>
+                <div class="nerd-stats">
+                    <p><strong>Number of Choices:</strong> {{ item.number_of_choice }}</p>
+                    <p><strong>Total Number of Choices:</strong> {{ item.total_number_of_choice }}</p>
+                    <p><strong>Nonce:</strong> {{ item.nonce }} (within range {{ item.lower_nonce }} - {{ item.upper_nonce }})</p>
+                </div>
+            </div>
+            {% empty %}
+            <p>No choices available for this game.</p>
+            {% endfor %}
+        </div>
+    </div>
     </div>
             </div>
 

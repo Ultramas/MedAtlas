@@ -57,6 +57,9 @@ function toggleChatWidget() {
 <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 
 <style>
+	html, body{
+	height: 100%;
+	}
 .hero-area {
     position: relative;
     overflow: hidden;
@@ -426,7 +429,7 @@ window.onscroll = function() {
         {% for BackgroundImage in Background %}
             {% if BackgroundImage.page == "index.html" %}
                 {% if BackgroundImage.position == 3 %}
-		<div class="container" style="background: url('{{BackgroundImage.cover.url}}');  alt='{{ BackgroundImage.image.url }}'; background-size: cover;">
+		<div class="container" style="background: url('{{BackgroundImage.cover.url}}');  alt='{{ BackgroundImage.image.url }}'; background-size: cover; background-repeat: no-repeat;">
                 {% endif %}
             {% endif %}
         {% endfor %}

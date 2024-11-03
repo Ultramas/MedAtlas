@@ -27,7 +27,120 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-<style>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --text-color: #333;
+            --background-color: #ecf0f1;
+            --card-background: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .col-lg-4 {
+            flex: 0 0 calc(33.333% - 20px);
+            max-width: calc(33.333% - 20px);
+        }
+
+        @media (max-width: 992px) {
+            .col-lg-4 {
+                flex: 0 0 calc(50% - 20px);
+                max-width: calc(50% - 20px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .col-lg-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+
+        .single-latest-news {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .single-latest-news:hover {
+            transform: translateY(-5px);
+        }
+
+        .news-text-box {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--card-background);
+            padding: 20px;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .news-text-box h3 {
+            margin: 0 0 10px;
+            font-size: 1.4em;
+            color: var(--primary-color);
+        }
+
+        .news-text-box .excerpt {
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .news-text-box .author {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .news-text-box .author img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .news-text-box .author h6 {
+            margin: 0;
+            font-size: 0.9em;
+            color: var(--secondary-color);
+        }
+
+        .news-text-box .heat_level h4 {
+            margin: 0;
+            font-size: 1em;
+            color: var(--secondary-color);
+        }
+
+        .cost {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+
         .single-latest-news {
             position: relative;
             overflow: hidden;
@@ -253,73 +366,40 @@
 		<br>
 		<br>
 
-		<div class="container">
-			<div class="row">
 {% for newprofile in Profiles %}
+<div class="col-lg-4">
+    <a href="{{ newprofile.get_profile_url2 }}">
+        <div class="single-latest-news" style="background-image: url('{% if newprofile.image %}{{ newprofile.image.url }}{% else %}/path/to/default/image.jpg{% endif %}'); height: 400px; background-size: cover;">
+            <div class="news-text-box">
+                <h3>{{ newprofile.title }}</h3>
+                <p class="excerpt">
+                    {% if newprofile.description|length > 200 %}
+                        {{ newprofile.description|slice:":200" }}...
+                    {% else %}
+                        {{ newprofile.description }}
+                    {% endif %}
+                </p>
+                <div class="author">
+                    <img src="{% if newprofile.newprofile_profile_picture_url %}{{ newprofile.newprofile_profile_picture_url }}{% else %}{% static 'css/images/a.jpg' %}{% endif %}" alt="{{ newprofile.user }}">
+                    <h6>{{ newprofile.user }}</h6>
+                </div>
+                <div class="cost" style="background: rgba(255, 255, 255, 0.2); padding: 4px; padding-left: 10px; border-radius: 10px; width: 22%;">{{ newprofile.cost }} 💎</div>
+                <div class="heat_level">
+                    <h4>Heat:
+                        {% if newprofile.cards.heat == 'M' %}🌶️
+                        {% elif newprofile.cards.heat == 'S' %}🌶️🌶️ (2)
+                        {% elif newprofile.cards.heat == 'F' %}🌶️🌶️🌶️ (3)
+                        {% elif newprofile.cards.heat == 'W' %}🌶️🌶️🌶️🌶️ (4)
+                        {% else %}🌶️🌶️🌶️🌶️🌶️ (5)
+                        {% endif %}
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </a>
+</div>
+{% endfor %}
 
-						<a href="{{newprofile.get_profile_url2}}">
-				<div class="col-lg-4 col-md-6" style="border-radius: 10px;">
-					{% if newprofile %}
-						{% if newprofile.image %}
-							<div class="single-latest-news" style="background: url({{ newprofile.image.url }}); background-size: cover; width: 350px; height: 455px; border-radius: 10px;">
-						{% else %}
-							<div class="single-latest-news" style="background: url('/path/to/default/image.jpg'); background-size: cover; width: 350px; height: 455px; border-radius: 10px;">
-						{% endif %}
-							<!-- Content goes here -->
-						</div>
-					{% endif %}
-
-						<div class="latest-news-bg news-bg-1" style="background: rgba(0, 0, 0, 0); margin-top: 15%;"></div>
-
-  <div class="news-text-box" style="border-radius: 5px; background-color: rgba(0, 0, 0, 0.3)">
-
-							<h3>{{newprofile.title}}</h3>
-
-							{% with description=newprofile.description %}
-							<p class="excerpt">
-								{% if description|length > 200 %}
-									{{ description|slice:":200" }}...
-								{% else %}
-									{{ description }}
-								{% endif %}
-							</p>
-						{% endwith %}
-									<h3 style="margin-left: 15px; font-size: 30px; color: white; margin-top: -30px;">{{ newprofile.name }}</h3>
-									<h6 style="margin-left: 15px; font-size: 18px; color: white;">{{ newprofile.cost }} 💎</h6>
-	  <br>
-						<ul style="width: 100%; display: flex;">
-								<span class="author" style="display: flex; align-items: center;">
-									{% if newprofile.newprofile_profile_picture_url %}
-									<a href="{{ newprofile.newprofile_profile_url }}">
-										<img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="40" height="40" style="border-radius: 50px; margin-right: 0px; margin-top: -10px;">
-									</a>
-									{% else %}
-									<!-- Placeholder image or default avatar -->
-									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="40" height="40" style="border-radius: 50px;">
-									{% endif %}
-									<h6 style="margin-left: 5px; color: white;">{{ newprofile.user }}</h6>
-								</span>
-						</ul>
-
-							<br>
-							{% if newprofile.cards.heat == 'M' %}
-							<div class="heat_level" style="color: white;"><h4 style="color: white;">Heat: 🌶️</h4></div>
-							{% elif newprofile.cards.heat == 'S' %}
-							<div class="heat_level" style="color: white;"><h4 style="color: white;">Heat: 🌶️🌶️ (2)</h4></div>
-							{% elif newprofile.cards.heat == 'F' %}
-							<div class="heat_level" style="color: white;"><h4 style="color: white;">Heat: 🌶️🌶️🌶️ (3)</h4></div>
-							{% elif newprofile.cards.heat == 'W' %}
-							<div class="heat_level" style="color: white;"><h4 style="color: white;">Heat: 🌶️🌶️🌶️🌶️(4)</h4></div>
-							{% else %}
-							<div class="heat_level" style="color: white;"><h4 style="color: white;">Heat: 🌶️🌶️🌶️🌶️🌶️ (5)</h4></div>
-							{% endif %}
-						</div>
-					</div>
-				</div></a>
-					{% endfor %}
-			</div>
-
-	</div>
 	<!-- end latest news -->
 	<!-- footer -->
 	<div class="footer-area">

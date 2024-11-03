@@ -1,105 +1,185 @@
-
 {% extends 'base.html' %}
-
 {% load static %}
 
-
 {% block content %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{user.username}}'s Trade Offers</title>
-      {% if current_theme %}
-    {% if current_theme.file %}
-        <style>
-            body {
-        background-image: url("{{ current_theme.file.url }}");
-        background-size: cover;
-        background-attachment: fixed;
-            }
-        </style>
+    {% if current_theme %}
+        {% if current_theme.file %}
+            <style>
+                body {
+                    background-image: url("{{ current_theme.file.url }}");
+                    background-size: cover;
+                    background-attachment: fixed;
+                    font-family: Arial, sans-serif;
+                    color: #333;
+                    line-height: 1.6;
+                }
+            </style>
+        {% else %}
+            <p style="color: black;">Error: Current theme does not have an image.</p>
+        {% endif %}
     {% else %}
-        <p>Error: Current theme does not have an image.</p>
+        <p style="color: black;">Error: No current theme found.</p>
     {% endif %}
-{% else %}
-    <p>Error: No current theme found.</p>
-{% endif %}
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .trade-offers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .trade-card {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            width: calc(50% - 10px);
+            margin-bottom: 20px;
+        }
+        .trade-card h2 {
+            color: #2980b9;
+            margin-top: 0;
+        }
+        .trade-card p {
+            margin: 10px 0;
+        }
+        .trade-card .actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+        .trade-card .actions a {
+            text-decoration: none;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+        .trade-card .actions .accept {
+            background-color: #2ecc71;
+        }
+        .trade-card .actions .decline {
+            background-color: #e74c3c;
+        }
+        @media (max-width: 768px) {
+            .trade-card {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+    <div class="container">
+        <h1>{{user.username}}'s Trade Offers</h1>
 
-<h1>Incoming Trade Offers:</h1>
-{% for request in pending_requests %}
-    <p>{{ request.user.username }} wants to trade!</p>
-    <a href="{% url 'showcase:accept_trade' request.id %}">Accept</a>
-    <a href="{% url 'showcase:decline_trade' request.id %}">Decline</a>
-{% endfor %}
+        <h2>Incoming Trade Offers</h2>
+        <div class="trade-offers">
+            {% for request in pending_requests %}
+                <div class="trade-card">
+                    <h2>{{ request.user.username }} wants to trade!</h2>
+                    <div class="actions">
+                        <a href="{% url 'showcase:accept_trade' request.id %}" class="accept">Accept</a>
+                        <a href="{% url 'showcase:decline_trade' request.id %}" class="decline">Decline</a>
+                    </div>
+                </div>
+            {% empty %}
+                <p style="color: black;">No incoming trade offers at the moment.</p>
+            {% endfor %}
+        </div>
 
-<h1>Outgoing Trade Offers:</h1>
-{% for request in outgoing_requests %}
-{% if request.user.username %}
-    <p style="color: black;">You sent a trade request to {{ request.user.username }}.</p>
-{% else %}
-    <p style="color: black;">Your trade offer was listed successfully!</p>
-{% endif %}
-{% endfor %}
+        <h2>Outgoing Trade Offers</h2>
+        <div class="trade-offers">
+            {% for request in outgoing_requests %}
+                <div class="trade-card">
+                    {% if request.user.username %}
+                        <p style="color: black;">You sent a trade request to {{ request.user.username }}.</p>
+                    {% else %}
+                        <p style="color: black;">Your trade offer was listed successfully!</p>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p style="color: black;">No outgoing trade offers at the moment.</p>
+            {% endfor %}
+        </div>
 
-<h1>Incoming Trade Offer Responses:</h1>
-{% for RespondingTradeOffer in response_pending_requests %}
-    {% if RespondingTradeOffer.user2 %}
+        <h2>Incoming Trade Offer Responses</h2>
+        <div class="trade-offers">
+            {% for RespondingTradeOffer in response_pending_requests %}
+                <div class="trade-card">
+                    {% if RespondingTradeOffer.user2 %}
+                        <h2>Trade request response from {{ RespondingTradeOffer.user.username }}</h2>
+                        <p style="color: black;">Offered Item(s): {{RespondingTradeOffer.wanted_trade_items}}</p>
+                        {% if RespondingTradeOffer.offered_trade_items is not None %}
+                            <p style="color: black;">Requested Item(s): {{RespondingTradeOffer.offered_trade_items}}</p>
+                        {% endif %}
+                        <div class="actions">
+                            <a href="{% url 'showcase:accept_response_trade' RespondingTradeOffer.id %}" class="accept">Accept Trade</a>
+                            <a href="{% url 'showcase:decline_response_trade' RespondingTradeOffer.id %}" class="decline">Decline Trade</a>
+                        </div>
+                    {% else %}
+                        <p style="color: black;">You received a trade request response.</p>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p style="color: black;">No incoming trade offer responses at the moment.</p>
+            {% endfor %}
+        </div>
 
-        <p style="color: black;">You received a trade request response from {{ RespondingTradeOffer.user.username }}.</p>
-<p style="color: black;">Offered Item(s): {{RespondingTradeOffer.wanted_trade_items}}</p>
-{% if RespondingTradeOffer.offered_trade_items is not None %}
-<p style="color: black;">Requested Item(s): {{RespondingTradeOffer.offered_trade_items}}</p>
-{% endif %}
+        <h2>Outgoing Trade Offer Responses</h2>
+        <div class="trade-offers">
+            {% for RespondingTradeOffer in response_outgoing_requests %}
+                <div class="trade-card">
+                    {% if RespondingTradeOffer.user2 %}
+                        <p style="color: black;">You sent a response trade request to {{ RespondingTradeOffer.user2.username }}.</p>
+                    {% elif RespondingTradeOffer.trade_offer_exists %}
+                        <p style="color: black;">The trade has been completed previously, so no recipient is specified.</p>
+                    {% else %}
+                        <p style="color: black;">Your response trade offer was not listed. Please specify a recipient.</p>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p style="color: black;">No outgoing trade offer responses at the moment.</p>
+            {% endfor %}
+        </div>
+    </div>
 
-<a style="color: black;" href="{% url 'showcase:accept_response_trade' RespondingTradeOffer.id %}">Accept Trade</a>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            function updateFriendRequests() {
+                $.ajax({
+                    url: '/friend_requests',
+                    headers: {'X-Requested-With': 'XMLHttpRequest'},
+                    success: function(data) {
+                        $('#friendRequestForm').html(data);
+                    }
+                });
+            }
 
-<a style="color: black;" href="{% url 'showcase:decline_response_trade' RespondingTradeOffer.id  %}">Decline Trade</a>
-        <!--make sure to show the trade offer received, with a hyperlink to the trade offer-->
-    {% else %}
-        <p style="color: black;">You received a trade request response.</p>
-    {% endif %}
-{% endfor %}
+            // Initial update
+            updateFriendRequests();
 
-<h1>Outgoing Trade Offer Responses:</h1>
-{% for RespondingTradeOffer in response_outgoing_requests %}
-    {% if RespondingTradeOffer.user2 %}
-        <p style="color: black;">You sent a response trade request to {{ RespondingTradeOffer.user2.username }}.</p>
-        <!--make sure to show the trade offer sent, with a hyperlink to the trade offer-->
-    {% elif RespondingTradeOffer.trade_offer_exists %}
-        <p style="color: black;">The trade has been completed previously, so no recipient is specified.</p>
-    {% else %}
-        <p style="color: black;">Your response trade offer was not listed. Please specify a recipient.</p>
-    {% endif %}
-{% endfor %}
-
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-$(document).ready(function(){
-  setInterval(function(){
-   $.ajax({
-      url: '/friend_requests',
-      headers: {'X-Requested-With': 'XMLHttpRequest'},
-      success: function(data) {
-        $('#friendRequestForm').html(data);
-      }
-    });
-  }, 5000); // specify the interval in milliseconds, e.g., 5000 for 5 seconds
-});
-</script>
-
-
+            // Set interval for updates
+            setInterval(updateFriendRequests, 5000);
+        });
+    </script>
 </body>
 </html>
 {% endblock %}
