@@ -548,6 +548,44 @@ margin-left: 0; margin-right: 0; width: 100%; height: 15vh;">
 
 
     </div>
+                <script>
+                    <script>
+    // Assuming `game_id` is passed to the template
+    const gameId = "{{ game_id }}";
+
+    fetch(`/create_view/${gameId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')  // Include CSRF token if needed
+        },
+        body: JSON.stringify({ game_id: gameId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Populate the template with choice data
+            document.getElementById('choice-id').textContent = `ID: ${data.choice_id}`;
+            document.getElementById('choice-text').textContent = `Text: ${data.choice_text}`;
+            document.getElementById('choice-color').textContent = `Color: ${data.choice_color}`;
+
+            // Show the choice file if it exists
+            const choiceFile = document.getElementById('choice-file');
+            if (data.choice_file) {
+                choiceFile.src = data.choice_file;
+                choiceFile.style.display = 'block';
+            } else {
+                choiceFile.style.display = 'none';
+            }
+        } else {
+            console.error('Error:', data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+
+
+                </script>
+
     <div class="popup" id="popup">
         <div class="contents">
             <span class="close">&times;</span>

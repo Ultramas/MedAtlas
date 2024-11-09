@@ -1404,7 +1404,11 @@ class ChestBackgroundView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+
+        user = self.request.user
+        user_profile, created = UserProfile.objects.get_or_create(user=user)
+        context['SentProfile'] = user_profile
+
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['wager_form'] = WagerForm()
 
@@ -1561,7 +1565,7 @@ def game_view(request, slug):
 
     # Initial nonce generation for the template
     nonce = random.randint(1, 1000000)
-    return render(request, 'game_template.html', {'game': game, 'nonce': nonce})
+    return render(request, 'game.html', {'game': game, 'nonce': nonce})
 
 
 @csrf_exempt
