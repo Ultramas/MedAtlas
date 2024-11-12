@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+    </style>
+</head>
+<body>
+
+{% if user.is_staff %}
+
+<div class="containerev" style="
+font-family: 'Lato', sans-serif;
+    background-color: var(--background);
+    color: var(--light-gold);
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    width: 80%;
+    top: 100%;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+">
+    <h1>Loot Drop Table</h1>
+    <div class="loot-grid" style="padding: 20px; border-radius: 20px;">
+        {% for item in choices %}
+        <div class="loot-item" style="width: 80%; margin: auto;">
+            <h2>{{ item.choice_text }}</h2>
+            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}px" height="{{ item.image_length }}px">
+            <div class="loot-details">
+                <p><strong>Value:</strong> {{ item.value }} {{ item.currency }}</p>
+                <p><strong>Rarity:</strong> <span class="rarity">{{ item.formatted_rarity }}%</span></p>
+                <p><strong>Category:</strong> {{ item.category }}</p>
+                {% if item.get_display_tier %}
+                <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
+                {% endif %}
+                <p><strong>Color:</strong> {{ item.get_color_display }}</p>
+            </div>
+            <div class="nerd-stats">
+                <p><strong>Inventory:</strong> {{ item.number_of_choice }}</p>
+                <p><strong>Total Number of Choices:</strong> {{ item.total_number_of_choice }}</p>
+                <p><strong>Nonce:</strong> {{ item.nonce }} (within range {{ item.lower_nonce }} - {{ item.upper_nonce }})</p>
+            </div>
+        </div>
+        {% empty %}
+        <p>No choices available for this game.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% else %}
+
+
+<div class="containerev" style="
+font-family: 'Lato', sans-serif;
+    background-color: var(--background);
+    color: var(--light-gold);
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    width: 80%;
+    top: 100%;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+">
+    <h1>Loot Drop Table</h1>
+    <div class="loot-grid" style="padding: 20px; border-radius: 20px;">
+        {% for item in choices %}
+        <div class="loot-item" style="width: 80%; margin: auto;">
+            <h2>{{ item.choice_text }}</h2>
+            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}px" height="{{ item.image_length }}px">
+            <div class="loot-details">
+                <p><strong>Value:</strong> {{ item.value }} {{ item.currency }}</p>
+                <p><strong>Rarity:</strong> <span class="rarity">{{ item.formatted_rarity }}%</span></p>
+                <p><strong>Category:</strong> {{ item.category }}</p>
+                {% if item.get_display_tier %}
+                <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
+                {% endif %}
+                <p><strong>Color:</strong> {{ item.get_color_display }}</p>
+            </div>
+            <div class="nerd-stats">
+                <p><strong>Nonce:</strong> {{ item.nonce }} (within range {{ item.lower_nonce }} - {{ item.upper_nonce }})</p>
+            </div>
+        </div>
+        {% empty %}
+        <p>No choices available for this game.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+</body>
+</html>

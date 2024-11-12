@@ -1,0 +1,1050 @@
+{% extends 'newnav.html' %}
+
+{% load static %}
+{% load random_nonce %}
+<!--manually count-->
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prize Picker</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/gametemplate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/spinboost.css' %}">
+     <script defer src="{% static 'css/js/gametemplatescript.js' %}"></script>
+     <script defer src="{% static 'css/js/spinboostscript.js' %}"></script>
+
+    <style>
+        .wrapperlootlist {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: left;
+        }
+
+        .game {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%:
+            padding: 20px;
+
+        }
+        .cardslootlist {
+            flex: 1 1 200px; /* Adjust the width as needed */
+            margin: 10px;
+            box-sizing: border-box;
+        }
+
+        .sliderlootlist {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: left;
+        }
+
+        .spinner-arrow {
+            width: 50px;
+            height: 50px;
+            z-index: 10; /* Ensure it's on top */
+        }
+     .cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start; /* Align cards to the start */
+    }
+
+    .individuallootelement {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start; /* Align items to the start */
+        padding: 15px;
+    }
+       .individuallootelement p {
+        margin: 5px 0;
+    }
+
+    .cards {
+        margin-right: 15px;
+        margin-left: 15px;
+        flex: 1 1 200px;
+        margin: 10px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column; /* Align elements vertically */
+        align-items: flex-start; /* Align items to the start */
+        align-items: left;
+    }
+.slider img{
+    width: 15vh;
+    height: 20vh;
+    margin-top: -2vh;
+    margin-left: -0.5vh;
+    border: 2px solid;
+    border-color: transparent; /*to change later*/
+    border-radius: 7px;
+}
+
+        :root {
+            --gold: #FFD700;
+            --dark-gold: #B8860B;
+            --light-gold: #FFF8DC;
+            --background: #1A1A1A;
+        }
+
+
+
+        .containerev {
+            width: 100%;
+            left: 50%;
+            transform: translateX(-50%); /* Centers the element horizontally */
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            text-align: center;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px var(--gold);
+        }
+
+        .loot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .loot-item {
+            background: linear-gradient(135deg, var(--dark-gold), var(--gold));
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .loot-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .loot-item h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            color: var(--background);
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .loot-item img {
+            width: 25%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .loot-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .loot-details p {
+            margin: 0;
+            color: var(--background);
+        }
+
+        .loot-details strong {
+            color: var(--light-gold);
+        }
+
+        .rarity {
+            font-weight: bold;
+            color: #FF4500;
+        }
+
+        .tier {
+            font-weight: bold;
+            color: #4B0082;
+        }
+
+        .nerd-stats {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            padding: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .nerd-stats p {
+            margin: 0.25rem 0;
+        }
+
+        @media (max-width: 600px) {
+            .loot-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .selections {
+    position: absolute;
+    top: 30vh;
+}
+    </style>
+
+</head>
+<body>
+    <div>
+<div class="selections" style="border: 2px solid black;">
+    <div class="flame-effect"></div>
+    <div class="content">
+        <label style="background: rgba(255, 255, 0, 1); padding: 10px;"> Spin Boost Power</label>
+        <div id="spinCount">
+            <button class="spin-option" data-value="1">1x</button>
+            <button class="spin-option" data-value="2">2x</button>
+            <button class="spin-option" data-value="3">3x</button>
+            <button class="spin-option" data-value="4">4x</button>
+            <button class="spin-option" data-value="5">5x</button>
+            <button class="spin-option" data-value="10">10x</button>
+        </div>
+        <br>
+
+        <input type="checkbox" id="quickspin-checkbox">
+        <label for="quickspin-checkbox">Quick Spin</label>
+        <input type="checkbox" id="persist-spin-checkbox">
+        <label for="persist-spin-checkbox">Save Spin Boost</label>
+    </div>
+</div>
+
+        <label>
+        </label>
+        <button class="start" id="start" style="margin-top: 2%;">Spin!</button>
+
+    </div>
+    <div class="popup" id="popup">
+        <div class="contents">
+            <span class="close">&times;</span>
+            <div class="text">
+                <img id="cardImage" src="" alt="" style="display: block; width: 200px; height: auto; margin-left: auto; margin-right: auto;">
+
+
+            </div>
+
+            <button class="close" style="margin-left: auto; margin-right: auto;">Collect</button>
+        </div>
+    </div>
+
+    <div class="wrapper">
+        <div class="containerre">
+            <div class="slider" id="slider">
+
+                {% for item in choices_with_nonce %}
+                    {% with choice=item.choice %}
+                        <div id="{{ choice.choice_text }}" class="cards">
+                            {% with color=game|get_color:choice %}
+                                <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
+                                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                                </div>
+                            {% endwith %}
+                            <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
+                            <p>Nonce: {{ item.nonce }}</p>
+                            <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
+                            <p>Random Amount: {{ random_amount }}</p> <!-- Display the random amount -->
+                        </div>
+                    {% endwith %}
+                {% endfor %}
+
+
+
+                {% for nonce, choice in matching_choices %}
+                    <p>Nonce: {{ nonce }}</p>
+                    <p>Choice: {{ choice.choice_text }}</p>
+                    <p>Value: {{ choice.value }}</p>
+
+            {% with cost_threshold=game.cost %}
+                {% with cost_threshold=cost_threshold|add:"0" %}
+                    {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost|mul:1 cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 %}
+                        {% if cost_threshold_10000 >= choice.value %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); padding: -10%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_500 >= choice.value > cost_threshold_10000 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_200 >= choice.value > cost_threshold_500 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_100 >= choice.value > cost_threshold_200 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
+                            <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% else %}
+                            <p>This choice does not meet the cost requirement.</p>
+                        {% endif %}
+                    {% endwith %}
+                {% endwith %}
+            {% endwith %}
+                {% endfor %}
+
+
+            </div>
+
+            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
+        </div>
+    </div>
+    <script>
+    const choicesWithNonce = {{ choices_with_nonce|safe }};
+</script>
+
+    {% include 'gameloottable.html' %}
+</body>
+</html>
+
+
+{% endblock content %}
+
+
+
+{% load static %}
+{% load random_nonce %}
+<!--manually count-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeTrove Wheel</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+    {% csrf_token %}
+	<link rel="shortcut icon" type="image/png" href="static/img/favicon.png">
+	<!-- google font -->
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+
+
+     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+     <script src="{% static 'css/js/main.js' %}"></script>
+     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+     <script src="{% static 'css/js/waypoints.js' %}"></script>
+	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+     <script src="{% static 'css/js/sticker.js' %}"></script>
+
+    <style>
+        .wrapperlootlist {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: left;
+        }
+
+        .game {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%:
+            padding: 20px;
+
+        }
+        .cardslootlist {
+            flex: 1 1 200px; /* Adjust the width as needed */
+            margin: 10px;
+            box-sizing: border-box;
+        }
+
+        .sliderlootlist {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: left;
+        }
+
+        .spinner-arrow {
+            width: 50px;
+            height: 50px;
+            z-index: 10; /* Ensure it's on top */
+        }
+     .cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start; /* Align cards to the start */
+    }
+
+    .individuallootelement {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start; /* Align items to the start */
+        padding: 15px;
+    }
+       .individuallootelement p {
+        margin: 5px 0;
+    }
+
+    .cards {
+        margin-right: 15px;
+        margin-left: 15px;
+        flex: 1 1 200px;
+        margin: 10px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column; /* Align elements vertically */
+        align-items: flex-start; /* Align items to the start */
+        align-items: left;
+    }
+.slider img{
+    width: 15vh;
+    height: 20vh;
+    margin-top: -2vh;
+    margin-left: -0.5vh;
+    border: 2px solid;
+    border-color: transparent; /*to change later*/
+    border-radius: 7px;
+}
+
+        :root {
+            --gold: #FFD700;
+            --dark-gold: #B8860B;
+            --light-gold: #FFF8DC;
+            --background: #1A1A1A;
+        }
+
+
+
+        .containerev {
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            text-align: center;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px var(--gold);
+        }
+
+        .loot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .loot-item {
+            background: linear-gradient(135deg, var(--dark-gold), var(--gold));
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .loot-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .loot-item h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            color: var(--background);
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .loot-item img {
+            width: 25%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .loot-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .loot-details p {
+            margin: 0;
+            color: var(--background);
+        }
+
+        .loot-details strong {
+            color: var(--light-gold);
+        }
+
+        .rarity {
+            font-weight: bold;
+            color: #FF4500;
+        }
+
+        .tier {
+            font-weight: bold;
+            color: #4B0082;
+        }
+
+        .nerd-stats {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            padding: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .nerd-stats p {
+            margin: 0.25rem 0;
+        }
+
+        @media (max-width: 600px) {
+            .loot-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+
+    <!-- Inline JavaScript -->
+
+
+
+    <script src="{% static 'css/js/build.js' %}"></script>
+    <script src="{% static 'css/js/start.js' %}"></script>
+    <script src="{% static 'css/js/test.js' %}"></script>
+    <style>
+    </style>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#quick_spin').change(function() {
+            savePreference(); // Automatically save the preference when the checkbox is toggled
+        });
+    });
+
+    function savePreference() {
+        const slug = "{{ slug }}";  // Ensure slug is correctly retrieved from the template context
+        $.ajax({
+            url: "{% url 'showcase:game' slug=slug %}",
+            type: "POST",
+            data: {
+                'quick_spin': $('#quick_spin').is(':checked'),
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                console.log("Preference saved successfully.");
+            },
+            error: function(xhr, status, error) {
+                console.error("Error saving preference:", error);
+            }
+        });
+    }
+
+</script>
+
+<script>
+$(".start").click(function () {
+    const button = $(this);
+    button.prop('disabled', true); // Disable the button when clicked
+
+    // Step 1: Create the outcome and get the relevant choice
+   createOutcome(button.data('game-id'), button.data('slug'))
+    .then(data => {
+        if (data.status === 'success') {
+            const choice = {
+                id: data.choice_id,
+                choice_text: data.choice_text,
+                color: data.choice_color,
+                file: data.choice_file
+            };
+
+            // Log the choice object to verify its structure
+            console.log('Choice Object:', choice);
+
+            renderChoiceDetails(choice);
+
+            // Other code to handle the outcome...
+        } else {
+            console.error('Error:', data.message);
+            button.prop('disabled', false); // Re-enable the button if there's an error
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        button.prop('disabled', false); // Re-enable the button if there's an error
+    });
+
+                // Log the values to ensure they are correct
+                console.log('Nonce:', chosenNonce);
+                console.log('Choice ID:', choiceId);
+                console.log('Choice Text:', choiceText);
+                console.log('Choice Color:', choiceColor);
+                console.log('Choice File:', choiceFile);
+
+                // Step 2: Set the animation to randomize the cards
+                let randomizeFlag = true;
+
+                function randomizeContents() {
+                    if (randomizeFlag) {
+                        $('div#slider').each(function () {
+                            var $div_parent = $(this);
+                            var $divsArr = $div_parent.children('div.cards');
+                            $divsArr.sort(function (a, b) {
+                                var temp = parseInt(Math.random() * 10);
+                                var isOddOrEven = temp % 2;
+                                var isPosOrNeg = temp > 5 ? 1 : -1;
+                                return (isOddOrEven * isPosOrNeg);
+                            }).appendTo($div_parent);
+                        });
+                        setTimeout(randomizeContents, 2000);
+                    }
+                }
+
+                randomizeContents();
+
+                setTimeout(() => {
+                    randomizeFlag = false;
+
+                    // Step 3: Control the final stop based on the nonce or choiceId
+                    const slider = document.querySelector('.slider');
+                    const cards = slider.querySelectorAll('.card');
+
+                    // Calculate the position to center the chosen card
+                    let targetCard = null;
+                    cards.forEach(card => {
+                        if (parseInt(card.dataset.choiceId) === choiceId) {
+                            targetCard = card;
+                        }
+                    });
+
+                    if (targetCard) {
+                        const targetOffsetLeft = targetCard.offsetLeft;
+                        const sliderWidth = slider.offsetWidth;
+                        const cardWidth = targetCard.offsetWidth;
+                        const targetScrollPosition = targetOffsetLeft - (sliderWidth / 2) + (cardWidth / 2);
+
+                        slider.scrollTo({
+                            left: targetScrollPosition,
+                            behavior: 'smooth'
+                        });
+
+                        // Assuming 'choice' is an object you receive via AJAX or another method
+                        function renderChoiceDetails(choice) {
+                            document.getElementById('choice-id').innerText = `Selected Choice ID: ${choice.id || 'N/A'}`;
+                            document.getElementById('choice-text').innerText = `Selected Choice Text: ${choice.choice_text || 'N/A'}`;
+                            document.getElementById('choice-color').innerText = `Selected Choice Color: ${choice.color || 'N/A'}`;
+
+                            // Handle the file field
+                            const choiceFileElement = document.getElementById('choice-file');
+                            if (choice.file) {
+                                choiceFileElement.src = choice.file; // Assuming file is a URL
+                                choiceFileElement.style.display = 'block'; // Show the image
+                            } else {
+                                choiceFileElement.style.display = 'none'; // Hide the image if there's no file
+                            }
+                        }
+
+
+                        const choiceFileElement = document.getElementById('choice-file');
+                        if (choiceFile) {
+                            choiceFileElement.src = choiceFile;
+                            choiceFileElement.style.display = 'block';
+                        } else {
+                            choiceFileElement.style.display = 'none';
+                        }
+
+                    } else {
+                        console.error('Error: Target card not found.');
+                    }
+
+                    // Re-enable the button after the animation finishes
+                    button.prop('disabled', false);
+
+                }, 9000); // Stop after 9 seconds (adjustable)
+
+            } else {
+                console.error('Error:', data.message);
+                button.prop('disabled', false); // Re-enable the button if there's an error
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            button.prop('disabled', false); // Re-enable the button if there's an error
+        });
+});
+
+function createOutcome(gameId, slug) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+return fetch(`/create_outcome/${slug}/`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken,  // Ensure csrf token is being sent
+    },
+    body: JSON.stringify({
+        game_id: gameId,  // Pass the game_id as needed
+        other_data: otherData,  // Add any additional data as needed
+    })
+})
+}.then(response => response.json())
+.then(data => {
+    if (data.status === 'success') {
+        document.getElementById('choice-id').innerText = `ID: ${data.choice_id}`;
+        document.getElementById('choice-text').innerText = `Text: ${data.choice_text}`;
+        document.getElementById('choice-color').innerText = `Color: ${data.choice_color}`;
+
+        const choiceFile = document.getElementById('choice-file');
+        if (data.choice_file) {
+            choiceFile.src = data.choice_file;
+            choiceFile.style.display = 'block';
+        } else {
+            choiceFile.style.display = 'none';
+        }
+    } else {
+        console.error('Error:', data.message);
+    }
+})
+.catch(error => console.error('Error:', error));
+
+
+
+
+</script>
+
+
+</head>
+
+
+ {% for BackgroundImage in Background %}
+            {% if BackgroundImage.page == "game.html" %}
+                {% if BackgroundImage.position == 1 %}
+	<body style="background: url('{{BackgroundImage.image.url}}'); background-size: cover;">
+    {% else %}
+    <body>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+<div class="loader" style="display: none;">
+        <div class="loader-inner">
+            <div class="circle"></div>
+        </div>
+    </div>
+	<!-- header -->
+                <div id="sticker-sticky-wrapper" class="sticky-wrapper is-sticky" style="height: 86px;">
+	<div class="top-header-area" id="sticker" style="width: 1129px; position: fixed;    top: 0px;    z-index: 17;">
+		<div class="" style='font-family: "Open Sans", sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    letter-spacing: 0.1px;
+    line-height: 1.8;
+    color: #051922;'>
+			<div class="row">
+				<div class="col-lg-12 col-sm-12 text-center" style="z-index: 5;">
+					<div class="main-menu-wrap">
+						<!-- logo -->
+        {% for GameHub in Logo %}
+        {% if GameHub.page == 'gamehub.html' %}
+
+        <a class="logo" href="{{GameHub.hyperlink}}">
+          <img class="imageicon" src="{{GameHub.logocover.url}}"
+                alt="{{GameHub.alternate}}" style="length: {{GameHub.length_for_resize}}px; width: {{GameHub.width_for_resize}}px;"></a>
+        {% endif %}
+        {% endfor %}
+						<!-- logo -->
+
+
+						<!-- menu start -->
+						<nav class="main-menu">
+							<ul>
+							  {% for column in Header %}
+
+      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
+									<ul class="sub-menu">
+										{% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% else %}
+              {% if row.opennew %}
+										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+									</ul>
+        {% endfor %}
+								</li>
+								<li>
+									<div class="header-icons">
+										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
+											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
+										</a>
+										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
+									</div>
+								</li>
+							</ul>
+						</nav>
+						<a class="mobile-show search-bar-icon" href="#"><i class="fas fa-search"></i></a>
+						<div class="mobile-menu"></div>
+						<!-- menu end -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<!-- end header -->
+{% for GameHub in Background %}
+  {% if GameHub.page == "game.html" %}
+  {% if GameHub.position == 1 %}
+	<div class="breadcrumb-section breadcrumb-bg" style="background: url({{GameHub.cover.url}}); background-size: cover;
+margin-left: 0; margin-right: 0; width: 100%; height: 15vh;">
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+
+
+
+			<div class="row">
+				<div class="col-lg-8 offset-lg-2 text-center">
+					<div class="breadcrumb-text">
+    <h2 style=" font-size: 30px; color: #F28123;">{{ game.name }}</h2>
+						<h1></h1>
+					</div>
+			</div>
+		</div>
+	</div>
+
+<div class="boxes" style="margin-left: 41%; margin-right: 50%; position: absolute;">
+    <img src="{{ game.image.url }}" class="game-image" alt="{{ game.name }}" style="width: 200px; height: 200px; margin-top: 150px;">
+    <form id="spin-preference-form" method="post">
+    {% csrf_token %}
+    <label for="quick_spin">Quick Spin</label>
+    <input type="checkbox" id="quick_spin" name="quick_spin" {% if quick_spin %}checked{% endif %} onchange="savePreference()">
+</form>
+</div>
+    <br>
+    <br>
+
+
+<button class="start" id="start" data-game-id="{{ game.id }}" data-slug="{{ game.slug }}"> Spin! </button>
+
+
+
+
+    </div>
+                <script>
+                    <script>
+    // Assuming `game_id` is passed to the template
+    const gameId = "{{ game_id }}";
+
+    fetch(`/create_view/${gameId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')  // Include CSRF token if needed
+        },
+        body: JSON.stringify({ game_id: gameId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Populate the template with choice data
+            document.getElementById('choice-id').textContent = `ID: ${data.choice_id}`;
+            document.getElementById('choice-text').textContent = `Text: ${data.choice_text}`;
+            document.getElementById('choice-color').textContent = `Color: ${data.choice_color}`;
+
+            // Show the choice file if it exists
+            const choiceFile = document.getElementById('choice-file');
+            if (data.choice_file) {
+                choiceFile.src = data.choice_file;
+                choiceFile.style.display = 'block';
+            } else {
+                choiceFile.style.display = 'none';
+            }
+        } else {
+            console.error('Error:', data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+
+
+                </script>
+
+    <div class="popup" id="popup">
+        <div class="contents">
+            <span class="close">&times;</span>
+            <div class="text" style="z-index: 5;">
+                <div id="choice-details">
+<h1>Congratulations!</h1>
+<h2>You got:</h2>
+<p id="choice-id"></p>
+<p id="choice-text"></p>
+<p id="choice-color"></p>
+<img id="choice-file" src="" alt="Selected Choice Image" style="display:none;">
+
+                </div>
+                <h1 id="cardname"></h1>
+
+            </div>
+
+        </div>
+    </div>
+
+     <div class="wrapper" style="position: absolute;">
+        <div class="container" style="height: 135.5vh; width: 300%; overflow-x: hidden;">
+            <div class="slider" id="slider">
+
+                {% for item in choices_with_nonce %}
+                    {% with choice=item.choice %}
+                        <div id="{{ choice.choice_text }}" class="cards">
+                            {% with color=game|get_color:choice %}
+                                <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
+                                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                                </div>
+                            {% endwith %}
+                            <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
+                            <p>Nonce: {{ item.nonce }}</p>
+                            <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
+                            <p>Random Amount: {{ random_amount }}</p> <!-- Display the random amount -->
+                        </div>
+                    {% endwith %}
+                {% endfor %}
+
+
+
+                {% for nonce, choice in matching_choices %}
+                    <p>Nonce: {{ nonce }}</p>
+                    <p>Choice: {{ choice.choice_text }}</p>
+                    <p>Value: {{ choice.value }}</p>
+
+            {% with cost_threshold=game.cost %}
+                {% with cost_threshold=cost_threshold|add:"0" %}
+                    {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost|mul:1 cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 %}
+                        {% if cost_threshold_10000 >= choice.value %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); padding: -10%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_500 >= choice.value > cost_threshold_10000 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_200 >= choice.value > cost_threshold_500 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_100 >= choice.value > cost_threshold_200 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
+                            <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% else %}
+                            <p>This choice does not meet the cost requirement.</p>
+                        {% endif %}
+                    {% endwith %}
+                {% endwith %}
+            {% endwith %}
+                {% endfor %}
+
+            </div>
+            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
+        </div>
+
+
+        <!-- Game nonce decides cards displayed in spinner -->
+        <br>
+        <br>
+        <br>
+        <br>
+    <div class="game" style="display: flex; flex-direction: row; justify-content: center; border-radius: 20px;width: 140%;" >
+
+        <div class="containerev" style="font-family: 'Lato', sans-serif;
+            background-color: var(--background);
+            color: var(--light-gold);
+            margin: 0;
+            padding: 0; border-radius: 20px;">
+        <h1>Loot Drop Table</h1>
+        <div class="loot-grid" style="padding: 20px; border-radius: 20px;">
+            {% for item in choices %}
+            <div class="loot-item" style="width: 80%;">
+                <h2>{{ item.choice_text }}</h2>
+                <img src="{{ item.file.url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}px" height="{{ item.image_length }}px">
+                <div class="loot-details">
+                    <p><strong>Value:</strong> {{ item.value }} Rubies</p>
+                    <p><strong>Rarity:</strong> <span class="rarity">{{ item.formatted_rarity }}%</span></p>
+                    <p><strong>Category:</strong> {{ item.category }}</p>
+                    {% if item.get_display_tier %}
+                    <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
+                    {% endif %}
+                    <p><strong>Color:</strong> {{ item.get_color_display }}</p>
+                </div>
+                <div class="nerd-stats">
+                    <p><strong>Number of Choices:</strong> {{ item.number_of_choice }}</p>
+                    <p><strong>Total Number of Choices:</strong> {{ item.total_number_of_choice }}</p>
+                    <p><strong>Nonce:</strong> {{ item.nonce }} (within range {{ item.lower_nonce }} - {{ item.upper_nonce }})</p>
+                </div>
+            </div>
+            {% empty %}
+            <p>No choices available for this game.</p>
+            {% endfor %}
+        </div>
+    </div>
+    </div>
+            </div>
+
+    </div>
+     </div>
+    <!-- Static script files -->
+    <script defer src="zsavedscript.js"></script>
+</body>
+</html>

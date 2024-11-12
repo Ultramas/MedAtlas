@@ -1398,6 +1398,11 @@ class ChestBackgroundView(BaseView):
         else:
             return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('../accounts/login')
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
@@ -1406,8 +1411,13 @@ class ChestBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
 
         user = self.request.user
-        user_profile, created = UserProfile.objects.get_or_create(user=user)
+        user_profile, created = UserProfile.objects.get_or_create(user=self.request.user)
         context['SentProfile'] = user_profile
+        user_cash = user_profile.currency_amount
+
+        context = {
+            'user_cash': user_cash,
+        }
 
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['wager_form'] = WagerForm()
@@ -1796,6 +1806,8 @@ class GameChestBackgroundView(BaseView):
                         'nonce': nonce,
                         'lower_nonce': choice.lower_nonce,
                         'upper_nonce': choice.upper_nonce,
+                        'file_url': choice.file.url if choice.file else None,  # Get the URL of the file field
+                        'value': choice.value  # Add the value field here
                     })
                     break  # Exit after finding the first match for this nonce
 
