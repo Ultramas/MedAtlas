@@ -2313,6 +2313,7 @@ class Choice(models.Model):
                                 verbose_name="Quantity Displayed")
     value = models.IntegerField(help_text="Value of item in Rubicoins.", blank=True,
                                 null=True, verbose_name="Value (Rubicoins)")
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True,)
     number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)", blank=True, null=True, default=1)
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -2324,11 +2325,17 @@ class Choice(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:  # Check if this is a new object
             self.number = Choice.objects.filter(shufflers=self.shufflers).count() + 1
+
         if self.total_number_of_choice and self.number_of_choice:
             if self.total_number_of_choice != 0:
                 self.rarity = (Decimal(self.number_of_choice) / Decimal(self.total_number_of_choice)) * Decimal(100)
             else:
                 self.rarity = Decimal(0)
+
+        if not self.currency:
+            first_currency = Currency.objects.first()
+            if first_currency:
+                self.currency = first_currency
 
         if self.lower_nonce is None:
             self.lower_nonce = random.randint(0, 1000000)
@@ -4915,8 +4922,44 @@ class Item(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
 
-from django.db import models
-from django.conf import settings
+class GameHistory(models.Model):
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="gamecreator")
+    players = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='gameplayers')
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='games', null=True, blank=True)
+    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='images/')
+    image_length = models.PositiveIntegerField(
+        blank=True, null=True, default=100,
+        help_text='Original length of the advertisement (use for original ratio).',
+        verbose_name="image length"
+    )
+    image_width = models.PositiveIntegerField(
+        blank=True, null=True, default=100,
+        help_text='Original width of the advertisement (use for original ratio).',
+        verbose_name="image width"
+    )
+    plays = models.IntegerField(help_text="Number of plays", blank=True, null=True)
+    value = models.IntegerField(help_text="Value of item in Rubicoins.", blank=True,
+                                null=True, verbose_name="Value (Rubicoins)")
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True,)
+    number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)", blank=True, null=True, default=1)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.choice + " on " + self.game + " by " + self.user.username
+
+    def save(self, *args, **kwargs):
+
+        # Set the default currency to the first instance of Currency if not already set
+        if not self.creator:
+            self.creator = self.game.user
+        if not self.image:
+            self.file = self.game.image
+        super().save(*args, **kwargs)
 
 
 class QuickItem(models.Model):

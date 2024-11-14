@@ -1807,7 +1807,10 @@ class GameChestBackgroundView(BaseView):
                         'lower_nonce': choice.lower_nonce,
                         'upper_nonce': choice.upper_nonce,
                         'file_url': choice.file.url if choice.file else None,  # Get the URL of the file field
-                        'value': choice.value  # Add the value field here
+                        'currency': {
+                            'symbol': choice.currency.name if choice.currency else '💎',
+                            'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                        }
                     })
                     break  # Exit after finding the first match for this nonce
 

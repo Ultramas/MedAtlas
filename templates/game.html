@@ -17,6 +17,22 @@
      <script defer src="{% static 'css/js/gametemplatescript.js' %}"></script>
      <script defer src="{% static 'css/js/spinboostscript.js' %}"></script>
 
+     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+     <script src="{% static 'css/js/main.js' %}"></script>
+     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+     <script src="{% static 'css/js/waypoints.js' %}"></script>
+	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+     <script src="{% static 'css/js/sticker.js' %}"></script>
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+    <script src="{% static 'css/js/build.js' %}"></script>
+    <script src="{% static 'css/js/start.js' %}"></script>
+    <script src="{% static 'css/js/test.js' %}"></script>
     <style>
         .wrapperlootlist {
             display: flex;
@@ -198,6 +214,9 @@
 
 </head>
 <body>
+
+<div class="boxes" style="left: 0%; position: absolute; width: 100%; height: 50%; background: url('{{ game.image.url }}'); alt='{{ game.name }}'; background-size: cover; background-repeat: no-repeat ">
+</div>
     <div>
 <div class="selections" style="border: 2px solid black;">
     <div class="flame-effect"></div>
@@ -222,7 +241,71 @@
 
         <label>
         </label>
-        <button class="start" id="start" style="margin-top: 2%;">Spin!</button>
+
+        <button class="start" id="start" data-game-id="{{ game.id }}" data-slug="{{ game.slug }}" style="margin-top: 2%;">Spin!</button>
+<script>
+$(document).ready(function() {
+    console.log("jQuery is loaded.");
+
+    let spinMultiplier = 1; // Default to 1 spin if no option is selected
+
+    $('.spin-option').on('click', function() {
+        $('.spin-option').removeClass('selected');
+        $(this).addClass('selected');
+        spinMultiplier = parseInt($(this).data('value'));
+        console.log("Spin multiplier selected:", spinMultiplier);
+    });
+
+    $('#start').on('click', function() {
+        console.log('Button clicked.');
+
+        const gameId = $(this).data('game-id');
+        const slug = $(this).data('slug');
+        const csrfToken = '{{ csrf_token }}';
+        const url = '{% url "showcase:create_outcome" "SLUG_PLACEHOLDER" %}'.replace('SLUG_PLACEHOLDER', slug);
+
+        console.log('Game ID:', gameId);
+        console.log('CSRF Token:', csrfToken);
+        console.log('URL:', url);
+        console.log('Spin Multiplier:', spinMultiplier);
+
+        let completedSpins = 0;
+        let allChoices = [];
+
+        for (let i = 0; i < spinMultiplier; i++) {
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                    csrfmiddlewaretoken: csrfToken,
+                    game_id: gameId
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        completedSpins++;
+                        allChoices = allChoices.concat(response.choices);  // Aggregate choices from each spin
+                        console.log('Choice received successfully for spin', i + 1);
+
+                        // Update the UI only after all spins are completed
+                        if (completedSpins === spinMultiplier) {
+                            console.log('All spins completed.');
+                            updateWheelContents(allChoices); // Display all outcomes at once
+                        }
+                    } else {
+                        console.error(response.message);
+                    }
+                },
+                error: function(error) {
+                    console.error('Error during spin', i + 1, ':', error);
+                }
+            });
+        }
+    });
+});
+
+</script>
+
+
 
     </div>
 
@@ -253,28 +336,32 @@
         <div class="containerre">
             <div class="slider" id="slider">
 
-                {% for item in choices_with_nonce %}
-                    {% with choice=item.choice %}
-                        <div id="{{ choice.choice_text }}" class="cards">
-                            {% with color=game|get_color:choice %}
-                                <div class="lootelement" style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
-                                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                                </div>
-                            {% endwith %}
-                            <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
-                            <p>Nonce: {{ item.nonce }}</p>
-                            <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
-                            <p>Random Amount: {{ random_amount }}</p> <!-- Display the random amount -->
-                        </div>
-                    {% endwith %}
-                {% endfor %}
+            {% for item in choices_with_nonce %}
+                {% with choice=item.choice %}
+                    <div id="{{ choice.choice_text }}" class="cards">
+                        {% with color=game|get_color:choice %}
+                            <div class="lootelement"
+                                 data-price="{{ choice.value }}"
+                                 data-currency-file="{{ item.currency.file_url }}"
+                                 data-currency-symbol="{{ item.currency.symbol }}"
+                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
+                                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% endwith %}
+                        <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
+                        <p>Nonce: {{ item.nonce }}</p>
+                        <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
+                        <p>Random Amount: {{ random_amount }}</p>
+                    </div>
+                {% endwith %}
+            {% endfor %}
 
 
 
                 {% for nonce, choice in matching_choices %}
+                    <p>Value: {{ choice.value }}</p>
                     <p>Nonce: {{ nonce }}</p>
                     <p>Choice: {{ choice.choice_text }}</p>
-                    <p>Value: {{ choice.value }}</p>
 
             {% with cost_threshold=game.cost %}
                 {% with cost_threshold=cost_threshold|add:"0" %}
@@ -326,7 +413,305 @@
     const choicesWithNonce = {{ choices_with_nonce|safe }};
 </script>
 
+<script>
+$(document).ready(function() {
+            console.log("jQuery is loaded.");
+            $('#start').on('click', function() {
+                console.log('Button clicked.');
+                var gameId = $(this).data('game-id');
+                var slug = $(this).data('slug'); // Get the slug from the data attribute
+                var csrfToken = '{{ csrf_token }}';
+                var url = '{% url "showcase:create_outcome" "SLUG_PLACEHOLDER" %}'.replace('SLUG_PLACEHOLDER', slug);
+
+                console.log('Game ID:', gameId);
+                console.log('CSRF Token:', csrfToken);
+                console.log('URL:', url);
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: {
+                        csrfmiddlewaretoken: csrfToken
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            console.log('Choices received successfully!');
+                            updateWheelContents(response.choices);
+                        } else {
+                            console.error(response.message);
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        });
+
+
+        </script>
+    <script>
+
+function createOutcome(gameId, slug) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+return fetch(`/create_outcome/${slug}/`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken,  // Ensure csrf token is being sent
+    },
+    body: JSON.stringify({
+        game_id: gameId,  // Pass the game_id as needed
+        other_data: otherData,  // Add any additional data as needed
+    })
+})
+}.then(response => response.json())
+.then(data => {
+    if (data.status === 'success') {
+        document.getElementById('choice-id').innerText = `ID: ${data.choice_id}`;
+        document.getElementById('choice-text').innerText = `Text: ${data.choice_text}`;
+        document.getElementById('choice-color').innerText = `Color: ${data.choice_color}`;
+
+        const choiceFile = document.getElementById('choice-file');
+        if (data.choice_file) {
+            choiceFile.src = data.choice_file;
+            choiceFile.style.display = 'block';
+        } else {
+            choiceFile.style.display = 'none';
+        }
+    } else {
+        console.error('Error:', data.message);
+    }
+})
+.catch(error => console.error('Error:', error));
+
+
+
+
+</script>
+
     {% include 'gameloottable.html' %}
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+
+</script>
+
+<script>
+$(".start").click(function () {
+    const button = $(this);
+    button.prop('disabled', true); // Disable the button when clicked
+
+    // Step 1: Create the outcome and get the relevant choice
+   createOutcome(button.data('game-id'), button.data('slug'))
+    .then(data => {
+        if (data.status === 'success') {
+            const choice = {
+                id: data.choice_id,
+                choice_text: data.choice_text,
+                color: data.choice_color,
+                file: data.choice_file
+            };
+
+            // Log the choice object to verify its structure
+            console.log('Choice Object:', choice);
+
+            renderChoiceDetails(choice);
+
+            // Other code to handle the outcome...
+        } else {
+            console.error('Error:', data.message);
+            button.prop('disabled', false); // Re-enable the button if there's an error
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        button.prop('disabled', false); // Re-enable the button if there's an error
+    });
+
+                // Log the values to ensure they are correct
+                console.log('Nonce:', chosenNonce);
+                console.log('Choice ID:', choiceId);
+                console.log('Choice Text:', choiceText);
+                console.log('Choice Color:', choiceColor);
+                console.log('Choice File:', choiceFile);
+
+                // Step 2: Set the animation to randomize the cards
+                let randomizeFlag = true;
+
+                function randomizeContents() {
+                    if (randomizeFlag) {
+                        $('div#slider').each(function () {
+                            var $div_parent = $(this);
+                            var $divsArr = $div_parent.children('div.cards');
+                            $divsArr.sort(function (a, b) {
+                                var temp = parseInt(Math.random() * 10);
+                                var isOddOrEven = temp % 2;
+                                var isPosOrNeg = temp > 5 ? 1 : -1;
+                                return (isOddOrEven * isPosOrNeg);
+                            }).appendTo($div_parent);
+                        });
+                        setTimeout(randomizeContents, 2000);
+                    }
+                }
+
+                randomizeContents();
+
+                setTimeout(() => {
+                    randomizeFlag = false;
+
+                    // Step 3: Control the final stop based on the nonce or choiceId
+                    const slider = document.querySelector('.slider');
+                    const cards = slider.querySelectorAll('.card');
+
+                    // Calculate the position to center the chosen card
+                    let targetCard = null;
+                    cards.forEach(card => {
+                        if (parseInt(card.dataset.choiceId) === choiceId) {
+                            targetCard = card;
+                        }
+                    });
+
+                    if (targetCard) {
+                        const targetOffsetLeft = targetCard.offsetLeft;
+                        const sliderWidth = slider.offsetWidth;
+                        const cardWidth = targetCard.offsetWidth;
+                        const targetScrollPosition = targetOffsetLeft - (sliderWidth / 2) + (cardWidth / 2);
+
+                        slider.scrollTo({
+                            left: targetScrollPosition,
+                            behavior: 'smooth'
+                        });
+
+                        // Assuming 'choice' is an object you receive via AJAX or another method
+                        function renderChoiceDetails(choice) {
+                            document.getElementById('choice-id').innerText = `Selected Choice ID: ${choice.id || 'N/A'}`;
+                            document.getElementById('choice-text').innerText = `Selected Choice Text: ${choice.choice_text || 'N/A'}`;
+                            document.getElementById('choice-color').innerText = `Selected Choice Color: ${choice.color || 'N/A'}`;
+
+                            // Handle the file field
+                            const choiceFileElement = document.getElementById('choice-file');
+                            if (choice.file) {
+                                choiceFileElement.src = choice.file; // Assuming file is a URL
+                                choiceFileElement.style.display = 'block'; // Show the image
+                            } else {
+                                choiceFileElement.style.display = 'none'; // Hide the image if there's no file
+                            }
+                        }
+
+
+                        const choiceFileElement = document.getElementById('choice-file');
+                        if (choiceFile) {
+                            choiceFileElement.src = choiceFile;
+                            choiceFileElement.style.display = 'block';
+                        } else {
+                            choiceFileElement.style.display = 'none';
+                        }
+
+                    } else {
+                        console.error('Error: Target card not found.');
+                    }
+
+                    // Re-enable the button after the animation finishes
+                    button.prop('disabled', false);
+
+                }, 9000); // Stop after 9 seconds (adjustable)
+
+            } else {
+                console.error('Error:', data.message);
+                button.prop('disabled', false); // Re-enable the button if there's an error
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            button.prop('disabled', false); // Re-enable the button if there's an error
+        });
+});
+
+function createOutcome(gameId, slug) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+return fetch(`/create_outcome/${slug}/`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken,  // Ensure csrf token is being sent
+    },
+    body: JSON.stringify({
+        game_id: gameId,  // Pass the game_id as needed
+        other_data: otherData,  // Add any additional data as needed
+    })
+})
+}.then(response => response.json())
+.then(data => {
+    if (data.status === 'success') {
+        document.getElementById('choice-id').innerText = `ID: ${data.choice_id}`;
+        document.getElementById('choice-text').innerText = `Text: ${data.choice_text}`;
+        document.getElementById('choice-color').innerText = `Color: ${data.choice_color}`;
+
+        const choiceFile = document.getElementById('choice-file');
+        if (data.choice_file) {
+            choiceFile.src = data.choice_file;
+            choiceFile.style.display = 'block';
+        } else {
+            choiceFile.style.display = 'none';
+        }
+    } else {
+        console.error('Error:', data.message);
+    }
+})
+.catch(error => console.error('Error:', error));
+
+
+
+
+</script>
+
+
+
+
+<script>
+    document.getElementById('start').addEventListener('click', function() {
+        const slug = this.getAttribute('data-slug');  // Retrieve slug from data attribute
+        const url = `/create_outcome/${slug}/`;       // Use slug in the URL
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({
+                'game_id': gameId,  // Replace with your actual game ID if needed
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById('choice-id').innerText = `ID: ${data.choice_id}`;
+                document.getElementById('choice-text').innerText = `Text: ${data.choice_text}`;
+                document.getElementById('choice-color').innerText = `Color: ${data.choice_color}`;
+
+                const choiceFile = document.getElementById('choice-file');
+                if (data.choice_file) {
+                    choiceFile.src = data.choice_file;
+                    choiceFile.style.display = 'block';
+                } else {
+                    choiceFile.style.display = 'none';
+                }
+            } else {
+                console.error('Error:', data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+</script>
+
+
 </body>
 </html>
 
