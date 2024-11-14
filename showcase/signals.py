@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
+from .models import Outcome, Achievements
 from .models import User, Profile, AdministrationChangeLog
 from .views import get_changes
 
@@ -75,7 +76,6 @@ def log_model_delete(sender, instance, **kwargs):
         # Log the error or handle it appropriately
         print(f"Error creating AdministrationChangeLog: {e}")
 
-from .models import Outcome
 
 @receiver(post_save, sender=Outcome)
 def update_achievement_counters(sender, instance, **kwargs):

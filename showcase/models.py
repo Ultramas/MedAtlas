@@ -2411,7 +2411,7 @@ class Outcome(models.Model):
     gold_counter = models.IntegerField(blank=True, null=True, default=0)
     redgold_counter = models.IntegerField(blank=True, null=True, default=0)
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
-    nonce = models.DecimalField(max_digits=6, decimal_places=0)
+    nonce = models.DecimalField(max_digits=7, decimal_places=0)
     date_and_time = models.DateTimeField(null=True, verbose_name="date and time", auto_now_add=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
