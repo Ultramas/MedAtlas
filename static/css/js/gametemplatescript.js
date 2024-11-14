@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.setItem("startAnimation", "true");
         sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
         location.reload();
+        /* initializeAnimation(); */
     });
 
     function initializeAnimation() {

@@ -81,16 +81,18 @@ from .models import Outcome
 def update_achievement_counters(sender, instance, **kwargs):
     user = instance.user
     if not user:
-        return# If there's no associated user, exit# Retrieve all achievements associated with the current user
+        return  # If there's no associated user, exit
+
+    # Retrieve all achievements associated with the current user
     achievements = Achievements.objects.filter(user=user)
 
-    # Update each achievement's counters with the values from the outcome instance for achievement in achievements:
-    achievement.green_counter += instance.green_counter
-    achievement.yellow_counter += instance.yellow_counter
-    achievement.orange_counter += instance.orange_counter
-    achievement.red_counter += instance.red_counter
-    achievement.black_counter += instance.black_counter
-    achievement.gold_counter += instance.gold_counter
-    achievement.redgold_counter += instance.redgold_counter
-
-    achievement.save()
+    # Iterate over each achievement in the queryset and update its counters
+    for achievement in achievements:
+        achievement.green_counter += instance.green_counter
+        achievement.yellow_counter += instance.yellow_counter
+        achievement.orange_counter += instance.orange_counter
+        achievement.red_counter += instance.red_counter
+        achievement.black_counter += instance.black_counter
+        achievement.gold_counter += instance.gold_counter
+        achievement.redgold_counter += instance.redgold_counter
+        achievement.save()  # Save each achievement after updating
