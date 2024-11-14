@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 scroller.style.animationPlayState = 'running';
             });
         }
-
+        /*
         function spin() {
             $(".spin-option").prop('disabled', true);
 
@@ -91,10 +91,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }, isQuickSpin ? 4500 : 9000);
         }
+            */
+
+        function spin() {
+            $(".spin-option").prop('disabled', true);
+        
+            randomizeContents();
+            addAnimation();
+        
+            const animationDuration = isQuickSpin ? 4500 : 9000;
+            const buffer = 500; // Buffer to handle timing issues
+        
+            setTimeout(() => {
+                // Pause animation after it completes
+                document.querySelectorAll('.slider').forEach(scroller => {
+                    scroller.style.animationPlayState = 'paused';
+                });
+        
+                // Find the selected card
+                findSelectedCard();
+                currentSpin++;
+        
+                if (currentSpin < totalSpins) {
+                    // Schedule the next spin
+                    setTimeout(spin, buffer); // Add slight delay before calling spin again
+                } else {
+                    // Final spin logic
+                    animationStopped = true;
+                    showPopup();
+        
+                    if (!persistSpin) {
+                        totalSpins = 1;
+                        sessionStorage.setItem("totalSpins", totalSpins);
+                    }
+        
+                    $(".start").prop('disabled', false);
+                    $(".spin-option").prop('disabled', false);
+                }
+            }, animationDuration); // Align with animation duration
+        }
+        
+        
+        
 
         spin();
     }
 
+    /*
     function findSelectedCard() {
         const selector = document.getElementById('selector').getBoundingClientRect();
         document.querySelectorAll('.cards').forEach(card => {
@@ -110,6 +153,38 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+        */
+
+    function findSelectedCard() {
+        const selector = document.getElementById('selector').getBoundingClientRect();
+        let currentSelection = null;
+    
+        document.querySelectorAll('.cards').forEach(card => {
+            const cardRect = card.getBoundingClientRect();
+    
+            // Check if the card overlaps with the selector
+            if (
+                !(selector.right < cardRect.left || 
+                  selector.left > cardRect.right || 
+                  selector.bottom < cardRect.top || 
+                  selector.top > cardRect.bottom)
+            ) {
+                currentSelection = {
+                    id: card.id,
+                    src: card.querySelector('img').src,
+                    price: card.dataset.price,
+                    color: card.dataset.color,
+                    value: card.dataset.value
+                };
+            }
+        });
+    
+        // Only add the current selection if it exists
+        if (currentSelection) {
+            selectedItems.push(currentSelection);
+        }
+    }
+    
 
     function showPopup() {
         textContainer.innerHTML = `

@@ -9,7 +9,6 @@ from django.db import transaction
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
 from social_core.backends import stripe
-from stripe.api_resources import order
 
 from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
