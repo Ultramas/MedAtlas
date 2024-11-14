@@ -8,6 +8,7 @@ from django.contrib.messages import get_messages
 from django.db import transaction
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
+from social_core.backends import stripe
 from stripe.api_resources import order
 
 from . import models
@@ -9179,11 +9180,6 @@ def currency_reduce_quantity_item(request, slug):
 #      messages.error(request, form.errors)
 
 
-import stripe
-
-stripe.api_key = "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"
-
-
 class HomeView(ListView):
     model = Item
     paginate_by = 10
@@ -10171,8 +10167,6 @@ def my_view(request):
 
 
 from django.urls import reverse
-
-stripe.api_key = "sk_test_51JSB5LH4sbqF1dn75jWAc2wiQvhKq0HfNkQXthKPYmycweqQQkmyTSYgY0vzxQadtgDd2j1RqXYglHspHQXb22kG0086JLfOxS"
 
 from django.views.decorators.csrf import csrf_exempt
 
