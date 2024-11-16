@@ -284,6 +284,19 @@
       <!-- Your button with initial data attributes -->
 <button class="start" id="start" data-game-id="{{ game.id }}" data-nonce="{{ choice.nonce }}" data-slug="{{ game.slug }}" style="margin-top: 2%;">Spin!</button>
 
+        <script>
+document.addEventListener("DOMContentLoaded", () => {
+    const startButton = document.getElementById("start");
+    startButton.addEventListener("click", () => {
+        setTimeout(() => {
+            const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
+            audio.play();
+        }, 200); // 200 milliseconds delay
+    });
+});
+
+</script>
+
 <script type="text/javascript">
 $(document).ready(function() {
     console.log("jQuery is loaded.");
@@ -767,7 +780,7 @@ return fetch(`/create_outcome/${slug}/`, {
                 'X-CSRFToken': '{{ csrf_token }}',
             },
             body: JSON.stringify({
-                'game_id': gameId,  // Replace with your actual game ID if needed
+                'game_id': game.id,  // Replace with your actual game ID if needed
             }),
         })
         .then(response => response.json())
