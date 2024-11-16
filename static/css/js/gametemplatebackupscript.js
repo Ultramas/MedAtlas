@@ -11,15 +11,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSpin = 0;
 
     const persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
-    const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
+
+    // Map quickSpinMode to animation durations
+    const quickSpinModes = {
+        "default": 9000,   // Default spin
+        "quick": 4500,     // Quick spin
+        "bullet": 2500,    // Bullet spin
+        "lightning": 1000, // Lightning spin
+        "instant": 0       // Instant spin
+    };
+
+    let quickSpinMode = "default"; // Default mode
 
     // Persist settings on checkbox change
     $('#persist-spin-checkbox').change(function () {
         localStorage.setItem('persistSpinChecked', $(this).prop('checked').toString());
     });
 
-    $('#quickspin-checkbox').change(function () {
-        localStorage.setItem('quickSpinChecked', $(this).prop('checked').toString());
+    // Handle quick spin mode selection
+    $(".quickspin-mode-option").click(function () {
+        $(".quickspin-mode-option").removeClass("selected");
+        $(this).addClass("selected");
+        quickSpinMode = $(this).data("mode");
+        localStorage.setItem("quickSpinMode", quickSpinMode);
     });
 
     // Update total spins when a spin option is clicked
@@ -33,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Start animation on button click
     $(".start").click(function () {
         sessionStorage.setItem("startAnimation", "true");
-        sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
 
         // Reset current spin count and initialize the animation
         currentSpin = 0;
@@ -42,99 +55,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initializeAnimation() {
         $(".start").prop('disabled', true);
-        const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
         selectedItems = [];
 
+        // Retrieve the animation duration based on the selected quickSpinMode
+        const animationDuration = quickSpinModes[quickSpinMode] || quickSpinModes["default"];
+        const buffer = 500; // Buffer to handle timing issues
 
-function randomizeContents() {
-    // Send an AJAX request to the create_outcome endpoint
-    $.ajax({
-        url: `/create_outcome/${slug}/, // Replace with the actual endpoint URL
-        type: 'POST',
-        data: {
-            game_id: $('#game_id').val(),
-            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
-        },
-        success: function (response) {
-            if (response.status === 'success') {
-                const orderedChoices = response.ordered_choices;
-
-                // Clear the current slider
-                $('#slider .cards').remove();
-
-                // Reorder and append the choices based on the response
-                orderedChoices.forEach(function (choice) {
-                    $('#slider').append(`
-                        <div class="card" data-id="${choice.id}" style="background-color: ${choice.color};">
-                            <p>${choice.choice_text}</p>
-                            ${choice.file ? `<img src="${choice.file}" alt="Choice File">` : ''}
-                        </div>
-                    `);
-                });
-            } else {
-                console.error('Error:', response.message);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error('AJAX Error:', error);
+        function randomizeContents() {
+            $('#slider .cards').sort(() => 0.5 - Math.random()).appendTo('#slider');
         }
-    });
-}
-
-
-
 
         function addAnimation() {
             document.querySelectorAll('.slider').forEach(scroller => {
                 scroller.style.animation = 'none';
                 scroller.offsetHeight;  // Trigger reflow
-                let animationDuration = isQuickSpin ? '9s' : '18s';
-                scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
+                const duration = `${animationDuration / 1000}s`; // Convert milliseconds to seconds for CSS
+                scroller.style.animation = `slideshow ${duration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
                 scroller.style.animationPlayState = 'running';
             });
         }
 
         function spin() {
             $(".spin-option").prop('disabled', true);
-        
+
             randomizeContents();
             addAnimation();
-        
-            const animationDuration = isQuickSpin ? 4500 : 9000;
-            const buffer = 150; // Buffer to handle timing issues
-        
+
+
             setTimeout(() => {
                 // Pause animation after it completes
                 document.querySelectorAll('.slider').forEach(scroller => {
                     scroller.style.animationPlayState = 'paused';
                 });
-        
+
                 // Find the selected card
                 findSelectedCard();
                 currentSpin++;
-        
+
                 if (currentSpin < totalSpins) {
                     // Schedule the next spin
                     setTimeout(spin, buffer); // Add slight delay before calling spin again
                 } else {
                     // Final spin logic
                     animationStopped = true;
-                    setTimeout(buffer); // Add slight delay before calling spin again
                     showPopup();
-        
+
                     if (!persistSpin) {
                         totalSpins = 1;
                         sessionStorage.setItem("totalSpins", totalSpins);
                     }
-        
+
                     $(".start").prop('disabled', false);
                     $(".spin-option").prop('disabled', false);
                 }
             }, animationDuration); // Align with animation duration
         }
-        
-        
-        
 
         spin();
     }
@@ -160,15 +135,15 @@ function randomizeContents() {
     function findSelectedCard() {
         const selector = document.getElementById('selector').getBoundingClientRect();
         let currentSelection = null;
-    
+
         document.querySelectorAll('.cards').forEach(card => {
             const cardRect = card.getBoundingClientRect();
-    
+
             // Check if the card overlaps with the selector
             if (
-                !(selector.right < cardRect.left || 
-                  selector.left > cardRect.right || 
-                  selector.bottom < cardRect.top || 
+                !(selector.right < cardRect.left ||
+                  selector.left > cardRect.right ||
+                  selector.bottom < cardRect.top ||
                   selector.top > cardRect.bottom)
             ) {
                 currentSelection = {
@@ -180,13 +155,13 @@ function randomizeContents() {
                 };
             }
         });
-    
+
         // Only add the current selection if it exists
         if (currentSelection) {
             selectedItems.push(currentSelection);
         }
     }
-    
+
 
     function showPopup() {
         textContainer.innerHTML = `
@@ -201,7 +176,7 @@ function randomizeContents() {
             const cardElement = document.createElement('div');
             cardElement.classList.add('popup-card');
             cardElement.innerHTML = `
-                <div class="card-fire" data-color="${item.color}">
+                <div class="card-fire" data-color="${item.color}" style="overflow-x: hidden;">
                     <div class="card-flames">
                         <div class="card-flame"></div>
                     </div>
