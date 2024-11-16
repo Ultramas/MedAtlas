@@ -1707,55 +1707,35 @@ class GameChestBackgroundView(BaseView):
         slug = self.kwargs.get('slug')
         context['slug'] = slug
 
-        # Fetch necessary data
+        # Fetch data related to the user and game
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
         game = get_object_or_404(Game, slug=slug)
+
+        # Pass the game as a list
         context['game'] = game
-        choices = Choice.objects.filter(game=game)
 
-        # Fetch other related data
-        context.update({
-            'BaseCopyrightTextFielded': BaseCopyrightTextField.objects.filter(is_active=1),
-            'Titles': Titled.objects.filter(is_active=1).order_by("page"),
-            'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
-            'DropDown': NavBar.objects.filter(is_active=1).order_by("position"),
-            'Money': Currency.objects.filter(is_active=1).first(),
-            'wager_form': WagerForm(),
-            'Background': BackgroundImageBase.objects.filter(page=self.template_name).order_by("position"),
-        })
-
-        # Handle profiles
         user = self.request.user
         if user.is_authenticated:
             try:
-                context['SentProfile'] = UserProfile.objects.get(user=user)
+                context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
             except UserProfile.DoesNotExist:
                 context['SentProfile'] = None
         else:
             context['SentProfile'] = None
 
-        # Update profiles with avatar URLs
-        profiles = UpdateProfile.objects.filter(is_active=1)
-        for profile in profiles:
-            user_profile = ProfileDetails.objects.filter(user=profile.user).first()
-            if user_profile:
-                profile.newprofile_profile_picture_url = user_profile.avatar.url
-                profile.newprofile_profile_url = profile.get_profile_url()
-        context['Profiles'] = profiles
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['wager_form'] = WagerForm()
 
-        # Handle spin preferences
-        spin_preference = None
-        if user.is_authenticated:
-            spin_preference, _ = SpinPreference.objects.get_or_create(user=user, defaults={'quick_spin': False})
-        context['spinpreference'] = spin_preference
-        context['quick_spin'] = spin_preference.quick_spin if spin_preference else False
-        context['spin_preference_form'] = SpinPreferenceForm(instance=spin_preference) if spin_preference else SpinPreferenceForm()
+        game = get_object_or_404(Game, slug=slug)
+        context['games'] = game
+        choices = Choice.objects.filter(game=game)
+        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
+        context['spinner_choice_renders'] = spinner_choice_renders
 
-        # Determine random amount
-        random_amount = random.randint(500, 1000) if context['quick_spin'] else random.randint(150, 300)
-        context['random_amount'] = random_amount
-        context['range_random_amount'] = range(random_amount)
-
-        # Prepare thresholds
         cost = game.discount_cost if game.discount_cost else game.cost
         context.update({
             'cost_threshold_80': cost * 0.8,
@@ -1765,44 +1745,94 @@ class GameChestBackgroundView(BaseView):
             'cost_threshold_10000': cost * 100,
         })
 
-        return context
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        context['Profiles'] = newprofile
 
-    def post(self, request, *args, **kwargs):
-        # Handle the AJAX request for `choices_with_nonce`
-        slug = kwargs.get('slug')
-        game = get_object_or_404(Game, slug=slug)
-        choices = Choice.objects.filter(game=game)
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+                # Move the SpinPreference handling here
 
-        # Generate random nonces
-        random_amount = random.randint(150, 300)  # Adjust range as needed
+        user = self.request.user
+        spinpreference = None  # Initialize spinpreference to ensure it exists
+
+        if user.is_authenticated:
+            try:
+                spinpreference = SpinPreference.objects.get(user=user)
+            except SpinPreference.DoesNotExist:
+                spinpreference = SpinPreference(user=user, quick_spin=False)
+                spinpreference.save()
+
+            context['quick_spin'] = spinpreference.quick_spin
+        else:
+            context['quick_spin'] = False
+
+        context['spinpreference'] = spinpreference
+
+        # Initialize the form with spinpreference instance, or None if not authenticated
+        if spinpreference:
+            spinform = SpinPreferenceForm(instance=spinpreference)
+        else:
+            spinform = SpinPreferenceForm()  # Initialize an empty form if spinpreference is None
+        context['spin_preference_form'] = spinform
+
+        if user.is_authenticated:
+            # Determine the random amount based on quick_spin preference
+            if spinpreference.quick_spin:
+                random_amount = random.randint(500, 1000)
+            else:
+                random_amount = random.randint(150, 300)
+        else:
+            random_amount = random.randint(150, 300)
+
+        context['random_amount'] = random_amount
+        context['range_random_amount'] = range(random_amount)
+        print(str('the random amount is ') + str(random_amount))
+
+        # Generate a list of random nonces
         random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
+        context['random_nonces'] = random_nonces
 
-        # Match choices with nonces
+        # Create a list to store choices matched with the generated nonces
         choices_with_nonce = []
         for nonce in random_nonces:
             for choice in choices:
                 if choice.lower_nonce <= nonce <= choice.upper_nonce:
                     choices_with_nonce.append({
-                        'id': choice.id,
-                        'choice_text': choice.choice_text,
+                        'choice': choice,
                         'nonce': nonce,
                         'lower_nonce': choice.lower_nonce,
                         'upper_nonce': choice.upper_nonce,
-                        'file': choice.file.url if choice.file else None,
-                        'color': getattr(choice, 'color', '#FFFFFF'),
+                        'file_url': choice.file.url if choice.file else None,  # Get the URL of the file field
                         'currency': {
                             'symbol': choice.currency.name if choice.currency else '💎',
-                            'file': choice.currency.file.url if choice.currency and choice.currency.file else None,
+                            'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
                         }
                     })
-                    break
+                    break  # Exit after finding the first match for this nonce
 
-        print(choices_with_nonce)
+        context['choices_with_nonce'] = choices_with_nonce
 
-        return JsonResponse({
-            'status': 'success',
-            'choices_with_nonce': choices_with_nonce
-        })
+        # Get the game_id from the URL kwargs
+        game_id = self.kwargs.get('slug')
+
+        # Retrieve the Game object
+        game = get_object_or_404(Game, slug=slug)
+
+        # Retrieve related Choice objects
+        choices = Choice.objects.filter(game=game)
+
+        # Add them to the context
+        context['game'] = game
+        context['choices'] = choices
+
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        print(context['Background'])
+
+        return context
 
     def game_detail(request, slug):
         game = get_object_or_404(Game, slug=slug)

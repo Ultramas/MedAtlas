@@ -286,28 +286,10 @@
 
 
 <!-- Embed choices and other data in a script tag -->
-<script>
-    const gameData = {
-        choices: {{ choices_with_nonce|safe }},
-        nonce: {{ random_nonces|first }},
-        game: {
-            id: {{ game.id }},
-            name: "{{ game.name }}",
-            slug: "{{ game.slug }}"
-        }
-    };
-</script>
+
 
         <script>
-document.addEventListener("DOMContentLoaded", () => {
-    const startButton = document.getElementById("start");
-    startButton.addEventListener("click", () => {
-        setTimeout(() => {
-            const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
-            audio.play();
-        }, 200); // 200 milliseconds delay
-    });
-});
+
 
 </script>
 
@@ -417,41 +399,6 @@ $(document).ready(function() {
 });
 
 </script>
-
-
-<script>
-    fetch('/create_outcome/${slug}/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}',
-        },
-        body: JSON.stringify({
-            game_id: 1,  // Replace with your game ID
-        }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            document.getElementById('choice-id').innerText = `ID: ${data.choice_id}`;
-            document.getElementById('choice-text').innerText = `Text: ${data.choice_text}`;
-            document.getElementById('choice-color').innerText = `Color: ${data.choice_color}`;
-
-            const choiceFile = document.getElementById('choice-file');
-            if (data.choice_file) {
-                choiceFile.src = data.choice_file;
-                choiceFile.style.display = 'block';
-            } else {
-                choiceFile.style.display = 'none';
-            }
-        } else {
-            console.error('Error:', data.message);
-        }
-    })
-    .catch(error => console.error('Error:', error));
-</script>
-
-
 
 
     </div>
@@ -566,7 +513,7 @@ $(document).ready(function() {
 function createOutcome(gameId, slug) {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-return fetch(`/create_outcome/${slug}/`, {
+fetch(`/create_outcome/${slug}/`, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
@@ -740,41 +687,6 @@ $(".start").click(function () {
         });
 });
 
-function createOutcome(gameId, slug) {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-return fetch(`/create_outcome/${slug}/`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken,  // Ensure csrf token is being sent
-    },
-    body: JSON.stringify({
-        game_id: gameId,  // Pass the game_id as needed
-        other_data: otherData,  // Add any additional data as needed
-    })
-})
-}.then(response => response.json())
-.then(data => {
-    if (data.status === 'success') {
-        document.getElementById('choice-id').innerText = `ID: ${data.choice_id}`;
-        document.getElementById('choice-text').innerText = `Text: ${data.choice_text}`;
-        document.getElementById('choice-color').innerText = `Color: ${data.choice_color}`;
-
-        const choiceFile = document.getElementById('choice-file');
-        if (data.choice_file) {
-            choiceFile.src = data.choice_file;
-            choiceFile.style.display = 'block';
-        } else {
-            choiceFile.style.display = 'none';
-        }
-    } else {
-        console.error('Error:', data.message);
-    }
-})
-.catch(error => console.error('Error:', error));
-
-
 
 
 </script>
@@ -783,41 +695,6 @@ return fetch(`/create_outcome/${slug}/`, {
 
 
 <script>
-    document.getElementById('start').addEventListener('click', function() {
-        const slug = this.getAttribute('data-slug');  // Retrieve slug from data attribute
-        const url = `/create_outcome/${slug}/`;       // Use slug in the URL
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}',
-            },
-            body: JSON.stringify({
-                'game_id': game.id,  // Replace with your actual game ID if needed
-            }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                document.getElementById('choice-id').innerText = `ID: ${data.choice_id}`;
-                document.getElementById('choice-text').innerText = `Text: ${data.choice_text}`;
-                document.getElementById('choice-color').innerText = `Color: ${data.choice_color}`;
-
-                const choiceFile = document.getElementById('choice-file');
-                if (data.choice_file) {
-                    choiceFile.src = data.choice_file;
-                    choiceFile.style.display = 'block';
-                } else {
-                    choiceFile.style.display = 'none';
-                }
-            } else {
-                console.error('Error:', data.message);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    });
-
 </script>
 
     {% include 'gameloottable.html' %}

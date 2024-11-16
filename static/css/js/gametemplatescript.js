@@ -45,110 +45,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
         selectedItems = [];
 
-function randomizeContents() {
-    const startButton = document.getElementById("start");
-    const gameId = startButton.getAttribute("data-game-id");
-    const nonce = startButton.getAttribute("data-nonce");
-    const slug = startButton.getAttribute("data-slug");
+        function randomizeContents() {
+            const startButton = document.getElementById("start");
+            const gameId = startButton.getAttribute("data-game-id"); // Retrieve gameId
+            const nonce = startButton.getAttribute("data-nonce"); // Retrieve nonce
+            const slug = startButton.getAttribute("data-slug"); // Retrieve slug
 
-    console.log("Game ID:", gameId);
-    console.log("Nonce:", nonce);
-    console.log("Slug:", slug);
-
-    $.ajax({
-        url: `/create_outcome/${slug}/`,
-        type: 'POST',
-        data: {
-            game_id: gameId,
-            nonce: nonce,
-            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
-        },
-        success: function (response) {
-            if (response.status === 'success') {
-                console.log("Ordered Choices:", response.choices_with_nonce);
-
-                // Clear the current slider
-                $('#slider .cards').remove();
-
-                // Append the ordered choices
-                response.choices_with_nonce.forEach(function (choice) {
-                    $('#slider').append(`
-                        <div class="card" data-id="${choice.id}" style="background-color: ${choice.color};">
-                            <p>${choice.choice_text}</p>
-                            ${choice.file ? `<img src="${choice.file}" alt="Choice File">` : ''}
-                        </div>
-                    `);
-                });
-
-                initializeAnimation(response.nonce);
-            } else {
-                console.error('Error:', response.message);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error('AJAX Error:', error);
+            // Log the values for debugging
+            console.log("Game ID:", gameId);
+            console.log("Nonce:", nonce);
+            console.log("Slug:", slug);
+            $('#slider .cards').sort(() => 0.5 - Math.random()).appendTo('#slider');
         }
-    });
-}
-
-
-
-function randomizeContents() {
-    // Get the slug from the slider element
-    const startButton = document.getElementById("start");
-    const gameId = startButton.getAttribute("data-game-id"); // Retrieve gameId
-    const nonce = startButton.getAttribute("data-nonce"); // Retrieve nonce
-    const slug = startButton.getAttribute("data-slug"); // Retrieve slug
-
-    // Log the values for debugging
-    console.log("Game ID:", gameId);
-    console.log("Nonce:", nonce);
-    console.log("Slug:", slug);
-
-
-    // Send an AJAX request to the create_outcome endpoint
-    $.ajax({
-        url: `/create_outcome/${slug}/`, // Use the retrieved slug in the URL
-        type: 'POST',
-        data: {
-            game_id: gameId, // Use the dynamically retrieved gameId
-            nonce: nonce, // Pass the nonce for validation
-            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
-        },
-        success: function (response) {
-            if (response.status === 'success') {
-                const nonce = response.nonce; // Extract the nonce from the response
-                console.log('Nonce:', nonce); // Log the nonce to the console
-
-                const choices_with_nonce = response.choices_with_nonce;
-
-                // Log the choices to the console
-                console.log('Ordered Choices:', choices_with_nonce);
-
-                // Clear the current slider
-                $('#slider .cards').remove();
-
-                // Reorder and append the choices based on the response
-                choices_with_nonce.forEach(function (choice) {
-                    $('#slider').append(`
-                        <div class="card" data-id="${choice.id}" style="background-color: ${choice.color};">
-                            <p>${choice.choice_text}</p>
-                            ${choice.file ? `<img src="${choice.file}" alt="Choice File">` : ''}
-                        </div>
-                    `);
-                });
-
-                // Optionally, call initializeAnimation with the nonce value
-                initializeAnimation(nonce);
-            } else {
-                console.error('Error:', response.message);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error('AJAX Error:', error);
-        }
-    });
-}
 
 
         function addAnimation() {
@@ -161,64 +69,79 @@ function randomizeContents() {
             });
         }
 
+        document.addEventListener("DOMContentLoaded", () => {
+            const startButton = document.getElementById("start");
+
+            // Add event listener to start button
+            startButton.addEventListener("click", () => {
+                // Start the spinning process
+                spin();
+            });
+        });
+
         function spin() {
             $(".spin-option").prop('disabled', true);
-        
+
             randomizeContents();
             addAnimation();
-        
+
             const animationDuration = isQuickSpin ? 4500 : 9000;
             const buffer = 150; // Buffer to handle timing issues
-        
+            const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
+            audio.play().catch(error => console.error('Error playing audio:', error));
+
             setTimeout(() => {
                 // Pause animation after it completes
                 document.querySelectorAll('.slider').forEach(scroller => {
                     scroller.style.animationPlayState = 'paused';
                 });
-        
+
                 // Find the selected card
                 findSelectedCard();
                 currentSpin++;
-        
+
                 if (currentSpin < totalSpins) {
                     // Schedule the next spin
                     setTimeout(spin, buffer); // Add slight delay before calling spin again
+
                 } else {
                     // Final spin logic
                     animationStopped = true;
                     setTimeout(buffer); // Add slight delay before calling spin again
                     showPopup();
-        
+
                     if (!persistSpin) {
                         totalSpins = 1;
                         sessionStorage.setItem("totalSpins", totalSpins);
                     }
-        
+
                     $(".start").prop('disabled', false);
                     $(".spin-option").prop('disabled', false);
                 }
             }, animationDuration); // Align with animation duration
         }
-        
-        
-        
+
+
+
 
         spin();
     }
 
 
     function findSelectedCard() {
-        const selector = document.getElementById('selector').getBoundingClientRect();
+
+                    const selector = document.getElementById('selector').getBoundingClientRect();
         let currentSelection = null;
-    
+
         document.querySelectorAll('.cards').forEach(card => {
             const cardRect = card.getBoundingClientRect();
-    
+
+            // here, make sure the correct card to the nonce is landed on
             // Check if the card overlaps with the selector
             if (
-                !(selector.right < cardRect.left || 
-                  selector.left > cardRect.right || 
-                  selector.bottom < cardRect.top || 
+                !(selector.right < cardRect.left ||
+                  selector.left > cardRect.right ||
+                  selector.bottom < cardRect.top ||
                   selector.top > cardRect.bottom)
             ) {
                 currentSelection = {
@@ -230,13 +153,13 @@ function randomizeContents() {
                 };
             }
         });
-    
+
         // Only add the current selection if it exists
         if (currentSelection) {
             selectedItems.push(currentSelection);
         }
     }
-    
+
 
     function showPopup() {
         textContainer.innerHTML = `
