@@ -284,6 +284,20 @@
       <!-- Your button with initial data attributes -->
 <button class="start" id="start" data-game-id="{{ game.id }}" data-nonce="{{ choice.nonce }}" data-slug="{{ game.slug }}" style="margin-top: 2%;">Spin!</button>
 
+
+<!-- Embed choices and other data in a script tag -->
+<script>
+    const gameData = {
+        choices: {{ choices_with_nonce|safe }},
+        nonce: {{ random_nonces|first }},
+        game: {
+            id: {{ game.id }},
+            name: "{{ game.name }}",
+            slug: "{{ game.slug }}"
+        }
+    };
+</script>
+
         <script>
 document.addEventListener("DOMContentLoaded", () => {
     const startButton = document.getElementById("start");
