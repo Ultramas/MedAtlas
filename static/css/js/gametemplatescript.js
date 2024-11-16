@@ -46,40 +46,46 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedItems = [];
 
 
-function randomizeContents() {
-    // Send an AJAX request to the create_outcome endpoint
-    $.ajax({
-        url: `/create_outcome/${slug}/, // Replace with the actual endpoint URL
-        type: 'POST',
-        data: {
-            game_id: $('#game_id').val(),
-            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
-        },
-        success: function (response) {
-            if (response.status === 'success') {
-                const orderedChoices = response.ordered_choices;
+        function randomizeContents() {
+            // Get the slug from the slider element
+            const slug = $('#slider').data('slug');
 
-                // Clear the current slider
-                $('#slider .cards').remove();
+            // Send an AJAX request to the create_outcome endpoint
+            $.ajax({
+                url: `/create_outcome/${slug}/`, // Use the retrieved slug in the URL
+                type: 'POST',
+                data: {
+                    game_id: $('#game_id').val(),
+                    csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        const orderedChoices = response.ordered_choices;
 
-                // Reorder and append the choices based on the response
-                orderedChoices.forEach(function (choice) {
-                    $('#slider').append(`
-                        <div class="card" data-id="${choice.id}" style="background-color: ${choice.color};">
-                            <p>${choice.choice_text}</p>
-                            ${choice.file ? `<img src="${choice.file}" alt="Choice File">` : ''}
-                        </div>
-                    `);
-                });
-            } else {
-                console.error('Error:', response.message);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error('AJAX Error:', error);
+                        // Log the choices to the console
+                        console.log('Ordered Choices:', orderedChoices);
+
+                        // Clear the current slider
+                        $('#slider .cards').remove();
+
+                        // Reorder and append the choices based on the response
+                        orderedChoices.forEach(function (choice) {
+                            $('#slider').append(`
+                                <div class="card" data-id="${choice.id}" style="background-color: ${choice.color};">
+                                    <p>${choice.choice_text}</p>
+                                    ${choice.file ? `<img src="${choice.file}" alt="Choice File">` : ''}
+                                </div>
+                            `);
+                        });
+                    } else {
+                        console.error('Error:', response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('AJAX Error:', error);
+                }
+            });
         }
-    });
-}
 
 
 
