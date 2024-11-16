@@ -1797,7 +1797,7 @@ class GameChestBackgroundView(BaseView):
                     })
                     break
 
-        print('the choices are ' + choices_with_nonce)
+        print(choices_with_nonce)
 
         return JsonResponse({
             'status': 'success',

@@ -45,49 +45,110 @@ document.addEventListener('DOMContentLoaded', () => {
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
         selectedItems = [];
 
+function randomizeContents() {
+    const startButton = document.getElementById("start");
+    const gameId = startButton.getAttribute("data-game-id");
+    const nonce = startButton.getAttribute("data-nonce");
+    const slug = startButton.getAttribute("data-slug");
 
-        function randomizeContents() {
-            // Get the slug from the slider element
-            const slug = $('#slider').data('slug');
+    console.log("Game ID:", gameId);
+    console.log("Nonce:", nonce);
+    console.log("Slug:", slug);
 
-            // Send an AJAX request to the create_outcome endpoint
-            $.ajax({
-                url: `/create_outcome/${slug}/`, // Use the retrieved slug in the URL
-                type: 'POST',
-                data: {
-                    game_id: $('#game_id').val(),
-                    csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
-                },
-                success: function (response) {
-                    if (response.status === 'success') {
-                        const orderedChoices = response.ordered_choices;
+    $.ajax({
+        url: `/create_outcome/${slug}/`,
+        type: 'POST',
+        data: {
+            game_id: gameId,
+            nonce: nonce,
+            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+        },
+        success: function (response) {
+            if (response.status === 'success') {
+                console.log("Ordered Choices:", response.choices_with_nonce);
 
-                        // Log the choices to the console
-                        console.log('Ordered Choices:', orderedChoices);
+                // Clear the current slider
+                $('#slider .cards').remove();
 
-                        // Clear the current slider
-                        $('#slider .cards').remove();
+                // Append the ordered choices
+                response.choices_with_nonce.forEach(function (choice) {
+                    $('#slider').append(`
+                        <div class="card" data-id="${choice.id}" style="background-color: ${choice.color};">
+                            <p>${choice.choice_text}</p>
+                            ${choice.file ? `<img src="${choice.file}" alt="Choice File">` : ''}
+                        </div>
+                    `);
+                });
 
-                        // Reorder and append the choices based on the response
-                        orderedChoices.forEach(function (choice) {
-                            $('#slider').append(`
-                                <div class="card" data-id="${choice.id}" style="background-color: ${choice.color};">
-                                    <p>${choice.choice_text}</p>
-                                    ${choice.file ? `<img src="${choice.file}" alt="Choice File">` : ''}
-                                </div>
-                            `);
-                        });
-                    } else {
-                        console.error('Error:', response.message);
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error('AJAX Error:', error);
-                }
-            });
+                initializeAnimation(response.nonce);
+            } else {
+                console.error('Error:', response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('AJAX Error:', error);
         }
+    });
+}
 
 
+
+function randomizeContents() {
+    // Get the slug from the slider element
+    const startButton = document.getElementById("start");
+    const gameId = startButton.getAttribute("data-game-id"); // Retrieve gameId
+    const nonce = startButton.getAttribute("data-nonce"); // Retrieve nonce
+    const slug = startButton.getAttribute("data-slug"); // Retrieve slug
+
+    // Log the values for debugging
+    console.log("Game ID:", gameId);
+    console.log("Nonce:", nonce);
+    console.log("Slug:", slug);
+
+
+    // Send an AJAX request to the create_outcome endpoint
+    $.ajax({
+        url: `/create_outcome/${slug}/`, // Use the retrieved slug in the URL
+        type: 'POST',
+        data: {
+            game_id: gameId, // Use the dynamically retrieved gameId
+            nonce: nonce, // Pass the nonce for validation
+            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+        },
+        success: function (response) {
+            if (response.status === 'success') {
+                const nonce = response.nonce; // Extract the nonce from the response
+                console.log('Nonce:', nonce); // Log the nonce to the console
+
+                const choices_with_nonce = response.choices_with_nonce;
+
+                // Log the choices to the console
+                console.log('Ordered Choices:', choices_with_nonce);
+
+                // Clear the current slider
+                $('#slider .cards').remove();
+
+                // Reorder and append the choices based on the response
+                choices_with_nonce.forEach(function (choice) {
+                    $('#slider').append(`
+                        <div class="card" data-id="${choice.id}" style="background-color: ${choice.color};">
+                            <p>${choice.choice_text}</p>
+                            ${choice.file ? `<img src="${choice.file}" alt="Choice File">` : ''}
+                        </div>
+                    `);
+                });
+
+                // Optionally, call initializeAnimation with the nonce value
+                initializeAnimation(nonce);
+            } else {
+                console.error('Error:', response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('AJAX Error:', error);
+        }
+    });
+}
 
 
         function addAnimation() {
@@ -145,23 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
         spin();
     }
 
-    /*
-    function findSelectedCard() {
-        const selector = document.getElementById('selector').getBoundingClientRect();
-        document.querySelectorAll('.cards').forEach(card => {
-            const cardRect = card.getBoundingClientRect();
-            if (!(selector.right < cardRect.left || selector.left > cardRect.right || selector.bottom < cardRect.top || selector.top > cardRect.bottom)) {
-                selectedItems.push({
-                    id: card.id,
-                    src: card.querySelector('img').src,
-                    price: card.dataset.price,
-                    color: card.dataset.color,
-                    value: card.dataset.value  // Access the value field here
-                });
-            }
-        });
-    }
-        */
 
     function findSelectedCard() {
         const selector = document.getElementById('selector').getBoundingClientRect();
