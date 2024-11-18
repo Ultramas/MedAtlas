@@ -1,9 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const slider = document.getElementById('slider');
     const popup = document.getElementById('popup');
-    const closeButton = popup.querySelector('.close');
     const fire = popup.querySelector('.fire');
     const textContainer = popup.querySelector('.text');
+    const persistSpinCheckbox = document.getElementById('persist-spin-checkbox');
+    const quickSpinCheckbox = document.getElementById('quickspin-checkbox');
+    const startButton = document.getElementById('start');
 
     let animationStopped = false;
     let selectedItems = [];
@@ -13,73 +15,104 @@ document.addEventListener('DOMContentLoaded', () => {
     const persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
 
+    // Initialize checkboxes from localStorage
+    persistSpinCheckbox.checked = persistSpin;
+    quickSpinCheckbox.checked = quickSpin;
+
     // Persist settings on checkbox change
-    $('#persist-spin-checkbox').change(function () {
-        localStorage.setItem('persistSpinChecked', $(this).prop('checked').toString());
+    persistSpinCheckbox.addEventListener('change', () => {
+        localStorage.setItem('persistSpinChecked', persistSpinCheckbox.checked.toString());
     });
 
-    $('#quickspin-checkbox').change(function () {
-        localStorage.setItem('quickSpinChecked', $(this).prop('checked').toString());
+    quickSpinCheckbox.addEventListener('change', () => {
+        localStorage.setItem('quickSpinChecked', quickSpinCheckbox.checked.toString());
     });
 
     // Update total spins when a spin option is clicked
-    $(".spin-option").click(function () {
-        $(".spin-option").removeClass("selected");
-        $(this).addClass("selected");
-        totalSpins = parseInt($(this).data("value"));
-        sessionStorage.setItem("totalSpins", totalSpins);
+    document.querySelectorAll('.spin-option').forEach(option => {
+        option.addEventListener('click', () => {
+            document.querySelectorAll('.spin-option').forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            totalSpins = parseInt(option.dataset.value);
+            sessionStorage.setItem('totalSpins', totalSpins);
+        });
     });
 
     // Start animation on button click
-    $(".start").click(function () {
-        sessionStorage.setItem("startAnimation", "true");
-        sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
+    startButton.addEventListener('click', () => {
+        sessionStorage.setItem('startAnimation', 'true');
+        sessionStorage.setItem('isQuickSpin', quickSpinCheckbox.checked);
 
         // Reset current spin count and initialize the animation
         currentSpin = 0;
         initializeAnimation();
     });
 
-    function initializeAnimation() {
-        $(".start").prop('disabled', true);
-        const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
-        selectedItems = [];
+async function randomizeContents() {
+    const gameId = startButton.getAttribute('data-game-id');
+    const slug = startButton.getAttribute('data-slug');
 
-        function randomizeContents() {
-            const startButton = document.getElementById("start");
-            const gameId = startButton.getAttribute("data-game-id"); // Retrieve gameId
-            const nonce = startButton.getAttribute("data-nonce"); // Retrieve nonce
-            const slug = startButton.getAttribute("data-slug"); // Retrieve slug
+    console.log("Game ID:", gameId);
+    console.log("Slug:", slug);
 
-            // Log the values for debugging
-            console.log("Game ID:", gameId);
-            console.log("Nonce:", nonce);
-            console.log("Slug:", slug);
-            $('#slider .cards').sort(() => 0.5 - Math.random()).appendTo('#slider');
-        }
+    try {
+        const payload = { game_id: gameId };
+        console.log("Payload sent to server:", payload);
 
-
-        function addAnimation() {
-            document.querySelectorAll('.slider').forEach(scroller => {
-                scroller.style.animation = 'none';
-                scroller.offsetHeight;  // Trigger reflow
-                let animationDuration = isQuickSpin ? '9s' : '18s';
-                scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
-                scroller.style.animationPlayState = 'running';
-            });
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const startButton = document.getElementById("start");
-
-            // Add event listener to start button
-            startButton.addEventListener("click", () => {
-                // Start the spinning process
-                spin();
-            });
+        const response = await fetch(`/create_outcome/${slug}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is included
+            },
+            body: JSON.stringify(payload),
         });
 
-        function spin() {
+        const data = await response.json();
+        console.log("Response from server:", data);
+
+        if (data.status === 'success') {
+            startButton.setAttribute('data-nonce', data.nonce);
+            console.log(`Nonce updated: ${data.nonce}`);
+            return data; // Return the entire data object
+        } else {
+            console.error(`Error: ${data.message}`);
+            return null;
+        }
+    } catch (error) {
+        console.error(`Request failed: ${error}`);
+        return null;
+    }
+}
+
+
+
+    function initializeAnimation() {
+        startButton.disabled = true;
+        const isQuickSpin = sessionStorage.getItem('isQuickSpin') === 'true';
+        selectedItems = [];
+
+        spin(isQuickSpin);
+    }
+
+function alignCardToSelector(card) {
+    const slider = document.getElementById('slider');
+    const sliderWidth = slider.offsetWidth; // Width of the slider container
+    const cardWidth = card.offsetWidth; // Width of the card
+    const cardPosition = card.offsetLeft; // Card's position relative to the slider
+
+    // Calculate the target scroll position to center the card
+    const targetPosition = cardPosition - (sliderWidth / 2) + (cardWidth / 2);
+    console.log('targetPosition: ' + targetPosition)
+    // Smoothly scroll the slider to the target position
+    slider.scrollTo({
+        left: targetPosition,
+        behavior: 'smooth',
+    });
+    console.log('location set successfully ')
+}
+
+function spin() {
             $(".spin-option").prop('disabled', true);
 
             randomizeContents();
@@ -127,17 +160,23 @@ document.addEventListener('DOMContentLoaded', () => {
         spin();
     }
 
+    function addAnimation(isQuickSpin) {
+        document.querySelectorAll('.slider').forEach(scroller => {
+            scroller.style.animation = 'none';
+            scroller.offsetHeight; // Trigger reflow
+            let animationDuration = isQuickSpin ? '9s' : '18s';
+            scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
+            scroller.style.animationPlayState = 'running';
+        });
+    }
+
 
     function findSelectedCard() {
-
-                    const selector = document.getElementById('selector').getBoundingClientRect();
+        const selector = document.getElementById('selector').getBoundingClientRect();
         let currentSelection = null;
 
-        document.querySelectorAll('.cards').forEach(card => {
+        document.querySelectorAll('.card').forEach(card => {
             const cardRect = card.getBoundingClientRect();
-
-            // here, make sure the correct card to the nonce is landed on
-            // Check if the card overlaps with the selector
             if (
                 !(selector.right < cardRect.left ||
                   selector.left > cardRect.right ||
@@ -154,12 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Only add the current selection if it exists
         if (currentSelection) {
             selectedItems.push(currentSelection);
         }
     }
-
 
     function showPopup() {
         textContainer.innerHTML = `
@@ -170,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         const cardsContainer = textContainer.querySelector('.cards-container');
-        selectedItems.forEach((item, index) => {
+        selectedItems.forEach(item => {
             const cardElement = document.createElement('div');
             cardElement.classList.add('popup-card');
             cardElement.innerHTML = `
@@ -182,45 +219,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>ID: ${item.id}</p>
                 <img src="${item.src}" alt="${item.id}">
                 <p>Price: $${item.price}</p>
-                <p>Value: ${item.value}</p> <!-- Display the value field here -->
+                <p>Value: ${item.value}</p>
             `;
             cardsContainer.appendChild(cardElement);
-
-            if (index === 0) {
-                const fire = document.querySelector('.fire');
-                fire.setAttribute('data-color', item.color);
-            }
         });
 
         popup.style.display = 'block';
+        fire.classList.add('active');
 
-        // Trigger the fire animation
-        setTimeout(() => {
-            const fire = document.querySelector('.fire');
-            fire.classList.add('active');
-        }, 100);
-
-        const closeBtn = textContainer.querySelector('.close');
-        closeBtn.addEventListener('click', () => {
-            const fire = document.querySelector('.fire');
-            fire.style.opacity = '0';
-            document.querySelectorAll('.card-fire').forEach(fire => {
-                fire.style.opacity = '0';
-            });
-
-            setTimeout(() => {
-                popup.style.display = 'none';
-            }, 500);
-
-            $(".spin-option").prop('disabled', false);
-            $(".start").prop('disabled', false);
-
-            if (!persistSpin) {
-                totalSpins = 1;
-                sessionStorage.setItem("totalSpins", totalSpins);
-                $(".spin-option").removeClass("selected");
-                $(".spin-option[data-value='1']").addClass("selected");
-            }
+        popup.querySelector('.close').addEventListener('click', () => {
+            fire.classList.remove('active');
+            popup.style.display = 'none';
         });
     }
 });

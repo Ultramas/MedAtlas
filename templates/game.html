@@ -282,16 +282,13 @@
         </label>
 
       <!-- Your button with initial data attributes -->
-<button class="start" id="start" data-game-id="{{ game.id }}" data-nonce="{{ choice.nonce }}" data-slug="{{ game.slug }}" style="margin-top: 2%;">Spin!</button>
+<button class="start" id="start" data-game-id="{{ game.id }}" data-nonce="{{ nonce }}" data-slug="{{ game.slug }}" style="margin-top: 2%;">Spin!</button>
+
 
 
 <!-- Embed choices and other data in a script tag -->
 
 
-        <script>
-
-
-</script>
 
 <script type="text/javascript">
 $(document).ready(function() {
@@ -524,28 +521,33 @@ fetch(`/create_outcome/${slug}/`, {
         other_data: otherData,  // Add any additional data as needed
     })
 })
-}.then(response => response.json())
-.then(data => {
-    if (data.status === 'success') {
-        document.getElementById('choice-id').innerText = `ID: ${data.choice_id}`;
-        document.getElementById('choice-text').innerText = `Text: ${data.choice_text}`;
-        document.getElementById('choice-color').innerText = `Color: ${data.choice_color}`;
+}
+.then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const choiceFile = data.choice_file;
 
-        const choiceFile = document.getElementById('choice-file');
-        if (data.choice_file) {
-            choiceFile.src = data.choice_file;
-            choiceFile.style.display = 'block';
+            if (choiceFile) {
+                const slider = document.querySelector('.slider'); // Adjust selector as needed
+                const newCard = document.createElement('div');
+                newCard.className = 'cards';
+                newCard.innerHTML = `
+                    <div class="lootelement"
+                         data-price="100"
+                         data-nonce="${data.nonce}"
+                         style="background: url('${choiceFile}'); padding: 6%; margin-left: 22px;">
+                        <p><img src="${choiceFile}" alt="Generated Card"></p>
+                    </div>
+                    <h2 style="margin-left: 22px;">100 💎</h2>
+                    <p>Nonce: ${data.nonce}</p>
+                `;
+                slider.appendChild(newCard);
+            }
         } else {
-            choiceFile.style.display = 'none';
+            console.error('Error:', data.message);
         }
-    } else {
-        console.error('Error:', data.message);
-    }
-})
-.catch(error => console.error('Error:', error));
-
-
-
+    })
+    .catch(error => console.error('Fetch error:', error));
 
 </script>
 

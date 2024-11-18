@@ -1582,12 +1582,18 @@ def game_view(request, slug):
 def create_outcome(request, slug):
     if request.method == 'POST':
         try:
-            game_id = request.POST.get('game_id')
+            # Parse JSON body
+            body = json.loads(request.body)
+            game_id = body.get('game_id')  # Get 'game_id' from the parsed JSON
             user = request.user
+
+            print(f"Received JSON body: {body}")
+            print(f"Game ID: {game_id}, User: {user}")
 
             if not game_id:
                 return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
 
+            # Retrieve the game and proceed
             game = Game.objects.get(id=game_id, slug=slug)
             nonce = random.randint(1, 1000000)
             choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
@@ -1596,17 +1602,11 @@ def create_outcome(request, slug):
                 return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
 
             choice = choices.order_by('?').first()
-
             color = game.get_color(choice)
             choice.color = color
-            choice.save()  # Save the updated color to the database
+            choice.save()
 
-            # Print the selected choice fields to the console
-            print(f"Selected Choice ID: {choice.id}")
-            print(f"Selected Choice Text: {choice.choice_text}")
-            print(f"Selected Choice Color: {choice.color}")
-            print(f"Selected Choice File: {choice.file.url if choice.file else 'No file associated'}")
-            print("the code output comes from the independent create_view")
+            print(f"Selected Choice: {choice.id}, {choice.choice_text}, {choice.color}")
 
             outcome_data = {
                 'game': game,
@@ -2037,6 +2037,26 @@ def game_detail(request, game_id):
     }
 
     return render(request, 'game.html', context)
+
+
+from django.http import JsonResponse
+
+
+@csrf_exempt  # Temporarily disable CSRF to test the view (remove this in production)
+def create_card_instance(request):
+    print("View called")  # Ensure this prints in the terminal
+
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        print(f"Received data: {data}")
+
+        selected_nonce = data.get('nonce')
+        if selected_nonce:
+            print(f"Selected nonce: {selected_nonce}")
+
+        return JsonResponse({'success': True, 'message': 'Debugging response'})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
 class EarningAchievement(BaseView):
