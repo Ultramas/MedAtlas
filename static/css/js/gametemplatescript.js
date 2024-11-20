@@ -45,14 +45,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
         selectedItems = [];
 
-        spin(isQuickSpin);
-        console.log('spin called here')
-
         async function randomizeContents() {
-            const gameId = startButton.getAttribute('data-game-id');
-            const slug = startButton.getAttribute('data-slug');
+            const startButton = document.getElementById("start");
+            const gameId = startButton.getAttribute("data-game-id"); // Retrieve gameId
+            const nonce = startButton.getAttribute("data-nonce"); // Retrieve nonce
+            const slug = startButton.getAttribute("data-slug"); // Retrieve slug
 
+
+            // Log the values for debugging
             console.log("Game ID:", gameId);
+            console.log("Nonce:", nonce);
             console.log("Slug:", slug);
 
             try {
@@ -96,164 +98,80 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-function alignCardToSelector(card) {
-    const slider = document.getElementById('slider');
-    const sliderWidth = slider.offsetWidth; // Width of the slider container
-    const cardWidth = card.offsetWidth; // Width of the card
-    const cardPosition = card.offsetLeft; // Card's position relative to the slider
+        function spin() {
+            $(".spin-option").prop('disabled', true);
 
-    // Calculate the target scroll position to center the card
-    const targetPosition = cardPosition - (sliderWidth / 2) + (cardWidth / 2);
-    console.log('targetPosition: ' + targetPosition)
-    // Smoothly scroll the slider to the target position
-    slider.scrollTo({
-        left: targetPosition,
-        behavior: 'smooth',
-    });
-    console.log('location set successfully ')
-}
+            randomizeContents();
+            addAnimation();
 
+            const animationDuration = isQuickSpin ? 4500 : 9000;
+            const buffer = 500; // Buffer to handle timing issues
 
-function insertCardAtVisiblePosition(slider, targetCardElement) {
-    const sliderWidth = slider.offsetWidth; // Width of the slider container
-    const cardWidth = targetCardElement.offsetWidth || 100; // Default card width if not rendered yet
-    const visibleMiddle = sliderWidth / 2; // Middle of the slider container
+            setTimeout(() => {
+                // Pause animation after it completes
+                document.querySelectorAll('.slider').forEach(scroller => {
+                    scroller.style.animationPlayState = 'paused';
+                });
 
-    // Calculate the total offset for the new card
-    const cards = slider.querySelectorAll('.card');
-    const currentScroll = slider.scrollLeft;
-    const totalOffset = visibleMiddle + currentScroll - (cardWidth / 2);
+                // Find the selected card
+                findSelectedCard();
+                currentSpin++;
 
-    // Find the approximate position for insertion
-    let insertBeforeCard = null;
-    cards.forEach(card => {
-        if (card.offsetLeft > totalOffset) {
-            insertBeforeCard = card;
+                if (currentSpin < totalSpins) {
+                    // Schedule the next spin
+                    setTimeout(spin, buffer); // Add slight delay before calling spin again
+                } else {
+                    // Final spin logic
+                    animationStopped = true;
+                    showPopup();
+
+                    if (!persistSpin) {
+                        totalSpins = 1;
+                        sessionStorage.setItem("totalSpins", totalSpins);
+                    }
+
+                    $(".start").prop('disabled', false);
+                    $(".spin-option").prop('disabled', false);
+                }
+            }, animationDuration); // Align with animation duration
         }
-    });
-
-    // Insert the card before the found card or at the end if no card is found
-    if (insertBeforeCard) {
-        slider.insertBefore(targetCardElement, insertBeforeCard);
-    } else {
-        slider.appendChild(targetCardElement);
-    }
-}
 
 
 
-async function spin(isQuickSpin) {
-    $(".spin-option").prop('disabled', true);
 
-    const data = await randomizeContents();
-    if (!data) return;
-
-    addAnimation(isQuickSpin);
-
-    const animationDuration = isQuickSpin ? 4500 : 9000;
-    const buffer = 150; // Buffer for timing
-    const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
-    audio.play().catch(error => console.error('Error playing audio:', error));
-
-    const cards = document.querySelectorAll('#slider .card');
-    let targetCard = null;
-
-    // Check if the card exists
-    cards.forEach(card => {
-        if (card.getAttribute('data-nonce') === String(data.nonce)) {
-            targetCard = card;
-        }
-    });
-
-    const slider = document.getElementById('slider');
-
-    // If the target card doesn't exist, create it
-    if (!targetCard) {
-        const attributes = {
-            id: data.choice_id,
-            nonce: data.nonce,
-            text: data.choice_text,
-            color: data.choice_color,
-            file: data.choice_file,
-        };
-
-        const targetCardElement = document.createElement('div');
-        targetCardElement.classList.add('card');
-        targetCardElement.setAttribute('id', `card-${attributes.id}`);
-        targetCardElement.setAttribute('data-nonce', attributes.nonce);
-        targetCardElement.setAttribute('data-color', attributes.color);
-
-        targetCardElement.innerHTML = `
-            <div class="card-content" style="background-color: ${attributes.color}">
-                <p>Nonce: ${attributes.nonce}</p>
-                <p>${attributes.text}</p>
-                ${attributes.file ? `<img src="${attributes.file}" alt="${attributes.text}">` : ''}
-            </div>
-        `;
-
-        // Insert card in a visible position
-        insertCardAtVisiblePosition(slider, targetCardElement);
-        targetCard = targetCardElement; // Assign the newly created card as the target
+        spin();
     }
 
-    // Stop animation after aligning the card
-    setTimeout(() => {
-        document.querySelectorAll('.slider').forEach(scroller => {
-            scroller.style.animation = 'none'; // Stop the animation
+
+    function findSelectedCard() {
+        const selector = document.getElementById('selector').getBoundingClientRect();
+        let currentSelection = null;
+
+        document.querySelectorAll('.cards').forEach(card => {
+            const cardRect = card.getBoundingClientRect();
+
+            // Check if the card overlaps with the selector
+            if (
+                !(selector.right < cardRect.left ||
+                  selector.left > cardRect.right ||
+                  selector.bottom < cardRect.top ||
+                  selector.top > cardRect.bottom)
+            ) {
+                currentSelection = {
+                    id: card.id,
+                    src: card.querySelector('img').src,
+                    price: card.dataset.price,
+                    color: card.dataset.color,
+                    value: card.dataset.value
+                };
+            }
         });
 
-        alignCardToSelector(targetCard);
-
-        // Increment current spin count
-        currentSpin++;
-
-        // Stop after reaching total spins
-        if (currentSpin >= totalSpins) {
-            animationStopped = true;
-
-            // Show the popup with the result
-            findSelectedCard(); // Add the selected card to selectedItems
-
-            showPopup();
-
-            if (!persistSpin) {
-                totalSpins = 1; // Reset total spins if persist spin is disabled
-                sessionStorage.setItem("totalSpins", totalSpins);
-            }
-
-            startButton.disabled = false; // Re-enable the start button
+        // Only add the current selection if it exists
+        if (currentSelection) {
+            selectedItems.push(currentSelection);
         }
-    }, animationDuration + buffer); // Wait for animation to complete
-}
-
-
-
-function findSelectedCard() {
-    const selector = document.getElementById('selector').getBoundingClientRect();
-    let currentSelection = null;
-
-    document.querySelectorAll('.card').forEach(card => {
-        const cardRect = card.getBoundingClientRect();
-        if (
-            !(selector.right < cardRect.left ||
-              selector.left > cardRect.right ||
-              selector.bottom < cardRect.top ||
-              selector.top > cardRect.bottom)
-        ) {
-            currentSelection = {
-                id: card.id,
-                src: card.querySelector('img') ? card.querySelector('img').src : '',
-                price: card.dataset.price || '0',
-                color: card.dataset.color || '',
-                value: card.dataset.value || 'N/A',
-            };
-        }
-    });
-
-    if (currentSelection) {
-        selectedItems.push(currentSelection); // Add the card to the array
     }
-}
 
 
     function showPopup() {
