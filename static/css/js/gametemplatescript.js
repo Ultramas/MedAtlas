@@ -45,47 +45,73 @@ document.addEventListener('DOMContentLoaded', () => {
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
         selectedItems = [];
 
-        async function randomizeContents() {
-            const startButton = document.getElementById("start");
-            const gameId = startButton.getAttribute("data-game-id"); // Retrieve gameId
-            const nonce = startButton.getAttribute("data-nonce"); // Retrieve nonce
-            const slug = startButton.getAttribute("data-slug"); // Retrieve slug
+ async function randomizeContents() {
+    const startButton = document.getElementById("start");
+    const gameId = startButton.getAttribute("data-game-id");
+    const nonce = startButton.getAttribute("data-nonce");
+    const slug = startButton.getAttribute("data-slug");
 
+    console.log("Game ID:", gameId);
+    console.log("Nonce:", nonce);
+    console.log("Slug:", slug);
 
-            // Log the values for debugging
-            console.log("Game ID:", gameId);
-            console.log("Nonce:", nonce);
-            console.log("Slug:", slug);
+    try {
+        const payload = { game_id: gameId };
+        console.log("Payload sent to server:", payload);
 
-            try {
-                const payload = { game_id: gameId };
-                console.log("Payload sent to server:", payload);
+        const response = await fetch(`/create_outcome/${slug}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify(payload),
+        });
 
-                const response = await fetch(`/create_outcome/${slug}/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is included
-                    },
-                    body: JSON.stringify(payload),
-                });
+        const data = await response.json();
+        console.log("Response from server:", data);
 
-                const data = await response.json();
-                console.log("Response from server:", data);
+        if (data.status === 'success') {
+            startButton.setAttribute('data-nonce', data.nonce);
+            console.log(`Nonce updated: ${data.nonce}`);
 
-                if (data.status === 'success') {
-                    startButton.setAttribute('data-nonce', data.nonce);
-                    console.log(`Nonce updated: ${data.nonce}`);
-                    return data; // Return the entire data object
-                } else {
-                    console.error(`Error: ${data.message}`);
-                    return null;
-                }
-            } catch (error) {
-                console.error(`Request failed: ${error}`);
-                return null;
-            }
+            // Create the target card
+            const attributes = {
+                id: data.choice_id,
+                nonce: data.nonce,
+                text: data.choice_text,
+                color: data.choice_color,
+                file: data.choice_file,
+            };
+
+            const targetCardElement = document.createElement('div');
+            targetCardElement.classList.add('card', 'target-card'); // Add a class to distinguish the target card
+            targetCardElement.setAttribute('id', `card-${attributes.id}`);
+            targetCardElement.setAttribute('data-nonce', attributes.nonce);
+            targetCardElement.setAttribute('data-color', attributes.color);
+
+            targetCardElement.innerHTML = `
+                <div class="card-content" style="background-color: ${attributes.color}">
+                    <p>Nonce: ${attributes.nonce}</p>
+                    <p>${attributes.text}</p>
+                    ${attributes.file ? `<img src="${attributes.file}" alt="${attributes.text}">` : ''}
+                </div>
+            `;
+
+            const slider = document.getElementById('slider');
+            slider.appendChild(targetCardElement); // Append the card to the slider
+            //make sure instead of the end, it gets put in the middle
+            return data; // Return the entire data object
+        } else {
+            console.error(`Error: ${data.message}`);
+            return null;
         }
+    } catch (error) {
+        console.error(`Request failed: ${error}`);
+        return null;
+    }
+}
+
 
         function addAnimation() {
             document.querySelectorAll('.slider').forEach(scroller => {
@@ -98,80 +124,75 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        function spin() {
-            $(".spin-option").prop('disabled', true);
 
-            randomizeContents();
-            addAnimation();
+ function spin() {
+    $(".spin-option").prop('disabled', true);
 
-            const animationDuration = isQuickSpin ? 4500 : 9000;
-            const buffer = 500; // Buffer to handle timing issues
+    randomizeContents();
+    addAnimation();
 
-            setTimeout(() => {
-                // Pause animation after it completes
-                document.querySelectorAll('.slider').forEach(scroller => {
-                    scroller.style.animationPlayState = 'paused';
-                });
+    const animationDuration = isQuickSpin ? 4500 : 9000;
+    const buffer = 150;
+    const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
+    audio.play().catch(error => console.error('Error playing audio:', error));
 
-                // Find the selected card
-                findSelectedCard();
-                currentSpin++;
-
-                if (currentSpin < totalSpins) {
-                    // Schedule the next spin
-                    setTimeout(spin, buffer); // Add slight delay before calling spin again
-                } else {
-                    // Final spin logic
-                    animationStopped = true;
-                    showPopup();
-
-                    if (!persistSpin) {
-                        totalSpins = 1;
-                        sessionStorage.setItem("totalSpins", totalSpins);
-                    }
-
-                    $(".start").prop('disabled', false);
-                    $(".spin-option").prop('disabled', false);
-                }
-            }, animationDuration); // Align with animation duration
-        }
-
-
-
-
-        spin();
-    }
-
-
-    function findSelectedCard() {
-        const selector = document.getElementById('selector').getBoundingClientRect();
-        let currentSelection = null;
-
-        document.querySelectorAll('.cards').forEach(card => {
-            const cardRect = card.getBoundingClientRect();
-
-            // Check if the card overlaps with the selector
-            if (
-                !(selector.right < cardRect.left ||
-                  selector.left > cardRect.right ||
-                  selector.bottom < cardRect.top ||
-                  selector.top > cardRect.bottom)
-            ) {
-                currentSelection = {
-                    id: card.id,
-                    src: card.querySelector('img').src,
-                    price: card.dataset.price,
-                    color: card.dataset.color,
-                    value: card.dataset.value
-                };
-            }
+    setTimeout(() => {
+        document.querySelectorAll('.slider').forEach(scroller => {
+            scroller.style.animationPlayState = 'paused';
         });
 
-        // Only add the current selection if it exists
-        if (currentSelection) {
-            selectedItems.push(currentSelection);
+        findSelectedCard();
+        currentSpin++;
+
+        if (currentSpin < totalSpins) {
+            setTimeout(spin, buffer);
+        } else {
+            animationStopped = true;
+            showPopup();
+            $(".start").prop('disabled', false);
+            $(".spin-option").prop('disabled', false);
         }
+    }, animationDuration);
+}
+   spin();
     }
+
+
+function findSelectedCard() {
+    const selector = document.getElementById('selector').getBoundingClientRect();
+    let currentSelection = null;
+
+    document.querySelectorAll('.cards').forEach(card => {
+        const cardRect = card.getBoundingClientRect();
+
+        if (
+            !(selector.right < cardRect.left ||
+              selector.left > cardRect.right ||
+              selector.bottom < cardRect.top ||
+              selector.top > cardRect.bottom)
+        ) {
+            currentSelection = {
+                id: card.id,
+                src: card.querySelector('img')?.src || '',
+                price: card.dataset.price,
+                color: card.dataset.color,
+                value: card.dataset.value,
+                text: card.dataset.text, // Include additional data like text
+            };
+
+            // Highlight the target card specifically
+            if (card.classList.contains('target-card')) {
+                card.classList.add('highlight'); // Apply a class for visual indication
+                console.log('Target card landed:', currentSelection);
+            }
+        }
+    });
+
+    if (currentSelection) {
+        selectedItems.push(currentSelection);
+    }
+}
+
 
 
     function showPopup() {

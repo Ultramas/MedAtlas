@@ -74,12 +74,12 @@ body{
 }
 /* Quick Spin Animation */
 .slider[data-animated='quick'] {
-    animation: slideshow 9s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+    animation: slideshow 9s cubic-bezier(0.02, 0.1, 0.02, 1) forwards;
 }
 
 /* Normal Spin Animation */
 .slider[data-animated='true'] {
-    animation: slideshow 18s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+    animation: slideshow 18s cubic-bezier(0.02, 0.1, 0.02, 1) forwards;
 }
 
 
@@ -579,6 +579,7 @@ body{
     font-size: 0.9em;
     color: white;
 }
+
 .cards-container {
     display: flex;
     flex-wrap: nowrap;
@@ -590,3 +591,7 @@ body{
     padding: 20px 0;
 }
 
+.target-card.highlight {
+    border: 3px solid gold; /* Highlight effect */
+    transform: scale(1.1); /* Slightly enlarge the card */
+}
