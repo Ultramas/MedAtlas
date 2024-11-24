@@ -505,6 +505,35 @@ $(document).ready(function() {
     const choicesWithNonce = {{ choices_with_nonce|safe }};
 </script>
 
+<script>
+document.getElementById('start').addEventListener('click', function () {
+    const selectedMultiplier = document.querySelector('.spin-option.selected')?.dataset.value || 1;
+    const gameId = this.dataset.gameId;
+    const nonce = this.dataset.nonce;
+    const slug = this.dataset.slug;
+
+    fetch('/charge-user/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Ensure CSRF token is included
+        },
+        body: JSON.stringify({
+            game_id: gameId,
+            multiplier: selectedMultiplier,
+            nonce: nonce,
+            slug: slug,
+        })
+    }).then(response => response.json()).then(data => {
+        if (data.success) {
+            alert('Charged successfully!');
+        } else {
+            alert(data.message || 'Something went wrong.');
+        }
+    });
+});
+</script>
+
     <script>
 
 function createOutcome(gameId, slug) {

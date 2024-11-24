@@ -303,10 +303,25 @@ from django.forms import inlineformset_factory
 from .models import Game, Choice
 
 
+class ChoiceForm(forms.ModelForm):
+    class Meta:
+        model = Choice
+        fields = ['choice_text', 'file', 'color', 'value', 'category', 'subcategory',]
+
+
+ChoiceFormSet = inlineformset_factory(
+    Game,
+    Choice,
+    fields=('choice_text', 'file', 'category', 'subcategory'),
+    extra=1,  # Number of empty forms to show initially
+    can_delete=True,  # Allow users to delete choices
+)
+
+
 class GameForm(forms.ModelForm):
     class Meta:
         model = Game
-        fields = ['name', 'cost', 'discount_cost', 'type', 'image', 'filter',]
+        fields = ['name', 'user', 'cost', 'discount_cost', 'type', 'image', 'power_meter',]
 
 
 class CardUploading(forms.ModelForm):

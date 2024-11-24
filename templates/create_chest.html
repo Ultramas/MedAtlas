@@ -114,23 +114,47 @@
      <br>
      <br>
 <form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-        {{ game_form.as_p }}
+    {% csrf_token %}
+    {{ game_form.as_p }}
+
+    <div id="formset-container">
         {{ formset.management_form }}
         {% for form in formset %}
-            {{ form.as_p }}
+            <div class="form-row" id="form-{{ forloop.counter }}">
+                {{ form.as_p }}
+                <button type="button" class="remove-form-btn">Remove</button>
+            </div>
         {% endfor %}
+    </div>
 
-    <button type="submit">Create Chest</button>
-           <div class="drops">
-               <!--fix the drop classes in style-->
-        <div class="drop drop-1"></div>
-        <div class="drop drop-2"></div>
-        <div class="drop drop-3"></div>
-        <div class="drop drop-4"></div>
-        <div class="drop drop-5"></div>
-     </div>
-  </form>
+    <button type="button" id="add-form-btn">Add Choice</button>
+    <button type="submit">Save</button>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const formContainer = document.getElementById('formset-container');
+        const addButton = document.getElementById('add-form-btn');
+        let totalForms = parseInt(document.getElementById('id_form-TOTAL_FORMS').value);
+
+        addButton.addEventListener('click', () => {
+            const newForm = document.createElement('div');
+            newForm.innerHTML = formContainer.dataset.emptyForm.replace(/__prefix__/g, totalForms);
+            formContainer.appendChild(newForm);
+            totalForms++;
+            document.getElementById('id_form-TOTAL_FORMS').value = totalForms;
+        });
+
+        formContainer.addEventListener('click', (event) => {
+            if (event.target.classList.contains('remove-form-btn')) {
+                event.target.closest('.form-row').remove();
+                totalForms--;
+                document.getElementById('id_form-TOTAL_FORMS').value = totalForms;
+            }
+        });
+    });
+</script>
+
 </div>
 </div>
 

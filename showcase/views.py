@@ -1398,43 +1398,43 @@ class ChestBackgroundView(BaseView):
         else:
             return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect('../accounts/login')
-        return super().dispatch(request, *args, **kwargs)
+        def dispatch(self, request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                return redirect('../accounts/login')
+            return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+            context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+            context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+            context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
 
-        user = self.request.user
-        user_profile, created = UserProfile.objects.get_or_create(user=self.request.user)
-        context['SentProfile'] = user_profile
-        user_cash = user_profile.currency_amount
+            user = self.request.user
+            user_profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+            context['SentProfile'] = user_profile
+            user_cash = user_profile.currency_amount
 
-        context = {
-            'user_cash': user_cash,
-        }
+            context = {
+                'user_cash': user_cash,
+            }
 
-        context['Money'] = Currency.objects.filter(is_active=1).first()
-        context['wager_form'] = WagerForm()
+            context['Money'] = Currency.objects.filter(is_active=1).first()
+            context['wager_form'] = WagerForm()
 
-        newprofile = UpdateProfile.objects.filter(is_active=1)
-        # Retrieve the author's profile avatar
+            newprofile = UpdateProfile.objects.filter(is_active=1)
+            # Retrieve the author's profile avatar
 
-        context['Profiles'] = newprofile
+            context['Profiles'] = newprofile
 
-        for newprofile in context['Profiles']:
-            user = newprofile.user
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+            for newprofile in context['Profiles']:
+                user = newprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    newprofile.newprofile_profile_picture_url = profile.avatar.url
+                    newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
-        return context
+            return context
 
 
 class PokeChestBackgroundView(BaseView):
@@ -1757,6 +1757,17 @@ class GameChestBackgroundView(BaseView):
                 # Move the SpinPreference handling here
 
         user = self.request.user
+
+        user_profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+        context['SentProfile'] = user_profile
+        user_cash = user_profile.currency_amount
+
+        context = {
+            'user_cash': user_cash,
+        }
+
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+
         spinpreference = None  # Initialize spinpreference to ensure it exists
 
         if user.is_authenticated:
@@ -6969,35 +6980,36 @@ class CreateChestView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['game_form'] = GameForm(self.request.POST, self.request.FILES)
-            context['formset'] = ChoiceFormSet(self.request.POST, self.request.FILES)
+        # Ensure game_form and formset are defined regardless of POST or GET
+        if self.request.method == 'POST':
+            game_form = GameForm(self.request.POST, self.request.FILES)
+            formset = ChoiceFormSet(self.request.POST, self.request.FILES)
         else:
-            context['game_form'] = GameForm()
-            context['formset'] = ChoiceFormSet()
+            game_form = GameForm()
+            formset = ChoiceFormSet(queryset=Choice.objects.none())
 
-        # Add other context data as needed
-        context['Background'] = BackgroundImageBase.objects.filter(
-            is_active=1, page=self.template_name).order_by("position")
-        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['PrizePool'] = PrizePool.objects.all()
-        context['Shuffle'] = Shuffler.objects.filter(is_active=1).order_by("category")
+        # Add them to context
+        context['game_form'] = game_form
+        context['formset'] = formset
+
+        context['formset_empty_form'] = formset.empty_form
+        context.update({
+            'Background': BackgroundImageBase.objects.filter(
+                is_active=1, page=self.template_name).order_by("position"),
+            'PostBackgroundImage': PostBackgroundImage.objects.all(),
+            'BaseCopyrightTextFielded': BaseCopyrightTextField.objects.filter(is_active=1),
+            'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+            'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
+            'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
+            'PrizePool': PrizePool.objects.all(),
+            'Shuffle': Shuffler.objects.filter(is_active=1).order_by("category"),
+        })
+
         return context
 
     def post(self, request, *args, **kwargs):
-        game_form = GameForm(request.POST, request.FILES)
-        formset = ChoiceFormSet(request.POST, request.FILES)
-
-        if not game_form.is_valid():
-            print("Game Form Errors:", game_form.errors)
-        if not formset.is_valid():
-            print("Formset Management Form:", formset.management_form.errors)
-            for form in formset:
-                print("Form errors:", form.errors)
+        game_form = GameForm(self.request.POST, self.request.FILES)
+        formset = ChoiceFormSet(self.request.POST, self.request.FILES)
 
         if game_form.is_valid() and formset.is_valid():
             game = game_form.save()
@@ -7005,9 +7017,11 @@ class CreateChestView(FormView):
             for choice in choices:
                 choice.game = game
                 choice.save()
-            return redirect('game_detail', pk=game.pk)  # Adjust redirect as needed
+            return redirect('game_detail', pk=game.pk)
         else:
-            return self.render_to_response(self.get_context_data(game_form=game_form, formset=formset))
+            return self.render_to_response(self.get_context_data(
+                game_form=game_form, formset=formset
+            ))
 
 
 def move_to_trading(self, **kwargs):

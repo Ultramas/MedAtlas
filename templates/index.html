@@ -206,7 +206,7 @@ window.onscroll = function() {
 
 
 								</li>
-								<li style="margin-right: -10%;">
+								<li style="display: flex; align-items: center; margin-right: -10%;">
 									{% for userprofile in Profiles %}
 									{% if userprofile.newprofile_profile_picture_url %}
 									<a href="{{ userprofile.newprofile_profile_url }}">
@@ -216,6 +216,7 @@ window.onscroll = function() {
 									<!-- Placeholder image or default avatar -->
 									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
 									{% endif %}
+									<h3 class="currency_designation" style="text-align: center; space-between: 5px;">{{userprofile.currency_amount}} {{userprofile.currency}}</h3>
 									{% endfor %}
 								</li>
 							</ul>

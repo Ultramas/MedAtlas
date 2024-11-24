@@ -100,6 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const slider = document.getElementById('slider');
             slider.appendChild(targetCardElement); // Append the card to the slider
+
+            // Immediately center the card after appending it
+            alignCardWithSpinner();
+
             //make sure instead of the end, it gets put in the middle
             return data; // Return the entire data object
         } else {
@@ -123,6 +127,38 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+function alignCardWithSpinner() {
+    const spinnerTick = document.getElementById('selector'); // The spinner tick element
+    const slider = document.getElementById('slider');
+    const targetCard = document.querySelector('.target-card'); // The new card to align
+
+    if (!targetCard || !spinnerTick) {
+        console.error('Target card or spinner tick not found!');
+        return;
+    }
+
+    // Get the center position of the spinner tick
+    const spinnerTickRect = spinnerTick.getBoundingClientRect();
+    const spinnerTickCenter = spinnerTickRect.left + spinnerTickRect.width / 2;
+
+    // Get the center position of the target card
+    const targetCardRect = targetCard.getBoundingClientRect();
+    const targetCardCenter = targetCardRect.left + targetCardRect.width / 2;
+
+    // Calculate the offset needed to align the card with the spinner tick
+    const offset = spinnerTickCenter - targetCardCenter;
+
+    // Update the slider's translateX value
+    const currentTransform = getComputedStyle(slider).transform;
+    const matrix = new DOMMatrix(currentTransform); // Use DOMMatrix for robust transformation parsing
+    const currentTranslateX = matrix.m41 || 0;
+
+    slider.style.transform = `translateX(${currentTranslateX + offset}px)`;
+    console.log(`Slider adjusted by offset: ${offset}px`);
+}
+
+
+
 
 
  function spin() {
@@ -136,23 +172,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
     audio.play().catch(error => console.error('Error playing audio:', error));
 
-    setTimeout(() => {
-        document.querySelectorAll('.slider').forEach(scroller => {
-            scroller.style.animationPlayState = 'paused';
-        });
+// Call this function when the spin ends
+setTimeout(() => {
 
-        findSelectedCard();
-        currentSpin++;
+    const animationDuration = isQuickSpin ? 4500 : 9000;
+    document.querySelectorAll('.slider').forEach(scroller => {
+        scroller.style.animationPlayState = 'paused';
+    });
 
-        if (currentSpin < totalSpins) {
-            setTimeout(spin, buffer);
-        } else {
-            animationStopped = true;
-            showPopup();
-            $(".start").prop('disabled', false);
-            $(".spin-option").prop('disabled', false);
-        }
-    }, animationDuration);
+    findSelectedCard();
+    currentSpin++;
+
+    if (currentSpin < totalSpins) {
+        setTimeout(spin, buffer); // Queue the next spin
+    } else {
+        animationStopped = true; // Spin has ended
+        showPopup();
+        $(".start").prop('disabled', false);
+        $(".spin-option").prop('disabled', false);
+    }
+}, animationDuration);
 }
    spin();
     }
@@ -214,10 +253,12 @@ function findSelectedCard() {
                     </div>
                 </div>
                 <p>ID: ${item.id}</p>
+                <p>Nonce: ${item.nonce}</p>
                 <img src="${item.src}" alt="${item.id}">
                 <p>Price: $${item.price}</p>
                 <p>Value: ${item.value}</p> <!-- Display the value field here -->
             `;
+
             cardsContainer.appendChild(cardElement);
 
             if (index === 0) {
