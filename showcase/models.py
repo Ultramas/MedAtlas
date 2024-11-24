@@ -692,16 +692,14 @@ class CurrencyOrder(models.Model):
             raise ValueError("Not enough currency")
 
     def get_final_price(self):
-        if self.item.price is not None:
-            return self.quantity * self.item.price
-        elif self.item.currency_price is not None:
-            return self.quantity * self.item.currency_price
+        if self.items.price is not None:
+            return self.quantity * self.items.price
         return 0  # or handle this case appropriately
 
     def get_final_currency_price(self):
-        if self.items.discount_currency_price:
+        if self.items.discount_price:
             return self.get_discount_item_currency_price()
-        return self.get_total_currency_item_price()
+        return self.get_total_currency_price()
 
     def get_profile_url(self):
         return reverse('showcase:profile', args=[str(self.slug)])
@@ -783,14 +781,14 @@ class CurrencyFullOrder(models.Model):
     def get_total_price(self):
         total = 0
         for order_item in self.items.all():
-            if order_item.item.price:
+            if order_item.items.price:
                 total += order_item.get_final_price()
         return total
 
     def get_total_currency_price(self):
         currency_total = 0
         for order_item in self.items.all():
-            if order_item.item.currency_price():
+            if order_item.items.price:
                 currency_total += order_item.get_final_currency_price()
                 # no coupons on currency items-yet-because currency can be given out in codes
             return currency_total

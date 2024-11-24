@@ -8681,6 +8681,7 @@ class CurrencyMarketView(EBaseView):
         return context
 
 
+
 class CurrencyCheckoutView(View):
     template_name = "currencycheckout.html"
 
@@ -8697,7 +8698,7 @@ class CurrencyCheckoutView(View):
             messages.warning(request, "Please log in to see your order history.")
             return redirect("accounts/login")
         try:
-            order = Order.objects.get(user=request.user, ordered=False)
+            order = CurrencyFullOrder.objects.get(user=request.user, ordered=False)
             form = CurrencyCheckoutForm()
             context = self.get_context_data(form=form)
             context['order'] = order
@@ -8709,7 +8710,7 @@ class CurrencyCheckoutView(View):
     def post(self, request, *args, **kwargs):
         form = CurrencyCheckoutForm(request.POST or None)
         try:
-            order = Order.objects.get(user=request.user, ordered=False)
+            order = CurrencyFullOrder.objects.get(user=request.user, ordered=False)
             if form.is_valid():
                 try:
                     order.deduct_currency_amount()
@@ -8726,12 +8727,12 @@ class CurrencyCheckoutView(View):
                 return render(request, self.template_name, context)
         except ObjectDoesNotExist:
             messages.info(request, "You do not have an active order")
-            return redirect("showcase:checkout")
+            return redirect("showcase:currencycheckout")
         except Exception as e:
             messages.error(request, str(e))
             context = self.get_context_data(form=form)
             return render(request, self.template_name, context)
-        return redirect("showcase:checkout")
+        return redirect("showcase:currencycheckout")
 
 
 from paypalrestsdk import Payment as PayPalPayment
