@@ -398,8 +398,10 @@ class Subscription(models.Model):
         verbose_name_plural = "Subscriptions"
 
 
+
+
 class Currency(models.Model):
-    name = models.CharField(default='Rubies', max_length=200)
+    name = models.CharField(default='Rubiaces', max_length=200)
     flavor_text = models.CharField(max_length=200)
     file = models.FileField(null=True, verbose_name='Sprite')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -409,7 +411,6 @@ class Currency(models.Model):
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
-    position = models.IntegerField(verbose_name="Currency Numerical Label", default=1)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -473,8 +474,6 @@ class CurrencyMarket(models.Model):
     class Meta:
         verbose_name = "Currency Market"
         verbose_name_plural = "Currency Markets"
-
-
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(blank=True, null=True)
@@ -578,7 +577,6 @@ class ProfileDetails(models.Model):
         verbose_name = "Account Profile"
         verbose_name_plural = "Account Profiles"
 
-
 class CurrencyOrder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -590,9 +588,10 @@ class CurrencyOrder(models.Model):
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField(blank=True, null=True)
     ordered = models.BooleanField(default=False)
-    shipping_address = models.CharField(blank=True, null=True, max_length=250)
-    billing_address = models.CharField(blank=True, null=True, max_length=250)
-    profile = models.ForeignKey(ProfileDetails, blank=True, null=True, on_delete=models.CASCADE)
+    shipping_address = models.ForeignKey('Address', related_name='currency_shipping_address', on_delete=models.SET_NULL,
+                                         blank=True, null=True)
+    billing_address = models.ForeignKey('Address', related_name='currency_billing_address', on_delete=models.SET_NULL,
+                                        blank=True, null=True)
     payment = models.ForeignKey('Payment', on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, blank=True, null=True)
     being_delivered = models.BooleanField(default=False)
@@ -628,28 +627,11 @@ class CurrencyOrder(models.Model):
             return self.quantity * self.get_discount_item_price()
         return self.quantity * self.items.price
 
-    def get_total_item_currency_price(self):
-        if self.items.discount_currency_price:
-            return self.quantity * self.get_discount_item_currency_price()
-        return self.quantity * self.items.currency_price
-
-    def get_item_price(self):
-        return self.quantity * self.item.price
-
-    def get_item_currency_price(self):
-        return self.quantity * self.item.currency_price
-
     def get_discount_item_price(self):
-        return self.quantity * self.item.discount_price
-
-    def get_discount_item_currency_price(self):
-        return self.quantity * self.item.discount_currency_price
+        return self.quantity * self.items.discount_price
 
     def get_amount_saved(self):
-        return self.get_item_price() - self.get_discount_item_price()
-
-    def get_currency_amount_saved(self):
-        return self.get_item_currency_price() - self.get_discount_item_currency_price()
+        return self.get_total_item_price() - self.get_discount_item_price()
 
     def currency_get_add_to_cart_url(self):
         return reverse("showcase:currency-add-to-cart", kwargs={'slug': self.slug})
@@ -662,44 +644,22 @@ class CurrencyOrder(models.Model):
             self.amount = self.items.discount_price
         else:
             self.amount = self.items.price
-        if self.profile:
-            self.shipping_address = self.profile.shipping_address
-            self.billing_address = self.profile.billing_address
         super().save(*args, **kwargs)
 
     def get_total_price(self):
         total = 0
-        for order_item in self.items.all():
-            if order_item.item.price:
-                total += order_item.get_final_price()
+        total += self.items.price  # or another field representing the item's price
+        if self.coupon:
+            if self.coupon.percentDollars:
+                total *= 1 - (0.01 * self.coupon.amount)
+            else:
+                total -= self.coupon.amount
         return total
 
-    def get_total_currency_price(self):
-        currency_total = 0
-        for order_item in self.items.all():
-            if order_item.item.currency_price():
-                currency_total += order_item.get_final_currency_price()
-                # no coupons on currency items-yet-because currency can be given out in codes
-            return currency_total
-
-    def deduct_currency_amount(self):
-        profile = ProfileDetails.objects.get(user=self.user)
-        total_currency_price = self.get_total_currency_price()
-        if profile.currency_amount >= total_currency_price:
-            profile.currency_amount -= total_currency_price
-            profile.save()
-        else:
-            raise ValueError("Not enough currency")
-
     def get_final_price(self):
-        if self.items.price is not None:
-            return self.quantity * self.items.price
-        return 0  # or handle this case appropriately
-
-    def get_final_currency_price(self):
         if self.items.discount_price:
-            return self.get_discount_item_currency_price()
-        return self.get_total_currency_price()
+            return self.get_discount_item_price()
+        return self.get_total_item_price()
 
     def get_profile_url(self):
         return reverse('showcase:profile', args=[str(self.slug)])
@@ -749,58 +709,26 @@ class CurrencyFullOrder(models.Model):
         return self.user.username
 
     def get_final_price(self):
-        if self.item.price is not None:
-            return self.quantity * self.item.price
-        elif self.item.currency_price is not None:
-            return self.quantity * self.item.currency_price
-        return 0  # or handle this case appropriately
-
-    def get_final_currency_price(self):
-        if self.items.discount_currency_price:
-            return self.get_discount_item_currency_price()
-        return self.get_total_currency_item_price()
-
-    def get_item_price(self):
-        return self.quantity * self.item.price
-
-    def get_item_currency_price(self):
-        return self.quantity * self.item.currency_price
+        if self.items.discount_price:
+            return self.get_discount_item_price()
+        return self.get_total_item_price()
 
     def get_discount_item_price(self):
-        return self.quantity * self.item.discount_price
-
-    def get_discount_item_currency_price(self):
-        return self.quantity * self.item.discount_currency_price
+        return self.item.discount_price
 
     def get_amount_saved(self):
-        return self.get_item_price() - self.get_discount_item_price()
-
-    def get_currency_amount_saved(self):
-        return self.get_item_price() - self.get_discount_item_currency_price()
+        return self.get_total_item_price() - self.get_discount_item_price()
 
     def get_total_price(self):
         total = 0
         for order_item in self.items.all():
-            if order_item.items.price:
-                total += order_item.get_final_price()
+            total += order_item.get_final_price()
+        if self.coupon:
+            if self.coupon.percentDollars:
+                total *= 1 - (0.01 * self.coupon.amount)
+            else:
+                total -= self.coupon.amount
         return total
-
-    def get_total_currency_price(self):
-        currency_total = 0
-        for order_item in self.items.all():
-            if order_item.items.price:
-                currency_total += order_item.get_final_currency_price()
-                # no coupons on currency items-yet-because currency can be given out in codes
-            return currency_total
-
-    def deduct_currency_amount(self):
-        profile = ProfileDetails.objects.get(user=self.user)
-        total_currency_price = self.get_total_currency_price()
-        if profile.currency_amount >= total_currency_price:
-            profile.currency_amount -= total_currency_price
-            profile.save()
-        else:
-            raise ValueError("Not enough currency")
 
     def get_profile_url(self):
         return reverse('showcase:profile', args=[str(self.slug)])
@@ -811,7 +739,6 @@ class CurrencyFullOrder(models.Model):
     class Meta:
         verbose_name = "Total Currency Order"
         verbose_name_plural = "Total Currency Orders"
-
 
 class SecretRoom(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

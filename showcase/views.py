@@ -8624,6 +8624,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
 
+
 @login_required
 @csrf_exempt
 def subtract_currency(request):
@@ -8681,58 +8682,58 @@ class CurrencyMarketView(EBaseView):
         return context
 
 
-
-class CurrencyCheckoutView(View):
+class CurrencyCheckoutView(EBaseView):
+    model = CheckoutBackgroundImage
     template_name = "currencycheckout.html"
 
     def get_context_data(self, **kwargs):
-        context = {}
+        context = super().get_context_data(**kwargs)
+        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        context.update(kwargs)
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         return context
 
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            messages.warning(request, "Please log in to see your order history.")
-            return redirect("accounts/login")
+    def get(self, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            messages.warning(self.request, "Please log in to see your order history.")
+            return redirect("accounts/login")  # replace "login" with your login route
         try:
-            order = CurrencyFullOrder.objects.get(user=request.user, ordered=False)
+            order = CurrencyFullOrder.objects.get(user=self.request.user, ordered=False)
             form = CurrencyCheckoutForm()
-            context = self.get_context_data(form=form)
+            context = self.get_context_data()
+            context['form'] = form
+            context['couponform'] = CouponForm()
             context['order'] = order
-            return render(request, self.template_name, context)
+            context['DISPLAY_COUPON_FORM'] = True
+            return render(self.request, "currencycheckout.html", context)
         except ObjectDoesNotExist:
-            messages.info(request, "You do not have an active order")
-            return redirect("showcase:checkout")
-
-    def post(self, request, *args, **kwargs):
-        form = CurrencyCheckoutForm(request.POST or None)
-        try:
-            order = CurrencyFullOrder.objects.get(user=request.user, ordered=False)
-            if form.is_valid():
-                try:
-                    order.deduct_currency_amount()
-                except ValueError as e:
-                    messages.warning(request, str(e))
-                    context = self.get_context_data(form=form)
-                    context['order'] = order
-                    return render(request, self.template_name, context)
-            else:
-                print("Form errors:", form.errors)
-                messages.warning(request, "Form is not valid. Please correct the errors below.")
-                context = self.get_context_data(form=form)
-                context['order'] = order
-                return render(request, self.template_name, context)
-        except ObjectDoesNotExist:
-            messages.info(request, "You do not have an active order")
+            messages.info(self.request, "You do not have an active order")
             return redirect("showcase:currencycheckout")
-        except Exception as e:
-            messages.error(request, str(e))
-            context = self.get_context_data(form=form)
-            return render(request, self.template_name, context)
-        return redirect("showcase:currencycheckout")
+
+    def post(self, *args, **kwargs):
+        form = CurrencyCheckoutForm(self.request.POST or None)
+        # print(self.request.GET)
+        try:
+            order = CurrencyFullOrder.objects.get(user=self.request.user, ordered=False)
+
+            if form.is_valid():
+                payment_option = form.cleaned_data.get('payment_option')
+
+                if payment_option == 'S':
+                    return redirect('showcase:currencypayment',
+                                    payment_option='stripe')
+                elif payment_option == 'P':
+                    return redirect('showcase:currencypayment',
+                                    payment_option='paypal')
+                else:
+                    messages.warning(self.request,
+                                     "Invalid payment option selected")
+                    return redirect('showcase:currencycheckout')
+        except ObjectDoesNotExist:
+            messages.warning(self.request, "You do not have an active order")
+            return redirect("showcase:currencymarket")
 
 
 from paypalrestsdk import Payment as PayPalPayment
@@ -8747,8 +8748,6 @@ class CurrencyPaymentView(EBaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        endowment_form = EndowmentForm(request=self.request)  # Pass the request object to the form
-        context['endowmentform'] = endowment_form
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
 
         return context
@@ -8811,6 +8810,7 @@ class CurrencyPaymentView(EBaseView):
             save = form.cleaned_data.get('save')
             use_default = form.cleaned_data.get('use_default')
             user_profile = get_object_or_404(UserProfile, user=self.request.user)
+
             # Now you can access stripe_customer_id
             stripe_customer_id = user_profile.stripe_customer_id
 
@@ -8826,7 +8826,6 @@ class CurrencyPaymentView(EBaseView):
                     userprofile.save()
 
             amount = int(order.get_total_price() * 100)
-            currency_amount = int(order.get_total_currency_price())
 
             try:
                 if use_default or save:
@@ -9032,7 +9031,6 @@ class CurrencyPaypalFormView(FormView):
             'no_shipping': '1',
         }
 
-
 @allow_guest_user
 def currency_add_to_cart(request, slug):
     item = get_object_or_404(CurrencyMarket, slug=slug)
@@ -9090,8 +9088,8 @@ def currency_remove_from_cart(request, slug):
         order = order_qs[0]
         if order.items.filter(item__slug=item.slug).exists():
             order_item = CurrencyOrder.objects.filter(item=item,
-                                                      user=request.user,
-                                                      ordered=False)[0]
+                                                  user=request.user,
+                                                  ordered=False)[0]
             order_item.delete()
             messages.info(
                 request, "Item \"" + order_item.item.title +
@@ -9104,7 +9102,6 @@ def currency_remove_from_cart(request, slug):
         # add message doesnt have order
         messages.info(request, "You do not seem to have an order currently")
         return redirect("showcase:product", slug=slug)
-
 
 def currency_get_coupon(request, code):
     try:
@@ -9135,6 +9132,7 @@ class CurrencyAddCouponView(View):
                 return redirect("showcase:currencycheckout")
 
 
+
 def index(request):
     return redirect('showcase')
 
@@ -9147,8 +9145,8 @@ def currency_reduce_quantity_item(request, slug):
         order = order_qs[0]
         if order.items.filter(item__slug=item.slug).exists():
             order_item = CurrencyOrder.objects.filter(item=item,
-                                                      user=request.user,
-                                                      ordered=False)[0]
+                                                  user=request.user,
+                                                  ordered=False)[0]
             if order_item.quantity > 1:
                 order_item.quantity -= 1
                 order_item.save()
@@ -9164,54 +9162,6 @@ def currency_reduce_quantity_item(request, slug):
         messages.info(request, "You do not have an Order")
         return redirect("showcase:order-summary")
 
-
-# users/views.py
-
-# ...
-
-# @login_required
-# def profile(request, username):
-#    user = get_object_or_404(User, username=username)
-#    profile = get_object_or_404(Profile, user=user)
-#    return render(request, 'like.html', {'profile': profile, 'user': user})
-
-# ...
-
-# @login_required
-# def edit_profile(request):
-# if request.method == "POST":
-# form = EditProfileForm(request.POST, request.FILES)
-# if form.is_valid():
-# about_me = form.cleaned_data["about_me"]
-# username = form.cleaned_data["username"]
-# image = form.cleaned_data["image"]
-
-# user = User.objects.get(id=request.user.id)
-# profile = Profile.objects.get(user=user)
-# user.username = username
-# user.save()
-# profile.about_me = about_me
-# if image:
-# profile.image = image
-# profile.save()
-# return redirect('like', username=user.username)
-# else:
-# form = EditProfileForm()
-# return render(request, 'edit_profile.html', {'form': form})
-
-# @login_required
-# def backgroundimages(request):
-#  if(request.method == "POST"):
-#    form = BackgroundImagery(request.POST)
-#    if(form.is_valid()):
-#      post = form.save(commit=False)
-#      post.save()
-#      return redirect('showcase:index')
-#  else:
-#      form = PosteForm()
-#      return render(request, 'index.html', {'form':form})
-#      messages.error(request, 'Image submission failed to register, please try again.')
-#      messages.error(request, form.errors)
 
 
 class HomeView(ListView):
