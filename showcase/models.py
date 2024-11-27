@@ -577,6 +577,7 @@ class ProfileDetails(models.Model):
         verbose_name = "Account Profile"
         verbose_name_plural = "Account Profiles"
 
+
 class CurrencyOrder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -5796,6 +5797,7 @@ class Answer(models.Model):
         return f"{self.user.username}'s answer to '{self.question.text}'"
 
 
+
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
@@ -5807,8 +5809,10 @@ class Order(models.Model):
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField()
     ordered = models.BooleanField(default=False)
-    shipping_address = models.CharField(blank=True, null=True, max_length=250)
-    billing_address = models.CharField(blank=True, null=True, max_length=250)
+    shipping_address = models.ForeignKey('Address', related_name='shipping_address', on_delete=models.SET_NULL,
+                                         blank=True, null=True)
+    billing_address = models.ForeignKey('Address', related_name='billing_address', on_delete=models.SET_NULL,
+                                        blank=True, null=True)
     profile = models.ForeignKey(ProfileDetails, blank=True, null=True, on_delete=models.CASCADE)
     payment = models.ForeignKey('Payment', on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, blank=True, null=True)
