@@ -398,8 +398,10 @@ class Subscription(models.Model):
         verbose_name_plural = "Subscriptions"
 
 
+
+
 class Currency(models.Model):
-    name = models.CharField(default='Rubies', max_length=200)
+    name = models.CharField(default='Rubiaces', max_length=200)
     flavor_text = models.CharField(max_length=200)
     file = models.FileField(null=True, verbose_name='Sprite')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -409,7 +411,6 @@ class Currency(models.Model):
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
-    position = models.IntegerField(verbose_name="Currency Numerical Label", default=1)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -473,9 +474,6 @@ class CurrencyMarket(models.Model):
     class Meta:
         verbose_name = "Currency Market"
         verbose_name_plural = "Currency Markets"
-
-
-
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(blank=True, null=True)
@@ -578,7 +576,6 @@ class ProfileDetails(models.Model):
     class Meta:
         verbose_name = "Account Profile"
         verbose_name_plural = "Account Profiles"
-
 
 class CurrencyOrder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -742,7 +739,6 @@ class CurrencyFullOrder(models.Model):
     class Meta:
         verbose_name = "Total Currency Order"
         verbose_name_plural = "Total Currency Orders"
-
 
 class SecretRoom(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
