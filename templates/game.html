@@ -97,6 +97,13 @@
 .cards-container::-webkit-scrollbar-thumb:hover {
     background-color: #555; /* Darker color on hover */
 }
+
+.card{
+background: none;
+background-color: nonce;
+border: none;
+}
+
 .popup-card {
     min-width: 200px;
     max-width: 250px;
@@ -427,7 +434,7 @@ $(document).ready(function() {
     <div class="wrapper">
         <div class="containerre">
             <div class="slider" id="slider">
-
+<!--currently, the card ends up at the back of the slider. make sure it ends up in the middle where it can be selected-->
             {% for item in choices_with_nonce %}
                 {% with choice=item.choice %}
                     <div id="{{ choice.choice_text }}" class="cards">
@@ -440,8 +447,8 @@ $(document).ready(function() {
                                 <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
                             </div>
                         {% endwith %}
-                        <h2 style="margin-left: 22px;">{{ choice.value }} 💎</h2>
-                        <p>Nonce: {{ item.nonce }}</p>
+                        <h5 style="margin-left: 22px;">{{ choice.value }} 💎</h5>
+                        <p>Noncevalue: {{ item.nonce }}</p>
                         <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
                         <p>Random Amount: {{ random_amount }}</p>
                     </div>
@@ -452,7 +459,7 @@ $(document).ready(function() {
 
                 {% for nonce, choice in matching_choices %}
                     <p>Value: {{ choice.value }}</p>
-                    <p>Nonce: {{ nonce }}</p>
+                    <p>Nonces: {{ nonce }}</p>
                     <p>Choice: {{ choice.choice_text }}</p>
 
             {% with cost_threshold=game.cost %}
@@ -600,7 +607,10 @@ $(".start").click(function () {
                 id: data.choice_id,
                 choice_text: data.choice_text,
                 color: data.choice_color,
-                file: data.choice_file
+                file: data.choice_file,
+                value: data.choice_value || 0,
+                lowerNonce: data.lower_nonce || 'N/A',
+                upperNonce: data.upper_nonce || 'N/A',
             };
 
             // Log the choice object to verify its structure

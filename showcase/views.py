@@ -8,7 +8,9 @@ from django.contrib.messages import get_messages
 from django.db import transaction
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
-from social_core.backends import stripe
+import stripe  # Official Stripe library
+from social_core.backends.stripe import StripeOAuth2  # If needed for OAuth
+
 
 from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
@@ -198,6 +200,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.edit import FormView
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class SignupView(FormMixin, ListView):
@@ -1627,6 +1631,9 @@ def create_outcome(request, slug):
                 'outcome': outcome.id,
                 'nonce': outcome.nonce,
                 'choice_id': choice.id,
+                'choice_value': choice.value,
+                'upper_nonce': choice.upper_nonce,
+                'lower_nonce': choice.lower_nonce,
                 'choice_text': choice.choice_text,
                 'choice_color': choice.color,
                 'choice_file': choice.file.url if choice.file else None

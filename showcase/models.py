@@ -398,8 +398,10 @@ class Subscription(models.Model):
         verbose_name_plural = "Subscriptions"
 
 
+
+
 class Currency(models.Model):
-    name = models.CharField(default='Rubies', max_length=200)
+    name = models.CharField(default='Rubiaces', max_length=200)
     flavor_text = models.CharField(max_length=200)
     file = models.FileField(null=True, verbose_name='Sprite')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -409,7 +411,6 @@ class Currency(models.Model):
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
-    position = models.IntegerField(verbose_name="Currency Numerical Label", default=1)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -473,9 +474,6 @@ class CurrencyMarket(models.Model):
     class Meta:
         verbose_name = "Currency Market"
         verbose_name_plural = "Currency Markets"
-
-
-
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(blank=True, null=True)
@@ -742,7 +740,6 @@ class CurrencyFullOrder(models.Model):
     class Meta:
         verbose_name = "Total Currency Order"
         verbose_name_plural = "Total Currency Orders"
-
 
 class SecretRoom(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -1566,7 +1563,7 @@ class AdministrationChangeLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     action = models.CharField(max_length=6, choices=ACTION_CHOICES)
     model = models.CharField(max_length=100)
-    object_id = models.PositiveIntegerField()
+    object_id = models.CharField(max_length=255)
     timestamp = models.DateTimeField(default=timezone.now)
     changes = models.JSONField(null=True, blank=True)
 
@@ -2271,6 +2268,10 @@ class Choice(models.Model):
         if self.upper_nonce is None:
             self.upper_nonce = random.randint(0, 1000000)
 
+        # Calculate rarity if both upper_nonce and lower_nonce are present
+        if self.upper_nonce is not None and self.lower_nonce is not None:
+            rarity_value = (self.upper_nonce - self.lower_nonce) / 10000
+            self.rarity = round(rarity_value, 6)  # Set rarity with up to 6 decimal places
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -5800,6 +5801,7 @@ class Answer(models.Model):
         return f"{self.user.username}'s answer to '{self.question.text}'"
 
 
+
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
@@ -5811,8 +5813,10 @@ class Order(models.Model):
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField()
     ordered = models.BooleanField(default=False)
-    shipping_address = models.CharField(blank=True, null=True, max_length=250)
-    billing_address = models.CharField(blank=True, null=True, max_length=250)
+    shipping_address = models.ForeignKey('Address', related_name='shipping_address', on_delete=models.SET_NULL,
+                                         blank=True, null=True)
+    billing_address = models.ForeignKey('Address', related_name='billing_address', on_delete=models.SET_NULL,
+                                        blank=True, null=True)
     profile = models.ForeignKey(ProfileDetails, blank=True, null=True, on_delete=models.CASCADE)
     payment = models.ForeignKey('Payment', on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, blank=True, null=True)

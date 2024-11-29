@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
         selectedItems = [];
 
- async function randomizeContents() {
+async function randomizeContents() {
     const startButton = document.getElementById("start");
     const gameId = startButton.getAttribute("data-game-id");
     const nonce = startButton.getAttribute("data-nonce");
@@ -75,37 +75,73 @@ document.addEventListener('DOMContentLoaded', () => {
             startButton.setAttribute('data-nonce', data.nonce);
             console.log(`Nonce updated: ${data.nonce}`);
 
-            // Create the target card
-            const attributes = {
-                id: data.choice_id,
-                nonce: data.nonce,
-                text: data.choice_text,
-                color: data.choice_color,
-                file: data.choice_file,
-            };
+            // Clear existing cards
+            clearCards();
 
-            const targetCardElement = document.createElement('div');
-            targetCardElement.classList.add('card', 'target-card'); // Add a class to distinguish the target card
-            targetCardElement.setAttribute('id', `card-${attributes.id}`);
-            targetCardElement.setAttribute('data-nonce', attributes.nonce);
-            targetCardElement.setAttribute('data-color', attributes.color);
+        const attributes = {
+            id: data.choice_id || 'N/A',
+            nonce: data.nonce || 'N/A',
+            text: data.choice_text || 'Unknown',
+            color: data.choice_color || '#FFFFFF',
+            file: data.choice_file || null,
+            value: data.choice_value || 0,
+            lowerNonce: data.lower_nonce || 'N/A',
+            upperNonce: data.upper_nonce || 'N/A',
+        };
 
-            targetCardElement.innerHTML = `
-                <div class="card-content" style="background-color: ${attributes.color}">
-                    <p>Nonce: ${attributes.nonce}</p>
-                    <p>${attributes.text}</p>
-                    ${attributes.file ? `<img src="${attributes.file}" alt="${attributes.text}">` : ''}
+        // Create the target card
+        const targetCardElement = document.createElement('div');
+        targetCardElement.classList.add('card', 'target-card');
+        targetCardElement.setAttribute('id', `card-${attributes.id}`);
+        targetCardElement.setAttribute('data-nonce', attributes.nonce);
+        targetCardElement.setAttribute('data-color', attributes.color);
+        targetCardElement.setAttribute('data-choice_value', attributes.value);
+        targetCardElement.setAttribute('data-lower_nonce', attributes.lowerNonce);
+        targetCardElement.setAttribute('data-upper_nonce', attributes.upperNonce);
+
+        targetCardElement.innerHTML = `
+<div class="lge" style="background-color: white;">
+                <div class="lootelement" style="background-color: ${attributes.color};  padding: 6%; margin-left: 22px; margin-top: 12px;">
+                    ${attributes.file ? `<img src="${attributes.file}" alt="${attributes.text}" width="100" height="100">` : ''}
                 </div>
-            `;
+                </div>
+                <h5>${attributes.value} 💎</h5>
+                <p>${attributes.text}</p>
+                <p>Nonce: ${attributes.nonce}</p>
+        `;
 
-            const slider = document.getElementById('slider');
-            slider.appendChild(targetCardElement); // Append the card to the slider
+            selectedItems.push({
+                id: attributes.id,
+                nonce: attributes.nonce,
+                text: attributes.text,
+                color: attributes.color,
+                src: attributes.file, // Assuming this is the file URL for the image
+                value: attributes.value,
+                lowerNonce: attributes.lowerNonce,
+                upperNonce: attributes.upperNonce
+            });
 
-            // Immediately center the card after appending it
-            alignCardWithSpinner();
+            // Get the container of the cards
+            const cardContainer = document.querySelector('.slider'); // Adjust selector if necessary
 
-            //make sure instead of the end, it gets put in the middle
-            return data; // Return the entire data object
+            // Calculate the position to insert: 4 cards to the right of the middle
+            const middleIndex = Math.floor(cardContainer.children.length / 2);
+            const targetIndex = Math.min(
+                cardContainer.children.length,
+                middleIndex + 3
+            );
+
+            if (cardContainer.children[targetIndex]) {
+                cardContainer.insertBefore(targetCardElement, cardContainer.children[targetIndex]);
+            } else {
+                cardContainer.appendChild(targetCardElement);
+            }
+
+            // Adjust the slider to center the new card
+            centerCard(targetCardElement);
+
+            console.log("Target card inserted 3 cards to the right of the middle.");
+            return data; // Return the data for further use
         } else {
             console.error(`Error: ${data.message}`);
             return null;
@@ -115,6 +151,31 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 }
+
+// Function to clear all cards
+function clearCards() {
+    const cardContainer = document.querySelector('.slider');
+    const targetCards = cardContainer.querySelectorAll('.target-card');
+
+    targetCards.forEach(card => cardContainer.removeChild(card));
+
+    console.log("All target cards removed.");
+}
+
+// Function to center the card in the slider
+function centerCard(cardElement) {
+    const slider = document.getElementById('slider');
+    const cardOffset = cardElement.offsetLeft;
+    const sliderWidth = slider.offsetWidth;
+    const cardWidth = cardElement.offsetWidth;
+
+    // Adjust margin-left to center the card
+    slider.scrollTo({
+        left: cardOffset - sliderWidth / 2 + cardWidth / 2,
+        behavior: 'smooth',
+    });
+}
+
 
 
         function addAnimation() {
@@ -191,8 +252,8 @@ setTimeout(() => {
         $(".start").prop('disabled', false);
         $(".spin-option").prop('disabled', false);
     }
-}, animationDuration);
-}
+    }, animationDuration);
+    }
    spin();
     }
 
@@ -243,21 +304,22 @@ function findSelectedCard() {
         `;
 
         const cardsContainer = textContainer.querySelector('.cards-container');
-        selectedItems.forEach((item, index) => {
-            const cardElement = document.createElement('div');
-            cardElement.classList.add('popup-card');
-            cardElement.innerHTML = `
-                <div class="card-fire" data-color="${item.color}">
-                    <div class="card-flames">
-                        <div class="card-flame"></div>
-                    </div>
+    selectedItems.forEach((item, index) => {
+        const cardElement = document.createElement('div');
+        cardElement.innerHTML = `
+            <div class="card-fire" data-color="${item.color}">
+                <div class="card-flames">
+                    <div class="card-flame"></div>
                 </div>
-                <p>ID: ${item.id}</p>
-                <p>Nonce: ${item.nonce}</p>
-                <img src="${item.src}" alt="${item.id}">
-                <p>Price: $${item.price}</p>
-                <p>Value: ${item.value}</p> <!-- Display the value field here -->
-            `;
+            </div>
+            <p>ID: ${item.id}</p>
+            <p>Nonceword: ${item.nonce}</p>
+            <img src="${item.src || ''}" alt="${item.id}">
+            <p>Value: ${item.value} 💎</p>
+            <p>Lower Nonce: ${item.lowerNonce}</p>
+            <p>Upper Nonce: ${item.upperNonce}</p>
+        `;
+
 
             cardsContainer.appendChild(cardElement);
 
