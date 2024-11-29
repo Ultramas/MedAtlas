@@ -378,6 +378,7 @@ urlpatterns = [
     path('currency-reduce-quantity-item/<slug>/', currency_reduce_quantity_item, name='currency-reduce-quantity-item'),
     path('currencycheckout/', views.CurrencyCheckoutView.as_view(), name='currencycheckout'),
     path('currencypayment/<payment_option>/', views.CurrencyPaymentView.as_view(), name='currencypayment'),
+    path('create_inventory_object/', views.create_inventory_object, name='create_inventory_object'),
     path('under_construction/', TemplateView.as_view(template_name='under_construction.html'), name='under_construction'),
 
     # path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='main/password/password_reset_done.html'), name='password_reset_done'),

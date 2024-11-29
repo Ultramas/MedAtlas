@@ -1625,7 +1625,6 @@ def create_outcome(request, slug):
                 outcome_data['user'] = user
 
             outcome = Outcome.objects.create(**outcome_data)
-
             return JsonResponse({
                 'status': 'success',
                 'outcome': outcome.id,
@@ -6962,6 +6961,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             messages.success(request, f"TradeItem created with ID: {tradeitem.id}")
             return redirect('showcase:tradeinventory')
 
+
     def remove_trade_object(self, request, pk):
         trade_item = get_object_or_404(TradeItem, pk=pk)
 
@@ -6979,6 +6979,48 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
+
+
+@csrf_exempt
+def create_inventory_object(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Parse the JSON payload
+            inventory = Inventory.objects.get(user=request.user)
+            print("Received payload:", data)
+        except Inventory.DoesNotExist:
+            return JsonResponse({'error': 'No inventory found for the user!'}, status=400)
+
+        # Extract data from the payload
+        choice_id = data.get('choice_id')  # Retrieve choice_id from payload
+        choice_value = data.get('choice_value')  # Retrieve choice_value from payload
+
+        # Ensure the choice exists
+        try:
+            choice = Choice.objects.get(id=choice_id) if choice_id else None
+        except Choice.DoesNotExist:
+            return JsonResponse({'error': 'Invalid choice!'}, status=400)
+
+        # Create a new InventoryObject using the choice data
+        inventory_object = InventoryObject(
+            user=request.user,
+            inventory=inventory,
+            choice=choice,  # Save the choice instance
+            choice_text=choice.choice_text if choice else "Default Choice",
+            category=data.get('category', 'default'),
+            currency=Currency.objects.first(),
+            price=data.get('price', 0),
+            condition=data.get('condition', 'M'),
+            quantity=data.get('quantity', 1),
+        )
+
+        try:
+            inventory_object.save()
+            return JsonResponse({'success': True, 'message': 'Inventory object created successfully!'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 
 class CreateChestView(FormView):

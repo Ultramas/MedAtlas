@@ -938,7 +938,6 @@ class Inventory(models.Model):
 
 
 class InventoryObject(models.Model):
-    """Model for sharing ideas and getting user feedback"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, blank=True, null=True)
     choice = models.ForeignKey('Choice', on_delete=models.CASCADE, blank=True, null=True)
