@@ -8673,6 +8673,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
 
+
 @login_required
 @csrf_exempt
 def subtract_currency(request):
@@ -9211,54 +9212,6 @@ def currency_reduce_quantity_item(request, slug):
         messages.info(request, "You do not have an Order")
         return redirect("showcase:order-summary")
 
-
-# users/views.py
-
-# ...
-
-# @login_required
-# def profile(request, username):
-#    user = get_object_or_404(User, username=username)
-#    profile = get_object_or_404(Profile, user=user)
-#    return render(request, 'like.html', {'profile': profile, 'user': user})
-
-# ...
-
-# @login_required
-# def edit_profile(request):
-# if request.method == "POST":
-# form = EditProfileForm(request.POST, request.FILES)
-# if form.is_valid():
-# about_me = form.cleaned_data["about_me"]
-# username = form.cleaned_data["username"]
-# image = form.cleaned_data["image"]
-
-# user = User.objects.get(id=request.user.id)
-# profile = Profile.objects.get(user=user)
-# user.username = username
-# user.save()
-# profile.about_me = about_me
-# if image:
-# profile.image = image
-# profile.save()
-# return redirect('like', username=user.username)
-# else:
-# form = EditProfileForm()
-# return render(request, 'edit_profile.html', {'form': form})
-
-# @login_required
-# def backgroundimages(request):
-#  if(request.method == "POST"):
-#    form = BackgroundImagery(request.POST)
-#    if(form.is_valid()):
-#      post = form.save(commit=False)
-#      post.save()
-#      return redirect('showcase:index')
-#  else:
-#      form = PosteForm()
-#      return render(request, 'index.html', {'form':form})
-#      messages.error(request, 'Image submission failed to register, please try again.')
-#      messages.error(request, form.errors)
 
 
 class HomeView(ListView):
