@@ -51,15 +51,13 @@
 					<div class="main-menu-wrap">
 						<!-- logo -->
 						<div class="site-logo">
-							<a href="index.html">
-							{% for BackgroundView in Logo %}
-								{% if BackgroundView.page == 'index.html' %}
-								<a class="logo" href="{{BackgroundView.hyperlink}}">
-								  <img class="imageicon" src="{{BackgroundView.logocover.url}}"
-										alt="{{BackgroundView.alternate}}" style="length: {{BackgroundView.length_for_resize}}px; width: {{BackgroundView.width_for_resize}}px;"></a>
+							{% for GameChestBackgroundView in Logo %}
+								{% if GameChestBackgroundView.page == 'game.html' %}
+								<a class="logo" href="{{GameChestBackgroundView.hyperlink}}">
+								  <img class="imageicon" src="{{GameChestBackgroundView.logocover.url}}"
+										alt="{{GameChestBackgroundView.alternate}}" style="length: {{GameChestBackgroundView.length_for_resize}}px; width: {{GameChestBackgroundView.width_for_resize}}px;"></a>
 								{% endif %}
 							{% endfor %}
-							</a>
 						</div>
 						<!-- logo -->
 
@@ -209,7 +207,7 @@
             <div class="single-product-item">
                 <div class="product-image">
                     <a href="single-product.html">
-                        <img src="{{ Inventory.image.url }}" style="width: 600px; height: 200px;" alt="Product Image">
+                        <img src="{{ Inventory.image.url }}" style="height: 200px;" alt="Product Image">
                     </a>
                 </div>
                 <h3>{{ Inventory.choice.choice_text }}</h3>
