@@ -8,7 +8,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
-    SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize
+    SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -2094,17 +2094,30 @@ class TransactionAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('date_and_time',)
 
+
 admin.site.register(Transaction, TransactionAdmin)
 
 
 class BattleAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Battle Information', {
-            'fields': ('battle_name', 'chests', 'currency', 'price', 'participants', 'robots', 'min_human_participants',)
+            'fields': ('battle_name', 'currency', 'price', 'creator', 'min_human_participants',)
         }),
     )
 
+
 admin.site.register(Battle, BattleAdmin)
+
+
+class BattleGameAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Battle Information', {
+            'fields': ('battle', 'game', 'quantity',)
+        }),
+    )
+
+
+admin.site.register(BattleGame, BattleGameAdmin)
 
 
 class LevelAdmin(admin.ModelAdmin):

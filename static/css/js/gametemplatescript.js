@@ -140,7 +140,7 @@ async function randomizeContents() {
             }
 
             // Adjust the slider to center the new card
-            centerCard(targetCardElement);
+            //centerCard(targetCardElement);
 
             console.log("Target card inserted 3 cards to the right of the middle.");
 
@@ -263,8 +263,27 @@ function alignCardWithSpinner() {
 
     const animationDuration = isQuickSpin ? 4500 : 9000;
     const buffer = 150;
+    const audiobuffer = 300;
     const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
+
+audio.addEventListener('loadedmetadata', () => {
+    // Calculate the adjusted duration
+    const adjustedDuration = (animationDuration + audiobuffer) / 1000; // Convert ms to seconds
+    const originalDuration = audio.duration;
+
+    // Adjust playback rate if the original duration is available
+    if (originalDuration) {
+        audio.playbackRate = originalDuration / adjustedDuration;
+    }
+
+    // Play the audio
     audio.play().catch(error => console.error('Error playing audio:', error));
+});
+
+// Handle audio load errors
+audio.addEventListener('error', (e) => {
+    console.error('Audio failed to load:', e);
+});
 
 // Call this function when the spin ends
 setTimeout(() => {

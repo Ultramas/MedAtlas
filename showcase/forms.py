@@ -333,36 +333,84 @@ class CardUploading(forms.ModelForm):
         user = kwargs.pop('user', None)
         super(CardUploading, self).__init__(*args, **kwargs)
 
+
 ChoiceFormSet = inlineformset_factory(Game, Choice, form=CardUploading, extra=1)
 
 
 class BattleCreationForm(forms.ModelForm):
+    game_values = forms.CharField(
+        widget=forms.Textarea(attrs={'readonly': 'readonly'}),
+        required=False,
+        label="Game Quantities and Values"
+    )
+    total_value = forms.DecimalField(
+        widget=forms.NumberInput(attrs={'readonly': 'readonly'}),
+        required=False,
+        label="Total Value"
+    )
+
     class Meta:
         model = Battle
-        fields = ['battle_name', 'chests', 'min_human_participants']  # Adjust fields as needed
+        fields = ['battle_name', 'chests', 'min_human_participants', 'game_values', 'total_value']
         widgets = {
             'participants': forms.SelectMultiple(attrs={'disabled': True}),  # Disable participant selection
         }
 
     def clean(self):
         cleaned_data = super().clean()
-        # Ensure a price is set based on chest price (logic outside of form)
-        # ... (Implement your price calculation based on chest price)
-        cleaned_data['price'] = calculated_price
+        chests = cleaned_data.get('chests')  # This retrieves the M2M data
+        battle_instance = self.instance
+
+        if chests:
+            # Retrieve the game quantities if the instance exists
+            if battle_instance.pk:
+                game_quantities = battle_instance.get_game_quantities()
+                game_values = [
+                    f"{game.name}: {quantity} x {game.cost} = {quantity * game.cost}"
+                    for game, quantity in game_quantities.items()
+                ]
+                total_value = sum(quantity * game.cost for game, quantity in game_quantities.items())
+            else:
+                # Handle the form without a pre-existing instance
+                game_values = [
+                    f"{game.name}: 1 x {game.cost} = {game.cost}"
+                    for game in chests
+                ]
+                total_value = sum(game.cost for game in chests)
+
+            cleaned_data['game_values'] = "\n".join(game_values)
+            cleaned_data['total_value'] = total_value
+        else:
+            cleaned_data['game_values'] = ""
+            cleaned_data['total_value'] = 0
 
         return cleaned_data
 
 
+
 class BattleJoinForm(forms.Form):
-    battle = forms.ModelChoiceField(queryset=Battle.objects.all())
+    battle = forms.ModelChoiceField(queryset=Battle.objects.filter(status='O'))
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)  # Pass the user to the form
+        super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned_data = super().clean()
         battle = cleaned_data.get('battle')
-        if battle.participants.count() >= battle.participants.limit_choices_to.limit_value:
-            raise forms.ValidationError('This battle has reached the maximum participant limit.')
-        return cleaned_data
 
+        if not battle:
+            raise forms.ValidationError('Battle not selected.')
+
+        # Check if the user is already a participant
+        if battle.participants.filter(user=self.user).exists():
+            raise forms.ValidationError('You have already joined this battle.')
+
+        # Check if the battle is full
+        if battle.participants.count() >= battle.min_human_participants:
+            raise forms.ValidationError('This battle has reached the maximum participant limit.')
+
+        return cleaned_data
 
 class MoveToTradeForm(forms.Form):
     title = forms.CharField(max_length=100, required=False)

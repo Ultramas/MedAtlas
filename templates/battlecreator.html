@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <h4>Game Values</h4>
+    <textarea readonly>{{ form.cleaned_data.game_values }}</textarea>
+    <h4>Total Value</h4>
+    <input type="number" value="{{ form.cleaned_data.total_value }}" readonly>
+    <button type="submit">Submit</button>
+</form>
+
+
+
+</body>
+</html>

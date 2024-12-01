@@ -17,7 +17,8 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
-    SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference
+    SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference, Battle, \
+    BattleParticipant
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -106,7 +107,7 @@ from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, Tr
     MemeForm, CurrencyCheckoutForm, CurrencyPaymentForm, CurrencyPaypalPaymentForm, HitStandForm, WagerForm, \
     DirectedTradeOfferForm, FriendRequestForm, RespondingTradeOfferForm, ShippingForm, EndowmentForm, UploadCardsForm, \
     RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, GameForm, CardUploading, GameForm, MoveToTradeForm, \
-    SpinPreferenceForm
+    SpinPreferenceForm, BattleCreationForm, BattleJoinForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -2076,6 +2077,54 @@ def create_card_instance(request):
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
+class OpenBattleListView(ListView):
+    model = Battle
+    template_name = "battle.html"  # Your template for listing open battles
+    context_object_name = "open_battles"  # The context variable name to use in the template
+
+    def get_queryset(self):
+        return Battle.objects.filter(status='O').order_by('-time')
+
+
+class BattleCreationView(CreateView):
+    model = Battle
+    form_class = BattleCreationForm
+    template_name = "battlecreator.html"  # Your template for the creation form
+    success_url = reverse_lazy('showcase:battle')  # Redirect to the open battles list
+
+    def form_valid(self, form):
+        # Any additional processing can go here
+        return super().form_valid(form)
+
+
+class BattleJoinView(FormView):
+    template_name = 'join_battle.html'
+    form_class = BattleJoinForm
+    success_url = reverse_lazy('showcase:battle')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        battle = form.cleaned_data['battle']
+        participant, created = BattleParticipant.objects.get_or_create(user=self.request.user)
+        battle.participants.add(participant)
+        messages.success(self.request, f"You have successfully joined the battle: {battle.battle_name}")
+        return super().form_valid(form)
+
+
+    def form_invalid(self, form):
+        # Handle invalid form (optional customization)
+        return super().form_invalid(form)
+
+
+def battle_detail_view(request, battle_id):
+    battle = get_object_or_404(Battle, id=battle_id)
+    return render(request, 'battle_detail.html', {'battle': battle})
+
+
 class EarningAchievement(BaseView):
     model = Achievements
     template_name = "achievements.html"
@@ -2126,6 +2175,45 @@ def earningachievement(self, achievement_id):
         return JsonResponse({"status": "success", "message": "Achievement earned successfully!"})
     else:
         return JsonResponse({"status": "failure", "message": "Achievement has already been earned."})
+
+
+class PlayerEarnedAchievement(BaseView):
+    model = EarnedAchievements
+    template_name = "earnedachievements.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        return context
+
+    def earningachievement(self, achievement_id):
+        achievement = get_object_or_404(Achievements, id=achievement_id)
+        user_profile = get_object_or_404(ProfileDetails, user=self.request.user)
+
+        # Check if the achievement is not already earned
+        if not achievement.earned:
+            # Update the achievement status and associate it with the user
+            achievement.earned = True
+            achievement.user = self.request.user
+            achievement.save()
+
+            # Add the achievement's value to the user's currency amount
+            user_profile.add_currency(achievement.value)
+
+            # Set the currency to the first applicable currency if not already set
+            if not user_profile.currency:
+                first_currency = Currency.objects.first()
+                if first_currency:
+                    user_profile.currency = first_currency
+
+            user_profile.save()
+
+            return JsonResponse({"status": "success", "message": "Achievement earned successfully!"})
+        else:
+            return JsonResponse({"status": "failure", "message": "Achievement has already been earned."})
 
 
 class ChatCreatePostView(CreateView):
@@ -2304,11 +2392,28 @@ class AchievementsView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.request.user  # Assuming the user is obtained from the request
-        context['TotalAchievements'] = Achievements.objects.filter(is_active=1)
-        context['Achievements'] = Achievements.objects.filter(is_active=1, earned=True)
-        newprofile = Achievements.objects.filter(is_active=1, user=user)
+        user = self.request.user  # Assuming the user is authenticated
 
+        # All active achievements
+        total_achievements = Achievements.objects.filter(is_active=1)
+
+        # Achievements the user has earned
+        earned_achievements = Achievements.objects.filter(
+            is_active=1, earnedachievements__user=user
+        ).distinct()
+
+        # Counts for achievements
+        context['earned_count'] = earned_achievements.count()
+        context['total_count'] = total_achievements.count()
+
+        # Add achievements to context
+        context['total_achievements'] = total_achievements
+        context['earned_achievements'] = earned_achievements
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         return context
 
     def CheckAchievements(self, user):

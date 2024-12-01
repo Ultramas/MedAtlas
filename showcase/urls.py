@@ -20,7 +20,7 @@ from django.views.generic.base import TemplateView
 from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, BlogSearchResultsView, \
     currency_remove_from_cart, currency_add_to_cart, currency_reduce_quantity_item, submit_seller_application, \
     PlaceWagerView, update_wager, SendFriendRequestView, FriendSearchResultsView, GameCategorySearchResultsView, \
-    GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView, changelog_view
+    GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView, changelog_view, BattleJoinView
 
 # remove this:
 # from . import settings
@@ -356,6 +356,9 @@ urlpatterns = [
     path('gametemplate/', TemplateView.as_view(template_name='gametemplate.html'), name='gametemplate'),
     path('create_outcome/<slug:slug>/', views.create_outcome, name='create_outcome'),
     path('spin/<int:game_id>/', views.game_view, name='game_view'),
+    path('battle/', views.OpenBattleListView.as_view(), name='battle'),
+    path('battlecreator/', views.BattleCreationView.as_view(), name='battlecreator'),
+    path('join/', BattleJoinView.as_view(), name='join_battle'),
     path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
     path('inventory/', views.PlayerInventoryView.as_view(), name='inventory'),
     path('inventory/<int:pk>/sell/',  views.PlayerInventoryView.as_view(), name='sell_inventory_object'),

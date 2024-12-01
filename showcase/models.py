@@ -75,6 +75,12 @@ GAME_MODE = (
     ('SR', 'Spin Roulette'),
 )
 
+BATTLE_STATUS = (
+    ('O', 'Open'),
+    ('R', 'Running'),
+    ('C', 'Complete'),
+)
+
 TYPE_CHOICES = (('S', 'Singles'), ('BP', 'Booster Pack'),
                 ('BB', 'Booster Box'), ('PP', 'Pokemon Product'), ('O',
                                                                    'Other'))
@@ -2559,11 +2565,11 @@ class Achievements(models.Model):
 
 class EarnedAchievements(models.Model):
     achievement = models.ForeignKey(Achievements, on_delete=models.CASCADE)
-    title = models.TextField(verbose_name="Achievement Title")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="earner")
+    title = models.TextField(verbose_name="Achievement Title", blank=True, null=True)
+    user = models.ManyToManyField(User, related_name="earner")
     slug = AutoSlugField(unique=True)
     value = models.IntegerField(blank=True, null=True)
-    type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
+    type = models.ForeignKey(GameHub, on_delete=models.CASCADE, blank=True, null=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
@@ -2571,6 +2577,20 @@ class EarnedAchievements(models.Model):
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
+
+    type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
+    category = models.CharField(choices=AchievementCategory, max_length=4, blank=True, null=True)
+    rubies_spent = models.IntegerField(blank=True, null=True) #make sure it does not show unless the selected category is RS
+    rubies_collected = models.IntegerField(blank=True, null=True) #make sure it does not show unless the selected category is CRS
+    total_rubies_earned = models.IntegerField(blank=True, null=True) #make sure it does not show unless the selected category is TRS
+    earned = models.BooleanField(default=False)
+    green_counter = models.IntegerField(blank=True, null=True, default=0,)
+    yellow_counter = models.IntegerField(blank=True, null=True, default=0)
+    orange_counter = models.IntegerField(blank=True, null=True, default=0)
+    red_counter = models.IntegerField(blank=True, null=True, default=0)
+    black_counter = models.IntegerField(blank=True, null=True, default=0)
+    gold_counter = models.IntegerField(blank=True, null=True, default=0)
+    redgold_counter = models.IntegerField(blank=True, null=True, default=0)
     date_and_time = models.DateTimeField(null=True, verbose_name="date and time", auto_now_add=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -2579,24 +2599,29 @@ class EarnedAchievements(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def save(self, *args, **kwargs):
-        if not self.value and self.achievement:
-            self.value = self.value
-        if not self.type and self.achievement:
-            self.type = self.achievement.type
-        if not self.image and self.achievement:
-            self.image = self.achievement.image()
-        if not self.slug and self.achievement:
-            self.slug = self.achievement.slug
-        if not self.title and self.achievement:
-            self.title = self.achievement.title
-        if not self.type and self.achievement:
-            self.type = self.achievement.type
-        if not self.image_length and self.achievement:
-            self.image_length = self.achievement.image_length
-        if not self.image_width and self.achievement:
-            self.image_width = self.achievement.image_width
+        if self.achievement:
+            # Safely retrieve related values from the achievement
+            if not self.value:
+                self.value = self.achievement.value
+            if not self.type:
+                self.type = self.achievement.type
+            if not self.image:
+                self.image = self.achievement.image
+            if not self.slug:
+                self.slug = self.achievement.slug
+            if not self.title:
+                self.title = self.achievement.title
+            if not self.image_length:
+                self.image_length = self.achievement.image_length
+            if not self.image_width:
+                self.image_width = self.achievement.image_width
+
+        # Set the default date and time if not already set
         if not self.date_and_time:
             self.date_and_time = timezone.now()
+
+        # Call the parent's save method to save changes
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} earned by {self.user}"
@@ -2707,41 +2732,96 @@ class BattleParticipant(models.Model):
     is_bot = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name = "Battle"
-        verbose_name_plural = "Battles"
+        verbose_name = "Battle Participant"
+        verbose_name_plural = "Battle Participants"
+
+
+class BattleGame(models.Model):
+    battle = models.ForeignKey('Battle', on_delete=models.CASCADE, related_name='battle_games')
+    game = models.ForeignKey('Game', on_delete=models.CASCADE, related_name='battle_games')
+    quantity = models.PositiveIntegerField(default=1)  # Track how many of this game exist in the battle
+
+    class Meta:
+        verbose_name = "Battle Game"
+        verbose_name_plural = "Battle Games"
+        unique_together = ('battle', 'game')  # Ensure no duplicate combinations of battle and game
+
+    def __str__(self):
+        return f"{self.quantity} x {self.game} in {self.battle}"
+
+    def get_total_price(self):
+        """Returns the total price of this game in the battle, considering quantity and discount_cost."""
+        game = self.game
+        # Use discount_cost if available, otherwise use the regular cost
+        price_per_game = game.discount_cost if game.discount_cost else game.cost
+        return price_per_game * self.quantity
+
 
 
 class Battle(models.Model):
-    battle_name = models.CharField(max_length=100, help_text='Your name and tag go here.', blank=True, null=True)
-    chests = models.ManyToManyField(Game)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    battle_name = models.CharField(max_length=100, blank=True, null=True)
+    chests = models.ManyToManyField('Game', through='BattleGame', related_name='battles')
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    participants = models.ManyToManyField(BattleParticipant, blank=True, related_name='battles',
-                                          limit_choices_to={'is_bot': False})
-    robots = models.ManyToManyField(Robot, blank=True, related_name='battles', limit_choices_to={'is_bot': True})
-    min_human_participants = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)],
-                                                         help_text='Minimum number of human participants required.')
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    participants = models.ManyToManyField(
+        BattleParticipant, blank=True, related_name='battles', limit_choices_to={'is_bot': False}
+    )
+    robots = models.ManyToManyField(
+        Robot, blank=True, related_name='battles', limit_choices_to={'is_bot': True}
+    )
+    min_human_participants = models.PositiveIntegerField(
+        default=0,
+        validators=[MinValueValidator(0)],
+        help_text='Minimum number of human participants required.',
+    )
+    status = models.CharField(choices=BATTLE_STATUS, max_length=1, default="O")
+    time = models.DateTimeField(default=timezone.now, blank=True)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?",
+    )
 
-    def clean(self):
-        pass
+    def get_game_quantities(self):
+        """Returns a dictionary of games and their quantities in this battle."""
+        return {bg.game: bg.quantity for bg in self.battle_games.all()}
 
     def __str__(self):
-        return f"{self.battle_name} submitted by {self.user}"
+        return f"{self.battle_name} submitted by {self.creator}"
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        total_price = sum(game.discount_cost if game.discount_cost else game.cost for game in self.chests.all())
+
+        # Calculate total price from BattleGame entries
+        total_price = 0
+        for battle_game in self.battle_games.all():
+            game = battle_game.game
+            quantity = battle_game.quantity
+            # Use discount_cost if available, otherwise use the regular cost
+            total_price += (game.discount_cost if game.discount_cost else game.cost) * quantity
+
         self.price = total_price
-        self.save()  # Save again to update the price field
+
+        # Assign creator if not set
+        if not self.creator:
+            self.creator = self.request.user
+
+        # Assign a default currency if not set
+        if not self.currency:
+            first_currency = Currency.objects.first()
+            if first_currency:
+                self.currency = first_currency
+
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Battle"
         verbose_name_plural = "Battles"
+
 
 
 class Hits(models.Model):

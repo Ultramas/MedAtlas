@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ battle.battle_name }}</title>
+</head>
+<body>
+    <h1>{{ battle.battle_name }}</h1>
+    <p>Status: {{ battle.get_status_display }}</p>
+
+    {% if battle.status == 'O' %}
+        {% include 'join_battle.html' %}
+    {% else %}
+        <p>This battle is not open for joining.</p>
+    {% endif %}
+</body>
+</html>
