@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
         selectedItems = [];
 
+
 async function randomizeContents() {
     const startButton = document.getElementById("start");
     const gameId = startButton.getAttribute("data-game-id");
@@ -59,6 +60,7 @@ async function randomizeContents() {
         const payload = { game_id: gameId };
         console.log("Payload sent to server:", payload);
 
+        // Call the create_outcome endpoint
         const response = await fetch(`/create_outcome/${slug}/`, {
             method: 'POST',
             headers: {
@@ -78,44 +80,44 @@ async function randomizeContents() {
             // Clear existing cards
             clearCards();
 
-        const attributes = {
-            id: data.choice_id || 'N/A',
-            nonce: data.nonce || 'N/A',
-            text: data.choice_text || 'Unknown',
-            color: data.choice_color || '#FFFFFF',
-            file: data.choice_file || null,
-            value: data.choice_value || 0,
-            lowerNonce: data.lower_nonce || 'N/A',
-            upperNonce: data.upper_nonce || 'N/A',
-        };
+            const attributes = {
+                id: data.choice_id || 'N/A',
+                nonce: data.nonce || 'N/A',
+                text: data.choice_text || 'Unknown',
+                color: data.choice_color || '#FFFFFF',
+                file: data.choice_file || null,
+                value: data.choice_value || 0,
+                lowerNonce: data.lower_nonce || 'N/A',
+                upperNonce: data.upper_nonce || 'N/A',
+            };
 
-        // Create the target card
-        const targetCardElement = document.createElement('div');
-        targetCardElement.classList.add('card', 'target-card');
-        targetCardElement.setAttribute('id', `card-${attributes.id}`);
-        targetCardElement.setAttribute('data-nonce', attributes.nonce);
-        targetCardElement.setAttribute('data-color', attributes.color);
-        targetCardElement.setAttribute('data-choice_value', attributes.value);
-        targetCardElement.setAttribute('data-lower_nonce', attributes.lowerNonce);
-        targetCardElement.setAttribute('data-upper_nonce', attributes.upperNonce);
+            // Create the target card
+            const targetCardElement = document.createElement('div');
+            targetCardElement.classList.add('card', 'target-card');
+            targetCardElement.setAttribute('id', `card-${attributes.id}`);
+            targetCardElement.setAttribute('data-nonce', attributes.nonce);
+            targetCardElement.setAttribute('data-color', attributes.color);
+            targetCardElement.setAttribute('data-choice_value', attributes.value);
+            targetCardElement.setAttribute('data-lower_nonce', attributes.lowerNonce);
+            targetCardElement.setAttribute('data-upper_nonce', attributes.upperNonce);
 
-        targetCardElement.innerHTML = `
-<div class="lge" style="background-color: white;">
-                <div class="lootelement" style="background-color: ${attributes.color};  padding: 6%; margin-left: 22px; margin-top: 12px;">
-                    ${attributes.file ? `<img src="${attributes.file}" alt="${attributes.text}" width="100" height="100">` : ''}
-                </div>
+            targetCardElement.innerHTML = `
+                <div class="lge" style="background-color: white;">
+                    <div class="lootelement" style="background-color: ${attributes.color};  padding: 6%; margin-left: 22px; margin-top: 12px;">
+                        ${attributes.file ? `<img src="${attributes.file}" alt="${attributes.text}" width="100" height="100">` : ''}
+                    </div>
                 </div>
                 <h5>${attributes.value} 💎</h5>
                 <p>${attributes.text}</p>
                 <p>Nonce: ${attributes.nonce}</p>
-        `;
+            `;
 
             selectedItems.push({
                 id: attributes.id,
                 nonce: attributes.nonce,
                 text: attributes.text,
                 color: attributes.color,
-                src: attributes.file, // Assuming this is the file URL for the image
+                src: attributes.file,
                 value: attributes.value,
                 lowerNonce: attributes.lowerNonce,
                 upperNonce: attributes.upperNonce
@@ -138,9 +140,39 @@ async function randomizeContents() {
             }
 
             // Adjust the slider to center the new card
-            centerCard(targetCardElement);
+            //centerCard(targetCardElement);
 
             console.log("Target card inserted 3 cards to the right of the middle.");
+
+            // Call create_inventory_object after the card is created
+            const inventoryPayload = {
+                choice_id: data.choice_id,  // Use choice_id from outcome response
+                choice_value: data.choice_value,  // Use choice_value
+                category: 'example_category',  // Additional data as needed
+                price: 100,
+                condition: 'New',
+                quantity: 1
+            };
+            console.log("Calling /create_inventory_object/ with payload:", inventoryPayload);
+
+            const inventoryResponse = await fetch('/create_inventory_object/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is correctly passed
+                },
+                body: JSON.stringify(inventoryPayload),
+            });
+
+            const inventoryData = await inventoryResponse.json();
+            console.log("Response from /create_inventory_object/:", inventoryData);
+
+            if (inventoryData.status === 'success') {
+                console.log("Inventory object created successfully.");
+            } else {
+                console.error("Failed to create inventory object:", inventoryData.message);
+            }
+
             return data; // Return the data for further use
         } else {
             console.error(`Error: ${data.message}`);
@@ -151,6 +183,7 @@ async function randomizeContents() {
         return null;
     }
 }
+
 
 // Function to clear all cards
 function clearCards() {
@@ -214,8 +247,8 @@ function alignCardWithSpinner() {
     const matrix = new DOMMatrix(currentTransform); // Use DOMMatrix for robust transformation parsing
     const currentTranslateX = matrix.m41 || 0;
 
-    slider.style.transform = `translateX(${currentTranslateX + offset}px)`;
-    console.log(`Slider adjusted by offset: ${offset}px`);
+    //slider.style.transform = `translateX(${currentTranslateX + offset}px)`;
+    //console.log(`Slider adjusted by offset: ${offset}px`);
 }
 
 
@@ -230,8 +263,27 @@ function alignCardWithSpinner() {
 
     const animationDuration = isQuickSpin ? 4500 : 9000;
     const buffer = 150;
+    const audiobuffer = 300;
     const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
+
+audio.addEventListener('loadedmetadata', () => {
+    // Calculate the adjusted duration
+    const adjustedDuration = (animationDuration + audiobuffer) / 1000; // Convert ms to seconds
+    const originalDuration = audio.duration;
+
+    // Adjust playback rate if the original duration is available
+    if (originalDuration) {
+        audio.playbackRate = originalDuration / adjustedDuration;
+    }
+
+    // Play the audio
     audio.play().catch(error => console.error('Error playing audio:', error));
+});
+
+// Handle audio load errors
+audio.addEventListener('error', (e) => {
+    console.error('Audio failed to load:', e);
+});
 
 // Call this function when the spin ends
 setTimeout(() => {
@@ -241,7 +293,7 @@ setTimeout(() => {
         scroller.style.animationPlayState = 'paused';
     });
 
-    findSelectedCard();
+    //findSelectedCard();
     currentSpin++;
 
     if (currentSpin < totalSpins) {
@@ -314,7 +366,7 @@ function findSelectedCard() {
             </div>
             <p>ID: ${item.id}</p>
             <p>Nonceword: ${item.nonce}</p>
-            <img src="${item.src || ''}" alt="${item.id}">
+            <img src="${item.src || ''}" alt="${item.id}" width=150 height=225>
             <p>Value: ${item.value} 💎</p>
             <p>Lower Nonce: ${item.lowerNonce}</p>
             <p>Upper Nonce: ${item.upperNonce}</p>
