@@ -6714,4 +6714,3 @@ class DefaultAvatar(models.Model):
         verbose_name = "Default Avatar"
         verbose_name_plural = "Default Avatars"
 
-
