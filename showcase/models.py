@@ -2132,6 +2132,7 @@ class Game(models.Model):
     slug = models.SlugField(max_length=200, unique=True, blank=True, null=True)
     filter = models.CharField(choices=GAMEHUB_CHOICES, max_length=1, blank=True, null=True)
     player_made = models.BooleanField(default=True)
+    player_inventory = models.BooleanField(default=True)
     date_and_time = models.DateTimeField(null=True, verbose_name="date and time", auto_now_add=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,

@@ -585,7 +585,7 @@ class GameAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Game Information - Categorial Description', {
-            'fields': ('name', 'user', 'type', 'category', 'cost', 'image', 'power_meter', 'slug', 'filter', 'player_made', 'is_active',),
+            'fields': ('name', 'user', 'type', 'category', 'cost', 'image', 'power_meter', 'slug', 'filter', 'player_made', 'player_inventory', 'is_active',),
             'classes': ('collapse',),
         }),
     )
