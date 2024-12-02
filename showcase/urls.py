@@ -174,6 +174,7 @@ urlpatterns = [
     # path('blog/', views.BlogBackgroundView, name='blog'),
     path('featuredproducts/', views.Featured.as_view(), name='featuredproducts'),
     path('create_chest/', views.CreateChestView.as_view(), name='create_chest'),
+    path('inventory_create_chest/', views.CreateInventoryChestView.as_view(), name='inventory_create_chest'),
     # path('post_edit/', views.post_new, name='post_edit'),
     path('vote/', views.PosteView.as_view(), name='vote'),
     # path('share/, views.post, name='share'),

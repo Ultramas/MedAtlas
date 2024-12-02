@@ -2125,8 +2125,10 @@ class Game(models.Model):
     cost = models.IntegerField(default=0)
     discount_cost = models.IntegerField(blank=True, null=True)
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
+    category = models.CharField(max_length=100, help_text='Category of choice (Pokemon, Yu-Gi-Oh, Bakugo, Magic The Gathering, etc.).')
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     power_meter = models.CharField(choices=POWER, max_length=4, default=1)
+    items = models.ManyToManyField(PrizePool, related_name='official_items')
     slug = models.SlugField(max_length=200, unique=True, blank=True, null=True)
     filter = models.CharField(choices=GAMEHUB_CHOICES, max_length=1, blank=True, null=True)
     player_made = models.BooleanField(default=True)
@@ -2202,7 +2204,7 @@ class Choice(models.Model):
     color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
     votes = models.IntegerField(default=0)
     value = models.IntegerField(default=0)
-    category = models.CharField(max_length=100, help_text='Category of choice (Pokemon, Yu-Gi-Oh, Bakugo, Magic The Gathering, etc.).')
+    category = models.CharField(max_length=100, help_text='Category of choice (Pokemon, Yu-Gi-Oh, Bakugo, Magic The Gathering, etc.).', blank=True, null=True)
     subcategory = models.CharField(max_length=200, help_text='Subcategory of choice (Pokemon, trainers, etc.).', blank=True, null=True)
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     tier = models.CharField(choices=LEVEL, max_length=1, blank=True, null=True)
@@ -2738,24 +2740,16 @@ class BattleParticipant(models.Model):
 
 class BattleGame(models.Model):
     battle = models.ForeignKey('Battle', on_delete=models.CASCADE, related_name='battle_games')
-    game = models.ForeignKey('Game', on_delete=models.CASCADE, related_name='battle_games')
-    quantity = models.PositiveIntegerField(default=1)  # Track how many of this game exist in the battle
+    game = models.ForeignKey('Game', on_delete=models.CASCADE, related_name='game_battles')
+    quantity = models.PositiveIntegerField(default=1)
 
     class Meta:
+        unique_together = ('battle', 'game')  # Ensure no duplicate game-battle pairs
         verbose_name = "Battle Game"
         verbose_name_plural = "Battle Games"
-        unique_together = ('battle', 'game')  # Ensure no duplicate combinations of battle and game
 
     def __str__(self):
-        return f"{self.quantity} x {self.game} in {self.battle}"
-
-    def get_total_price(self):
-        """Returns the total price of this game in the battle, considering quantity and discount_cost."""
-        game = self.game
-        # Use discount_cost if available, otherwise use the regular cost
-        price_per_game = game.discount_cost if game.discount_cost else game.cost
-        return price_per_game * self.quantity
-
+        return f"{self.game.name} x{self.quantity} in {self.battle.battle_name}"
 
 
 class Battle(models.Model):
@@ -2793,22 +2787,12 @@ class Battle(models.Model):
     def __str__(self):
         return f"{self.battle_name} submitted by {self.creator}"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, user=None, **kwargs):
         super().save(*args, **kwargs)
-
-        # Calculate total price from BattleGame entries
-        total_price = 0
-        for battle_game in self.battle_games.all():
-            game = battle_game.game
-            quantity = battle_game.quantity
-            # Use discount_cost if available, otherwise use the regular cost
-            total_price += (game.discount_cost if game.discount_cost else game.cost) * quantity
-
-        self.price = total_price
 
         # Assign creator if not set
         if not self.creator:
-            self.creator = self.request.user
+            self.creator = user
 
         # Assign a default currency if not set
         if not self.currency:
@@ -2821,7 +2805,6 @@ class Battle(models.Model):
     class Meta:
         verbose_name = "Battle"
         verbose_name_plural = "Battles"
-
 
 
 class Hits(models.Model):

@@ -106,8 +106,8 @@ from .models import AdminPages
 from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, SellerApplicationForm, \
     MemeForm, CurrencyCheckoutForm, CurrencyPaymentForm, CurrencyPaypalPaymentForm, HitStandForm, WagerForm, \
     DirectedTradeOfferForm, FriendRequestForm, RespondingTradeOfferForm, ShippingForm, EndowmentForm, UploadCardsForm, \
-    RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, GameForm, CardUploading, GameForm, MoveToTradeForm, \
-    SpinPreferenceForm, BattleCreationForm, BattleJoinForm
+    RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, GameForm, CardUploading, MoveToTradeForm, \
+    SpinPreferenceForm, BattleCreationForm, BattleJoinForm, InventoryGameForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -1758,15 +1758,19 @@ class GameChestBackgroundView(BaseView):
                 newprofile.newprofile_profile_picture_url = profile.avatar.url
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
-        user = self.request.user
+        user_profile = None  # Initialize to ensure it always exists
+        if game.user:
+            # Perform actions only if the `user` field is filled
+            user_profile, created = UserProfile.objects.get_or_create(user=game.user)
+            # Additional logic if necessary
 
-        user_profile, created = UserProfile.objects.get_or_create(user=self.request.user)
         context['SentProfile'] = user_profile
-        user_cash = user_profile.currency_amount
+        if game.user:
+            user_cash = user_profile.currency_amount
 
-        context = {
-            'user_cash': user_cash,
-        }
+            context = {
+                'user_cash': user_cash,
+            }
 
         context['Money'] = Currency.objects.filter(is_active=1).first()
 
@@ -7143,6 +7147,29 @@ class CreateChestView(FormView):
             return self.render_to_response(self.get_context_data(
                 game_form=game_form, formset=formset
             ))
+
+
+class CreateInventoryChestView(FormView):
+    template_name = "inventory_create_chest.html"
+    form_class = InventoryGameForm
+    success_url = reverse_lazy('game_list')  # Replace 'game_list' with your desired success URL name
+
+    def form_valid(self, form):
+        # Save the form instance but do not commit it to the database yet
+        game = form.save(commit=False)
+        # Add additional logic if needed, for example, associating the user
+        game.user = self.request.user  # Assuming the user is logged in
+        game.save()  # Save the game instance
+
+        # ManyToMany fields require saving after the main object is saved
+        if 'items' in form.cleaned_data:
+            game.items.set(form.cleaned_data['items'])  # Assign the items (ManyToManyField)
+
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        # Handle the form validation errors
+        return JsonResponse({'errors': form.errors}, status=400)
 
 
 def move_to_trading(self, **kwargs):

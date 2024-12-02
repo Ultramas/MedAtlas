@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <h3>Create a New Game</h3>
+
+    {{ form.non_field_errors }}
+
+    <label for="{{ form.name.id_for_label }}">Game Name:</label>
+    {{ form.name }}
+
+    <label for="{{ form.cost.id_for_label }}">Cost:</label>
+    {{ form.cost }}
+
+    <label for="{{ form.discount_cost.id_for_label }}">Discount Cost:</label>
+    {{ form.discount_cost }}
+
+    <label for="{{ form.type.id_for_label }}">Type:</label>
+    {{ form.type }}
+
+    <label for="{{ form.image.id_for_label }}">Game Image:</label>
+    {{ form.image }}
+
+    <label for="{{ form.power_meter.id_for_label }}">Power Meter:</label>
+    {{ form.power_meter }}
+<h4>Available Prizes:</h4>
+{% for value, prize in form.items.field.choices %}
+    <div class="prize-item">
+        <label for="id_items_{{ value }}">
+            <input type="checkbox" id="id_items_{{ value }}" name="items" value="{{ value }}">
+            <strong>{{ prize.prize_name }}</strong><br>
+            <img src="{{ prize.image.url }}" alt="{{ prize.prize_name }}" width="100">
+            <!--<p>Quantity: {{ prize.number }}</p>-->
+        </label>
+    </div>
+{% endfor %}
+
+
+    <button type="submit">Create Game</button>
+</form>
+
+
+
+</body>
+</html>

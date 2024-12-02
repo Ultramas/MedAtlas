@@ -4,14 +4,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Achievements</title>
-
-    <style>
-
-    </style>
-</head>
-<body>
     <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
@@ -20,6 +12,197 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
 
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeTrove Achievements</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f39c12;
+            --background-color: #f4f4f4;
+            --text-color: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+
+        .hero {
+            background-image: url('https://source.unsplash.com/random/1600x900/?pokemon');
+            background-size: cover;
+            background-position: center;
+            height: 50vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #fff;
+            padding: 2rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        main {
+            padding: 2rem 5%;
+            margin-top: 60px;
+        }
+
+        .achievements {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievements h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+        }
+
+        .progress-bar {
+            background-color: #e0e0e0;
+            height: 20px;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress {
+            background-color: var(--primary-color);
+            height: 100%;
+            border-radius: 10px;
+            width: 60%; /* Adjust this value to represent the actual progress */
+        }
+
+        .achievement-count {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .achievement {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .achievement:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .achievement img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+        }
+
+        .achievement h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .achievement.locked {
+            opacity: 0.5;
+        }
+
+        .achievement.locked img {
+            filter: grayscale(100%);
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+.achievement {
+        position: relative;
+    }
+
+    .hover-content {
+        display: none;
+        position: absolute;
+        opacity: 1;
+        left: 100%;
+        top: 0;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+        width: 200px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        z-index: 30;
+    }
+
+    .achievement:hover .hover-content {
+        display: block;
+    }
+
+    /* Adjust the achievement grid to allow space for popups */
+    .achievement-grid {
+        gap: 2rem 4rem;
+    }
+
+    /* Media query for smaller screens */
+    @media (max-width: 768px) {
+        .hover-content {
+            left: 50%;
+            top: 100%;
+            transform: translateX(-50%);
+        }
+    }
+    </style>
+</head>
+<body>
 
 
 	<!-- header -->
@@ -106,49 +289,28 @@
 	</div>
 	<!-- end search area -->
 
-	<!-- breadcrumb-section -->
-{% for GameHub in Background %}
-  {% if GameHub.page == "gamehub.html" %}
-  {% if GameHub.position == 1 %}
-	<div class="breadcrumb-section breadcrumb-bg" style="background: url({{GameHub.cover.url}}); background-size: cover;">
-        {% endif %}
-        {% endif %}
-        {% endfor %}
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-8 offset-lg-2 text-center">
-					<div class="breadcrumb-text">
-						<p>PokeTrove Achievements</p>
-						<h1></h1>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end breadcrumb section -->
-<!-- latest news -->
-<div class="latest-news mt-150 mb-150">
-    <div class="search" style="margin-left: 90%;">
+    <main>
+        <section class="hero">
+            <h1>PokeTrove Achievements</h1>
+            <p>Unlock your potential, collect them all!</p>
+        </section>
 
-      <form class="searchbar" action="{% url 'showcase:gamehubsearchresults' %}" method="get" style="border-radius: 30px;">
-        <input name="q" type="text" placeholder="Search Categories..." style="border-radius: 30px; margin-top: -500px; margin-right: 50px; ">
-      </form>
-      <br>
-      <br>
-    </div>
-<br>
-<div class="ret" style="border: 1px solid black; border-radius: 50px; padding: 20px;">
+        <section class="achievements" id="achievements">
+        <h1 style="text-align: center; font-size: 35px;">{{user.username}}'s Achievements ({{ earned_count }}/{{ total_count }})</h1>
 
-<h1 style="text-align: center; font-size: 35px;">{{user.username}}'s Achievements ({{ earned_count }}/{{ total_count }})</h1>
-<ul>
+            <div class="progress-bar">
+                <div class="progress"></div>
+                <span class="achievement-count">{{ earned_count }}/{{ total_count }}</span>
+            </div>
+
     {% for achievement in total_achievements %}
         {% if achievement in earned_achievements %}
-            <!-- Earned Achievement -->
-            <div class="image-container hover-container">
-                <h4>{{ achievement.title }}</h4>
-                <img src="{{ achievement.image.url }}" alt="{{ achievement.title }}" style="width: 100px; height: 100px; border-radius: 10px;">
-                <div class="hover-content">
+            <div class="achievement-grid">
+                <div class="achievement">
+                    <img src="{{ achievement.image.url }}" alt="{{ achievement.title }}" style="width: 100px; height: 100px; border-radius: 10px;">
+                    <h3>{{ achievement.title }}</h3>
                     <p>{{ achievement.description }}</p>
+                    <div class="hover-content">
                      {% if achievement.currency.name == "Rubies" %}
                     <p>Value: {{ achievement.value }} 💎</p>
                      {% else %}
@@ -157,14 +319,15 @@
                     <p>Type: {{ achievement.type }}</p>
                     <p>Status: Achieved</p>
                 </div>
-            </div>
-        {% else %}
+                </div>
+                 {% else %}
             <!-- Unearned Achievement (Blacked Out) -->
             <div class="image-container hover-container unearned">
-                <h4>{{ achievement.title }}</h4>
+                <div class="achievement locked">
                 <img src="{{ achievement.image.url }}" alt="{{ achievement.title }}" style="width: 100px; height: 100px; border-radius: 10px; opacity: 0.5;">
-                <div class="hover-content">
+                <h3>{{ achievement.title }}</h3>
                     <p>{{ achievement.description }}</p>
+                    <div class="hover-content">
                      {% if achievement.currency.name == "Rubies" %}
                     <p>Value: {{ achievement.value }} 💎</p>
                      {% else %}
@@ -174,92 +337,37 @@
                     <p>Status: Not Achieved</p>
                 </div>
             </div>
+            </div>
         {% endif %}
     {% empty %}
         <li>No achievements available.</li>
     {% endfor %}
-</ul>
+                <div class="achievement">
+                    <img src="https://source.unsplash.com/random/201x201/?pokemon" alt="Collector">
+                    <h3>Collector</h3>
+                    <p>Catch 50 unique Pokemon</p>
+                </div>
+                <div class="achievement locked">
+                    <img src="https://source.unsplash.com/random/202x202/?pokemon" alt="Master Trainer">
+                    <h3>Master Trainer</h3>
+                    <p>Win 100 battles</p>
+                </div>
+                <div class="achievement">
+                    <img src="https://source.unsplash.com/random/203x203/?pokemon" alt="Explorer">
+                    <h3>Explorer</h3>
+                    <p>Visit 10 different locations</p>
+                </div>
+                <div class="achievement locked">
+                    <img src="https://source.unsplash.com/random/204x204/?pokemon" alt="Legend">
+                    <h3>Legend</h3>
+                    <p>Catch a legendary Pokemon</p>
+                </div>
+            </div>
+        </section>
+    </main>
 
-
-</div>
-<style>.hover-container {
-    position: relative;
-    display: inline-block;
-}
-
-.hover-content {
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 110%;
-    width: 200px;
-    padding: 10px;
-    background-color: white;
-    border: 1px solid #ccc;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    z-index: 10;
-}
-
-.hover-container:hover .hover-content {
-    display: block;
-}
-
-
-    .image-container {
-    position: relative;
-    display: inline-block;
-}
-
-.image-container img {
-    display: block;
-    width: 100%;
-    height: auto;
-    filter: grayscale(100%);
-}
-
-.image-container h4 {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    font-size: 2em; /* Adjust as needed */
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    z-index: 1;
-}
-
-
-    .image-containere {
-    position: relative;
-    display: inline-block;
-}
-
-.image-containere img {
-    display: block;
-    width: 100%;
-    height: auto;
-}
-
-.image-containere h4 {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    font-size: 2em; /* Adjust as needed */
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    z-index: 1;
-}
-
-</style>
-
+    <footer>
+        <p>&copy; 2023 PokeTrove. All rights reserved.</p>
+    </footer>
 </body>
 </html>
-

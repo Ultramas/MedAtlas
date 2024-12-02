@@ -573,12 +573,19 @@ class GameChoiceInline(admin.StackedInline):
 class GameAdmin(admin.ModelAdmin):
     inlines = [GameChoiceInline]
 
-    def save_related(self, request, form, formsets, change):
-        super().save_related(request, form, formsets, change)
+    def save_formset(self, request, form, formset, change):
+        # Call the original save_formset to save the related objects
+        instances = formset.save(commit=False)
+        for instance in instances:
+            # Check if the instance is a Choice object and set its category to the game's category
+            if isinstance(instance, Choice):
+                instance.category = form.instance.category
+                instance.save()
+        formset.save_m2m()  # Save any many-to-many relationships
 
     fieldsets = (
         ('Game Information - Categorial Description', {
-            'fields': ('name', 'user', 'type', 'cost', 'image', 'power_meter', 'slug', 'filter', 'player_made', 'is_active',),
+            'fields': ('name', 'user', 'type', 'category', 'cost', 'image', 'power_meter', 'slug', 'filter', 'player_made', 'is_active',),
             'classes': ('collapse',),
         }),
     )

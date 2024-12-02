@@ -1,3 +1,6 @@
+
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,7 +40,7 @@ font-family: 'Lato', sans-serif;
                 {% if item.get_display_tier %}
                 <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
                 {% endif %}
-                <p><strong>Color:</strong> {{ item.get_color_display }}</p>
+                <p><strong>Color:</strong> qweqwe{{ item.get_color_display }}</p>
             </div>
             <div class="nerd-stats">
                 <p><strong>Inventory:</strong> {{ item.number_of_choice }}</p>
@@ -81,7 +84,39 @@ font-family: 'Lato', sans-serif;
                 {% if item.get_display_tier %}
                 <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
                 {% endif %}
-                <p><strong>Color:</strong> {{ item.get_color_display }}</p>
+                 {% if cost_threshold_10000 >= item.value %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); padding: -10%;">
+                    <p><img src="{{ item.file.url }}" alt="{{ item.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_500 >= item.value > cost_threshold_10000 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); padding: 6%;">
+                    <p><img src="{{ item.file.url }}" alt="{{ item.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_200 >= item.value > cost_threshold_500 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); padding: 6%;">
+                    <p><img src="{{ item.file.url }}" alt="{{ item.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_100 >= item.value > cost_threshold_200 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); padding: 6%;">
+                    <p><img src="{{ item.file.url }}" alt="{{ item.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_80 >= item.value > cost_threshold_100 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); padding: 6%;">
+                    <p><img src="{{ item.file.url }}" alt="{{ item.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_80 >= item.value > cost_threshold_100 %}
+                            <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); padding: 6%;">
+                    <p><img src="{{ item.file.url }}" alt="{{ item.choice_text }}"></p>
+                            </div>
+                        {% else %}
+                            <p>This item does not meet the cost requirement.</p>
+                        {% endif %}
+
             </div>
             <div class="nerd-stats">
                 <p><strong>Nonce:</strong> {{ item.nonce }} (within range {{ item.lower_nonce }} - {{ item.upper_nonce }})</p>

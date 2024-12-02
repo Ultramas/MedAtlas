@@ -10,7 +10,7 @@ from mysite import settings
 from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme, TradeOffer, \
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
-    SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem
+    SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -51,6 +51,7 @@ from .models import BaseCopyrightTextField
 from .models import Battle
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.forms.widgets import CheckboxSelectMultiple
 
 # from .models import ProfileTwo
 # from .models import PublicProfile
@@ -318,10 +319,46 @@ ChoiceFormSet = inlineformset_factory(
 )
 
 
+#used when the user wants to use their own cards; PokeTrove gets commission
 class GameForm(forms.ModelForm):
     class Meta:
         model = Game
-        fields = ['name', 'user', 'cost', 'discount_cost', 'type', 'image', 'power_meter',]
+        fields = ['name', 'cost', 'discount_cost', 'type', 'image', 'power_meter',]
+
+
+#used when the user wants to use cards owned by PokeTrove; user gets commission
+
+class InventoryGameForm(forms.ModelForm):
+    items = forms.ModelMultipleChoiceField(
+        queryset=PrizePool.objects.filter(is_active=1),  # Only active items
+        widget=CheckboxSelectMultiple,
+        required=False,  # Optional if needed
+        label="Available Prizes",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Attach related PrizePool objects to the field choices
+        self.fields['items'].choices = [
+            (prize.id, prize) for prize in self.fields['items'].queryset
+        ]
+
+    def save(self, commit=True):
+        # Call the parent save method to create or update the Game instance
+        game = super().save(commit=False)
+        # Set the player_inventory field to False
+        game.player_inventory = False
+        if commit:
+            # Save the Game instance to the database
+            game.save()
+            # Save the ManyToMany relationships
+            self.save_m2m()
+        return game
+
+    class Meta:
+        model = Game
+        fields = ['name', 'items', 'cost', 'discount_cost', 'type', 'image', 'power_meter']
+
 
 
 class CardUploading(forms.ModelForm):
