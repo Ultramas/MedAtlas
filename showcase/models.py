@@ -6692,6 +6692,7 @@ class LotteryTickets(models.Model):
         verbose_name = "Lottery Ticket"
         verbose_name_plural = "Lottery Tickets"
 
+
 class DefaultAvatar(models.Model):
     default_avatar_name = models.CharField(max_length=300, blank=True, null=True)
     default_avatar = models.ImageField(upload_to='images/')
