@@ -5,7 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-<form method="post" action="{% url 'battles:join_battle' %}">
+<form method="post" action="{% url 'showcase:join_battle' %}">
     {% csrf_token %}
     <input type="hidden" name="battle" value="{{ battle.id }}">
     {{ form.as_p }}

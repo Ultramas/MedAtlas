@@ -424,13 +424,20 @@ class BattleCreationForm(forms.ModelForm):
         return cleaned_data
 
 
-
 class BattleJoinForm(forms.Form):
-    battle = forms.ModelChoiceField(queryset=Battle.objects.filter(status='O'))
+    battle = forms.ModelChoiceField(
+        queryset=Battle.objects.filter(status='O'),
+        widget=forms.HiddenInput()  # Render as a hidden field
+    )
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)  # Pass the user to the form
+        battle_instance = kwargs.pop('battle_instance', None)  # Pass the specific battle instance
         super().__init__(*args, **kwargs)
+
+        if battle_instance:
+            self.fields['battle'].queryset = Battle.objects.filter(id=battle_instance.id)
+            self.fields['battle'].initial = battle_instance
 
     def clean(self):
         cleaned_data = super().clean()
@@ -448,6 +455,7 @@ class BattleJoinForm(forms.Form):
             raise forms.ValidationError('This battle has reached the maximum participant limit.')
 
         return cleaned_data
+
 
 class MoveToTradeForm(forms.Form):
     title = forms.CharField(max_length=100, required=False)

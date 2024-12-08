@@ -2110,6 +2110,10 @@ class BattleJoinView(FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
+        battle_id = self.request.POST.get('battle')  # Get battle ID from POST data
+        if battle_id:
+            battle_instance = Battle.objects.filter(id=battle_id, status='O').first()
+            kwargs['battle_instance'] = battle_instance
         return kwargs
 
     def form_valid(self, form):

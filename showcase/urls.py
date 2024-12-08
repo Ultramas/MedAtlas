@@ -358,6 +358,7 @@ urlpatterns = [
     path('create_outcome/<slug:slug>/', views.create_outcome, name='create_outcome'),
     path('spin/<int:game_id>/', views.game_view, name='game_view'),
     path('battle/', views.OpenBattleListView.as_view(), name='battle'),
+    path('join_battle/', views.BattleJoinView.as_view(), name='join_battle'),
     path('battlecreator/', views.BattleCreationView.as_view(), name='battlecreator'),
     path('join/', BattleJoinView.as_view(), name='join_battle'),
     path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
