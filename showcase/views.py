@@ -2098,6 +2098,7 @@ class BattleCreationView(CreateView):
 
     def form_valid(self, form):
         # Any additional processing can go here
+        form.instance.creator = self.request.user
         return super().form_valid(form)
 
 

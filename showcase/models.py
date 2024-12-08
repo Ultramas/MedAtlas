@@ -2791,10 +2791,6 @@ class Battle(models.Model):
     def save(self, *args, user=None, **kwargs):
         super().save(*args, **kwargs)
 
-        # Assign creator if not set
-        if not self.creator:
-            self.creator = user
-
         # Assign a default currency if not set
         if not self.currency:
             first_currency = Currency.objects.first()
