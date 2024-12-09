@@ -2081,6 +2081,7 @@ def create_card_instance(request):
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
+
 class OpenBattleListView(ListView):
     model = Battle
     template_name = "battle.html"  # Your template for listing open battles
@@ -2089,44 +2090,91 @@ class OpenBattleListView(ListView):
     def get_queryset(self):
         return Battle.objects.filter(status='O').order_by('-time')
 
+    def post(self, request, *args, **kwargs):
+        battle_id = request.POST.get('battle_id')
+        try:
+            battle = Battle.objects.get(id=battle_id)
+        except Battle.DoesNotExist:
+            messages.error(request, "Battle not found.")
+            return redirect('home')
+
+        # Check if the battle is open for participants
+        if battle.status != 'O':
+            messages.error(request, 'This battle is not currently open for participants.')
+            return redirect('home')
+
+        # Check if the user is already a participant
+        if request.user in battle.participants.all():
+            messages.error(request, 'You are already a participant in this battle.')
+            return redirect('battle_detail', battle_id=battle.id)
+
+        form = BattleJoinForm(request.POST, user=request.user, battle=battle)
+        if form.is_valid():
+            form.save()  # Add the user as a participant
+            messages.success(request, 'You have successfully joined the battle!')
+            return redirect('showcase:battle_detail', battle_id=battle.id)  # Redirect to battle detail page
+        else:
+            messages.error(request, 'There was an error joining the battle. Please try again.')
+
+        return self.get(request, *args, **kwargs)
+
 
 class BattleCreationView(CreateView):
     model = Battle
     form_class = BattleCreationForm
-    template_name = "battlecreator.html"  # Your template for the creation form
+    template_name = "battlecreator.html"  # Use the same template
     success_url = reverse_lazy('showcase:battle')  # Redirect to the open battles list
 
     def form_valid(self, form):
-        # Any additional processing can go here
+        # Set the creator of the battle to the logged-in user
         form.instance.creator = self.request.user
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-class BattleJoinView(FormView):
-    template_name = 'join_battle.html'
-    form_class = BattleJoinForm
-    success_url = reverse_lazy('showcase:battle')
+        # Add the games as JSON data to the context with effective cost
+        games = Game.objects.all()
+        context['games_json'] = json.dumps([
+            {
+                'id': game.id,
+                'name': game.name,
+                'cost': game.get_effective_cost()  # Use the effective cost
+            }
+            for game in games
+        ])
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        battle_id = self.request.POST.get('battle')  # Get battle ID from POST data
-        if battle_id:
-            battle_instance = Battle.objects.filter(id=battle_id, status='O').first()
-            kwargs['battle_instance'] = battle_instance
-        return kwargs
-
-    def form_valid(self, form):
-        battle = form.cleaned_data['battle']
-        participant, created = BattleParticipant.objects.get_or_create(user=self.request.user)
-        battle.participants.add(participant)
-        messages.success(self.request, f"You have successfully joined the battle: {battle.battle_name}")
-        return super().form_valid(form)
+        return context
 
 
-    def form_invalid(self, form):
-        # Handle invalid form (optional customization)
-        return super().form_invalid(form)
+def join_battle(request):
+    # Fetch the battle based on the battle_id from the POST request
+    battle_id = request.POST.get('battle_id')
+    battle = Battle.objects.get(id=battle_id)
+
+    if battle.status != 'O':
+        messages.error(request, 'This battle is not currently open for participants.')
+        return redirect('home')  # Redirect to another page if battle is closed
+
+    # Check if the user is already a participant
+    if request.user in battle.participants.all():
+        messages.error(request, 'You are already a participant in this battle.')
+        return redirect('battle_detail', battle_id=battle.id)
+
+    if request.method == 'POST':
+        form = BattleJoinForm(request.POST, user=request.user, battle=battle)
+
+        if form.is_valid():
+            form.save()  # Add the user as a participant
+            messages.success(request, 'You have successfully joined the battle!')
+            return redirect('battle_detail', battle_id=battle.id)  # Redirect to battle detail page
+        else:
+            messages.error(request, 'There was an error joining the battle. Please try again.')
+    else:
+        # Create a new form instance with the user and battle
+        form = BattleJoinForm(user=request.user, battle=battle)
+
+    return render(request, 'showcase/join_battle.html', {'form': form, 'battle': battle})
 
 
 def battle_detail_view(request, battle_id):

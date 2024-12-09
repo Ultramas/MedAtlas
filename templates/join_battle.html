@@ -1,16 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<form method="post" action="{% url 'showcase:join_battle' %}">
-    {% csrf_token %}
-    <input type="hidden" name="battle" value="{{ battle.id }}">
-    {{ form.as_p }}
-    <button type="submit">Join Battle</button>
-</form>
 
-</body>
-</html>
+
+  <h1>Join Battle: {{ battle.battle_name }}</h1>
+
+  {% if battle.status == 'O' %}
+    <p>This battle is open for participants. Join now!</p>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Join Battle</button>
+    </form>
+  {% else %}
+    <p>This battle is not currently open for participants.</p>
+  {% endif %}
+

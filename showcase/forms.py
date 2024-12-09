@@ -10,7 +10,7 @@ from mysite import settings
 from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme, TradeOffer, \
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
-    SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool
+    SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -360,7 +360,6 @@ class InventoryGameForm(forms.ModelForm):
         fields = ['name', 'items', 'cost', 'discount_cost', 'type', 'image', 'power_meter']
 
 
-
 class CardUploading(forms.ModelForm):
     class Meta:
         model = Choice
@@ -399,21 +398,21 @@ class BattleCreationForm(forms.ModelForm):
         battle_instance = self.instance
 
         if chests:
-            # Retrieve the game quantities if the instance exists
             if battle_instance.pk:
+                # Retrieve the game quantities if the instance exists
                 game_quantities = battle_instance.get_game_quantities()
                 game_values = [
-                    f"{game.name}: {quantity} x {game.cost} = {quantity * game.cost}"
+                    f"{game.name}: {quantity} x {game.get_effective_cost()} = {quantity * game.get_effective_cost()}"
                     for game, quantity in game_quantities.items()
                 ]
-                total_value = sum(quantity * game.cost for game, quantity in game_quantities.items())
+                total_value = sum(quantity * game.get_effective_cost() for game, quantity in game_quantities.items())
             else:
                 # Handle the form without a pre-existing instance
                 game_values = [
-                    f"{game.name}: 1 x {game.cost} = {game.cost}"
+                    f"{game.name}: 1 x {game.get_effective_cost()} = {game.get_effective_cost()}"
                     for game in chests
                 ]
-                total_value = sum(game.cost for game in chests)
+                total_value = sum(game.get_effective_cost() for game in chests)
 
             cleaned_data['game_values'] = "\n".join(game_values)
             cleaned_data['total_value'] = total_value
@@ -422,39 +421,46 @@ class BattleCreationForm(forms.ModelForm):
             cleaned_data['total_value'] = 0
 
         return cleaned_data
+BattleGameFormSet = inlineformset_factory(
+    parent_model=Battle,
+    model=BattleGame,
+    fields=['game', 'quantity'],
+    extra=1,  # Number of empty forms to show initially
+    can_delete=True,  # Allow removing games from the battle
+    widgets={
+        'game': forms.Select(attrs={'class': 'form-control'}),
+        'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+    }
+)
 
-
-class BattleJoinForm(forms.Form):
-    battle = forms.ModelChoiceField(
-        queryset=Battle.objects.filter(status='O'),
-        widget=forms.HiddenInput()  # Render as a hidden field
-    )
+class BattleJoinForm(forms.ModelForm):
+    class Meta:
+        model = BattleParticipant
+        fields = []  # No fields needed as we're adding the user directly
 
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)  # Pass the user to the form
-        battle_instance = kwargs.pop('battle_instance', None)  # Pass the specific battle instance
+        self.user = kwargs.pop('user', None)  # Pass the user instance
+        self.battle = kwargs.pop('battle', None)  # Pass the battle instance
         super().__init__(*args, **kwargs)
 
-        if battle_instance:
-            self.fields['battle'].queryset = Battle.objects.filter(id=battle_instance.id)
-            self.fields['battle'].initial = battle_instance
-
     def clean(self):
+        # Check if the battle status is 'O' and if the user is already a participant
         cleaned_data = super().clean()
-        battle = cleaned_data.get('battle')
+        if self.battle.status != 'O':
+            raise ValidationError("You cannot join a battle that is not open.")
 
-        if not battle:
-            raise forms.ValidationError('Battle not selected.')
-
-        # Check if the user is already a participant
-        if battle.participants.filter(user=self.user).exists():
-            raise forms.ValidationError('You have already joined this battle.')
-
-        # Check if the battle is full
-        if battle.participants.count() >= battle.min_human_participants:
-            raise forms.ValidationError('This battle has reached the maximum participant limit.')
+        if self.user in self.battle.participants.all():
+            raise ValidationError("You are already a participant in this battle.")
 
         return cleaned_data
+
+    def save(self, commit=True):
+        # Create a new participant and add the user to the battle
+        participant = BattleParticipant(user=self.user)
+        if commit:
+            participant.save()
+            self.battle.participants.add(participant)
+        return participant
 
 
 class MoveToTradeForm(forms.Form):

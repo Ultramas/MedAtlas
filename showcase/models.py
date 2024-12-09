@@ -81,6 +81,26 @@ BATTLE_STATUS = (
     ('C', 'Complete'),
 )
 
+BATTLE_SLOTS = (
+    ('2', '1v1'),
+    ('3', '1v1v1'),
+    ('4', '1v1v1v1'),
+    ('5', '1ve5'),
+    ('6', '1ve6'),
+    ('7', '1ve7'),
+    ('8', '1ve8'),
+    ('9', '1ve9'),
+    ('10', '1ve10'),
+    ('2v2', '2v2'),
+    ('2ve3', '2v2v2'),
+    ('2ve4', '2v2v2v2'),
+    ('2ve5', '2ve5'),
+    ('3v3', '3v3'),
+    ('3ve3', '3v3v3'),
+    ('4v4', '4v4'),
+    ('5v5', '5v5'),
+)
+
 TYPE_CHOICES = (('S', 'Singles'), ('BP', 'Booster Pack'),
                 ('BB', 'Booster Box'), ('PP', 'Pokemon Product'), ('O',
                                                                    'Other'))
@@ -2186,6 +2206,10 @@ class Game(models.Model):
     def get_profile_url2(self):
         return reverse('showcase:game', args=[str(self.slug)])
 
+    def get_effective_cost(self):
+        """Return the discount cost if available, otherwise the regular cost."""
+        return self.discount_cost if self.discount_cost else self.cost
+
     class Meta:
         verbose_name = "Game"
         verbose_name_plural = "Games"
@@ -2734,6 +2758,9 @@ class BattleParticipant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_bot = models.BooleanField(default=False)
 
+    def __str__(self):
+        return str(self.user)
+
     class Meta:
         verbose_name = "Battle Participant"
         verbose_name_plural = "Battle Participants"
@@ -2744,13 +2771,23 @@ class BattleGame(models.Model):
     game = models.ForeignKey('Game', on_delete=models.CASCADE, related_name='game_battles')
     quantity = models.PositiveIntegerField(default=1)
 
+    def __str__(self):
+        return f"{self.game.name} x{self.quantity} in {self.battle.battle_name}"
+
     class Meta:
         unique_together = ('battle', 'game')  # Ensure no duplicate game-battle pairs
         verbose_name = "Battle Game"
         verbose_name_plural = "Battle Games"
 
-    def __str__(self):
-        return f"{self.game.name} x{self.quantity} in {self.battle.battle_name}"
+    def game_cost(self):
+        return self.game.cost
+
+    game_cost.short_description = "Game Cost"  # Label in the admin interface
+
+    def game_discount_cost(self):
+        return self.game.discount_cost
+
+    game_discount_cost.short_description = "Discounted Cost"  # Label in the admin interface
 
 
 class Battle(models.Model):
@@ -2771,6 +2808,7 @@ class Battle(models.Model):
         help_text='Minimum number of human participants required.',
     )
     status = models.CharField(choices=BATTLE_STATUS, max_length=1, default="O")
+    slots = models.CharField(choices=BATTLE_SLOTS, max_length=4, default="2")
     time = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.IntegerField(
         default=1,
@@ -2790,12 +2828,24 @@ class Battle(models.Model):
 
     def save(self, *args, user=None, **kwargs):
         super().save(*args, **kwargs)
+        for participant in self.participants.all():
+            print(f'Checking participant: {participant.user}')
+            if BattleParticipant.objects.filter(user=participant.user, battle=self).exists():
+                raise ValueError(f"User {participant.user} is already a participant in this battle.")
 
         # Assign a default currency if not set
         if not self.currency:
             first_currency = Currency.objects.first()
             if first_currency:
                 self.currency = first_currency
+        total_price = 0
+        for game in self.chests.all():  # Accessing the related Game instances via the 'chests' field
+            if game.discount_cost is not None:
+                total_price += game.discount_cost
+            else:
+                total_price += game.cost
+
+        self.price = total_price
 
         super().save(*args, **kwargs)
 

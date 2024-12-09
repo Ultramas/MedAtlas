@@ -5,15 +5,41 @@
     <title>Title</title>
 </head>
 <body>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const gameData = {{ games_json|safe }}; // Pass game data as JSON
+
+        const chestsSelect = document.getElementById("id_chests");
+        const gameValuesField = document.getElementById("id_game_values");
+        const totalValueField = document.getElementById("id_total_value");
+
+        chestsSelect.addEventListener("change", function () {
+            let selectedGames = Array.from(chestsSelect.selectedOptions).map(option => parseInt(option.value));
+            let gameValues = [];
+            let totalValue = 0;
+
+            selectedGames.forEach(gameId => {
+                let game = gameData.find(g => g.id === gameId);
+                if (game) {
+                    let gameCost = game.cost || 0;
+                    gameValues.push(`${game.name}: 1 x ${gameCost} = ${gameCost}`);
+                    totalValue += gameCost;
+                }
+            });
+
+            gameValuesField.value = gameValues.join("\n");
+            totalValueField.value = totalValue;
+        });
+    });
+</script>
+
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <h4>Game Values</h4>
-    <textarea readonly>{{ form.cleaned_data.game_values }}</textarea>
-    <h4>Total Value</h4>
-    <input type="number" value="{{ form.cleaned_data.total_value }}" readonly>
+
     <button type="submit">Submit</button>
 </form>
+
 
 
 

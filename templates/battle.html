@@ -9,33 +9,34 @@
     <h1>Open Battles</h1>
     {% if open_battles %}
         <ul>
-            {% for battle in open_battles %}
-                <li>
-                    <strong>Battle Name:</strong> {{ battle.battle_name }}<br>
-                    <strong>Creator:</strong> {{ battle.creator }}<br>
-                    <strong>Price:</strong> {{ battle.price }} {{ battle.currency }}<br>
-                    <strong>Minimum Participants:</strong> {{ battle.min_human_participants }}<br>
-                    <strong>Status:</strong> {{ battle.get_status_display }}<br>
-                    <strong>Time:</strong> {{ battle.time }}<br>
-                    <strong>Games:</strong>
-                    <ul>
-                        {% for game, quantity in battle.get_game_quantities.items %}
-                            <li>{{ game.name }}: {{ quantity }}</li>
-                        {% endfor %}
-                    </ul>
+{% for battle in open_battles %}
+<li>
+    <strong>Battle Name:</strong> {{ battle.battle_name }}<br>
+    <strong>Creator:</strong> {{ battle.creator }}<br>
+    <strong>Price:</strong> {{ battle.price }} {{ battle.currency }}<br>
+    <strong>Minimum Participants:</strong> {{ battle.min_human_participants }}<br>
+    <strong>Status:</strong> {{ battle.get_status_display }}<br>
+    <strong>Time:</strong> {{ battle.time }}<br>
+    <strong>Games:</strong>
+    <ul>
+        {% for game, quantity in battle.get_game_quantities.items %}
+            <li>{{ game.name }}: {{ quantity }}</li>
+        {% endfor %}
+    </ul>
 
-                    <!-- Include the join_battle form -->
-                    <form method="post" action="{% url 'showcase:join_battle' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="battle" value="{{ battle.id }}">
-                        <button type="submit">Join Battle</button>
-                    </form>
-                </li>
-                <hr>
-            {% endfor %}
+{% if battle.status == 'O' %}
+            <!-- Join Battle Form -->
+            <form method="post" action="{% url 'showcase:battle' %}">
+                {% csrf_token %}
+                <input type="hidden" name="battle_id" value="{{ battle.id }}">
+                <button type="submit">Join Battle</button>
+            </form>
+
         </ul>
     {% else %}
         <p>No open battles found.</p>
+    {% endif %}
+    {% endfor %}
     {% endif %}
 </body>
 </html>

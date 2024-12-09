@@ -585,7 +585,7 @@ class GameAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Game Information - Categorial Description', {
-            'fields': ('name', 'user', 'type', 'category', 'cost', 'image', 'power_meter', 'slug', 'filter', 'player_made', 'player_inventory', 'is_active',),
+            'fields': ('name', 'user', 'type', 'category', 'cost', 'discount_cost', 'image', 'power_meter', 'slug', 'filter', 'player_made', 'player_inventory', 'is_active',),
             'classes': ('collapse',),
         }),
     )
@@ -2105,26 +2105,45 @@ class TransactionAdmin(admin.ModelAdmin):
 admin.site.register(Transaction, TransactionAdmin)
 
 
+admin.site.register(BattleParticipant)
+
+
+class BattleGameInline(admin.TabularInline):
+    model = BattleGame
+    extra = 1  # Number of empty forms to display
+    fields = ('game', 'quantity', 'game_cost', 'game_discount_cost')
+    readonly_fields = ('game', 'quantity', 'game_cost', 'game_discount_cost')  # Make these fields read-only
+
+
+class BattleParticipantInline(admin.TabularInline):
+    model = Battle.participants.through  # Use the through model for the ManyToMany field
+    extra = 1
+    verbose_name = "Participant"
+    verbose_name_plural = "Participants"
+    fields = ('battleparticipant',)
+
+
+class RobotInline(admin.TabularInline):
+    model = Battle.robots.through
+    extra = 1
+    verbose_name = "Robot"
+    verbose_name_plural = "Robots"
+    fields = ('robot',)
+
+
 class BattleAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Battle Information', {
-            'fields': ('battle_name', 'currency', 'price', 'creator', 'min_human_participants',)
+            'fields': ('battle_name', 'currency', 'price', 'creator', 'min_human_participants', 'status', 'slots', 'time', 'is_active'),
         }),
     )
+    list_display = ('battle_name', 'creator', 'price', 'currency', 'status', 'is_active', 'time')
+    list_filter = ('status', 'is_active', 'currency', 'creator')  # Add filters for quick navigation
+    search_fields = ('battle_name', 'creator__username')  # Add search functionality
+    inlines = [BattleGameInline, BattleParticipantInline, RobotInline]  # Include inlines
 
 
 admin.site.register(Battle, BattleAdmin)
-
-
-class BattleGameAdmin(admin.ModelAdmin):
-    fieldsets = (
-        ('Battle Information', {
-            'fields': ('battle', 'game', 'quantity',)
-        }),
-    )
-
-
-admin.site.register(BattleGame, BattleGameAdmin)
 
 
 class LevelAdmin(admin.ModelAdmin):
