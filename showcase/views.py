@@ -2126,9 +2126,15 @@ class BattleCreationView(CreateView):
     success_url = reverse_lazy('showcase:battle')  # Redirect to the open battles list
 
     def form_valid(self, form):
-        # Set the creator of the battle to the logged-in user
-        form.instance.creator = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        quantities = form.cleaned_data.get('quantities', {})
+        battle = form.instance
+
+        for game_id, quantity in quantities.items():
+            game = Game.objects.get(id=game_id)
+            BattleGame.objects.create(battle=battle, game=game, quantity=quantity)
+
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

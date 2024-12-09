@@ -7,13 +7,16 @@
 <body>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const gameData = {{ games_json|safe }}; // Pass game data as JSON
-
+        const gameData = {{ games_json|safe }}; // Game data as JSON
         const chestsSelect = document.getElementById("id_chests");
         const gameValuesField = document.getElementById("id_game_values");
         const totalValueField = document.getElementById("id_total_value");
+        const quantitiesContainer = document.createElement("div"); // Container for quantity inputs
+        quantitiesContainer.id = "quantities-container";
+        chestsSelect.parentNode.appendChild(quantitiesContainer);
 
-        chestsSelect.addEventListener("change", function () {
+        // Function to update quantities and total value
+        function updateGameValues() {
             let selectedGames = Array.from(chestsSelect.selectedOptions).map(option => parseInt(option.value));
             let gameValues = [];
             let totalValue = 0;
@@ -21,21 +24,67 @@
             selectedGames.forEach(gameId => {
                 let game = gameData.find(g => g.id === gameId);
                 if (game) {
+                    let quantityInput = document.getElementById(`quantity-${gameId}`);
+                    let quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
                     let gameCost = game.cost || 0;
-                    gameValues.push(`${game.name}: 1 x ${gameCost} = ${gameCost}`);
-                    totalValue += gameCost;
+                    let totalGameCost = quantity * gameCost;
+                    gameValues.push(`${game.name}: ${quantity} x ${gameCost} = ${totalGameCost}`);
+                    totalValue += totalGameCost;
                 }
             });
 
             gameValuesField.value = gameValues.join("\n");
             totalValueField.value = totalValue;
+        }
+
+        // Function to add a quantity input
+        function addQuantityInput(gameId, gameName) {
+            let quantityDiv = document.createElement("div");
+            quantityDiv.id = `quantity-container-${gameId}`;
+            quantityDiv.innerHTML = `
+                <label for="quantity-${gameId}">${gameName} Quantity:</label>
+                <input type="number" id="quantity-${gameId}" name="quantity-${gameId}" value="1" min="1" class="form-control">
+            `;
+            quantitiesContainer.appendChild(quantityDiv);
+
+            // Listen for changes to update game values
+            document.getElementById(`quantity-${gameId}`).addEventListener("input", updateGameValues);
+        }
+
+        // Function to remove a quantity input
+        function removeQuantityInput(gameId) {
+            let quantityDiv = document.getElementById(`quantity-container-${gameId}`);
+            if (quantityDiv) {
+                quantityDiv.remove();
+            }
+        }
+
+        // Handle changes to the chests field
+        chestsSelect.addEventListener("change", function () {
+            let selectedGameIds = Array.from(chestsSelect.selectedOptions).map(option => parseInt(option.value));
+            let allGameIds = gameData.map(game => game.id);
+
+            allGameIds.forEach(gameId => {
+                let game = gameData.find(g => g.id === gameId);
+                if (selectedGameIds.includes(gameId)) {
+                    if (!document.getElementById(`quantity-container-${gameId}`)) {
+                        addQuantityInput(gameId, game.name);
+                    }
+                } else {
+                    removeQuantityInput(gameId);
+                }
+            });
+
+            updateGameValues();
         });
     });
 </script>
 
+
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
+<div id="quantities-container"></div>
 
     <button type="submit">Submit</button>
 </form>

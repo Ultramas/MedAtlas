@@ -389,38 +389,26 @@ class BattleCreationForm(forms.ModelForm):
         model = Battle
         fields = ['battle_name', 'chests', 'min_human_participants', 'game_values', 'total_value']
         widgets = {
-            'participants': forms.SelectMultiple(attrs={'disabled': True}),  # Disable participant selection
+            'chests': forms.SelectMultiple(attrs={'id': 'id_chests'}),
         }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        chests = cleaned_data.get('chests')  # This retrieves the M2M data
-        battle_instance = self.instance
+def clean(self):
+    cleaned_data = super().clean()
+    chests = cleaned_data.get('chests')
+    quantities = {}
 
-        if chests:
-            if battle_instance.pk:
-                # Retrieve the game quantities if the instance exists
-                game_quantities = battle_instance.get_game_quantities()
-                game_values = [
-                    f"{game.name}: {quantity} x {game.get_effective_cost()} = {quantity * game.get_effective_cost()}"
-                    for game, quantity in game_quantities.items()
-                ]
-                total_value = sum(quantity * game.get_effective_cost() for game, quantity in game_quantities.items())
-            else:
-                # Handle the form without a pre-existing instance
-                game_values = [
-                    f"{game.name}: 1 x {game.get_effective_cost()} = {game.get_effective_cost()}"
-                    for game in chests
-                ]
-                total_value = sum(game.get_effective_cost() for game in chests)
+    for game in chests:
+        quantity_key = f'quantity-{game.id}'
+        quantity = self.data.get(quantity_key, 1)  # Default to 1 if not provided
+        if not quantity.isdigit() or int(quantity) < 1:
+            raise forms.ValidationError(f"Invalid quantity for {game.name}.")
+        quantities[game.id] = int(quantity)
 
-            cleaned_data['game_values'] = "\n".join(game_values)
-            cleaned_data['total_value'] = total_value
-        else:
-            cleaned_data['game_values'] = ""
-            cleaned_data['total_value'] = 0
+    # Store quantities for use elsewhere (e.g., saving the Battle instance)
+    self.cleaned_data['quantities'] = quantities
+    return cleaned_data
 
-        return cleaned_data
+
 BattleGameFormSet = inlineformset_factory(
     parent_model=Battle,
     model=BattleGame,
@@ -432,6 +420,7 @@ BattleGameFormSet = inlineformset_factory(
         'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
     }
 )
+
 
 class BattleJoinForm(forms.ModelForm):
     class Meta:
