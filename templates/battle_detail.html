@@ -1,17 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ battle.battle_name }}</title>
-</head>
-<body>
-    <h1>{{ battle.battle_name }}</h1>
-    <p>Status: {{ battle.get_status_display }}</p>
+{% extends "base.html" %}
 
-    {% if battle.status == 'O' %}
-        {% include 'join_battle.html' %}
-    {% else %}
-        <p>This battle is not open for joining.</p>
-    {% endif %}
-</body>
-</html>
+{% block content %}
+  <h1>{{ battle.battle_name }}</h1>
+  <p>Status: {{ battle.get_status_display }}</p>
+  <p>Creator: {{ battle.creator }}</p>
+  <p>Participants: {{ battle.participants.count }}</p>
+  <p>Price: {{ battle.price }}</p>
+  <p>Time: {{ battle.time }}</p>
+
+  <!-- Display the form to join the battle -->
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="battle_id" value="{{ battle.id }}">
+    <button type="submit">Join Battle</button>
+  </form>
+{% endblock %}

@@ -8,7 +8,8 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
-    SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame
+    SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
+    MonstrositySprite
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -2073,7 +2074,9 @@ admin.site.register(DefaultAvatar, DefaultAvatarAdmin)
 class ProfileDetailsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Profile Information', {
-            'fields': ('user', 'email', 'avatar', 'alternate', 'about_me', 'level', 'subscription', 'currency', 'currency_amount', 'is_active')
+            'fields': ('user', 'email', 'avatar', 'alternate', 'about_me', 'level', 'subscription', 'currency', 'currency_amount',
+                       'total_currency_amount', 'total_currency_spent', 'green_cards_hit', 'yellow_cards_hit', 'orange_cards_hit','red_cards_hit',
+                       'black_cards_hit', 'gold_cards_hit', 'red_gold_cards_hit', 'times_subtract_called', 'monstrosity', 'seller', 'membership', 'position', 'is_active')
         }),
     )
     readonly_fields = ('position',)
@@ -2134,7 +2137,7 @@ class RobotInline(admin.TabularInline):
 class BattleAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Battle Information', {
-            'fields': ('battle_name', 'currency', 'price', 'creator', 'min_human_participants', 'status', 'slots', 'time', 'is_active'),
+            'fields': ('battle_name', 'currency', 'price', 'creator', 'min_human_participants', 'status', 'slots', 'type', 'bets_allowed', 'time', 'is_active'),
         }),
     )
     list_display = ('battle_name', 'creator', 'price', 'currency', 'status', 'is_active', 'time')
@@ -2155,6 +2158,59 @@ class LevelAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Level, LevelAdmin)
+
+
+class MonstrosityAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Monstrosity Information', {
+            'fields': ('user', 'monstrositysprite', 'monstrositys_name', 'level', 'is_active',)
+        }),
+    )
+
+    list_display = (
+        'user',
+        'monstrositysprite',
+        'monstrositys_name',
+        'level',
+        'is_active',
+        'display_sprite_images'  # Add this method to list display
+    )
+
+    def display_sprite_images(self, obj):
+        images = obj.get_sprite_images()  # Use the method defined in Withdraw model
+        if images:
+            return mark_safe(
+                '<br>'.join([f'<img src="{img}" style="width: 100px; height: auto;" />' for img in images])
+            )
+        return 'No images'
+
+    display_sprite_images.short_description = 'Monstrosity Sprites'
+
+
+admin.site.register(Monstrosity, MonstrosityAdmin)
+
+
+class MonstrositySpriteAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Monstrosity Sprite Information', {
+            'fields': ('name', 'image', 'is_active',)
+        }),
+    )
+
+
+admin.site.register(MonstrositySprite, MonstrositySpriteAdmin)
+
+
+class MembershipAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Membership Information', {
+            'fields': ('name', 'tier', 'file', 'description', 'image_length', 'image_width', 'price', 'discount_price',  'second_price', 'second_discount_price', 'is_active',)
+        }),
+    )
+    readonly_fields = ('mfg_date',)
+
+
+admin.site.register(Membership, MembershipAdmin)
 
 
 class AdministrationPagesAdmin(admin.ModelAdmin):

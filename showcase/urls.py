@@ -358,7 +358,7 @@ urlpatterns = [
     path('create_outcome/<slug:slug>/', views.create_outcome, name='create_outcome'),
     path('spin/<int:game_id>/', views.game_view, name='game_view'),
     path('battle/', views.OpenBattleListView.as_view(), name='battle'),
-    path('battle_detail/<int:battle_id>/', views.OpenBattleListView.as_view(), name='battle_detail'),
+    path('battle_detail/<int:battle_id>/', views.SingleBattleListView.as_view(), name='battle_detail'),
     path('battle/<int:battle_id>/join/', views.join_battle, name='join_battle'),
     path('battlecreator/', views.BattleCreationView.as_view(), name='battlecreator'),
     path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
@@ -374,6 +374,7 @@ urlpatterns = [
     path('dailylottoclaimed/', views.DailyLotteryView.as_view(), name='dailylottoclaimed'),
     path('lottery/<slug:slug>/', views.Lottereal.as_view(), name='lottery'),
     path('lotterywinners/', views.Lottereal.as_view(), name='lotterywinners'),
+    path('membership/', views.MembershipView.as_view(), name='membership'),
     path('meme_list', views.MemeHostView.as_view(), name='meme_list'),
     path('create_meme', views.MemeView.as_view(), name='create_meme'),
     path('currencymarket/', views.CurrencyMarketView.as_view(), name='currencymarket'),
@@ -482,6 +483,8 @@ urlpatterns = [
     path('my_friends/', views.FriendlyView.as_view(), name='my_friends'),
     path('accept_friend_request/<int:request_id>/', views.accept_friend_request, name='accept_friend_request'),
     path('decline_friend_request/<int:request_id>/', views.decline_friend_request, name='decline_friend_request'),
+    path('addamonstrosity/', views.AddMonstrosityView.as_view(), name='addamonstrosity'),
+    path('mymonstrosity/', views.MonstrosityView.as_view(), name='mymonstrosity'),
 
     # change url <str:room> to use user username for added security
     path('product/<slug>/', views.ProductView.as_view(), name='product'),

@@ -1,42 +1,218 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Open Battles</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: #0f0f1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            margin: 0 auto;
+        }
+
+        .title {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: transparent;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: titleAnimation 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleAnimation {
+            from { filter: hue-rotate(0deg); }
+            to { filter: hue-rotate(360deg); }
+        }
+
+        .battle-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .battle-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .battle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .battle-name {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #00ffff;
+        }
+
+        .battle-info {
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+
+        .battle-info strong {
+            color: #00ffff;
+            margin-right: 0.5rem;
+        }
+
+        .game-list {
+            margin-top: 1rem;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .game-list li {
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .join-button {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            border: none;
+            border-radius: 5px;
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        .join-button:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        .join-button:active {
+            transform: scale(0.95);
+        }
+
+        .no-battles {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #00ffff;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 3rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Open Battles</h1>
-    {% if open_battles %}
-        <ul>
-{% for battle in open_battles %}
-<li>
-    <strong>Battle Name:</strong> {{ battle.battle_name }}<br>
-    <strong>Creator:</strong> {{ battle.creator }}<br>
-    <strong>Price:</strong> {{ battle.price }} {{ battle.currency }}<br>
-    <strong>Minimum Participants:</strong> {{ battle.min_human_participants }}<br>
-    <strong>Status:</strong> {{ battle.get_status_display }}<br>
-    <strong>Time:</strong> {{ battle.time }}<br>
-    <strong>Games:</strong>
-    <ul>
-        {% for game, quantity in battle.get_game_quantities.items %}
-            <li>{{ game.name }}: {{ quantity }}</li>
-        {% endfor %}
-    </ul>
+    <div class="container">
+        <h1 class="title">Open Battles</h1>
+        {% if open_battles %}
+            <ul class="battle-list">
+                {% for battle in open_battles %}
+                    <li class="battle-card">
+                        <div class="battle-name">{{ battle.battle_name }}</div>
+                        <div class="battle-info">
+                            {% if battle.creator %}
+                            <strong>Creator:</strong> {{ battle.creator }}
+                            {% else %}
+                            <strong>This is a ghost battle...</strong>
+                            {% endif %}
+                        </div>
+                        <div class="battle-info" style="display: flex; flex-direction: row; align-items: center;">
 
-{% if battle.status == 'O' %}
-            <!-- Join Battle Form -->
-            <form method="post" action="{% url 'showcase:battle' %}">
-                {% csrf_token %}
-                <input type="hidden" name="battle_id" value="{{ battle.id }}">
-                <button type="submit">Join Battle</button>
-            </form>
+                            {% if battle.currency|lower == 'ruby' or battle.currency|lower == 'rubies' %}
+                            <strong>Price:</strong> {{ battle.price }} <img src="{% static 'css/images/ruby.png' %}" style="width: 35; height: 30px;">
+                            {% else %}
+                            <strong>Price:</strong> {{ battle.price }} {{ battle.currency }}
+                            {% endif %}
+                        </div>
+                        <div class="battle-info">
+                            <strong>Minimum Participants:</strong> {{ battle.min_human_participants }}
+                        </div>
+                        <div class="battle-info">
+                            <strong>Status:</strong> {{ battle.get_status_display }}
+                        </div>
+                        <div class="battle-info">
+                            <strong>Slots:</strong> {{ battle.slots }}
+                        </div>
+                        <div class="battle-info">
+                            <strong>Type:</strong> {{ battle.type }}
+                        </div>
+                        <div class="battle-info">
+                            <strong>Time:</strong> {{ battle.time }}
+                        </div>
+                        <div class="battle-info">
+                            <strong>Games:</strong>
+                            <ul class="game-list">
+                                {% for game, quantity in battle.get_game_quantities.items %}
+                                    <li>{{ game.name }}: {{ quantity }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% if battle.status == 'O' %}
+                            <form method="post" action="{% url 'showcase:battle' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="battle_id" value="{{ battle.id }}">
+                                <button type="submit" class="join-button">View Battle</button>
+                            </form>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="no-battles">No open battles found.</p>
+        {% endif %}
+    </div>
 
-        </ul>
-    {% else %}
-        <p>No open battles found.</p>
-    {% endif %}
-    {% endfor %}
-    {% endif %}
+    <script>
+        // Add any JavaScript functionality here if needed
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation for title entrance
+            const title = document.querySelector('.title');
+            title.style.opacity = '0';
+            title.style.transform = 'translateY(-50px)';
+
+            setTimeout(() => {
+                title.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                title.style.opacity = '1';
+                title.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
 </body>
 </html>

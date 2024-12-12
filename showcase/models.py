@@ -81,26 +81,6 @@ BATTLE_STATUS = (
     ('C', 'Complete'),
 )
 
-BATTLE_SLOTS = (
-    ('2', '1v1'),
-    ('3', '1v1v1'),
-    ('4', '1v1v1v1'),
-    ('5', '1ve5'),
-    ('6', '1ve6'),
-    ('7', '1ve7'),
-    ('8', '1ve8'),
-    ('9', '1ve9'),
-    ('10', '1ve10'),
-    ('2v2', '2v2'),
-    ('2ve3', '2v2v2'),
-    ('2ve4', '2v2v2v2'),
-    ('2ve5', '2ve5'),
-    ('3v3', '3v3'),
-    ('3ve3', '3v3v3'),
-    ('4v4', '4v4'),
-    ('5v5', '5v5'),
-)
-
 TYPE_CHOICES = (('S', 'Singles'), ('BP', 'Booster Pack'),
                 ('BB', 'Booster Box'), ('PP', 'Pokemon Product'), ('O',
                                                                    'Other'))
@@ -381,16 +361,70 @@ class Level(models.Model):
         ordering = ['level']
 
 
+class MonstrositySprite(models.Model):
+    name = models.CharField(max_length=200, blank=True, null=True)
+    image = models.ImageField(upload_to='images/')
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.name:
+            self.name = str(self.image)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Monstrosity Sprite"
+        verbose_name_plural = "Monstrosity Sprites"
+
+
+class Monstrosity(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    monstrositysprite = models.ForeignKey(MonstrositySprite, on_delete=models.CASCADE, verbose_name="Monstrosity Sprite")
+    monstrositys_name = models.CharField(max_length=200, blank=True, null=True,  verbose_name="Monstrosity Name", unique=True)
+    level = models.IntegerField(default=1)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.user) + "'s " + self.monstrositys_name
+
+    def get_sprite_images(self):
+        # Retrieve images from related InventoryObjects
+        return [self.monstrositysprite.image.url]
+
+    @property
+    def display_sprite_images(self):
+        return self.get_sprite_images()
+
+    class Meta:
+        verbose_name = "Monstrosity"
+        verbose_name_plural = "Monstrosities"
+
+
 class Membership(models.Model):
-    name = models.CharField(default='Rubiaces', max_length=200)
+    name = models.CharField(default='Rubies', max_length=200)
     tier = models.CharField(choices=MEMBERSHIP_TIER, max_length=2, blank=True, null=True)
     file = models.FileField(null=True, verbose_name='Sprite')
+    description = models.TextField(blank=True, null=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
                                                verbose_name="image length")
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
+    price = models.FloatField(default=0)
+    discount_price = models.FloatField(blank=True, null=True)
+    second_price = models.FloatField(blank=True, null=True)
+    second_discount_price = models.FloatField(blank=True, null=True)
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -424,10 +458,8 @@ class Subscription(models.Model):
         verbose_name_plural = "Subscriptions"
 
 
-
-
 class Currency(models.Model):
-    name = models.CharField(default='Rubiaces', max_length=200)
+    name = models.CharField(default='Rubies', max_length=200)
     flavor_text = models.CharField(max_length=200)
     file = models.FileField(null=True, verbose_name='Sprite')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -500,6 +532,8 @@ class CurrencyMarket(models.Model):
     class Meta:
         verbose_name = "Currency Market"
         verbose_name_plural = "Currency Markets"
+
+
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(blank=True, null=True)
@@ -511,7 +545,7 @@ class ProfileDetails(models.Model):
     about_me = models.TextField(blank=True, null=True)
     level = models.ForeignKey(Level, on_delete=models.CASCADE, default="")
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, blank=True, null=True)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     currency_amount = models.IntegerField(default=0)
     total_currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_currency_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -523,7 +557,9 @@ class ProfileDetails(models.Model):
     gold_cards_hit = models.IntegerField(blank=True, null=True)
     red_gold_cards_hit = models.IntegerField(blank=True, null=True)
     times_subtract_called = models.IntegerField(default=0)
+    monstrosity = models.ForeignKey(Monstrosity, blank=True, null=True, on_delete=models.CASCADE, related_name="monster")
     seller = models.BooleanField(default=False, null=True)
+    membership = models.ForeignKey(Membership, blank=True, null=True, on_delete=models.CASCADE)
     position = models.UUIDField(
         default=uuid.uuid4,
         editable=False,
@@ -594,6 +630,7 @@ class ProfileDetails(models.Model):
     post_save.connect(create_user_profile, sender=User)
 
     def save(self, *args, **kwargs):
+        self.currency = Currency.objects.filter(is_active=1).first()
         if not self.avatar:
             self.avatar = 'static/css/images/a.jpg'
             print('saved the profile avatar to default image')
@@ -767,6 +804,7 @@ class CurrencyFullOrder(models.Model):
         verbose_name = "Total Currency Order"
         verbose_name_plural = "Total Currency Orders"
 
+
 class SecretRoom(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     code = models.CharField(validators=[MinLengthValidator(24)], max_length=50)
@@ -783,18 +821,6 @@ class SecretRoom(models.Model):
         verbose_name = "Secret Room"
         verbose_name_plural = "Secret Room"
         # there can be only one...
-
-
-class Monstrosity(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    monstrositys_name = models.CharField(max_length=200)
-    level = models.IntegerField()
-
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
 
 class Endowment(models.Model):
@@ -2791,6 +2817,34 @@ class BattleGame(models.Model):
 
 
 class Battle(models.Model):
+    BATTLE_SLOTS = (
+        ('2', '1v1'),
+        ('3', '1v1v1'),
+        ('4', '1v1v1v1'),
+        ('5', '1ve5'),
+        ('6', '1ve6'),
+        ('7', '1ve7'),
+        ('8', '1ve8'),
+        ('9', '1ve9'),
+        ('10', '1ve10'),
+        ('2v2', '2v2'),
+        ('2ve3', '2v2v2'),
+        ('2ve4', '2v2v2v2'),
+        ('2ve5', '2ve5'),
+        ('3v3', '3v3'),
+        ('3ve3', '3v3v3'),
+        ('4v4', '4v4'),
+        ('5v5', '5v5'),
+    )
+    BATTLE_TYPE = (
+        ('Free For All', 'Free For All'),
+        ('Upside-Down', 'Upside-Down'),
+        ('Teams', 'Teams'),
+        ('Dual Win', 'Dual Win'),
+        ('Team Fight', 'Team Fight'),
+        ('Do Not Lose', 'Do Not Lose'),
+        ('Share', 'Share'),
+    )
     battle_name = models.CharField(max_length=100, blank=True, null=True)
     chests = models.ManyToManyField('Game', through='BattleGame', related_name='battles')
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
@@ -2809,6 +2863,8 @@ class Battle(models.Model):
     )
     status = models.CharField(choices=BATTLE_STATUS, max_length=1, default="O")
     slots = models.CharField(choices=BATTLE_SLOTS, max_length=4, default="2")
+    type = models.CharField(choices=BATTLE_TYPE, max_length=20, default='Free For All')
+    bets_allowed = models.BooleanField(default=False)
     time = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.IntegerField(
         default=1,
@@ -2909,7 +2965,7 @@ class SellerApplication(models.Model):
     accepted = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.user)
+        return str(self.user) + " - Email Verified: " + str(self.email_verified) + " - Registered: " + str(self.accepted)
 
     class Meta:
         verbose_name = "Seller Application"
@@ -6091,11 +6147,6 @@ class Withdraw(models.Model):
                 return f"{self.user.username} withdrew {self.number_of_cards} card: {card_choices}"
             else:
                 return f"{self.user.username} withdrew {self.number_of_cards} cards: {card_choices}"
-
-    def get_card_images(self):
-        # Retrieve images from related InventoryObjects
-        images = [card.image.url for card in self.cards.all() if card.image]
-        return images
 
     def get_card_images(self):
         # Retrieve images from related InventoryObjects

@@ -5,12 +5,14 @@ import self
 from django import forms
 from django.forms import inlineformset_factory
 from django.shortcuts import get_object_or_404
+from django.utils.safestring import mark_safe
 
 from mysite import settings
 from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme, TradeOffer, \
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
-    SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame
+    SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame, Monstrosity, \
+    MonstrositySprite
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -384,13 +386,26 @@ class BattleCreationForm(forms.ModelForm):
         required=False,
         label="Total Value"
     )
+    slots = forms.ChoiceField(
+        choices=Battle.BATTLE_SLOTS,  # Use the model's defined choices
+        widget=forms.RadioSelect,
+        label="Battle Slots",
+        initial='2'  # Default option
+    )
+    type = forms.ChoiceField(
+        choices=Battle.BATTLE_TYPE,  # Use the model's defined choices
+        widget=forms.RadioSelect,
+        label="Battle Type",
+        initial='F'  # Default option
+    )
 
     class Meta:
         model = Battle
-        fields = ['battle_name', 'chests', 'min_human_participants', 'game_values', 'total_value']
+        fields = ['battle_name', 'chests', 'min_human_participants', 'slots', 'type', 'bets_allowed', 'game_values', 'total_value']
         widgets = {
             'chests': forms.SelectMultiple(attrs={'id': 'id_chests'}),
         }
+
 
 def clean(self):
     cleaned_data = super().clean()
@@ -874,6 +889,19 @@ class ExchangePrizesForm(forms.ModelForm):
         if user:
             self.fields['usercard'].queryset = InventoryObject.objects.filter(user=user)
 
+
+class AddMonstrosityForm(forms.ModelForm):
+    class Meta:
+        model = Monstrosity
+        fields = ['monstrositysprite', 'monstrositys_name']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Set a custom widget for displaying monstrositysprite options
+        self.fields['monstrositysprite'].queryset = MonstrositySprite.objects.filter(is_active=1)
+        self.fields['monstrositysprite'].widget = forms.RadioSelect(
+            choices=[(sprite.id, sprite) for sprite in self.fields['monstrositysprite'].queryset],
+        )
 
 from .models import Endowment
 

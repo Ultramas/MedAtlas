@@ -1,123 +1,489 @@
-<script>
-</script>
-<section class="avenue2-messenger" id="chatwidget2">
-<div class="chat2" >
-  <div class="chat2-title">
-	  {% if user.is_authenticated %}
-<script type="text/javascript">
-$(document).on('submit', '#general-post-form', function(e) {
-    e.preventDefault();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body><style>
+    :root {
+    --primary-color: #d4af37;
+    --secondary-color: #1a1a1a;
+    --text-color: #ffffff;
+    --input-bg: rgba(255, 255, 255, 0.1);
+    --input-border: #d4af37;
+}
 
-    var formData = new FormData();
-    formData.append('username', $('#username').val());
-    formData.append('room_id', $('#room_id').val()); // Ensure this is correctly set in your HTML
-    formData.append('room_name', $('#room_name').val()); // Ensure this is correctly set in your HTML
-    formData.append('message', $('#message-input').val()); // Ensure correct ID for message input
-    formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
-    formData.append('page_name', $('#page_name').val()); // Ensure this is correctly set in your HTML
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-    var fileInput = $('#file')[0];
-    if (fileInput && fileInput.files.length > 0) {
-        formData.append('file', fileInput.files[0]);
+body {
+    font-family: 'Roboto', sans-serif;
+    color: var(--text-color);
+    background-color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.casino-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://images.unsplash.com/photo-1596838132731-3301c3fd4317');
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.3);
+    z-index: -1;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    color: var(--primary-color);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+form {
+    background: rgba(26, 26, 26, 0.8);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+select {
+    height: 150px;
+}
+
+.radio-group {
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--input-bg);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.radio-group input[type="radio"] {
+    display: none;
+}
+
+.radio-group label {
+    flex: 1;
+    padding: 0.75rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.radio-group input[type="radio"]:checked + label {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.submit-btn {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #b8960c;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
     }
 
-    $.ajax({
-        type: 'POST',
-        url: '{% url "showcase:generalsend" %}', // Use Django's URL template tag
-        data: formData,
-        contentType: false,
-        processData: false,
-        success: function(response) {
-            if (response.status === 'success') {
-                // Handle success response
-                console.log('Message sent successfully:', response.message);
-                loadAndDisplayGeneralMessages();  // Reload messages after posting
-            } else {
-                // Handle non-successful response (if needed)
-                console.error('Error:', response.message);
-                // Optionally, display an error message to the user
-            }
-        },
-        error: function(xhr, status, error) {
-            // Handle AJAX errors
-            console.error('Error:', error);
+    h1 {
+        font-size: 2rem;
+    }
 
-            // Example: Handle specific validation errors
-            if (xhr.responseJSON && xhr.responseJSON.status === 'error') {
-                var errors = xhr.responseJSON.errors;
-                if (errors) {
-                    // Display error messages to the user
-                    console.error('Validation Errors:', errors);
-                }
+    form {
+        padding: 1rem;
+    }
+}
+#id_chests {
+    display: none;
+}
+        /* Optional: Add a transition effect for smooth open/close */
+    .id_chests.open {
+        display: block;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleButton = document.getElementById("toggle-chests");
+        const chestsContainer = document.getElementById("id_chests");
+
+        toggleButton.addEventListener("click", function () {
+            // Check the current visibility of the container
+            if (chestsContainer.style.display === "none" || !chestsContainer.style.display) {
+                chestsContainer.style.display = "block";
+                toggleButton.textContent = "Close Chests";
             } else {
-                // Handle other types of errors
-                console.error('Unknown Error:', status, error);
+                chestsContainer.style.display = "none";
+                toggleButton.textContent = "Select Chests";
             }
-        }
+        });
     });
+</script>
 
-    // Clear input fields after form submission
-    $('#message-input').val('');
-    $('#file').val('');
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const gameData = {{ games_json|safe }}; // Game data as JSON
+    const chestsSelect = document.getElementById("id_chests");
+    const gameValuesField = document.getElementById("id_game_values");
+    const totalValueField = document.getElementById("id_total_value");
+    const quantitiesContainer = document.createElement("div"); // Container for quantity inputs
+    quantitiesContainer.id = "quantities-container";
+    chestsSelect.parentNode.appendChild(quantitiesContainer);
+
+    const checkboxes = document.querySelectorAll(".form-check-input"); // Custom checkboxes
+
+    // Function to update quantities and total value
+    function updateGameValues() {
+        let selectedGames = Array.from(chestsSelect.selectedOptions).map(option => parseInt(option.value));
+        let gameValues = [];
+        let totalValue = 0;
+
+        selectedGames.forEach(gameId => {
+            let game = gameData.find(g => g.id === gameId);
+            if (game) {
+                let quantityInput = document.getElementById(`quantity-${gameId}`);
+                let quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+                let gameCost = game.cost || 0;
+                let totalGameCost = quantity * gameCost;
+                gameValues.push(`${game.name}: ${quantity} x ${gameCost} = ${totalGameCost}`);
+                totalValue += totalGameCost;
+            }
+        });
+
+        gameValuesField.value = gameValues.join("\n");
+        totalValueField.value = totalValue;
+    }
+
+    // Function to add a quantity input
+    function addQuantityInput(gameId, gameName) {
+        if (!document.getElementById(`quantity-container-${gameId}`)) {
+            let quantityDiv = document.createElement("div");
+            quantityDiv.id = `quantity-container-${gameId}`;
+            quantityDiv.innerHTML = `
+                <label for="quantity-${gameId}">${gameName} Quantity:</label>
+                <input type="number" id="quantity-${gameId}" name="quantity-${gameId}" value="1" min="1" class="form-control">
+            `;
+            quantitiesContainer.appendChild(quantityDiv);
+
+            // Listen for changes to update game values
+            document.getElementById(`quantity-${gameId}`).addEventListener("input", updateGameValues);
+        }
+    }
+
+    // Function to remove a quantity input
+    function removeQuantityInput(gameId) {
+        let quantityDiv = document.getElementById(`quantity-container-${gameId}`);
+        if (quantityDiv) {
+            quantityDiv.remove();
+        }
+    }
+
+    // Handle changes to the chests field
+    function handleSelectionChange() {
+        let selectedGameIds = Array.from(chestsSelect.selectedOptions).map(option => parseInt(option.value));
+        let allGameIds = gameData.map(game => game.id);
+
+        allGameIds.forEach(gameId => {
+            let game = gameData.find(g => g.id === gameId);
+            if (selectedGameIds.includes(gameId)) {
+                addQuantityInput(gameId, game.name);
+            } else {
+                removeQuantityInput(gameId);
+            }
+        });
+
+        updateGameValues();
+    }
+
+    chestsSelect.addEventListener("change", handleSelectionChange);
+
+    // Sync checkboxes with chestsSelect
+    checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", function () {
+            // Update the chestsSelect options
+            const selectedValues = Array.from(checkboxes)
+                .filter((cb) => cb.checked)
+                .map((cb) => parseInt(cb.value));
+
+            Array.from(chestsSelect.options).forEach((option) => {
+                option.selected = selectedValues.includes(parseInt(option.value));
+            });
+
+            // Trigger the same logic as chestsSelect change
+            handleSelectionChange();
+        });
+    });
 });
 
-
 </script>
-    <h5>PokeTrove Community</h5>
-    <br>
-    <h6> PokeTrove General Chat  </h6>
-  </div>
-  <div class="message" style="overflow: auto;">
-    <h2>{{ username }}</h2>
-    <div id="display" class="chat-messages" style="height: 400px; overflow-y: scroll;">
 
-    </div>
-  </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const gameData = {{ games_json|safe }}; // Game data as JSON
+        const chestsSelect = document.getElementById("id_chests");
+        const gameValuesField = document.getElementById("id_game_values");
+        const totalValueField = document.getElementById("id_total_value");
+        const quantitiesContainer = document.createElement("div"); // Container for quantity inputs
+        quantitiesContainer.id = "quantities-container";
+        chestsSelect.parentNode.appendChild(quantitiesContainer);
 
-<div class="message-box">
-    <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;">
-        <form id="general-post-form" method="post" action="{% url 'showcase:generalsend' %}">
-    <input type="hidden" id="username" name="username" value="{{ request.user.username }}">
-    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-            <input type="text" name="message" id="message" width="100px" placeholder="Type your message...">
-            <input type="submit" class="message-submit" style="margin-top: -9px; display: flex; overflow: hidden;" value="➤">
-        </form>
+        // Function to update quantities and total value
+        function updateGameValues() {
+            let selectedGames = Array.from(chestsSelect.selectedOptions).map(option => parseInt(option.value));
+            let gameValues = [];
+            let totalValue = 0;
+
+            selectedGames.forEach(gameId => {
+                let game = gameData.find(g => g.id === gameId);
+                if (game) {
+                    let quantityInput = document.getElementById(`quantity-${gameId}`);
+                    let quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+                    let gameCost = game.cost || 0;
+                    let totalGameCost = quantity * gameCost;
+                    gameValues.push(`${game.name}: ${quantity} x ${gameCost} = ${totalGameCost}`);
+                    totalValue += totalGameCost;
+                }
+            });
+
+            gameValuesField.value = gameValues.join("\n");
+            totalValueField.value = totalValue;
+        }
+
+        // Function to add a quantity input
+        function addQuantityInput(gameId, gameName) {
+            let quantityDiv = document.createElement("div");
+            quantityDiv.id = `quantity-container-${gameId}`;
+            quantityDiv.innerHTML = `
+                <label for="quantity-${gameId}">${gameName} Quantity:</label>
+                <input type="number" id="quantity-${gameId}" name="quantity-${gameId}" value="1" min="1" class="form-control">
+            `;
+            quantitiesContainer.appendChild(quantityDiv);
+
+            // Listen for changes to update game values
+            document.getElementById(`quantity-${gameId}`).addEventListener("input", updateGameValues);
+        }
+
+        // Function to remove a quantity input
+        function removeQuantityInput(gameId) {
+            let quantityDiv = document.getElementById(`quantity-container-${gameId}`);
+            if (quantityDiv) {
+                quantityDiv.remove();
+            }
+        }
+
+        // Handle changes to the chests field
+        chestsSelect.addEventListener("change", function () {
+            let selectedGameIds = Array.from(chestsSelect.selectedOptions).map(option => parseInt(option.value));
+            let allGameIds = gameData.map(game => game.id);
+
+            allGameIds.forEach(gameId => {
+                let game = gameData.find(g => g.id === gameId);
+                if (selectedGameIds.includes(gameId)) {
+                    if (!document.getElementById(`quantity-container-${gameId}`)) {
+                        addQuantityInput(gameId, game.name);
+                    }
+                } else {
+                    removeQuantityInput(gameId);
+                }
+            });
+
+            updateGameValues();
+        });
+    });
+</script>
+
+    <div class="casino-background"></div>
+    <div class="container">
+        <header>
+            <h1>Luxury Casino Battle Creator</h1>
+        </header>
+        <main>
+
+<form method="post"id="battle-creator-form">
+    {% csrf_token %}
+
+    <!-- Render the 'battle_name' field -->
+    <div class="form-group">
+        <label for="{{ form.battle_name.id_for_label }}">{{ form.battle_name.label }}</label>
+        {{ form.battle_name }}
+        {% if form.battle_name.help_text %}
+            <small class="form-text text-muted">{{ form.battle_name.help_text }}</small>
+        {% endif %}
+        {% for error in form.battle_name.errors %}
+            <span class="text-danger">{{ error }}</span>
+        {% endfor %}
     </div>
+
+    <!-- Render the 'chests' field -->
+    <div class="form-group">
+        <label for="{{ form.chests.id_for_label }}">{{ form.chests.label }}</label>
+        <div class="chest-widget">
+    <button id="toggle-chests" class="btn btn-primary">Select Chests</button>
+    <div id="chests-container" class="chest-content" style="display: none;">
+        <div class="chestlabel">
+            {{ form.chests }}
+        </div>
+    </div>
+</div>
+         {% for game in form.chests.field.queryset %}
+        <div class="form-check">
+            <input
+                type="checkbox"
+                name="chests"
+                id="game_{{ game.id }}"
+                value="{{ game.id }}"
+                class="form-check-input"
+                {% if game in form.chests.value %}checked{% endif %}
+            >
+            <label class="form-check-label" for="game_{{ game.id }}">
+                <img
+                    src="{{ game.image.url }}"
+                    alt="{{ game.name }}"
+                    style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px;"
+                >
+                {{ game.name }}
+            </label>
+        </div>
+    {% endfor %}
+        {% if form.chests.help_text %}
+            <small class="form-text text-muted">{{ form.chests.help_text }}</small>
+        {% endif %}
+        {% for error in form.chests.errors %}
+            <span class="text-danger">{{ error }}</span>
+        {% endfor %}
+    </div>
+
+    <!-- Render the 'min_human_participants' field -->
+    <div class="form-group">
+        <label for="{{ form.min_human_participants.id_for_label }}">{{ form.min_human_participants.label }}</label>
+        {{ form.min_human_participants }}
+        {% if form.min_human_participants.help_text %}
+            <small class="form-text text-muted">{{ form.min_human_participants.help_text }}</small>
+        {% endif %}
+        {% for error in form.min_human_participants.errors %}
+            <span class="text-danger">{{ error }}</span>
+        {% endfor %}
+    </div>
+
+
+
+<!-- Render the 'slots' field as radio buttons -->
+<div class="form-group">
+    <label>{{ form.slots.label }}</label>
+                    <div class="radio-group">
+    {% for choice in form.slots %}
+        <div class="form-check">
+            {{ choice.tag }}  <!-- Renders the radio button -->
+            <label class="form-check-label" for="{{ choice.id_for_label }}">
+                {{ choice.choice_label }}  <!-- Renders the label for the radio button -->
+            </label>
+        </div>
+    {% endfor %}
+    {% for error in form.slots.errors %}
+        <span class="text-danger">{{ error }}</span>
+    {% endfor %}
 </div>
 </div>
 
+    <!-- Render the 'game_values' field -->
+    <div class="form-group">
+        <label for="{{ form.game_values.id_for_label }}">{{ form.game_values.label }}</label>
+        {{ form.game_values }}
+        {% if form.game_values.help_text %}
+            <small class="form-text text-muted">{{ form.game_values.help_text }}</small>
+        {% endif %}
+        {% for error in form.game_values.errors %}
+            <span class="text-danger">{{ error }}</span>
+        {% endfor %}
+    </div>
+
+    <!-- Render the 'total_value' field -->
+    <div class="form-group">
+        <label for="{{ form.total_value.id_for_label }}">{{ form.total_value.label }}</label>
+        {{ form.total_value }}
+        {% if form.total_value.help_text %}
+            <small class="form-text text-muted">{{ form.total_value.help_text }}</small>
+        {% endif %}
+        {% for error in form.total_value.errors %}
+            <span class="text-danger">{{ error }}</span>
+        {% endfor %}
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit"  class="submit-btn">Submit</button>
+</form>
+
+        </main></div>
 
 
-
-def send(request):
-    if request.method == 'POST':
-        message = request.POST.get('message')
-        username = request.POST.get('username')
-        room_id = request.POST.get('room_id')
-
-        print(f"message: {message}, username: {username}, room_id: {room_id}")
-
-        # Check if the user is authenticated
-        if request.user.is_authenticated:
-            # User is authenticated, use their user ID for the message user field
-            new_message = Message.objects.create(
-                value=message,
-                user=username,
-                room=room_id,
-                signed_in_user=request.user  # Set the signed_in_user to the authenticated user
-            )
-            new_message.save()
-        else:
-            # User is not authenticated, use the provided username for the message user field
-            new_message = Message.objects.create(
-                value=message,
-                user=username,
-                room=room_id,
-            )
-            new_message.save()
-
-        # Return a response indicating the message was sent successfully
-        return HttpResponse('Message sent successfully')
-
-    # If the request method is not POST, handle the appropriate response here
-    return HttpResponse('Invalid request method. Please use POST to send a message.')
+</body>
+</html>

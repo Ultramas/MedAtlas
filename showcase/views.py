@@ -18,7 +18,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference, Battle, \
-    BattleParticipant
+    BattleParticipant, Monstrosity, MonstrositySprite, Product
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -107,7 +107,7 @@ from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, Tr
     MemeForm, CurrencyCheckoutForm, CurrencyPaymentForm, CurrencyPaypalPaymentForm, HitStandForm, WagerForm, \
     DirectedTradeOfferForm, FriendRequestForm, RespondingTradeOfferForm, ShippingForm, EndowmentForm, UploadCardsForm, \
     RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, GameForm, CardUploading, MoveToTradeForm, \
-    SpinPreferenceForm, BattleCreationForm, BattleJoinForm, InventoryGameForm
+    SpinPreferenceForm, BattleCreationForm, BattleJoinForm, InventoryGameForm, AddMonstrosityForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -2081,7 +2081,6 @@ def create_card_instance(request):
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
-
 class OpenBattleListView(ListView):
     model = Battle
     template_name = "battle.html"  # Your template for listing open battles
@@ -2107,6 +2106,42 @@ class OpenBattleListView(ListView):
         if request.user in battle.participants.all():
             messages.error(request, 'You are already a participant in this battle.')
             return redirect('battle_detail', battle_id=battle.id)
+
+        form = BattleJoinForm(request.POST, user=request.user, battle=battle)
+        if form.is_valid():
+            form.save()  # Add the user as a participant
+            messages.success(request, 'You have successfully joined the battle!')
+            return redirect('showcase:battle_detail', battle_id=battle.id)  # Redirect to battle detail page
+        else:
+            messages.error(request, 'There was an error joining the battle. Please try again.')
+
+        return self.get(request, *args, **kwargs)
+
+
+class SingleBattleListView(DetailView):
+    model = Battle
+    template_name = "battle_detail.html"  # Make sure this template exists
+    context_object_name = "battle"
+
+    def get_object(self):
+        battle_id = self.kwargs.get('battle_id')
+        try:
+            return Battle.objects.get(id=battle_id)
+        except Battle.DoesNotExist:
+            raise Http404("Battle not found.")
+
+    def post(self, request, *args, **kwargs):
+        battle = self.get_object()  # Get the current battle instance
+
+        # Check if the battle is open for participants
+        if battle.status != 'O':
+            messages.error(request, 'This battle is not currently open for participants.')
+            return redirect('showcase:battles')
+
+        # Check if the user is already a participant
+        if request.user in battle.participants.all():
+            messages.error(request, 'You are already a participant in this battle.')
+            return redirect('showcase:battle_detail', battle_id=battle.id)
 
         form = BattleJoinForm(request.POST, user=request.user, battle=battle)
         if form.is_valid():
@@ -3109,6 +3144,51 @@ class PerksBackgroundView(BaseView):
         return context
 
 
+class MonstrosityView(ListView):
+    model = Monstrosity
+    template_name = "mymonstrosity.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Monster'] = Monstrosity.objects.filter(is_active=1)
+        context['MonsterSprite'] = MonstrositySprite.objects.filter(is_active=1)
+        return context
+
+
+class AddMonstrosityView(FormMixin, LoginRequiredMixin, ListView):
+    model = Monstrosity
+    form_class = AddMonstrosityForm
+    template_name = "addamonstrosity.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Monster'] = Monstrosity.objects.filter(is_active=1)
+        context['MonsterSprite'] = MonstrositySprite.objects.filter(is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = AddMonstrosityForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Monstrosity added.')
+            return redirect('showcase:mymonstrosity')
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            return render(request, "addamonstrosity.html", {'form': form})
+
+
 #  def get_queryset(self):
 #    return BackgroundImage.objects.all()
 
@@ -3326,9 +3406,14 @@ def checkview(request):
         signed_in_user = request.user
         print('the room owner is ' + str(signed_in_user))
         new_room.signed_in_user = signed_in_user if signed_in_user.is_authenticated else None
+
+        if hasattr(new_room, 'file_field') and new_room.file_field:
+            new_room.file_field = os.path.basename(new_room.file_field.name)  # Save file name or path instead
+
         new_room.save()
         # Redirect to create_room page after successful creation (assuming it exists)
         return redirect('showcase:create_room')  # Assuming you have a URL pattern named 'create_room'
+
 
 
 @csrf_exempt
@@ -3642,6 +3727,7 @@ from .models import NavBarHeader
 from .models import DonateIcon
 from .models import Donate
 from .models import Titled
+from .models import Membership
 from .models import AdvertisementBase
 from .models import ImageBase
 from .models import SocialMedia
@@ -4134,6 +4220,26 @@ class PrintShippingLabelView(LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Label'] = TradeShippingLabel.objects.filter(is_active=1, user=self.request.user)
+
+        return context
+
+
+class MembershipView(LoginRequiredMixin, ListView):
+    model = Membership
+    template_name = "membership.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Label'] = TradeShippingLabel.objects.filter(is_active=1, user=self.request.user)
+        context['tier'] = Membership.objects.filter(is_active=1)
 
         return context
 
@@ -8844,7 +8950,6 @@ def subtract_currency(request):
             return JsonResponse({'status': 'success'})
         except ValueError:
             return JsonResponse({'status': 'error', 'message': 'Not enough currency'})
-
 
 
 class CurrencyProductView(DetailView):
