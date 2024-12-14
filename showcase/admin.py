@@ -2075,7 +2075,7 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Profile Information', {
             'fields': ('user', 'email', 'avatar', 'alternate', 'about_me', 'level', 'subscription', 'currency', 'currency_amount',
-                       'total_currency_amount', 'total_currency_spent', 'green_cards_hit', 'yellow_cards_hit', 'orange_cards_hit','red_cards_hit',
+                       'total_currency_amount', 'total_currency_spent', 'rubies_spent', 'green_cards_hit', 'yellow_cards_hit', 'orange_cards_hit','red_cards_hit',
                        'black_cards_hit', 'gold_cards_hit', 'red_gold_cards_hit', 'times_subtract_called', 'monstrosity', 'seller', 'membership', 'position', 'is_active')
         }),
     )
@@ -2152,7 +2152,7 @@ admin.site.register(Battle, BattleAdmin)
 class LevelAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Level Information', {
-            'fields': ('level', 'level_name', 'is_active',)
+            'fields': ('level', 'level_name', 'experience', 'is_active',)
         }),
     )
 

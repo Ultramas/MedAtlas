@@ -193,20 +193,20 @@
 
 			</div>
 
+{% if user_monstrosity %}
+  <div>
+    <h2>{{ user_monstrosity.monstrositys_name }}</h2>
+    <p>Level: {{ user_monstrosity.level }}</p>
+    <p>Status: {{ user_monstrosity.get_is_active_display }}</p>
+    <img src="{{ user_monstrosity.monstrositysprite.image.url }}" alt="{{ user_monstrosity.monstrositys_name }}">
+  </div>
+{% else %}
+  <p>You do not have a Monstrosity yet. Reach level 10 to recover one!</p>
+{% endif %}
+
 			<div class="row">
 				<div class="container">
 					<div class="row">
-						<div class="col-lg-12 text-center">
-							<div class="pagination-wrap">
-								<ul>
-									<li><a href="#">Prev</a></li>
-									<li><a href="#">1</a></li>
-									<li><a class="active" href="#">2</a></li>
-									<li><a href="#">3</a></li>
-									<li><a href="#">Next</a></li>
-								</ul>
-							</div>
-						</div>
 					</div>
 				</div>
 			</div>

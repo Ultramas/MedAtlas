@@ -1789,6 +1789,30 @@ class GameChestBackgroundView(BaseView):
 
         context['spinpreference'] = spinpreference
 
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['Profiles'] = userprofile
+        else:
+            context['Profiles'] = None
+
+        if context['Profiles'] == None:
+            # Create a new object with the necessary attributes
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['Profiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
         # Initialize the form with spinpreference instance, or None if not authenticated
         if spinpreference:
             spinform = SpinPreferenceForm(instance=spinpreference)
@@ -2047,6 +2071,47 @@ class GameChestBackgroundView(BaseView):
                 return JsonResponse({'error': str(e)}, status=500)
         else:
             return JsonResponse({'error': 'Invalid request method.'}, status=405)
+@csrf_exempt
+def spin_game(request):
+    if request.method == "POST":
+        try:
+            # Parse JSON body
+            data = json.loads(request.body)
+            game_id = data.get("game_id")
+            spin_multiplier = int(data.get("spin_multiplier", 1))
+
+            # Get the game instance
+            game = get_object_or_404(Game, id=game_id)
+
+            # Get the user's profile
+            profile = ProfileDetails.objects.filter(user=request.user).first()
+            if not profile:
+                return JsonResponse({"success": False, "error": "User profile not found."})
+
+            # Calculate the cost
+            effective_cost = game.get_effective_cost()
+            total_cost = effective_cost * spin_multiplier
+
+            # Check if the user has enough currency
+            if profile.currency_amount < total_cost:
+                return JsonResponse({"success": False, "error": "Insufficient currency."})
+
+            # Deduct the cost
+            profile.currency_amount -= total_cost
+            profile.save()
+
+            # Return updated data in the response
+            return JsonResponse({
+                "success": True,
+                "message": f"Spin charged {total_cost} {profile.currency.name}",
+                "updated_currency_amount": profile.currency_amount,
+                "currency_name": profile.currency.name,
+            })
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON."})
+
+    return JsonResponse({"success": False, "error": "Invalid request method."})
 
 
 def game_detail(request, game_id):
@@ -3150,8 +3215,15 @@ class MonstrosityView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['user_monstrosity'] = Monstrosity.objects.filter(user=self.request.user, is_active=1).first()
         context['Monster'] = Monstrosity.objects.filter(is_active=1)
         context['MonsterSprite'] = MonstrositySprite.objects.filter(is_active=1)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         return context
 
 
@@ -3160,8 +3232,16 @@ class AddMonstrosityView(FormMixin, LoginRequiredMixin, ListView):
     form_class = AddMonstrosityForm
     template_name = "addamonstrosity.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        # Check if the user already has a Monstrosity
+        if Monstrosity.objects.filter(user=request.user).exists():
+            messages.error(request, "You already have a Monstrosity and cannot create another.")
+            return redirect('showcase:mymonstrosity')  # Redirect to the user's existing Monstrosity page
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['user_monstrosity'] = Monstrosity.objects.filter(user=self.request.user, is_active=1).first()
         context['Monster'] = Monstrosity.objects.filter(is_active=1)
         context['MonsterSprite'] = MonstrositySprite.objects.filter(is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -3174,6 +3254,7 @@ class AddMonstrosityView(FormMixin, LoginRequiredMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
+        # The user check is already done in `dispatch`, so this handles form submission
         form = AddMonstrosityForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)

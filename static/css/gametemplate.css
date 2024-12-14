@@ -20,7 +20,7 @@ body{
    border-color: #323c52;
    border-radius: 15px;
    width: 120vh; /* or any specific width */
-   height: 65vh;
+   height: 45vh;
    backdrop-filter: blur(20px);
    overflow: hidden;
    margin: 0 auto; /* Centers the container horizontally */

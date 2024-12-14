@@ -319,7 +319,7 @@ class UpdateProfile(models.Model):
 
 class Experience(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    amount = models.IntegerField()
+    amount = models.IntegerField() #consider a growth rate of x^2, with x starting at 100 & 1xp = 1 ruby spent
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -335,9 +335,9 @@ class Experience(models.Model):
 
 
 class Level(models.Model):
-    level = models.IntegerField(default=1)
+    level = models.IntegerField(default=1, blank=True, null=True)
     level_name = models.CharField(max_length=200)
-    experience = models.ForeignKey(Experience, on_delete=models.CASCADE, blank=True, null=True)
+    experience = models.IntegerField(default=0, blank=True, null=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -353,6 +353,8 @@ class Level(models.Model):
             if last_level:
                 self.level = last_level.level + 1
             # if there is no last_level, self.level will be 1 by default
+            if not self.experience and self.level:
+                self.experience = self.level ** 2
         super().save(*args, **kwargs)
 
     class Meta:
@@ -387,6 +389,7 @@ class Monstrosity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     monstrositysprite = models.ForeignKey(MonstrositySprite, on_delete=models.CASCADE, verbose_name="Monstrosity Sprite")
     monstrositys_name = models.CharField(max_length=200, blank=True, null=True,  verbose_name="Monstrosity Name", unique=True)
+    experience = models.IntegerField(default=0)
     level = models.IntegerField(default=1)
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -395,7 +398,12 @@ class Monstrosity(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return str(self.user) + "'s " + self.monstrositys_name
+        return str(self.user) + "'s " + str(self.monstrositys_name)
+
+    def save(self, *args, **kwargs):
+        if not self.monstrositys_name:  # Avoid division by zero
+            self.monstrositys_name = str(self.user) + "'s " + str(self.monstrositysprite)
+        super().save(*args, **kwargs)
 
     def get_sprite_images(self):
         # Retrieve images from related InventoryObjects
@@ -549,6 +557,7 @@ class ProfileDetails(models.Model):
     currency_amount = models.IntegerField(default=0)
     total_currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_currency_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    rubies_spent = models.IntegerField(blank=True, null=True, default=0) #linked to experiencek
     green_cards_hit = models.IntegerField(blank=True, null=True)
     yellow_cards_hit = models.IntegerField(blank=True, null=True)
     orange_cards_hit = models.IntegerField(blank=True, null=True)
@@ -634,6 +643,17 @@ class ProfileDetails(models.Model):
         if not self.avatar:
             self.avatar = 'static/css/images/a.jpg'
             print('saved the profile avatar to default image')
+        if self.pk:
+            # Retrieve the previous currency_amount from the database
+            previous_instance = ProfileDetails.objects.get(pk=self.pk)
+            if previous_instance.currency_amount > self.currency_amount:
+                # Calculate the spent amount
+                spent_amount = previous_instance.currency_amount - self.currency_amount
+                # Get the first active Currency instance (adjust if needed)
+                first_currency = Currency.objects.filter(is_active=1).first()
+                if first_currency and self.currency == first_currency:
+                    # Update rubies_spent
+                    self.rubies_spent = (self.rubies_spent or 0) + spent_amount
         super().save(*args, **kwargs)
 
     class Meta:

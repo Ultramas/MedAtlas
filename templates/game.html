@@ -260,6 +260,8 @@ border: none;
 
 </head>
 <body>
+
+
 	<!-- header -->
 	<div class="top-header-area" id="sticker" style="background: linear-gradient(rgba(0, 0, 0, 1) 5%, rgba(0,0,0,0));">
 		<div class="container">
@@ -318,7 +320,7 @@ border: none;
 
 
 								</li>
-								<li style="margin-right: -10%;">
+<li style="display: flex; align-items: center; margin-right: -10%;">
 									{% for userprofile in Profiles %}
 									{% if userprofile.newprofile_profile_picture_url %}
 									<a href="{{ userprofile.newprofile_profile_url }}">
@@ -328,8 +330,10 @@ border: none;
 									<!-- Placeholder image or default avatar -->
 									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
 									{% endif %}
+									<h3 class="currency_designation" id="currency-amount" style="text-align: center; space-between: 5px;">{{userprofile.currency_amount}} {{userprofile.currency}}</h3>
 									{% endfor %}
 								</li>
+
 							</ul>
 						</nav>
 						<a class="mobile-show search-bar-icon" href="#"><i class="fas fa-search"></i></a>
@@ -345,7 +349,7 @@ border: none;
 <div class="boxes" style="left: 0%; position: absolute; width: 100%; height: 50%; background: url('{{ game.image.url }}'); alt='{{ game.name }}'; background-size: cover; background-repeat: no-repeat ">
 </div>
     <div>
-<div class="selections" style="border: 2px solid black;">
+<div class="selections" style="border: 2px solid black; margin-bottom: 120%;">
     <div class="flame-effect"></div>
     <div class="content">
         <label style="background: rgba(255, 255, 255, 0.3); padding: 2px; border-radius: 10px;"> Spin Boost Power</label>
@@ -358,24 +362,105 @@ border: none;
             <button class="spin-option" data-value="10">10x</button>
         </div>
         <br>
+        <h3 id="cost-display">
+            {% if game.discount_cost %}
+                <span id="base-cost">{{ game.discount_cost }}</span> 💎
+            {% else %}
+                <span id="base-cost">{{ game.cost }}</span> 💎
+            {% endif %}
+        </h3>
+        <script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function () {
+    const spinButtons = document.querySelectorAll(".spin-option");
+    const baseCostElement = document.getElementById("base-cost");
+    const costDisplayElement = document.getElementById("cost-display");
 
+    // Parse the base cost as a number (default to 0 if not a number)
+    const baseCost = parseFloat(baseCostElement.textContent) || 0;
+
+    spinButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            const spinMultiplier = parseInt(this.dataset.value, 10); // Get the spin multiplier
+            const totalCost = baseCost * spinMultiplier; // Calculate the total cost
+            costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`; // Update the display
+        });
+    });
+});
+</script>
         <input type="checkbox" id="quickspin-checkbox">
         <label for="quickspin-checkbox">Quick Spin</label>
         <input type="checkbox" id="persist-spin-checkbox">
         <label for="persist-spin-checkbox">Save Spin Boost</label>
     </div>
 </div>
-
         <label>
         </label>
 
       <!-- Your button with initial data attributes -->
-<button class="start" id="start" data-game-id="{{ game.id }}" data-nonce="{{ nonce }}" data-slug="{{ game.slug }}" style="margin-top: 2%;">Spin!</button>
+<button class="start" id="start" data-game-id="{{ game.id }}" data-nonce="{{ nonce }}" data-slug="{{ game.slug }}" style="margin-top: 5%;">Spin!</button>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    let selectedMultiplier = 1;  // Default multiplier
+
+    // Add event listener to each spin-option button
+    document.querySelectorAll(".spin-option").forEach(button => {
+        button.addEventListener("click", function() {
+            selectedMultiplier = parseInt(this.getAttribute("data-value"));
+            console.log("Selected multiplier:", selectedMultiplier);  // For debugging
+        });
+    });
+
+    // Add event listener to the spin button
+    document.getElementById("start").addEventListener("click", function() {
+        console.log("Button clicked!"); // Check if the button click is being registered
+
+        const button = this;
+        const gameId = button.getAttribute("data-game-id");
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value; // Assumes a CSRF token is present in the page
+
+        console.log("Game ID:", gameId); // Check if the game ID is being fetched correctly
+        console.log("CSRF Token:", csrfToken); // Check if the CSRF token is being retrieved correctly
+        console.log("Spin Multiplier:", selectedMultiplier); // Log the selected multiplier
+
+        fetch("{% url 'showcase:spin_game' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({
+                game_id: gameId,
+                spin_multiplier: selectedMultiplier  // Send the selected multiplier
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Response data:", data); // Log the parsed response data
+            if (data.success) {
+                // alert(data.message);  // Show success message
+
+                // Update the displayed currency amount in the DOM
+                const currencyElement = document.querySelector("#currency-amount"); // Assuming this element displays the currency
+                if (currencyElement) {
+                    currencyElement.innerText = `${data.updated_currency_amount} ${data.currency_name}`;
+                }
+            } else {
+                alert(data.error);
+            }
+        })
+        .catch(error => {
+            console.error("Error in fetch:", error); // Log any errors from the fetch request
+        });
+    });
+});
+
+
+</script>
 
 
 
 <!-- Embed choices and other data in a script tag -->
-
 
 
 <script type="text/javascript">
@@ -513,7 +598,7 @@ $(document).ready(function() {
 
 
     <div class="wrapper">
-        <div class="containerre">
+        <div class="containerre" style="margin-top: 3%;">
             <div class="slider" id="slider">
 <!--currently, the card ends up at the back of the slider. make sure it ends up in the middle where it can be selected-->
             {% for item in choices_with_nonce %}
@@ -593,34 +678,6 @@ $(document).ready(function() {
     const choicesWithNonce = {{ choices_with_nonce|safe }};
 </script>
 
-<script>
-document.getElementById('start').addEventListener('click', function () {
-    const selectedMultiplier = document.querySelector('.spin-option.selected')?.dataset.value || 1;
-    const gameId = this.dataset.gameId;
-    const nonce = this.dataset.nonce;
-    const slug = this.dataset.slug;
-
-    fetch('/charge-user/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}' // Ensure CSRF token is included
-        },
-        body: JSON.stringify({
-            game_id: gameId,
-            multiplier: selectedMultiplier,
-            nonce: nonce,
-            slug: slug,
-        })
-    }).then(response => response.json()).then(data => {
-        if (data.success) {
-            alert('Charged successfully!');
-        } else {
-            alert(data.message || 'Something went wrong.');
-        }
-    });
-});
-</script>
 
     <script>
 
@@ -822,6 +879,7 @@ $(".start").click(function () {
     {% include 'gameloottable.html' %}
 <br>
 <br>
+
 </body>
 </html>
 
