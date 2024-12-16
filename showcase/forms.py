@@ -375,6 +375,22 @@ class CardUploading(forms.ModelForm):
 ChoiceFormSet = inlineformset_factory(Game, Choice, form=CardUploading, extra=1)
 
 
+class GameAdminForm(forms.ModelForm):
+    class Meta:
+        model = Game
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        daily = cleaned_data.get("daily")
+        unlocking_level = cleaned_data.get("unlocking_level")
+
+        if daily and not unlocking_level:
+            raise ValidationError("An unlocking level must be set for daily games.")
+
+        return cleaned_data
+
+
 class BattleCreationForm(forms.ModelForm):
     game_values = forms.CharField(
         widget=forms.Textarea(attrs={'readonly': 'readonly'}),

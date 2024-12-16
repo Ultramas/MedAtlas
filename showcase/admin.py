@@ -246,7 +246,7 @@ admin.site.register(LotteryTickets, LotteryTicketAdmin)
 class LotteryAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Lottery Information - Categorial Descriptions', {
-            'fields': ('name', 'flavor_text', 'file_path', 'slug', 'file', 'image_length', 'image_width', 'is_active')
+            'fields': ('name', 'flavor_text', 'file_path', 'slug', 'maximum_tickets', 'price', 'currency', 'file', 'image_length', 'image_width', 'is_active')
         }),
     )
     readonly_fields = ('mfg_date',)
@@ -566,6 +566,9 @@ class GameHubAdmin(admin.ModelAdmin):
 admin.site.register(GameHub, GameHubAdmin)
 
 
+from django.contrib import admin
+from django.utils.html import format_html
+
 class GameChoiceInline(admin.StackedInline):
     model = Choice
     extra = 1
@@ -586,11 +589,17 @@ class GameAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Game Information - Categorial Description', {
-            'fields': ('name', 'user', 'type', 'category', 'cost', 'discount_cost', 'image', 'power_meter', 'slug', 'filter', 'player_made', 'player_inventory', 'is_active',),
+            'fields': ('name', 'user', 'type', 'category', 'cost', 'discount_cost', 'image', 'power_meter', 'slug', 'filter', 'player_made', 'player_inventory', 'daily', 'is_active'),
+            'classes': ('collapse',),
+        }),
+        ('Unlocking Level (Daily Games Only)', {
+            'fields': ('unlocking_level', 'cooldown',),
             'classes': ('collapse',),
         }),
     )
 
+    class Media:
+        js = ('admin/js/game_admin.js',)  # Path to the custom JavaScript file
 
 admin.site.register(Game, GameAdmin)
 
@@ -2068,6 +2077,7 @@ class DefaultAvatarAdmin(admin.ModelAdmin):
         }),
     )
 
+
 admin.site.register(DefaultAvatar, DefaultAvatarAdmin)
 
 
@@ -2085,13 +2095,32 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
 admin.site.register(ProfileDetails, ProfileDetailsAdmin)
 
 
-class ExperienceAdmin(admin.ModelAdmin):
-    fieldsets = (
-        ('Level Information', {
-            'fields': ('user', 'name', 'is_active',)
-        }),
-    )
+class LevelInline(admin.TabularInline):
+    model = Experience.level.through
+    extra = 1  # Number of blank fields for new levels
 
+
+class ExperienceAdmin(admin.ModelAdmin):
+    list_display = ('user', 'profile', 'display_levels', 'amount', 'is_active')
+    inlines = [LevelInline]
+    filter_horizontal = ('level',)
+
+    def display_levels(self, obj):
+        """Custom method to display levels as a comma-separated list."""
+        levels = obj.level.all()
+        if levels.exists():
+            return ", ".join([level.level_name for level in levels])
+        return "No levels assigned"
+
+    display_levels.short_description = "Levels"  # Rename column header
+
+    def save_model(self, request, obj, form, change):
+        """Override save_model to calculate and set eligible levels."""
+        super().save_model(request, obj, form, change)  # Save the instance first
+
+        # Fetch eligible levels and update ManyToMany field
+        eligible_levels = Level.objects.filter(experience__lte=obj.amount)
+        obj.level.set(eligible_levels)  # Set eligible levels to the ManyToMany field
 
 admin.site.register(Experience, ExperienceAdmin)
 
@@ -2150,11 +2179,9 @@ admin.site.register(Battle, BattleAdmin)
 
 
 class LevelAdmin(admin.ModelAdmin):
-    fieldsets = (
-        ('Level Information', {
-            'fields': ('level', 'level_name', 'experience', 'is_active',)
-        }),
-    )
+    list_display = ('level', 'level_name', 'experience', 'affiliation', 'is_active')
+    filter_horizontal = ('games',)  # Use horizontal filter for the ManyToManyField
+    ordering = ('level',)
 
 
 admin.site.register(Level, LevelAdmin)

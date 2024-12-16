@@ -1,6 +1,8 @@
 import string
 import uuid
-from datetime import timedelta
+from datetime import timedelta, time, datetime
+
+from django.utils import timezone
 from uuid import uuid4
 
 from PIL import Image
@@ -17,7 +19,7 @@ from django.dispatch import receiver
 from django.forms import CharField
 from django.shortcuts import reverse
 from django_countries.fields import CountryField
-from django.utils import timezone
+from django.utils.timezone import now, make_aware
 from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
 from pydantic import ValidationError
 from django.contrib.auth.models import Group
@@ -317,45 +319,140 @@ class UpdateProfile(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
 
-class Experience(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    amount = models.IntegerField() #consider a growth rate of x^2, with x starting at 100 & 1xp = 1 ruby spent
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
-
-    def __str__(self):
-        return str(self.user) + ": " + str(self.amount) + " EXP"
-
-    class Meta:
-        verbose_name = "Experience"
-        verbose_name_plural = "Experience"
+from django.db import transaction, connection
 
 
 class Level(models.Model):
     level = models.IntegerField(default=1, blank=True, null=True)
     level_name = models.CharField(max_length=200)
     experience = models.IntegerField(default=0, blank=True, null=True)
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+    full_row = models.BooleanField(default=True)
+    affiliation = models.BooleanField(default=None, blank=True, null=True)
+    games = models.ManyToManyField(
+        'Game',  # Refer to Game using a string
+        blank=True,
+        limit_choices_to={'daily': True},
+        related_name='levels',
+        verbose_name="Games with Daily Mode"
+    )
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
 
     def __str__(self):
-        return str(self.level_name) + " " + str(self.level)
+        return f"{self.level_name} (Level {self.level})"
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # if the object is being created, not updated
+        # Ensure the current instance is saved first to generate a primary key
+        if not self.pk:
+            super().save(*args, **kwargs)
+
+        if self.full_row:
+            # Get the last level to calculate the new level
             last_level = Level.objects.all().order_by('-level').first()
-            if last_level:
-                self.level = last_level.level + 1
-            # if there is no last_level, self.level will be 1 by default
-            if not self.experience and self.level:
-                self.experience = self.level ** 2
-        super().save(*args, **kwargs)
+            self.level = (last_level.level + 1) if last_level else 1
+
+            # Prepare new level instances for bulk creation
+            level_instances = []
+            for i in range(10):
+                new_level = Level(
+                    level=self.level + i,
+                    level_name=self.level_name,
+                    experience=self.experience,
+                    full_row=False,
+                    is_active=self.is_active
+                )
+                level_instances.append(new_level)
+
+            # Perform bulk creation asynchronously or in a transaction
+            self._bulk_create_level_instances(level_instances)
+
+            # Early exit to prevent saving the original instance again
+            return
+
+        # Update experience based on the level
+        self.experience = self.level ** 2
+
+        # Avoid unnecessary updates to level_name
+        if self.pk:
+            existing_instance = Level.objects.filter(pk=self.pk).first()
+            if existing_instance and existing_instance.level_name != self.level_name:
+                Level.objects.filter(level_name=existing_instance.level_name).exclude(pk=self.pk).update(
+                    level_name=self.level_name)
+
+        super().save(*args, **kwargs)  # Save the instance
+
+        # Correct level gaps if necessary
+        self._correct_level_gaps()
+
+        # Adjust related levels for the same level_name
+        self._adjust_related_levels()
+
+    def _bulk_create_level_instances(self, level_instances):
+        try:
+            with transaction.atomic():
+                Level.objects.bulk_create(level_instances)
+        except Exception as e:
+            # Log or handle the error as needed
+            print(f"Error during bulk creation: {e}")
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)  # Delete the instance
+        self._correct_level_gaps()  # Correct gaps after deletion
+
+    def _correct_level_gaps(self):
+        try:
+            with transaction.atomic():
+                levels = Level.objects.order_by('level')  # Fetch ordered levels
+                new_levels = []
+                current_level = 1
+
+                for level_obj in levels:
+                    if level_obj.level != current_level:
+                        level_obj.level = current_level
+                        new_levels.append(level_obj)
+                    current_level += 1
+
+                if new_levels:
+                    Level.objects.bulk_update(new_levels, ['level'])  # Apply updates
+        except Exception as e:
+            print(f"Error correcting level gaps: {e}")
+
+    def _adjust_related_levels(self):
+        try:
+            with transaction.atomic():
+                # Step 1: Fetch all levels grouped by level_name and ordered by their appearance
+                all_levels = Level.objects.order_by('level', 'id')
+                level_groups = {}
+
+                for level_obj in all_levels:
+                    if level_obj.level_name not in level_groups:
+                        level_groups[level_obj.level_name] = []
+                    level_groups[level_obj.level_name].append(level_obj)
+
+                # Step 2: Rebuild levels in order, ensuring:
+                #   - Groups with the first appearance come first
+                #   - Levels within each group are sequential
+                new_levels = []
+                current_level = 1  # Start levels from 1
+
+                for group_name, level_group in level_groups.items():
+                    for i, level_obj in enumerate(level_group):
+                        # Prevent duplicate levels by adjusting later instances
+                        level_obj.level = current_level
+                        current_level += 1
+                        new_levels.append(level_obj)
+
+                # Step 3: Perform a bulk update to apply the changes
+                Level.objects.bulk_update(new_levels, ['level'])
+
+        except Exception as e:
+            print(f"Error adjusting related levels: {e}")
 
     class Meta:
         verbose_name = "Level"
@@ -387,8 +484,10 @@ class MonstrositySprite(models.Model):
 
 class Monstrosity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    monstrositysprite = models.ForeignKey(MonstrositySprite, on_delete=models.CASCADE, verbose_name="Monstrosity Sprite")
-    monstrositys_name = models.CharField(max_length=200, blank=True, null=True,  verbose_name="Monstrosity Name", unique=True)
+    monstrositysprite = models.ForeignKey(MonstrositySprite, on_delete=models.CASCADE,
+                                          verbose_name="Monstrosity Sprite")
+    monstrositys_name = models.CharField(max_length=200, blank=True, null=True, verbose_name="Monstrosity Name",
+                                         unique=True)
     experience = models.IntegerField(default=0)
     level = models.IntegerField(default=1)
     is_active = models.IntegerField(default=1,
@@ -557,7 +656,7 @@ class ProfileDetails(models.Model):
     currency_amount = models.IntegerField(default=0)
     total_currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_currency_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    rubies_spent = models.IntegerField(blank=True, null=True, default=0) #linked to experiencek
+    rubies_spent = models.IntegerField(blank=True, null=True, default=0)  # linked to experiencek
     green_cards_hit = models.IntegerField(blank=True, null=True)
     yellow_cards_hit = models.IntegerField(blank=True, null=True)
     orange_cards_hit = models.IntegerField(blank=True, null=True)
@@ -566,7 +665,8 @@ class ProfileDetails(models.Model):
     gold_cards_hit = models.IntegerField(blank=True, null=True)
     red_gold_cards_hit = models.IntegerField(blank=True, null=True)
     times_subtract_called = models.IntegerField(default=0)
-    monstrosity = models.ForeignKey(Monstrosity, blank=True, null=True, on_delete=models.CASCADE, related_name="monster")
+    monstrosity = models.ForeignKey(Monstrosity, blank=True, null=True, on_delete=models.CASCADE,
+                                    related_name="monster")
     seller = models.BooleanField(default=False, null=True)
     membership = models.ForeignKey(Membership, blank=True, null=True, on_delete=models.CASCADE)
     position = models.UUIDField(
@@ -639,21 +739,31 @@ class ProfileDetails(models.Model):
     post_save.connect(create_user_profile, sender=User)
 
     def save(self, *args, **kwargs):
-        self.currency = Currency.objects.filter(is_active=1).first()
+        # Set the first active currency if not already set
+        if not self.currency:
+            self.currency = Currency.objects.filter(is_active=1).first()
+
+        # Set a default avatar if not provided
         if not self.avatar:
             self.avatar = 'static/css/images/a.jpg'
             print('saved the profile avatar to default image')
+
+        # Check if rubies_spent has changed
         if self.pk:
-            # Retrieve the previous currency_amount from the database
             previous_instance = ProfileDetails.objects.get(pk=self.pk)
             if previous_instance.currency_amount > self.currency_amount:
-                # Calculate the spent amount
                 spent_amount = previous_instance.currency_amount - self.currency_amount
-                # Get the first active Currency instance (adjust if needed)
                 first_currency = Currency.objects.filter(is_active=1).first()
                 if first_currency and self.currency == first_currency:
-                    # Update rubies_spent
                     self.rubies_spent = (self.rubies_spent or 0) + spent_amount
+
+            # Update the level field if rubies_spent has changed
+            if self.rubies_spent != previous_instance.rubies_spent:
+                new_level = Level.objects.filter(experience__lte=self.rubies_spent).order_by('-level').first()
+                if new_level:
+                    self.level = new_level
+
+        # Call the parent class's save method to trigger signals
         super().save(*args, **kwargs)
 
     class Meta:
@@ -823,6 +933,47 @@ class CurrencyFullOrder(models.Model):
     class Meta:
         verbose_name = "Total Currency Order"
         verbose_name_plural = "Total Currency Orders"
+
+
+class Experience(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    profile = models.ForeignKey(ProfileDetails, on_delete=models.CASCADE, blank=True, null=True)
+    level = models.ManyToManyField('showcase.Level', blank=True, related_name='current_level')
+    amount = models.IntegerField(default=0, blank=True, null=True)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    def __str__(self):
+        return f"{self.user}: {self.amount} EXP"
+
+    def save(self, *args, **kwargs):
+        # Assign profile if not already set
+        if self.user and not self.profile:
+            self.profile = ProfileDetails.objects.filter(user=self.user).first()
+
+        # Set amount based on profile rubies spent if not already set
+        if self.profile:
+            self.amount = self.profile.rubies_spent or 0
+
+        super().save(*args, **kwargs)  # Save the instance first to ensure it has a primary key
+
+        # Iterate through all Level instances and add eligible levels to the ManyToMany field
+        eligible_levels = Level.objects.filter(experience__lte=self.amount)
+
+        # Set the levels after the instance is saved
+        print(f"Eligible levels: {eligible_levels}")
+        self.level.set(eligible_levels)
+        print(f"Set levels: {self.level.all()}")
+
+    class Meta:
+        verbose_name = "Experience"
+        verbose_name_plural = "Experiences"
 
 
 class SecretRoom(models.Model):
@@ -1191,7 +1342,7 @@ class TradeItem(models.Model):
     slug = models.SlugField()  # might change to automatically get the slug
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
     certified = models.BooleanField(default=False,
-                                         help_text="If you are applying to become a partner in more than 1 category, talk to Trove.")
+                                    help_text="If you are applying to become a partner in more than 1 category, talk to Trove.")
     description = models.TextField()
     value = models.IntegerField(blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
@@ -2124,7 +2275,8 @@ class BlogTips(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:  # If the object is being created (not updated)
-            max_position = BlogTips.objects.filter(author=self.author).aggregate(models.Max('position'))['position__max']
+            max_position = BlogTips.objects.filter(author=self.author).aggregate(models.Max('position'))[
+                'position__max']
             self.position = (max_position or 0) + 1
 
         super(BlogTips, self).save(*args, **kwargs)
@@ -2135,7 +2287,6 @@ class BlogTips(models.Model):
     class Meta:
         verbose_name = "Blog Tip"
         verbose_name_plural = "Blog Tips"
-
 
 
 class ShuffleType(models.Model):
@@ -2191,7 +2342,8 @@ class Game(models.Model):
     cost = models.IntegerField(default=0)
     discount_cost = models.IntegerField(blank=True, null=True)
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
-    category = models.CharField(max_length=100, help_text='Category of choice (Pokemon, Yu-Gi-Oh, Bakugo, Magic The Gathering, etc.).')
+    category = models.CharField(max_length=100,
+                                help_text='Category of choice (Pokemon, Yu-Gi-Oh, Bakugo, Magic The Gathering, etc.).')
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     power_meter = models.CharField(choices=POWER, max_length=4, default=1)
     items = models.ManyToManyField(PrizePool, related_name='official_items')
@@ -2200,6 +2352,11 @@ class Game(models.Model):
     player_made = models.BooleanField(default=True)
     player_inventory = models.BooleanField(default=True)
     date_and_time = models.DateTimeField(null=True, verbose_name="date and time", auto_now_add=True)
+    daily = models.BooleanField(default=False)
+    unlocking_level = models.OneToOneField(Level, blank=True, null=True, on_delete=models.CASCADE)
+    cooldown = models.DateTimeField(null=True, blank=True)
+    locked = models.BooleanField(default=True)  # if cooldown is reached & level is unlocked, set locked to False
+    # remaining time until 5:00pm each day; only activates if locked is true
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2209,10 +2366,71 @@ class Game(models.Model):
     def __str__(self):
         return str(self.name)
 
+    def clean(self):
+        """Ensure player_made and daily cannot both be True."""
+        if self.player_made and self.daily:
+            raise ValidationError("A game cannot be both player-made and daily.")
+        if self.daily and not self.unlocking_level:
+            raise ValidationError("An unlocking level must be set for daily games.")
+
     def save(self, *args, **kwargs):
+        self.full_clean()  # Call full_clean() to trigger validation
         if not self.slug:
             self.slug = slugify(self.name)
+        if self.cost == 0:
+            total_cost = 0
+            for choice in self.choices.all():
+                if choice.value and choice.rarity:
+                    # Calculate the product of value and rarity, divided by 100
+                    choice_cost = (choice.value * float(choice.rarity)) / 100
+                    total_cost += choice_cost
+            # Multiply the total cost by 1.12
+            self.cost = int(total_cost * 1.12)
+        if self.daily == True and not self.discount_cost:
+            self.discount_cost = 0
+        # Ensure the `cooldown` field is updated with a timezone-aware datetime
+        today_5pm = make_aware(datetime.combine(now().date(), time(17, 0)))
+        if not self.cooldown or self.cooldown.date() != now().date():
+            self.cooldown = today_5pm
+
         super().save(*args, **kwargs)
+
+    def check_locked_status(self, user):
+        if self.daily and self.unlocking_level:
+            # Check if user's level meets or exceeds unlocking_level
+            if user.level.level >= self.unlocking_level.level:
+                self.locked = False
+            else:
+                self.locked = True
+        return self.locked
+
+    def get_time_until_5pm(self):
+        """
+        Calculate the remaining time until 5:00 PM today.
+        Only activates if locked is True.
+        """
+        if not self.locked:
+            return timedelta(seconds=0)  # No remaining time if not locked
+
+        # Get the current time (timezone-aware)
+        current_time = now()
+
+        # Define 5:00 PM today
+        today_5pm = current_time.replace(hour=17, minute=0, second=0, microsecond=0)
+
+        # If 5:00 PM has already passed today, move to tomorrow
+        if current_time >= today_5pm:
+            today_5pm += timedelta(days=1)
+
+        # Calculate the remaining time
+        remaining_time = today_5pm - current_time
+        return remaining_time
+
+    def get_time_until_5pm_formatted(self):
+        remaining_time = self.get_time_until_5pm()
+        hours, remainder = divmod(remaining_time.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        return f"{hours}h {minutes}m {seconds}s"
 
     def get_color(self, choice):
         cost_threshold_80 = self.cost * 0.8
@@ -2275,8 +2493,11 @@ class Choice(models.Model):
     color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
     votes = models.IntegerField(default=0)
     value = models.IntegerField(default=0)
-    category = models.CharField(max_length=100, help_text='Category of choice (Pokemon, Yu-Gi-Oh, Bakugo, Magic The Gathering, etc.).', blank=True, null=True)
-    subcategory = models.CharField(max_length=200, help_text='Subcategory of choice (Pokemon, trainers, etc.).', blank=True, null=True)
+    category = models.CharField(max_length=100,
+                                help_text='Category of choice (Pokemon, Yu-Gi-Oh, Bakugo, Magic The Gathering, etc.).',
+                                blank=True, null=True)
+    subcategory = models.CharField(max_length=200, help_text='Subcategory of choice (Pokemon, trainers, etc.).',
+                                   blank=True, null=True)
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     tier = models.CharField(choices=LEVEL, max_length=1, blank=True, null=True)
     rarity = models.DecimalField(max_digits=9, decimal_places=6, help_text="Rarity of choice in percent (optional).",
@@ -2311,14 +2532,15 @@ class Choice(models.Model):
         help_text="Do NOT fill out manually.",
         blank=True,
         null=True,
-        verbose_name = 'Generated Nonce'
+        verbose_name='Generated Nonce'
     )
     nodes = models.IntegerField(help_text="Number of the choice included", blank=True, null=True,
                                 verbose_name="Quantity Displayed")
     value = models.IntegerField(help_text="Value of item in Rubicoins.", blank=True,
                                 null=True, verbose_name="Value (Rubicoins)")
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True,)
-    number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)", blank=True, null=True, default=1)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True, )
+    number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)", blank=True, null=True,
+                                 default=1)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2350,6 +2572,7 @@ class Choice(models.Model):
         if self.upper_nonce is not None and self.lower_nonce is not None:
             rarity_value = (self.upper_nonce - self.lower_nonce) / 10000
             self.rarity = round(rarity_value, 6)  # Set rarity with up to 6 decimal places
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -2491,9 +2714,12 @@ class Achievements(models.Model):
     slug = AutoSlugField(populate_from='title', unique=True)
     value = models.IntegerField(blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    rubies_spent = models.IntegerField(blank=True, null=True) #make sure it does not show unless the selected category is RS
-    rubies_collected = models.IntegerField(blank=True, null=True) #make sure it does not show unless the selected category is CRS
-    total_rubies_earned = models.IntegerField(blank=True, null=True) #make sure it does not show unless the selected category is TRS
+    rubies_spent = models.IntegerField(blank=True,
+                                       null=True)  # make sure it does not show unless the selected category is RS
+    rubies_collected = models.IntegerField(blank=True,
+                                           null=True)  # make sure it does not show unless the selected category is CRS
+    total_rubies_earned = models.IntegerField(blank=True,
+                                              null=True)  # make sure it does not show unless the selected category is TRS
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
     category = models.CharField(choices=AchievementCategory, max_length=4, blank=True, null=True)
     earned = models.BooleanField(default=False)
@@ -2653,11 +2879,14 @@ class EarnedAchievements(models.Model):
 
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
     category = models.CharField(choices=AchievementCategory, max_length=4, blank=True, null=True)
-    rubies_spent = models.IntegerField(blank=True, null=True) #make sure it does not show unless the selected category is RS
-    rubies_collected = models.IntegerField(blank=True, null=True) #make sure it does not show unless the selected category is CRS
-    total_rubies_earned = models.IntegerField(blank=True, null=True) #make sure it does not show unless the selected category is TRS
+    rubies_spent = models.IntegerField(blank=True,
+                                       null=True)  # make sure it does not show unless the selected category is RS
+    rubies_collected = models.IntegerField(blank=True,
+                                           null=True)  # make sure it does not show unless the selected category is CRS
+    total_rubies_earned = models.IntegerField(blank=True,
+                                              null=True)  # make sure it does not show unless the selected category is TRS
     earned = models.BooleanField(default=False)
-    green_counter = models.IntegerField(blank=True, null=True, default=0,)
+    green_counter = models.IntegerField(blank=True, null=True, default=0, )
     yellow_counter = models.IntegerField(blank=True, null=True, default=0)
     orange_counter = models.IntegerField(blank=True, null=True, default=0)
     red_counter = models.IntegerField(blank=True, null=True, default=0)
@@ -2985,7 +3214,8 @@ class SellerApplication(models.Model):
     accepted = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.user) + " - Email Verified: " + str(self.email_verified) + " - Registered: " + str(self.accepted)
+        return str(self.user) + " - Email Verified: " + str(self.email_verified) + " - Registered: " + str(
+            self.accepted)
 
     class Meta:
         verbose_name = "Seller Application"
@@ -4385,8 +4615,6 @@ class Room(models.Model):
         return final_url
 
 
-from django.db import models
-from django.utils import timezone
 from django.contrib.auth.models import User
 
 
@@ -4495,7 +4723,7 @@ class GeneralMessage(models.Model):
         if not self.pk:
             # Get the current maximum message number
             max_message_number = GeneralMessage.objects.aggregate(max_message_number=Max('message_number'))[
-                'max_message_number'] or 0
+                                     'max_message_number'] or 0
             self.message_number = max_message_number + 1
 
             # Get the associated ProfileDetails for the signed-in user
@@ -4871,7 +5099,6 @@ class UserProfile(models.Model):
         verbose_name_plural = "User Profiles"
 
 
-
 from django.db.models import signals
 from django.db.transaction import atomic
 
@@ -5038,7 +5265,8 @@ class Item(models.Model):
 
 
 class GameHistory(models.Model):
-    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="gamecreator")
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
+                                related_name="gamecreator")
     players = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='gameplayers')
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='games', null=True, blank=True)
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
@@ -5056,8 +5284,9 @@ class GameHistory(models.Model):
     plays = models.IntegerField(help_text="Number of plays", blank=True, null=True)
     value = models.IntegerField(help_text="Value of item in Rubicoins.", blank=True,
                                 null=True, verbose_name="Value (Rubicoins)")
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True,)
-    number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)", blank=True, null=True, default=1)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True, )
+    number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)", blank=True, null=True,
+                                 default=1)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -5164,7 +5393,6 @@ class Transaction(models.Model):
         verbose_name_plural = "Transactions"
 
 
-
 from django.utils.text import slugify
 
 
@@ -5218,8 +5446,8 @@ class TradeOffer(models.Model):
         return reverse('showcase:directedtradeoffers', args=[str(self.slug)])
 
     def save(self, *args, **kwargs):
-       #if not self.trade_agreement:
-       #    raise ValidationError("Trade agreement must be true to create a trade offer.")
+        # if not self.trade_agreement:
+        #    raise ValidationError("Trade agreement must be true to create a trade offer.")
         if not self.slug:
             print("Title:", self.title)  # Print the title
             self.slug = slugify(self.title)
@@ -5320,8 +5548,8 @@ class TradeShippingLabel(models.Model):
     class Meta:
         verbose_name = "Trade Shipping Label"
         verbose_name_plural = "Trade Shipping Labels"
-    unique_together = ('user', 'id',)
 
+    unique_together = ('user', 'id',)
 
 
 """
@@ -5352,7 +5580,7 @@ class RespondingTradeOffer(models.Model):
     )
     wanted_trade_items = models.ForeignKey(TradeOffer, on_delete=models.CASCADE, blank=True, null=True)
     trade_offer_exists = models.BooleanField(default=False,
-                                        help_text="Indicates if the trade has been completed previously.")
+                                             help_text="Indicates if the trade has been completed previously.")
     offered_trade_items = models.ManyToManyField(TradeItem)
     trade_shipping_label = models.ForeignKey(TradeShippingLabel, on_delete=models.CASCADE, null=True, blank=True)
     estimated_trading_value = models.DecimalField(
@@ -5524,7 +5752,8 @@ class TradeConfirmation(models.Model):
     trade = models.ForeignKey(Trade, on_delete=models.CASCADE, related_name='tradeconfirm')
     trader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='traderconfirm')
     recipient = models.ForeignKey(User, on_delete=models.CASCADE)
-    trade_confirmation = models.BooleanField('I confirm that I agree to these terms & conditions for the trade.', default=False)
+    trade_confirmation = models.BooleanField('I confirm that I agree to these terms & conditions for the trade.',
+                                             default=False)
     trading_contract = models.ForeignKey(Trade, on_delete=models.CASCADE, related_name='contract')
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -5986,7 +6215,6 @@ class Answer(models.Model):
         return f"{self.user.username}'s answer to '{self.question.text}'"
 
 
-
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
@@ -6135,14 +6363,10 @@ class Refund(models.Model):
 
 from django.db.models.signals import m2m_changed
 
-
 from django.db import models
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 
-
-from django.utils import timezone
-from datetime import timedelta
 
 
 class Withdraw(models.Model):
@@ -6724,8 +6948,11 @@ class Lottery(models.Model):
     flavor_text = models.CharField(max_length=200)
     file_path = models.CharField(max_length=500, blank=True, null=True)
     slug = models.SlugField(max_length=200, unique=True, blank=True, null=True)
-    file = models.FileField(null=True, verbose_name='Sprite')
     profile_number = models.PositiveIntegerField(default=0, editable=False)
+    maximum_tickets = models.PositiveIntegerField(blank=True, null=True)
+    price = models.PositiveIntegerField(default=0)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
+    file = models.FileField(null=True, verbose_name='Sprite')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
                                                verbose_name="image length")
@@ -6747,12 +6974,14 @@ class Lottery(models.Model):
             max_message_number = Lottery.objects.aggregate(max_message_number=models.Max('profile_number'))[
                                      'max_message_number'] or 0
             self.profile_number = max_message_number + 1
-
         if not self.slug:
             if self.name != "Daily Lotto" and self.name != "Daily Lottery" and self.name != "daily lotto" and self.name != "daily lottery":
                 self.slug = slugify(self.name)
 
         self.file_path = reverse('showcase:lottery', kwargs={'slug': self.slug})
+
+        if not self.currency:
+            self.currency = Currency.objects.first()
 
         super().save(*args, **kwargs)  # Call the "real" save() method.
 
@@ -6831,4 +7060,3 @@ class DefaultAvatar(models.Model):
     class Meta:
         verbose_name = "Default Avatar"
         verbose_name_plural = "Default Avatars"
-

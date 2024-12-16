@@ -331,8 +331,11 @@ border: none;
 									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
 									{% endif %}
 									<h3 class="currency_designation" id="currency-amount" style="text-align: center; space-between: 5px;">{{userprofile.currency_amount}} {{userprofile.currency}}</h3>
-									{% endfor %}
+
+                                    Level: {{ userprofile.level }}
+                                    {% endfor %}
 								</li>
+
 
 							</ul>
 						</nav>
@@ -363,12 +366,30 @@ border: none;
         </div>
         <br>
         <h3 id="cost-display">
-            {% if game.discount_cost %}
-                <span id="base-cost">{{ game.discount_cost }}</span> 💎
+            {% if game.daily %}
+                {% if game.discount_cost == 0 %}
+                    <span id="base-cost" style="display: none;">{{ game.discount_cost }} 💎</span>
+
+                    <span>Chest Value: {{ game.cost }}</span> 💎
+             <script>
+            // Disable the cost calculation JavaScript
+            document.addEventListener("DOMContentLoaded", function () {
+                const costDisplayElement = document.getElementById("cost-display");
+                if (costDisplayElement) {
+                    costDisplayElement.innerHTML = `<span id="base-cost">0</span> 💎`; // Set cost to 0
+                }
+            });
+        </script>
+                {% endif %}
             {% else %}
-                <span id="base-cost">{{ game.cost }}</span> 💎
+                {% if game.discount_cost %}
+                    <span id="base-cost">{{ game.discount_cost }}</span> 💎
+                {% else %}
+                    <span id="base-cost">{{ game.cost }}</span> 💎
+                {% endif %}
             {% endif %}
         </h3>
+
         <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function () {
     const spinButtons = document.querySelectorAll(".spin-option");
@@ -387,6 +408,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+
         <input type="checkbox" id="quickspin-checkbox">
         <label for="quickspin-checkbox">Quick Spin</label>
         <input type="checkbox" id="persist-spin-checkbox">
@@ -399,30 +421,32 @@ document.addEventListener("DOMContentLoaded", function () {
       <!-- Your button with initial data attributes -->
 <button class="start" id="start" data-game-id="{{ game.id }}" data-nonce="{{ nonce }}" data-slug="{{ game.slug }}" style="margin-top: 5%;">Spin!</button>
 
+
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    let selectedMultiplier = 1;  // Default multiplier
+document.addEventListener("DOMContentLoaded", function () {
+    let selectedMultiplier = 1; // Default multiplier
 
     // Add event listener to each spin-option button
     document.querySelectorAll(".spin-option").forEach(button => {
-        button.addEventListener("click", function() {
+        button.addEventListener("click", function () {
             selectedMultiplier = parseInt(this.getAttribute("data-value"));
-            console.log("Selected multiplier:", selectedMultiplier);  // For debugging
+            console.log("Selected multiplier:", selectedMultiplier); // For debugging
         });
     });
 
     // Add event listener to the spin button
-    document.getElementById("start").addEventListener("click", function() {
-        console.log("Button clicked!"); // Check if the button click is being registered
+    document.getElementById("start").addEventListener("click", function () {
+        console.log("Spin button clicked!"); // Debug log
 
         const button = this;
         const gameId = button.getAttribute("data-game-id");
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value; // Assumes a CSRF token is present in the page
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value; // Fetch CSRF token
 
-        console.log("Game ID:", gameId); // Check if the game ID is being fetched correctly
-        console.log("CSRF Token:", csrfToken); // Check if the CSRF token is being retrieved correctly
-        console.log("Spin Multiplier:", selectedMultiplier); // Log the selected multiplier
+        console.log("Game ID:", gameId); // Debug log
+        console.log("CSRF Token:", csrfToken); // Debug log
+        console.log("Spin Multiplier:", selectedMultiplier); // Debug log
 
+        // Perform the fetch request to initiate the spin
         fetch("{% url 'showcase:spin_game' %}", {
             method: "POST",
             headers: {
@@ -431,31 +455,30 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             body: JSON.stringify({
                 game_id: gameId,
-                spin_multiplier: selectedMultiplier  // Send the selected multiplier
+                spin_multiplier: selectedMultiplier
             })
         })
         .then(response => response.json())
         .then(data => {
-            console.log("Response data:", data); // Log the parsed response data
+            console.log("Response data:", data); // Debug log
+            //if box is not daily
             if (data.success) {
-                // alert(data.message);  // Show success message
-
-                // Update the displayed currency amount in the DOM
-                const currencyElement = document.querySelector("#currency-amount"); // Assuming this element displays the currency
+                // Update the currency amount automatically
+                const currencyElement = document.getElementById("currency-amount");
                 if (currencyElement) {
                     currencyElement.innerText = `${data.updated_currency_amount} ${data.currency_name}`;
                 }
+                // Optionally, display a success message
+                console.log("Spin successful:", data.message);
             } else {
-                alert(data.error);
+                alert(data.error); // Show error message if the spin fails
             }
         })
         .catch(error => {
-            console.error("Error in fetch:", error); // Log any errors from the fetch request
+            console.error("Error during fetch:", error); // Log any fetch errors
         });
     });
 });
-
-
 </script>
 
 

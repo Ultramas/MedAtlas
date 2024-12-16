@@ -379,10 +379,13 @@
                         {{ newprofile.description }}
                     {% endif %}
                 </p>
-                <div class="author">
-                    <img src="{% if newprofile.newprofile_profile_picture_url %}{{ newprofile.newprofile_profile_picture_url }}{% else %}{% static 'css/images/a.jpg' %}{% endif %}" alt="{{ newprofile.user }}">
-                    <h6>{{ newprofile.user }}</h6>
-                </div>
+				<div class="author">
+					{% if newprofile.user %}
+					<img src="{% if newprofile.newprofile_profile_picture_url %}{{ newprofile.newprofile_profile_picture_url }}{% else %}{% static 'css/images/a.jpg' %}{% endif %}" alt="{{ newprofile.user }}">
+					<h6>{{ newprofile.user }}</h6>
+					{% endif %}
+					<h3>{{newprofile.name}}</h3>
+				</div>
                 <div class="cost" style="background: rgba(255, 255, 255, 0.2); padding: 4px; padding-left: 10px; border-radius: 10px; width: 22%;">{{ newprofile.cost }} 💎</div>
                 <div class="heat_level">
                     <h4>Heat:

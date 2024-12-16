@@ -13,7 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
 
-    // Persist settings on checkbox change
+
+    // Set the checkbox state based on localStorage value
+    if (persistSpin) {
+        $('#persist-spin-checkbox').prop('checked', true);
+    }
+
+    // Handle the checkbox state change
     $('#persist-spin-checkbox').change(function () {
         localStorage.setItem('persistSpinChecked', $(this).prop('checked').toString());
     });
@@ -301,6 +307,11 @@ setTimeout(() => {
     } else {
         animationStopped = true; // Spin has ended
         showPopup();
+        // Reset totalSpins to 1 only if Persist Spin is unchecked, and after all spins are completed
+        if (!persistSpin) {
+            totalSpins = 1;
+            sessionStorage.setItem("totalSpins", totalSpins); // Set to 1 after spin completes
+        }
         $(".start").prop('disabled', false);
         $(".spin-option").prop('disabled', false);
     }

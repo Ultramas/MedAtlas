@@ -353,6 +353,8 @@ urlpatterns = [
     path('gameroom/<slug:slug>/', views.GameRoomView.as_view(), name='gameroom'), #game room with a single game genre (possibly multiple games)
     path('game/<slug:slug>/', views.GameChestBackgroundView.as_view(), name='game'), #game with a single game
     path('game/', views.GameChestBackgroundView.as_view(), name='game'),
+    path('dailyroom/', views.DailyRoomView.as_view(), name='dailyroom'), #game with a single game
+    path('dailygame/<slug:slug>/', views.DailyChestView.as_view(), name='dailygame'), #game with a single game
     path('spin_game/', views.spin_game, name='spin_game'),
     path('create-card-instance/', views.create_card_instance, name='create-card-instance'), #game with a single game
     path('gametemplate/', TemplateView.as_view(template_name='gametemplate.html'), name='gametemplate'),

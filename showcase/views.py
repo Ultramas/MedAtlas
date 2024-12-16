@@ -1,5 +1,7 @@
 from urllib import request
 from venv import logger
+
+from celery import shared_task
 from django.db import IntegrityError
 
 import django
@@ -18,7 +20,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference, Battle, \
-    BattleParticipant, Monstrosity, MonstrositySprite, Product
+    BattleParticipant, Monstrosity, MonstrositySprite, Product, Level
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -1651,7 +1653,10 @@ def game_view(request, game_id):
     game = get_object_or_404(Game, id=game_id)
 
     # Use the discount cost if available, otherwise use the regular cost
-    cost = game.discount_cost if game.discount_cost else game.cost
+    if game.daily:
+        cost = 0
+    else:
+        cost = game.discount_cost if game.discount_cost else game.cost
 
     context = {
         'game': game,
@@ -1733,13 +1738,14 @@ class GameChestBackgroundView(BaseView):
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['wager_form'] = WagerForm()
 
-        game = get_object_or_404(Game, slug=slug)
-        context['games'] = game
         choices = Choice.objects.filter(game=game)
         spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
         context['spinner_choice_renders'] = spinner_choice_renders
 
-        cost = game.discount_cost if game.discount_cost else game.cost
+        if game.daily:
+            cost = 0
+        else:
+            cost = game.discount_cost if game.discount_cost else game.cost
         context.update({
             'cost_threshold_80': cost * 0.8,
             'cost_threshold_100': cost,
@@ -1788,7 +1794,6 @@ class GameChestBackgroundView(BaseView):
             context['quick_spin'] = False
 
         context['spinpreference'] = spinpreference
-
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -2071,6 +2076,346 @@ class GameChestBackgroundView(BaseView):
                 return JsonResponse({'error': str(e)}, status=500)
         else:
             return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
+class DailyRoomView(BaseView):
+    model = GameHub
+    template_name = "dailyroom.html"
+
+    def post(self, request, *args, **kwargs):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            return redirect('showcase:emaildone')
+        else:
+            messages.error(request, "Form submission invalid")
+            print("there was an error in registering the email")
+            return render(request, "dailyroom.html", {'form': form})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
+            except ObjectDoesNotExist:
+                context['SentProfile'] = None  # or some default value
+        else:
+            context['SentProfile'] = None  # or some default value
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['Game'] = GameHub.objects.filter(is_active=1).first()
+        context['GameRoom'] = Game.objects.filter(is_active=1, daily=True).first()
+        context['form'] = EmailForm()
+
+        newprofile = Game.objects.filter(is_active=1, daily=True)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        return context
+
+
+class DailyChestView(BaseView):
+    template_name = "game.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        slug = self.kwargs.get('slug')
+        context['slug'] = slug
+
+        # Fetch data related to the user and game
+
+        game = get_object_or_404(Game, slug=slug)
+
+        # Pass the game as a list
+        context['game'] = game
+
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+            except UserProfile.DoesNotExist:
+                context['SentProfile'] = None
+        else:
+            context['SentProfile'] = None
+
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['wager_form'] = WagerForm()
+
+        game = get_object_or_404(Game, slug=slug)
+        context['games'] = game
+        choices = Choice.objects.filter(game=game)
+        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
+        context['spinner_choice_renders'] = spinner_choice_renders
+        if game.daily:
+            cost = 0
+        else:
+            cost = game.discount_cost if game.discount_cost else game.cost
+        context.update({
+            'cost_threshold_80': cost * 0.8,
+            'cost_threshold_100': cost,
+            'cost_threshold_200': cost * 2,
+            'cost_threshold_500': cost * 5,
+            'cost_threshold_10000': cost * 100,
+        })
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        user_profile = None  # Initialize to ensure it always exists
+        if game.user:
+            # Perform actions only if the `user` field is filled
+            user_profile, created = UserProfile.objects.get_or_create(user=game.user)
+            # Additional logic if necessary
+
+        context['SentProfile'] = user_profile
+        if game.user:
+            user_cash = user_profile.currency_amount
+
+            context = {
+                'user_cash': user_cash,
+            }
+
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+
+        spinpreference = None  # Initialize spinpreference to ensure it exists
+
+        if user.is_authenticated:
+            try:
+                spinpreference = SpinPreference.objects.get(user=user)
+            except SpinPreference.DoesNotExist:
+                spinpreference = SpinPreference(user=user, quick_spin=False)
+                spinpreference.save()
+
+            context['quick_spin'] = spinpreference.quick_spin
+        else:
+            context['quick_spin'] = False
+
+        context['spinpreference'] = spinpreference
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['Profiles'] = userprofile
+        else:
+            context['Profiles'] = None
+
+        if context['Profiles'] == None:
+            # Create a new object with the necessary attributes
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['Profiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        # Initialize the form with spinpreference instance, or None if not authenticated
+        if spinpreference:
+            spinform = SpinPreferenceForm(instance=spinpreference)
+        else:
+            spinform = SpinPreferenceForm()  # Initialize an empty form if spinpreference is None
+        context['spin_preference_form'] = spinform
+
+        if user.is_authenticated:
+            # Determine the random amount based on quick_spin preference
+            if spinpreference.quick_spin:
+                random_amount = random.randint(500, 1000)
+            else:
+                random_amount = random.randint(150, 300)
+        else:
+            random_amount = random.randint(150, 300)
+
+        context['random_amount'] = random_amount
+        context['range_random_amount'] = range(random_amount)
+        print(str('the random amount is ') + str(random_amount))
+
+        # Generate a list of random nonces
+        random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
+        context['random_nonces'] = random_nonces
+
+        # Create a list to store choices matched with the generated nonces
+        choices_with_nonce = []
+        for nonce in random_nonces:
+            for choice in choices:
+                if choice.lower_nonce <= nonce <= choice.upper_nonce:
+                    choices_with_nonce.append({
+                        'choice': choice,
+                        'nonce': nonce,
+                        'lower_nonce': choice.lower_nonce,
+                        'upper_nonce': choice.upper_nonce,
+                        'file_url': choice.file.url if choice.file else None,  # Get the URL of the file field
+                        'currency': {
+                            'symbol': choice.currency.name if choice.currency else '💎',
+                            'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                        }
+                    })
+                    break  # Exit after finding the first match for this nonce
+
+        context['choices_with_nonce'] = choices_with_nonce
+
+        # Get the game_id from the URL kwargs
+        game_id = self.kwargs.get('slug')
+
+        # Retrieve the Game object
+        game = get_object_or_404(Game, slug=slug)
+
+        # Retrieve related Choice objects
+        choices = Choice.objects.filter(game=game)
+
+        # Add them to the context
+        context['game'] = game
+        context['choices'] = choices
+
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        print(context['Background'])
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        return context
+
+    def game_detail(request, slug):
+        game = get_object_or_404(Game, slug=slug)
+        choices = game.choices.all()  # Get all related choices for the game
+        return render(request, 'game_detail.html', {'game': game, 'choices': choices})
+
+    def display_choices(request, game_id, slug):
+        game = get_object_or_404(Game, id=game_id, slug=slug)
+        choices = Choice.objects.filter(game=game)
+
+        # Ensure each choice has a nonce
+        for choice in choices:
+            if choice.lower_nonce is None or choice.upper_nonce is None:
+                choice.lower_nonce = random.randint(0, 1000000)
+                choice.upper_nonce = random.randint(0, 1000000)
+                choice.save()
+
+        return render(request, 'game.html', {'game': game, 'choices': choices})
+
+    # Example usage in a view or any other part of your application
+    def take_spinner_slot(user, game, choice):
+        SpinnerChoiceRenders.take_up_slot(user=user, game=game, choice=choice, value=100, ratio=2,
+                                          type=game.type,
+                                          image=choice.image.url, color=choice.color)
+
+    def save_spin_preference(request):
+        if request.method == "POST" and request.is_ajax():
+            quick_spin = request.POST.get('quick_spin') == 'true'
+            spinpreference, created = SpinPreference.objects.get_or_create(user=request.user)
+            spinpreference.quick_spin = quick_spin
+            spinpreference.save()
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False}, status=400)
+
+    def wager(self, request, *args, **kwargs):
+        form = WagerForm(request.POST, user_profile=request.user.user_profile)
+        if form.is_valid():
+            wager = form.save(commit=False)
+            wager.user_profile = request.user.user_profile
+            wager.save()
+            return redirect('showcase:blackjack')  # replace with your actual view name
+        else:
+            # If the form is not valid, re-render the page with the form errors
+            return self.get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            quick_spin = request.POST.get('quick_spin') == 'true'
+            spinpreference, created = SpinPreference.objects.get_or_create(user=request.user)
+            spinpreference.quick_spin = quick_spin
+            spinpreference.save()
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False}, status=400)
+
+    @csrf_exempt
+    def create_outcome(request, slug):
+        if request.method == 'POST':
+            try:
+                game_id = request.POST.get('game_id')
+                user = request.user
+
+                if not game_id:
+                    return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
+
+                game = Game.objects.get(id=game_id, slug=slug)
+                nonce = random.randint(1, 1000000)
+                choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
+
+                if not choices.exists():
+                    return JsonResponse(
+                        {'status': 'error', 'message': 'No valid choice found for the given nonce.'})
+
+                choice = choices.order_by('?').first()
+
+                color = game.get_color(choice)
+                choice.color = color
+                choice.save()  # Save the updated color to the database
+
+                # Print the selected choice fields to the console
+                print(f"Selected Choice ID: {choice.id}")
+                print(f"Selected Choice Text: {choice.choice_text}")
+                print(f"Selected Choice Color: {choice.color}")
+                print(f"Selected Choice File: {choice.file.url if choice.file else 'No file associated'}")
+
+                outcome_data = {
+                    'game': game,
+                    'choice': choice,
+                    'nonce': nonce,
+                    'value': random.randint(1, 1000000),
+                    'ratio': random.randint(1, 10),
+                    'type': game.type
+                }
+
+                if user.is_authenticated:
+                    outcome_data['user'] = user
+
+                outcome = Outcome.objects.create(**outcome_data)
+
+                return JsonResponse({
+                    'status': 'success',
+                    'outcome': outcome.id,
+                    'nonce': outcome.nonce,
+                    'choice_id': choice.id,
+                    'choice_text': choice.choice_text,
+                    'choice_color': choice.color,
+                    'choice_file': choice.file.url if choice.file else None
+                })
+
+            except Game.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'Game not found.'})
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': str(e)})
+
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+
 @csrf_exempt
 def spin_game(request):
     if request.method == "POST":
@@ -2288,6 +2633,20 @@ def battle_detail_view(request, battle_id):
     return render(request, 'battle_detail.html', {'battle': battle})
 
 
+def update_profile_level(profile):
+    if profile.rubies_spent is not None:
+        highest_level = Level.objects.filter(
+            experience__lte=profile.rubies_spent
+        ).order_by('-level').first()
+
+        if highest_level:
+            print(f"Highest level found: {highest_level}")
+            profile.level = highest_level
+            profile.save()
+        else:
+            print(f"No level matches rubies_spent: {profile.rubies_spent}")
+
+
 class EarningAchievement(BaseView):
     model = Achievements
     template_name = "achievements.html"
@@ -2469,10 +2828,10 @@ class GameRoomView(BaseView):
             context['SentProfile'] = None  # or some default value
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['Game'] = GameHub.objects.filter(is_active=1).first()
-        context['GameRoom'] = Game.objects.filter(is_active=1).first()
+        context['GameRoom'] = Game.objects.filter(is_active=1, daily=False).first()
         context['form'] = EmailForm()
 
-        newprofile = Game.objects.filter(is_active=1)
+        newprofile = Game.objects.filter(is_active=1, daily=False)
         context['Profiles'] = newprofile
 
         for newprofile in context['Profiles']:
@@ -2547,6 +2906,27 @@ class ClubRoomView(BaseView):
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
         return context
+
+
+@shared_task
+def update_locked_status():
+    # Get current time for comparison
+    now = datetime.now()
+    for game in Game.objects.filter(daily=True):
+        # Check if cooldown has passed
+        if game.cooldown and game.cooldown <= now:
+            # Fetch users associated with this game and check unlocking levels
+            users = ProfileDetails.objects.filter(level__gte=game.unlocking_level.level)
+
+            if users.exists():  # If at least one user meets the requirement
+                game.locked = False
+            else:
+                game.locked = True
+
+            # Reset cooldown to tomorrow's 5:00 PM
+            tomorrow_5pm = datetime.combine(now.date() + timedelta(days=1), time(17, 0))
+            game.cooldown = tomorrow_5pm
+            game.save()
 
 
 class AchievementsView(TemplateView):

@@ -42,3 +42,21 @@ def log_model_delete(sender, instance, **kwargs):
         model=model_name,
         object_id=instance.pk
     )
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .models import ProfileDetails, Experience, Level
+
+@receiver(post_save, sender=ProfileDetails)
+def check_rubies_spent(sender, instance, **kwargs):
+    if instance.rubies_spent:
+        profile_exp, created = Experience.objects.get_or_create(profile=instance, user=instance.user)
+        for level in Level.objects.all():
+            if instance.rubies_spent >= level.experience:
+                profile_exp.level.add(level)
+
+@receiver(post_save, sender=ProfileDetails)
+def update_profile_level_on_save(sender, instance, **kwargs):
+    print(f"Signal triggered for profile: {instance}")
+    print(f"Rubies spent: {instance.rubies_spent}")
+    update_profile_level(instance)
