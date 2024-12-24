@@ -13,9 +13,14 @@
 <body>
   <div class="column three mobile-twelve section_header_logo vertical-align-middle"
         style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
-                     <a class="logo" href="">
-          <img class="imageicon" src="{% static 'css/images/quasarlogo.png' %}"
-                alt="Quasar Logo" style="length: 120px; width: 180px;"></a>
+               {% for room in rooms_with_logo_same_name %}
+        {% if room.logo %}
+            <img src="{{ room.logo.url }}" alt="{{ room.name }} logo" style="width: 22vh; height: 14.5vh; padding: 0px; margin-top: -40px;">
+        {% else %}
+            <p></p>
+        {% endif %}
+{% endfor %}
+
 
 
 
@@ -35,7 +40,7 @@
 
             <div class = "boedy">
   <div class="containereatede">
-     <h1 class = "banh1">My Room Settings</h1>
+     <h1 class = "banh1">My Community Settings</h1>
       </div>
                 </div>
      <br>

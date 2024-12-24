@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
-from .models import Outcome, Achievements
+from .models import Outcome, Achievements, ProfileDetails
 from .models import User, Profile, AdministrationChangeLog
 from .views import get_changes
 
@@ -96,3 +96,9 @@ def update_achievement_counters(sender, instance, **kwargs):
         achievement.gold_counter += instance.gold_counter
         achievement.redgold_counter += instance.redgold_counter
         achievement.save()  # Save each achievement after updating
+
+
+@receiver(post_save, sender=ProfileDetails)
+def populate_other_currencies(sender, instance, created, **kwargs):
+    if created:
+        update_currencies_for_profile(instance)

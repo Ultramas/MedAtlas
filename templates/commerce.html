@@ -4,18 +4,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exchange Prizes Form</title>
-    <!-- Include your CSS stylesheets here -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <title>Exchange Prizes</title>
 </head>
 <body>
     <h1>Exchange Prizes</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
-    </form>
-    <!-- Include your JavaScript scripts here -->
-    <script src="{% static 'css/js/script.js' %}"></script>
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <table style="max-height: 100%;">
+        {% for field in form %}
+            <tr style="overflow: scroll; max-height: 100%;">
+                <th>{{ field.label }}</th>
+                <td>
+                    {{ field.errors }}
+                    {% if field.name == "usercard" %}
+                        <ul>
+                            {% for choice in field.field.queryset %}
+                                <li>
+                                    <label>
+                                        <input type="checkbox"
+                                               name="usercard"
+                                               value="{{ choice.pk }}"
+                                               data-price="{{ choice.price }}"
+                                               data-choice-text="{{ choice.choice_text }}"
+                                               data-condition="{{ choice.condition }}"
+                                               data-image-url="{{ choice.image.url }}"
+                                               onchange="updateTotalValue()">
+
+                                        {{ choice.choice_text }} - ${{ choice.price }} ({{ choice.condition }})
+                                    </label>
+                                    <br>
+                                    <img src="{{ choice.image.url }}" alt="{{ choice.choice_text }}" width="100">
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <p><strong>Total Value:</strong> $<span id="totalValue">0.00</span></p>
+    <div id="selectedCards">
+        <h3>Selected Cards:</h3>
+        <ul id="selectedCardsList"></ul>
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+    function updateTotalValue() {
+        const checkboxes = document.querySelectorAll('input[name="usercard"]:checked');
+        let total = 0;
+
+        const selectedCardsList = document.getElementById('selectedCardsList');
+        selectedCardsList.innerHTML = '';
+
+        checkboxes.forEach((checkbox) => {
+            total += parseFloat(checkbox.getAttribute('data-price')) || 0;
+
+            const listItem = document.createElement('li');
+            const choiceText = checkbox.getAttribute('data-choice-text');
+            const condition = checkbox.getAttribute('data-condition');
+            const imageUrl = checkbox.getAttribute('data-image-url');
+            const price = parseFloat(checkbox.getAttribute('data-price')).toFixed(2);
+
+            listItem.innerHTML = `
+                <strong>${choiceText}</strong> - $${price} (${condition})
+                <br>
+                <img src="${imageUrl}" alt="${choiceText}" width="100">
+            `;
+            selectedCardsList.appendChild(listItem);
+        });
+
+        document.getElementById('totalValue').innerText = total.toFixed(2);
+    }
+</script>
+
+
+    <h2>Your Trade Items</h2>
+    <ul>
+        {% for item in trade_items %}
+            <li>
+                <strong>Title:</strong> {{ item.title }}<br>
+                <strong>Condition:</strong> {{ item.get_condition_display }}<br>
+                <strong>Category:</strong> {{ item.get_category_display }}<br>
+                <strong>Value:</strong> ${{ item.value }}<br>
+                <strong>Currency:</strong> {{ item.currency }}<br>
+                <img src="{{ item.image.url }}" alt="{{ item.title }}" width="100">
+            </li>
+        {% empty %}
+            <p>No trade items found.</p>
+        {% endfor %}
+    </ul>
 </body>
 </html>

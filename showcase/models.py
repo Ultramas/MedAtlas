@@ -20,9 +20,11 @@ from django.forms import CharField
 from django.shortcuts import reverse
 from django_countries.fields import CountryField
 from django.utils.timezone import now, make_aware
+import pytz
 from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
 from pydantic import ValidationError
 from django.contrib.auth.models import Group
+from django.db import connection
 
 # from image.utils import render
 
@@ -107,6 +109,17 @@ HEAT = (
     ('E', 'Explosive'),
 )
 
+ASCENSIONFLAVORTEXT = (
+    ('A', 'Ate the forbidden cookies'),
+    ('B', 'Bit the bullet'),
+    ('C', 'Caught in the act'),
+    ('D', "Doordash'd "),
+    ('E', 'Enigma '),
+    ('S', 'Shacked to a galloping horse'),
+    ('X', 'Xyster to the keister'),
+    ('Z', 'Zapperdoodled'),
+)
+
 SHIPPINGTYPE = (
     ('S', 'Standard'),
     ('E', 'Expedited'),
@@ -130,6 +143,7 @@ POWER = (
     ('100', 'x100'),
     ('1000', 'x1000'),
 )
+
 
 # consider having the power level shift up the hit cards & remove some of the original floor cards
 
@@ -319,7 +333,22 @@ class UpdateProfile(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
 
-from django.db import transaction, connection
+class Affiliation(models.Model):
+    type = models.CharField(max_length=200)
+    flavor_text = models.TextField()
+    icon = models.ImageField()
+    unlocking_level = models.OneToOneField('Level', blank=True, null=True, on_delete=models.CASCADE, related_name='level_to_unlock')
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    def __str__(self):
+        return f"{self.type}" + " " + self.flavor_text
 
 
 class Level(models.Model):
@@ -327,7 +356,7 @@ class Level(models.Model):
     level_name = models.CharField(max_length=200)
     experience = models.IntegerField(default=0, blank=True, null=True)
     full_row = models.BooleanField(default=True)
-    affiliation = models.BooleanField(default=None, blank=True, null=True)
+    affiliation = models.ForeignKey(Affiliation, blank=True, null=True, on_delete=models.CASCADE)
     games = models.ManyToManyField(
         'Game',  # Refer to Game using a string
         blank=True,
@@ -376,7 +405,8 @@ class Level(models.Model):
             return
 
         # Update experience based on the level
-        self.experience = self.level ** 2
+        formulaic_experience = self.level * 2
+        self.experience = formulaic_experience ** 2
 
         # Avoid unnecessary updates to level_name
         if self.pk:
@@ -490,6 +520,9 @@ class Monstrosity(models.Model):
                                          unique=True)
     experience = models.IntegerField(default=0)
     level = models.IntegerField(default=1)
+    currency = models.ForeignKey('Currency', on_delete=models.CASCADE) #Monster Fuel
+    currency_amount = models.IntegerField(default=0)
+    feed_amount = models.IntegerField(default=0)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -500,8 +533,14 @@ class Monstrosity(models.Model):
         return str(self.user) + "'s " + str(self.monstrositys_name)
 
     def save(self, *args, **kwargs):
-        if not self.monstrositys_name:  # Avoid division by zero
+        if not self.monstrositys_name:  # Ensure a default name is set
             self.monstrositys_name = str(self.user) + "'s " + str(self.monstrositysprite)
+
+        if not self.currency:  # Set default currency if not specified
+            try:
+                self.currency = Currency.objects.all().order_by('id')[2]  # Retrieves the third object
+            except IndexError:
+                self.currency = None  # Or provide a fallback value
         super().save(*args, **kwargs)
 
     def get_sprite_images(self):
@@ -651,12 +690,15 @@ class ProfileDetails(models.Model):
     alternate = models.TextField(verbose_name="Alternate text", null=True, blank=True)
     about_me = models.TextField(blank=True, null=True)
     level = models.ForeignKey(Level, on_delete=models.CASCADE, default="")
+    unlocked_daily_chests = models.ManyToManyField('Game', blank=True)
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     currency_amount = models.IntegerField(default=0)
     total_currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_currency_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     rubies_spent = models.IntegerField(blank=True, null=True, default=0)  # linked to experiencek
+    other_currencies_amount = models.ManyToManyField(Currency, through='ProfileCurrency',
+                                                     related_name="profile_currencies")  # get the integer fieds of all the other currencies besides the first (Rubies)
     green_cards_hit = models.IntegerField(blank=True, null=True)
     yellow_cards_hit = models.IntegerField(blank=True, null=True)
     orange_cards_hit = models.IntegerField(blank=True, null=True)
@@ -709,6 +751,14 @@ class ProfileDetails(models.Model):
             self.save()
         else:
             raise ValueError("Not enough currency")
+
+    def update_currencies_for_profile(profile):
+        currencies = Currency.objects.all()
+        for currency in currencies:
+            profile_currency, created = ProfileCurrency.objects.get_or_create(profile=profile, currency=currency)
+            if created:
+                profile_currency.quantity = 0  # Default quantity; adjust as needed
+                profile_currency.save()
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
@@ -769,6 +819,15 @@ class ProfileDetails(models.Model):
     class Meta:
         verbose_name = "Account Profile"
         verbose_name_plural = "Account Profiles"
+
+
+class ProfileCurrency(models.Model):
+    profile = models.ForeignKey('ProfileDetails', on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.profile.user}'s {self.currency.name} ({self.quantity})"
 
 
 class CurrencyOrder(models.Model):
@@ -976,6 +1035,89 @@ class Experience(models.Model):
         verbose_name_plural = "Experiences"
 
 
+class Ascension(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    profile = models.ForeignKey(ProfileDetails, on_delete=models.CASCADE)
+    ascension = models.CharField(max_length=200, blank=True, null=True)
+    flavor_text = models.CharField(choices=ASCENSIONFLAVORTEXT, max_length=1, blank=True, null=True)
+    ascension_number = models.IntegerField(blank=True, null=True, editable=False)
+    final_level = models.ForeignKey(
+        'Level', blank=True, null=True, on_delete=models.CASCADE, related_name='necessary_level_to_unlock'
+    )
+    reward = models.IntegerField(default=1)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    def __str__(self):
+        return str(self.ascension)
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():  # Start a database transaction
+            # Automatically set the `ascension_number` for the user
+            if not self.ascension_number:
+                last_ascension = Ascension.objects.filter(user=self.user).order_by('-ascension_number').first()
+                self.ascension_number = (last_ascension.ascension_number + 1) if last_ascension else 1
+
+            # Ensure the final_level is set to the lowest level if not already assigned
+            if not self.final_level_id:
+                lowest_level = Level.objects.filter(level=1).first()
+                if lowest_level:
+                    self.final_level = lowest_level
+
+            # Automatically set the `ascension` field if not already set
+            if not self.ascension:
+                ordinal_suffix = self._get_ordinal_suffix(self.ascension_number)
+                self.ascension = f"{self.user}'s {self.ascension_number}{ordinal_suffix} Ascension"
+
+            # Randomly assign a flavor_text if not provided
+            if not self.flavor_text:
+                self.flavor_text = random.choice([choice[0] for choice in ASCENSIONFLAVORTEXT])
+
+            # Save the Ascension instance
+            super().save(*args, **kwargs)
+
+            # Handle rubies_spent and reset logic
+            profile = ProfileDetails.objects.filter(user=self.user).first()
+            if profile and profile.level.level >= 100:
+                print('ascending through the rubies')
+                # Increase rubies_spent by 10% before resetting
+                if profile.rubies_spent > 0:
+                    print('rubies gained: ' + str(profile.rubies_spent))
+                    profile.currency_amount += int(profile.rubies_spent * 0.1)  # Add 10%
+
+                    # Reset rubies_spent to 0
+                    profile.rubies_spent = 0
+                else:
+                    print(
+                        'Somehow you gained levels without playing the game properly. Either you are a developer (you are clear) or you hacked the system. Hacking will not be tolerated and your account has been reported.')
+
+                # Optionally adjust other fields
+                profile.level = Level.objects.filter(level=1).first()
+                profile.save(update_fields=['rubies_spent', 'level', 'currency_amount'])
+
+                print(f'User {profile.user} ascended at level {profile.level.level}')
+            elif profile and profile.level.level < 100:
+                print('User cannot ascend due to not having reached level 100')
+            else:
+                print('No profile found for this user.')
+
+    def _get_ordinal_suffix(self, number):
+        """Helper method to get the ordinal suffix for a given number."""
+        if 11 <= number % 100 <= 13:
+            return "th"
+        return {1: "st", 2: "nd", 3: "rd"}.get(number % 10, "th")
+
+    class Meta:
+        verbose_name = "Ascension"
+        verbose_name_plural = "Ascensions"
+
+
 class SecretRoom(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     code = models.CharField(validators=[MinLengthValidator(24)], max_length=50)
@@ -1180,6 +1322,7 @@ class InventoryObject(models.Model):
                                               verbose_name="image width")
     length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
     width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Creation Time")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2309,6 +2452,17 @@ class ShuffleType(models.Model):
         verbose_name_plural = "Shuffle Types"
 
 
+class DailySpin(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="daily_spins")
+    cooldown = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('user', 'cooldown')  # Ensure no duplicate cooldowns for a user
+
+    def __str__(self):
+        return f"{self.user.username} - {self.cooldown}"
+
+
 class GameHub(models.Model):
     name = models.CharField(max_length=200, verbose_name="Game Hub Name")
     type = models.CharField(choices=GAMETYPE, max_length=1, blank=True, null=True)
@@ -2375,25 +2529,103 @@ class Game(models.Model):
 
     def save(self, *args, **kwargs):
         self.full_clean()  # Call full_clean() to trigger validation
+
+        # Ensure slug is generated if not provided
         if not self.slug:
             self.slug = slugify(self.name)
+
+        # Default discount cost to 0 for daily games
+        if self.daily and not self.discount_cost:
+            self.discount_cost = 0
+
+        # Save the instance to generate a primary key if it doesn't already exist
+        is_new_instance = self.pk is None
+        if is_new_instance:
+            super().save(*args, **kwargs)
+
+        # Handle cost calculation only if choices exist
         if self.cost == 0:
             total_cost = 0
             for choice in self.choices.all():
                 if choice.value and choice.rarity:
-                    # Calculate the product of value and rarity, divided by 100
                     choice_cost = (choice.value * float(choice.rarity)) / 100
                     total_cost += choice_cost
-            # Multiply the total cost by 1.12
             self.cost = int(total_cost * 1.12)
-        if self.daily == True and not self.discount_cost:
-            self.discount_cost = 0
-        # Ensure the `cooldown` field is updated with a timezone-aware datetime
-        today_5pm = make_aware(datetime.combine(now().date(), time(17, 0)))
-        if not self.cooldown or self.cooldown.date() != now().date():
-            self.cooldown = today_5pm
 
+        # Set 5:00 PM PST logic
+        pst = pytz.timezone('US/Pacific')
+        current_time_pst = now().astimezone(pst)
+        today = current_time_pst.date()
+        today_5pm_pst = make_aware(datetime.combine(today, time(17, 0)), pst)
+
+        # If before 5:00 PM PST, window started yesterday
+        if current_time_pst < today_5pm_pst:
+            cycle_start = today_5pm_pst - timedelta(days=1)
+        else:
+            cycle_start = today_5pm_pst
+
+        # Set cooldown for next unlock at 5:00 PM PST
+        if not self.cooldown or self.cooldown < cycle_start:
+            self.cooldown = cycle_start + timedelta(days=1)  # Next 5:00 PM PST window
+
+        # Update locked status: unlock at 5:00 PM PST
+        if self.daily:
+            if current_time_pst >= self.cooldown:  # After 5:00 PM PST, unlock automatically
+                self.locked = False
+            else:  # Keep it locked until the cooldown expires
+                self.locked = True
+
+        # Save the instance again to persist changes
         super().save(*args, **kwargs)
+
+    def _get_pst_time(self):
+        """Get the current time in PST and determine today's 5 PM PST."""
+        pst = pytz.timezone('US/Pacific')
+        current_time_pst = now().astimezone(pst)
+        today = current_time_pst.date()
+        today_5pm_pst = make_aware(datetime.combine(today, time(17, 0)), pst)
+
+        # If before 5 PM PST, the window started yesterday
+        if current_time_pst < today_5pm_pst:
+            cycle_start = today_5pm_pst - timedelta(days=1)
+        else:
+            cycle_start = today_5pm_pst
+
+        return cycle_start, current_time_pst
+
+    def spin_daily(self, user):
+        """
+        Allow the user to spin the daily chest if they haven't spun during the current cycle.
+        """
+        if not self.daily:
+            raise ValueError("This game is not configured as daily.")
+
+        # Get the current cycle start and time
+        cycle_start, current_time_pst = self._get_pst_time()
+
+        # Check if the user has already spun during the current cycle
+        existing_spin = DailySpin.objects.filter(user=user, cooldown=cycle_start).first()
+
+        if existing_spin:
+            raise ValueError("You have already spun the chest for today. Come back after 5:00 PM PST!")
+
+        # Create a new DailySpin record to lock the user for this cycle
+        DailySpin.objects.create(user=user, cooldown=cycle_start)
+
+        # Perform spin logic here (e.g., awarding a prize)
+        print(f"{user.username} spun the daily chest successfully!")
+
+        # Set game-level cooldown if needed
+        self.cooldown = cycle_start + timedelta(days=1)
+        self.locked = True
+        self.save()
+
+    def is_user_locked(self, user):
+        """
+        Check if a user is locked from spinning the chest.
+        """
+        cycle_start, _ = self._get_pst_time()
+        return DailySpin.objects.filter(user=user, cooldown=cycle_start).exists()
 
     def check_locked_status(self, user):
         if self.daily and self.unlocking_level:
@@ -2644,6 +2876,7 @@ class Outcome(models.Model):
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
     nonce = models.DecimalField(max_digits=7, decimal_places=0)
     date_and_time = models.DateTimeField(null=True, verbose_name="date and time", auto_now_add=True)
+    demonstration = models.BooleanField(default=False)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -7056,6 +7289,13 @@ class DefaultAvatar(models.Model):
         if not self.default_avatar_name and self.default_avatar:
             self.default_avatar_name = self.default_avatar.name
         super().save(*args, **kwargs)
+
+    def to_dict(self):
+        return {
+            "default_avatar_name": self.default_avatar_name,
+            "default_avatar_url": self.default_avatar.url if self.default_avatar else None,
+            "is_active": self.is_active,
+        }
 
     class Meta:
         verbose_name = "Default Avatar"

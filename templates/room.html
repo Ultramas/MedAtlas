@@ -692,23 +692,12 @@ $(document).ready(function(){
 <br>
 
   <div id="display"></div>
-  <div class="chat-input" style="margin-left: 5.5%; width: 94.5%;">
-  <form id="post-form" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="hidden" name="username" id="username" value="{{username}}" />
-    <input type="hidden" name="room_id" id="room_id" value="{{room}}" />
-      <div class="combined-input">
-    <input type="text" name="message" id="message" placeholder="Type your message or choose a file..." />
-    <input type="file" name="file" id="file" style="display: none;">  <!-- Add this line -->
-        <label for="file" id="file-label">📎</label>
-</div>
-
-    <input type="submit" value="Send">
-  </form>
-
   </div>
-<br>
+
 </div>
+
+
+<br>
 <br>
 <br>
 
@@ -831,9 +820,23 @@ function preloadImages(urls) {
     scrollToBottom();
   };
 </script>
+                      <div class="chat-input" style="height: 15%;;">
+  <form id="post-form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="username" id="username" value="{{username}}" />
+    <input type="hidden" name="room_id" id="room_id" value="{{room}}" />
+      <div class="combined-input">
+    <input type="text" name="message" id="message" placeholder="Type your message or choose a file..." />
+    <input type="file" name="file" id="file" style="display: none;">  <!-- Add this line -->
+        <label for="file" id="file-label">📎</label>
+</div>
 
+    <input type="submit" value="Send">
+  </form>
+                      </div>
 
 						</div>
+
 						<div class="card-footer">
 
 

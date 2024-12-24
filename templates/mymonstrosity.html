@@ -27,7 +27,48 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-
+    <style>
+        .monster-card {
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            max-width: 300px;
+            transition: transform 0.3s ease;
+        }
+        .monster-card:hover {
+            transform: scale(1.05);
+        }
+        h2 {
+            color: #ff69b4;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #4b0082;
+            margin: 5px 0;
+        }
+        .monstrosity {
+            max-width: 200px;
+            border-radius: 50%;
+            margin: 10px 0;
+            border: 3px solid #ff69b4;
+        }
+        .no-monster {
+            background-color: #ffb6c1;
+            color: #4b0082;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 300px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
 </head>
 <body>
 
@@ -135,7 +176,10 @@
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="breadcrumb-text">
 						<p>PokeTrove Information</p>
-						<h1>My Monstrosity</h1>
+						<br>
+						<br>
+						<br>
+						<h1 style="">My Monstrosity</h1>
 					</div>
 				</div>
 			</div>
@@ -195,15 +239,16 @@
 
 {% if user_monstrosity %}
   <div>
-    <h2>{{ user_monstrosity.monstrositys_name }}</h2>
+    <h5>{{ user_monstrosity.monstrositys_name }}</h5>
     <p>Level: {{ user_monstrosity.level }}</p>
     <p>Status: {{ user_monstrosity.get_is_active_display }}</p>
-    <img src="{{ user_monstrosity.monstrositysprite.image.url }}" alt="{{ user_monstrosity.monstrositys_name }}">
+    <img src="{{ user_monstrosity.monstrositysprite.image.url }}" alt="{{ user_monstrosity.monstrositys_name }}" class="monstrosity">
   </div>
 {% else %}
   <p>You do not have a Monstrosity yet. Reach level 10 to recover one!</p>
 {% endif %}
 
+			{% include 'feed_monstrosity.html' %}
 			<div class="row">
 				<div class="container">
 					<div class="row">
@@ -225,7 +270,7 @@
                   		{% if MonstrosityView.image_position == 2 %}
 						<div class="single-logo-item">
 							<a href="{{ MonstrosityView.hyperlink }}">
-							<img src="{{ MonstrosityView.image.url }}" alt="">
+							<img src="{{ MonstrosityView.image.url }}"  alt="{{MonstrosityView.monstrositys_name}}" class="monstrosity">
 							</a>
 						</div>
 						{% endif %}
@@ -237,7 +282,7 @@
                   		{% if MonstrosityView.image_position == 3 %}
 						<div class="single-logo-item">
 							<a href="{{ MonstrosityView.hyperlink }}">
-							<img src="{{ MonstrosityView.image.url }}" alt="">
+							<img src="{{ MonstrosityView.image.url }}"  alt="{{MonstrosityView.monstrositys_name}}" class="monstrosity">
 							</a>
 						</div>
 						{% endif %}
@@ -249,7 +294,7 @@
                   		{% if MonstrosityView.image_position == 4 %}
 						<div class="single-logo-item">
 							<a href="{{ MonstrosityView.hyperlink }}">
-							<img src="{{ MonstrosityView.image.url }}" alt="">
+							<img src="{{ MonstrosityView.image.url }}"  alt="{{MonstrosityView.monstrositys_name}}" class="monstrosity">
 							</a>
 						</div>
 						{% endif %}
@@ -261,7 +306,7 @@
                   		{% if MonstrosityView.image_position == 5 %}
 						<div class="single-logo-item">
 							<a href="{{ MonstrosityView.hyperlink }}">
-							<img src="{{ MonstrosityView.image.url }}" alt="">
+							<img src="{{ MonstrosityView.image.url }}" alt="{{MonstrosityView.monstrositys_name}}" class="monstrosity">
 							</a>
 						</div>
 						{% endif %}
@@ -273,7 +318,7 @@
                   		{% if MonstrosityView.image_position == 6 %}
 						<div class="single-logo-item">
 							<a href="{{ MonstrosityView.hyperlink }}">
-							<img src="{{ MonstrosityView.image.url }}" alt="">
+							<img src="{{ MonstrosityView.image.url }}" alt="{{MonstrosityView.monstrositys_name}}" class="monstrosity">
 							</a>
 						</div>
 						{% endif %}

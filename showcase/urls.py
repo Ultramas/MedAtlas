@@ -353,6 +353,7 @@ urlpatterns = [
     path('gameroom/<slug:slug>/', views.GameRoomView.as_view(), name='gameroom'), #game room with a single game genre (possibly multiple games)
     path('game/<slug:slug>/', views.GameChestBackgroundView.as_view(), name='game'), #game with a single game
     path('game/', views.GameChestBackgroundView.as_view(), name='game'),
+    path('sell/',  views.GameChestBackgroundView.as_view(), name='sell_game_inventory_object'),
     path('dailyroom/', views.DailyRoomView.as_view(), name='dailyroom'), #game with a single game
     path('dailygame/<slug:slug>/', views.DailyChestView.as_view(), name='dailygame'), #game with a single game
     path('spin_game/', views.spin_game, name='spin_game'),
@@ -372,6 +373,7 @@ urlpatterns = [
     path('tradeinventory/', views.TradeInventoryView.as_view(), name='tradeinventory'),
     path('update_wager/<int:wager_id>/', update_wager, name='update_wager'),
     path('place_wager/', PlaceWagerView.as_view(), name='place_wager'),
+    path('ascension/create/', views.create_ascension, name='ascend'),
     path('lotteries/', views.LotteryBackgroundView.as_view(), name='lotteries'),
     path('dailylotto/', views.DailyLotteryView.as_view(), name='dailylotto'), #special variant of Lottery, the daily lottery
     path('dailylottoclaimed/', views.DailyLotteryView.as_view(), name='dailylottoclaimed'),
@@ -488,6 +490,7 @@ urlpatterns = [
     path('decline_friend_request/<int:request_id>/', views.decline_friend_request, name='decline_friend_request'),
     path('addamonstrosity/', views.AddMonstrosityView.as_view(), name='addamonstrosity'),
     path('mymonstrosity/', views.MonstrosityView.as_view(), name='mymonstrosity'),
+    path('feed_monstrosity/<int:monstrosity_id>/', views.feedmonstrosity, name='feed_monstrosity'),
 
     # change url <str:room> to use user username for added security
     path('product/<slug>/', views.ProductView.as_view(), name='product'),

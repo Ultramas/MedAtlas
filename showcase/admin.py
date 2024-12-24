@@ -9,7 +9,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
-    MonstrositySprite
+    MonstrositySprite, Affiliation, Ascension, ProfileCurrency
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -569,6 +569,7 @@ admin.site.register(GameHub, GameHubAdmin)
 from django.contrib import admin
 from django.utils.html import format_html
 
+
 class GameChoiceInline(admin.StackedInline):
     model = Choice
     extra = 1
@@ -592,14 +593,32 @@ class GameAdmin(admin.ModelAdmin):
             'fields': ('name', 'user', 'type', 'category', 'cost', 'discount_cost', 'image', 'power_meter', 'slug', 'filter', 'player_made', 'player_inventory', 'daily', 'is_active'),
             'classes': ('collapse',),
         }),
-        ('Unlocking Level (Daily Games Only)', {
-            'fields': ('unlocking_level', 'cooldown',),
+        ('Unlocking (Daily Games Only)', {
+            'fields': ('unlocking_level', 'cooldown', 'locked',),
+            'classes': ('collapse',),
+        }),
+        ('Player Inventory (Player Only)', {
+            'fields': ('items',),
             'classes': ('collapse',),
         }),
     )
 
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj)
+
+        # If player_made is not selected, make 'player_inventory' fields non-editable
+        if obj and not obj.player_made:
+            readonly_fields += ('player_inventory', 'items')
+
+        # If daily is not selected, make 'Unlocking' fields non-editable
+        if obj and not obj.daily:
+            readonly_fields += ('unlocking_level', 'cooldown', 'locked')
+
+        return readonly_fields
+
     class Media:
         js = ('admin/js/game_admin.js',)  # Path to the custom JavaScript file
+
 
 admin.site.register(Game, GameAdmin)
 
@@ -2081,15 +2100,21 @@ class DefaultAvatarAdmin(admin.ModelAdmin):
 admin.site.register(DefaultAvatar, DefaultAvatarAdmin)
 
 
+class ProfileCurrencyInline(admin.TabularInline):
+    model = ProfileCurrency
+    extra = 1  # Number of empty forms to display for adding new instances
+
+
 class ProfileDetailsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Profile Information', {
-            'fields': ('user', 'email', 'avatar', 'alternate', 'about_me', 'level', 'subscription', 'currency', 'currency_amount',
+            'fields': ('user', 'email', 'avatar', 'alternate', 'about_me', 'level', 'unlocked_daily_chests', 'subscription', 'currency', 'currency_amount',
                        'total_currency_amount', 'total_currency_spent', 'rubies_spent', 'green_cards_hit', 'yellow_cards_hit', 'orange_cards_hit','red_cards_hit',
                        'black_cards_hit', 'gold_cards_hit', 'red_gold_cards_hit', 'times_subtract_called', 'monstrosity', 'seller', 'membership', 'position', 'is_active')
         }),
     )
     readonly_fields = ('position',)
+    inlines = [ProfileCurrencyInline]
 
 
 admin.site.register(ProfileDetails, ProfileDetailsAdmin)
@@ -2123,6 +2148,19 @@ class ExperienceAdmin(admin.ModelAdmin):
         obj.level.set(eligible_levels)  # Set eligible levels to the ManyToMany field
 
 admin.site.register(Experience, ExperienceAdmin)
+
+
+class AscensionAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Ascension Information - Categorial Description', {
+            'fields': ('user', 'ascension', 'flavor_text', 'final_level', 'reward', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('ascension_number',)
+
+
+admin.site.register(Ascension, AscensionAdmin)
 
 
 class TransactionAdmin(admin.ModelAdmin):
@@ -2176,6 +2214,13 @@ class BattleAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Battle, BattleAdmin)
+
+
+class AffiliationAdmin(admin.ModelAdmin):
+    list_display = ('type', 'flavor_text', 'icon', 'unlocking_level', 'is_active')
+
+
+admin.site.register(Affiliation, AffiliationAdmin)
 
 
 class LevelAdmin(admin.ModelAdmin):

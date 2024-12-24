@@ -23,26 +23,34 @@
     <label for="{{ form.type.id_for_label }}">Type:</label>
     {{ form.type }}
 
+    <label for="{{ form.category.id_for_label }}">Type:</label>
+    {{ form.category }}
+
     <label for="{{ form.image.id_for_label }}">Game Image:</label>
     {{ form.image }}
 
     <label for="{{ form.power_meter.id_for_label }}">Power Meter:</label>
     {{ form.power_meter }}
-<h4>Available Prizes:</h4>
-{% for value, prize in form.items.field.choices %}
-    <div class="prize-item">
-        <label for="id_items_{{ value }}">
-            <input type="checkbox" id="id_items_{{ value }}" name="items" value="{{ value }}">
-            <strong>{{ prize.prize_name }}</strong><br>
-            <img src="{{ prize.image.url }}" alt="{{ prize.prize_name }}" width="100">
-            <!--<p>Quantity: {{ prize.number }}</p>-->
-        </label>
-    </div>
-{% endfor %}
 
+    <h4>Available Prizes:</h4>
+    {% for prize in form.items.field.queryset %}
+        <div class="prize-item">
+            <input type="checkbox" name="items" value="{{ prize.id }}" id="prize_{{ prize.id }}">
+            <label for="prize_{{ prize.id }}">
+                <strong>{{ prize.prize_name }}</strong><br>
+                <img src="{{ prize.image.url }}" alt="{{ prize.prize_name }}" width="100"><br>
+                Quantity Available: {{ prize.number }}
+            </label>
+            <div>
+                <label for="id_quantity_{{ prize.id }}">Quantity:</label>
+                <input type="number" name="quantity_{{ prize.id }}" id="id_quantity_{{ prize.id }}" min="0" max="{{ prize.number }}">
+            </div>
+        </div>
+    {% endfor %}
 
     <button type="submit">Create Game</button>
 </form>
+
 
 
 

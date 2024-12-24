@@ -363,6 +363,12 @@ function findSelectedCard() {
             <h2>Congratulations!</h2>
             <p>You got:</p>
             <div class="cards-container"></div>
+            <form method="POST" action="{% url 'showcase:sell_game_inventory_object' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="sell">
+                <button type="submit" class="btn btn-danger">Sell Item</button>
+            </form>
+
             <button class="close">Collect</button>
         `;
 

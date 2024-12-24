@@ -12,7 +12,7 @@ from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewTy
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
     SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame, Monstrosity, \
-    MonstrositySprite
+    MonstrositySprite, Ascension
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -309,7 +309,7 @@ from .models import Game, Choice
 class ChoiceForm(forms.ModelForm):
     class Meta:
         model = Choice
-        fields = ['choice_text', 'file', 'color', 'value', 'category', 'subcategory',]
+        fields = ['choice_text', 'file', 'color', 'value', 'category', 'subcategory', ]
 
 
 ChoiceFormSet = inlineformset_factory(
@@ -321,14 +321,43 @@ ChoiceFormSet = inlineformset_factory(
 )
 
 
-#used when the user wants to use their own cards; PokeTrove gets commission
-class GameForm(forms.ModelForm):
+# used when the user wants to use their own cards; PokeTrove gets commission
+class InventoryGameForm(forms.ModelForm):
     class Meta:
         model = Game
-        fields = ['name', 'cost', 'discount_cost', 'type', 'image', 'power_meter',]
+        fields = ('name', 'cost', 'discount_cost', 'type', 'category', 'image', 'power_meter', 'items',
+                  'slug', 'filter',)
+        readonly_fields = ('date_and_time',)
 
 
-#used when the user wants to use cards owned by PokeTrove; user gets commission
+class PlayerInventoryGameForm(forms.ModelForm):
+    items = forms.ModelMultipleChoiceField(
+        queryset=PrizePool.objects.filter(is_active=1),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Available Prizes"
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.quantity_fields = {}
+        for prize in PrizePool.objects.filter(is_active=1):
+            field_name = f"quantity_{prize.id}"
+            self.fields[field_name] = forms.IntegerField(
+                label=f"Quantity for {prize.prize_name}",
+                min_value=0,
+                max_value=prize.number,
+                required=False,
+            )
+            self.quantity_fields[prize.id] = field_name
+
+    class Meta:
+        model = Game
+        fields = ['name', 'cost', 'discount_cost', 'type', 'category', 'image', 'power_meter', 'items']
+
+
+
+# used when the user wants to use cards owned by PokeTrove; user gets commission
 
 class InventoryGameForm(forms.ModelForm):
     items = forms.ModelMultipleChoiceField(
@@ -360,6 +389,12 @@ class InventoryGameForm(forms.ModelForm):
     class Meta:
         model = Game
         fields = ['name', 'items', 'cost', 'discount_cost', 'type', 'image', 'power_meter']
+
+
+class AscensionCreateForm(forms.ModelForm):
+    class Meta:
+        model = Ascension
+        fields = []  # No fields are required; only the submit button will be shown
 
 
 class CardUploading(forms.ModelForm):
@@ -417,7 +452,8 @@ class BattleCreationForm(forms.ModelForm):
 
     class Meta:
         model = Battle
-        fields = ['battle_name', 'chests', 'min_human_participants', 'slots', 'type', 'bets_allowed', 'game_values', 'total_value']
+        fields = ['battle_name', 'chests', 'min_human_participants', 'slots', 'type', 'bets_allowed', 'game_values',
+                  'total_value']
         widgets = {
             'chests': forms.SelectMultiple(attrs={'id': 'id_chests'}),
         }
@@ -732,16 +768,16 @@ class UploadCardsForm(forms.ModelForm):
 
 
 class InviteCodeForm(forms.ModelForm):
-  class Meta:
-    model = InviteCode
-    fields = ['code', 'user', 'expire_time', 'permalink']  # Assuming these are your fields
+    class Meta:
+        model = InviteCode
+        fields = ['code', 'user', 'expire_time', 'permalink']  # Assuming these are your fields
 
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    # Get the current user if logged in
-    user = self.request.user
-    if user.is_authenticated:
-      self.initial['user'] = user
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Get the current user if logged in
+        user = self.request.user
+        if user.is_authenticated:
+            self.initial['user'] = user
 
 
 from django_countries.fields import CountryField
@@ -757,12 +793,15 @@ PAYMENT_CHOICES = (
 class CheckoutForm(forms.Form):
     shipping_address = forms.CharField(required=False)
     shipping_address2 = forms.CharField(required=False)
-    shipping_country = CountryField(blank_label='(select country)').formfield(required=False, widget=CountrySelectWidget(attrs={'class': 'custom-select d-block w-100'}))
+    shipping_country = CountryField(blank_label='(select country)').formfield(required=False,
+                                                                              widget=CountrySelectWidget(attrs={
+                                                                                  'class': 'custom-select d-block w-100'}))
     shipping_zip = forms.CharField(required=False)
 
     billing_address = forms.CharField(required=False)
     billing_address2 = forms.CharField(required=False)
-    billing_country = CountryField(blank_label='(select country)').formfield(required=False, widget=CountrySelectWidget(attrs={'class': 'custom-select d-block w-100'}))
+    billing_country = CountryField(blank_label='(select country)').formfield(required=False, widget=CountrySelectWidget(
+        attrs={'class': 'custom-select d-block w-100'}))
     billing_zip = forms.CharField(required=False)
 
     same_billing_address = forms.BooleanField(required=False)
@@ -846,7 +885,6 @@ class CurrencyPaypalPaymentForm(forms.Form):
 
 from .models import Withdraw
 
-
 from django import forms
 from .models import Withdraw, InventoryObject
 
@@ -894,16 +932,29 @@ class TradeProposalForm(forms.ModelForm):
 
 
 class ExchangePrizesForm(forms.ModelForm):
+    usercard = forms.ModelMultipleChoiceField(
+        queryset=InventoryObject.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        label="Select Items to Trade"
+    )
 
     class Meta:
-        model = CommerceExchange
-        fields = ['usercard', 'prizes',] # Adjust fields as needed
+        model = CommerceExchange  # Ensure this is the correct model
+        fields = ['usercard', 'prizes']
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Get the user from kwargs (if provided)
-        super(ExchangePrizesForm, self).__init__(*args, **kwargs)
+        user = kwargs.pop('user', None)  # Extract the user from kwargs
+        super().__init__(*args, **kwargs)
         if user:
             self.fields['usercard'].queryset = InventoryObject.objects.filter(user=user)
+
+        # Customize the label display for the usercard field
+        self.fields['usercard'].label_from_instance = self.get_usercard_label
+
+    def get_usercard_label(self, obj):
+        """Define how InventoryObject details are displayed in the form."""
+        return f"{obj.choice_text} - {obj.category} - ${obj.price} ({obj.condition})"
 
 
 class AddMonstrosityForm(forms.ModelForm):
@@ -919,11 +970,24 @@ class AddMonstrosityForm(forms.ModelForm):
             choices=[(sprite.id, sprite) for sprite in self.fields['monstrositysprite'].queryset],
         )
 
+
+class FeedMonstrosityForm(forms.ModelForm):
+    class Meta:
+        model = Monstrosity
+        fields = ['feed_amount',]
+
+    def clean_currency_amount(self):
+        currency_amount = self.cleaned_data['currency_amount']
+        if currency_amount <= 0:
+            raise forms.ValidationError("Currency amount must be positive.")
+        return currency_amount
+
+
 from .models import Endowment
 
 
 class EndowmentForm(forms.Form):
-    #target = forms.ModelChoiceField(queryset=User.objects.exclude(pk=1))  # Exclude the superuser (with pk=1)
+    # target = forms.ModelChoiceField(queryset=User.objects.exclude(pk=1))  # Exclude the superuser (with pk=1)
     target = forms.CharField(widget=forms.TextInput(
         attrs={'placeholder': 'Name of Endowed Individual'}))  # Exclude the superuser (with pk=1)
 
@@ -934,7 +998,7 @@ class EndowmentForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        #get the current order
+        # get the current order
 
         # Set initial values for target and user (optional, adjust as needed)
         self.initial['user'] = self.request.user
@@ -949,7 +1013,8 @@ class EndowmentForm(forms.Form):
             raise forms.ValidationError('Invalid username. Please enter a valid user.')
 
     def save(self, commit=True):
-        instance = Endowment(user=self.cleaned_data['user'], target=self.cleaned_data['target'], order=self.cleaned_data['order'])
+        instance = Endowment(user=self.cleaned_data['user'], target=self.cleaned_data['target'],
+                             order=self.cleaned_data['order'])
 
         if commit:
             instance.save()

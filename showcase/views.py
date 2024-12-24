@@ -20,7 +20,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference, Battle, \
-    BattleParticipant, Monstrosity, MonstrositySprite, Product, Level
+    BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -104,12 +104,15 @@ from .models import SocialMedia
 from .models import AdminRoles
 from .models import AdminTasks
 from .models import AdminPages
+from .models import Ascension
+from .models import (Item, OrderItem, Order, Address, Payment, Coupon, Refund,
+                     UserProfile)
 # from .models import Background2aImage
 from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, SellerApplicationForm, \
     MemeForm, CurrencyCheckoutForm, CurrencyPaymentForm, CurrencyPaypalPaymentForm, HitStandForm, WagerForm, \
     DirectedTradeOfferForm, FriendRequestForm, RespondingTradeOfferForm, ShippingForm, EndowmentForm, UploadCardsForm, \
-    RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, GameForm, CardUploading, MoveToTradeForm, \
-    SpinPreferenceForm, BattleCreationForm, BattleJoinForm, InventoryGameForm, AddMonstrosityForm
+    RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, InventoryGameForm, PlayerInventoryGameForm, CardUploading, MoveToTradeForm, \
+    SpinPreferenceForm, BattleCreationForm, BattleJoinForm, AddMonstrosityForm, AscensionCreateForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -151,7 +154,7 @@ from .forms import StoreViewTypeForm
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth import login
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.views import generic
 from django.views.generic import TemplateView, ListView
 
@@ -187,6 +190,8 @@ from guest_user.mixins import RegularUserRequiredMixin
 
 from guest_user.decorators import allow_guest_user
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -195,8 +200,6 @@ from django.views.generic import ListView, DetailView, View
 from datetime import datetime
 from django.utils import timezone
 from .forms import CheckoutForm
-from .models import (Item, OrderItem, Order, Address, Payment, Coupon, Refund,
-                     UserProfile)
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -1720,10 +1723,7 @@ class GameChestBackgroundView(BaseView):
         context['slug'] = slug
 
         # Fetch data related to the user and game
-
         game = get_object_or_404(Game, slug=slug)
-
-        # Pass the game as a list
         context['game'] = game
 
         user = self.request.user
@@ -1742,10 +1742,15 @@ class GameChestBackgroundView(BaseView):
         spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
         context['spinner_choice_renders'] = spinner_choice_renders
 
-        if game.daily:
+        # Retrieve 'button_type' from the request
+        button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
+
+        # Determine cost based on button type
+        if button_type == "start2":  # If Demo Spin is pressed
             cost = 0
-        else:
+        else:  # If normal Spin is pressed
             cost = game.discount_cost if game.discount_cost else game.cost
+
         context.update({
             'cost_threshold_80': cost * 0.8,
             'cost_threshold_100': cost,
@@ -1884,6 +1889,52 @@ class GameChestBackgroundView(BaseView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
+
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        action = self.request.POST.get('action')
+        pk = self.request.POST.get('pk')
+
+        def post(self, request, *args, **kwargs):
+            action = self.request.POST.get('action')
+            if action == 'sell':
+                return self.sell_game_inventory_object(request)
+    def sell_game_inventory_object(self, request):
+        # Get the most recently created InventoryObject for the current user
+        inventory_object = InventoryObject.objects.filter(
+            user=request.user,
+            inventory__isnull=False,  # Ensure it's still in inventory
+        ).order_by('-created_at').first()  # Get the latest instance
+
+        if not inventory_object:
+            messages.error(request, 'No items available to sell!')
+            return redirect('showcase:inventory')
+
+        # Update InventoryObject
+        inventory_object.user = None
+        inventory_object.inventory = None
+
+        with transaction.atomic():
+            # Create the Transaction instance
+            Transaction.objects.create(
+                inventory_object=inventory_object,
+                user=request.user,
+                currency=inventory_object.currency,
+                amount=inventory_object.price
+            )
+
+            # Save the updated InventoryObject
+            inventory_object.save()
+
+            # Update UserProfile's currency_amount
+            user_profile = get_object_or_404(UserProfile, user=request.user)
+            user_profile.currency_amount += inventory_object.price
+            user_profile.save()
+
+        messages.success(request,
+                         f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
+        return redirect('showcase:inventory')
 
     def game_detail(request, slug):
         game = get_object_or_404(Game, slug=slug)
@@ -2647,6 +2698,59 @@ def update_profile_level(profile):
             print(f"No level matches rubies_spent: {profile.rubies_spent}")
 
 
+@receiver(post_save, sender=Ascension)
+def reset_currency_spent_if_high_level(sender, instance, created, **kwargs):
+    if created:
+        profile = ProfileDetails.objects.filter(user=instance.user).first()
+        if profile and profile.level.level >= 100:
+            profile.rubies_spent = 0
+
+            # Assuming 'currency.amount' holds the numeric value
+            if hasattr(profile.rubies_spent, 'amount'):
+                profile.rubies_spent.amount += int(profile.rubies_spent.amount / 10)  # 10% gain in rubies
+
+            print(f'User {profile.user} ascended at level {profile.level.level}')
+
+            # Reset level to the first level
+            profile.level = Level.objects.order_by('id').first()  # Adjust based on your level model
+            profile.save()
+
+
+class AscendView(BaseView):
+    model = Ascension
+    template_name = "ascend.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        return context
+@login_required
+def create_ascension(request):
+    profile = ProfileDetails.objects.filter(user=request.user).first()
+    if not profile:
+        messages.error(request, "Profile not found.")
+        return redirect('showcase:index')  # Replace with your desired fallback page
+
+    if request.method == "POST":
+
+        # Create the Ascension instance
+        ascension = Ascension(
+            final_level=profile.level,
+            reward=1,  # Customize as needed
+            user=request.user,
+            profile=profile,  # Set the profile field
+        )
+        ascension.save()
+        messages.success(request, "Ascension created successfully!")
+        return redirect('showcase:index')  # Replace with the success redirect page
+
+    form = AscensionCreateForm()
+    return render(request, 'ascend.html', {'form': form})
+
+
 class EarningAchievement(BaseView):
     model = Achievements
     template_name = "achievements.html"
@@ -2941,9 +3045,12 @@ class AchievementsView(TemplateView):
         total_achievements = Achievements.objects.filter(is_active=1)
 
         # Achievements the user has earned
+
+        # Achievements the user has earned
         earned_achievements = Achievements.objects.filter(
-            is_active=1, earnedachievements__user=user
-        ).distinct()
+            is_active=1, user=user
+        ).distinct()  # Filter by the ManyToManyField `user`
+
 
         # Counts for achievements
         context['earned_count'] = earned_achievements.count()
@@ -3650,6 +3757,39 @@ class AddMonstrosityView(FormMixin, LoginRequiredMixin, ListView):
             return render(request, "addamonstrosity.html", {'form': form})
 
 
+
+from .forms import FeedMonstrosityForm
+
+@login_required
+def feedmonstrosity(request, monstrosity_id):
+    monstrosity = get_object_or_404(Monstrosity, id=monstrosity_id)
+
+    # Ensure the Monstrosity belongs to the current user
+    if monstrosity.user != request.user:
+        messages.error(request, "You do not have permission to feed this Monstrosity.")
+        return redirect('mymonstrosity')  # Replace with the appropriate redirect URL
+
+    if request.method == 'POST':
+        form = FeedMonstrosityForm(request.POST)
+        if form.is_valid():
+
+            # Check if the Monstrosity has enough currency
+            if monstrosity.currency_amount >= monstrosity.feed_amount:
+                # Deduct currency from the Monstrosity's currency_amount
+                monstrosity.currency_amount -= monstrosity.feed_amount
+                monstrosity.experience += monstrosity.feed_amount  # Add experience
+                monstrosity.save()
+
+                messages.success(request, f"You have successfully fed {monstrosity.monstrositys_name}.")
+                return redirect('showcase:mymonstrosity')  # Replace with the appropriate redirect URL
+            else:
+                messages.error(request, "This Monstrosity does not have enough currency to be fed.")
+    else:
+        form = FeedMonstrosityForm()
+
+    return render(request, 'feed_monstrosity.html', {'form': form, 'monstrosity': monstrosity})
+
+
 #  def get_queryset(self):
 #    return BackgroundImage.objects.all()
 
@@ -3876,7 +4016,6 @@ def checkview(request):
         return redirect('showcase:create_room')  # Assuming you have a URL pattern named 'create_room'
 
 
-
 @csrf_exempt
 def send(request):
     if request.method == 'POST':
@@ -3884,13 +4023,14 @@ def send(request):
         username = request.POST.get('username')
         room_id = request.POST.get('room_id')
         page_name = request.POST.get('page_name')
+        uploaded_file = request.FILES.get('file')
 
         if page_name == 'index.html':
             room_id = 'General'
 
         logger.debug(f"message: {message}, username: {username}, room_id: {room_id}, page_name: {page_name}")
         print(f"message: {message}, username: {username}, room_id: {room_id}, page_name: {page_name}")
-        print('This is a community-sent message')
+        print('This is a personable-sent message')
 
         try:
             room = Room.objects.get(name=room_id)
@@ -3906,17 +4046,21 @@ def send(request):
                     value=message,
                     user=username,
                     room=room.name,
-                    signed_in_user=request.user
+                    signed_in_user=request.user,
+                    file=uploaded_file
                 )
             else:
                 new_message = Message.objects.create(
                     value=message,
                     user=username,
-                    room=room.name
+                    room=room.name,
+                    file=uploaded_file
                 )
             new_message.save()
 
             # Return only serializable data
+            file_url = new_message.file.url if new_message.file and hasattr(new_message.file, 'url') else None
+
             response_data = {
                 'status': 'success',
                 'message': 'Message sent successfully',
@@ -3924,7 +4068,7 @@ def send(request):
                     'value': new_message.value,
                     'user': new_message.user,
                     'room': new_message.room,
-                    'file_url': new_message.file.url if new_message.file and new_message.file.url else None,
+                    'file_url': file_url,
                 }
             }
 
@@ -3980,6 +4124,25 @@ class NewRoomSettingsView(LoginRequiredMixin, TemplateView):
         return render(request, self.template_name, {'form': form})
 
 
+# Utility function to serialize a DefaultAvatar instance
+def serialize_default_avatar(avatar):
+    if avatar:
+        return {
+            "default_avatar_name": avatar.default_avatar_name,
+            "default_avatar_url": avatar.default_avatar.url if avatar.default_avatar else None,
+            "is_active": avatar.is_active,
+        }
+    return None
+
+# Utility function to serialize a ProfileDetails instance
+def serialize_profile(profile_details):
+    if profile_details:
+        return {
+            "avatar_url": profile_details.avatar.url if profile_details.avatar else None,
+            "profile_url": profile_details.get_absolute_url(),
+        }
+    return None
+
 def getMessages(request, room):
     try:
         room_details = Room.objects.get(name=room)
@@ -3988,14 +4151,20 @@ def getMessages(request, room):
 
     messages = Message.objects.filter(room=room_details)
     messages_data = []
+
     for message in messages:
         profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
-        if profile_details:
-            user_profile_url = message.get_profile_url()
-            avatar_url = profile_details.avatar.url
-        else:
-            user_profile_url = f'/home/{room}/?username={request.user.username}'
-            avatar_url = DefaultAvatar.objects.first()
+        default_avatar = DefaultAvatar.objects.first()
+
+        # Use the profile avatar if available, otherwise fallback to default avatar
+        avatar_url = (
+            profile_details.avatar.url if profile_details and profile_details.avatar else
+            serialize_default_avatar(default_avatar)['default_avatar_url']
+        )
+        user_profile_url = (
+            profile_details.get_absolute_url() if profile_details else
+            f'/home/{room}/?username={request.user.username}'
+        )
 
         message_data = {
             'user_profile_url': user_profile_url,
@@ -5793,19 +5962,29 @@ def getGeneralMessages(request):
     messages = GeneralMessage.objects.all()
     messages_data = []
 
-    for message in messages:
-        profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
-        if profile_details:
-            user_profile_url = message.get_profile_url()
-            avatar_url = profile_details.avatar.url
-        else:
-            user_profile_url = 'index.html'
-            avatar_url = DefaultAvatar.objects.first()
+    # Get the first default avatar for fallback purposes
+    default_avatar = DefaultAvatar.objects.first()
+    default_avatar_data = serialize_default_avatar(default_avatar)
 
+    for message in messages:
+        # Get profile details if they exist
+        profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+
+        # Determine avatar URL and user profile URL
+        avatar_url = (
+            profile_details.avatar.url if profile_details and profile_details.avatar else
+            default_avatar_data['default_avatar_url'] if default_avatar_data else None
+        )
+        user_profile_url = (
+            profile_details.get_absolute_url() if profile_details else
+            'index.html'  # Fallback URL
+        )
+
+        # Build the message data
         message_data = {
             'user_profile_url': user_profile_url,
             'avatar_url': avatar_url,
-            'user': message.user,
+            'user': str(message.user),
             'value': message.value,
             'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
             'message_number': message.message_number,
@@ -5816,16 +5995,12 @@ def getGeneralMessages(request):
     return JsonResponse({'messages': messages_data})
 
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .models import GeneralMessage
-
-
 @csrf_exempt
 def generalsend(request):
     if request.method == 'POST':
         generalmessage = request.POST.get('message')
         username = request.POST.get('username')
+        uploaded_file = request.FILES.get('file')  # Handle uploaded file
 
         print(f"message: {generalmessage}, username: {username}")
         print('This is a community-sent message')
@@ -5834,18 +6009,26 @@ def generalsend(request):
             return JsonResponse({'status': 'error', 'generalmessage': 'Message is required.'})
 
         try:
+            # Create a new message depending on the authentication status
             if request.user.is_authenticated:
                 new_message = GeneralMessage.objects.create(
                     value=generalmessage,
                     user=username,
-                    signed_in_user=request.user
+                    signed_in_user=request.user,
+                    file=uploaded_file  # Attach the file if provided
                 )
             else:
                 new_message = GeneralMessage.objects.create(
                     value=generalmessage,
-                    user=username
+                    user=username,
+                    file=uploaded_file  # Attach the file if provided
                 )
             new_message.save()
+
+            # Handle file URL safely
+            file_url = None
+            if new_message.file:  # Ensure a file was uploaded
+                file_url = new_message.file.url if hasattr(new_message.file, 'url') else None
 
             # Prepare the JSON response
             response_data = {
@@ -5854,14 +6037,13 @@ def generalsend(request):
                 'message_data': {
                     'value': new_message.value,
                     'user': new_message.user,
-                    'file_url': new_message.file.url if new_message.file else None,
-                    # Other serializable fields can be added here
+                    'file_url': file_url,  # Include file URL only if available
                 }
             }
             return JsonResponse(response_data)
         except Exception as e:
             print(f"Error saving message: {e}")
-            return JsonResponse({'status': 'error', 'generalmessage': str(e)})
+            return JsonResponse({'status': 'error', 'generalmessage': 'An error occurred while saving the message.'})
 
     return JsonResponse({'status': 'error', 'generalmessage': 'Invalid request method.'})
 
@@ -7116,45 +7298,41 @@ def supportgetMessages(request, signed_in_user, **kwargs):
     if not request.user.is_authenticated:
         return JsonResponse({'messages': []})
 
-    try:
-        chat_room = SupportChat.objects.get(signed_in_user__username=signed_in_user)
-    except SupportChat.DoesNotExist:
-        # Create a new chat room if it doesn't exist
-        chat_room = SupportChat(signed_in_user=request.user)
-        chat_room.save()
+    # Retrieve or create the chat room
+    chat_room, created = SupportChat.objects.get_or_create(signed_in_user__username=signed_in_user, defaults={
+        'signed_in_user': request.user,
+    })
 
-    # Check if the requesting user is the creator of the room or an administrator
-    if request.user == chat_room.signed_in_user or request.user.is_staff:
-        messages = SupportMessage.objects.filter(room=chat_room)
-        messages_data = []
-
-        for message in messages:
-            user_str = str(message.signed_in_user) if message.signed_in_user else 'Support Request'
-            user_profile_url = ''  # Initialize user_profile_url
-            profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
-            default_avatar = DefaultAvatar.objects.first()
-
-            if message.signed_in_user and profile_details:
-                user_profile_url = profile_details.get_absolute_url()  # Get the user_profile_url for each message
-            if profile_details:
-                avatar_url = profile_details.avatar.url  # Get the avatar URL
-            elif default_avatar:
-                avatar_url = default_avatar  # Default avatar URL
-            else:
-                avatar_url = staticfiles_storage.url('css/images/a.jpg')
-
-            messages_data.append({
-                'user_profile_url': user_profile_url,
-                'avatar_url': avatar_url,
-                'user': user_str,
-                'value': message.value,
-                'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
-            })
-
-        return JsonResponse({'messages': messages_data})
-    else:
+    # Check if the requesting user is the creator or an admin
+    if request.user != chat_room.signed_in_user and not request.user.is_staff:
         return HttpResponseForbidden("You do not have permission to access this chat room")
 
+    messages = SupportMessage.objects.filter(room=chat_room)
+    messages_data = []
+
+    default_avatar = DefaultAvatar.objects.first()
+
+    for message in messages:
+        profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+
+        # Serialize profile details or use default avatar
+        avatar_url = (
+            profile_details.avatar.url if profile_details and profile_details.avatar else
+            serialize_default_avatar(default_avatar)['default_avatar_url']
+        )
+        user_profile_url = (
+            profile_details.get_absolute_url() if profile_details else ""
+        )
+
+        messages_data.append({
+            'user_profile_url': user_profile_url,
+            'avatar_url': avatar_url,
+            'user': str(message.signed_in_user) if message.signed_in_user else 'Support Request',
+            'value': message.value,
+            'date': message.date.strftime("%Y-%m-%d %H:%M:%S"),
+        })
+
+    return JsonResponse({'messages': messages_data})
 
 """def supportgetMessages(request, **kwargs):
    messages = SupportMessage.objects.filter(room=request.user.username)
@@ -7529,8 +7707,6 @@ from django.db import transaction
 from django.urls import reverse
 
 
-
-
 class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
     model = InventoryObject
     template_name = "inventory.html"
@@ -7636,7 +7812,6 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         messages.success(request, f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
         return redirect('showcase:inventory')
 
-
     def move_to_trade(self, request, pk):
         inventory_item = get_object_or_404(InventoryObject, pk=pk, user=request.user)
 
@@ -7724,19 +7899,52 @@ def create_inventory_object(request):
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
+def sell_game_inventory_object(self, request, pk):
+    inventory_object = get_object_or_404(InventoryObject, pk=pk)
+
+    # Check if user owns the inventory object
+    if inventory_object.user != request.user:
+        messages.error(request, 'You cannot sell items you do not own!')
+        return redirect('showcase:inventory')
+
+    # Update InventoryObject
+    inventory_object.user = None
+    inventory_object.inventory = None
+
+    with transaction.atomic():
+        # Create the Transaction instance
+        Transaction.objects.create(
+            inventory_object=inventory_object,
+            user=request.user,
+            currency=inventory_object.currency,
+            amount=inventory_object.price
+        )
+
+        # Save the updated InventoryObject
+        inventory_object.save()
+
+        # Update UserProfile's currency_amount
+        user_profile = get_object_or_404(UserProfile, user=request.user)
+        user_profile.currency_amount += inventory_object.price
+        user_profile.save()
+
+    messages.success(request, f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
+    return redirect('showcase:inventory')
+
 
 class CreateChestView(FormView):
+    model = Game
     template_name = "create_chest.html"
-    form_class = GameForm
+    form_class = InventoryGameForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Ensure game_form and formset are defined regardless of POST or GET
         if self.request.method == 'POST':
-            game_form = GameForm(self.request.POST, self.request.FILES)
+            game_form = InventoryGameForm(self.request.POST, self.request.FILES)
             formset = ChoiceFormSet(self.request.POST, self.request.FILES)
         else:
-            game_form = GameForm()
+            game_form = InventoryGameForm()
             formset = ChoiceFormSet(queryset=Choice.objects.none())
 
         # Add them to context
@@ -7759,7 +7967,7 @@ class CreateChestView(FormView):
         return context
 
     def post(self, request, *args, **kwargs):
-        game_form = GameForm(self.request.POST, self.request.FILES)
+        game_form = InventoryGameForm(self.request.POST, self.request.FILES)
         formset = ChoiceFormSet(self.request.POST, self.request.FILES)
 
         if game_form.is_valid() and formset.is_valid():
@@ -7777,25 +7985,26 @@ class CreateChestView(FormView):
 
 class CreateInventoryChestView(FormView):
     template_name = "inventory_create_chest.html"
-    form_class = InventoryGameForm
-    success_url = reverse_lazy('game_list')  # Replace 'game_list' with your desired success URL name
+    form_class = PlayerInventoryGameForm
+    success_url = reverse_lazy('showcase:game') #set to the new game
 
     def form_valid(self, form):
-        # Save the form instance but do not commit it to the database yet
+        # Save the game instance
         game = form.save(commit=False)
-        # Add additional logic if needed, for example, associating the user
-        game.user = self.request.user  # Assuming the user is logged in
-        game.save()  # Save the game instance
+        game.user = self.request.user
+        game.save()
 
-        # ManyToMany fields require saving after the main object is saved
-        if 'items' in form.cleaned_data:
-            game.items.set(form.cleaned_data['items'])  # Assign the items (ManyToManyField)
+        # Save ManyToMany relationship
+        game.items.set(form.cleaned_data['items'])
+
+        # Handle quantities
+        for prize_id, field_name in form.quantity_fields.items():
+            quantity = self.request.POST.get(field_name)
+            if quantity:
+                prize = PrizePool.objects.get(id=prize_id)
+                print(f"Prize: {prize.prize_name}, Quantity: {quantity}")
 
         return super().form_valid(form)
-
-    def form_invalid(self, form):
-        # Handle the form validation errors
-        return JsonResponse({'errors': form.errors}, status=400)
 
 
 def move_to_trading(self, **kwargs):
@@ -7854,13 +8063,12 @@ def move_to_trade(self, request, pk):
     return render(request, 'inventory.html', {'form': form, 'inventory_item': inventory_item})
 
 
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, DecimalField
 from django.shortcuts import render, redirect
 from .models import Game, Choice
-from .forms import GameForm, ChoiceFormSet
 from django.shortcuts import render, redirect
 from .models import Game, Choice
-from .forms import GameForm, ChoiceFormSet
+from .forms import ChoiceFormSet
 
 
 class SecretRoomView(LoginRequiredMixin, FormMixin, ListView):
@@ -9089,43 +9297,77 @@ class CommerceExchangeView(CreateView):
     form_class = ExchangePrizesForm
 
     def form_valid(self, form):
+        # Associate the currently logged-in user with the form instance
         form.instance.user = self.request.user
         return super().form_valid(form)
 
+    def get_form(self):
+        # Pass the current user to the form
+        return self.form_class(user=self.request.user, **self.get_form_kwargs())
+
     def get_context_data(self, **kwargs):
-        self.object_list = self.get_queryset()
+        # Add additional context to the template
         context = super().get_context_data(**kwargs)
-        form = ExchangePrizesForm(self.request.POST or None, user=self.request.user)
-        context['form'] = form  # Add the form to the context
+        user = self.request.user
+
+        # Query TradeItem objects for the current user
+        trade_items = TradeItem.objects.filter(user=user)
+
+        # Add additional context variables
+        context['trade_items'] = trade_items
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(
             is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(
             is_active=1).order_by('position')
-        context['form'] = self.get_form()
+
         return context
+
 
 
 class ExchangePrizesView(FormMixin, ListView):
     model = ExchangePrize
     template_name = "commerce.html"
-    form = ExchangePrizesForm
+    form_class = ExchangePrizesForm
+
+    def get_form_kwargs(self):
+        """Pass the user to the form."""
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def form_valid(self, form):
+        # Assign the logged-in user to the form instance
         form.instance.user = self.request.user
-        return super().form_valid(form)
+
+        # Save the form data
+        exchange_prize = form.save(commit=False)
+
+        # Calculate total value of selected cards
+        selected_inventory_objects = form.cleaned_data.get('usercard')
+        total_usercard_value = (
+            selected_inventory_objects.aggregate(
+                total_price=Sum(F('price') * F('quantity'), output_field=DecimalField())
+            )['total_price'] or 0
+        )
+
+        exchange_prize.total_usercard_value = total_usercard_value
+        exchange_prize.save()
+        form.save_m2m()
+
+        messages.success(self.request, f"Form submitted successfully. Total Value: ${total_usercard_value:.2f}.")
+        return redirect('showcase:commerce')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['form'] = self.get_form()
         context['BanAppealBackgroundImage'] = BanAppealBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(
@@ -9137,25 +9379,12 @@ class ExchangePrizesView(FormMixin, ListView):
 
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
-        if request.method == "POST":
-            form = ExchangePrizesForm(request.POST, request.FILES)
-            if form.is_valid():
-                post = form.save(commit=False)
-                post.save()
-                messages.success(request, 'Form submitted successfully.')
-                return redirect('showcase:commerce')
-            else:
-                print(form.errors)
-                print(form.non_field_errors())
-                print(form.cleaned_data)
-                messages.error(request, "Form submission invalid")
-                return render(request, "commerce.html", {'form': form})
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
         else:
-            form = ExchangePrizesForm()
-            messages.error(request, 'Form submission failed to register, please try again.')
-            messages.error(request, form.errors)
-            return render(request, "commerce.html", {'form': form})
-
+            messages.error(request, "Form submission invalid")
+            return self.render_to_response(self.get_context_data(form=form))
 
 class IssueBackgroundView(FormMixin, ListView):
     model = IssueBackgroundImage
@@ -9518,231 +9747,105 @@ class CurrencyPaymentView(EBaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
-
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=True)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=True, page=self.template_name
+        ).order_by("position")
         return context
 
-    def get(self, *args, **kwargs):
-        # request (self) does not seem to be getting user
-        order = CurrencyOrder.objects.get(user=self.request.user, ordered=False)
-        if order:
-            context = self.get_context_data(**kwargs)
-            context['order'] = order
-            context['DISPLAY_COUPON_FORM'] = False
-            context['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
-            userprofile = User.objects.get(username=self.request.user.username)
-            if hasattr(userprofile, "one_click_purchasing"):
-                # userprofile is probably not linked to database
-                if userprofile.one_click_purchasing:
-                    # fetch the users list
-                    cards = stripe.Customer.list_sources(
-                        userprofile.stripe_customer_id,
-                        limit=3,
-                        object='card'
-                    )
-                    card_list = cards['data']
-                    if len(card_list) > 0:
-                        # update the context with the default card
-                        context.update({
-                            'card': card_list[0]
-                        })
-            else:
-                userprofile.one_click_purchasing = False
-                return render(self.request, "currencypayment.html", context)
-                # Check if PayPal payment method is available
-            if hasattr(userprofile, 'paypal_enabled') and userprofile.paypal_enabled:
-                context['PAYPAL_CLIENT_ID'] = settings.PAYPAL_CLIENT_ID
+    def save_stripe_customer(user_profile, token, save):
+        if save and user_profile.stripe_customer_id:
+            customer = stripe.Customer.retrieve(user_profile.stripe_customer_id)
+            customer.sources.create(source=token)
+        elif save:
+            customer = stripe.Customer.create(email=user_profile.user.email)
+            customer.sources.create(source=token)
+            user_profile.stripe_customer_id = customer['id']
+            user_profile.one_click_purchasing = True
+            user_profile.save()
+        return user_profile
 
-            return render(self.request, "currencypayment.html", context)
-        else:
-            messages.warning(
-                self.request, "Please add a billing address.")
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect("login")
+
+        try:
+            order = CurrencyOrder.objects.get(user=self.request.user, ordered=False)
+        except CurrencyOrder.DoesNotExist:
+            messages.warning(self.request, "Please add a billing address.")
             return redirect("showcase:currencycheckout")
 
-    def post(self, *args, **kwargs):
-        order = CurrencyOrder.objects.get(user=self.request.user, ordered=False)
-        form = CurrencyPaymentForm(self.request.POST)
-        userprofile = User.objects.get(username=self.request.user.username)
-        payment_method = self.request.POST.get('payment_method')
+        context = self.get_context_data(**kwargs)
+        context.update({
+            'order': order,
+            'DISPLAY_COUPON_FORM': False,
+            'STRIPE_PUBLIC_KEY': getattr(settings, 'STRIPE_PUBLIC_KEY', None),
+        })
+
+        userprofile = get_object_or_404(UserProfile, user=self.request.user)
+        if userprofile.one_click_purchasing:
+            cards = stripe.Customer.list_sources(
+                userprofile.stripe_customer_id,
+                limit=3,
+                object='card'
+            )
+            context['card'] = cards['data'][0] if cards['data'] else None
+
+        if getattr(userprofile, 'paypal_enabled', False):
+            context['PAYPAL_CLIENT_ID'] = getattr(settings, 'PAYPAL_CLIENT_ID', None)
+
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        order = get_object_or_404(CurrencyOrder, user=request.user, ordered=False)
+        form = CurrencyPaymentForm(request.POST)
+        user_profile = get_object_or_404(UserProfile, user=request.user)
 
         if form.is_valid():
-            print(form.cleaned_data)
-            print(form.cleaned_data.get("expiry"))
-
-            token = stripe.Token.create(
-                card={
-                    "number": form.cleaned_data.get("number"),
-                    "exp_month": form.cleaned_data.get("exp_month"),
-                    "exp_year": form.cleaned_data.get("exp_year"),
-                    "cvc": form.cleaned_data.get("cvc"),
-                },
-            )
+            payment_method = request.POST.get('payment_method')
+            token = request.POST.get("stripeToken")
             save = form.cleaned_data.get('save')
             use_default = form.cleaned_data.get('use_default')
-            user_profile = get_object_or_404(UserProfile, user=self.request.user)
 
-            # Now you can access stripe_customer_id
-            stripe_customer_id = user_profile.stripe_customer_id
-
-            if save:
-                if userprofile.stripe_customer_id != '' and userprofile.stripe_customer_id is not None:
-                    customer = stripe.Customer.retrieve(userprofile.stripe_customer_id)
-                    customer.sources.create(source=token)
-                else:
-                    customer = stripe.Customer.create(email=self.request.user.email)
-                    customer.sources.create(source=token)
-                    userprofile.stripe_customer_id = customer['id']
-                    userprofile.one_click_purchasing = True
-                    userprofile.save()
+            if save and user_profile.stripe_customer_id:
+                customer = stripe.Customer.retrieve(user_profile.stripe_customer_id)
+                customer.sources.create(source=token)
+            elif save:
+                customer = stripe.Customer.create(email=request.user.email)
+                customer.sources.create(source=token)
+                user_profile.stripe_customer_id = customer['id']
+                user_profile.one_click_purchasing = True
+                user_profile.save()
 
             amount = int(order.get_total_price() * 100)
 
             try:
-                if use_default or save:
-                    # charge the customer because we cannot charge the token more than once
-                    charge = stripe.Charge.create(
-                        amount=amount,  # cents
-                        currency="usd",
-                        customer=userprofile.stripe_customer_id
-                    )
-
-                    with transaction.atomic():
-                        print('currency updates activated')
-                        user_profile = UserProfile.objects.get(user=self.request.user)
-                        currencymarket = order.items.first().items  # Assuming single item
-                        user_profile.currency = currencymarket.currency
-                        user_profile.currency_amount += currencymarket.amount
-                        print('the currency amount is ' + currencymarket.amount)
-                        user_profile.save()
-                    print('the payment went through')
+                charge_params = {
+                    "amount": amount,
+                    "currency": "usd",
+                }
+                if use_default and user_profile.stripe_customer_id:
+                    charge_params["customer"] = user_profile.stripe_customer_id
+                elif token:
+                    charge_params["source"] = token
                 else:
-                    # charge once off on the token
-                    charge = stripe.Charge.create(
-                        amount=amount,  # cents
-                        currency="usd",
-                        source=token
-                    )
+                    raise ValueError("No payment method provided.")
 
-                    def is_numeric(value):
-                        """
-                        Checks if a given value is a numeric type.
+                charge = stripe.Charge.create(**charge_params)
 
-                        Args:
-                            value: The value to check.
-
-                        Returns:
-                            True if the value is numeric, False otherwise.
-                        """
-                        return isinstance(value, (int, float, complex))
-
-                    with transaction.atomic():
-                        print('currency updates activated')
-                        user_profile = UserProfile.objects.get(user=self.request.user)
-                        print('II')
-                        order = CurrencyOrder.objects.first()  # Get the first CurrencyOrder instance
-
-                        # Access the related CurrencyMarket object
-                        currencymarket = order.items
-
-                        # Check if both variables are numeric before addition
-                        if is_numeric(user_profile.currency_amount) and is_numeric(currencymarket.amount):
-                            user_profile.currency = currencymarket.currency
-                            print('IV')
-                            user_profile.currency_amount += currencymarket.amount
-                            print('the currency amount is ' + str(currencymarket.amount))
-                            user_profile.save()
-                        else:
-                            print('Error: One or both variables are not numeric.')
-                    print('the payment went through')
-
-                # create the payment
-                payment = Payment()
-                payment.stripe_charge_id = charge['id']
-                payment.user = self.request.user
-                payment.amount = order.get_total_price()
-                payment.save()
-                print('your payment has been saved')
-
-                # Access the single related item directly:
-                currency_market = order.items
-
-                # Update the order items, assuming you need to update the single related item:
-                currency_market.ordered = True
-                currency_market.save()  # Save the changes to the single item
-
-                # Print update confirmation:
-                print('Your payment has been updated for the ' + currency_market.name + ' item.')
-
-                # Cart removal logic
-                order_items = CurrencyOrder.objects.filter(user=self.request.user, ordered=False)
-                for order_item in order_items:
-                    order_item.delete()
-
-                # Inform the user about cart clearance
-                messages.success(request, "Your order has been placed! Your cart has been cleared.")
-
-                order.ordered = True
-                order.payment = payment
-                order.ref_code = create_ref_code()
-                print('the value of order is ' + order.ref_code)
-                order.save()
-                messages.success(self.request, "Your order was successful!")
-
+                self._process_successful_payment(order, charge, user_profile)
                 if payment_method == 'paypal':
                     return HttpResponseRedirect(self.process_paypal_payment(order))
                 return redirect("showcase:currencymarket")
 
-            except stripe.error.CardError as e:
-                body = e.json_body
-                err = body.get('error', {})
-                messages.warning(self.request, f"{err.get('message')}")
-                return redirect("showcase:currencymarket")
-
-            except stripe.error.RateLimitError as e:
-                # Too many requests made to the API too quickly
-                messages.warning(self.request, "Rate limit error")
-                return redirect("showcase:currencymarket")
-
-            except stripe.error.InvalidRequestError as e:
-                # Invalid parameters were supplied to Stripe's API
-                print(e)
-                print(12345)
-                # print ('stripeToken', stripeToken)
-                messages.warning(self.request, "Invalid parameters")
-                return redirect("/currencymarket")
-
-            except stripe.error.AuthenticationError as e:
-                # Authentication with Stripe's API failed
-                # (maybe you changed API keys recently)
-                messages.warning(self.request, "Not authenticated")
-                return redirect("/")
-
-            except stripe.error.APIConnectionError as e:
-                # Network communication with Stripe failed
-                messages.warning(self.request, "Network error")
-                return redirect("/currencymarket")
-
             except stripe.error.StripeError as e:
-                # Display a very generic error to the user, and maybe send
-                # yourself an email
-                messages.warning(
-                    self.request, "Something went wrong. You were not charged. Please try again."
-                )
-                return redirect("/currencymarket")
+                messages.warning(request, f"Stripe error: {str(e)}")
+            except ValueError as e:
+                messages.error(request, str(e))
+            except Exception:
+                messages.error(request, "An unexpected error occurred. Please try again.")
 
-            except Exception as e:
-                # send an email to ourselves
-                messages.warning(
-                    self.request, "Your order was placed!"
-                )
-                return redirect("/currencymarket")
-
-        messages.warning(self.request, "Invalid data received")
-        return redirect("/currencypayment/stripe")
+            return redirect("showcase:currencymarket")
 
 
 class CurrencyPayPalExecuteView(View):

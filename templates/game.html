@@ -419,7 +419,9 @@ document.addEventListener("DOMContentLoaded", function () {
         </label>
 
       <!-- Your button with initial data attributes -->
-<button class="start" id="start" data-game-id="{{ game.id }}" data-nonce="{{ nonce }}" data-slug="{{ game.slug }}" style="margin-top: 5%;">Spin!</button>
+<button class="start" id="start" data-game-id="{{ game.id }}" data-nonce="{{ nonce }}" data-slug="{{ game.slug }}" style="margin-top: 5%; margin-right: 25%;">Spin!</button>
+
+<button class="start" id="start2" data-game-id="{{ game.id }}" data-nonce="{{ nonce }}" data-slug="{{ game.slug }}" style="margin-top: 5%; margin-left: 25%;">Demo Spin</button>
 
 
 <script>
@@ -615,7 +617,14 @@ $(document).ready(function() {
 <p id="choice-text"></p>
 <p id="choice-color"></p>
 <img id="choice-file" src="" alt="Selected Choice Image" style="display:none;">
-            <button class="close" style="padding: 5px;">Collect</button>
+<div id="hidden-form" style="display:none;">
+    <form method="POST" action="{% url 'showcase:sell_game_inventory_object' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="sell">
+        <button type="submit" class="btn btn-danger">Sell Item</button>
+    </form>
+</div>
+
         </div>
     </div>
 

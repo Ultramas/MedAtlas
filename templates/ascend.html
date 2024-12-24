@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --primary-color: rgba(255, 255, 255, 0.9);
+            --background-color: #000;
+            --font-family: 'Arial', sans-serif;
+            --glow-color: rgba(255, 255, 255, 0.5);
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: var(--font-family);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: var(--primary-color);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Cosmic Background */
+        .cosmic-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Sacred Geometry */
+        .sacred-geometry {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.2;
+            z-index: 1;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 3rem;
+            position: relative;
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+            animation: containerGlow 4s infinite alternate;
+        }
+
+        @keyframes containerGlow {
+            0% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.1); }
+            100% { box-shadow: 0 0 50px rgba(255, 255, 255, 0.3); }
+        }
+
+        h2 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-align: center;
+            background: linear-gradient(45deg, #fff, #7b68ee, #fff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: titleGlow 3s infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+            100% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary-color);
+            opacity: 0.8;
+        }
+
+        input, textarea, select {
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            font-family: var(--font-family);
+            font-size: 1rem;
+            color: var(--primary-color);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 20px var(--glow-color);
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .btn:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+            animation: ripple 1.5s infinite;
+        }
+
+        @keyframes ripple {
+            0% { transform: translate(-50%, -50%) scale(0.3); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+
+        .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0;
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        /* Particle effect */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="cosmic-background"></canvas>
+    <canvas class="sacred-geometry"></canvas>
+
+    <div class="form-container">
+        <h2>Ascend </h2>
+        <form method="post" id="ascensionForm">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                <ul class="errorlist">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn">Ascend</button>
+        </form>
+    </div>
+
+    <script>
+        // Cosmic Background Animation
+        const cosmicCanvas = document.querySelector('.cosmic-background');
+        const ctx = cosmicCanvas.getContext('2d');
+
+        function resizeCanvas() {
+            cosmicCanvas.width = window.innerWidth;
+            cosmicCanvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const stars = [];
+        for(let i = 0; i < 200; i++) {
+            stars.push({
+                x: Math.random() * cosmicCanvas.width,
+                y: Math.random() * cosmicCanvas.height,
+                size: Math.random() * 2,
+                speed: Math.random() * 0.5
+            });
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, cosmicCanvas.width, cosmicCanvas.height);
+            ctx.fillStyle = '#fff';
+
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                star.y = (star.y + star.speed) % cosmicCanvas.height;
+            });
+
+            requestAnimationFrame(drawStars);
+        }
+
+        drawStars();
+
+        // Sacred Geometry Animation
+        const geometryCanvas = document.querySelector('.sacred-geometry');
+        const gctx = geometryCanvas.getContext('2d');
+
+        geometryCanvas.width = window.innerWidth;
+        geometryCanvas.height = window.innerHeight;
+
+        let angle = 0;
+
+        function drawSacredGeometry() {
+            gctx.clearRect(0, 0, geometryCanvas.width, geometryCanvas.height);
+
+            const centerX = geometryCanvas.width / 2;
+            const centerY = geometryCanvas.height / 2;
+            const radius = Math.min(geometryCanvas.width, geometryCanvas.height) * 0.3;
+
+            gctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            gctx.lineWidth = 1;
+
+            // Draw rotating mandala
+            for(let i = 0; i < 12; i++) {
+                gctx.beginPath();
+                gctx.save();
+                gctx.translate(centerX, centerY);
+                gctx.rotate(angle + (Math.PI * 2 / 12 * i));
+
+                // Draw geometric pattern
+                gctx.moveTo(0, -radius);
+                gctx.lineTo(radius * Math.cos(Math.PI/6), -radius * Math.sin(Math.PI/6));
+                gctx.lineTo(radius * Math.cos(-Math.PI/6), -radius * Math.sin(-Math.PI/6));
+                gctx.closePath();
+                gctx.stroke();
+
+                gctx.restore();
+            }
+
+            angle += 0.002;
+            requestAnimationFrame(drawSacredGeometry);
+        }
+
+        drawSacredGeometry();
+
+        // Form Interactions
+        document.getElementById('ascensionForm').addEventListener('submit', function(e) {
+            const button = this.querySelector('button[type="submit"]');
+            button.textContent = 'Ascending...';
+            button.disabled = true;
+
+            // Create ascension particle effect
+            createAscensionEffect(button);
+        });
+
+        function createAscensionEffect(element) {
+            for(let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                document.body.appendChild(particle);
+
+                const size = Math.random() * 4 + 2;
+                const startX = element.offsetLeft + element.offsetWidth / 2;
+                const startY = element.offsetTop + element.offsetHeight / 2;
+
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${startX}px`;
+                particle.style.top = `${startY}px`;
+
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 100 + 50;
+                const animation = particle.animate([
+                    {
+                        transform: `translate(0, 0)`,
+                        opacity: 1
+                    },
+                    {
+                        transform: `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity}px)`,
+                        opacity: 0
+                    }
+                ], {
+                    duration: 1000,
+                    easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)'
+                });
+
+                animation.onfinish = () => particle.remove();
+            }
+        }
+
+        // Field focus effects
+        document.querySelectorAll('input, textarea, select').forEach(element => {
+            element.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateX(5px)';
+                createEtherealGlow(this);
+            });
+
+            element.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateX(0)';
+            });
+        });
+
+        function createEtherealGlow(element) {
+            const glow = document.createElement('div');
+            glow.style.position = 'absolute';
+            glow.style.width = '20px';
+            glow.style.height = '20px';
+            glow.style.background = 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%)';
+            glow.style.pointerEvents = 'none';
+            glow.style.zIndex = '1';
+            glow.style.opacity = '0.5';
+
+            document.body.appendChild(glow);
+
+            document.addEventListener('mousemove', moveGlow);
+
+            function moveGlow(e) {
+                glow.style.left = e.clientX - 10 + 'px';
+                glow.style.top = e.clientY - 10 + 'px';
+            }
+
+            element.addEventListener('blur', () => {
+                document.removeEventListener('mousemove', moveGlow);
+                glow.remove();
+            });
+        }
+    </script>
+</body>
+</html>
