@@ -9,7 +9,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
-    MonstrositySprite, Affiliation, Ascension, ProfileCurrency
+    MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -435,6 +435,18 @@ class TradeItemAdmin(admin.ModelAdmin):
 
 
 admin.site.register(TradeItem, TradeItemAdmin)
+
+
+class InventoryTradeOfferAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Inventory Trade Offer Information - Categorial Description', {
+            'fields': ('initiator', 'receiver', 'offered_items', 'requested_items', 'status', 'is_active', ),
+            'classes': ('collapse',),
+        }),
+    )
+
+
+admin.site.register(InventoryTradeOffer, InventoryTradeOfferAdmin)
 
 
 class TradeAdmin(admin.ModelAdmin):
@@ -1628,7 +1640,7 @@ admin.site.register(WithdrawClass, WithdrawClassAdmin)
 class ExchangePrizeAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Exchange Prize Information - Categorial Description', {
-            'fields': ('prize', 'value', 'currency', 'condition', 'image_length', 'image_width', 'is_active',),
+            'fields': ('prize', 'name', 'value', 'currency', 'condition', 'image_length', 'image_width', 'is_active',),
             'classes': ('collapse',),
         }),
     )

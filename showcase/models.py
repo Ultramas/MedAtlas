@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from PIL import Image
 from decimal import Decimal
+import logging
 
 from autoslug import AutoSlugField
 from autoslug.utils import generate_unique_slug
@@ -16,8 +17,6 @@ from django.contrib.auth.models import User, AbstractUser, Permission
 from django.db import models, transaction
 from django.db.models import Max, F, Count, Sum
 from django.dispatch import receiver
-from django.forms import CharField
-from django.shortcuts import reverse
 from django_countries.fields import CountryField
 from django.utils.timezone import now, make_aware
 import pytz
@@ -25,6 +24,9 @@ from django.core.validators import MinValueValidator, MaxValueValidator, MinLeng
 from pydantic import ValidationError
 from django.contrib.auth.models import Group
 from django.db import connection
+
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 # from image.utils import render
 
@@ -1182,6 +1184,8 @@ class PrizePool(models.Model):
     prize_name = models.CharField(max_length=500, verbose_name="Prize Name")
     image = models.FileField(upload_to='images/', verbose_name="Prize Image")
     number = models.IntegerField(default=1, verbose_name="Quantity of Card")
+    price = models.IntegerField(default=1)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -1191,6 +1195,12 @@ class PrizePool(models.Model):
 
     def __str__(self):
         return str(self.prize_name) + "    Quantity-" + str(self.number)
+
+    def save(self, *args, **kwargs):
+
+        self.currency = Currency.objects.filter(is_active=1).first()
+
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Inventory"
@@ -1430,6 +1440,7 @@ class Trade_In_Cards(models.Model):
 
 class ExchangePrize(models.Model):
     prize = models.ForeignKey('Choice', on_delete=models.CASCADE)
+    name = models.CharField(max_length=200, blank=True, null=True)
     value = models.IntegerField(blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2)
@@ -1447,11 +1458,11 @@ class ExchangePrize(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return str(self.prize)
+        return str(self.name)
 
     def save(self, *args, **kwargs):
         if self.prize:
-            self.choice_text = self.prize.choice_text
+            self.name = self.prize.choice_text
             self.image = self.prize.file
             self.image_length = self.prize.image_length
             self.image_width = self.prize.image_width
@@ -1482,14 +1493,14 @@ class TradeItem(models.Model):
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
     condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2)
     label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default="N")  # can use for cataloging products
-    slug = models.SlugField()  # might change to automatically get the slug
+    slug = models.SlugField(blank=True, null=True)  # might change to automatically get the slug
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
     certified = models.BooleanField(default=False,
                                     help_text="If you are applying to become a partner in more than 1 category, talk to Trove.")
     description = models.TextField()
     value = models.IntegerField(blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    image = models.ImageField()
+    image = models.ImageField(upload_to='images/')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
                                                verbose_name="image length")
@@ -1562,9 +1573,27 @@ class TradeItem(models.Model):
         verbose_name_plural = "Trade Items"
 
 
+class InventoryTradeOffer(models.Model):
+    initiator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="initiated_trades")
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_trades")
+    offered_items = models.ManyToManyField(TradeItem, related_name="offered_in_trades")
+    requested_items = models.ManyToManyField(TradeItem, related_name="requested_in_trades")
+    status = models.CharField(
+        max_length=10,
+        choices=[('pending', 'Pending'), ('accepted', 'Accepted'), ('declined', 'Declined')],
+        default='pending'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class TradeOfferManager(models.Manager):
-    def get_queryset(self, request):
-        return super().get_queryset().select_related('trade_items').filter(trade_items__user=request.user)
+    def get_queryset(self, user=None):
+        queryset = super().get_queryset()
+        if user:
+            return queryset.filter(
+                Q(initiator=user) | Q(receiver=user)
+            ).select_related('initiator', 'receiver')
+        return queryset
 
 
 class CommerceExchange(models.Model):
@@ -1622,6 +1651,25 @@ class CommerceExchange(models.Model):
     class Meta:
         verbose_name = "Commerce Exchange"
         verbose_name_plural = "Commerce Exchanges"
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    message = models.TextField()
+    created_at = models.DateTimeField(default=now)
+    is_read = models.BooleanField(default=False)
+
+    # Optional: Related object for more context
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    related_object = GenericForeignKey('content_type', 'object_id')
+
+    def mark_as_read(self):
+        self.is_read = True
+        self.save()
+
+    def __str__(self):
+        return f"Notification for {self.user.username}: {self.message}"
 
 
 class Vote(models.Model):
@@ -3265,9 +3313,10 @@ class Robot(models.Model):
 class BattleParticipant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_bot = models.BooleanField(default=False)
+    battle = models.ForeignKey('Battle', on_delete=models.CASCADE, blank=True, null=True, related_name='battle_joined')
 
     def __str__(self):
-        return str(self.user)
+        return str(self.user) + " " + str(self.battle)
 
     class Meta:
         verbose_name = "Battle Participant"
@@ -3364,20 +3413,30 @@ class Battle(models.Model):
     def __str__(self):
         return f"{self.battle_name} submitted by {self.creator}"
 
-    def save(self, *args, user=None, **kwargs):
+    logger = logging.getLogger(__name__)
+
+    def is_full(self):
+        slot_number = int(self.slots.split('v')[-1])
+        return self.participants.count() >= slot_number
+
+    def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+
+        # Assign this Battle instance to the participants only if necessary
         for participant in self.participants.all():
-            print(f'Checking participant: {participant.user}')
-            if BattleParticipant.objects.filter(user=participant.user, battle=self).exists():
-                raise ValueError(f"User {participant.user} is already a participant in this battle.")
+            if participant.battle != self:
+                participant.battle = self
+                participant.save()
 
         # Assign a default currency if not set
         if not self.currency:
             first_currency = Currency.objects.first()
             if first_currency:
                 self.currency = first_currency
+
+        # Calculate the total price based on the games' costs
         total_price = 0
-        for game in self.chests.all():  # Accessing the related Game instances via the 'chests' field
+        for game in self.chests.all():
             if game.discount_cost is not None:
                 total_price += game.discount_cost
             else:
@@ -3385,6 +3444,7 @@ class Battle(models.Model):
 
         self.price = total_price
 
+        # Save again to ensure currency and price updates
         super().save(*args, **kwargs)
 
     class Meta:

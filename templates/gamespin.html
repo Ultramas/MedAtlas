@@ -1,0 +1,77 @@
+    <div class="wrapper">
+        <div class="containerre" style="margin-top: 3%;">
+            <div class="slider" id="slider">
+<!--currently, the card ends up at the back of the slider. make sure it ends up in the middle where it can be selected-->
+            {% for item in choices_with_nonce %}
+                {% with choice=item.choice %}
+                    <div id="{{ choice.choice_text }}" class="cards">
+                        {% with color=game|get_color:choice %}
+                            <div class="lootelement"
+                                 data-price="{{ choice.value }}"
+                                 data-currency-file="{{ item.currency.file_url }}"
+                                 data-currency-symbol="{{ item.currency.symbol }}"
+                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
+                                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% endwith %}
+                        <h5 style="margin-left: 22px;">{{ choice.value }} 💎</h5>
+                        <p>Noncevalue: {{ item.nonce }}</p>
+                        <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
+                        <p>Random Amount: {{ random_amount }}</p>
+                    </div>
+                {% endwith %}
+            {% endfor %}
+
+
+
+                {% for nonce, choice in matching_choices %}
+                    <p>Value: {{ choice.value }}</p>
+                    <p>Nonces: {{ nonce }}</p>
+                    <p>Choice: {{ choice.choice_text }}</p>
+
+            {% with cost_threshold=game.cost %}
+                {% with cost_threshold=cost_threshold|add:"0" %}
+                    {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost|mul:1 cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 %}
+                        {% if cost_threshold_10000 >= choice.value %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); padding: -10%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_500 >= choice.value > cost_threshold_10000 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_200 >= choice.value > cost_threshold_500 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_100 >= choice.value > cost_threshold_200 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
+                            <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% else %}
+                            <p>This choice does not meet the cost requirement.</p>
+                        {% endif %}
+                    {% endwith %}
+                {% endwith %}
+            {% endwith %}
+                {% endfor %}
+
+
+            </div>
+
+            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
+        </div>
+    </div>

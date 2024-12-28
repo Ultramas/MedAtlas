@@ -1,17 +1,69 @@
-{% extends "base.html" %}
+<style>
+  .slots-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+}
 
-{% block content %}
-  <h1>{{ battle.battle_name }}</h1>
-  <p>Status: {{ battle.get_status_display }}</p>
-  <p>Creator: {{ battle.creator }}</p>
-  <p>Participants: {{ battle.participants.count }}</p>
-  <p>Price: {{ battle.price }}</p>
-  <p>Time: {{ battle.time }}</p>
+.slot {
+  border: 2px solid #ccc;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  border-radius: 5px;
+}
 
-  <!-- Display the form to join the battle -->
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="battle_id" value="{{ battle.id }}">
-    <button type="submit">Join Battle</button>
-  </form>
-{% endblock %}
+.slot.occupied {
+  background-color: #f2dede;
+  border-color: #ebccd1;
+}
+
+.slot.available {
+  background-color: #dff0d8;
+  border-color: #d6e9c6;
+}
+
+</style>
+<h1>{{ battle.battle_name }}</h1>
+<p>Status: {{ battle.get_status_display }}</p>
+<p>Creator: {{ battle.creator }}</p>
+<p>Participants: {{ battle.participants.count }} / {{ battle.get_slots_display }}</p>
+<p>Price: {{ battle.price }}</p>
+<p>Time: {{ battle.time }}</p>
+
+<div class="slots-container">
+  {% for participant in battle.participants.all %}
+    <div class="slot occupied">
+      <p>{{ participant.user.username }}</p>
+    </div>
+  {% endfor %}
+
+  {% for i in range|slice:":{{ battle.slots|add:'-1'|int }}" %}
+    <div class="slot available">
+      <p>Available</p>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Display the form to join the battle -->
+
+
+{% if is_full %}
+    <p>This battle is full.</p>
+{% else %}
+    {% if not is_participant %}
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="battle_id" value="{{ battle.id }}">
+            <button type="submit">Join Battle</button>
+        </form>
+    {% else %}
+        <p>You have already joined this battle.</p>
+    {% endif %}
+{% endif %}
+
+<!-- Display related games -->
+<h2>Games in this Battle:</h2>
+{% for game in related_games %}
+    {% include 'game.html' with game=game %}
+{% endfor %}

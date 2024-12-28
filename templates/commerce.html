@@ -4,74 +4,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exchange Prizes</title>
+    <title>PokeTrove Commerce</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+        .card-container {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .card-section {
+            flex: 1;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding-right: 1rem;
+        }
+        .card-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+        .card-grid::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .card-grid::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        .card-grid::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header {
+            background-color: #1a1a2e;
+            color: #ffffff;
+            padding: 1rem 2rem;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .content {
+            display: flex;
+            flex: 1;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #16213e;
+            color: #ffffff;
+            padding: 2rem 1rem;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li {
+            margin-bottom: 1rem;
+        }
+        .sidebar a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .sidebar a:hover {
+            text-decoration: underline;
+        }
+        .main {
+            flex: 1;
+            padding: 2rem;
+        }
+        .exchange-prizes, .trade-items {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .card {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card label {
+            margin-bottom: 0.5rem;
+        }
+        .summary {
+            background-color: #f0f2f5;
+            border-radius: 4px;
+            padding: 1rem;
+        }
+        .submit-button {
+            background-color: #0070f3;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .submit-button:hover {
+            background-color: #0051a2;
+        }
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        .item {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .item-details {
+            margin-left: 1rem;
+        }
+        .item-details h3 {
+            margin-top: 0;
+        }
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Exchange Prizes</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <table style="max-height: 100%;">
-        {% for field in form %}
-            <tr style="overflow: scroll; max-height: 100%;">
-                <th>{{ field.label }}</th>
-                <td>
-                    {{ field.errors }}
-                    {% if field.name == "usercard" %}
-                        <ul>
-                            {% for choice in field.field.queryset %}
-                                <li>
-                                    <label>
-                                        <input type="checkbox"
-                                               name="usercard"
-                                               value="{{ choice.pk }}"
-                                               data-price="{{ choice.price }}"
-                                               data-choice-text="{{ choice.choice_text }}"
-                                               data-condition="{{ choice.condition }}"
-                                               data-image-url="{{ choice.image.url }}"
-                                               onchange="updateTotalValue()">
+    <div class="container">
+        <header class="header">
+            <h1>PokeTrove Commerce</h1>
+        </header>
+        <div class="content">
+            <aside class="sidebar">
+                <nav>
+                    <ul>
+                        <li><a href="#exchange">Exchange Cards</a></li>
+                        <li><a href="#trade-items">Your Inventory Items</a></li>
+                    </ul>
+                </nav>
+            </aside>
+            <main class="main">
+                <section id="exchange" class="exchange-prizes">
+                    <h2>Exchange Cards</h2>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.non_field_errors }}
 
-                                        {{ choice.choice_text }} - ${{ choice.price }} ({{ choice.condition }})
-                                    </label>
-                                    <br>
-                                    <img src="{{ choice.image.url }}" alt="{{ choice.choice_text }}" width="100">
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        {{ field }}
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
-    <p><strong>Total Value:</strong> $<span id="totalValue">0.00</span></p>
+                    <div class="card-container">
+                        <div class="card-section">
+                            <h3>Your Inventory Cards</h3>
+                            <div class="card-grid">
+                                {% for field in form %}
+                                    {% if field.name == "usercard" %}
+                                        {% for choice in field.field.queryset %}
+                                            <div class="card">
+                                                <label>
+                                                    <input type="checkbox"
+                                                           name="usercard"
+                                                           value="{{ choice.pk }}"
+                                                           data-price="{{ choice.price }}"
+                                                           data-choice-text="{{ choice.choice_text }}"
+                                                           data-condition="{{ choice.condition }}"
+                                                           data-image-url="{{ choice.image.url }}"
+                                                           onchange="updateValues()">
+                                                    {{ choice.choice_text }} - ${{ choice.price }} ({{ choice.condition }})
+                                                </label>
+                                                <img src="{{ choice.image.url }}" alt="{{ choice.choice_text }}" width="100">
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="card-section">
+                            <h3>Exchange Cards</h3>
+                            <div class="card-grid">
+                                {% for field in form %}
+                                    {% if field.name == "exchangeprizes" %}
+                                        {% for prize in field.field.queryset %}
+                                            <div class="card">
+                                                <label>
+                                                    <input type="checkbox"
+                                                           name="exchangeprizes"
+                                                           value="{{ prize.pk }}"
+                                                           data-price="{{ prize.value }}"
+                                                           data-name="{{ prize.name }}"
+                                                           data-condition="{{ prize.condition }}"
+                                                           data-image-url="{{ prize.image.url }}"
+                                                           onchange="updateValues()">
+                                                    {{ prize.name }} - ${{ prize.value }} ({{ prize.condition }})
+                                                </label>
+                                                <img src="{{ prize.image.url }}" alt="{{ prize.name }}" width="100">
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+<div class="summary">
+    <p><strong>Total Value of User Cards:</strong> $<span id="totalValue">0.00</span></p>
     <div id="selectedCards">
-        <h3>Selected Cards:</h3>
+        <h3>Selected User Cards:</h3>
         <ul id="selectedCardsList"></ul>
     </div>
-    <button type="submit">Submit</button>
-</form>
+</div>
+<hr>
+<div class="summary">
+    <p><strong>Total Value of Exchange Prizes:</strong> $<span id="totalExchangePrizesValue">0.00</span></p>
+    <div id="selectedPrizes">
+        <h3>Selected Exchange Prizes:</h3>
+        <ul id="selectedPrizesList"></ul>
+    </div>
+</div>
+<p>Total Value: <span id="totalValue">0.00</span></p>
+<p>Total Exchange Prizes Value: <span id="totalExchangePrizesValue">0.00</span></p>
+<p>Difference: <span id="difference">0.00 </span></p>
+<p id="tradeMessage"></p>
 
+
+<hr>
+
+                            <button type="submit" class="submit-button">Submit</button>
+                    </form>
+                </section>
+
+                <section id="trade-items" class="trade-items">
+                    <h2>Your Trade Items</h2>
+                    <div class="item-grid">
+                        {% for item in trade_items %}
+                            <div class="item">
+                                <img src="{{ item.image.url }}" alt="{{ item.title }}" width="100">
+                                <div class="item-details">
+                                    <h3>{{ item.title }}</h3>
+                                    <p><strong>Condition:</strong> {{ item.get_condition_display }}</p>
+                                    <p><strong>Category:</strong> {{ item.get_category_display }}</p>
+                                    <p><strong>Value:</strong> ${{ item.value }} {{ item.currency }}</p>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p>No trade items found.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
 <script>
+ document.addEventListener('DOMContentLoaded', function () {
+    // Attach event listeners to all checkboxes
+    document.querySelectorAll('input[name="usercard"], input[name="exchangeprizes"]').forEach((checkbox) => {
+        checkbox.addEventListener('change', () => {
+            updateValues();
+        });
+    });
+
+    // Function to update all values
+    function updateValues() {
+        const totalValue = updateTotalValue();
+        const totalExchangePrizesValue = updateExchangePrizesTotal();
+        updateDifference(totalValue, totalExchangePrizesValue);
+    }
+
     function updateTotalValue() {
-        const checkboxes = document.querySelectorAll('input[name="usercard"]:checked');
+        const userCardCheckboxes = document.querySelectorAll('input[name="usercard"]:checked');
         let total = 0;
 
         const selectedCardsList = document.getElementById('selectedCardsList');
         selectedCardsList.innerHTML = '';
 
-        checkboxes.forEach((checkbox) => {
-            total += parseFloat(checkbox.getAttribute('data-price')) || 0;
+        userCardCheckboxes.forEach((checkbox) => {
+            const price = parseFloat(checkbox.getAttribute('data-price')) || 0;
+            total += price;
 
             const listItem = document.createElement('li');
             const choiceText = checkbox.getAttribute('data-choice-text');
             const condition = checkbox.getAttribute('data-condition');
             const imageUrl = checkbox.getAttribute('data-image-url');
-            const price = parseFloat(checkbox.getAttribute('data-price')).toFixed(2);
 
             listItem.innerHTML = `
-                <strong>${choiceText}</strong> - $${price} (${condition})
+                <strong>${choiceText}</strong> - $${price.toFixed(2)} (${condition})
                 <br>
                 <img src="${imageUrl}" alt="${choiceText}" width="100">
             `;
@@ -79,24 +320,76 @@
         });
 
         document.getElementById('totalValue').innerText = total.toFixed(2);
+        return total;
     }
+
+    function updateExchangePrizesTotal() {
+        const exchangePrizesCheckboxes = document.querySelectorAll('input[name="exchangeprizes"]:checked');
+        let total = 0;
+
+        const selectedPrizesList = document.getElementById('selectedPrizesList');
+        selectedPrizesList.innerHTML = '';
+
+        exchangePrizesCheckboxes.forEach((checkbox) => {
+            const price = parseFloat(checkbox.getAttribute('data-price')) || 0;
+            total += price;
+
+            const listItem = document.createElement('li');
+            const name = checkbox.getAttribute('data-name');
+            const condition = checkbox.getAttribute('data-condition');
+            const imageUrl = checkbox.getAttribute('data-image-url');
+
+            listItem.innerHTML = `
+                <strong>${name}</strong> - $${price.toFixed(2)} (${condition})
+                <br>
+                <img src="${imageUrl}" alt="${name}" width="100">
+            `;
+            selectedPrizesList.appendChild(listItem);
+        });
+
+        document.getElementById('totalExchangePrizesValue').innerText = total.toFixed(2);
+        return total;
+    }
+
+    function updateDifference(totalValue, totalExchangePrizesValue) {
+        const difference = totalValue - totalExchangePrizesValue;
+
+        document.getElementById('difference').innerText = difference.toFixed(2);
+
+        const tradeMessage = document.getElementById('tradeMessage');
+        if (difference < 0) {
+            tradeMessage.innerText = 'The value of your cards is insufficient for the selected prizes.';
+            tradeMessage.style.color = 'red';
+        } else {
+            tradeMessage.innerText = 'Your selection is valid.';
+            tradeMessage.style.color = 'green';
+        }
+    }
+});
+
+</script>
+<script>
+    document.querySelector('#id_trading_user').addEventListener('change', function () {
+    const userId = this.value;
+    const exchangeField = document.querySelector('#id_exchangeprizes');
+
+    if (userId) {
+        fetch(`/get-user-inventory/${userId}/`)
+            .then(response => response.json())
+            .then(data => {
+                exchangeField.innerHTML = '';  // Clear existing options
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.text = `${item.choice_text} - ${item.category} - $${item.price} (${item.condition})`;
+                    exchangeField.appendChild(option);
+                });
+            });
+    }
+});
+
 </script>
 
 
-    <h2>Your Trade Items</h2>
-    <ul>
-        {% for item in trade_items %}
-            <li>
-                <strong>Title:</strong> {{ item.title }}<br>
-                <strong>Condition:</strong> {{ item.get_condition_display }}<br>
-                <strong>Category:</strong> {{ item.get_category_display }}<br>
-                <strong>Value:</strong> ${{ item.value }}<br>
-                <strong>Currency:</strong> {{ item.currency }}<br>
-                <img src="{{ item.image.url }}" alt="{{ item.title }}" width="100">
-            </li>
-        {% empty %}
-            <p>No trade items found.</p>
-        {% endfor %}
-    </ul>
 </body>
 </html>

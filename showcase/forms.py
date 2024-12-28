@@ -4,6 +4,7 @@ from urllib import request
 import self
 from django import forms
 from django.forms import inlineformset_factory
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 
@@ -12,7 +13,7 @@ from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewTy
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
     SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame, Monstrosity, \
-    MonstrositySprite, Ascension
+    MonstrositySprite, Ascension, InventoryTradeOffer
 from .models import UpdateProfile
 from .models import Vote
 from .models import StaffApplication
@@ -487,35 +488,40 @@ BattleGameFormSet = inlineformset_factory(
         'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
     }
 )
+from django import forms
+from .models import Battle, BattleParticipant
 
 
 class BattleJoinForm(forms.ModelForm):
     class Meta:
         model = BattleParticipant
-        fields = []  # No fields needed as we're adding the user directly
+        fields = []
 
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)  # Pass the user instance
-        self.battle = kwargs.pop('battle', None)  # Pass the battle instance
+        self.user = kwargs.pop('user', None)
+        self.battle = kwargs.pop('battle', None)
         super().__init__(*args, **kwargs)
 
     def clean(self):
-        # Check if the battle status is 'O' and if the user is already a participant
         cleaned_data = super().clean()
-        if self.battle.status != 'O':
-            raise ValidationError("You cannot join a battle that is not open.")
 
-        if self.user in self.battle.participants.all():
-            raise ValidationError("You are already a participant in this battle.")
+        # Ensure the user isn't already a participant in the battle
+        if BattleParticipant.objects.filter(user=self.user, battle=self.battle).exists():
+            raise forms.ValidationError("You are already a participant in this battle.")
 
         return cleaned_data
 
     def save(self, commit=True):
-        # Create a new participant and add the user to the battle
-        participant = BattleParticipant(user=self.user)
+        # Create or retrieve the participant instance
+        participant = super().save(commit=False)
+        participant.user = self.user
+        participant.battle = self.battle
+
         if commit:
             participant.save()
+            # Add the participant to the battle's participants ManyToMany field
             self.battle.participants.add(participant)
+
         return participant
 
 
@@ -931,6 +937,14 @@ class TradeProposalForm(forms.ModelForm):
             self.fields['trade_items'].queryset = TradeItem.objects.filter(user=user)
 
 
+class InventoryTradeOfferResponseForm(forms.ModelForm):
+    class Meta:
+        model = InventoryTradeOffer
+        fields = ['status']
+        widgets = {
+            'status': forms.RadioSelect(choices=[('accepted', 'Accept'), ('declined', 'Decline')]),
+        }
+
 class ExchangePrizesForm(forms.ModelForm):
     usercard = forms.ModelMultipleChoiceField(
         queryset=InventoryObject.objects.none(),
@@ -938,10 +952,16 @@ class ExchangePrizesForm(forms.ModelForm):
         required=True,
         label="Select Items to Trade"
     )
+    exchangeprizes = forms.ModelMultipleChoiceField(
+        queryset=ExchangePrize.objects.filter(is_active=1),  # Only active prizes
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Select Prizes"
+    )
 
     class Meta:
         model = CommerceExchange  # Ensure this is the correct model
-        fields = ['usercard', 'prizes']
+        fields = ['usercard', 'exchangeprizes']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)  # Extract the user from kwargs
@@ -949,12 +969,102 @@ class ExchangePrizesForm(forms.ModelForm):
         if user:
             self.fields['usercard'].queryset = InventoryObject.objects.filter(user=user)
 
-        # Customize the label display for the usercard field
+        # Customize the label display for the usercard and exchangeprizes fields
         self.fields['usercard'].label_from_instance = self.get_usercard_label
+        self.fields['exchangeprizes'].label_from_instance = self.get_exchangeprize_label
 
     def get_usercard_label(self, obj):
         """Define how InventoryObject details are displayed in the form."""
         return f"{obj.choice_text} - {obj.category} - ${obj.price} ({obj.condition})"
+
+    def get_exchangeprize_label(self, obj):
+        """Define how ExchangePrize details are displayed in the form."""
+        return f"{obj.name} - ${obj.value} ({obj.condition})"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get('usercard') and not cleaned_data.get('exchangeprizes'):
+            raise forms.ValidationError("You must select at least one item to trade or exchange.")
+        return cleaned_data
+
+    def save(self, commit=True):
+        selected_usercards = self.cleaned_data.get('usercard', [])
+        selected_exchangeprizes = self.cleaned_data.get('exchangeprizes', [])
+
+        # Calculate total value of usercards and exchangeprizes
+        total_usercard_value = sum([card.price for card in selected_usercards])
+        total_exchangeprize_value = sum([prize.value for prize in selected_exchangeprizes])
+
+        # Calculate the difference
+        difference = total_usercard_value - total_exchangeprize_value
+
+        # Get the user's ProfileDetails instance
+        profile = ProfileDetails.objects.get(user=self.instance.user)
+
+        # If the difference is positive, update the currency_amount
+        if difference > 0:
+            profile.currency_amount += difference
+            profile.save()
+
+        # Delete usercards from the inventory
+        for usercard in selected_usercards:
+            usercard.delete()
+
+        # Add the selected prizes to the user's inventory
+        for exchangeprize in selected_exchangeprizes:
+            InventoryObject.objects.create(
+                user=self.instance.user,  # Ensure the user is set
+                choice=exchangeprize.prize,  # Assuming the ExchangePrize has a related prize Choice
+                choice_text=exchangeprize.name,
+                category=exchangeprize.prize.category,  # Assuming prize has a category field
+                currency=exchangeprize.currency,
+                price=exchangeprize.value,
+                condition=exchangeprize.condition,
+                image=exchangeprize.image,
+                image_length=exchangeprize.image_length,
+                image_width=exchangeprize.image_width,
+                is_active=1,  # Set active by default
+            )
+
+        if commit:
+            self.instance.save()  # Save the CommerceExchange instance
+        return self.instance
+
+
+class InventoryTradeForm(forms.ModelForm):
+    trading_user = forms.ModelChoiceField(
+        queryset=User.objects.none(),
+        required=True,
+        label="Select a User to Trade With"
+    )
+    usercard = forms.ModelMultipleChoiceField(
+        queryset=TradeItem.objects.none(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'usercard-checkbox'}),
+        required=True,
+        label="Select Your Items to Trade"
+    )
+    exchangeprizes = forms.ModelMultipleChoiceField(
+        queryset=TradeItem.objects.none(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'exchangeprizes-checkbox'}),
+        required=True,
+        label="Select Their Items to Trade"
+    )
+
+    class Meta:
+        model = CommerceExchange
+        fields = ['trading_user', 'usercard', 'exchangeprizes']
+
+    def __init__(self, *args, **kwargs):
+        current_user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        # Populate trading_user field with users who have active trade items
+        self.fields['trading_user'].queryset = User.objects.filter(
+            tradeitem__is_active=True
+        ).distinct().exclude(id=current_user.id)
+
+        # Populate usercard with current user's active trade items
+        self.fields['usercard'].queryset = TradeItem.objects.filter(user=current_user, is_active=True)
 
 
 class AddMonstrosityForm(forms.ModelForm):

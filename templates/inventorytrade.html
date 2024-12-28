@@ -1,0 +1,453 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeTrove Commerce</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+        .card-container {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .card-section {
+            flex: 1;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding-right: 1rem;
+        }
+        .card-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+        .card-grid::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .card-grid::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        .card-grid::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header {
+            background-color: #1a1a2e;
+            color: #ffffff;
+            padding: 1rem 2rem;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .content {
+            display: flex;
+            flex: 1;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #16213e;
+            color: #ffffff;
+            padding: 2rem 1rem;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li {
+            margin-bottom: 1rem;
+        }
+        .sidebar a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .sidebar a:hover {
+            text-decoration: underline;
+        }
+        .main {
+            flex: 1;
+            padding: 2rem;
+        }
+        .exchange-prizes, .trade-items {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .card {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card label {
+            margin-bottom: 0.5rem;
+        }
+        .summary {
+            background-color: #f0f2f5;
+            border-radius: 4px;
+            padding: 1rem;
+        }
+        .submit-button {
+            background-color: #0070f3;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .submit-button:hover {
+            background-color: #0051a2;
+        }
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        .item {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .item-details {
+            margin-left: 1rem;
+        }
+        .item-details h3 {
+            margin-top: 0;
+        }
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                padding: 1rem;
+            }
+        }
+
+        .highlighted {
+            border: 2px solid #ff9900;
+            background-color: #ffe6b3;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>PokeTrove Commerce</h1>
+        </header>
+        <div class="content">
+            <aside class="sidebar">
+                <nav>
+                    <ul>
+                        <li><a href="#exchange">Exchange Cards</a></li>
+                        <li><a href="#trade-items">Your Inventory Items</a></li>
+                    </ul>
+                </nav>
+            </aside>
+            <main class="main">
+                <section id="exchange" class="exchange-prizes">
+                    <h2>Exchange Cards</h2>
+                    <form method="post" id="trade-form">
+                        {% csrf_token %}
+                        <label for="trading-user">Select a User to Trade With:</label>
+                        {{ form.trading_user }}
+
+                        <!-- Your Items Section -->
+                        <h3>Your Items:</h3>
+                        <div id="user-items">
+                            {% for item in form.usercard %}
+                                <div class="item">
+                                    <input type="checkbox" name="{{ item.name }}" id="{{ item.id_for_label }}" value="{{ item.data.id }}"
+                                           data-value="{{ item.data.value }}" />
+                                    <label for="{{ item.id_for_label }}">{{ item.data.label }} - ${{ item.data.value }}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+        <!-- Other User's Items Section -->
+        <h3>Other User's Items:</h3>
+        <div id="other-user-items">
+            <!-- This will be populated dynamically with JavaScript -->
+        </div>
+
+        <!-- Dynamic Value Calculation -->
+        <h4>Total Value:</h4>
+<p id="user-total">Your Total: $0</p>
+        <p id="other-user-total">Other User's Total: $0</p>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-button">Submit</button>
+    </form>
+                </section>
+            </main>
+        </div>
+
+<!-- Your Trade Items Section -->
+<section id="user-trade-items" class="trade-items">
+    <h2 class="trade-user-name">'s Trade Items</h2>
+    <div class="item-grid">
+        {% for item in my_trade_items %}
+            <div class="item">
+                <img src="{{ item.image.url }}" alt="{{ item.title }}" width="100">
+                <div class="item-details">
+                    <h3>{{ item.title }}</h3>
+                    <p><strong>Condition:</strong> {{ item.condition }}</p>
+                    <p><strong>Value:</strong> ${{ item.value }} {{ item.currency__name }}</p>
+                </div>
+            </div>
+        {% empty %}
+            <p>No trade items found.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Selected User's Trade Items -->
+<section id="trade-items" class="trade-items">
+    <h2>{{ user.username }}'s Trade Items</h2>
+    <div class="item-grid">
+        {% for item in trade_items %}
+            <div class="item" data-item-id="{{ item.id }}">
+                <img src="{{ item.image.url }}" alt="{{ item.title }}" width="100">
+                <div class="item-details">
+                    <h3>{{ item.title }}</h3>
+                    <p><strong>Condition:</strong> {{ item.get_condition_display }}</p>
+                    <p><strong>Category:</strong> {{ item.get_category_display }}</p>
+                    <p><strong>Value:</strong> ${{ item.value }} {{ item.currency }}</p>
+                </div>
+            </div>
+        {% empty %}
+            <p>No trade items found.</p>
+        {% endfor %}
+    </div>
+</section>
+
+            </main>
+        </div>
+    </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tradingUserSelect = document.querySelector('select[name="trading_user"]');
+    const tradeItemsContainer = document.querySelector('.trade-items .item-grid');
+    const tradeUserName = document.querySelector('.trade-user-name');
+
+    tradingUserSelect.addEventListener('change', function () {
+        const userId = this.value;
+
+        // Clear the container
+        tradeItemsContainer.innerHTML = '';
+        tradeUserName.innerText = '';
+
+        if (!userId) {
+            tradeItemsContainer.innerHTML = '<p>Please select a user to view their trade items.</p>';
+            return;
+        }
+
+        // Perform the AJAX request
+        fetch(`/api/trade-items/${userId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data.trade_user) {
+                    tradeUserName.innerText = 'Unknown User\'s Trade Items';
+                } else {
+                    tradeUserName.innerText = `${data.trade_user}'s Trade Items`;
+                }
+
+                if (!data.trade_items || data.trade_items.length === 0) {
+                    tradeItemsContainer.innerHTML = '<p>No trade items found.</p>';
+                    return;
+                }
+
+                data.trade_items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'item';
+                    itemDiv.innerHTML = `
+                        <img src="${item.image}" alt="${item.title}" width="100">
+                        <div class="item-details">
+                            <h3>${item.title}</h3>
+                            <p><strong>Condition:</strong> ${item.condition}</p>
+                            <p><strong>Value:</strong> $${item.value} ${item.currency__name}</p>
+                        </div>
+                    `;
+                    tradeItemsContainer.appendChild(itemDiv);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching trade items:', error);
+                tradeItemsContainer.innerHTML = '<p>Error fetching trade items.</p>';
+            });
+    });
+});
+
+
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tradingUserSelect = document.querySelector('select[name="trading_user"]');
+    const userTotalDisplay = document.getElementById('user-total');
+    const otherUserTotalDisplay = document.getElementById('other-user-total');
+
+    let userTotal = 0;
+    let otherUserTotal = 0;
+
+    // Function to update total values dynamically
+    function updateTotals() {
+        userTotal = [...document.querySelectorAll('#user-items input[type="checkbox"]:checked')]
+            .reduce((sum, checkbox) => sum + parseFloat(checkbox.dataset.value || 0), 0);
+
+        otherUserTotal = [...document.querySelectorAll('#other-user-items input[type="checkbox"]:checked')]
+            .reduce((sum, checkbox) => sum + parseFloat(checkbox.dataset.value || 0), 0);
+
+        userTotalDisplay.textContent = `Your Total: $${userTotal.toFixed(2)}`;
+        otherUserTotalDisplay.textContent = `Other User's Total: $${otherUserTotal.toFixed(2)}`;
+    }
+
+    // Fetch other user's trade items when a new user is selected
+    tradingUserSelect.addEventListener('change', function () {
+        const userId = this.value;
+        const otherUserItemsContainer = document.getElementById('other-user-items');
+        const myTradeItemsContainer = document.querySelector('#user-trade-items .item-grid');
+
+        otherUserItemsContainer.innerHTML = '';
+
+        if (!userId) return;
+
+        fetch(`/api/trade-items/${userId}/`)
+            .then(response => response.json())
+            .then(data => {
+                data.trade_items.forEach(item => {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'exchangeprizes';
+                    checkbox.value = item.id;
+                    checkbox.dataset.value = item.value;
+                    checkbox.id = `exchangeprizes-${item.id}`;
+
+                    const label = document.createElement('label');
+                    label.htmlFor = `exchangeprizes-${item.id}`;
+                    label.textContent = `${item.title} - $${item.value}`;
+
+                    const container = document.createElement('div');
+                    container.className = 'item';
+                    container.appendChild(checkbox);
+                    container.appendChild(label);
+
+                    otherUserItemsContainer.appendChild(container);
+
+                    // Add event listener for dynamic update
+                    checkbox.addEventListener('change', updateTotals);
+
+                    // Add event listener to highlight the associated trade item in `user-trade-items`
+                    checkbox.addEventListener('change', function () {
+                        const associatedItem = document.querySelector(`#user-trade-items .item[data-item-id="${item.id}"]`);
+                        if (this.checked) {
+                            associatedItem.classList.add('highlighted');
+                        } else {
+                            associatedItem.classList.remove('highlighted');
+                        }
+                    });
+                });
+
+                // Highlight items in `my_trade_items` dynamically
+                myTradeItemsContainer.querySelectorAll('.item').forEach(itemElement => {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.dataset.itemId = itemElement.getAttribute('data-item-id');
+
+                    // Add event listener for checkbox to dynamically toggle the `highlighted` class
+                    checkbox.addEventListener('change', function () {
+                        if (this.checked) {
+                            itemElement.classList.add('highlighted');
+                        } else {
+                            itemElement.classList.remove('highlighted');
+                        }
+                    });
+
+                    // Append the checkbox to the trade items
+                    itemElement.appendChild(checkbox);
+                });
+            });
+    });
+
+    // Add event listeners for your items
+    document.querySelectorAll('#user-items input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', updateTotals);
+
+        // Add event listener to highlight the associated trade item when checkbox is selected
+        checkbox.addEventListener('change', function () {
+            const itemId = this.value;  // Assuming item.value corresponds to item ID
+            const associatedItem = document.querySelector(`#trade-items .item[data-item-id="${itemId}"]`);
+            if (this.checked) {
+                associatedItem.classList.add('highlighted');
+            } else {
+                associatedItem.classList.remove('highlighted');
+            }
+        });
+    });
+});
+
+
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const userTotalDisplay = document.getElementById('user-total');
+
+    // Function to calculate and update totals
+    function updateUserTotal() {
+        const selectedUsercards = document.querySelectorAll('#user-items input[type="checkbox"]:checked');
+        const totalValue = Array.from(selectedUsercards).reduce((sum, checkbox) => {
+            return sum + parseFloat(checkbox.dataset.value || 0);
+        }, 0);
+
+        userTotalDisplay.textContent = `Your Total: $${totalValue.toFixed(2)}`;
+    }
+
+    // Add event listeners to all usercard checkboxes
+    const usercardCheckboxes = document.querySelectorAll('#user-items input[type="checkbox"]');
+    usercardCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateUserTotal);
+    });
+});
+
+</script>
+
+
+</body>
+</html>

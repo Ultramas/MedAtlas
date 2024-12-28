@@ -2,6 +2,7 @@ from urllib import request
 from venv import logger
 
 from celery import shared_task
+from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError
 
 import django
@@ -20,7 +21,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference, Battle, \
-    BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame
+    BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -111,8 +112,10 @@ from .models import (Item, OrderItem, Order, Address, Payment, Coupon, Refund,
 from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, SellerApplicationForm, \
     MemeForm, CurrencyCheckoutForm, CurrencyPaymentForm, CurrencyPaypalPaymentForm, HitStandForm, WagerForm, \
     DirectedTradeOfferForm, FriendRequestForm, RespondingTradeOfferForm, ShippingForm, EndowmentForm, UploadCardsForm, \
-    RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, InventoryGameForm, PlayerInventoryGameForm, CardUploading, MoveToTradeForm, \
-    SpinPreferenceForm, BattleCreationForm, BattleJoinForm, AddMonstrosityForm, AscensionCreateForm
+    RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, InventoryGameForm, PlayerInventoryGameForm, \
+    CardUploading, MoveToTradeForm, \
+    SpinPreferenceForm, BattleCreationForm, BattleJoinForm, AddMonstrosityForm, AscensionCreateForm, InventoryTradeForm, \
+    InventoryTradeOfferResponseForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -2544,7 +2547,7 @@ def create_card_instance(request):
 
 class OpenBattleListView(ListView):
     model = Battle
-    template_name = "battle.html"  # Your template for listing open battles
+    template_name = "battle.html"
     context_object_name = "open_battles"  # The context variable name to use in the template
 
     def get_queryset(self):
@@ -2556,48 +2559,18 @@ class OpenBattleListView(ListView):
             battle = Battle.objects.get(id=battle_id)
         except Battle.DoesNotExist:
             messages.error(request, "Battle not found.")
-            return redirect('home')
+            return redirect('showcase:battle')
+
+        # Check if the battle is full
+        if battle.participants.count() >= int(battle.slots.split('v')[-1]):
+            messages.error(request, 'This battle is full. You cannot join.')
+            battle.status = '0'
+            return redirect('showcase:battle_detail', battle_id=battle.id)
 
         # Check if the battle is open for participants
         if battle.status != 'O':
             messages.error(request, 'This battle is not currently open for participants.')
-            return redirect('home')
-
-        # Check if the user is already a participant
-        if request.user in battle.participants.all():
-            messages.error(request, 'You are already a participant in this battle.')
-            return redirect('battle_detail', battle_id=battle.id)
-
-        form = BattleJoinForm(request.POST, user=request.user, battle=battle)
-        if form.is_valid():
-            form.save()  # Add the user as a participant
-            messages.success(request, 'You have successfully joined the battle!')
             return redirect('showcase:battle_detail', battle_id=battle.id)  # Redirect to battle detail page
-        else:
-            messages.error(request, 'There was an error joining the battle. Please try again.')
-
-        return self.get(request, *args, **kwargs)
-
-
-class SingleBattleListView(DetailView):
-    model = Battle
-    template_name = "battle_detail.html"  # Make sure this template exists
-    context_object_name = "battle"
-
-    def get_object(self):
-        battle_id = self.kwargs.get('battle_id')
-        try:
-            return Battle.objects.get(id=battle_id)
-        except Battle.DoesNotExist:
-            raise Http404("Battle not found.")
-
-    def post(self, request, *args, **kwargs):
-        battle = self.get_object()  # Get the current battle instance
-
-        # Check if the battle is open for participants
-        if battle.status != 'O':
-            messages.error(request, 'This battle is not currently open for participants.')
-            return redirect('showcase:battles')
 
         # Check if the user is already a participant
         if request.user in battle.participants.all():
@@ -2611,9 +2584,65 @@ class SingleBattleListView(DetailView):
             return redirect('showcase:battle_detail', battle_id=battle.id)  # Redirect to battle detail page
         else:
             messages.error(request, 'There was an error joining the battle. Please try again.')
+            return redirect('showcase:battle_detail', battle_id=battle.id)
 
         return self.get(request, *args, **kwargs)
 
+class SingleBattleListView(DetailView):
+    model = Battle
+    template_name = "battle_detail.html"
+    context_object_name = "battle"
+
+    def get_object(self):
+        battle_id = self.kwargs.get('battle_id')
+        return get_object_or_404(Battle, id=battle_id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        battle = self.get_object()
+
+        # Get all games related to the battle through BattleGame
+        context['related_games'] = Game.objects.filter(game_battles__battle=battle).distinct()
+
+        context['is_participant'] = self.request.user in battle.participants.all()
+        context['is_full'] = battle.is_full()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        battle = self.get_object()
+
+        # Check if the battle is open
+        if battle.status != 'O':
+            messages.error(request, 'This battle is not currently open for participants.')
+            return redirect('showcase:battle_detail', battle_id=battle.id)
+
+        # Check if the user is already a participant
+        if request.user in battle.participants.all():
+            messages.error(request, 'You are already a participant in this battle.')
+            return redirect('showcase:battle_detail', battle_id=battle.id)
+
+        # Check if the battle is full
+        if battle.is_full():
+            battle.status = 'R'  # Update the status to Running
+            battle.save()
+            messages.error(request, 'This battle is now full and has started.')
+            return redirect('showcase:battle_detail', battle_id=battle.id)
+
+        # Handle the form submission for joining the battle
+        form = BattleJoinForm(request.POST, user=request.user, battle=battle)
+        if form.is_valid():
+            form.save()
+            # Update the status if the battle is now full
+            if battle.is_full():
+                battle.status = 'R'  # Update status to Running
+                battle.save()
+                messages.success(request, 'You have successfully joined the battle, and it is now running!')
+            else:
+                messages.success(request, 'You have successfully joined the battle!')
+            return redirect('showcase:battle_detail', battle_id=battle.id)
+
+        messages.error(request, 'There was an error joining the battle. Please try again.')
+        return self.get(request, *args, **kwargs)
 
 class BattleCreationView(CreateView):
     model = Battle
@@ -2649,40 +2678,69 @@ class BattleCreationView(CreateView):
         return context
 
 
+def battle_detail(request, battle_id):
+    battle = get_object_or_404(Battle, id=battle_id)
+
+    # Check if the user is a participant
+    is_participant = battle.participants.filter(user=request.user).exists()
+
+    return render(
+        request,
+        'battle_detail.html',
+        {
+            'battle': battle,
+            'is_participant': is_participant,
+        },
+    )
+
+
 def join_battle(request):
-    # Fetch the battle based on the battle_id from the POST request
     battle_id = request.POST.get('battle_id')
     battle = Battle.objects.get(id=battle_id)
 
     if battle.status != 'O':
         messages.error(request, 'This battle is not currently open for participants.')
-        return redirect('home')  # Redirect to another page if battle is closed
+        return redirect('home')
 
     # Check if the user is already a participant
-    if request.user in battle.participants.all():
+    if BattleParticipant.objects.filter(user=request.user, battle=battle).exists():
         messages.error(request, 'You are already a participant in this battle.')
+        return redirect('battle_detail', battle_id=battle.id)
+
+    # Check if the battle is full
+    if battle.participants.count() >= int(battle.slots.split('v')[-1]):
+        messages.error(request, 'This battle is full. You cannot join.')
         return redirect('battle_detail', battle_id=battle.id)
 
     if request.method == 'POST':
         form = BattleJoinForm(request.POST, user=request.user, battle=battle)
-
         if form.is_valid():
-            form.save()  # Add the user as a participant
+            form.save()  # Save and associate participant with battle
             messages.success(request, 'You have successfully joined the battle!')
-            return redirect('battle_detail', battle_id=battle.id)  # Redirect to battle detail page
+            return redirect('battle_detail', battle_id=battle.id)
         else:
             messages.error(request, 'There was an error joining the battle. Please try again.')
     else:
-        # Create a new form instance with the user and battle
         form = BattleJoinForm(user=request.user, battle=battle)
 
     return render(request, 'showcase/join_battle.html', {'form': form, 'battle': battle})
 
 
+
 def battle_detail_view(request, battle_id):
     battle = get_object_or_404(Battle, id=battle_id)
-    return render(request, 'battle_detail.html', {'battle': battle})
 
+    # Convert the slots to an integer for rendering
+    slot_number = int(slugify(battle.slots).split('v')[-1]) if 'v' in battle.slots else int(battle.slots)
+
+    return render(
+        request,
+        'battle_detail.html',
+        {
+            'battle': battle,
+            'slots': slot_number
+        }
+    )
 
 def update_profile_level(profile):
     if profile.rubies_spent is not None:
@@ -9295,6 +9353,7 @@ class CommerceExchangeView(CreateView):
     model = CommerceExchange
     template_name = "commerce.html"
     form_class = ExchangePrizesForm
+    success_url = reverse_lazy('showcase:commerce')
 
     def form_valid(self, form):
         # Associate the currently logged-in user with the form instance
@@ -9323,9 +9382,182 @@ class CommerceExchangeView(CreateView):
             is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(
             is_active=1).order_by('position')
+        context['Prizes'] = ExchangePrize.objects.filter(
+            is_active=1).order_by('value')
 
         return context
 
+
+class InventoryTradeView(CreateView):
+    model = CommerceExchange
+    template_name = "inventorytrade.html"
+    form_class = InventoryTradeForm
+    success_url = reverse_lazy('showcase:inventorytrade')
+
+    def form_valid(self, form):
+        # Associate the currently logged-in user with the form instance
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+    def get_form(self):
+        # Pass the current user to the form
+        return self.form_class(user=self.request.user, **self.get_form_kwargs())
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        # Query TradeItem objects for the current user and others
+        trade_items = TradeItem.objects.filter(user=user, is_active=1)
+        other_trade_items = TradeItem.objects.exclude(user=user).filter(is_active=1)
+
+        # Add context variables for the template
+        context.update({
+            'form': self.get_form(),
+            'trade_items': trade_items,
+            'other_trade_items': other_trade_items,
+            'Background': BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+            'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+            'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
+            'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
+            'Prizes': ExchangePrize.objects.filter(is_active=1).order_by('value'),
+        })
+
+        return context
+
+
+def trade_offers_view(request):
+    user = request.user
+
+    # Get all offers where the user is either the initiator or the receiver
+    pending_initiator = InventoryTradeOffer.objects.filter(initiator=user, status='pending')
+    pending_receiver = InventoryTradeOffer.objects.filter(receiver=user, status='pending')
+    accepted_initiator = InventoryTradeOffer.objects.filter(initiator=user, status='accepted')
+    accepted_receiver = InventoryTradeOffer.objects.filter(receiver=user, status='accepted')
+    declined_initiator = InventoryTradeOffer.objects.filter(initiator=user, status='declined')
+    declined_receiver = InventoryTradeOffer.objects.filter(receiver=user, status='declined')
+
+    context = {
+        'pending_initiator': pending_initiator,
+        'pending_receiver': pending_receiver,
+        'accepted_initiator': accepted_initiator,
+        'accepted_receiver': accepted_receiver,
+        'declined_initiator': declined_initiator,
+        'declined_receiver': declined_receiver,
+    }
+
+    return render(request, 'receivinginventorytrade.html', context)
+
+
+@login_required
+def get_trade_items(request, user_id):
+    if request.method == "GET":
+        # Get the currently logged-in user
+        current_user = request.user
+        trade_user = User.objects.filter(id=user_id).first()
+
+        # Get trade items for the selected user
+        trade_items = TradeItem.objects.filter(user_id=user_id, is_active=True).values(
+            'id', 'title', 'condition', 'value', 'currency__name', 'image'
+        )
+
+        # Get trade items for the current user
+        my_trade_items = TradeItem.objects.filter(user_id=current_user.id, is_active=True).values(
+            'id', 'title', 'condition', 'value', 'currency__name', 'image'
+        )
+
+        # Prepare JSON response
+        response = {
+            'trade_user': trade_user.username if trade_user else "Unknown",
+            'trade_items': list(trade_items),
+            'my_trade_items': list(my_trade_items),  # Include current user's items
+        }
+        return JsonResponse(response)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+def fetch_trade_items(request, user_id):
+    if request.method == "GET":
+        # Fetch trade items for the selected user
+        trade_items = TradeItem.objects.filter(user_id=user_id, is_active=True).values(
+            'id', 'title', 'condition', 'value', 'currency__name'
+        )
+        return JsonResponse({'trade_items': list(trade_items)})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+def create_trade_offer(request):
+    if request.method == 'POST':
+        form = InventoryTradeForm(request.POST, user=request.user)
+        if form.is_valid():
+            # Save the trade offer
+            trade_offer = TradeOffer.objects.create(
+                initiator=request.user,
+                receiver=form.cleaned_data['trading_user'],
+            )
+            trade_offer.offered_items.set(form.cleaned_data['usercard'])
+            trade_offer.requested_items.set(form.cleaned_data['exchangeprizes'])
+            trade_offer.save()
+
+            # Redirect with a success message
+            messages.success(request, "Trade offer sent successfully!")
+            return redirect('trade_offer_sent')  # Define the URL for this page
+    else:
+        form = InventoryTradeForm(user=request.user)
+
+    return render(request, 'trade_form.html', {'form': form})
+
+
+def respond_to_trade_offer(request, trade_offer_id):
+    trade_offer = get_object_or_404(TradeOffer, id=trade_offer_id, receiver=request.user)
+    if request.method == 'POST':
+        form = InventoryTradeOfferResponseForm(request.POST, instance=trade_offer)
+        if form.is_valid():
+            form.save()
+
+            # Notify the initiator via email, notification, etc.
+            if trade_offer.status == 'accepted':
+                messages.success(request, "You accepted the trade offer!")
+            else:
+                messages.info(request, "You declined the trade offer.")
+            return redirect('trade_dashboard')  # Redirect to the user's dashboard or another page
+    else:
+        form = InventoryTradeOfferResponseForm(instance=trade_offer)
+
+    return render(request, 'trade_response_form.html', {'form': form, 'trade_offer': trade_offer})
+
+
+def create_notification(user, message, related_object=None):
+    content_type = None
+    object_id = None
+
+    if related_object:
+        content_type = ContentType.objects.get_for_model(related_object)
+        object_id = related_object.id
+
+    Notification.objects.create(
+        user=user,
+        message=message,
+        content_type=content_type,
+        object_id=object_id
+    )
+
+
+def notify(request, pk):
+    notification = get_object_or_404(InventoryTradeOffer, pk=pk)
+
+    # Notify the user
+    create_notification(
+        user=InventoryTradeOffer.receiver,
+        message=f"An update has been made to {InventoryTradeOffer.name}",
+        related_object=notification
+    )
+
+
+def dashboard_view(request):
+    notifications = request.user.notifications.filter(is_read=False)
+    return render(request, 'dashboard.html', {'notifications': notifications})
 
 
 class ExchangePrizesView(FormMixin, ListView):
@@ -9385,6 +9617,7 @@ class ExchangePrizesView(FormMixin, ListView):
         else:
             messages.error(request, "Form submission invalid")
             return self.render_to_response(self.get_context_data(form=form))
+
 
 class IssueBackgroundView(FormMixin, ListView):
     model = IssueBackgroundImage

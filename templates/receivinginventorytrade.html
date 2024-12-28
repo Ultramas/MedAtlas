@@ -1,0 +1,43 @@
+<h2>Your Trade Offers</h2>
+
+<h3>Pending (You are the Initiator)</h3>
+<ul>
+    {% for offer in pending_initiator %}
+    <li>{{ offer.receiver.username }} - {{ offer.offered_items.all|join:", " }} - Status: {{ offer.status }}</li>
+    {% endfor %}
+</ul>
+
+<h3>Pending (You are the Receiver)</h3>
+<ul>
+    {% for offer in pending_receiver %}
+    <li>{{ offer.initiator.username }} - {{ offer.requested_items.all|join:", " }} - Status: {{ offer.status }}</li>
+    {% endfor %}
+</ul>
+
+<h3>Accepted (You are the Initiator)</h3>
+<ul>
+    {% for offer in accepted_initiator %}
+    <li>{{ offer.receiver.username }} - {{ offer.offered_items.all|join:", " }} - Status: {{ offer.status }}</li>
+    {% endfor %}
+</ul>
+
+<h3>Accepted (You are the Receiver)</h3>
+<ul>
+    {% for offer in accepted_receiver %}
+    <li>{{ offer.initiator.username }} - {{ offer.requested_items.all|join:", " }} - Status: {{ offer.status }}</li>
+    {% endfor %}
+</ul>
+
+<h3>Declined (You are the Initiator)</h3>
+<ul>
+    {% for offer in declined_initiator %}
+    <li>{{ offer.receiver.username }} - {{ offer.offered_items.all|join:", " }} - Status: {{ offer.status }}</li>
+    {% endfor %}
+</ul>
+
+<h3>Declined (You are the Receiver)</h3>
+<ul>
+    {% for offer in declined_receiver %}
+    <li>{{ offer.initiator.username }} - {{ offer.requested_items.all|join:", " }} - Status: {{ offer.status }}</li>
+    {% endfor %}
+</ul>

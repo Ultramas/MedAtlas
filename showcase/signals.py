@@ -1,11 +1,11 @@
 # users/signals.py
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import m2m_changed, post_save, post_delete
 from django.dispatch import receiver
 
 from .models import Outcome, Achievements, ProfileDetails
-from .models import User, Profile, AdministrationChangeLog
+from .models import User, Profile, AdministrationChangeLog, Battle
 from .views import get_changes
 
 
@@ -97,8 +97,23 @@ def update_achievement_counters(sender, instance, **kwargs):
         achievement.redgold_counter += instance.redgold_counter
         achievement.save()  # Save each achievement after updating
 
+def update_currencies_for_profile(instance):
+    """
+    Update the 'other_currencies_amount' for the given profile instance.
+    """
+    # Example logic to populate other currencies
+    currencies = Currency.objects.exclude(pk=instance.currency.pk)  # Exclude the primary currency
+    for currency in currencies:
+        ProfileCurrency.objects.get_or_create(profile=instance, currency=currency)
 
-@receiver(post_save, sender=ProfileDetails)
-def populate_other_currencies(sender, instance, created, **kwargs):
-    if created:
-        update_currencies_for_profile(instance)
+def populate_other_currencies(sender, instance, **kwargs):
+    update_currencies_for_profile(instance)
+
+@receiver(m2m_changed, sender=Battle.participants.through)
+def update_participant_battle(sender, instance, action, **kwargs):
+    if action == "post_add":
+        for participant in instance.participants.all():
+            if participant.battle != instance:
+                participant.battle = instance
+                print('participant saved')  # Should now appear
+                participant.save()

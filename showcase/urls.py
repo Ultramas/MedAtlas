@@ -20,7 +20,7 @@ from django.views.generic.base import TemplateView
 from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, BlogSearchResultsView, \
     currency_remove_from_cart, currency_add_to_cart, currency_reduce_quantity_item, submit_seller_application, \
     PlaceWagerView, update_wager, SendFriendRequestView, FriendSearchResultsView, GameCategorySearchResultsView, \
-    GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView, changelog_view
+    GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView, changelog_view, InventoryTradeView
 
 # remove this:
 # from . import settings
@@ -299,6 +299,9 @@ urlpatterns = [
     path('friendssearchresultview/', views.friendlysearchresultview, name='friendssearchresultview'),
     path('blogsearch/', BlogSearchResultsView.as_view(), name='blogsearch_results'),
     path('commerce/', CommerceExchangeView.as_view(), name='commerce'),
+    path('inventorytrade/', InventoryTradeView.as_view(), name='inventorytrade'),
+    path('receivinginventorytrade/', views.trade_offers_view, name='receivinginventorytrade'),
+    path('api/trade-items/<int:user_id>/', views.get_trade_items, name='get_trade_items'),
     path('pagesearch/', views.PageSearchResultsView.as_view(), name='pagesearch'),
     path('i2/', TemplateView.as_view(template_name='i2.html'), name='i2'),
 
@@ -352,7 +355,7 @@ urlpatterns = [
     path('gamehub/<slug:slug>/', views.GameHubView.as_view(), name='gamehub'), #game hub with a single game hub
     path('gameroom/<slug:slug>/', views.GameRoomView.as_view(), name='gameroom'), #game room with a single game genre (possibly multiple games)
     path('game/<slug:slug>/', views.GameChestBackgroundView.as_view(), name='game'), #game with a single game
-    path('game/', views.GameChestBackgroundView.as_view(), name='game'),
+    path('gamespin/', views.GameChestBackgroundView.as_view(), name='gamespin'),
     path('sell/',  views.GameChestBackgroundView.as_view(), name='sell_game_inventory_object'),
     path('dailyroom/', views.DailyRoomView.as_view(), name='dailyroom'), #game with a single game
     path('dailygame/<slug:slug>/', views.DailyChestView.as_view(), name='dailygame'), #game with a single game

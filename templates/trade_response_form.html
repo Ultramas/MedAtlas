@@ -1,0 +1,21 @@
+<h2>Trade Offer</h2>
+<p>Initiated by: {{ trade_offer.initiator.username }}</p>
+<p>Your Items Requested:</p>
+<ul>
+    {% for item in trade_offer.requested_items.all %}
+    <li>{{ item.name }} - ${{ item.value }}</li>
+    {% endfor %}
+</ul>
+
+<p>Their Items Offered:</p>
+<ul>
+    {% for item in trade_offer.offered_items.all %}
+    <li>{{ item.name }} - ${{ item.value }}</li>
+    {% endfor %}
+</ul>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit Response</button>
+</form>
