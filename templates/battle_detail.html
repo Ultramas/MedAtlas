@@ -1,69 +1,542 @@
-<style>
-  .slots-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 10px;
-}
 
-.slot {
-  border: 2px solid #ccc;
-  padding: 10px;
-  text-align: center;
-  font-size: 14px;
-  border-radius: 5px;
-}
+{% load static %}
+{% load random_nonce %}
 
-.slot.occupied {
-  background-color: #f2dede;
-  border-color: #ebccd1;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/gametemplate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/spinboost.css' %}">
+     <script defer src="{% static 'css/js/gametemplatescript.js' %}"></script>
+     <script defer src="{% static 'css/js/spinboostscript.js' %}"></script>
 
-.slot.available {
-  background-color: #dff0d8;
-  border-color: #d6e9c6;
-}
+     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+     <script src="{% static 'css/js/main.js' %}"></script>
+     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+     <script src="{% static 'css/js/waypoints.js' %}"></script>
+	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+     <script src="{% static 'css/js/sticker.js' %}"></script>
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-</style>
-<h1>{{ battle.battle_name }}</h1>
-<p>Status: {{ battle.get_status_display }}</p>
-<p>Creator: {{ battle.creator }}</p>
-<p>Participants: {{ battle.participants.count }} / {{ battle.get_slots_display }}</p>
-<p>Price: {{ battle.price }}</p>
-<p>Time: {{ battle.time }}</p>
 
-<div class="slots-container">
-  {% for participant in battle.participants.all %}
-    <div class="slot occupied">
-      <p>{{ participant.user.username }}</p>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ battle.battle_name }}</title>
+    <style>
+        /* Base styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #111827;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 64rem;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Battle Header */
+        .battle-header {
+            background-color: #1f2937;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .battle-header h1 {
+            font-size: 2.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .battle-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .battle-info-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .battle-info-item svg {
+            margin-right: 0.5rem;
+        }
+
+        /* Participant Slots */
+        .participant-slots {
+            margin-bottom: 2rem;
+        }
+
+        .participant-slots h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+
+        .slot {
+            background-color: #374151;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .slot.occupied {
+            background-color: #2563eb;
+        }
+
+        .slot svg {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Join Battle Form */
+        .join-battle-form {
+            margin-bottom: 2rem;
+        }
+
+        .join-battle-form button {
+            background-color: #059669;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .join-battle-form button:hover {
+            background-color: #047857;
+        }
+
+        /* Game List */
+        .game-list h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .game-card {
+            background-color: #1f2937;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .game-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .game-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 0.375rem;
+            margin-right: 1rem;
+            object-fit: cover;
+        }
+
+        .game-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .game-category {
+            color: #9ca3af;
+        }
+
+        .game-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="battle-header">
+            <h1>{{ battle.battle_name }}</h1>
+            <div class="battle-info">
+                <div class="battle-info-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <span>Status: {{ battle.get_status_display }}</span>
+                </div>
+                <div class="battle-info-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-400"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Creator: {{ battle.creator }}</span>
+                </div>
+                <div class="battle-info-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Time: {{ battle.time }}</span>
+                </div>
+                <div class="battle-info-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    <span>Price: {{ battle.price }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="participant-slots">
+            <h2>Participants ({{ battle.participants.count }} / {{ battle.get_slots_display }})</h2>
+            <div class="slots-grid">
+                {% for participant in battle.participants.all %}
+                    <div class="slot occupied">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span>{{ participant.user.username }}</span>
+                    </div>
+                {% endfor %}
+                {% for i in range|slice:":{{ battle.slots|add:'-1'|int }}" %}
+                    <div class="slot">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span>Available</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="join-battle-form">
+            {% if is_full %}
+                <p class="text-red-400">This battle is full.</p>
+            {% else %}
+                {% if not is_participant %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="battle_id" value="{{ battle.id }}">
+                        <button type="submit">Join Battle</button>
+                    </form>
+                {% else %}
+                    <p class="text-green-400">You have already joined this battle.</p>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <div class="game-list">
+            <h2>Games in this Battle</h2>
+            <div class="games-grid">
+                {% for game in battle.chests.all %}
+                    <div class="game-card">
+                        <div class="game-header">
+                            {% if game.image %}
+                                <img src="{{ game.image.url }}" alt="{{ game.name }}" class="game-image">
+                            {% else %}
+                                <div class="game-image" style="background-color: #374151; display: flex; align-items: center; justify-content: center;">
+                                    <span style="color: #6b7280;">No image</span>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <h3 class="game-title">{{ game.name }}</h3>
+                                <p class="game-category">{{ game.category }}</p>
+                            </div>
+                        </div>
+                        <div class="game-details">
+                            <p>Type: {{ game.type }}</p>
+                            <p>Power Meter: {{ game.power_meter }}</p>
+                            <p>Cost: ${{ game.cost }}</p>
+                            {% if game.discount_cost %}
+                                <p>Discount: ${{ game.discount_cost }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+
+  <div class="wrapper">
+        <div class="containerre" style="margin-top: 3%;">
+            <div class="slider" id="slider">
+<!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
+            {% for item in choices_with_nonce %}
+                {% with choice=item.choice %}
+                    <div id="{{ choice.choice_text }}" class="cards">
+                        {% with color=game|get_color:choice %}
+                            <div class="lootelement"
+                                 data-price="{{ choice.value }}"
+                                 data-currency-file="{{ item.currency.file_url }}"
+                                 data-currency-symbol="{{ item.currency.symbol }}"
+                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
+                                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% endwith %}
+                        <h5 style="margin-left: 22px;">{{ choice.value }} 💎</h5>
+                        <p>Noncevalue: {{ item.nonce }}</p>
+                        <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
+                        <p>Random Amount: {{ random_amount }}</p>
+                    </div>
+                {% endwith %}
+            {% endfor %}
+
+
+
+                {% for nonce, choice in matching_choices %}
+                    <p>Value: {{ choice.value }}</p>
+                    <p>Nonces: {{ nonce }}</p>
+                    <p>Choice: {{ choice.choice_text }}</p>
+
+            {% with cost_threshold=game.cost %}
+                {% with cost_threshold=cost_threshold|add:"0" %}
+                    {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost|mul:1 cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 %}
+                        {% if cost_threshold_10000 >= choice.value %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); padding: -10%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_500 >= choice.value > cost_threshold_10000 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_200 >= choice.value > cost_threshold_500 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_100 >= choice.value > cost_threshold_200 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
+
+                            <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
+                            <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); padding: 6%;">
+                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                            </div>
+                        {% else %}
+                            <p>This choice does not meet the cost requirement.</p>
+                        {% endif %}
+                    {% endwith %}
+                {% endwith %}
+            {% endwith %}
+                {% endfor %}
+
+
+            </div>
+
+            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
+        </div>
     </div>
-  {% endfor %}
-
-  {% for i in range|slice:":{{ battle.slots|add:'-1'|int }}" %}
-    <div class="slot available">
-      <p>Available</p>
+            </div>
+        </div>
     </div>
-  {% endfor %}
-</div>
+    <script>
+    const choicesWithNonce = {{ choices_with_nonce|safe }};
+</script>
 
-<!-- Display the form to join the battle -->
+
+    <script>
+
+function createOutcome(gameId, slug) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+fetch(`/create_outcome/${slug}/`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken,  // Ensure csrf token is being sent
+    },
+    body: JSON.stringify({
+        game_id: gameId,  // Pass the game_id as needed
+        other_data: otherData,  // Add any additional data as needed
+    })
+})
+}
+.then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const choiceFile = data.choice_file;
+
+            if (choiceFile) {
+                const slider = document.querySelector('.slider'); // Adjust selector as needed
+                const newCard = document.createElement('div');
+                newCard.className = 'cards';
+                newCard.innerHTML = `
+                    <div class="lootelement"
+                         data-price="100"
+                         data-nonce="${data.nonce}"
+                         style="background: url('${choiceFile}'); padding: 6%; margin-left: 22px;">
+                        <p><img src="${choiceFile}" alt="Generated Card"></p>
+                    </div>
+                    <h2 style="margin-left: 22px;">100 💎</h2>
+                    <p>Nonce: ${data.nonce}</p>
+                `;
+                slider.appendChild(newCard);
+            }
+        } else {
+            console.error('Error:', data.message);
+        }
+    })
+    .catch(error => console.error('Fetch error:', error));
+
+</script>
 
 
-{% if is_full %}
-    <p>This battle is full.</p>
-{% else %}
-    {% if not is_participant %}
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="battle_id" value="{{ battle.id }}">
-            <button type="submit">Join Battle</button>
-        </form>
-    {% else %}
-        <p>You have already joined this battle.</p>
-    {% endif %}
-{% endif %}
 
-<!-- Display related games -->
-<h2>Games in this Battle:</h2>
-{% for game in related_games %}
-    {% include 'game.html' with game=game %}
-{% endfor %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+
+</script>
+
+<script>
+$(".start").click(function () {
+    const button = $(this);
+    button.prop('disabled', true); // Disable the button when clicked
+
+    // Step 1: Create the outcome and get the relevant choice
+   createOutcome(button.data('game-id'), button.data('slug'))
+    .then(data => {
+        if (data.status === 'success') {
+            const choice = {
+                id: data.choice_id,
+                choice_text: data.choice_text,
+                color: data.choice_color,
+                file: data.choice_file,
+                value: data.choice_value || 0,
+                lowerNonce: data.lower_nonce || 'N/A',
+                upperNonce: data.upper_nonce || 'N/A',
+            };
+
+            // Log the choice object to verify its structure
+            console.log('Choice Object:', choice);
+
+            renderChoiceDetails(choice);
+
+            // Other code to handle the outcome...
+        } else {
+            console.error('Error:', data.message);
+            button.prop('disabled', false); // Re-enable the button if there's an error
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        button.prop('disabled', false); // Re-enable the button if there's an error
+    });
+
+                // Log the values to ensure they are correct
+                console.log('Nonce:', chosenNonce);
+                console.log('Choice ID:', choiceId);
+                console.log('Choice Text:', choiceText);
+                console.log('Choice Color:', choiceColor);
+                console.log('Choice File:', choiceFile);
+
+                // Step 2: Set the animation to randomize the cards
+                let randomizeFlag = true;
+
+                function randomizeContents() {
+                    if (randomizeFlag) {
+                        $('div#slider').each(function () {
+                            var $div_parent = $(this);
+                            var $divsArr = $div_parent.children('div.cards');
+                            $divsArr.sort(function (a, b) {
+                                var temp = parseInt(Math.random() * 10);
+                                var isOddOrEven = temp % 2;
+                                var isPosOrNeg = temp > 5 ? 1 : -1;
+                                return (isOddOrEven * isPosOrNeg);
+                            }).appendTo($div_parent);
+                        });
+                        setTimeout(randomizeContents, 2000);
+                    }
+                }
+
+                randomizeContents();
+
+                setTimeout(() => {
+                    randomizeFlag = false;
+
+                    // Step 3: Control the final stop based on the nonce or choiceId
+                    const slider = document.querySelector('.slider');
+                    const cards = slider.querySelectorAll('.card');
+
+                    // Calculate the position to center the chosen card
+                    let targetCard = null;
+                    cards.forEach(card => {
+                        if (parseInt(card.dataset.choiceId) === choiceId) {
+                            targetCard = card;
+                        }
+                    });
+
+                    if (targetCard) {
+                        const targetOffsetLeft = targetCard.offsetLeft;
+                        const sliderWidth = slider.offsetWidth;
+                        const cardWidth = targetCard.offsetWidth;
+                        const targetScrollPosition = targetOffsetLeft - (sliderWidth / 2) + (cardWidth / 2);
+
+                        slider.scrollTo({
+                            left: targetScrollPosition,
+                            behavior: 'smooth'
+                        });
+
+                        // Assuming 'choice' is an object you receive via AJAX or another method
+                        function renderChoiceDetails(choice) {
+                            document.getElementById('choice-id').innerText = `Selected Choice ID: ${choice.id || 'N/A'}`;
+                            document.getElementById('choice-text').innerText = `Selected Choice Text: ${choice.choice_text || 'N/A'}`;
+                            document.getElementById('choice-color').innerText = `Selected Choice Color: ${choice.color || 'N/A'}`;
+
+                            // Handle the file field
+                            const choiceFileElement = document.getElementById('choice-file');
+                            if (choice.file) {
+                                choiceFileElement.src = choice.file; // Assuming file is a URL
+                                choiceFileElement.style.display = 'block'; // Show the image
+                            } else {
+                                choiceFileElement.style.display = 'none'; // Hide the image if there's no file
+                            }
+                        }
+
+
+                        const choiceFileElement = document.getElementById('choice-file');
+                        if (choiceFile) {
+                            choiceFileElement.src = choiceFile;
+                            choiceFileElement.style.display = 'block';
+                        } else {
+                            choiceFileElement.style.display = 'none';
+                        }
+
+                    } else {
+                        console.error('Error: Target card not found.');
+                    }
+
+                    // Re-enable the button after the animation finishes
+                    button.prop('disabled', false);
+
+                }, 9000); // Stop after 9 seconds (adjustable)
+
+            } else {
+                console.error('Error:', data.message);
+                button.prop('disabled', false); // Re-enable the button if there's an error
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            button.prop('disabled', false); // Re-enable the button if there's an error
+        });
+});
+
+
+
+</script>
+</body>
+</html>

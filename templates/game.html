@@ -628,11 +628,10 @@ $(document).ready(function() {
         </div>
     </div>
 
-
-    <div class="wrapper">
+  <div class="wrapper">
         <div class="containerre" style="margin-top: 3%;">
             <div class="slider" id="slider">
-<!--currently, the card ends up at the back of the slider. make sure it ends up in the middle where it can be selected-->
+<!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
             {% for item in choices_with_nonce %}
                 {% with choice=item.choice %}
                     <div id="{{ choice.choice_text }}" class="cards">
@@ -706,6 +705,7 @@ $(document).ready(function() {
             <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
         </div>
     </div>
+
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
 </script>

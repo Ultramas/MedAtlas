@@ -180,56 +180,138 @@
 
                     <div class="card-container">
                         <div class="card-section">
-                            <h3>Your Inventory Cards</h3>
-                            <div class="card-grid">
-                                {% for field in form %}
-                                    {% if field.name == "usercard" %}
-                                        {% for choice in field.field.queryset %}
-                                            <div class="card">
-                                                <label>
-                                                    <input type="checkbox"
-                                                           name="usercard"
-                                                           value="{{ choice.pk }}"
-                                                           data-price="{{ choice.price }}"
-                                                           data-choice-text="{{ choice.choice_text }}"
-                                                           data-condition="{{ choice.condition }}"
-                                                           data-image-url="{{ choice.image.url }}"
-                                                           onchange="updateValues()">
-                                                    {{ choice.choice_text }} - ${{ choice.price }} ({{ choice.condition }})
-                                                </label>
-                                                <img src="{{ choice.image.url }}" alt="{{ choice.choice_text }}" width="100">
-                                            </div>
-                                        {% endfor %}
-                                    {% endif %}
-                                {% endfor %}
+                            <div class="card-grid"><h3>Your Inventory Cards (<span id="selectedCount">0</span>/<span id="totalCount">0</span>)</h3>
+                          <!-- Add a search bar -->
+                           <input type="text" id="searchBar" placeholder="Search cards..." oninput="filterCards()">
+
+                        <!-- Render the form -->
+                        {% for field in form %}
+                    {% if field.name == "usercard" %}
+                        <div id="cardContainer">
+                            {% for choice in field.field.queryset %}
+                                <div class="card" data-name="{{ choice.choice_text }}">
+                                    <label>
+                                        <input type="checkbox"
+                                               name="usercard"
+                                               value="{{ choice.pk }}"
+                                               data-price="{{ choice.price }}"
+                                               data-choice-text="{{ choice.choice_text }}"
+                                               data-condition="{{ choice.condition }}"
+                                               data-image-url="{{ choice.image.url }}"
+                                               onchange="updateValues()">
+                                        {{ choice.choice_text }} - ${{ choice.price }} ({{ choice.condition }})
+                                    </label>
+                                    <img src="{{ choice.image.url }}" alt="{{ choice.choice_text }}" width="100">
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Add JavaScript -->
+                <script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Update the total count dynamically on page load
+    const totalCountElement = document.getElementById("totalCount");
+    const cardContainer = document.getElementById("cardContainer");
+
+    function updateTotalCount() {
+        const visibleCards = document.querySelectorAll("#cardContainer .card:not([style*='display: none']) input[type='checkbox']");
+        totalCountElement.textContent = visibleCards.length;
+    }
+
+    const totalCards = document.querySelectorAll("#cardContainer input[type='checkbox']").length;
+    totalCountElement.textContent = totalCards;
+
+    // Function to update the number of selected cards
+    window.updateValues = function () {
+        const selectedCount = document.querySelectorAll("#cardContainer input[type='checkbox']:checked").length;
+        document.getElementById("selectedCount").textContent = selectedCount;
+    };
+
+    // Function to filter cards dynamically based on search input
+    window.filterCards = function () {
+        const searchInput = document.getElementById("searchBar").value.toLowerCase();
+        const cards = document.querySelectorAll("#cardContainer .card");
+
+        cards.forEach((card) => {
+            const cardName = card.getAttribute("data-name").toLowerCase();
+            if (cardName.includes(searchInput)) {
+                card.style.display = "block"; // Show the card if it matches the search
+            } else {
+                card.style.display = "none"; // Hide the card if it doesn't match
+            }
+        });
+
+        // Update the total card count based on visible cards
+        updateTotalCount();
+    };
+
+    // Ensure total count is accurate initially
+    updateTotalCount();
+});
+
+                </script>
+
                             </div>
                         </div>
                         <div class="card-section">
-                            <h3>Exchange Cards</h3>
-                            <div class="card-grid">
-                                {% for field in form %}
-                                    {% if field.name == "exchangeprizes" %}
-                                        {% for prize in field.field.queryset %}
-                                            <div class="card">
-                                                <label>
-                                                    <input type="checkbox"
-                                                           name="exchangeprizes"
-                                                           value="{{ prize.pk }}"
-                                                           data-price="{{ prize.value }}"
-                                                           data-name="{{ prize.name }}"
-                                                           data-condition="{{ prize.condition }}"
-                                                           data-image-url="{{ prize.image.url }}"
-                                                           onchange="updateValues()">
-                                                    {{ prize.name }} - ${{ prize.value }} ({{ prize.condition }})
-                                                </label>
-                                                <img src="{{ prize.image.url }}" alt="{{ prize.name }}" width="100">
-                                            </div>
-                                        {% endfor %}
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        </div>
+                            <h3>Exchange Cards (<span id="selectedExchangeCount">0</span>/<span id="totalExchangeCount">0</span>)</h3>
+                                <input type="text" id="exchangeSearchBar" placeholder="Search exchange cards..." oninput="filterExchangeCards()">
+
+<div class="card-grid" id="exchangeCardContainer">
+ {% for field in form %}
+            {% if field.name == "exchangeprizes" %}
+                {% for prize in field.field.queryset %}
+                    <div class="card" data-name="{{ prize.name }}">
+                        <label>
+                            <input type="checkbox"
+                                   name="exchangeprizes"
+                                   value="{{ prize.pk }}"
+                                   data-price="{{ prize.value }}"
+                                   data-name="{{ prize.name }}"
+                                   data-condition="{{ prize.condition }}"
+                                   data-image-url="{{ prize.image.url }}"
+                                   onchange="updateExchangeValues()">
+                            {{ prize.name }} - ${{ prize.value }} ({{ prize.condition }})
+                        </label>
+                        <img src="{{ prize.image.url }}" alt="{{ prize.name }}" width="100">
                     </div>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+</div>
+                        </div></div>
+<!-- Add JavaScript -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Update the total count dynamically on page load
+        const totalExchangeCount = document.querySelectorAll("#exchangeCardContainer input[type='checkbox']").length;
+        document.getElementById("totalExchangeCount").textContent = totalExchangeCount;
+
+        // Function to update the number of selected exchange cards
+        window.updateExchangeValues = function () {
+            const selectedExchangeCount = document.querySelectorAll("#exchangeCardContainer input[type='checkbox']:checked").length;
+            document.getElementById("selectedExchangeCount").textContent = selectedExchangeCount;
+        };
+
+        // Function to filter exchange cards dynamically based on search input
+        window.filterExchangeCards = function () {
+            const searchInput = document.getElementById("exchangeSearchBar").value.toLowerCase();
+            const cards = document.querySelectorAll("#exchangeCardContainer .card");
+
+            cards.forEach((card) => {
+                const cardName = card.getAttribute("data-name").toLowerCase();
+                if (cardName.includes(searchInput)) {
+                    card.style.display = "block"; // Show the card if it matches the search
+                } else {
+                    card.style.display = "none"; // Hide the card if it doesn't match
+                }
+            });
+        };
+    });
+</script>
 
 <div class="summary">
     <p><strong>Total Value of User Cards:</strong> $<span id="totalValue">0.00</span></p>
@@ -364,6 +446,35 @@
             tradeMessage.innerText = 'Your selection is valid.';
             tradeMessage.style.color = 'green';
         }
+    }
+
+    // Function to update total cards out of the total searched exchange cards
+    function updateExchangeCardCounts() {
+        const exchangeSearchInput = document.getElementById('exchangeSearchBar').value.toLowerCase();
+        const cards = document.querySelectorAll('#exchangeCardContainer .card');
+        let totalExchangeCount = 0;
+
+        cards.forEach((card) => {
+            const cardName = card.getAttribute('data-name').toLowerCase();
+            if (cardName.includes(exchangeSearchInput)) {
+                totalExchangeCount += 1;
+                card.style.display = 'block'; // Show the card if it matches the search
+            } else {
+                card.style.display = 'none'; // Hide the card if it doesn't match
+            }
+        });
+
+        document.getElementById('totalExchangeCount').textContent = totalExchangeCount;
+        const selectedExchangeCount = document.querySelectorAll(
+            '#exchangeCardContainer input[type="checkbox"]:checked'
+        ).length;
+        document.getElementById('selectedExchangeCount').textContent = selectedExchangeCount;
+    }
+
+    // Add event listener to the search bar for exchange cards
+    const exchangeSearchBar = document.getElementById('exchangeSearchBar');
+    if (exchangeSearchBar) {
+        exchangeSearchBar.addEventListener('input', updateExchangeCardCounts);
     }
 });
 

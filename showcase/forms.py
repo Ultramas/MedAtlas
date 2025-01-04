@@ -1531,6 +1531,19 @@ class TradeItemForm(forms.ModelForm):
         model = TradeItem
         fields = ['title', 'category', 'specialty', 'condition', 'slug', 'status', 'description', 'image']
 
+    def __init__(self, *args, **kwargs):
+        inventory_object = kwargs.pop('inventory_object', None)
+        super().__init__(*args, **kwargs)
+
+        # Pre-fill fields based on the provided InventoryObject
+        if inventory_object:
+            self.fields['title'].initial = inventory_object.title
+            self.fields['category'].initial = inventory_object.category
+            self.fields['specialty'].initial = inventory_object.specialty
+            self.fields['condition'].initial = inventory_object.condition
+            self.fields['description'].initial = inventory_object.description
+            self.fields['image'].initial = inventory_object.image
+
 
 class TradeProposalForm(forms.ModelForm):
     class Meta:

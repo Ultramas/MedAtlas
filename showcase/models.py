@@ -2948,7 +2948,14 @@ class Outcome(models.Model):
             self.game_creator = self.game.user
         if not self.file:
             self.file = self.choice.file
+        if self.shuffler and self.shuffler.demonstration == 'P':
+            self.demonstration = False
         super().save(*args, **kwargs)
+
+    def get_profile_url(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
 
     def get_color(self, choice):
         cost_threshold_80 = self.game.cost * 0.8
@@ -3507,8 +3514,10 @@ class SellerApplication(models.Model):
     accepted = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.user) + " - Email Verified: " + str(self.email_verified) + " - Registered: " + str(
-            self.accepted)
+        if str(self.email):
+            return str(self.user) + " - Email: " + str(self.email) + " - Registered: " + str(self.accepted)
+        else:
+            return str(self.user) + " No Email Registered "
 
     class Meta:
         verbose_name = "Seller Application"

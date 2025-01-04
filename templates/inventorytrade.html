@@ -186,76 +186,153 @@
                         {{ form.trading_user }}
 
                         <!-- Your Items Section -->
-                        <h3>Your Items:</h3>
-                        <div id="user-items">
-                            {% for item in form.usercard %}
-                                <div class="item">
-                                    <input type="checkbox" name="{{ item.name }}" id="{{ item.id_for_label }}" value="{{ item.data.id }}"
-                                           data-value="{{ item.data.value }}" />
-                                    <label for="{{ item.id_for_label }}">{{ item.data.label }} - ${{ item.data.value }}</label>
-                                </div>
-                            {% endfor %}
-                        </div>
-        <!-- Other User's Items Section -->
-        <h3>Other User's Items:</h3>
-        <div id="other-user-items">
-            <!-- This will be populated dynamically with JavaScript -->
-        </div>
+<h3>Your Items:</h3>
+<input type="text" id="search-items" placeholder="Search your items..." />
+<div id="user-items">
+{% for item in trade_items %}
+    <div class="item">
+        <input type="checkbox" name="{{ item.title }}" id="{{ item.id }}" value="{{ item.id }}" data-value="{{ item.value }}" />
+        <label for="{{ item.id }}">
+            {{ item.title }} - ${{ item.value }}
+        </label>
+        <br>
+        <br>
+        <br>
+
+            <img src="{{ item.image.url }}" alt="{{ item.title }}" class="item-image" />
+    </div>
+{% endfor %}
+
+</div>
+
+<h3>Other User's Items:</h3>
+<input type="text" id="search-other-items" placeholder="Search other user's items..." />
+<div id="other-user-items">
+
+</div>
+
 
         <!-- Dynamic Value Calculation -->
         <h4>Total Value:</h4>
 <p id="user-total">Your Total: $0</p>
         <p id="other-user-total">Other User's Total: $0</p>
+        <!-- Dynamic Final Cost Display -->
+        <h4>Final Cost:</h4>
+        <p id="final-cost">Final Cost: $0</p>
 
         <!-- Submit Button -->
-        <button type="submit" class="submit-button">Submit</button>
+        <button type="submit" class="submit-button">Send Offer </button>
     </form>
                 </section>
             </main>
         </div>
-
-<!-- Your Trade Items Section -->
-<section id="user-trade-items" class="trade-items">
-    <h2 class="trade-user-name">'s Trade Items</h2>
-    <div class="item-grid">
-        {% for item in my_trade_items %}
-            <div class="item">
-                <img src="{{ item.image.url }}" alt="{{ item.title }}" width="100">
-                <div class="item-details">
-                    <h3>{{ item.title }}</h3>
-                    <p><strong>Condition:</strong> {{ item.condition }}</p>
-                    <p><strong>Value:</strong> ${{ item.value }} {{ item.currency__name }}</p>
-                </div>
-            </div>
-        {% empty %}
-            <p>No trade items found.</p>
-        {% endfor %}
     </div>
-</section>
+    <script>
+ document.addEventListener('DOMContentLoaded', function () {
+    const userItems = document.querySelectorAll('#user-items .item input[type="checkbox"]');
+    const otherUserItems = document.querySelectorAll('#other-user-items .item input[type="checkbox"]');
+    const userTotalEl = document.getElementById('user-total');
+    const otherUserTotalEl = document.getElementById('other-user-total');
+    const searchInput = document.getElementById('search-items');
+    const searchOtherInput = document.getElementById('search-other-items');
 
-<!-- Selected User's Trade Items -->
-<section id="trade-items" class="trade-items">
-    <h2>{{ user.username }}'s Trade Items</h2>
-    <div class="item-grid">
-        {% for item in trade_items %}
-            <div class="item" data-item-id="{{ item.id }}">
-                <img src="{{ item.image.url }}" alt="{{ item.title }}" width="100">
-                <div class="item-details">
-                    <h3>{{ item.title }}</h3>
-                    <p><strong>Condition:</strong> {{ item.get_condition_display }}</p>
-                    <p><strong>Category:</strong> {{ item.get_category_display }}</p>
-                    <p><strong>Value:</strong> ${{ item.value }} {{ item.currency }}</p>
-                </div>
-            </div>
-        {% empty %}
-            <p>No trade items found.</p>
-        {% endfor %}
-    </div>
-</section>
+    // Function to calculate total value
+    function calculateTotal(items, totalEl) {
+        let total = 0;
+        let selectedCount = 0;
+        items.forEach(item => {
+            if (item.checked) {
+                total += parseFloat(item.getAttribute('data-value'));
+                selectedCount++;
+            }
+        });
+        totalEl.textContent = `Total: $${total.toFixed(2)} (Selected: ${selectedCount} items)`;
+    }
 
-            </main>
-        </div>
-    </div>
+    // Attach event listeners to user items
+    userItems.forEach(item => {
+        item.addEventListener('change', function () {
+            calculateTotal(userItems, userTotalEl);
+        });
+    });
+
+    // Attach event listeners to other user's items
+    otherUserItems.forEach(item => {
+        item.addEventListener('change', function () {
+            calculateTotal(otherUserItems, otherUserTotalEl);
+        });
+    });
+
+    // Search functionality for "Your Items"
+    searchInput.addEventListener('input', function () {
+        const searchTerm = searchInput.value.toLowerCase();
+        userItems.forEach(item => {
+            const label = item.nextElementSibling.textContent.toLowerCase();
+            if (label.includes(searchTerm)) {
+                item.parentElement.style.display = 'block';
+            } else {
+                item.parentElement.style.display = 'none';
+            }
+        });
+    });
+
+    // Search functionality for "Other User's Items"
+    searchOtherInput.addEventListener('input', function () {
+        const searchTerm = searchOtherInput.value.toLowerCase();
+        otherUserItems.forEach(item => {
+            const label = item.nextElementSibling.textContent.toLowerCase();
+            if (label.includes(searchTerm)) {
+                item.parentElement.style.display = 'block';
+            } else {
+                item.parentElement.style.display = 'none';
+            }
+        });
+    });
+});
+
+</script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    // Helper function to update item visibility and count
+    function updateItems(searchInput, gridId, totalId) {
+        const query = searchInput.value.toLowerCase(); // Get search query
+        const items = document.querySelectorAll(`${gridId} .item`); // Get all items
+        let visibleCount = 0;
+
+        // Iterate through items to check if they match the query
+        items.forEach(item => {
+            const title = item.querySelector("h3").textContent.toLowerCase(); // Get item title
+            if (title.includes(query)) {
+                item.style.display = ""; // Show item
+                visibleCount++;
+            } else {
+                item.style.display = "none"; // Hide item
+            }
+        });
+
+        // Update total count dynamically
+        document.querySelector(totalId).textContent = `Total Items: ${visibleCount}`;
+    }
+
+    // Add event listeners for search inputs
+    const userSearchInput = document.getElementById("user-items-search");
+    const selectedUserSearchInput = document.getElementById("selected-user-items-search");
+
+    userSearchInput.addEventListener("input", function () {
+        updateItems(userSearchInput, "#user-items-grid", "#user-total-count");
+    });
+
+    selectedUserSearchInput.addEventListener("input", function () {
+        updateItems(selectedUserSearchInput, "#selected-user-items-grid", "#selected-user-total-count");
+    });
+
+    // Initialize counts on page load
+    updateItems(userSearchInput, "#user-items-grid", "#user-total-count");
+    updateItems(selectedUserSearchInput, "#selected-user-items-grid", "#selected-user-total-count");
+});
+
+    </script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const tradingUserSelect = document.querySelector('select[name="trading_user"]');
@@ -317,6 +394,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 </script>
+<script>
+    const otherTradeItems = {{ other_trade_items|safe }};
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -345,14 +425,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const otherUserItemsContainer = document.getElementById('other-user-items');
         const myTradeItemsContainer = document.querySelector('#user-trade-items .item-grid');
 
-        otherUserItemsContainer.innerHTML = '';
+        otherUserItemsContainer.innerHTML = ''; // Clear the container first
 
-        if (!userId) return;
+        if (!userId) return; // Exit if no user is selected
 
+        // Fetch trade items for the selected user
         fetch(`/api/trade-items/${userId}/`)
             .then(response => response.json())
             .then(data => {
                 data.trade_items.forEach(item => {
+                    // Create checkbox for item selection
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.name = 'exchangeprizes';
@@ -360,21 +442,37 @@ document.addEventListener('DOMContentLoaded', function () {
                     checkbox.dataset.value = item.value;
                     checkbox.id = `exchangeprizes-${item.id}`;
 
+                    // Create label for item
                     const label = document.createElement('label');
                     label.htmlFor = `exchangeprizes-${item.id}`;
                     label.textContent = `${item.title} - $${item.value}`;
 
+                    // Create condition element
+                    const condition = document.createElement('span');
+                    condition.textContent = `Condition: ${item.condition}`;
+                    condition.className = 'item-condition';
+
+                    // Create image element (with fallback for missing image)
+                    const image = document.createElement('img');
+                    image.src = item.image_url || '/path/to/placeholder/image.jpg';  // Fallback to placeholder if no image URL
+                    image.alt = item.title;
+                    image.className = 'item-image';
+
+                    // Create container for the item
                     const container = document.createElement('div');
                     container.className = 'item';
-                    container.appendChild(checkbox);
-                    container.appendChild(label);
+                    container.appendChild(image);       // Append the image
+                    container.appendChild(condition);  // Append the condition
+                    container.appendChild(checkbox);   // Append the checkbox
+                    container.appendChild(label);      // Append the label
 
+                    // Append the container to the other user's items section
                     otherUserItemsContainer.appendChild(container);
 
-                    // Add event listener for dynamic update
+                    // Add event listener for checkbox to update totals
                     checkbox.addEventListener('change', updateTotals);
 
-                    // Add event listener to highlight the associated trade item in `user-trade-items`
+                    // Event listener to highlight the associated trade item in `user-trade-items`
                     checkbox.addEventListener('change', function () {
                         const associatedItem = document.querySelector(`#user-trade-items .item[data-item-id="${item.id}"]`);
                         if (this.checked) {
@@ -384,29 +482,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     });
                 });
-
-                // Highlight items in `my_trade_items` dynamically
-                myTradeItemsContainer.querySelectorAll('.item').forEach(itemElement => {
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.dataset.itemId = itemElement.getAttribute('data-item-id');
-
-                    // Add event listener for checkbox to dynamically toggle the `highlighted` class
-                    checkbox.addEventListener('change', function () {
-                        if (this.checked) {
-                            itemElement.classList.add('highlighted');
-                        } else {
-                            itemElement.classList.remove('highlighted');
-                        }
-                    });
-
-                    // Append the checkbox to the trade items
-                    itemElement.appendChild(checkbox);
-                });
+            })
+            .catch(error => {
+                console.error('Error fetching trade items:', error);
             });
     });
 
-    // Add event listeners for your items
+    // Add event listeners for your items (already selected user items)
     document.querySelectorAll('#user-items input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', updateTotals);
 
@@ -422,7 +504,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
-
 
 </script>
 <script>
@@ -447,7 +528,69 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    // Get elements
+    const userItems = document.querySelectorAll("#user-items-grid .item-select");
+    const selectedUserItems = document.querySelectorAll("#selected-user-items-grid .item-select");
+    const totalDifferenceDisplay = document.getElementById("total-difference");
 
+    // Function to calculate total value from selected items
+    function calculateTotalValue(items) {
+        let total = 0;
+        items.forEach(item => {
+            if (item.checked) {
+                total += parseFloat(item.dataset.value); // Get value from data attribute
+            }
+        });
+        return total;
+    }
+
+    // Function to update the trade difference
+    function updateTradeDifference() {
+        const userTotal = calculateTotalValue(userItems);
+        const selectedUserTotal = calculateTotalValue(selectedUserItems);
+        const difference = userTotal - selectedUserTotal;
+
+        // Update the difference display
+        totalDifferenceDisplay.textContent = `Difference: $${difference}`;
+    }
+
+    // Add event listeners to all checkboxes
+    userItems.forEach(item => item.addEventListener("change", updateTradeDifference));
+    selectedUserItems.forEach(item => item.addEventListener("change", updateTradeDifference));
+
+    // Initialize the difference on page load
+    updateTradeDifference();
+});
+
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const userTotalEl = document.getElementById("user-total");
+    const otherUserTotalEl = document.getElementById("other-user-total");
+    const finalCostEl = document.getElementById("final-cost");
+
+    function updateFinalCost() {
+        // Parse the numeric values from the text content of the totals
+        const userTotal = parseFloat(userTotalEl.textContent.replace(/[^0-9.-]+/g, "")) || 0;
+        const otherUserTotal = parseFloat(otherUserTotalEl.textContent.replace(/[^0-9.-]+/g, "")) || 0;
+
+        // Calculate the final cost
+        const finalCost = userTotal - otherUserTotal;
+
+        // Update the final cost element
+        finalCostEl.textContent = `Final Cost: $${finalCost.toFixed(2)}`;
+    }
+
+    // Observe changes to the totals and update the final cost dynamically
+    const observer = new MutationObserver(updateFinalCost);
+
+    // Observe changes to the content of user and other user total elements
+    observer.observe(userTotalEl, { childList: true });
+    observer.observe(otherUserTotalEl, { childList: true });
+});
+</script>
 
 </body>
 </html>

@@ -2588,6 +2588,7 @@ class OpenBattleListView(ListView):
 
         return self.get(request, *args, **kwargs)
 
+
 class SingleBattleListView(DetailView):
     model = Battle
     template_name = "battle_detail.html"
@@ -2602,10 +2603,171 @@ class SingleBattleListView(DetailView):
         battle = self.get_object()
 
         # Get all games related to the battle through BattleGame
-        context['related_games'] = Game.objects.filter(game_battles__battle=battle).distinct()
+        related_games = Game.objects.filter(game_battles__battle=battle).distinct()
+        context['related_games'] = related_games
 
         context['is_participant'] = self.request.user in battle.participants.all()
         context['is_full'] = battle.is_full()
+
+
+        slug = self.kwargs.get('slug')
+        context['slug'] = slug
+
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+            except UserProfile.DoesNotExist:
+                context['SentProfile'] = None
+        else:
+            context['SentProfile'] = None
+
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['wager_form'] = WagerForm()
+
+        choices = Choice.objects.filter(game=related_games)
+        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=related_games)
+        context['spinner_choice_renders'] = spinner_choice_renders
+
+        # Retrieve 'button_type' from the request
+        button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
+
+
+        cost = related_games.discount_cost if related_games.discount_cost else related_games.cost
+
+        context.update({
+            'cost_threshold_80': cost * 0.8,
+            'cost_threshold_100': cost,
+            'cost_threshold_200': cost * 2,
+            'cost_threshold_500': cost * 5,
+            'cost_threshold_10000': cost * 100,
+        })
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        user_profile = None  # Initialize to ensure it always exists
+        if related_games.user:
+            # Perform actions only if the `user` field is filled
+            user_profile, created = UserProfile.objects.get_or_create(user=related_games.user)
+            # Additional logic if necessary
+
+        context['SentProfile'] = user_profile
+        if related_games.user:
+            user_cash = user_profile.currency_amount
+
+            context = {
+                'user_cash': user_cash,
+            }
+
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+
+        spinpreference = None  # Initialize spinpreference to ensure it exists
+
+        if user.is_authenticated:
+            try:
+                spinpreference = SpinPreference.objects.get(user=user)
+            except SpinPreference.DoesNotExist:
+                spinpreference = SpinPreference(user=user, quick_spin=False)
+                spinpreference.save()
+
+            context['quick_spin'] = spinpreference.quick_spin
+        else:
+            context['quick_spin'] = False
+
+        context['spinpreference'] = spinpreference
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['Profiles'] = userprofile
+        else:
+            context['Profiles'] = None
+
+        if context['Profiles'] == None:
+            # Create a new object with the necessary attributes
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['Profiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        # Initialize the form with spinpreference instance, or None if not authenticated
+        if spinpreference:
+            spinform = SpinPreferenceForm(instance=spinpreference)
+        else:
+            spinform = SpinPreferenceForm()  # Initialize an empty form if spinpreference is None
+        context['spin_preference_form'] = spinform
+
+        if user.is_authenticated:
+            # Determine the random amount based on quick_spin preference
+            if spinpreference.quick_spin:
+                random_amount = random.randint(500, 1000)
+            else:
+                random_amount = random.randint(150, 300)
+        else:
+            random_amount = random.randint(150, 300)
+
+        context['random_amount'] = random_amount
+        context['range_random_amount'] = range(random_amount)
+        print(str('the random amount is ') + str(random_amount))
+
+        # Generate a list of random nonces
+        random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
+        context['random_nonces'] = random_nonces
+
+        # Create a list to store choices matched with the generated nonces
+        choices_with_nonce = []
+        for nonce in random_nonces:
+            for choice in choices:
+                if choice.lower_nonce <= nonce <= choice.upper_nonce:
+                    choices_with_nonce.append({
+                        'choice': choice,
+                        'nonce': nonce,
+                        'lower_nonce': choice.lower_nonce,
+                        'upper_nonce': choice.upper_nonce,
+                        'file_url': choice.file.url if choice.file else None,  # Get the URL of the file field
+                        'currency': {
+                            'symbol': choice.currency.name if choice.currency else '💎',
+                            'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                        }
+                    })
+                    break  # Exit after finding the first match for this nonce
+
+        context['choices_with_nonce'] = choices_with_nonce
+
+        # Get the game_id from the URL kwargs
+        game_id = self.kwargs.get('slug')
+
+        # Retrieve related Choice objects
+        choices = Choice.objects.filter(game=related_games)
+
+        # Add them to the context
+        context['choices'] = choices
+
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        print(context['Background'])
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -2643,6 +2805,7 @@ class SingleBattleListView(DetailView):
 
         messages.error(request, 'There was an error joining the battle. Please try again.')
         return self.get(request, *args, **kwargs)
+
 
 class BattleCreationView(CreateView):
     model = Battle
@@ -3006,24 +3169,44 @@ class GameRoomView(BaseView):
         return context
 
 
+from django.core.serializers.json import DjangoJSONEncoder
+import json
+
+
+from django.core.serializers.json import DjangoJSONEncoder
+from django.shortcuts import render
+import json
+
 class OutcomeHistoryView(BaseView):
     model = Outcome
     template_name = "outcomehistory.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['Outcome'] = Outcome.objects.filter(is_active=1)
-        context['Game'] = GameHub.objects.filter(is_active=1).first()
-        context['GameRoom'] = Game.objects.filter(is_active=1).first()
-        newprofile = Outcome.objects.filter(is_active=1)
-        context['Profiles'] = newprofile
+        current_user = self.request.user
+        user_outcomes = Outcome.objects.filter(is_active=1, user=current_user)
 
-        for newprofile in context['Profiles']:
-            user = newprofile.user
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+        # Serialize outcomes into JSON-compatible structure
+        context['UserOutcomes'] = user_outcomes
+        context['UserOutcomesJSON'] = json.dumps(
+            [
+                {
+                    'id': outcome.id,
+                    'user': str(outcome.user),
+                    'quick_spin': outcome.quick_spin,
+                    'slug': outcome.slug,
+                    'value': outcome.value,
+                    'file': outcome.file.url if outcome.file else None,
+                    'color': outcome.color,
+                    'game': str(outcome.game),
+                    'choice': str(outcome.choice),
+                    'nonce': outcome.nonce,
+                    'date_and_time': outcome.date_and_time.isoformat(),
+                }
+                for outcome in user_outcomes
+            ],
+            cls=DjangoJSONEncoder
+        )
 
         return context
 
@@ -4502,7 +4685,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic import ListView, DetailView, View
-from datetime import datetime
 from django.utils import timezone
 from .forms import CheckoutForm
 from .models import (Item, OrderItem, Order, Address, Payment, Coupon, Refund,
@@ -9388,6 +9570,10 @@ class CommerceExchangeView(CreateView):
         return context
 
 
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import TradeItem
+
 class InventoryTradeView(CreateView):
     model = CommerceExchange
     template_name = "inventorytrade.html"
@@ -9395,27 +9581,35 @@ class InventoryTradeView(CreateView):
     success_url = reverse_lazy('showcase:inventorytrade')
 
     def form_valid(self, form):
-        # Associate the currently logged-in user with the form instance
         form.instance.user = self.request.user
         return super().form_valid(form)
 
     def get_form(self):
-        # Pass the current user to the form
         return self.form_class(user=self.request.user, **self.get_form_kwargs())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        # Query TradeItem objects for the current user and others
+        # Query TradeItem objects for the logged-in user and other users
         trade_items = TradeItem.objects.filter(user=user, is_active=1)
         other_trade_items = TradeItem.objects.exclude(user=user).filter(is_active=1)
 
-        # Add context variables for the template
+        # Serialize other_trade_items with image URLs for JavaScript
+        context['other_trade_items'] = [
+            {
+                'id': item.id,
+                'title': item.title,
+                'value': item.value,
+                'image_url': item.image.url if item.image and hasattr(item.image, 'url') else '',  # Safely handle missing or invalid images
+                'condition': item.get_condition_display(),  # Include human-readable condition
+            }
+            for item in other_trade_items
+        ]
+
         context.update({
             'form': self.get_form(),
             'trade_items': trade_items,
-            'other_trade_items': other_trade_items,
             'Background': BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position"),
             'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
             'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
@@ -9424,6 +9618,23 @@ class InventoryTradeView(CreateView):
         })
 
         return context
+
+def trade_items_api(request, user_id):
+    # This view handles the API request to fetch trade items for a specific user
+    trade_items = TradeItem.objects.filter(user_id=user_id, is_active=1)
+    trade_items_data = [
+        {
+            'id': item.id,
+            'title': item.title,
+            'value': item.value,
+            'image_url': item.image.url if item.image and hasattr(item.image, 'url') else '/path/to/placeholder/image.jpg',  # Fallback to placeholder if no image
+            'condition': item.get_condition_display(),
+        }
+        for item in trade_items
+    ]
+    return JsonResponse({'trade_items': trade_items_data})
+
+
 
 
 def trade_offers_view(request):
@@ -11687,49 +11898,73 @@ def submit_seller_application(request):
 def verify_otp(request):
     if request.method == 'POST':
         user_entered_otp = request.POST.get('otp')
+        resend_request = request.POST.get('resend_otp')  # Check if the user clicked "Resend OTP"
 
-        # Get the device id from the session
-        device_id = request.session.get('device_id')
+        # Handle Resend OTP
+        if resend_request:
+            try:
+                # Retrieve the device using the device_id from the session
+                device_id = request.session.get('device_id')
+                device = TOTPDevice.objects.get(id=device_id)
 
-        # Get the TOTP device
-        device = TOTPDevice.objects.get(id=device_id)
+                # Generate a new OTP
+                secret_key = base64.b32encode(device.bin_key).decode()
+                totp = pyotp.TOTP(secret_key)
+                new_otp = totp.now()
 
-        # Base32-encode the binary key
-        secret_key = base64.b32encode(device.bin_key).decode()
+                # Send the new OTP via email
+                user = request.user
+                subject = "Your One-Time Password (Resent)"
+                message = f'Your new OTP is: {new_otp}'
+                email_from = settings.EMAIL_HOST_USER
+                recipient_list = [user.email]  # Send to the user's email
+                send_mail(subject, message, email_from, recipient_list)
 
-        # Generate OTP
-        totp = pyotp.TOTP(secret_key)
+                # Optionally update the session timestamp (for security)
+                request.session['otp_timestamp'] = datetime.now().isoformat()
 
-        # Verify the OTP
-        if totp.verify(int(user_entered_otp)):  # Convert user_entered_otp to int
-            application = SellerApplication.objects.get(user=request.user)
-            application.email_verified = True
-            application.save()
+                # Provide feedback to the user
+                messages.success(request, 'A new OTP has been sent to your registered email.')
+            except TOTPDevice.DoesNotExist:
+                messages.error(request, 'Device not found. Please try again.')
+            except Exception as e:
+                messages.error(request, f'An error occurred while resending OTP: {e}')
 
-            messages.success(request, 'OTP verified successfully.')
-        else:
-            messages.error(request, 'Invalid OTP. Please try again.')
             return render(request, 'verify_otp.html')
 
+        # Normal OTP Verification
         try:
-            profile = ProfileDetails.objects.get(user=request.user)
-            profile.email = application.email
-            profile.save()
-        except ProfileDetails.DoesNotExist:
-            messages.error(request, 'Profile details not found.')
+            device_id = request.session.get('device_id')
+            device = TOTPDevice.objects.get(id=device_id)
+
+            # Base32-encode the binary key
+            secret_key = base64.b32encode(device.bin_key).decode()
+
+            # Generate OTP
+            totp = pyotp.TOTP(secret_key)
+
+            # Verify the OTP
+            if totp.verify(int(user_entered_otp)):  # Convert user_entered_otp to int
+                try:
+                    application = SellerApplication.objects.get(user=request.user)
+                    application.email_verified = True
+                    application.save()
+
+                    # Update email_verified field for the user
+                    user = request.user
+                    user.email_verified = True
+                    user.save()
+
+                    messages.success(request, 'OTP verified successfully.')
+                    return render(request, 'sellerapplicationfinish.html')
+                except SellerApplication.DoesNotExist:
+                    messages.error(request, 'Seller application not found.')
+            else:
+                messages.error(request, 'Invalid OTP. Please try again.')
+        except TOTPDevice.DoesNotExist:
+            messages.error(request, 'Device not found. Please try again.')
         except Exception as e:
             messages.error(request, f'An error occurred: {e}')
-
-        try:
-            user = request.user
-            user.email = application.email
-            user.first_name = application.first_name
-            user.last_name = application.last_name
-            user.save()
-        except Exception as e:
-            messages.error(request, f'An error occurred: {e}')
-
-        return redirect('showcase:ehome')
 
     return render(request, 'verify_otp.html')
 
@@ -11766,7 +12001,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .forms import FeedbackForm
 import json
-import datetime
 
 from .fusioncharts import FusionCharts
 from showcase.models import Feedback
@@ -12968,3 +13202,12 @@ def submit_answer(request, question_id):
 
 def sociallogin(request):
     return render(request, 'registration/sociallogin.html')
+
+
+
+
+
+
+
+
+

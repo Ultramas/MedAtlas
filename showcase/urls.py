@@ -331,6 +331,8 @@ urlpatterns = [
     path('sellerapplication/', views.SellerApplicationView.as_view(), name='sellerapplication'),
     path('submit_application/', views.submit_seller_application, name='submit_application'),
     path('verify_otp/', views.verify_otp, name='verify_otp'),
+    path('sellerapplicationfinish/', TemplateView.as_view(template_name='sellerapplicationfinish.html'), name='sellerapplicationfinish'),
+    path('sellersuccess/', TemplateView.as_view(template_name='sellersuccess.html'), name='sellersuccess'),
     path('tradeitems/', views.TradeBackgroundView.as_view(), name='tradeitems'),
     path('createtradeoffer/', views.TradeOfferCreateView.as_view(), name='createtradeoffer'),
     path('tradingcentral/', views.TradeItemCreateView.as_view(), name='tradingcentral'),
@@ -355,7 +357,7 @@ urlpatterns = [
     path('gamehub/<slug:slug>/', views.GameHubView.as_view(), name='gamehub'), #game hub with a single game hub
     path('gameroom/<slug:slug>/', views.GameRoomView.as_view(), name='gameroom'), #game room with a single game genre (possibly multiple games)
     path('game/<slug:slug>/', views.GameChestBackgroundView.as_view(), name='game'), #game with a single game
-    path('gamespin/', views.GameChestBackgroundView.as_view(), name='gamespin'),
+    path('game/', views.GameChestBackgroundView.as_view(), name='game'),
     path('sell/',  views.GameChestBackgroundView.as_view(), name='sell_game_inventory_object'),
     path('dailyroom/', views.DailyRoomView.as_view(), name='dailyroom'), #game with a single game
     path('dailygame/<slug:slug>/', views.DailyChestView.as_view(), name='dailygame'), #game with a single game
@@ -363,6 +365,7 @@ urlpatterns = [
     path('create-card-instance/', views.create_card_instance, name='create-card-instance'), #game with a single game
     path('gametemplate/', TemplateView.as_view(template_name='gametemplate.html'), name='gametemplate'),
     path('create_outcome/<slug:slug>/', views.create_outcome, name='create_outcome'),
+    path('outcomehistory/', views.OutcomeHistoryView.as_view(), name='outcomehistory'),
     path('spin/<int:game_id>/', views.game_view, name='game_view'),
     path('battle/', views.OpenBattleListView.as_view(), name='battle'),
     path('battle_detail/<int:battle_id>/', views.SingleBattleListView.as_view(), name='battle_detail'),
