@@ -330,9 +330,14 @@ border: none;
 									<!-- Placeholder image or default avatar -->
 									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
 									{% endif %}
-									<h3 class="currency_designation" id="currency-amount" style="text-align: center; space-between: 5px;">{{userprofile.currency_amount}} {{userprofile.currency}}</h3>
-
+                                    <div class="currency_level" style="display: column; color: white;">
+                                        {% if userprofile.currency|lower == 'rubies' %}
+									<h3 class="currency_designation" id="currency-amount" style="text-align: center; space-between: 5px; color: white;">{{userprofile.currency_amount}} 💎</h3>
+									{% else %}
+                                        <h3 class="currency_designation" id="currency-amount" style="text-align: center; space-between: 5px; color: white;">{{userprofile.currency_amount}} {{userprofile.currency}}</h3>
+                                    {% endif %}
                                     Level: {{ userprofile.level }}
+                                    </div>
                                     {% endfor %}
 								</li>
 

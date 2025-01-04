@@ -136,7 +136,7 @@ async function randomizeContents() {
             const middleIndex = Math.floor(cardContainer.children.length / 2);
             const targetIndex = Math.min(
                 cardContainer.children.length,
-                middleIndex + 3
+                middleIndex + 4
             );
 
             if (cardContainer.children[targetIndex]) {
@@ -148,7 +148,7 @@ async function randomizeContents() {
             // Adjust the slider to center the new card
             //centerCard(targetCardElement);
 
-            console.log("Target card inserted 3 cards to the right of the middle.");
+            console.log("Target card inserted 4 cards to the right of the middle.");
 
             // Call create_inventory_object after the card is created
             const inventoryPayload = {
@@ -157,7 +157,8 @@ async function randomizeContents() {
                 category: 'example_category',  // Additional data as needed
                 price: 100,
                 condition: 'New',
-                quantity: 1
+                quantity: 1,
+                button_type: buttonType
             };
             console.log("Calling /create_inventory_object/ with payload:", inventoryPayload);
 

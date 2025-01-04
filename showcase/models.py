@@ -2948,8 +2948,8 @@ class Outcome(models.Model):
             self.game_creator = self.game.user
         if not self.file:
             self.file = self.choice.file
-        if self.shuffler and self.shuffler.demonstration == 'P':
-            self.demonstration = False
+        #if self.shuffler and self.shuffler.demonstration == 'P':
+        #   self.demonstration = False
         super().save(*args, **kwargs)
 
     def get_profile_url(self):

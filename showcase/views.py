@@ -1609,7 +1609,7 @@ def create_outcome(request, slug):
             # Retrieve the game and proceed
             game = Game.objects.get(id=game_id, slug=slug)
             nonce = random.randint(1, 1000000)
-            choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
+            choices = Choice.objects.filter(game=game, lower_nonce__lte=nonce, upper_nonce__gte=nonce)
 
             if not choices.exists():
                 return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
@@ -1619,7 +1619,7 @@ def create_outcome(request, slug):
             choice.color = color
             choice.save()
 
-            print(f"Selected Choice: {choice.id}, {choice.choice_text}, {choice.color}")
+            print(f"Game: {game}, Selected Choice: {choice.id}, {choice.choice_text}, {choice.color}")
 
             outcome_data = {
                 'game': game,
@@ -1990,66 +1990,6 @@ class GameChestBackgroundView(BaseView):
             spinpreference.save()
             return JsonResponse({'success': True})
         return JsonResponse({'success': False}, status=400)
-
-    @csrf_exempt
-    def create_outcome(request, slug):
-        if request.method == 'POST':
-            try:
-                game_id = request.POST.get('game_id')
-                user = request.user
-
-                if not game_id:
-                    return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
-
-                game = Game.objects.get(id=game_id, slug=slug)
-                nonce = random.randint(1, 1000000)
-                choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
-
-                if not choices.exists():
-                    return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
-
-                choice = choices.order_by('?').first()
-
-                color = game.get_color(choice)
-                choice.color = color
-                choice.save()  # Save the updated color to the database
-
-                # Print the selected choice fields to the console
-                print(f"Selected Choice ID: {choice.id}")
-                print(f"Selected Choice Text: {choice.choice_text}")
-                print(f"Selected Choice Color: {choice.color}")
-                print(f"Selected Choice File: {choice.file.url if choice.file else 'No file associated'}")
-
-                outcome_data = {
-                    'game': game,
-                    'choice': choice,
-                    'nonce': nonce,
-                    'value': random.randint(1, 1000000),
-                    'ratio': random.randint(1, 10),
-                    'type': game.type
-                }
-
-                if user.is_authenticated:
-                    outcome_data['user'] = user
-
-                outcome = Outcome.objects.create(**outcome_data)
-
-                return JsonResponse({
-                    'status': 'success',
-                    'outcome': outcome.id,
-                    'nonce': outcome.nonce,
-                    'choice_id': choice.id,
-                    'choice_text': choice.choice_text,
-                    'choice_color': choice.color,
-                    'choice_file': choice.file.url if choice.file else None
-                })
-
-            except Game.DoesNotExist:
-                return JsonResponse({'status': 'error', 'message': 'Game not found.'})
-            except Exception as e:
-                return JsonResponse({'status': 'error', 'message': str(e)})
-
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
     def create_spinner_choice_render_automatically(request):
         nonce = random.randint(0, 1000000)
@@ -8103,41 +8043,80 @@ def create_inventory_object(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)  # Parse the JSON payload
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON payload!'}, status=400)
+
+        try:
             inventory = Inventory.objects.get(user=request.user)
-            print("Received payload:", data)
         except Inventory.DoesNotExist:
             return JsonResponse({'error': 'No inventory found for the user!'}, status=400)
 
-        # Extract data from the payload
+        button_type = data.get('button_type')
+        print("Received payload:", data)
+
+        # Validate and fetch choice
         choice_id = data.get('choice_id')  # Retrieve choice_id from payload
         choice_value = data.get('choice_value')  # Retrieve choice_value from payload
 
-        # Ensure the choice exists
         try:
-            choice = Choice.objects.get(id=choice_id) if choice_id else None
+            choice = Choice.objects.get(id=choice_id)
         except Choice.DoesNotExist:
-            return JsonResponse({'error': 'Invalid choice!'}, status=400)
+            return JsonResponse({'error': 'Invalid choice ID!'}, status=400)
 
-        # Create a new InventoryObject using the choice data
-        inventory_object = InventoryObject(
-            user=request.user,
-            inventory=inventory,
-            choice=choice,  # Save the choice instance
-            choice_text=choice.choice_text if choice else "Default Choice",
-            category=data.get('category', 'default'),
-            currency=Currency.objects.first(),
-            price=data.get('price', 0),
-            condition=data.get('condition', 'M'),
-            quantity=data.get('quantity', 1),
-        )
+        # Validate currency
+        currency = Currency.objects.first()
+        if not currency:
+            return JsonResponse({'error': 'No currency found in the database!'}, status=500)
 
-        try:
-            inventory_object.save()
-            return JsonResponse({'success': True, 'message': 'Inventory object created successfully!'})
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+        if button_type == "start2":
+            # Temporary inventory object for demonstration spins
+            inventory_object = InventoryObject(
+                inventory=inventory,
+                choice=choice,
+                choice_text=choice.choice_text,
+                category=data.get('category', 'default'),
+                currency=currency,
+                price=data.get('price', 0),
+                condition=data.get('condition', 'M'),
+                quantity=data.get('quantity', 1),
+            )
+            try:
+                inventory_object.save()
+                print(f"Temporary InventoryObject created: {inventory_object.id}")
+
+                # Spin logic here (placeholder for additional processing)
+                # ...
+
+                # Delete the inventory object after the spin
+                inventory_object.delete()
+                print(f"Temporary InventoryObject deleted: {inventory_object.id}")
+                return JsonResponse({'success': True, 'message': 'Demonstration rendered and object deleted!'})
+            except Exception as e:
+                return JsonResponse({'error': f'Failed during temporary object handling: {str(e)}'}, status=500)
+        else:
+            # Clear previous inventory objects for the user
+            InventoryObject.objects.filter(user=request.user, inventory=inventory).delete()
+
+            # Create and save the new inventory object
+            inventory_object = InventoryObject(
+                user=request.user,
+                inventory=inventory,
+                choice=choice,
+                choice_text=choice.choice_text,
+                category=data.get('category', 'default'),
+                currency=currency,
+                price=data.get('price', 0),
+                condition=data.get('condition', 'M'),
+                quantity=data.get('quantity', 1),
+            )
+            try:
+                inventory_object.save()
+                return JsonResponse({'success': True, 'message': 'Inventory object created successfully!', 'choice_id': inventory_object.id})
+            except Exception as e:
+                return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
 
 def sell_game_inventory_object(self, request, pk):
     inventory_object = get_object_or_404(InventoryObject, pk=pk)
