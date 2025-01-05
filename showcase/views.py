@@ -8038,84 +8038,48 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         return super().dispatch(*args, **kwargs)
 
 
+
 @csrf_exempt
 def create_inventory_object(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)  # Parse the JSON payload
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON payload!'}, status=400)
-
-        try:
             inventory = Inventory.objects.get(user=request.user)
+            print("Received payload:", data)
         except Inventory.DoesNotExist:
             return JsonResponse({'error': 'No inventory found for the user!'}, status=400)
 
-        button_type = data.get('button_type')
-        print("Received payload:", data)
-
-        # Validate and fetch choice
+        # Extract data from the payload
         choice_id = data.get('choice_id')  # Retrieve choice_id from payload
         choice_value = data.get('choice_value')  # Retrieve choice_value from payload
 
+        # Ensure the choice exists
         try:
-            choice = Choice.objects.get(id=choice_id)
+            choice = Choice.objects.get(id=choice_id) if choice_id else None
         except Choice.DoesNotExist:
-            return JsonResponse({'error': 'Invalid choice ID!'}, status=400)
+            return JsonResponse({'error': 'Invalid choice!'}, status=400)
 
-        # Validate currency
-        currency = Currency.objects.first()
-        if not currency:
-            return JsonResponse({'error': 'No currency found in the database!'}, status=500)
+        # Create a new InventoryObject using the choice data
+        inventory_object = InventoryObject(
+            user=request.user,
+            inventory=inventory,
+            choice=choice,  # Save the choice instance
+            choice_text=choice.choice_text if choice else "Default Choice",
+            category=data.get('category', 'default'),
+            currency=Currency.objects.first(),
+            price=data.get('price', 0),
+            condition=data.get('condition', 'M'),
+            quantity=data.get('quantity', 1),
+        )
 
-        if button_type == "start2":
-            # Temporary inventory object for demonstration spins
-            inventory_object = InventoryObject(
-                inventory=inventory,
-                choice=choice,
-                choice_text=choice.choice_text,
-                category=data.get('category', 'default'),
-                currency=currency,
-                price=data.get('price', 0),
-                condition=data.get('condition', 'M'),
-                quantity=data.get('quantity', 1),
-            )
-            try:
-                inventory_object.save()
-                print(f"Temporary InventoryObject created: {inventory_object.id}")
-
-                # Spin logic here (placeholder for additional processing)
-                # ...
-
-                # Delete the inventory object after the spin
-                inventory_object.delete()
-                print(f"Temporary InventoryObject deleted: {inventory_object.id}")
-                return JsonResponse({'success': True, 'message': 'Demonstration rendered and object deleted!'})
-            except Exception as e:
-                return JsonResponse({'error': f'Failed during temporary object handling: {str(e)}'}, status=500)
-        else:
-            # Clear previous inventory objects for the user
-            InventoryObject.objects.filter(user=request.user, inventory=inventory).delete()
-
-            # Create and save the new inventory object
-            inventory_object = InventoryObject(
-                user=request.user,
-                inventory=inventory,
-                choice=choice,
-                choice_text=choice.choice_text,
-                category=data.get('category', 'default'),
-                currency=currency,
-                price=data.get('price', 0),
-                condition=data.get('condition', 'M'),
-                quantity=data.get('quantity', 1),
-            )
-            try:
-                inventory_object.save()
-                return JsonResponse({'success': True, 'message': 'Inventory object created successfully!', 'choice_id': inventory_object.id})
-            except Exception as e:
-                return JsonResponse({'error': str(e)}, status=500)
+        try:
+            inventory_object.save()
+            return JsonResponse({'success': True, 'message': 'Inventory object created successfully!'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
 
 
 def sell_game_inventory_object(self, request, pk):
