@@ -8039,6 +8039,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
 
 
+
 @csrf_exempt
 def create_inventory_object(request):
     if request.method == 'POST':

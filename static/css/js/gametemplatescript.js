@@ -13,13 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
 
-
-    // Set the checkbox state based on localStorage value
-    if (persistSpin) {
-        $('#persist-spin-checkbox').prop('checked', true);
-    }
-
-    // Handle the checkbox state change
+    // Persist settings on checkbox change
     $('#persist-spin-checkbox').change(function () {
         localStorage.setItem('persistSpinChecked', $(this).prop('checked').toString());
     });
@@ -136,7 +130,7 @@ async function randomizeContents() {
             const middleIndex = Math.floor(cardContainer.children.length / 2);
             const targetIndex = Math.min(
                 cardContainer.children.length,
-                middleIndex + 4
+                middleIndex + 3
             );
 
             if (cardContainer.children[targetIndex]) {
@@ -148,7 +142,7 @@ async function randomizeContents() {
             // Adjust the slider to center the new card
             //centerCard(targetCardElement);
 
-            console.log("Target card inserted 4 cards to the right of the middle.");
+            console.log("Target card inserted 3 cards to the right of the middle.");
 
             // Call create_inventory_object after the card is created
             const inventoryPayload = {
@@ -157,8 +151,7 @@ async function randomizeContents() {
                 category: 'example_category',  // Additional data as needed
                 price: 100,
                 condition: 'New',
-                quantity: 1,
-                button_type: buttonType
+                quantity: 1
             };
             console.log("Calling /create_inventory_object/ with payload:", inventoryPayload);
 
@@ -308,11 +301,6 @@ setTimeout(() => {
     } else {
         animationStopped = true; // Spin has ended
         showPopup();
-        // Reset totalSpins to 1 only if Persist Spin is unchecked, and after all spins are completed
-        if (!persistSpin) {
-            totalSpins = 1;
-            sessionStorage.setItem("totalSpins", totalSpins); // Set to 1 after spin completes
-        }
         $(".start").prop('disabled', false);
         $(".spin-option").prop('disabled', false);
     }
@@ -364,12 +352,6 @@ function findSelectedCard() {
             <h2>Congratulations!</h2>
             <p>You got:</p>
             <div class="cards-container"></div>
-            <form method="POST" action="{% url 'showcase:sell_game_inventory_object' %}">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="sell">
-                <button type="submit" class="btn btn-danger">Sell Item</button>
-            </form>
-
             <button class="close">Collect</button>
         `;
 
