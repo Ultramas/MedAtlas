@@ -13,7 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
 
-    // Persist settings on checkbox change
+
+    // Set the checkbox state based on localStorage value
+    if (persistSpin) {
+        $('#persist-spin-checkbox').prop('checked', true);
+    }
+
+    // Handle the checkbox state change
     $('#persist-spin-checkbox').change(function () {
         localStorage.setItem('persistSpinChecked', $(this).prop('checked').toString());
     });
@@ -31,19 +37,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Start animation on button click
-    $(".start").click(function () {
+    $(".start").click(function (event) {
+        const buttonId = event.target.id; // Extract the ID of the clicked button
+        console.log(`Button clicked: ${buttonId}`); // Debug: Log the button's ID
         sessionStorage.setItem("startAnimation", "true");
         sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
 
         // Reset current spin count and initialize the animation
-        currentSpin = 0;
-        initializeAnimation();
+
+
+        let currentSpin = 0;
+        console.log('current spin set to 0')
+        initializeAnimation(buttonId);
     });
 
-    function initializeAnimation() {
+    function initializeAnimation(buttonId) {
         $(".start").prop('disabled', true);
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
         selectedItems = [];
+        console.log(`Initializing animation for button: ${buttonId}`); // Debug log for button ID
+
 
 
 async function randomizeContents() {
@@ -130,7 +143,7 @@ async function randomizeContents() {
             const middleIndex = Math.floor(cardContainer.children.length / 2);
             const targetIndex = Math.min(
                 cardContainer.children.length,
-                middleIndex + 3
+                middleIndex + 4
             );
 
             if (cardContainer.children[targetIndex]) {
@@ -142,7 +155,7 @@ async function randomizeContents() {
             // Adjust the slider to center the new card
             //centerCard(targetCardElement);
 
-            console.log("Target card inserted 3 cards to the right of the middle.");
+            console.log("Target card inserted 4 cards to the right of the middle.");
 
             // Call create_inventory_object after the card is created
             const inventoryPayload = {
@@ -253,62 +266,87 @@ function alignCardWithSpinner() {
 
 
 
+$(".start").click(function (event) {
+    const buttonId = event.target.id; // Extract the ID of the clicked button
+    console.log(`Button clicked: ${buttonId}`); // Debug: Log the button's ID
+});
 
+function spin(buttonId) {
+    // Reset currentSpin to 0 when a button is pressed
+    if (currentSpin === totalSpins || animationStopped) {
+        currentSpin = 0; // Reset spin count
+        animationStopped = false; // Ensure animations are not marked as stopped
+    }
 
- function spin() {
     $(".spin-option").prop('disabled', true);
 
     randomizeContents();
     addAnimation();
+
+    if (buttonId === "start") {
+        console.log("Regular Spin triggered");
+    } else if (buttonId === "start2") {
+        console.log("Demo Spin triggered");
+    }
 
     const animationDuration = isQuickSpin ? 4500 : 9000;
     const buffer = 150;
     const audiobuffer = 300;
     const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
 
-audio.addEventListener('loadedmetadata', () => {
-    // Calculate the adjusted duration
-    const adjustedDuration = (animationDuration + audiobuffer) / 1000; // Convert ms to seconds
-    const originalDuration = audio.duration;
+    audio.addEventListener('loadedmetadata', () => {
+        // Calculate the adjusted duration
+        const adjustedDuration = (animationDuration + audiobuffer) / 1000; // Convert ms to seconds
+        const originalDuration = audio.duration;
 
-    // Adjust playback rate if the original duration is available
-    if (originalDuration) {
-        audio.playbackRate = originalDuration / adjustedDuration;
-    }
+        // Adjust playback rate if the original duration is available
+        if (originalDuration) {
+            audio.playbackRate = originalDuration / adjustedDuration;
+        }
 
-    // Play the audio
-    audio.play().catch(error => console.error('Error playing audio:', error));
-});
-
-// Handle audio load errors
-audio.addEventListener('error', (e) => {
-    console.error('Audio failed to load:', e);
-});
-
-// Call this function when the spin ends
-setTimeout(() => {
-
-    const animationDuration = isQuickSpin ? 4500 : 9000;
-    document.querySelectorAll('.slider').forEach(scroller => {
-        scroller.style.animationPlayState = 'paused';
+        // Play the audio
+        audio.play().catch((error) => console.error('Error playing audio:', error));
     });
 
-    //findSelectedCard();
-    currentSpin++;
+    // Handle audio load errors
+    audio.addEventListener('error', (e) => {
+        console.error('Audio failed to load:', e);
+    });
 
-    if (currentSpin < totalSpins) {
-        setTimeout(spin, buffer); // Queue the next spin
-    } else {
-        animationStopped = true; // Spin has ended
-        showPopup();
-        $(".start").prop('disabled', false);
-        $(".spin-option").prop('disabled', false);
-    }
+    // Call this function when the spin ends
+    setTimeout(() => {
+        document.querySelectorAll('.slider').forEach((scroller) => {
+            scroller.style.animationPlayState = 'paused';
+        });
+
+        // Increment currentSpin and log the buttonId
+        currentSpin++;
+        console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`); // Log spin number and button ID
+
+        // If there are more spins, recursively call spin with the buttonId
+        if (currentSpin < totalSpins) {
+            setTimeout(() => spin(buttonId), buffer); // Pass buttonId explicitly to the next spin
+        } else {
+            // All spins completed
+            animationStopped = true; // Spin has ended
+            console.log(`The spins have ended.`);
+
+            showPopup(); // Show the popup after all spins complete
+
+            // Reset totalSpins to 1 only if Persist Spin is unchecked, and after all spins are completed
+            if (!persistSpin) {
+                totalSpins = 1;
+                sessionStorage.setItem("totalSpins", totalSpins); // Set to 1 after spin completes
+            }
+
+            // Re-enable buttons and options
+            $(".start").prop('disabled', false);
+            $(".spin-option").prop('disabled', false);
+        }
     }, animationDuration);
-    }
-   spin();
-    }
-
+}
+    spin(buttonId);
+}
 
 function findSelectedCard() {
     const selector = document.getElementById('selector').getBoundingClientRect();
@@ -352,6 +390,12 @@ function findSelectedCard() {
             <h2>Congratulations!</h2>
             <p>You got:</p>
             <div class="cards-container"></div>
+            <form method="POST" action="{% url 'showcase:sell_game_inventory_object' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="sell">
+                <button type="submit" class="btn btn-danger">Sell Item</button>
+            </form>
+
             <button class="close">Collect</button>
         `;
 
@@ -406,6 +450,7 @@ function findSelectedCard() {
 
             if (!persistSpin) {
                 totalSpins = 1;
+                console.log(`persist spin not enabled; reset spins to 1`); // Debug: Log the button's ID
                 sessionStorage.setItem("totalSpins", totalSpins);
                 $(".spin-option").removeClass("selected");
                 $(".spin-option[data-value='1']").addClass("selected");
