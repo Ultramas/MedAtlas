@@ -8038,17 +8038,19 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         return super().dispatch(*args, **kwargs)
 
 
-
-
 @csrf_exempt
 def create_inventory_object(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)  # Parse the JSON payload
-            inventory = Inventory.objects.get(user=request.user)
+            button_id = data.get('buttonId')  # Retrieve buttonId from the payload
+
+            inventory = None
+            if button_id == "start":
+                inventory = Inventory.objects.get(user=request.user)
             print("Received payload:", data)
         except Inventory.DoesNotExist:
-            return JsonResponse({'error': 'No inventory found for the user!'}, status=400)
+            return JsonResponse({'status': 'error', 'message': 'No inventory found for the user!'}, status=400)
 
         # Extract data from the payload
         choice_id = data.get('choice_id')  # Retrieve choice_id from payload
@@ -8058,12 +8060,12 @@ def create_inventory_object(request):
         try:
             choice = Choice.objects.get(id=choice_id) if choice_id else None
         except Choice.DoesNotExist:
-            return JsonResponse({'error': 'Invalid choice!'}, status=400)
+            return JsonResponse({'status': 'error', 'message': 'Invalid choice!'}, status=400)
 
         # Create a new InventoryObject using the choice data
         inventory_object = InventoryObject(
-            user=request.user,
-            inventory=inventory,
+            user=request.user if button_id == "start" else None,
+            inventory=inventory if button_id == "start" else None,
             choice=choice,  # Save the choice instance
             choice_text=choice.choice_text if choice else "Default Choice",
             category=data.get('category', 'default'),
@@ -8075,12 +8077,32 @@ def create_inventory_object(request):
 
         try:
             inventory_object.save()
-            return JsonResponse({'success': True, 'message': 'Inventory object created successfully!'})
+            response_data = {
+                'status': 'success',
+                'message': 'Inventory object created successfully!',
+                'button_id': button_id,
+                'inventory_object_id': inventory_object.id
+            }
+            return JsonResponse(response_data)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+
+@csrf_exempt
+def delete_inventory_object(request, object_id):
+    if request.method == 'DELETE':
+        try:
+            inventory_object = InventoryObject.objects.get(id=object_id, user__isnull=True)
+            inventory_object.delete()
+            return JsonResponse({'success': True, 'message': 'Temporary inventory object deleted!'})
+        except InventoryObject.DoesNotExist:
+            return JsonResponse({'error': 'Inventory object not found!'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
-
 
 
 def sell_game_inventory_object(self, request, pk):

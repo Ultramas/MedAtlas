@@ -159,12 +159,13 @@ async function randomizeContents() {
 
             // Call create_inventory_object after the card is created
             const inventoryPayload = {
-                choice_id: data.choice_id,  // Use choice_id from outcome response
-                choice_value: data.choice_value,  // Use choice_value
-                category: 'example_category',  // Additional data as needed
+                choice_id: data.choice_id, // Use choice_id from outcome response
+                choice_value: data.choice_value, // Use choice_value
+                category: 'example_category', // Additional data as needed
                 price: 100,
                 condition: 'New',
-                quantity: 1
+                quantity: 1,
+                buttonId: buttonId,
             };
             console.log("Calling /create_inventory_object/ with payload:", inventoryPayload);
 
@@ -181,9 +182,31 @@ async function randomizeContents() {
             console.log("Response from /create_inventory_object/:", inventoryData);
 
             if (inventoryData.status === 'success') {
-                console.log("Inventory object created successfully.");
+                if (inventoryData.button_id === "start") {
+                    console.log("Inventory object created successfully with user.");
+                } else if (inventoryData.button_id === "start2") {
+                    console.log("Temporary inventory object created without user. ID:", inventoryData.inventory_object_id);
+                }
             } else {
                 console.error("Failed to create inventory object:", inventoryData.message);
+            }
+            if (buttonId === "start2" && currentSpin >= totalSpins) {
+                try {
+                    const deleteResponse = await fetch(`/delete_temp_inventory_object/${inventoryData.inventory_object_id}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                        },
+                    });
+                    const deleteData = await deleteResponse.json();
+                    if (deleteData.status === 'success') {
+                        console.log("Temporary inventory object deleted successfully.");
+                    } else {
+                        console.error("Failed to delete temporary inventory object:", deleteData.message);
+                    }
+                } catch (error) {
+                    console.error("Error deleting temporary inventory object:", error);
+                }
             }
 
             return data; // Return the data for further use
