@@ -217,8 +217,8 @@
 <p id="user-total">Your Total: $0</p>
         <p id="other-user-total">Other User's Total: $0</p>
         <!-- Dynamic Final Cost Display -->
-        <h4>Final Cost:</h4>
-        <p id="final-cost">Final Cost: $0</p>
+        <h4>Final Difference:</h4>
+        <p id="final-cost">Final Difference: $0</p>
 
         <!-- Submit Button -->
         <button type="submit" class="submit-button">Send Offer </button>
@@ -430,62 +430,59 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!userId) return; // Exit if no user is selected
 
         // Fetch trade items for the selected user
-        fetch(`/api/trade-items/${userId}/`)
-            .then(response => response.json())
-            .then(data => {
-                data.trade_items.forEach(item => {
-                    // Create checkbox for item selection
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.name = 'exchangeprizes';
-                    checkbox.value = item.id;
-                    checkbox.dataset.value = item.value;
-                    checkbox.id = `exchangeprizes-${item.id}`;
+// Fetch trade items for the selected user
+fetch(`/api/trade-items/${userId}/`)
+    .then(response => response.json())
+    .then(data => {
+        let htmlContent = ''; // Initialize an empty string for the HTML content
 
-                    // Create label for item
-                    const label = document.createElement('label');
-                    label.htmlFor = `exchangeprizes-${item.id}`;
-                    label.textContent = `${item.title} - $${item.value}`;
+       data.trade_items.forEach(item => {
+            // Construct the HTML string for each item
+            const imagePath = item.image ? `/media/${item.image}` : 'path/to/placeholder-image.jpg';
 
-                    // Create condition element
-                    const condition = document.createElement('span');
-                    condition.textContent = `Condition: ${item.condition}`;
-                    condition.className = 'item-condition';
+            htmlContent += `
+                <div class="item">
+                    <img
+                        src="${imagePath}"
+                        alt="${item.title}"
+                        class="item-image"
+                    />
+                    <span class="item-condition">Condition: ${item.condition}</span>
+                    <input
+                        type="checkbox"
+                        name="exchangeprizes"
+                        value="${item.id}"
+                        data-value="${item.value}"
+                        id="exchangeprizes-${item.id}"
+                    />
+                    <label for="exchangeprizes-${item.id}">${item.title} - $${item.value}</label>
+                </div>
+            `;
+        });
 
-                    // Create image element (with fallback for missing image)
-                    const image = document.createElement('img');
-                    image.src = item.image_url || '/path/to/placeholder/image.jpg';  // Fallback to placeholder if no image URL
-                    image.alt = item.title;
-                    image.className = 'item-image';
 
-                    // Create container for the item
-                    const container = document.createElement('div');
-                    container.className = 'item';
-                    container.appendChild(image);       // Append the image
-                    container.appendChild(condition);  // Append the condition
-                    container.appendChild(checkbox);   // Append the checkbox
-                    container.appendChild(label);      // Append the label
+        // Append the constructed HTML to the container
+        otherUserItemsContainer.innerHTML = htmlContent;
 
-                    // Append the container to the other user's items section
-                    otherUserItemsContainer.appendChild(container);
+        // Add event listeners for checkboxes
+        document.querySelectorAll('input[name="exchangeprizes"]').forEach(checkbox => {
+            checkbox.addEventListener('change', updateTotals);
 
-                    // Add event listener for checkbox to update totals
-                    checkbox.addEventListener('change', updateTotals);
-
-                    // Event listener to highlight the associated trade item in `user-trade-items`
-                    checkbox.addEventListener('change', function () {
-                        const associatedItem = document.querySelector(`#user-trade-items .item[data-item-id="${item.id}"]`);
-                        if (this.checked) {
-                            associatedItem.classList.add('highlighted');
-                        } else {
-                            associatedItem.classList.remove('highlighted');
-                        }
-                    });
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching trade items:', error);
+            // Event listener to highlight the associated trade item in `user-trade-items`
+            checkbox.addEventListener('change', function () {
+                const associatedItem = document.querySelector(`#user-trade-items .item[data-item-id="${this.value}"]`);
+                if (this.checked) {
+                    associatedItem.classList.add('highlighted');
+                } else {
+                    associatedItem.classList.remove('highlighted');
+                }
             });
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching trade items:', error);
+    });
+
     });
 
     // Add event listeners for your items (already selected user items)

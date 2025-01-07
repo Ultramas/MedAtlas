@@ -172,25 +172,13 @@
 
 			<!-- product section -->
 	<div class="product-section mt-150 mb-150">
-
+<strong>{{ SentProfile.user.username }}</strong> -
+    <span id="currency-amount">{{ SentProfile.currency_amount }} Rubies </span>
 		<div class="container">
-		{% for userprofile in Profiles %}
-		{% if userprofile.newprofile_profile_picture_url %}
-
-		<p style="display: flex;"><a href="{{ userprofile.newprofile_profile_url }}">
-										<img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="35" height="35" style="border-radius: 50px; margin-right: 20px;">
-									</a>
-			<strong>{{ userprofile.user.username }} </strong>  - {{ userprofile.currency_amount }} {{ userprofile.currency.name }}</p>
-
-									{% else %}
-
-        <p>No profile information available.</p>
-			{% endif %}
-									{% endfor %}
 			<div class="row">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="section-title">
-						<h3><span class="orange-text">My</span> Inventory - ({{ StockObject|length }})</h3>
+						<h3><span class="orange-text">My</span> Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)</h3>
 
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "inventory.html" %}
@@ -340,23 +328,26 @@
         <p class="product-condition">Card Condition: {{ Inventory.condition }}</p>
         <p class="product-description">{{ Inventory.description }}</p>
         <div class="action-buttons">
-          <form action="" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="sell">
-            <input type="hidden" name="pk" value="{{ Inventory.pk }}">
-            <button type="submit" class="action-button sell-button">Sell</button>
-          </form>
-          <form method="post" action="">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="withdraw">
-            <input type="hidden" name="pk" value="{{ Inventory.pk }}">
-            <button type="submit" class="action-button withdraw-button">Withdraw</button>
-          </form>
-          <form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="move">
-            <button type="submit" class="action-button trade-button">Tradable</button>
-          </form>
+       <form id="sell-form-{{ Inventory.pk }}" action="" method="post" class="ajax-form">
+			{% csrf_token %}
+			<input type="hidden" name="action" value="sell">
+			<input type="hidden" name="pk" value="{{ Inventory.pk }}">
+			<button type="submit" class="action-button sell-button">Sell</button>
+		</form>
+
+		<form id="withdraw-form-{{ Inventory.pk }}" action="" method="post" class="ajax-form">
+			{% csrf_token %}
+			<input type="hidden" name="action" value="withdraw">
+			<input type="hidden" name="pk" value="{{ Inventory.pk }}">
+			<button type="submit" class="action-button withdraw-button">Withdraw</button>
+		</form>
+
+		<form id="trade-form-{{ Inventory.pk }}" action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post" class="ajax-form">
+			{% csrf_token %}
+			<input type="hidden" name="action" value="move">
+			<button type="submit" class="action-button trade-button">Tradable</button>
+		</form>
+
         </div>
       </div>
     </div>
@@ -554,7 +545,61 @@
 		</div>
 	</div>
 	<!-- end copyright -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const forms = document.querySelectorAll(".ajax-form");
 
+    forms.forEach(form => {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const url = this.getAttribute("action");
+            const csrfToken = formData.get("csrfmiddlewaretoken");
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                },
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Update stock count
+                    const stockCountElement = document.querySelector("#stock-count");
+                    if (stockCountElement) {
+                        stockCountElement.textContent = data.stock_count;
+                    }
+
+                    // Update currency amount
+                    const currencyAmountElement = document.querySelector("#currency-amount");
+                    if (currencyAmountElement) {
+                        currencyAmountElement.textContent = data.currency_amount;
+                    }
+
+                    // Example: Remove the item from the UI
+                    this.closest(".inventory-item").remove();
+                } else {
+                    console.error("Action failed.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    });
+});
+
+
+
+</script>
 	<!-- jquery -->
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
      <script src="{% static 'css/js/main.js' %}"></script>

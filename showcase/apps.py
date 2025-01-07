@@ -1,7 +1,5 @@
+# showcase/apps.py
 from django.apps import AppConfig
-
-from showcase.middleware import logger
-
 
 class ShowcaseConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
@@ -9,5 +7,4 @@ class ShowcaseConfig(AppConfig):
 
     def ready(self):
         import showcase.signals  # Ensure this line is correctly included and executed
-        logger.debug("ShowcaseConfig ready method called, signals.py imported")
-
+        # logger.debug("ShowcaseConfig ready method called, signals.py imported")  # Remove this line

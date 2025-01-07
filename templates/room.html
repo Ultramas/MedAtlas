@@ -696,6 +696,46 @@ $(document).ready(function(){
 
 </div>
 
+<script>
+  window.onload = function() {
+    setTimeout(function() {
+    var display = document.getElementById('display');
+    display.scrollTop = 0;
+    }, 1000); // 100 milliseconds delay
+  };
+</script>
+
+<script>
+  function checkUserPresence() {
+    // Check if the user is logged in and has unread notifications
+    if ({{ user.is_authenticated|yesno:"true,false" }}) {
+      // Send an AJAX request to notify the server the user is on the page
+      fetch("{% url 'showcase:mark_notifications_as_read' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify({ room_id: {{ room.id }} }),
+      })
+        .then((response) => {
+          if (response.ok) {
+            console.log("User presence confirmed, notifications marked as read.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error updating notifications:", error);
+        });
+    } else {
+      console.log("User is not logged in or no unread notifications.");
+    }
+  }
+
+  // Check user presence every 0.2 seconds
+  setInterval(checkUserPresence, 0200);
+</script>
+
+
 
 <br>
 <br>

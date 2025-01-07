@@ -31,10 +31,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update total spins when a spin option is clicked
     $(".spin-option").click(function () {
         $(".spin-option").removeClass("selected");
+
+        // Play sound bubble_selection.mp3
+        let audio = new Audio("/static/css/sounds/bubble_selection.mp3");
+        audio.play();
+
         $(this).addClass("selected");
         totalSpins = parseInt($(this).data("value"));
         sessionStorage.setItem("totalSpins", totalSpins);
     });
+
 
     // Start animation on button click
     $(".start").click(function (event) {
@@ -189,24 +195,6 @@ async function randomizeContents() {
                 }
             } else {
                 console.error("Failed to create inventory object:", inventoryData.message);
-            }
-            if (buttonId === "start2" && currentSpin >= totalSpins) {
-                try {
-                    const deleteResponse = await fetch(`/delete_temp_inventory_object/${inventoryData.inventory_object_id}/`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}',
-                        },
-                    });
-                    const deleteData = await deleteResponse.json();
-                    if (deleteData.status === 'success') {
-                        console.log("Temporary inventory object deleted successfully.");
-                    } else {
-                        console.error("Failed to delete temporary inventory object:", deleteData.message);
-                    }
-                } catch (error) {
-                    console.error("Error deleting temporary inventory object:", error);
-                }
             }
 
             return data; // Return the data for further use

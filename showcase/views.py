@@ -21,7 +21,8 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference, Battle, \
-    BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer
+    BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
+    UserNotification
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -3998,6 +3999,7 @@ from django.http import HttpRequest, JsonResponse
 from django.views.generic import TemplateView
 
 
+
 class RoomView(TemplateView):
     model = Room
     template_name = 'room.html'
@@ -4005,10 +4007,26 @@ class RoomView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        room_name = self.kwargs['room']  # assuming 'room' is the room name passed in the URL
+        room_name = self.kwargs['room']
+        room = get_object_or_404(Room, name=room_name)
+        context['room'] = room
+
         rooms_with_logo_same_name = Room.objects.filter(name=room_name).exclude(logo='')
         context['rooms_with_logo_same_name'] = rooms_with_logo_same_name
-        room = self.kwargs['room']
+
+        if self.request.user.is_authenticated:
+            room_content_type = ContentType.objects.get_for_model(Room)
+
+            # Check if the user has any unread notifications for this room
+            has_unread_notifications = UserNotification.objects.filter(
+                user=self.request.user,
+                notification__content_type=room_content_type,
+                notification__object_id=room.id,
+                is_read=False
+            ).exists()
+
+            # Add this to the room context
+            context['room'].has_unread_notifications = has_unread_notifications
 
         username = self.request.GET.get('username')
         room_details = Room.objects.get(name=room)
@@ -4259,6 +4277,59 @@ def send(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+
+def mark_notifications_as_read(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            room_id = data.get("room_id")
+            if not room_id:
+                print("Room ID not provided.")
+                return JsonResponse({"status": "error", "message": "Room ID not provided."}, status=400)
+
+            # Get the ContentType for the Room model
+            room_content_type = ContentType.objects.get_for_model(Room)
+
+            # Validate the room existence
+            try:
+                room = Room.objects.get(id=room_id)
+                print(f"Room retrieved: {room}")
+            except Room.DoesNotExist:
+                print(f"Room with ID {room_id} does not exist.")
+                return JsonResponse({"status": "error", "message": "Invalid Room ID."}, status=400)
+
+            # Fetch the related UserNotifications for the specific room and user
+            queryset = UserNotification.objects.filter(
+                user=request.user,
+                notification__content_type=room_content_type,
+                notification__object_id=room_id,
+                is_read=False
+            )
+
+            # Debug: Check if any records match the query
+            if not queryset.exists():
+                print(f"No matching UserNotifications found for user: {request.user}, room_id: {room_id}.")
+                return JsonResponse({"status": "error", "message": "No unread notifications found."}, status=404)
+            else:
+                for notification in queryset:
+                    print(f"Matching UserNotification: ID={notification.id}, User={notification.user}, Is_Read={notification.is_read}")
+
+            # Perform the update
+            notifications_updated = queryset.update(is_read=True)
+
+            print(f"Notifications updated: {notifications_updated}")
+            print(f"User: {request.user}")
+            print(f"Room ID: {room_id}")
+            print(f"ContentType: {room_content_type}")
+
+            return JsonResponse({"status": "success", "message": f"{notifications_updated} notifications marked as read."})
+        except Exception as e:
+            print(f"Error marking notifications as read: {e}")
+            return JsonResponse({"status": "error", "message": "An error occurred."}, status=500)
+
+    print("Invalid request method.")
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
 
 
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -7905,6 +7976,19 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
         except UserProfile.DoesNotExist:
             context['SentProfile'] = None
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
         context['Money'] = Currency.objects.filter(is_active=1)
         context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user)
         context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
@@ -7913,8 +7997,8 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
-        action = self.request.POST.get('action')
-        pk = self.request.POST.get('pk')
+        action = request.POST.get('action')
+        pk = request.POST.get('pk')
 
         if action == 'sell':
             return self.sell_inventory_object(request, pk)
@@ -7923,7 +8007,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         elif action == 'move':
             return self.move_to_trade(request, pk)
         else:
-            return HttpResponse(status=400)  # Bad request if action is unknown
+            return JsonResponse({'success': False, 'error': 'Invalid action'}, status=400)
 
     def withdraw_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
@@ -7963,34 +8047,32 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
     def sell_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
-        # Check if user owns the inventory object
         if inventory_object.user != request.user:
-            messages.error(request, 'You cannot sell items you do not own!')
-            return redirect('showcase:inventory')
+            return JsonResponse({'success': False}, status=403)
 
-        # Update InventoryObject
         inventory_object.user = None
         inventory_object.inventory = None
 
         with transaction.atomic():
-            # Create the Transaction instance
             Transaction.objects.create(
                 inventory_object=inventory_object,
                 user=request.user,
                 currency=inventory_object.currency,
                 amount=inventory_object.price
             )
-
-            # Save the updated InventoryObject
             inventory_object.save()
 
-            # Update UserProfile's currency_amount
             user_profile = get_object_or_404(UserProfile, user=request.user)
             user_profile.currency_amount += inventory_object.price
             user_profile.save()
 
-        messages.success(request, f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
-        return redirect('showcase:inventory')
+        # Include updated values in the response
+        stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+        return JsonResponse({
+            'success': True,
+            'stock_count': stock_count,
+            'currency_amount': user_profile.currency_amount
+        })
 
     def move_to_trade(self, request, pk):
         inventory_item = get_object_or_404(InventoryObject, pk=pk, user=request.user)
@@ -8768,13 +8850,16 @@ class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user_settings = self.request.user.settings
 
-        context['username'] = self.request.user.username
-        context['password'] = SettingsModel.password
-        context['email'] = SettingsModel.email
-        context['coupons'] = SettingsModel.coupons
-        context['news'] = SettingsModel.news
+        # Fetch the settings for the currently logged-in user
+        try:
+            user_settings = SettingsModel.objects.get(user=self.request.user, is_active=1)
+        except SettingsModel.DoesNotExist:
+            user_settings = None
+
+        # Pass the user settings to the context
+        context['settings'] = user_settings
+
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
@@ -9540,6 +9625,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from .models import TradeItem
 
+
 class InventoryTradeView(CreateView):
     model = CommerceExchange
     template_name = "inventorytrade.html"
@@ -9561,14 +9647,14 @@ class InventoryTradeView(CreateView):
         trade_items = TradeItem.objects.filter(user=user, is_active=1)
         other_trade_items = TradeItem.objects.exclude(user=user).filter(is_active=1)
 
-        # Serialize other_trade_items with image URLs for JavaScript
+
         context['other_trade_items'] = [
             {
                 'id': item.id,
                 'title': item.title,
                 'value': item.value,
-                'image_url': item.image.url if item.image and hasattr(item.image, 'url') else '',  # Safely handle missing or invalid images
-                'condition': item.get_condition_display(),  # Include human-readable condition
+                'image_url': item.image.url if item.image and hasattr(item.image, 'url') else '/path/to/placeholder/image.jpg',  # Fallback to placeholder if no image
+                'condition': item.get_condition_display(),
             }
             for item in other_trade_items
         ]
@@ -9584,6 +9670,7 @@ class InventoryTradeView(CreateView):
         })
 
         return context
+
 
 def trade_items_api(request, user_id):
     # This view handles the API request to fetch trade items for a specific user

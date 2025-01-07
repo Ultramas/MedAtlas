@@ -472,6 +472,7 @@ urlpatterns = [
     path('user.username/<str:room>/', views.room, name='room'), #causes admistration redirection on messages' "view on site"
     path('home/<str:room>/', views.RoomView.as_view(), name='room'),
     path('create_room', views.NewRoomSettingsView.as_view(), name='create_room'),
+    path('mark_notifications_as_read/', views.mark_notifications_as_read, name='mark_notifications_as_read'),
     path('supportchat/checkview', views.supportcheckview, name='supportcheckview'),
     #path('supportgetMessages/room/', views.supportgetMessages, name='supportgetMessages'),
     path('supportgetMessages/<str:signed_in_user>/', views.supportgetMessages, name='supportlinegetmessages'),

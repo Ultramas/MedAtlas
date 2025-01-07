@@ -104,9 +104,11 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'showcase.utils.CurrentUserMiddleware',
+    'showcase.middleware.current_room.CurrentRoomMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'showcase.middleware.middleware.CurrentUserMiddleware',
+    'showcase.middleware.middleware.NotificationStatusMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'

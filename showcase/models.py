@@ -57,7 +57,6 @@ LABEL_CHOICES = (
     ('BS', 'Best Seller'),
     ('BV', 'Best Value'),
 )
-
 SHUFFLE_CHOICES = (
     ('L', 'Luck'),
     ('S', 'Skill'),
@@ -109,6 +108,12 @@ HEAT = (
     ('F', 'Fiery'),
     ('W', 'Wild'),
     ('E', 'Explosive'),
+)
+
+NOTIFICATIONSTATUS = (
+    ('ON', 'Online'),
+    ('DND', 'Do Not Disturb'),
+    ('OFF', 'Offline'),
 )
 
 ASCENSIONFLAVORTEXT = (
@@ -1654,22 +1659,35 @@ class CommerceExchange(models.Model):
 
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    user = models.ManyToManyField(User, related_name="notifications")
     message = models.TextField()
-    created_at = models.DateTimeField(default=now)
-    is_read = models.BooleanField(default=False)
-
-    # Optional: Related object for more context
+    created_at = models.DateTimeField(auto_now_add=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
     object_id = models.PositiveIntegerField(null=True, blank=True)
     related_object = GenericForeignKey('content_type', 'object_id')
+
+    def __str__(self):
+        return f"Notification: {self.message}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        for user in self.user.all():
+            created = UserNotification.objects.get_or_create(user=user, notification=self)
+            print(f"Created UserNotification for {user.username}: {created}")
+
+
+class UserNotification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_notifications")
+    notification = models.ForeignKey(Notification, on_delete=models.CASCADE, related_name="user_notifications")
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def mark_as_read(self):
         self.is_read = True
         self.save()
 
     def __str__(self):
-        return f"Notification for {self.user.username}: {self.message}"
+        return f"UserNotification: {self.notification.message} for {self.user.username} - Read: {str(self.is_read)}"
 
 
 class Vote(models.Model):
@@ -4033,9 +4051,10 @@ class SettingsModel(models.Model):
     username = models.CharField(help_text='Your username', max_length=200)
     password = models.CharField(help_text='Your password', max_length=200)
     email = models.EmailField(help_text='Your password', max_length=200, blank=True, null=True)
-    coupons = models.BooleanField(verbose_name="Send me coupons", default=True, blank=True, null=True,
+    notifications_status = models.CharField(choices=NOTIFICATIONSTATUS, max_length=3, default='OFF')
+    coupons = models.BooleanField(verbose_name="Send me coupons", default=False, blank=True, null=True,
                                   choices=((True, 'Yes'), (False, 'No')))
-    news = models.BooleanField(verbose_name="Keep me in the loop", default=True, blank=True, null=True,
+    news = models.BooleanField(verbose_name="Keep me in the loop", default=False, blank=True, null=True,
                                choices=((True, 'Yes'), (False, 'No')))
     # connects to email
     is_active = models.IntegerField(default=1,
@@ -4045,7 +4064,7 @@ class SettingsModel(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return self.username
+        return self.user.username
 
     class Meta:
         verbose_name = "Setting"

@@ -9,7 +9,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
-    MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer
+    MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -498,6 +498,32 @@ class RespondingTradeOfferAdmin(admin.ModelAdmin):
 admin.site.register(RespondingTradeOffer, RespondingTradeOfferAdmin)
 
 
+class NotificationAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Notification Information - Categorial Description', {
+            'fields': ('user', 'message', 'content_type', 'object_id',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('created_at',)
+
+
+admin.site.register(Notification, NotificationAdmin)
+
+class UserNotificationAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Notification Information - Categorial Description', {
+            'fields': ('user', 'notification', 'is_read',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('created_at',)
+
+
+admin.site.register(UserNotification, UserNotificationAdmin)
+
+
+
 class ProfileAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Profile Information', {
@@ -543,7 +569,7 @@ class SettingsAdmin(admin.ModelAdmin):
             'fields': ('coupons', 'news',)
         }),
         ('Settings Information - Active Settings', {
-            'fields': ('is_active',)
+            'fields': ('notifications_status', 'is_active',)
         }),
     )
 

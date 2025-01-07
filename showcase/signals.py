@@ -5,7 +5,7 @@ from django.db.models.signals import m2m_changed, post_save, post_delete
 from django.dispatch import receiver
 
 from .models import Outcome, Achievements, ProfileDetails
-from .models import User, Profile, AdministrationChangeLog, Battle
+from .models import User, Profile, AdministrationChangeLog, Battle, Room, Message, Notification
 from .views import get_changes
 
 
@@ -83,7 +83,7 @@ def update_achievement_counters(sender, instance, **kwargs):
     if not user:
         return  # If there's no associated user, exit
 
-    # Retrieve all achievements associated with the current user
+    # Retrieve all achievements associated with the curren user
     achievements = Achievements.objects.filter(user=user)
 
     # Iterate over each achievement in the queryset and update its counters
@@ -117,3 +117,60 @@ def update_participant_battle(sender, instance, action, **kwargs):
                 participant.battle = instance
                 print('participant saved')  # Should now appear
                 participant.save()
+
+from django.contrib.auth.signals import user_logged_out
+from .models import SettingsModel
+
+@receiver(user_logged_out)
+def set_notifications_off(sender, request, user, **kwargs):
+    try:
+        settings = SettingsModel.objects.get(user=user)
+        if settings.notifications_status == 'ON':
+            settings.notifications_status = 'OFF'
+            settings.save()
+    except SettingsModel.DoesNotExist:
+        pass
+
+
+@receiver(post_save, sender=User)
+def create_user_settings(sender, instance, created, **kwargs):
+    """
+    Signal to create a SettingsModel instance when a new user is created.
+    """
+    if created:
+        SettingsModel.objects.create(
+            user=instance,
+            username=instance.username,
+            email=instance.email if hasattr(instance, 'email') else None
+        )
+
+@receiver(post_save, sender=Message)
+def create_notification_on_message(sender, instance, created, **kwargs):
+    """
+    Signal to create notifications for users in a room when a new message is posted.
+    """
+    if created:  # Trigger for newly created messages
+        message = instance
+        try:
+            room = Room.objects.get(name=message.room)
+            members_to_notify = room.members.exclude(id=message.signed_in_user.id)
+
+            # Get all users in the room except the sender
+            for member in members_to_notify:
+                # Check if the member's current_room matches the message's room
+                if getattr(member, 'current_room', None) != room.name:
+                    # Check notification settings
+                    user_settings = SettingsModel.objects.filter(user=member).first()
+                    if user_settings and user_settings.notifications_status == "ON":
+                        notification = Notification.objects.create(
+                            content_type=ContentType.objects.get_for_model(Message),
+                            object_id=message.id,
+                            related_object=message,
+                            message=f"{message.signed_in_user.username} sent a message in {room.name}: {message.value}"
+                        )
+                        # Add the member to the notification
+                        notification.user.add(member)
+                        notification.save()
+
+        except Room.DoesNotExist:
+            print(f"Room '{message.room}' does not exist.")

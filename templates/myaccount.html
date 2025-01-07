@@ -37,60 +37,21 @@
   <br>
     <h1 class="hello">Hello, {{user.username}}!</h1>
       <br>
-        <br>
-    <h1>My Name: {{user.username}}</h1>
-        <br>
 
 
     <h1>My Settings</h1>
     <!--saved items here-->
-    {% for SettingsView in object_list %}
-      <div class = "postop">
-        <h1>{{SettingsView.name}}</h1>
-        <br>
-        <p class="describe">
-          {{SettingsView.description}}</p>
-        <br>
-        <br>
-          <img class = "hunt" src="{{SettingsView.image}}">
-        <br>
-        <br>
-        <br>
-  </div>
-      <br>
-      <br>
-      <br>
-      <br>
- <nav>
-     <div class="bell"></div>
-     <div onclick='navToggle(this)'  class="hamburger">
-       <div class="bun"></div>
-       <div class="bun"></div>
-       <div class="bun"></div>
-     </div>
+    {% if settings %}
+    <p>Username: {{ user.username }}</p>
+    <p>Email: {{ settings.email }}</p>
+    <p>Notification Status: {{ settings.notifications_status }}</p>
+    <p>Receive Coupons: {{ settings.coupons|yesno:"Yes,No" }}</p>
+    <p>Receive News: {{ settings.news|yesno:"Yes,No" }}</p>
+    <p>Account Status: {{ settings.get_is_active_display }}</p>
+{% else %}
+    <p>No settings found for this user.</p>
+{% endif %}
 
-   <h2 class = "navtext">IntelleX</h2>  
-   
-     <div class="navItem"><a href = "{% url 'index' %}">Home</a></li></div>
-     <div class="navItem2"><a href = "{% url 'about' %}">About Us</a></div>
-     <div class="navItem3"><a href = "{% url 'hackerman' %}">Product Showcase</a></li></div>
-     <div class="navItem4"><a href = "{% url 'story' %}">Shop</a></li></div>
-     <div class="navItem5"><a href = "{% url 'pricing' %}">Contact Us</a></li></div>
-     <div class="navItem6"><a href = "{% url 'showcase' %}">My Account Settings</a></li></div>
-     <div class="navItem7"><a href = "{% url 'faq' %}">FAQ</a></li></div>
-     <div class="navItem8"><a href = "{% url 'commitment' %}">Our Guarantee</a></li></div>
-     <div class="navItem9"><a href = "{% url 'showcase' %}">Sign In</a></li></div>
-     
-   </nav>
-
-   <!--Custom JS-->
-    <script src="{% static 'css/js/script.js' %}"></script>
-    <script src="{% static 'css/js.darkmode.js' %}"></script>
-    <script src="{% static 'css/js/navbar.js' %}"></script>
-    <script src="{% static 'css/js/scroll.js' %}"></script>
-    
-   
-    {% endfor %}
   {% else %}
   <div class ="login">
     <p>You are not logged in. Please Login or Sign Up to access the IntelleX Member Area.</p>
