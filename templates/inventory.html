@@ -245,7 +245,7 @@
 
   .product-condition {
     font-size: 0.9rem;
-    color: #ffd700;
+    color: green;
     margin-bottom: 0.5rem;
   }
 
@@ -327,7 +327,7 @@
         <h3 class="product-name">{{ Inventory.price }} 💎</h3>
         <p class="product-condition">Card Condition: {{ Inventory.condition }}</p>
         <p class="product-description">{{ Inventory.description }}</p>
-        <div class="action-buttons">
+        <div class="action-buttons" style="position: fixed;">
        <form id="sell-form-{{ Inventory.pk }}" action="" method="post" class="ajax-form">
 			{% csrf_token %}
 			<input type="hidden" name="action" value="sell">

@@ -1030,7 +1030,6 @@ class ExchangePrizesForm(forms.ModelForm):
             self.instance.save()  # Save the CommerceExchange instance
         return self.instance
 
-
 class InventoryTradeForm(forms.ModelForm):
     trading_user = forms.ModelChoiceField(
         queryset=User.objects.none(),
@@ -1065,6 +1064,9 @@ class InventoryTradeForm(forms.ModelForm):
 
         # Populate usercard with current user's active trade items
         self.fields['usercard'].queryset = TradeItem.objects.filter(user=current_user, is_active=True)
+
+        # Populate exchangeprizes with all active trade items
+        self.fields['exchangeprizes'].queryset = TradeItem.objects.filter(is_active=True)
 
 
 class AddMonstrosityForm(forms.ModelForm):

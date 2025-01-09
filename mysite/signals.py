@@ -60,3 +60,35 @@ def update_profile_level_on_save(sender, instance, **kwargs):
     print(f"Signal triggered for profile: {instance}")
     print(f"Rubies spent: {instance.rubies_spent}")
     update_profile_level(instance)
+
+
+@receiver(user_logged_out)
+def set_notifications_off(sender, request, user, **kwargs):
+    """Set notification status to 'OFF' when the user logs out."""
+    if user.is_authenticated:  # Ensure the user is logged in
+        try:
+            settings = SettingsModel.objects.get(user=request.user)
+            if settings.notifications_status == 'ON':
+                settings.notifications_status = 'OFF'
+                settings.save()
+        except SettingsModel.DoesNotExist:
+            pass
+
+
+# Signal to handle status change
+
+@receiver(post_save, sender=InventoryTradeOffer)
+def notify_initiator_on_status_change(sender, instance, created, **kwargs):
+    if not created:  # Skip notifications for new objects
+        content_type = ContentType.objects.get_for_model(InventoryTradeOffer)
+        Notification.objects.create(
+            message=f"Your trade offer (ID: {instance.id}) has been {instance.status}.",
+            content_type=content_type,
+            object_id=instance.id,
+            user=instance.initiator
+            from django.db import transaction
+
+def calculate_final_cost(offer):
+    # Sum the fees or values of all offered items
+    return sum(item.value or 0 for item in offer.offered_items.all())
+

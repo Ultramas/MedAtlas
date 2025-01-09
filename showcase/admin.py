@@ -440,7 +440,7 @@ admin.site.register(TradeItem, TradeItemAdmin)
 class InventoryTradeOfferAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Inventory Trade Offer Information - Categorial Description', {
-            'fields': ('initiator', 'receiver', 'offered_items', 'requested_items', 'status', 'is_active', ),
+            'fields': ('initiator', 'receiver', 'offered_items', 'requested_items',  'final_cost', 'status', 'is_active', ),
             'classes': ('collapse',),
         }),
     )

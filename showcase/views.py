@@ -1645,7 +1645,7 @@ def create_outcome(request, slug):
                 'lower_nonce': choice.lower_nonce,
                 'choice_text': choice.choice_text,
                 'choice_color': choice.color,
-                'choice_file': choice.file.url if choice.file else None
+                'choice_file': choice.file.url if choice.file else None,
             })
 
         except Game.DoesNotExist:
@@ -4004,32 +4004,28 @@ class RoomView(TemplateView):
     model = Room
     template_name = 'room.html'
 
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         room_name = self.kwargs['room']
-        room = get_object_or_404(Room, name=room_name)
-        context['room'] = room
+        roomed = get_object_or_404(Room, name=room_name)
+        context['room'] = roomed
 
         rooms_with_logo_same_name = Room.objects.filter(name=room_name).exclude(logo='')
         context['rooms_with_logo_same_name'] = rooms_with_logo_same_name
 
-        if self.request.user.is_authenticated:
-            room_content_type = ContentType.objects.get_for_model(Room)
-
-            # Check if the user has any unread notifications for this room
-            has_unread_notifications = UserNotification.objects.filter(
+        if self.request.user.is_authenticated and getattr(self.request.user, 'current_room', None) == room_name:
+            # Mark related UserNotifications as read
+            UserNotification.objects.filter(
                 user=self.request.user,
-                notification__content_type=room_content_type,
-                notification__object_id=room.id,
-                is_read=False
-            ).exists()
+                notification__content_type=ContentType.objects.get_for_model(Room),
+                notification__object_id=roomed.id,
+            ).update(is_read=True)
 
-            # Add this to the room context
-            context['room'].has_unread_notifications = has_unread_notifications
 
         username = self.request.GET.get('username')
-        room_details = Room.objects.get(name=room)
+        room_details = Room.objects.get(name=roomed)
         profile_details = ProfileDetails.objects.filter(user__username=username).first()
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -4277,59 +4273,47 @@ def send(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-
-
 def mark_notifications_as_read(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             room_id = data.get("room_id")
             if not room_id:
-                print("Room ID not provided.")
                 return JsonResponse({"status": "error", "message": "Room ID not provided."}, status=400)
 
-            # Get the ContentType for the Room model
+            # Get ContentType for Room
             room_content_type = ContentType.objects.get_for_model(Room)
 
-            # Validate the room existence
-            try:
-                room = Room.objects.get(id=room_id)
-                print(f"Room retrieved: {room}")
-            except Room.DoesNotExist:
-                print(f"Room with ID {room_id} does not exist.")
-                return JsonResponse({"status": "error", "message": "Invalid Room ID."}, status=400)
-
-            # Fetch the related UserNotifications for the specific room and user
-            queryset = UserNotification.objects.filter(
+            # Filter UserNotifications based on Notification's content_type and object_id
+            user_notifications = UserNotification.objects.filter(
                 user=request.user,
                 notification__content_type=room_content_type,
                 notification__object_id=room_id,
                 is_read=False
             )
 
-            # Debug: Check if any records match the query
-            if not queryset.exists():
-                print(f"No matching UserNotifications found for user: {request.user}, room_id: {room_id}.")
-                return JsonResponse({"status": "error", "message": "No unread notifications found."}, status=404)
-            else:
-                for notification in queryset:
-                    print(f"Matching UserNotification: ID={notification.id}, User={notification.user}, Is_Read={notification.is_read}")
-
-            # Perform the update
-            notifications_updated = queryset.update(is_read=True)
-
-            print(f"Notifications updated: {notifications_updated}")
-            print(f"User: {request.user}")
+            # Debugging to validate query behavior
+            print(f"Room ContentType: {room_content_type}")
             print(f"Room ID: {room_id}")
-            print(f"ContentType: {room_content_type}")
+            if not user_notifications.exists():
+                print(f"No UserNotifications found for user={request.user}, room_id={room_id}.")
+            else:
+                for notification in user_notifications:
+                    print(f"Found UserNotification: {notification}")
+
+            # Mark notifications as read
+            notifications_updated = user_notifications.update(is_read=True)
+            print(f"Notifications updated: {notifications_updated}")
 
             return JsonResponse({"status": "success", "message": f"{notifications_updated} notifications marked as read."})
         except Exception as e:
-            print(f"Error marking notifications as read: {e}")
+            print(f"Error in mark_notifications_as_read: {e}")
             return JsonResponse({"status": "error", "message": "An error occurred."}, status=500)
 
-    print("Invalid request method.")
     return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+
+
 
 
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -9630,11 +9614,33 @@ class InventoryTradeView(CreateView):
     model = CommerceExchange
     template_name = "inventorytrade.html"
     form_class = InventoryTradeForm
-    success_url = reverse_lazy('showcase:inventorytrade')
+    success_url = reverse_lazy('showcase:inventorytradeofferstatuses')
+
+    def form_invalid(self, form):
+        print("Form validation errors:", form.errors)
+        return super().form_invalid(form)
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+
+        trading_user = form.cleaned_data['trading_user']
+        offered_items = form.cleaned_data['usercard']
+        requested_items = form.cleaned_data['exchangeprizes']
+
+        try:
+            trade_offer = InventoryTradeOffer.objects.create(
+                initiator=self.request.user,
+                receiver=trading_user
+            )
+            trade_offer.offered_items.set(offered_items)
+            trade_offer.requested_items.set(requested_items)
+            trade_offer.save()
+            print("Trade offer created:", trade_offer)
+        except Exception as e:
+            print("Error creating trade offer:", str(e))
+
+        return response
 
     def get_form(self):
         return self.form_class(user=self.request.user, **self.get_form_kwargs())
@@ -9647,6 +9653,13 @@ class InventoryTradeView(CreateView):
         trade_items = TradeItem.objects.filter(user=user, is_active=1)
         other_trade_items = TradeItem.objects.exclude(user=user).filter(is_active=1)
 
+        # Find items in pending offers
+        items_in_pending_offers = InventoryTradeOffer.objects.filter(
+            (Q(initiator=user) | Q(receiver=user)) & Q(status='pending')
+        ).values_list('offered_items', flat=True)
+
+        # Add disabled items to the context
+        context['disabled_items'] = set(items_in_pending_offers)
 
         context['other_trade_items'] = [
             {
@@ -9672,6 +9685,28 @@ class InventoryTradeView(CreateView):
         return context
 
 
+@method_decorator(csrf_exempt, name='dispatch')
+@method_decorator(login_required, name='dispatch')
+class UpdateTradeOfferStatusView(View):
+    def post(self, request, *args, **kwargs):
+        trade_offer_id = kwargs.get('pk')
+        trade_offer = get_object_or_404(InventoryTradeOffer, id=trade_offer_id)
+
+        # Ensure the logged-in user is the receiver
+        if trade_offer.receiver != request.user:
+            raise PermissionDenied("You are not authorized to update this trade offer.")
+
+        # Parse and update status
+        new_status = request.POST.get('status')
+        if new_status not in ['accepted', 'declined']:
+            return JsonResponse({'error': 'Invalid status value.'}, status=400)
+
+        trade_offer.status = new_status
+        trade_offer.save()
+
+        return JsonResponse({'message': 'Status updated successfully.', 'status': trade_offer.status})
+
+
 def trade_items_api(request, user_id):
     # This view handles the API request to fetch trade items for a specific user
     trade_items = TradeItem.objects.filter(user_id=user_id, is_active=1)
@@ -9688,29 +9723,53 @@ def trade_items_api(request, user_id):
     return JsonResponse({'trade_items': trade_items_data})
 
 
+class UserTradeOffersView(LoginRequiredMixin, View):
+    def get(self, request):
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            # Respond with JSON for AJAX requests
+            user = request.user
+            trade_offers = InventoryTradeOffer.objects.filter(
+                models.Q(initiator=user) | models.Q(receiver=user)
+            ).select_related('initiator', 'receiver').prefetch_related('offered_items', 'requested_items')
 
+            categories = {
+                "pending_initiator": trade_offers.filter(initiator=user, status='pending'),
+                "pending_receiver": trade_offers.filter(receiver=user, status='pending'),
+                "accepted_initiator": trade_offers.filter(initiator=user, status='accepted'),
+                "accepted_receiver": trade_offers.filter(receiver=user, status='accepted'),
+                "declined_initiator": trade_offers.filter(initiator=user, status='declined'),
+                "declined_receiver": trade_offers.filter(receiver=user, status='declined'),
+            }
 
-def trade_offers_view(request):
-    user = request.user
+            data = {
+                category: [
+                    {
+                        "id": offer.id,
+                        "initiator": str(offer.initiator),
+                        "initiator_id": offer.initiator.id,
+                        "receiver": str(offer.receiver),
+                        "receiver_id": offer.receiver.id,
+                        'offered_items': [
+                            {'title': item.title, 'fees': float(item.value or 0)} for item in offer.offered_items.all()
+                        ],
+                        'requested_items': [
+                            {'title': item.title, 'fees': float(item.value or 0)} for item in offer.requested_items.all()
+                        ],
+                        "status": offer.status,
+                        "created_at": offer.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    }
+                    for offer in offers
+                ]
+                for category, offers in categories.items()
+            }
+            return JsonResponse(data)
 
-    # Get all offers where the user is either the initiator or the receiver
-    pending_initiator = InventoryTradeOffer.objects.filter(initiator=user, status='pending')
-    pending_receiver = InventoryTradeOffer.objects.filter(receiver=user, status='pending')
-    accepted_initiator = InventoryTradeOffer.objects.filter(initiator=user, status='accepted')
-    accepted_receiver = InventoryTradeOffer.objects.filter(receiver=user, status='accepted')
-    declined_initiator = InventoryTradeOffer.objects.filter(initiator=user, status='declined')
-    declined_receiver = InventoryTradeOffer.objects.filter(receiver=user, status='declined')
-
-    context = {
-        'pending_initiator': pending_initiator,
-        'pending_receiver': pending_receiver,
-        'accepted_initiator': accepted_initiator,
-        'accepted_receiver': accepted_receiver,
-        'declined_initiator': declined_initiator,
-        'declined_receiver': declined_receiver,
-    }
-
-    return render(request, 'receivinginventorytrade.html', context)
+        # Render the template for non-AJAX requests
+        context = {
+            "user_id": request.user.id,
+            "user_username": request.user.username,
+        }
+        return render(request, "inventorytradeofferstatuses.html", context)
 
 
 @login_required

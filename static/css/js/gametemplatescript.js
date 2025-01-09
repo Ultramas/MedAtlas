@@ -282,6 +282,65 @@ $(".start").click(function (event) {
     console.log(`Button clicked: ${buttonId}`); // Debug: Log the button's ID
 });
 
+
+const casinoThump = new Audio('/static/css/sounds/thump.mp3');
+const casinoGreen = new Audio('/static/css/sounds/money.mp3');
+const casinoYellow = new Audio('/static/css/sounds/retro_video_game_col.mp3');
+const casinoOrange = new Audio('/static/css/sounds/money.mp3');
+const casinoRed = new Audio('/static/css/sounds/money.mp3');
+const casinoBlack = new Audio('/static/css/sounds/money.mp3');
+const casinoRedBlack = new Audio('/static/css/sounds/rap.mp3');
+const casinoRedGold = new Audio('/static/css/sounds/money.mp3');
+
+function playThump() {
+    casinoThump.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoGreenSound() {
+    casinoGreen.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoYellowSound() {
+    casinoYellow.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoOrangeSound() {
+    casinoOrange.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoRedSound() {
+    casinoThump.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoBlackSound() {
+    casinoGreen.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoRedBlackSound() {
+    casinoYellow.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoRedGoldSound() {
+    casinoOrange.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+
 function spin(buttonId) {
     // Reset currentSpin to 0 when a button is pressed
     if (currentSpin === totalSpins || animationStopped) {
@@ -325,38 +384,58 @@ function spin(buttonId) {
     });
 
     // Call this function when the spin ends
-    setTimeout(() => {
-        document.querySelectorAll('.slider').forEach((scroller) => {
-            scroller.style.animationPlayState = 'paused';
-        });
+setTimeout(() => {
+    document.querySelectorAll('.slider').forEach((scroller) => {
+        scroller.style.animationPlayState = 'paused';
 
-        // Increment currentSpin and log the buttonId
-        currentSpin++;
-        console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`); // Log spin number and button ID
+        // Dynamically get the choice color
+        const targetCard = document.querySelector('.target-card');
+        let choiceColor = targetCard ? targetCard.getAttribute('data-color') : 'gray';
 
-        // If there are more spins, recursively call spin with the buttonId
-        if (currentSpin < totalSpins) {
-            setTimeout(() => spin(buttonId), buffer); // Pass buttonId explicitly to the next spin
-        } else {
-            // All spins completed
-            animationStopped = true; // Spin has ended
-            console.log(`The spins have ended.`);
-
-            showPopup(); // Show the popup after all spins complete
-
-            // Reset totalSpins to 1 only if Persist Spin is unchecked, and after all spins are completed
-            if (!persistSpin) {
-                totalSpins = 1;
-                sessionStorage.setItem("totalSpins", totalSpins); // Set to 1 after spin completes
-            }
-
-            // Re-enable buttons and options
-            $(".start").prop('disabled', false);
-            $(".spin-option").prop('disabled', false);
+        // Log and handle choiceColor
+        console.log('The choice color is:', choiceColor);
+        if (choiceColor === 'gray') {
+            playThump();
+        } else if (choiceColor === 'green') {
+            playCasinoGreenSound();
+        } else if (choiceColor === 'yellow') {
+            playCasinoGreenSound();
+        } else if (choiceColor === 'orange') {
+            playCasinoGreenSound();
+        } else if (choiceColor === 'red') {
+            playCasinoGreenSound();
+        } else if (choiceColor === 'black') {
+            playCasinoGreenSound();
+        } else if (choiceColor === 'redblack') {
+            playCasinoGreenSound();
+        } else if (choiceColor === 'redgold') {
+            playCasinoGreenSound();
         }
-    }, animationDuration);
+    });
+
+    currentSpin++;
+    console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`);
+
+    if (currentSpin < totalSpins) {
+        setTimeout(() => spin(buttonId), buffer);
+    } else {
+        animationStopped = true;
+        console.log(`The spins have ended.`);
+        showPopup();
+
+        if (!persistSpin) {
+            totalSpins = 1;
+            sessionStorage.setItem("totalSpins", totalSpins);
+        }
+
+        $(".start").prop('disabled', false);
+        $(".spin-option").prop('disabled', false);
+    }
+}, animationDuration);
+
 }
-    spin(buttonId);
+spin(buttonId);
+
 }
 
 function findSelectedCard() {
@@ -415,9 +494,9 @@ function findSelectedCard() {
         const cardElement = document.createElement('div');
         cardElement.innerHTML = `
             <div class="card-fire" data-color="${item.color}">
-                <div class="card-flames">
-                    <div class="card-flame"></div>
-                </div>
+              <div class="card-flames">
+                <div class="card-flame"></div>
+              </div>
             </div>
             <p>ID: ${item.id}</p>
             <p>Nonceword: ${item.nonce}</p>

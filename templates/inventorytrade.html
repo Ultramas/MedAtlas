@@ -160,7 +160,10 @@
             border: 2px solid #ff9900;
             background-color: #ffe6b3;
         }
-
+         .connectcondition{
+         display: flex;
+          flex-direction: column;
+         }
     </style>
 </head>
 <body>
@@ -189,21 +192,29 @@
 <h3>Your Items:</h3>
 <input type="text" id="search-items" placeholder="Search your items..." />
 <div id="user-items">
-{% for item in trade_items %}
-    <div class="item">
-        <input type="checkbox" name="{{ item.title }}" id="{{ item.id }}" value="{{ item.id }}" data-value="{{ item.value }}" />
-        <label for="{{ item.id }}">
-            {{ item.title }} - ${{ item.value }}
-        </label>
-        <br>
-        <br>
-        <br>
+    {% for item in trade_items %}
+        <div class="item">
+            <input
+                type="checkbox"
+                name="usercard"
+                id="usercard-{{ item.id }}"
+                value="{{ item.id }}"
+                data-value="{{ item.value }}"
+                {% if item.id in disabled_items %} disabled {% endif %}
+            />
+            <label for="usercard-{{ item.id }}"
+                {% if item.id in disabled_items %} style="color: gray;" {% endif %}>
+                {{ item.title }} - ${{ item.value }}
+            </label>
+            <br><br><br>
 
             <img src="{{ item.image.url }}" alt="{{ item.title }}" class="item-image" />
-    </div>
-{% endfor %}
-
+        </div>
+    {% endfor %}
 </div>
+
+
+
 
 <h3>Other User's Items:</h3>
 <input type="text" id="search-other-items" placeholder="Search other user's items..." />
@@ -447,7 +458,7 @@ fetch(`/api/trade-items/${userId}/`)
                         alt="${item.title}"
                         class="item-image"
                     />
-                    <span class="item-condition">Condition: ${item.condition}</span>
+                    <div class="connectcondition">
                     <input
                         type="checkbox"
                         name="exchangeprizes"
@@ -456,6 +467,8 @@ fetch(`/api/trade-items/${userId}/`)
                         id="exchangeprizes-${item.id}"
                     />
                     <label for="exchangeprizes-${item.id}">${item.title} - $${item.value}</label>
+                    <span class="item-condition">Condition: ${item.condition}</span>
+                    </div>
                 </div>
             `;
         });

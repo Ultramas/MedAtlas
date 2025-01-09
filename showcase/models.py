@@ -1589,6 +1589,124 @@ class InventoryTradeOffer(models.Model):
         default='pending'
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    final_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Calculated in templates
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    def __str__(self):
+        return f"Initiator: {self.initiator} with receiver {self.receiver} - status: {str(self.status)}"
+
+    class Meta:
+        verbose_name = "Inventory Trade Offer"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['initiator', 'receiver', 'status'],
+                condition=models.Q(status='pending'),
+                name='unique_pending_trades'
+            )
+        ]
+
+    def clean(self):
+        if self.status == 'pending':
+            # Check for existing trades with the same initiator, receiver, and status
+            existing_trades = InventoryTradeOffer.objects.filter(
+                initiator=self.initiator,
+                receiver=self.receiver,
+                status='pending'
+            ).exclude(pk=self.pk)  # Exclude current instance
+
+            for trade in existing_trades:
+                # Compare offered_items and requested_items
+                existing_offered_items = list(trade.offered_items.all())
+                existing_requested_items = list(trade.requested_items.all())
+
+                current_offered_items = list(self.offered_items.all())
+                current_requested_items = list(self.requested_items.all())
+
+                if (set(existing_offered_items) == set(current_offered_items) and
+                        set(existing_requested_items) == set(current_requested_items)):
+                    raise ValidationError(
+                        "A pending trade offer with the same items already exists between these users."
+                    )
+
+    def save(self, *args, **kwargs):
+        is_new_instance = self.pk is None  # Check if the instance is being created
+        old_status = None
+
+        # If the instance already exists, fetch the old status
+        if not is_new_instance:
+            old_instance = InventoryTradeOffer.objects.filter(pk=self.pk).first()
+            old_status = old_instance.status if old_instance else None
+
+        super().save(*args, **kwargs)  # Save the instance normally to generate a primary key
+
+        # Handle status changes and ownership swapping after the initial save
+        if old_status != self.status and self.status == 'accepted':
+            self.handle_trade_offer_acceptance()
+            with transaction.atomic():
+                # Reassign the offered items to the receiver
+                for item in self.offered_items.all():
+                    item.user = self.receiver
+                    item.save()
+
+                # Reassign the requested items to the initiator
+                for item in self.requested_items.all():
+                    item.user = self.initiator
+                    item.save()
+
+        # If it's a new instance, create a notification for the receiver
+        if is_new_instance:
+            content_type = ContentType.objects.get_for_model(self)
+            notification_message = f"You have received a trade offer from {self.initiator.username}."
+            notification = Notification.objects.create(
+                message=notification_message,
+                content_type=content_type,
+                object_id=self.id
+            )
+            notification.user.add(self.receiver)  # Associate the receiver with the notification
+
+        # If the status has changed, create a notification for the initiator
+        elif old_status and old_status != self.status:
+            content_type = ContentType.objects.get_for_model(self)
+            notification_message = (
+                f"The status of your trade offer to {self.receiver.username} has been updated to '{self.status}'."
+            )
+            notification = Notification.objects.create(
+                message=notification_message,
+                content_type=content_type,
+                object_id=self.id
+            )
+            notification.user.add(self.initiator)  # Associate the initiator with the notification
+
+        @receiver(m2m_changed, sender=InventoryTradeOffer.offered_items.through)
+        @receiver(m2m_changed, sender=InventoryTradeOffer.requested_items.through)
+        def calculate_final_cost(sender, instance, action, **kwargs):
+            # Only calculate when items are added
+            if action == "post_add":
+                # Calculate the total value of offered and requested items
+                offered_total = sum(item.value for item in instance.offered_items.all() if item.value is not None)
+                requested_total = sum(item.value for item in instance.requested_items.all() if item.value is not None)
+                instance.final_cost = offered_total - requested_total
+
+                # Save the instance with the updated final_cost
+                instance.save(update_fields=['final_cost'])
+
+    @transaction.atomic
+    def handle_trade_offer_acceptance(self):
+        if self.final_cost is not None and self.initiator.profiledetails.currency_amount >= self.final_cost:
+            # Decrease the initiator's currency amount
+            self.initiator.profiledetails.currency_amount += self.final_cost
+            self.initiator.profiledetails.save()
+            self.receiver.profiledetails.currency_amount -= self.final_cost
+            self.receiver.profiledetails.save()
+        else:
+            raise ValueError("Insufficient funds for the trade.")
 
 
 class TradeOfferManager(models.Manager):
@@ -1688,6 +1806,9 @@ class UserNotification(models.Model):
 
     def __str__(self):
         return f"UserNotification: {self.notification.message} for {self.user.username} - Read: {str(self.is_read)}"
+
+    class Meta:
+        verbose_name = "User Notification"
 
 
 class Vote(models.Model):

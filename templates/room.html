@@ -697,44 +697,45 @@ $(document).ready(function(){
 </div>
 
 <script>
-  window.onload = function() {
-    setTimeout(function() {
-    var display = document.getElementById('display');
-    display.scrollTop = 0;
-    }, 1000); // 100 milliseconds delay
-  };
-</script>
-
-<script>
-  function checkUserPresence() {
-    // Check if the user is logged in and has unread notifications
-    if ({{ user.is_authenticated|yesno:"true,false" }}) {
-      // Send an AJAX request to notify the server the user is on the page
-      fetch("{% url 'showcase:mark_notifications_as_read' %}", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": "{{ csrf_token }}",
-        },
-        body: JSON.stringify({ room_id: {{ room.id }} }),
-      })
-        .then((response) => {
-          if (response.ok) {
-            console.log("User presence confirmed, notifications marked as read.");
-          }
-        })
-        .catch((error) => {
-          console.error("Error updating notifications:", error);
-        });
+document.addEventListener("DOMContentLoaded", function () {
+  // Function to scroll to the bottom of the display
+  function scrollToBottom() {
+    var display = document.getElementById("card-body msg_card_body");
+    if (display) {
+      display.scrollTop = display.scrollHeight;
+      console.log("Scrolled to bottom.");
     } else {
-      console.log("User is not logged in or no unread notifications.");
+      console.error("Element with id 'display' not found.");
     }
   }
 
-  // Check user presence every 0.2 seconds
-  setInterval(checkUserPresence, 0200);
+  // Call the function every 1 second
+  setInterval(scrollToBottom, 1000);
+});
 </script>
 
+        <script>
+  function checkUserPresence() {
+    // Send an AJAX request to notify the server the user is on the page
+    fetch("{% url 'showcase:mark_notifications_as_read' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      body: JSON.stringify({ room_id: {{ room.id }} }),
+    }).then(response => {
+      if (response.ok) {
+        console.log("User presence confirmed, notifications marked as read.");
+      }
+    }).catch(error => {
+      console.error("Error updating notifications:", error);
+    });
+  }
+
+  // Check user presence every 5 seconds
+  setInterval(checkUserPresence, 0200);
+</script>
 
 
 <br>
