@@ -9726,7 +9726,6 @@ def trade_items_api(request, user_id):
 class UserTradeOffersView(LoginRequiredMixin, View):
     def get(self, request):
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            # Respond with JSON for AJAX requests
             user = request.user
             trade_offers = InventoryTradeOffer.objects.filter(
                 models.Q(initiator=user) | models.Q(receiver=user)
@@ -9762,12 +9761,15 @@ class UserTradeOffersView(LoginRequiredMixin, View):
                 ]
                 for category, offers in categories.items()
             }
+
+            # Add the user's currency amount to the response
+            data['receiver_currency_amount'] = user.profiledetails.currency_amount
             return JsonResponse(data)
 
-        # Render the template for non-AJAX requests
         context = {
             "user_id": request.user.id,
             "user_username": request.user.username,
+            "currency_amount": request.user.profiledetails.currency_amount,
         }
         return render(request, "inventorytradeofferstatuses.html", context)
 

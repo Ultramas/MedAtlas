@@ -105,86 +105,43 @@
     <h1>Trade Offers</h1>
     <div id="trade-offers-container"></div>
 
-    <script>
-        async function fetchTradeOffers() {
-            try {
-                const response = await fetch(window.location.href, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                const data = await response.json();
-                updateTradeOffers(data);
-            } catch (error) {
-                console.error('Error fetching trade offers:', error);
-            }
-        }
-
-        function updateTradeOffers(data) {
-            const container = document.getElementById('trade-offers-container');
-            container.innerHTML = ''; // Reset content
-
-            for (const [category, offers] of Object.entries(data)) {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.classList.add('category');
-
-                const categoryTitle = document.createElement('h2');
-                categoryTitle.classList.add('category-title');
-                categoryTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-                categoryDiv.appendChild(categoryTitle);
-
-                if (offers.length > 0) {
-                    offers.forEach(offer => {
-                        const offerDiv = document.createElement('div');
-                        offerDiv.classList.add('trade-offer');
-                        offerDiv.innerHTML = `
-                            <p><strong>Trade ID:</strong> ${offer.id}</p>
-                            <p><strong>Initiator:</strong> ${offer.initiator}</p>
-                            <p><strong>Receiver:</strong> ${offer.receiver}</p>
-                            <p><strong>Status:</strong> ${offer.status}</p>
-                            <p><strong>Created At:</strong> ${offer.created_at}</p>
-                            <p><strong>Offered Items:</strong> ${offer.offered_items.join(', ')}</p>
-                            <p><strong>Requested Items:</strong> ${offer.requested_items.join(', ')}</p>
-                        `;
-                        categoryDiv.appendChild(offerDiv);
-                    });
-                } else {
-                    const noOffersP = document.createElement('p');
-                    noOffersP.classList.add('no-offers');
-                    noOffersP.textContent = 'No offers in this category.';
-                    categoryDiv.appendChild(noOffersP);
-                }
-
-                container.appendChild(categoryDiv);
-            }
-        }
-
-        function showLoading() {
-            const container = document.getElementById('trade-offers-container');
-            container.innerHTML = '<div class="loading">Loading trade offers...</div>';
-        }
-
-        // Fetch offers every 10 seconds
-        setInterval(fetchTradeOffers, 10000);
-
-        // Fetch initially when the page loads
-        window.onload = () => {
-            showLoading();
-            fetchTradeOffers();
-        };
-    </script><div id="trade-offers-container"></div>
-
-<script>
-
+   <script>
+    // Global Variables
     const currentUserId = {{ user_id }};
     const currentUserUsername = "{{ user_username }}";
+    const receiverCurrencyAmount = {{ currency_amount }};
+
+    // Fetch Trade Offers
+    async function fetchTradeOffers() {
+    /*console.log('Receiver Currency Amount:', receiverCurrencyAmount);*/
+
+        try {
+            const response = await fetch(window.location.href, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+            updateTradeOffers(data, receiverCurrencyAmount);
+        } catch (error) {
+            console.error('Error fetching trade offers:', error);
+        }
+    }
+
+    // Show Loading Indicator
+    function showLoading() {
+        const container = document.getElementById('trade-offers-container');
+        container.innerHTML = '<div class="loading">Loading trade offers...</div>';
+    }
+
+    // Update Trade Offer Status
     async function updateTradeOfferStatus(tradeOfferId, newStatus) {
         try {
             const response = await fetch(`/trade-offer/${tradeOfferId}/update-status/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}'  // Use Django's CSRF token for security
+                    'X-CSRFToken': '{{ csrf_token }}'
                 },
                 body: new URLSearchParams({
                     status: newStatus
@@ -194,7 +151,7 @@
             const data = await response.json();
             if (response.ok) {
                 alert('Trade offer status updated: ' + data.status);
-                fetchTradeOffers(); // Refresh offers
+                fetchTradeOffers();
             } else {
                 console.error('Error updating trade offer:', data.error);
             }
@@ -203,73 +160,105 @@
         }
     }
 
-function renderTradeOfferActions(offer) {
-    if (offer.receiver_id === currentUserId && offer.status === 'pending') {
-        return `
-            <button onclick="updateTradeOfferStatus(${offer.id}, 'accepted')">Accept</button>
-            <button onclick="updateTradeOfferStatus(${offer.id}, 'declined')">Decline</button>
-        `;
-    }
-    return ''; // Return an empty string if the criteria are not met
-}
-
-function calculateFinalCost(offeredItems, requestedItems) {
-    const offeredCost = offeredItems.reduce((sum, item) => sum + (item.fees || 0), 0);
-    const requestedCost = requestedItems.reduce((sum, item) => sum + (item.fees || 0), 0);
-    return offeredCost - requestedCost;
-}
-
-function updateTradeOffers(data) {
-    const container = document.getElementById('trade-offers-container');
-    container.innerHTML = ''; // Reset content
-
-    for (const [category, offers] of Object.entries(data)) {
-        const categoryDiv = document.createElement('div');
-        categoryDiv.classList.add('category');
-
-        const categoryTitle = document.createElement('h2');
-        categoryTitle.classList.add('category-title');
-        categoryTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-        categoryDiv.appendChild(categoryTitle);
-
-        if (offers.length > 0) {
-            offers.forEach(offer => {
-                const finalCost = calculateFinalCost(offer.offered_items, offer.requested_items);
-
-                const offerDiv = document.createElement('div');
-                offerDiv.classList.add('trade-offer');
-
-                // Add a data attribute for the final cost
-                offerDiv.dataset.finalCost = finalCost.toFixed(2);
-
-                // Build the offer's HTML
-                offerDiv.innerHTML = `
-                    <p><strong>Trade ID:</strong> ${offer.id}</p>
-                    <p><strong>Initiator:</strong> ${offer.initiator} (ID: ${offer.initiator_id})</p>
-                    <p><strong>Receiver:</strong> ${offer.receiver} (ID: ${offer.receiver_id})</p>
-                    <p><strong>Status:</strong> ${offer.status}</p>
-                    <p><strong>Created At:</strong> ${offer.created_at}</p>
-                    <p><strong>Offered Items:</strong> ${offer.offered_items.map(item => `${item.title} ($${item.fees.toFixed(2)})`).join(', ')}</p>
-                    <p><strong>Requested Items:</strong> ${offer.requested_items.map(item => `${item.title} ($${item.fees.toFixed(2)})`).join(', ')}</p>
-                    <p><strong>Final Cost:</strong> $${finalCost.toFixed(2)}</p>
-                    ${renderTradeOfferActions(offer)}
-                    <input type="hidden" name="final_cost" value="${finalCost.toFixed(2)}" />
-                `;
-                categoryDiv.appendChild(offerDiv);
+    // Render Trade Offer Actions
+    function renderTradeOfferActions(offer, receiverCurrencyAmount) {
+        const finalCost = calculateFinalCost(offer.offered_items, offer.requested_items);
+        const acceptButtonDisabled = receiverCurrencyAmount < finalCost;
+        console.log(finalCost)
+       if (acceptButtonDisabled) {
+            console.log('Accept button is disabled', {
+                receiverCurrencyAmount,
+                finalCost,
+                offerId: offer.id
             });
-        } else {
-            const noOffersP = document.createElement('p');
-            noOffersP.classList.add('no-offers');
-            noOffersP.textContent = 'No offers in this category.';
-            categoryDiv.appendChild(noOffersP);
         }
 
-        container.appendChild(categoryDiv);
-    }
+if (offer.receiver_id === currentUserId && offer.status === 'pending') {
+    return `
+        <div
+            title="${acceptButtonDisabled ? 'Not enough rubies' : ''}"
+            style="display: inline-block;"
+        >
+            <button
+                onclick="updateTradeOfferStatus(${offer.id}, 'accepted')"
+                style="${acceptButtonDisabled ? 'pointer-events: none; opacity: 0.5;' : ''}"
+                ${acceptButtonDisabled ? 'disabled' : ''}
+            >
+                Accept
+            </button>
+        </div>
+        <button onclick="updateTradeOfferStatus(${offer.id}, 'declined')">Decline</button>
+    `;
 }
 
+        return ''; // Return an empty string if criteria aren't met
+    }
 
+    // Calculate Final Cost
+    function calculateFinalCost(offeredItems, requestedItems) {
+        const offeredCost = offeredItems.reduce((sum, item) => sum + (item.fees || 0), 0);
+        const requestedCost = requestedItems.reduce((sum, item) => sum + (item.fees || 0), 0);
+        return offeredCost - requestedCost;
+    }
+
+    // Update Trade Offers
+    function updateTradeOffers(data, receiverCurrencyAmount) {
+        const container = document.getElementById('trade-offers-container');
+        container.innerHTML = ''; // Reset content
+
+        for (const [category, offers] of Object.entries(data)) {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.classList.add('category');
+
+            const categoryTitle = document.createElement('h2');
+            categoryTitle.classList.add('category-title');
+            categoryTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            categoryDiv.appendChild(categoryTitle);
+
+            if (offers.length > 0) {
+                offers.forEach(offer => {
+                    const finalCost = calculateFinalCost(offer.offered_items, offer.requested_items);
+
+                    const offerDiv = document.createElement('div');
+                    offerDiv.classList.add('trade-offer');
+                    offerDiv.dataset.finalCost = finalCost.toFixed(2);
+
+                    offerDiv.innerHTML = `
+                        <p><strong>Trade ID:</strong> ${offer.id}</p>
+                        <p><strong>Initiator:</strong> ${offer.initiator} (ID: ${offer.initiator_id})</p>
+                        <p><strong>Receiver:</strong> ${offer.receiver} (ID: ${offer.receiver_id})</p>
+                        <p><strong>Status:</strong> ${offer.status}</p>
+                        <p><strong>Created At:</strong> ${offer.created_at}</p>
+                        <p><strong>Offered Items:</strong> ${offer.offered_items.map(item => `${item.title} ($${item.fees.toFixed(2)})`).join(', ')}</p>
+                        <p><strong>Requested Items:</strong> ${offer.requested_items.map(item => `${item.title} ($${item.fees.toFixed(2)})`).join(', ')}</p>
+                        <p><strong>Final Cost:</strong> $${finalCost.toFixed(2)}</p>
+                        ${renderTradeOfferActions(offer, receiverCurrencyAmount)}
+                    `;
+                    categoryDiv.appendChild(offerDiv);
+                });
+            } else {
+                const noOffersP = document.createElement('p');
+                noOffersP.classList.add('no-offers');
+                noOffersP.textContent = 'No offers in this category.';
+                categoryDiv.appendChild(noOffersP);
+            }
+
+            container.appendChild(categoryDiv);
+        }
+    }
+
+    // Fetch offers every 10 seconds
+    setInterval(fetchTradeOffers, 10000);
+
+    // Fetch initially when the page loads
+    window.onload = () => {
+        showLoading();
+        fetchTradeOffers();
+    };
 </script>
+
+<div id="trade-offers-container"></div>
+
 
 </body>
 </html>

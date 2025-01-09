@@ -945,6 +945,7 @@ class InventoryTradeOfferResponseForm(forms.ModelForm):
             'status': forms.RadioSelect(choices=[('accepted', 'Accept'), ('declined', 'Decline')]),
         }
 
+
 class ExchangePrizesForm(forms.ModelForm):
     usercard = forms.ModelMultipleChoiceField(
         queryset=InventoryObject.objects.none(),
@@ -1029,6 +1030,7 @@ class ExchangePrizesForm(forms.ModelForm):
         if commit:
             self.instance.save()  # Save the CommerceExchange instance
         return self.instance
+
 
 class InventoryTradeForm(forms.ModelForm):
     trading_user = forms.ModelChoiceField(
