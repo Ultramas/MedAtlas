@@ -142,6 +142,15 @@ SHIPPINGSTATUS = (
     ('O', 'On Hold'),
 )
 
+TIMESTATUS = (
+    ('P', 'Processing'),
+    ('E', 'Earlier Than Expected'),
+    ('O', 'On Time'),
+    ('L', 'Late'),
+    ('N', 'Not Applicable - Down'),
+    ('N', 'Not Applicable - Intended'),
+)
+
 POWER = (
     ('1', 'x1'),
     ('2', 'x2'),
@@ -733,7 +742,7 @@ class ProfileDetails(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        return str(self.user)
+        return str(self.user) + " Selling Status: " + str(self.seller) + " Membership: " + str(self.membership)
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -1492,7 +1501,7 @@ class ExchangePrize(models.Model):
 class TradeItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=100)
-    inventoryobject = models.ForeignKey(InventoryObject, on_delete=models.CASCADE, null=True, blank=True)
+    inventoryobject = models.ForeignKey(InventoryObject, on_delete=models.SET_NULL, null=True, blank=True)
     fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
@@ -1512,8 +1521,8 @@ class TradeItem(models.Model):
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
-    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
-    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
+    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length", blank=True, null=True)
+    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width", blank=True, null=True)
     # hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
     relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
     is_active = models.IntegerField(default=1,
@@ -1540,21 +1549,26 @@ class TradeItem(models.Model):
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
-            if not self.currency_id:  # Use `currency_id` to avoid a query if `self.currency` is None
+            if not self.currency_id:
                 # Assign the first available currency if none is set
                 self.currency = Currency.objects.first()
             if not self.value and self.inventoryobject:
                 self.value = self.inventoryobject.value
             if not self.slug:
-                self.slug = TradeItem.generate_unique_slug(self.title, TradeItem)
+                # Generate a unique slug for the TradeItem
+                base_slug = self.title
+                self.slug = self.generate_unique_slug(base_slug, TradeItem)
             super().save(*args, **kwargs)
 
+            # Create a TradeOffer only if it doesn't exist
             if not TradeOffer.objects.filter(trade_items=self).exists():
+                # Generate a unique slug for TradeOffer
+                trade_offer_slug = self.generate_unique_slug(self.slug, TradeOffer)
                 trade_offer = TradeOffer.objects.create(
                     title=self.title,
                     estimated_trading_value=self.value or 0,
                     user=self.user,
-                    slug=self.slug,
+                    slug=trade_offer_slug,
                     trade_status=TradeOffer.PENDING,
                     is_active=self.is_active,
                 )
@@ -1848,18 +1862,34 @@ class Vote(models.Model):
 
 class EmailField(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    email = models.EmailField(unique=True,
-                              help_text="Sign up for our newsletter to get the latest news and gossip! We will never share your personal information with anyone without your explicit permission. Unsubscribe at any time. ")
+    email = models.EmailField(
+        unique=True,
+        help_text="Sign up for our newsletter to get the latest news and gossip! We will never share your personal information with anyone without your explicit permission. Unsubscribe at any time."
+    )
     confirmation = models.BooleanField(
-        help_text="By clicking this box, I agree to receive emails, coupons and discounts from PokeTrove. I also understand that I may unsubscribe at any time and PokeTrove will not share my personal information with anyone without my explicit permission.")
-    # username = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+        help_text="By clicking this box, I agree to receive emails, coupons and discounts from PokeTrove. I also understand that I may unsubscribe at any time and PokeTrove will not share my personal information with anyone without my explicit permission."
+    )
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    def save(self, *args, **kwargs):
+        # Check if a user is associated with this instance
+        if self.user:
+            # Delete all previous EmailField instances for this user
+            EmailField.objects.filter(user=self.user).exclude(pk=self.pk).delete()
+
+        # Call the original save method to save the new instance
+        super().save(*args, **kwargs)
 
     def __str__(self):
+        if self.user:
+            return f"{self.user} {self.email}"
         return self.email
 
     class Meta:
@@ -2482,7 +2512,7 @@ class BlogHeader(models.Model):
         return self.category
 
 
-from django.template.defaultfilters import slugify, random, date
+from django.template.defaultfilters import slugify, random, date, register
 
 
 class BlogFilter(models.Model):
@@ -2680,7 +2710,7 @@ class GameHub(models.Model):
 class Game(models.Model):
     name = models.CharField(max_length=200, verbose_name="Game Name")
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)  # game creator
-    cost = models.IntegerField(default=0)
+    cost = models.IntegerField(default=0, blank=True, null=True)
     discount_cost = models.IntegerField(blank=True, null=True)
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
     category = models.CharField(max_length=100,
@@ -3021,6 +3051,33 @@ class Choice(models.Model):
         verbose_name_plural = "Choices"
 
 
+class TopHits(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, blank=True, null=True)
+    choice = models.ForeignKey(Choice, on_delete=models.CASCADE, blank=True, null=True)
+    color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
+    file = models.FileField(null=True, verbose_name='File')
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return f'{self.user} - {self.game} - {self.choice} - {self.color} - {self.mfg_date}'
+
+    def save(self, *args, **kwargs):
+        if not self.color:
+            self.color = self.choice.color
+        if not self.file:
+            self.file = self.choice.file
+        super().save(*args, **kwargs)  # Ensure changes are persisted
+
+    class Meta:
+        verbose_name = "Top Hit"
+
+
 class SpinPreference(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="spinpreferer")
     game = models.ForeignKey(Game, on_delete=models.CASCADE, blank=True, null=True)
@@ -3138,6 +3195,7 @@ class Achievements(models.Model):
     user = models.ManyToManyField(User, related_name="achiever", blank=True)
     title = models.TextField(verbose_name="Achievement Title")
     description = models.TextField(verbose_name="Description")
+    difficulty = models.CharField(choices=HEAT, default='M', max_length=1)
     slug = AutoSlugField(populate_from='title', unique=True)
     value = models.IntegerField(blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
@@ -3172,6 +3230,11 @@ class Achievements(models.Model):
 
     def __str__(self):
         return f"{self.title}"
+
+    def get_card_images(self):
+        if self.image:
+            images = self.image.url
+            return images
 
     def check_and_add_user(self, user):
         """
@@ -3641,26 +3704,59 @@ class BlackJack(models.Model):
         verbose_name_plural = "BlackJack Games"
 
 
+from django.core.mail import send_mail
+from django.conf import settings
+
 class SellerApplication(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
     age = models.DateField(verbose_name='Date of birth')
     identification = models.FileField(
-        help_text="Please provide a valid government-issued id (Passport, Driver's License, Birth Certificate, etc)")
+        help_text="Please provide a valid government-issued ID (Passport, Driver's License, Birth Certificate, etc)"
+    )
     email = models.EmailField(help_text="Please input your email", unique=True)
     email_verified = models.BooleanField(default=False)
     accepted = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        # Check if the object already exists in the database
+        if self.pk:
+            previous_instance = SellerApplication.objects.get(pk=self.pk)
+            if previous_instance.accepted != self.accepted:  # Check if 'accepted' status changed
+                if self.accepted:
+                    # Accepted changed from False to True
+                    self.send_email(
+                        subject="Your Seller Application Was Accepted",
+                        message=f"Dear {self.first_name},\n\nCongratulations! Your seller application has been reviewed & you have been accepted. \n\nBest regards,\n Monstrosity?",
+                    )
+                else:
+                    # Accepted changed from True to False
+                    self.send_email(
+                        subject="Your Seller Application Was Revoked",
+                        message=f"Dear {self.first_name},\n\nWe regret to inform you that your seller application status has been revoked. For further details, please contact our support team.\nIf you believe this was a mistake, please reach out to us at poketrovecompany@gmail.com. \n\nBest regards,\n Monstrosity?",
+                    )
+        super().save(*args, **kwargs)
+
+    def send_email(self, subject, message):
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[self.email],
+            fail_silently=False,
+        )
+
     def __str__(self):
         if str(self.email):
-            return str(self.user) + " - Email: " + str(self.email) + " - Registered: " + str(self.accepted)
+            return f"{self.user} - Email: {self.email} - Registered: {self.accepted}"
         else:
-            return str(self.user) + " No Email Registered "
+            return f"{self.user} - No Email Registered"
 
     class Meta:
         verbose_name = "Seller Application"
         verbose_name_plural = "Seller Applications"
+
 
 
 class Preference(models.Model):
@@ -6810,16 +6906,17 @@ from django.urls import reverse
 from django.core.exceptions import ValidationError
 
 
-
 class Withdraw(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     cards = models.ManyToManyField(InventoryObject)
     number_of_cards = models.IntegerField(blank=True, null=True)
-    shipping_state = models.CharField(choices=SHIPPINGSTATUS, max_length=1, default='S')
+    shipping_state = models.CharField(choices=SHIPPINGSTATUS, max_length=1, default='P')
     fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    #slug = models.CharField(max_length=16, blank=True, null=True)
+    slag = models.SlugField(unique=True, max_length=16, blank=True, null=True, verbose_name='Slug')
     date_and_time = models.DateTimeField(null=True, verbose_name="time and date", auto_now_add=True)
     condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2, blank=True, null=True)
-    status = models.CharField(choices=SHIPPINGSTATUS, max_length=1, default='P')
+    status = models.CharField(choices=TIMESTATUS, max_length=1, default='P')
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -6839,18 +6936,25 @@ class Withdraw(models.Model):
         images = [card.image.url for card in self.cards.all() if card.image]
         return images
 
+    def generate_unique_slug(self):
+        while True:
+            random_slug = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+            if not Withdraw.objects.filter(slag=random_slug).exists():
+                return random_slug
+
     def save(self, *args, **kwargs):
         self.clean()
-
+        if not self.slag:
+            self.slag = self.generate_unique_slug()
         is_new = self.pk is None
 
         if is_new:
+            self.number_of_cards = self.cards.count()
             # Create the withdrawal first to ensure ID is generated
             super().save(*args, **kwargs)
 
             # Update number of cards
-            self.number_of_cards = self.cards.count()
-            self.save(update_fields=['number_of_cards'])
+
 
             # Handle WithdrawClass logic
             time_threshold = timezone.now() - timedelta(hours=48)
@@ -6879,6 +6983,7 @@ class Withdraw(models.Model):
         else:
             # Handle updates if not new
             self.number_of_cards = self.cards.count()
+
             super().save(*args, **kwargs)
 
     @receiver(pre_delete, sender=InventoryObject)
@@ -6899,6 +7004,40 @@ class Withdraw(models.Model):
         verbose_name = 'Withdrawal Card'
         verbose_name_plural = 'Withdrawal Cards'
 
+
+@receiver(m2m_changed, sender=Withdraw.cards.through)
+def update_number_of_cards(sender, instance, action, **kwargs):
+    if action in ['post_add', 'post_remove', 'post_clear']:
+        # Update the number_of_cards whenever the ManyToMany field changes
+        instance.number_of_cards = instance.cards.count()
+        instance.save(update_fields=['number_of_cards'])
+
+@receiver(post_save, sender=Withdraw)
+def handle_withdraw_class_logic(sender, instance, created, **kwargs):
+    if created:
+        time_threshold = timezone.now() - timedelta(hours=48)
+        withdraw_class = WithdrawClass.objects.annotate(
+            withdraw_count=Count('withdraw')
+        ).filter(
+            user=instance.user,
+            date_and_time__gte=time_threshold,
+            withdraw_count__lte=29,
+            open=True
+        ).first()
+
+        if withdraw_class:
+            withdraw_class.withdraw.add(instance)
+        else:
+            withdraw_class = WithdrawClass.objects.create(
+                user=instance.user,
+                shipping_state=instance.shipping_state,
+                fees=instance.fees,
+                status=instance.status,
+                is_active=instance.is_active,
+                currency=Currency.objects.filter(is_active=1).first(),
+                number_of_cards=instance.number_of_cards
+            )
+            withdraw_class.withdraw.add(instance)
 
 class WithdrawClass(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

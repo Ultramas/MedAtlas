@@ -1,0 +1,20 @@
+{% if user.is_authenticated %}
+    {% if email %}
+        <h2>Unsubscribe</h2>
+        <p>Your current email: {{ email }}</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit">Unsubscribe</button>
+        </form>
+    {% else %}
+        <p>You do not have an associated email and are not currently subscribed.</p>
+    {% endif %}
+{% else %}
+    <h2>Unsubscribe</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="email">Enter your email:</label>
+        <input type="email" id="email" name="email" required>
+        <button type="submit">Unsubscribe</button>
+    </form>
+{% endif %}

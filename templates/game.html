@@ -424,9 +424,90 @@ document.addEventListener("DOMContentLoaded", function () {
 </div>
         <label>
         </label>
+<script>
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+</script>
 
-      <!-- Your button with initial data attributes -->
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function () {
+    const spinButtons = document.querySelectorAll(".spin-option");
+    const baseCostElement = document.getElementById("base-cost");
+    const costDisplayElement = document.getElementById("cost-display");
+    const startButton = document.getElementById("start");
+    const baseCost = parseFloat(baseCostElement.textContent) || 0;
+
+    // Initialize user cash as a proxy
+    let userCash = parseFloat({{ user_cash|safe }});
+    const userCashProxy = new Proxy({ value: userCash }, {
+        set(target, key, newValue) {
+            if (key === "value") {
+                target[key] = newValue;
+                updateStartButton(); // Re-run the logic on change
+            }
+            return true;
+        }
+    });
+
+    function updateStartButton() {
+        const spinMultiplier = parseInt(
+            document.querySelector(".spin-option.active")?.dataset.value || 1,
+            10
+        );
+        const totalCost = baseCost * spinMultiplier;
+
+        costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`;
+
+        if (userCashProxy.value < totalCost) {
+            if (!startButton.parentElement.matches("a")) {
+                const link = document.createElement("a");
+                link.href = "currencymarket.html";
+                link.style.textDecoration = "none";
+                startButton.parentNode.replaceChild(link, startButton);
+                link.appendChild(startButton);
+            }
+            startButton.disabled = true;
+        } else {
+            if (startButton.parentElement.matches("a")) {
+                const parent = startButton.parentElement;
+                const container = parent.parentNode;
+                parent.replaceWith(startButton);
+                container.appendChild(startButton);
+            }
+            startButton.disabled = false;
+        }
+    }
+
+    // Add event listeners for spin buttons
+    spinButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            spinButtons.forEach(btn => btn.classList.remove("active"));
+            this.classList.add("active");
+            updateStartButton();
+        });
+    });
+
+    // Periodically fetch the updated user cash from the API
+    function fetchUserCash() {
+        fetch('/api/get-user-cash/')
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.user_cash !== undefined) {
+                    userCashProxy.value = data.user_cash; // Update proxy value
+                }
+            })
+            .catch(error => console.error('Error fetching user cash:', error));
+    }
+
+    // Poll the API every 0.5 seconds
+    setInterval(fetchUserCash, 500);
+});
+
+</script>
+
 <button class="start" id="start" data-game-id="{{ game.id }}" data-nonce="{{ nonce }}" data-slug="{{ game.slug }}" style="margin-top: 5%; margin-right: 25%;">Spin!</button>
+
 
 <button class="start" id="start2" data-game-id="{{ game.id }}" data-nonce="{{ nonce }}" data-slug="{{ game.slug }}" style="margin-top: 5%; margin-left: 25%;">Demo Spin</button>
 
@@ -617,6 +698,7 @@ $(document).ready(function() {
                 <div class="glow"></div>
             </div>
         </div>
+
         <div class="text">
             <h2>Congratulations!</h2>
             <p>You got:</p>
@@ -908,7 +990,10 @@ $(".start").click(function () {
 
 </script>
 
+    <!--sell item(s) after spins-->
+<script>
 
+</script>
 
 
     {% include 'gameloottable.html' %}

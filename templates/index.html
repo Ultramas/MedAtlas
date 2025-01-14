@@ -216,8 +216,10 @@ window.onscroll = function() {
 									<!-- Placeholder image or default avatar -->
 									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
 									{% endif %}
+									<a href="{% url 'showcase:currencymarket' %}">
 									<h3 class="currency_designation" style="text-align: center; space-between: 5px;">{{userprofile.currency_amount}} {{userprofile.currency}}</h3>
-									{% endfor %}
+									</a>
+										{% endfor %}
 								</li>
 							</ul>
 						</nav>
@@ -923,8 +925,9 @@ window.onscroll = function() {
 						<form method="post" action="">
     						{% csrf_token %}
 							{{ form.email }}
-
-							<button type="submit" style="height: 50px;"><img src="{% static 'css/images/sendemailairplane.png' %}" style="width: 30px; height: 16px; "></button>
+							<a href="{% url 'showcase:emaildone' %}">
+								<button type="submit" style="height: 50px;"><img src="{% static 'css/images/sendemailairplane.png' %}" style="width: 30px; height: 16px; "></button>
+							</a>
 													<br>
 							I agree to the Terms & Conditions: {{ form.confirmation }}
 						</form>

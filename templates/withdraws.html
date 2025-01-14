@@ -145,52 +145,126 @@
 
 	<!-- latest news -->
 	<div class="latest-news mt-150 mb-150">
-		<div class="container">
-			<div class="row">
-					{% for newprofile in Profiles %}
+    <div class="container">
+    <div class="row">
+        <h2>Completed Withdrawals</h2>
+        {% for newprofile in CompletedWithdraws %}
+		<br>
+            <div class="col-lg-4 col-md-63w" style="">
+                <div class="single-latest-news">
+                    <a href="{% url 'showcase:withdraw_detail' newprofile.slag %}">
+                        <div class="latest-news-bg news-bg-1"
+                             style="background: url({{ newprofile.cards.first.image.url }}); background-size: cover;">
+                        </div>
+                    </a>
+                    <div class="news-text-box">
+                        <h3><a href="{% url 'showcase:withdraw_detail' newprofile.slag %}">{{ newprofile.number_of_cards }} Cards</a></h3>
+                        <p class="blog-meta">
+                            <span class="author"><img src="{% static 'css/images/user-solid.svg' %}"
+                                style="width: 11px; height: 11px; color: white; margin-right: 10px;"> {{ newprofile.user }}</span>
+                            <span class="date"><img src="{% static 'css/images/calendar-solid.svg' %}"
+                                style="width: 11px; height: 11px; color: white; margin-right: 10px;"> {{ newprofile.date_and_time }}</span>
+                        </p>
+                        <p><strong>Shipping State:</strong> {{ newprofile.get_shipping_state_display }}</p>
+                        <p><strong>Condition:</strong> {{ newprofile.get_condition_display }}</p>
+                        <p><strong>Fees:</strong> ${{ newprofile.fees }}</p>
+                        <ul style="width: 100%;">
+                            <span class="author" style="display: flex; align-items: center;">
+                                {% if newprofile.newprofile_profile_picture_url %}
+                                    <a href="{{ newprofile.newprofile_profile_url }}">
+                                        <img src="{{ newprofile.newprofile_profile_picture_url }}"
+                                             alt="Profile Picture" width="50" height="50"
+                                             style="border-radius: 50px; margin-right: 20px;">
+                                    </a>
+                                {% else %}
+                                    <img src="{% static 'css/images/a.jpg' %}"
+                                         alt="Default Avatar" width="50" height="50"
+                                         style="border-radius: 50px;">
+                                {% endif %}
+                                <h5 style="margin-left: 15px;">{{ newprofile.user.username }}</h5>
+                            </span>
+                        </ul> <div class="row">
+                        {% for card in newprofile.cards.all %}
+                            <div class="col-md-4">
+                                <div class="card-item">
+                                    <div class="card-image"
+                                         style="background: url({{ card.image.url }}); background-size: cover; height: 200px; border: 1px solid #ddd;">
+                                    </div>
+                                    <div class="card-info">
+                                        <p><strong>User:</strong> {{ card.user.username }}</p>
+                                        <p><strong>Category:</strong> {{ card.get_category_display }}</p>
+                                        <p><strong>Choice Text:</strong> {{ card.choice_text }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        <br>
+        <br>
+        <h2>Incomplete Withdrawals</h2>
+        {% for newprofile in IncompleteWithdraws %}
+            <div class="col-lg-4 col-md-63w">
+                <div class="single-latest-news">
+                    <a href="{% url 'showcase:withdraw_detail' newprofile.slag %}">
+                        <div class="latest-news-bg news-bg-1"
+                             style="background: url({{ newprofile.cards.first.image.url }}); background-size: cover;">
+                        </div>
+                    </a>
+                    <div class="news-text-box">
+                        <h3><a href="{% url 'showcase:withdraw_detail' newprofile.slag %}">{{ newprofile.number_of_cards }} Cards</a></h3>
+                        <p class="blog-meta">
+                            <span class="author"><img src="{% static 'css/images/user-solid.svg' %}"
+                                style="width: 11px; height: 11px; color: white; margin-right: 10px;"> {{ newprofile.user }}</span>
+                            <span class="date"><img src="{% static 'css/images/calendar-solid.svg' %}"
+                                style="width: 11px; height: 11px; color: white; margin-right: 10px;"> {{ newprofile.date_and_time }}</span>
+                        </p>
+                        <p><strong>Shipping State:</strong> {{ newprofile.get_shipping_state_display }}</p>
+                        <p><strong>Condition:</strong> {{ newprofile.get_condition_display }}</p>
+                        <p><strong>Fees:</strong> ${{ newprofile.fees }}</p>
+                        <ul style="width: 100%;">
+                            <span class="author" style="display: flex; align-items: center;">
+                                {% if newprofile.newprofile_profile_picture_url %}
+                                    <a href="{{ newprofile.newprofile_profile_url }}">
+                                        <img src="{{ newprofile.newprofile_profile_picture_url }}"
+                                             alt="Profile Picture" width="50" height="50"
+                                             style="border-radius: 50px; margin-right: 20px;">
+                                    </a>
+                                {% else %}
+                                    <img src="{% static 'css/images/a.jpg' %}"
+                                         alt="Default Avatar" width="50" height="50"
+                                         style="border-radius: 50px;">
+                                {% endif %}
+                                <h5 style="margin-left: 15px;">{{ newprofile.user.username }}</h5>
+                            </span>
+                        </ul> <div class="row">
+                        {% for card in newprofile.cards.all %}
+                            <div class="col-md-4">
+                                <div class="card-item">
+                                    <div class="card-image"
+                                         style="background: url({{ card.image.url }}); background-size: cover; height: 200px; border: 1px solid #ddd;">
+                                    </div>
+                                    <div class="card-info">
+                                        <p><strong>User:</strong> {{ card.user.username }}</p>
+                                        <p><strong>Category:</strong> {{ card.get_category_display }}</p>
+                                        <p><strong>Choice Text:</strong> {{ card.choice_text }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 
-				<div class="col-lg-4 col-md-6">
-					<div class="single-latest-news">
-						<a href="single-news.html">
-							<div class="latest-news-bg news-bg-1" style="background: url({{newprofile.cards.image.url}}); background-size: cover;"></div></a>
+</div>
 
-						<div class="news-text-box">
-							<h3><a href="single-news.html">{{newprofile.title}}</a></h3>
-							<p class="blog-meta">
-								<span class="author"><img src="{% static 'css/images/user-solid.svg' %}" style="width: 11px; height: 11px; color: white; margin-right: 10px;"> {{ newprofile.user }} </span>
-								<span class="date"><img src="{% static 'css/images/calendar-solid.svg' %}" style="width: 11px; height: 11px; color: white; margin-right: 10px;"> {{newprofile.date_and_time}} </span>
-								<br>
-							</p>
-							{% with description=newprofile.description %}
-							<p class="excerpt">
-								{% if description|length > 200 %}
-									{{ description|slice:":200" }}...
-								{% else %}
-									{{ description }}
-								{% endif %}
-							</p>
-						{% endwith %}
-						<ul style="width: 100%;">
-								<span class="author" style="display: flex; align-items: center;">
-									{% if newprofile.newprofile_profile_picture_url %}
-									<a href="{{ newprofile.newprofile_profile_url }}">
-										<img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
-									</a>
-									{% else %}
-									<!-- Placeholder image or default avatar -->
-									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
-									{% endif %}
-									<h5 style="margin-left: 15px;">{{ newprofile.name }}</h5>
-								</span>
-						</ul>
-
-							<br>
-						</div>
-					</div>
-				</div>
-					{% endfor %}
-
-			</div>
 
 			<div class="row">
 				<div class="container">

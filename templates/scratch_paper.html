@@ -1,111 +1,43 @@
+  {% for newprofile in CompletedWithdraws %}
+            <div class="col-lg-12">
+                <div class="single-latest-news">
+                    <h3>{{ newprofile.user.username }}'s Withdrawal</h3>
+                    <p><strong>Number of Cards:</strong> {{ newprofile.number_of_cards }}</p>
+                    <p><strong>Fees:</strong> ${{ newprofile.fees }}</p>
+                    <p><strong>Shipping State:</strong> {{ newprofile.get_shipping_state_display }}</p>
+                    <p><strong>Condition:</strong> {{ newprofile.get_condition_display }}</p>
+                    <div class="row">
+                        {% for card in newprofile.cards.all %}
+                            <div class="col-md-4">
+                                <div class="card-item">
+                                    <div class="card-image"
+                                         style="background: url({{ card.image.url }}); background-size: cover; height: 200px; border: 1px solid #ddd;">
+                                    </div>
+                                    <div class="card-info">
+                                        <p><strong>User:</strong> {{ card.user.username }}</p>
+                                        <p><strong>Category:</strong> {{ card.get_category_display }}</p>
+                                        <p><strong>Choice Text:</strong> {{ card.choice_text }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
 
 
-class InventoryObject(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, blank=True, null=True)
-    choice = models.ForeignKey('Choice', on_delete=models.CASCADE, blank=True, null=True)
-    choice_text = models.CharField(max_length=200, verbose_name='Choice Text', blank=True, null=True)
-    category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
-    currency = models.ForeignKey(Currency, blank=True, null=True, on_delete=models.CASCADE)
-    price = models.IntegerField(default=0)
-    trade_locked = models.BooleanField(verbose_name="Set Tradable?", default=False)
-    condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2, blank=True, null=True)
-    quantity = models.IntegerField(default=1, help_text="Number of items available.")
-    image = models.ImageField(blank=True, null=True)
-    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                               help_text='Original length of the advertisement (use for original ratio).',
-                                               verbose_name="image length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                              help_text='Original width of the advertisement (use for original ratio).',
-                                              verbose_name="image width")
-    length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
-    width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Creation Time")
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
-    def __str__(self):
-        return str(self.user) + "'s " + str(self.choice) + " - " + str(self.condition)
 
-    def save(self, *args, **kwargs):
-        if self.choice:
-            self.choice_text = self.choice.choice_text
-            self.image = self.choice.file
-            self.image_length = self.choice.image_length
-            self.image_width = self.choice.image_width
-            self.price = self.choice.value
 
-            # Set currency to the first currency if creating a new object and currency is not set
-            if self.pk is None and self.currency is None:
-                try:
-                    self.currency = Currency.objects.first()
-                except Currency.DoesNotExist:
-                    # Handle the case where there are no currencies defined
-                    pass
-            if self.user and not self.inventory:
-                try:
-                    # Try to get the Inventory associated with the user
-                    self.inventory = Inventory.objects.get(user=self.user)
-                except Inventory.DoesNotExist:
-                    # Handle the case where no Inventory exists for the user
-                    raise ValueError(f"No inventory found for user {self.user}")
 
-        if self.pk is None and self.user:
-            self.inventory = Inventory.objects.get(user=self.user)
 
-        # After saving the InventoryObject, create a related TradeItem if trade_locked is True
-        if self.trade_locked:
-            trade_item, created = TradeItem.objects.get_or_create(
-                user=self.user,
-                title=self.choice_text,
-                defaults={
-                    'fees': self.price,
-                    'category': self.choice.category,  # Assuming choice has category
-                    'specialty': self.choice.specialty,  # Assuming choice has specialty
-                    'condition': self.condition,
-                    'label': self.choice.label,  # Assuming choice has label
-                    'slug': slugify(self.choice_text),
-                    'status': 1,  # Default to publish
-                    'description': self.choice_text,
-                    'image': self.image,
-                    'image_length': self.image_length,
-                    'image_width': self.image_width,
-                    'length_for_resize': self.length_for_resize,
-                    'width_for_resize': self.width_for_resize,
-                    'is_active': 1,  # Default to active
-                }
-            )
-        super().save(*args, **kwargs)
 
-    def move_to_trading(self, title, fees, category, specialty, condition, label, slug, description, image,
-                        image_length, image_width, length_for_resize, width_for_resize):
-        # Ensure the item exists in the inventory
-        if not self.pk:
-            raise ValidationError("Inventory item does not exist.")
 
-        # Create a TradeItem
-        trade_item = TradeItem.objects.create(
-            user=self.user,
-            currency=self.currency,
-            value=self.price,
-            condition=self.condition,
-            image=self.image,
-            image_length=image_length,
-            image_width=image_width,
-            length_for_resize=length_for_resize,
-            width_for_resize=width_for_resize,
-            is_active=1  # Set the status as active
-        )
 
-        # Optionally, you can also remove the item from the inventory
-        self.delete()
 
-        return trade_item
 
-    class Meta:
-        verbose_name = "Player Inventory Object"
-        verbose_name_plural = "Player Inventory Objects"
+
+
+
 

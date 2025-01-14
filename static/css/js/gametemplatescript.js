@@ -121,8 +121,8 @@ async function randomizeContents() {
             targetCardElement.setAttribute('data-upper_nonce', attributes.upperNonce);
 
             targetCardElement.innerHTML = `
-                <div class="lge" style="background-color: white;">
-                    <div class="lootelement" style="background-color: ${attributes.color};  padding: 6%; margin-left: 22px; margin-top: 12px;">
+                <div class="lge" style="background-color: white;" data-file="${attributes.file}">
+                    <div class="lootelement" style="background-color: ${attributes.color}; padding: 6%; margin-left: 22px; margin-top: 12px;">
                         ${attributes.file ? `<img src="${attributes.file}" alt="${attributes.text}" width="100" height="100">` : ''}
                     </div>
                 </div>
@@ -130,6 +130,7 @@ async function randomizeContents() {
                 <p>${attributes.text}</p>
                 <p>Nonce: ${attributes.nonce}</p>
             `;
+
 
             selectedItems.push({
                 id: attributes.id,
@@ -167,7 +168,7 @@ async function randomizeContents() {
             const inventoryPayload = {
                 choice_id: data.choice_id, // Use choice_id from outcome response
                 choice_value: data.choice_value, // Use choice_value
-                category: 'example_category', // Additional data as needed
+                category: data.category, // Additional data as needed
                 price: 100,
                 condition: 'New',
                 quantity: 1,
@@ -190,6 +191,7 @@ async function randomizeContents() {
             if (inventoryData.status === 'success') {
                 if (inventoryData.button_id === "start") {
                     console.log("Inventory object created successfully with user.");
+
                 } else if (inventoryData.button_id === "start2") {
                     console.log("Temporary inventory object created without user. ID:", inventoryData.inventory_object_id);
                 }
@@ -280,6 +282,7 @@ function alignCardWithSpinner() {
 $(".start").click(function (event) {
     const buttonId = event.target.id; // Extract the ID of the clicked button
     console.log(`Button clicked: ${buttonId}`); // Debug: Log the button's ID
+
 });
 
 
@@ -340,6 +343,49 @@ function playCasinoRedGoldSound() {
     });
 }
 
+function createTopHit(data) {
+    fetch('/top-hits/create/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+    .then((response) => response.json())
+    .then((result) => {
+        if (result.error) {
+            console.error('Error creating Top Hit:', result.error);
+        } else {
+            console.log('Top Hit created successfully:', result);
+        }
+    })
+    .catch((error) => {
+        console.error('Network error:', error);
+    });
+}
+
+
+// Function to get CSRF token
+function getCSRFToken() {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith('csrftoken=')) {
+            return cookie.substring('csrftoken='.length, cookie.length);
+        }
+    }
+    return null;
+}
+
+// Select the target card
+const targetCard = document.querySelector('.target-card');
+let choiceColor = targetCard ? targetCard.getAttribute('data-color') : 'gray';
+
+// Log and handle choiceColor
+console.log('Given the choice color:', choiceColor);
+
+
+
 
 function spin(buttonId) {
     // Reset currentSpin to 0 when a button is pressed
@@ -389,29 +435,104 @@ setTimeout(() => {
         scroller.style.animationPlayState = 'paused';
 
         // Dynamically get the choice color
-        const targetCard = document.querySelector('.target-card');
-        let choiceColor = targetCard ? targetCard.getAttribute('data-color') : 'gray';
+    const targetCard = document.querySelector('.target-card'); // Find the target element
+
+    const startButton = document.getElementById('start'); // Or use querySelector('.start')
+
+
+    if (targetCard) {
+        let choiceColor = targetCard.getAttribute('data-color') || 'gray';
+        let choiceId = targetCard.getAttribute('id');
+        let gameId = startButton.getAttribute("data-game-id");
+
 
         // Log and handle choiceColor
         console.log('The choice color is:', choiceColor);
+        console.log('The choice id is:', choiceId);
+        console.log('The game id is:', gameId);
         if (choiceColor === 'gray') {
             playThump();
+
         } else if (choiceColor === 'green') {
             playCasinoGreenSound();
+            $(".start").prop('disabled', true);
         } else if (choiceColor === 'yellow') {
+                console.log('yellow hit')
             playCasinoGreenSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    color: choiceColor,
+                    game_id: gameId, // Ensure this is set correctly
+                };
+                // Create the Top Hit
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
         } else if (choiceColor === 'orange') {
+                console.log('orange hit')
             playCasinoGreenSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                // Create the Top Hit
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
         } else if (choiceColor === 'red') {
+                console.log('red hit')
             playCasinoGreenSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                // Create the Top Hit
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
         } else if (choiceColor === 'black') {
+                console.log('black hit')
             playCasinoGreenSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                // Create the Top Hit
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
         } else if (choiceColor === 'redblack') {
+                console.log('redblack hit')
             playCasinoGreenSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                // Create the Top Hit
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
         } else if (choiceColor === 'redgold') {
+                console.log('redgold hit')
             playCasinoGreenSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                // Create the Top Hit
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
         }
+        }
+
     });
+
 
     currentSpin++;
     console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`);
@@ -421,14 +542,13 @@ setTimeout(() => {
     } else {
         animationStopped = true;
         console.log(`The spins have ended.`);
-        showPopup();
+        showPopup(buttonId);
 
         if (!persistSpin) {
             totalSpins = 1;
             sessionStorage.setItem("totalSpins", totalSpins);
         }
 
-        $(".start").prop('disabled', false);
         $(".spin-option").prop('disabled', false);
     }
 }, animationDuration);
@@ -474,20 +594,63 @@ function findSelectedCard() {
 }
 
 
+    document.addEventListener('submit', function (event) {
+    if (event.target.matches('#sell-form')) {
+        event.preventDefault();
 
-    function showPopup() {
+        const formData = new FormData(event.target);
+
+        fetch('', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                // Update the UI to reflect the sold item
+            } else {
+                alert(data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+});
+
+    function showPopup(buttonId) {
+
+    if (buttonId === "start") {
+        console.log("Show Regular Start");
+const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+textContainer.innerHTML = `
+    <h2>Congratulations!</h2>
+    <p>You got:</p>
+    <div class="cards-container"></div>
+    <form id="sell-form-{{ Inventory.pk }}" action="" method="post" class="ajax-form">
+        <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+        <input type="hidden" name="action" value="sell">
+        <input type="hidden" name="pk" value="{{ Inventory.pk }}">
+        <button type="submit" class="action-button sell-button">Sell</button>
+    </form>
+    <button class="close">Collect</button>
+`;
+
+    } else if (buttonId === "start2") {
+        console.log("Show Demo Start");
+
         textContainer.innerHTML = `
-            <h2>Congratulations!</h2>
-            <p>You got:</p>
+            <h2></h2>
+            <p>You would have hit:</p>
             <div class="cards-container"></div>
-            <form method="POST" action="{% url 'showcase:sell_game_inventory_object' %}">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="sell">
-                <button type="submit" class="btn btn-danger">Sell Item</button>
-            </form>
 
-            <button class="close">Collect</button>
+            <button class="close">I see</button>
         `;
+    }
+
 
         const cardsContainer = textContainer.querySelector('.cards-container');
     selectedItems.forEach((item, index) => {

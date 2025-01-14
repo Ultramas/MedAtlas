@@ -9,7 +9,8 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
-    MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification
+    MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
+    TopHits
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -661,6 +662,19 @@ class GameAdmin(admin.ModelAdmin):
 admin.site.register(Game, GameAdmin)
 
 
+class TopHitsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Top Hits Information - Categorial Description', {
+            'fields': ('user', 'game', 'choice', 'color', 'file', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+    readonly_fields = ('mfg_date',)
+
+
+admin.site.register(TopHits, TopHitsAdmin)
+
+
 class BlackJackAdmin(admin.ModelAdmin):
     fieldsets = (
         ('BlackJack Game Information - Categorial Description', {
@@ -686,13 +700,15 @@ class BlackJackWagerAdmin(admin.ModelAdmin):
 admin.site.register(Wager, BlackJackWagerAdmin)
 
 
+from django.utils.html import mark_safe
+
 class AchievementsAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Achievement  Information - Categorial Descriptions', {
-            'fields': ('title', 'description', 'value','type', 'currency',)
+        ('Achievement Information - Categorial Descriptions', {
+            'fields': ('title', 'description', 'difficulty', 'value', 'type', 'currency',)
         }),
         ('Achievement Information - Image Display', {
-            'fields': ('image', 'image_length', 'image_width',),
+            'fields': ('image', 'image_length', 'image_width', 'display_image'),
             'classes': ('collapse',),
         }),
         ('Achievement Information - Technical Description', {
@@ -700,8 +716,17 @@ class AchievementsAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
-    readonly_fields = ('slug',)
+    readonly_fields = ('slug', 'display_image')
 
+    # Display user, selling status, and membership as separate columns in the admin list view
+    list_display = ('title', 'difficulty', 'value', 'type', 'display_image')
+
+    def display_image(self, obj):
+        """Custom method to display the image in the admin."""
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" style="width: 100px; height: auto;" />')
+        return "No image available"
+    display_image.short_description = "Image Preview"
 
 admin.site.register(Achievements, AchievementsAdmin)
 
@@ -1618,7 +1643,7 @@ admin.site.register(InventoryObject, InventoryObjectAdmin)
 class WithdrawAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Withdraws - Categorial Description', {
-            'fields': ('user', 'cards', 'number_of_cards', 'shipping_state', 'fees', 'condition', 'status', 'is_active',),
+            'fields': ('user', 'cards', 'number_of_cards', 'shipping_state', 'fees', 'slag', 'condition', 'status', 'is_active',),
             'classes': ('collapse',),
         }),
     )
@@ -2142,19 +2167,33 @@ class ProfileCurrencyInline(admin.TabularInline):
     model = ProfileCurrency
     extra = 1  # Number of empty forms to display for adding new instances
 
-
 class ProfileDetailsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Profile Information', {
-            'fields': ('user', 'email', 'avatar', 'alternate', 'about_me', 'level', 'unlocked_daily_chests', 'subscription', 'currency', 'currency_amount',
-                       'total_currency_amount', 'total_currency_spent', 'rubies_spent', 'green_cards_hit', 'yellow_cards_hit', 'orange_cards_hit','red_cards_hit',
-                       'black_cards_hit', 'gold_cards_hit', 'red_gold_cards_hit', 'times_subtract_called', 'monstrosity', 'seller', 'membership', 'position', 'is_active')
+            'fields': (
+                'user', 'email', 'avatar', 'alternate', 'about_me', 'level', 'unlocked_daily_chests', 'subscription',
+                'currency', 'currency_amount', 'total_currency_amount', 'total_currency_spent', 'rubies_spent',
+                'green_cards_hit', 'yellow_cards_hit', 'orange_cards_hit', 'red_cards_hit', 'black_cards_hit',
+                'gold_cards_hit', 'red_gold_cards_hit', 'times_subtract_called', 'monstrosity', 'seller', 'membership',
+                'position', 'is_active'
+            )
         }),
     )
     readonly_fields = ('position',)
     inlines = [ProfileCurrencyInline]
 
+    # Display user, selling status, and membership as separate columns in the admin list view
+    list_display = ('user', 'get_selling_status', 'get_membership')
 
+    def get_selling_status(self, obj):
+        return 'Yes' if obj.seller else 'No'
+    get_selling_status.short_description = 'Selling Status'  # Column header in admin
+
+    def get_membership(self, obj):
+        return obj.membership if obj.membership else 'None'
+    get_membership.short_description = 'Membership'  # Column header in admin
+
+# Register the admin
 admin.site.register(ProfileDetails, ProfileDetailsAdmin)
 
 

@@ -2,9 +2,155 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You for Subscribing!</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #6e45e2, #88d3ce);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
+        }
+        h1 {
+            color: #6e45e2;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            opacity: 0;
+        }
+        p {
+            color: #333;
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0;
+        }
+        .emoji {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0;
+        }
+        .cta-button {
+            background-color: #6e45e2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0;
+        }
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f0f0f0;
+            position: absolute;
+            top: -10px;
+            will-change: transform;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="emoji">🎉</div>
+        <h1>Thank You for Subscribing!</h1>
+        <p>We're thrilled to have you join our newsletter community. Get ready for exciting updates, exclusive content, and amazing offers coming your way!</p>
 
+        <button class="cta-button">
+            <a href="{% url 'showcase:newsfeed' %}" style="text-decoration: none; color: white;">See What We've Got!</a>
+        </button>
+
+        <button class="cta-button">
+          <a href="{% url 'showcase:index' %}" style="text-decoration: none; color: white;">
+              Return Home
+          </a>
+        </button>
+        <br>
+        <br>
+        <a href="{% url 'showcase:unsubscribe' %}" style="text-decoration: none;">Looking to opt out of our newsletter?</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script>
+        // Animate elements
+        anime({
+            targets: '.container > *',
+            translateY: [50, 0],
+            opacity: [0, 1],
+            delay: anime.stagger(200, {start: 300}),
+            easing: 'easeOutQuad'
+        });
+
+        // Create and animate confetti
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            document.body.appendChild(confetti);
+
+            anime({
+                targets: confetti,
+                translateY: ['-10vh', '100vh'],
+                translateX: () => anime.random(-50, 50) + 'px',
+                rotate: () => anime.random(0, 360),
+                delay: anime.random(0, 2000),
+                duration: () => anime.random(1000, 3000),
+                easing: 'easeInOutQuad',
+                loop: true
+            });
+        }
+
+        // Button hover effect
+        const button = document.querySelector('.cta-button');
+        button.addEventListener('mouseover', () => {
+            anime({
+                targets: button,
+                scale: 1.1,
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+        });
+        button.addEventListener('mouseout', () => {
+            anime({
+                targets: button,
+                scale: 1,
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+        });
+
+        // Continuous background gradient animation
+        anime({
+            targets: 'body',
+            background: [
+                'linear-gradient(45deg, #6e45e2, #88d3ce)',
+                'linear-gradient(45deg, #88d3ce, #6e45e2)',
+                'linear-gradient(45deg, #6e45e2, #88d3ce)'
+            ],
+            duration: 10000,
+            easing: 'easeInOutQuad',
+            direction: 'alternate',
+            loop: true
+        });
+    </script>
 </body>
 </html>

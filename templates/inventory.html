@@ -335,18 +335,18 @@
 			<button type="submit" class="action-button sell-button">Sell</button>
 		</form>
 
-		<form id="withdraw-form-{{ Inventory.pk }}" action="" method="post" class="ajax-form">
-			{% csrf_token %}
-			<input type="hidden" name="action" value="withdraw">
-			<input type="hidden" name="pk" value="{{ Inventory.pk }}">
-			<button type="submit" class="action-button withdraw-button">Withdraw</button>
-		</form>
+            <form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' pk=Inventory.pk %}" method="post" class="ajax-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="withdraw">
+                <input type="hidden" name="pk" value="{{ Inventory.pk }}">
+                <button type="submit" class="action-button withdraw-button">Withdraw</button>
+            </form>
 
-		<form id="trade-form-{{ Inventory.pk }}" action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post" class="ajax-form">
-			{% csrf_token %}
-			<input type="hidden" name="action" value="move">
-			<button type="submit" class="action-button trade-button">Tradable</button>
-		</form>
+				<form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post">
+					{% csrf_token %}
+					<input type="hidden" name="action" value="move">
+					<button type="submit" class="cart-btn">Set Tradable</button>
+				</form>
 
         </div>
       </div>
@@ -598,6 +598,54 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+
+</script>
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+    const withdrawButtons = document.querySelectorAll(".withdraw-button");
+
+    withdrawButtons.forEach((button) => {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            const form = button.closest("form");
+            const formData = new FormData(form);
+            const actionUrl = form.getAttribute("action") || window.location.href;
+
+            fetch(actionUrl, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        // Remove the withdrawn inventory item from the DOM
+                        const inventoryItem = form.closest(".inventory-item");
+                        if (inventoryItem) {
+                            inventoryItem.remove();
+                        }
+
+                        // Update the stock count
+                        const stockCountElement = document.getElementById("stock-count");
+                        if (stockCountElement) {
+                            const newCount = parseInt(stockCountElement.textContent) - 1;
+                            stockCountElement.textContent = newCount;
+                        }
+
+                    } else {
+                        alert(data.error || "An error occurred while processing your request.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    alert("An unexpected error occurred. Please try again.");
+                });
+        });
+    });
+});
 
 </script>
 	<!-- jquery -->

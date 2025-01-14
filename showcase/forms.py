@@ -3,7 +3,7 @@ from urllib import request
 
 import self
 from django import forms
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, modelformset_factory
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
@@ -63,17 +63,29 @@ users = User.objects.filter()
 
 class SignUpForm(UserCreationForm):
     username = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': '150 Characters or fewer. Letters, digits and @/./+/-/_ only.'}))
-    email = forms.EmailField(widget=forms.TextInput(attrs={'placeholder': 'Your email address'}))
+        widget=forms.TextInput(attrs={'placeholder': '150 Characters or fewer. Letters, digits and @/./+/-/_ only.'})
+    )
+    email = forms.EmailField(
+        widget=forms.TextInput(attrs={'placeholder': 'Your email address'})
+    )
     password1 = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Your password must be at least 8 characters.'}), label='Password')
-    password2 = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Please confirm your password.'}),
-                                label='Confirm Password')
+        widget=forms.PasswordInput(attrs={'placeholder': 'Your password must be at least 8 characters.'}),
+        label='Password'
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'placeholder': 'Please confirm your password.'}),
+        label='Confirm Password'
+    )
 
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("This email is already in use. Please use a different email address.")
+        return email
 
 CONTACT_PREFERENCE = [
     ('email', 'Email'),
@@ -307,30 +319,7 @@ from django.forms import inlineformset_factory
 from .models import Game, Choice
 
 
-class ChoiceForm(forms.ModelForm):
-    class Meta:
-        model = Choice
-        fields = ['choice_text', 'file', 'color', 'value', 'category', 'subcategory', ]
-
-
-ChoiceFormSet = inlineformset_factory(
-    Game,
-    Choice,
-    fields=('choice_text', 'file', 'category', 'subcategory'),
-    extra=1,  # Number of empty forms to show initially
-    can_delete=True,  # Allow users to delete choices
-)
-
-
 # used when the user wants to use their own cards; PokeTrove gets commission
-class InventoryGameForm(forms.ModelForm):
-    class Meta:
-        model = Game
-        fields = ('name', 'cost', 'discount_cost', 'type', 'category', 'image', 'power_meter', 'items',
-                  'slug', 'filter',)
-        readonly_fields = ('date_and_time',)
-
-
 class PlayerInventoryGameForm(forms.ModelForm):
     items = forms.ModelMultipleChoiceField(
         queryset=PrizePool.objects.filter(is_active=1),
@@ -361,36 +350,49 @@ class PlayerInventoryGameForm(forms.ModelForm):
 # used when the user wants to use cards owned by PokeTrove; user gets commission
 
 class InventoryGameForm(forms.ModelForm):
-    items = forms.ModelMultipleChoiceField(
-        queryset=PrizePool.objects.filter(is_active=1),  # Only active items
-        widget=CheckboxSelectMultiple,
-        required=False,  # Optional if needed
-        label="Available Prizes",
-    )
+    class Meta:
+        model = Game
+        fields = [
+            'name', 'cost', 'discount_cost', 'type', 'category', 'image', 'power_meter',
+            'player_made', 'player_inventory', 'daily', 'unlocking_level', 'cooldown',
+            'locked'
+        ]
+
+
+class ChoiceForm(forms.ModelForm):
+    class Meta:
+        model = Choice
+        fields = ['rarity', 'lower_nonce', 'upper_nonce']  # Editable fields
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Attach related PrizePool objects to the field choices
-        self.fields['items'].choices = [
-            (prize.id, prize) for prize in self.fields['items'].queryset
-        ]
+        # Add non-editable fields
+        self.fields['choice_text'] = forms.CharField(
+            initial=self.instance.choice_text if self.instance else '',
+            required=False,
+            disabled=True,
+            widget=forms.TextInput(attrs={'readonly': 'readonly'})
+        )
+        self.fields['category'] = forms.CharField(
+            initial=self.instance.category if self.instance else '',
+            required=False,
+            disabled=True,
+            widget=forms.TextInput(attrs={'readonly': 'readonly'})
+        )
+        self.fields['value'] = forms.CharField(
+            initial=self.instance.value if self.instance else '',
+            required=False,
+            disabled=True,
+            widget=forms.TextInput(attrs={'readonly': 'readonly'})
+        )
 
-    def save(self, commit=True):
-        # Call the parent save method to create or update the Game instance
-        game = super().save(commit=False)
-        # Set the player_inventory field to False
-        game.player_inventory = False
-        if commit:
-            # Save the Game instance to the database
-            game.save()
-            # Save the ManyToMany relationships
-            self.save_m2m()
-        return game
 
-    class Meta:
-        model = Game
-        fields = ['name', 'items', 'cost', 'discount_cost', 'type', 'image', 'power_meter']
-
+ChoiceFormSet = modelformset_factory(
+    Choice,
+    form=ChoiceForm,  # Use ChoiceForm here
+    extra=1,
+    can_delete=True,
+)
 
 class AscensionCreateForm(forms.ModelForm):
     class Meta:

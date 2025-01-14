@@ -1,0 +1,216 @@
+class SingleBattleListView(DetailView):
+    model = Battle
+    template_name = "battle_detail.html"
+    context_object_name = "battle"
+
+    def get_object(self):
+        battle_id = self.kwargs.get('battle_id')
+        return get_object_or_404(Battle, id=battle_id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        battle = self.get_object()
+
+        # Get all games related to the battle through BattleGame
+        related_games = Game.objects.filter(game_battles__battle=battle).distinct()
+        context['related_games'] = related_games
+
+        context['is_participant'] = self.request.user in battle.participants.all()
+        context['is_full'] = battle.is_full()
+
+
+        slug = self.kwargs.get('slug')
+        context['slug'] = slug
+
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+            except UserProfile.DoesNotExist:
+                context['SentProfile'] = None
+        else:
+            context['SentProfile'] = None
+
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['wager_form'] = WagerForm()
+
+        choices = Choice.objects.filter(game=related_games)
+        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=related_games)
+        context['spinner_choice_renders'] = spinner_choice_renders
+
+        # Retrieve 'button_type' from the request
+        button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
+
+
+        cost = related_games.discount_cost if related_games.discount_cost else related_games.cost
+
+        context.update({
+            'cost_threshold_80': cost * 0.8,
+            'cost_threshold_100': cost,
+            'cost_threshold_200': cost * 2,
+            'cost_threshold_500': cost * 5,
+            'cost_threshold_10000': cost * 100,
+        })
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        user_profile = None  # Initialize to ensure it always exists
+        if related_games.user:
+            # Perform actions only if the `user` field is filled
+            user_profile, created = UserProfile.objects.get_or_create(user=related_games.user)
+            # Additional logic if necessary
+
+        context['SentProfile'] = user_profile
+        if related_games.user:
+            user_cash = user_profile.currency_amount
+
+            context = {
+                'user_cash': user_cash,
+            }
+
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+
+        spinpreference = None  # Initialize spinpreference to ensure it exists
+
+        if user.is_authenticated:
+            try:
+                spinpreference = SpinPreference.objects.get(user=user)
+            except SpinPreference.DoesNotExist:
+                spinpreference = SpinPreference(user=user, quick_spin=False)
+                spinpreference.save()
+
+            context['quick_spin'] = spinpreference.quick_spin
+        else:
+            context['quick_spin'] = False
+
+        context['spinpreference'] = spinpreference
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['Profiles'] = userprofile
+        else:
+            context['Profiles'] = None
+
+        if context['Profiles'] == None:
+            # Create a new object with the necessary attributes
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['Profiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        # Initialize the form with spinpreference instance, or None if not authenticated
+        if spinpreference:
+            spinform = SpinPreferenceForm(instance=spinpreference)
+        else:
+            spinform = SpinPreferenceForm()  # Initialize an empty form if spinpreference is None
+        context['spin_preference_form'] = spinform
+
+        if user.is_authenticated:
+            # Determine the random amount based on quick_spin preference
+            if spinpreference.quick_spin:
+                random_amount = random.randint(500, 1000)
+            else:
+                random_amount = random.randint(150, 300)
+        else:
+            random_amount = random.randint(150, 300)
+
+        context['random_amount'] = random_amount
+        context['range_random_amount'] = range(random_amount)
+        print(str('the random amount is ') + str(random_amount))
+
+        # Generate a list of random nonces
+        random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
+        context['random_nonces'] = random_nonces
+
+        # Create a list to store choices matched with the generated nonces
+        choices_with_nonce = []
+        for nonce in random_nonces:
+            for choice in choices:
+                if choice.lower_nonce <= nonce <= choice.upper_nonce:
+                    choices_with_nonce.append({
+                        'choice': choice,
+                        'nonce': nonce,
+                        'lower_nonce': choice.lower_nonce,
+                        'upper_nonce': choice.upper_nonce,
+                        'file_url': choice.file.url if choice.file else None,  # Get the URL of the file field
+                        'currency': {
+                            'symbol': choice.currency.name if choice.currency else '💎',
+                            'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                        }
+                    })
+                    break  # Exit after finding the first match for this nonce
+
+        context['choices_with_nonce'] = choices_with_nonce
+
+        # Get the game_id from the URL kwargs
+        game_id = self.kwargs.get('slug')
+
+        # Retrieve related Choice objects
+        choices = Choice.objects.filter(game=related_games)
+
+        # Add them to the context
+        context['choices'] = choices
+
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        print(context['Background'])
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        battle = self.get_object()
+
+        # Check if the battle is open
+        if battle.status != 'O':
+            messages.error(request, 'This battle is not currently open for participants.')
+            return redirect('showcase:battle_detail', battle_id=battle.id)
+
+        # Check if the user is already a participant
+        if request.user in battle.participants.all():
+            messages.error(request, 'You are already a participant in this battle.')
+            return redirect('showcase:battle_detail', battle_id=battle.id)
+
+        # Check if the battle is full
+        if battle.is_full():
+            battle.status = 'R'  # Update the status to Running
+            battle.save()
+            messages.error(request, 'This battle is now full and has started.')
+            return redirect('showcase:battle_detail', battle_id=battle.id)
+
+        # Handle the form submission for joining the battle
+        form = BattleJoinForm(request.POST, user=request.user, battle=battle)
+        if form.is_valid():
+            form.save()
+            # Update the status if the battle is now full
+            if battle.is_full():
+                battle.status = 'R'  # Update status to Running
+                battle.save()
+                messages.success(request, 'You have successfully joined the battle, and it is now running!')
+            else:
+                messages.success(request, 'You have successfully joined the battle!')
+            return redirect('showcase:battle_detail', battle_id=battle.id)
+
+        messages.error(request, 'There was an error joining the battle. Please try again.')
+        return self.get(request, *args, **kwargs)

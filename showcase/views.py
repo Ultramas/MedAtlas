@@ -10,6 +10,7 @@ import self
 from django.contrib.messages import get_messages
 from django.db import transaction
 from django.shortcuts import render, redirect
+from django.utils.html import strip_tags
 from django.views.generic import ListView
 import stripe  # Official Stripe library
 from social_core.backends.stripe import StripeOAuth2  # If needed for OAuth
@@ -22,7 +23,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
-    UserNotification
+    UserNotification, TopHits
 from .models import Idea
 from .models import Vote
 from .models import StaffApplication
@@ -172,7 +173,7 @@ from .models import BlogFilter
 from django.views.generic.edit import FormMixin
 
 import pdb
-from django.core.mail import send_mail, BadHeaderError
+from django.core.mail import send_mail, BadHeaderError, EmailMultiAlternatives
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound, \
     HttpResponseBadRequest
 from .forms import ContactForm
@@ -1718,8 +1719,56 @@ def display_choices(request, game_id, slug):
     return render(request, 'game.html', {'game': game, 'choices': choices})
 
 
+@login_required
+def get_user_cash(request):
+    profile = ProfileDetails.objects.filter(user=request.user).first()
+    user_cash = profile.currency_amount if profile else 0
+    return JsonResponse({'user_cash': user_cash})
+
+
 class GameChestBackgroundView(BaseView):
     template_name = "game.html"
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action')
+        if action == 'sell':
+            return self.sell_game_inventory_object(request)
+        return JsonResponse({'error': 'Invalid action'}, status=400)
+
+    def sell_game_inventory_object(self, request):
+        inventory_object = InventoryObject.objects.filter(
+            user=request.user,
+            inventory__isnull=False,
+        ).order_by('-created_at').first()
+
+        if not inventory_object:
+            return JsonResponse({'error': 'No items available to sell!'}, status=400)
+
+        # Update InventoryObject
+        inventory_object.user = None
+        inventory_object.inventory = None
+
+        with transaction.atomic():
+            # Create the Transaction instance
+            Transaction.objects.create(
+                inventory_object=inventory_object,
+                user=request.user,
+                currency=inventory_object.currency,
+                amount=inventory_object.price
+            )
+
+            inventory_object.save()
+
+            # Update UserProfile's currency_amount
+            user_profile = get_object_or_404(UserProfile, user=request.user)
+            user_profile.currency_amount += inventory_object.price
+            user_profile.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!",
+        })
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1745,6 +1794,23 @@ class GameChestBackgroundView(BaseView):
         choices = Choice.objects.filter(game=game)
         spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
         context['spinner_choice_renders'] = spinner_choice_renders
+
+        # Fetch user profile and calculate total cost
+        user = self.request.user
+        if user.is_authenticated:
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                effective_cost = game.get_effective_cost()
+                spin_multiplier = 1  # Default value; adjust as needed
+                total_cost = effective_cost * spin_multiplier
+                context['user_cash'] = profile.currency_amount
+                context['total_cost'] = total_cost
+            else:
+                context['user_cash'] = None
+                context['total_cost'] = None
+        else:
+            context['user_cash'] = None
+            context['total_cost'] = None
 
         # Retrieve 'button_type' from the request
         button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
@@ -1904,6 +1970,7 @@ class GameChestBackgroundView(BaseView):
             action = self.request.POST.get('action')
             if action == 'sell':
                 return self.sell_game_inventory_object(request)
+
     def sell_game_inventory_object(self, request):
         # Get the most recently created InventoryObject for the current user
         inventory_object = InventoryObject.objects.filter(
@@ -2071,6 +2138,74 @@ class GameChestBackgroundView(BaseView):
                 return JsonResponse({'error': str(e)}, status=500)
         else:
             return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
+@csrf_exempt
+def create_top_hit(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        required_fields = ['choice_id', 'game_id']
+
+        # Check for missing fields
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return JsonResponse({'error': f'Missing fields: {", ".join(missing_fields)}'}, status=400)
+
+        try:
+            # Fetch the related choice object
+            choice = Choice.objects.get(id=data['choice_id'])
+
+            # Fetch the related game object
+            try:
+                game = Game.objects.get(id=data['game_id'])
+            except Game.DoesNotExist:
+                return JsonResponse({'error': 'Invalid game_id. Game does not exist.'}, status=400)
+
+            # Create the TopHits instance
+            try:
+                top_hit = TopHits.objects.create(
+                    user=request.user if request.user.is_authenticated else None,
+                    game=game,
+                    choice=choice,
+                    color=choice.color,
+                    file=choice.file if hasattr(choice, 'file') else None,
+                )
+                print(
+                    f"Creating TopHits with data: user={request.user}, game={game}, choice={choice}, color={choice.color}, file={choice.file}"
+                )
+            except Exception as e:
+                print(f"Error while creating TopHits: {str(e)}")
+                raise
+
+            return JsonResponse({'message': 'Top Hit created successfully', 'id': top_hit.id})
+        except Choice.DoesNotExist:
+            return JsonResponse({'error': 'Invalid choice_id. Choice does not exist.'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+from django.template.loader import render_to_string
+
+
+class TopHitsListView(ListView):
+    model = TopHits
+    template_name = 'top_hits_list.html'  # Full page template
+    context_object_name = 'top_hits'
+
+    def get_queryset(self):
+        # Return only active TopHits
+        return TopHits.objects.filter(is_active=True).order_by('-mfg_date')
+
+    def render_to_response(self, context, **response_kwargs):
+        # Check if the request is an AJAX request
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            # Render only the HTML for the #top-hits-container
+            html = render_to_string('partials/top_hits_partial.html', context, request=self.request)
+            return JsonResponse({'html': html})
+        # Render the full template for regular requests
+        return super().render_to_response(context, **response_kwargs)
 
 
 class DailyRoomView(BaseView):
@@ -2543,39 +2678,24 @@ class SingleBattleListView(DetailView):
         context = super().get_context_data(**kwargs)
         battle = self.get_object()
 
-        # Get all games related to the battle through BattleGame
+        # Fetch related games via BattleGame
         related_games = Game.objects.filter(game_battles__battle=battle).distinct()
         context['related_games'] = related_games
 
-        context['is_participant'] = self.request.user in battle.participants.all()
-        context['is_full'] = battle.is_full()
-
-
-        slug = self.kwargs.get('slug')
-        context['slug'] = slug
-
+        # User and participation info
         user = self.request.user
-        if user.is_authenticated:
-            try:
-                context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
-            except UserProfile.DoesNotExist:
-                context['SentProfile'] = None
-        else:
-            context['SentProfile'] = None
+        context['is_participant'] = user in battle.participants.all()
+        context['is_full'] = battle.is_full()
+        context['SentProfile'] = UserProfile.objects.filter(user=user).first() if user.is_authenticated else None
 
+        # Default currency
         context['Money'] = Currency.objects.filter(is_active=1).first()
+
+        # Wager form
         context['wager_form'] = WagerForm()
 
-        choices = Choice.objects.filter(game=related_games)
-        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=related_games)
-        context['spinner_choice_renders'] = spinner_choice_renders
-
-        # Retrieve 'button_type' from the request
-        button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
-
-
-        cost = related_games.discount_cost if related_games.discount_cost else related_games.cost
-
+        # Cost thresholds for games
+        cost = sum(game.discount_cost or game.cost for game in related_games)
         context.update({
             'cost_threshold_80': cost * 0.8,
             'cost_threshold_100': cost,
@@ -2584,131 +2704,54 @@ class SingleBattleListView(DetailView):
             'cost_threshold_10000': cost * 100,
         })
 
-        newprofile = UpdateProfile.objects.filter(is_active=1)
-        context['Profiles'] = newprofile
-
-        for newprofile in context['Profiles']:
-            user = newprofile.user
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
-
-        user_profile = None  # Initialize to ensure it always exists
-        if related_games.user:
-            # Perform actions only if the `user` field is filled
-            user_profile, created = UserProfile.objects.get_or_create(user=related_games.user)
-            # Additional logic if necessary
-
-        context['SentProfile'] = user_profile
-        if related_games.user:
-            user_cash = user_profile.currency_amount
-
-            context = {
-                'user_cash': user_cash,
-            }
-
-        context['Money'] = Currency.objects.filter(is_active=1).first()
-
-        spinpreference = None  # Initialize spinpreference to ensure it exists
-
+        # Randomized amounts and nonces
+        spinpreference = None
         if user.is_authenticated:
-            try:
-                spinpreference = SpinPreference.objects.get(user=user)
-            except SpinPreference.DoesNotExist:
-                spinpreference = SpinPreference(user=user, quick_spin=False)
-                spinpreference.save()
-
-            context['quick_spin'] = spinpreference.quick_spin
-        else:
-            context['quick_spin'] = False
-
-        context['spinpreference'] = spinpreference
-
-        if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-        else:
-            userprofile = None
-
-        if userprofile:
-            context['Profiles'] = userprofile
-        else:
-            context['Profiles'] = None
-
-        if context['Profiles'] == None:
-            # Create a new object with the necessary attributes
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
-        else:
-            for userprofile in context['Profiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-        # Initialize the form with spinpreference instance, or None if not authenticated
-        if spinpreference:
-            spinform = SpinPreferenceForm(instance=spinpreference)
-        else:
-            spinform = SpinPreferenceForm()  # Initialize an empty form if spinpreference is None
-        context['spin_preference_form'] = spinform
-
-        if user.is_authenticated:
-            # Determine the random amount based on quick_spin preference
-            if spinpreference.quick_spin:
-                random_amount = random.randint(500, 1000)
-            else:
-                random_amount = random.randint(150, 300)
+            spinpreference, _ = SpinPreference.objects.get_or_create(user=user, defaults={'quick_spin': False})
+            random_amount = random.randint(500, 1000) if spinpreference.quick_spin else random.randint(150, 300)
         else:
             random_amount = random.randint(150, 300)
 
         context['random_amount'] = random_amount
         context['range_random_amount'] = range(random_amount)
-        print(str('the random amount is ') + str(random_amount))
+        context['random_nonces'] = [random.randint(0, 1000000) for _ in range(random_amount)]
 
-        # Generate a list of random nonces
-        random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
-        context['random_nonces'] = random_nonces
-
-        # Create a list to store choices matched with the generated nonces
-        choices_with_nonce = []
-        for nonce in random_nonces:
-            for choice in choices:
-                if choice.lower_nonce <= nonce <= choice.upper_nonce:
-                    choices_with_nonce.append({
-                        'choice': choice,
-                        'nonce': nonce,
-                        'lower_nonce': choice.lower_nonce,
-                        'upper_nonce': choice.upper_nonce,
-                        'file_url': choice.file.url if choice.file else None,  # Get the URL of the file field
-                        'currency': {
-                            'symbol': choice.currency.name if choice.currency else '💎',
-                            'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
-                        }
-                    })
-                    break  # Exit after finding the first match for this nonce
-
+        # Match choices with nonces
+        choices = Choice.objects.filter(game__in=related_games)
+        choices_with_nonce = [
+            {
+                'choice': choice,
+                'nonce': nonce,
+                'lower_nonce': choice.lower_nonce,
+                'upper_nonce': choice.upper_nonce,
+                'file_url': choice.file.url if choice.file else None,
+                'currency': {
+                    'symbol': choice.currency.name if choice.currency else '💎',
+                    'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                }
+            }
+            for nonce in context['random_nonces']
+            for choice in choices
+            if choice.lower_nonce <= nonce <= choice.upper_nonce
+        ]
         context['choices_with_nonce'] = choices_with_nonce
 
-        # Get the game_id from the URL kwargs
-        game_id = self.kwargs.get('slug')
+        # Profiles
+        user_profiles = ProfileDetails.objects.filter(user=user) if user.is_authenticated else None
+        context['Profiles'] = user_profiles or [
+            {'newprofile_profile_picture_url': 'static/css/images/a.jpg', 'newprofile_profile_url': None}
+        ]
 
-        # Retrieve related Choice objects
-        choices = Choice.objects.filter(game=related_games)
+        # Spin preference form
+        context['spin_preference_form'] = SpinPreferenceForm(
+            instance=spinpreference) if spinpreference else SpinPreferenceForm()
 
-        # Add them to the context
-        context['choices'] = choices
+        # Game-specific logic (ensure `game_id` is used correctly)
+        game_id = self.kwargs.get('game_id')
+        if game_id:
+            game = get_object_or_404(Game, id=game_id)
+            context['game'] = game
 
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        print(context['Background'])
-
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -4273,6 +4316,7 @@ def send(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
 def mark_notifications_as_read(request):
     if request.method == "POST":
         try:
@@ -6283,6 +6327,11 @@ def generalsend(request):
     return JsonResponse({'status': 'error', 'generalmessage': 'Invalid request method.'})
 
 
+from django.core.mail import send_mail
+from django.conf import settings
+from email.mime.image import MIMEImage
+
+
 class BackgroundView(FormMixin, BaseView):
     model = BackgroundImage
     form_class = EmailForm
@@ -6295,17 +6344,43 @@ class BackgroundView(FormMixin, BaseView):
             post = form.save(commit=False)
             form.instance.user = request.user
             post.save()
-            messages.success(request, 'Form submitted successfully.')
 
-            return render(request, "emaildone.html", {'form': form})
-            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
+            # Sending subscription confirmation email with an inline image
+            subject = "Subscription Confirmation"
+            recipient_email = form.cleaned_data.get('email')
+            sender_email = settings.DEFAULT_FROM_EMAIL
+
+            # Define email content
+            html_content = render_to_string('email_template.html', {'user': request.user})
+            text_content = strip_tags(html_content)  # Fallback text content
+
+            # Create email message
+            email = EmailMultiAlternatives(
+                subject,
+                text_content,
+                sender_email,
+                [recipient_email],
+            )
+            email.attach_alternative(html_content, "text/html")
+
+
+            # Attach image as inline
+            image_path = os.path.join(settings.BASE_DIR, 'static/css/images/poketrove_logo.png')
+            with open(image_path, 'rb') as img:
+                image = MIMEImage(img.read())
+                image.add_header('Content-ID', '<subscription_image>')
+                email.attach(image)
+
+            try:
+                email.send()
+                messages.success(request, 'Form submitted successfully. A confirmation email has been sent.')
+            except Exception as e:
+                messages.error(request, f"Form submitted successfully, but email could not be sent: {e}")
+
+            return redirect('showcase:emaildone')
         else:
             messages.error(request, "Form submission invalid")
-            print(form.errors)
-            print(form.non_field_errors())
-            print(form.cleaned_data)
             return render(request, "index.html", {'form': form})
-            return redirect('showcase:index')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -6458,6 +6533,39 @@ class BackgroundView(FormMixin, BaseView):
         context['GeneralMessanger'] = general_messages_data
 
         return context
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import EmailField
+
+def unsubscribe(request):
+    if request.user.is_authenticated:
+        # Case 1: User is signed in and has an associated email
+        try:
+            email_entry = EmailField.objects.get(user=request.user)
+            if request.method == "POST":
+                email_entry.delete()
+                messages.success(request, "Your email has been unsubscribed successfully.")
+                return redirect('home')  # Redirect to a suitable page
+            return render(request, 'unsubscribe.html', {'email': email_entry.email})
+        except EmailField.DoesNotExist:
+            # Case 2: User is signed in but has no associated email
+            messages.info(request, "You do not have an associated email and are not currently subscribed.")
+            return redirect('home')  # Redirect to a suitable page
+    else:
+        # Case 3: User is not signed in
+        if request.method == "POST":
+            email = request.POST.get('email')
+            try:
+                email_entry = EmailField.objects.get(email=email)
+                email_entry.delete()
+                messages.success(request, "The email has been unsubscribed successfully.")
+                return redirect('home')  # Redirect to a suitable page
+            except EmailField.DoesNotExist:
+                messages.error(request, "The email you entered is not subscribed.")
+                return redirect('unsubscribe')  # Reload the page for further input
+        return render(request, 'unsubscribe.html')
 
 
 """
@@ -7957,7 +8065,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
         try:
-            context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+            context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user) #specifically used to get ruby amount
         except UserProfile.DoesNotExist:
             context['SentProfile'] = None
 
@@ -7982,13 +8090,14 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action')
-        pk = request.POST.get('pk')
+        pk = kwargs.get('pk')
 
         if action == 'sell':
             return self.sell_inventory_object(request, pk)
         elif action == 'withdraw':
             return self.withdraw_inventory_object(request, pk)
         elif action == 'move':
+            print("Move action triggered")  # Debugging line
             return self.move_to_trade(request, pk)
         else:
             return JsonResponse({'success': False, 'error': 'Invalid action'}, status=400)
@@ -7996,37 +8105,33 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
     def withdraw_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
-        # Check if user owns the inventory object
         if inventory_object.user != request.user:
-            messages.error(request, 'You cannot withdraw items you do not own!')
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # AJAX check
+                return JsonResponse({'success': False}, status=403)
             return redirect('showcase:inventory')
 
-        # Update InventoryObject
         inventory_object.user = None
         inventory_object.inventory = None
         inventory_object.save()
 
-        # Handle withdrawal logic
         user = request.user
-
         with transaction.atomic():
-            # Query for an active withdrawal with fewer than 25 cards
-            withdraw = Withdraw.objects.filter(user=user, is_active=1, shipping_state='S', number_of_cards__lt=25).first()
+            withdraw = Withdraw.objects.filter(
+                user=user, is_active=1, shipping_state='S', number_of_cards__lt=25
+            ).first()
 
             if withdraw:
-                # Update existing withdrawal
                 withdraw.cards.add(inventory_object)
             else:
-                # Create a new withdrawal
                 withdraw = Withdraw.objects.create(user=user, is_active=1, shipping_state='S')
                 withdraw.cards.add(inventory_object)
 
-            # Update number of cards after adding the inventory object
             withdraw.number_of_cards = withdraw.cards.count()
             withdraw.save()
 
-        messages.success(request, f"Successfully withdrawn {inventory_object.choice}!")
-        return redirect('showcase:inventory')  # Ensure the redirect URL is correct
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # AJAX check
+            return JsonResponse({'success': True})
+        return redirect('showcase:inventory')
 
     def sell_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
@@ -8059,49 +8164,41 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         })
 
     def move_to_trade(self, request, pk):
-        inventory_item = get_object_or_404(InventoryObject, pk=pk, user=request.user)
+        # Fetch the InventoryObject instance by primary key
+        inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
-        if request.method == 'POST':
-            form = MoveToTradeForm(request.POST, request.FILES)
-            if form.is_valid():
-                trade_item = inventory_item.move_to_trading(
-                    title=form.cleaned_data['title'],
-                    fees=form.cleaned_data['fees'],
-                    category=form.cleaned_data['category'],
-                    specialty=form.cleaned_data['specialty'],
-                    condition=form.cleaned_data['condition'],
-                    label=form.cleaned_data['label'],
-                    slug=form.cleaned_data['slug'],
-                    description=form.cleaned_data['description'],
-                    image=form.cleaned_data['image'],
-                    image_length=form.cleaned_data['image_length'],
-                    image_width=form.cleaned_data['image_width'],
-                    length_for_resize=form.cleaned_data['length_for_resize'],
-                    width_for_resize=form.cleaned_data['width_for_resize']
-                )
-                return redirect('showcase:tradeitem_detail', trade_item.id)  # Redirect to the TradeItem detail view
-        else:
-            form = MoveToTradeForm()
+        # Check if the user owns the inventory object
+        if inventory_object.user != request.user:
+            messages.error(request, 'You cannot trade items you do not own!')
+            return redirect('showcase:inventory')
 
-        return render(request, 'inventory.html', {'form': form, 'inventory_item': inventory_item})
+        user = request.user
 
-    def remove_trade_object(self, request, pk):
-        trade_item = get_object_or_404(TradeItem, pk=pk)
+        # Use a transaction to ensure atomicity
+        with transaction.atomic():
+            # Create a new TradeItem instance
+            tradeitem = TradeItem.objects.create(
+                user=user,
+                title=inventory_object.choice_text or inventory_object.choice.text,  # Use choice_text if set
+                inventoryobject=inventory_object,  # Save reference to the InventoryObject
+                category=inventory_object.category,
+                is_active=1,
+                currency=inventory_object.currency,
+                value=inventory_object.price,
+                condition=inventory_object.condition,
+                image=inventory_object.image,
+                image_length=inventory_object.image_length,
+                image_width=inventory_object.image_width,
+                length_for_resize=inventory_object.length_for_resize,
+                width_for_resize=inventory_object.width_for_resize,
+                description=f"Automatically moved to trade by {user.username}"  # Example description
+            )
 
-        if trade_item.user != request.user:
-            messages.error(request, 'You cannot remove tradable items you do not own!')
+            # Delete the inventory object after creating the trade item
+            inventory_object.delete()
+
+            # Redirect to the trade inventory page
             return redirect('showcase:tradeinventory')
-
-        trade_item.user = None
-        trade_item.inventory = None
-        trade_item.save()
-
-        messages.success(request, f"Successfully removed {trade_item.title}!")
-        return redirect('showcase:tradeinventory')
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
 
 
 @csrf_exempt
@@ -8204,6 +8301,9 @@ def sell_game_inventory_object(self, request, pk):
     return redirect('showcase:inventory')
 
 
+from .forms import ChoiceFormSet
+
+
 class CreateChestView(FormView):
     model = Game
     template_name = "create_chest.html"
@@ -8211,22 +8311,16 @@ class CreateChestView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Ensure game_form and formset are defined regardless of POST or GET
-        if self.request.method == 'POST':
-            game_form = InventoryGameForm(self.request.POST, self.request.FILES)
-            formset = ChoiceFormSet(self.request.POST, self.request.FILES)
-        else:
-            game_form = InventoryGameForm()
-            formset = ChoiceFormSet(queryset=Choice.objects.none())
 
-        # Add them to context
-        context['game_form'] = game_form
-        context['formset'] = formset
+        # Initialize forms
+        if 'game_form' not in kwargs:
+            context['game_form'] = InventoryGameForm()
+        if 'choice_formset' not in kwargs:
+            context['choice_formset'] = ChoiceFormSet(queryset=Choice.objects.filter(game__isnull=True))
 
-        context['formset_empty_form'] = formset.empty_form
+        # Add your additional context (e.g., background images)
         context.update({
-            'Background': BackgroundImageBase.objects.filter(
-                is_active=1, page=self.template_name).order_by("position"),
+            'Background': BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position"),
             'PostBackgroundImage': PostBackgroundImage.objects.all(),
             'BaseCopyrightTextFielded': BaseCopyrightTextField.objects.filter(is_active=1),
             'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
@@ -8239,19 +8333,37 @@ class CreateChestView(FormView):
         return context
 
     def post(self, request, *args, **kwargs):
-        game_form = InventoryGameForm(self.request.POST, self.request.FILES)
-        formset = ChoiceFormSet(self.request.POST, self.request.FILES)
+        # Bind forms and formset with POST data
+        game_form = InventoryGameForm(request.POST, request.FILES)
+        choice_formset = ChoiceFormSet(request.POST)
 
-        if game_form.is_valid() and formset.is_valid():
+        if game_form.is_valid() and choice_formset.is_valid():
+            # Save the Game instance
             game = game_form.save()
-            choices = formset.save(commit=False)
+
+            # Save Choices and associate them with the Game
+            choices = choice_formset.save(commit=False)
             for choice in choices:
                 choice.game = game
+
+                # Default values for fields if null
+                if not choice.color:
+                    choice.color = 'DefaultColor'  # Replace with your logic
+                if not choice.value:
+                    choice.value = 10  # Replace with your logic
                 choice.save()
+
+            # Handle deleted choices
+            for choice in choice_formset.deleted_objects:
+                choice.delete()
+
+            # Redirect to the game detail page
             return redirect('game_detail', pk=game.pk)
         else:
+            # Re-render the form with validation errors
             return self.render_to_response(self.get_context_data(
-                game_form=game_form, formset=formset
+                game_form=game_form,
+                choice_formset=choice_formset,
             ))
 
 
@@ -8394,6 +8506,7 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
         context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user)
+        context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
         context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
         context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
         return context
@@ -8421,9 +8534,25 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
             messages.error(request, 'You cannot remove tradable items you do not own!')
             return redirect('showcase:tradeinventory')
 
+        inventory_object = InventoryObject.objects.create(
+            user=trade_item.user,
+            choice_text=trade_item.title,
+            category=trade_item.category,
+            is_active=1,
+            currency=trade_item.currency,
+            price=trade_item.value,
+            condition=trade_item.condition,
+            image=trade_item.image,
+            image_length=trade_item.image_length,
+            image_width=trade_item.image_width,
+            length_for_resize=trade_item.length_for_resize,
+            width_for_resize=trade_item.width_for_resize,
+        )
+
+        inventory_object.save()
         trade_item.delete()
         messages.success(request, f"Successfully removed {trade_item.title}!")
-        return redirect('showcase:tradeinventory')
+        return redirect('showcase:inventory')
 
     def existing_inventory_remove_trade_object(self, request, pk):
         trade_item = get_object_or_404(TradeItem, pk=pk)
@@ -9327,34 +9456,64 @@ class WithdrawView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
 
-        newprofile = Withdraw.objects.filter(is_active=1)
-        # Retrieve the author's profile avatar
+        # Filter withdrawals for the current user
+        completed_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, shipping_state='D')
+        incomplete_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1).exclude(shipping_state='D')
 
-        context['Profiles'] = newprofile
+        # Add both querysets to the context
+        context['CompletedWithdraws'] = completed_withdraws
+        context['IncompleteWithdraws'] = incomplete_withdraws
 
-        for newprofile in context['Profiles']:
-            user = newprofile.user
+        # Add profile details to completed withdrawals
+        for withdraw in context['CompletedWithdraws']:
+            user = withdraw.user
             profile = ProfileDetails.objects.filter(user=user).first()
             if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+                withdraw.newprofile_profile_picture_url = profile.avatar.url
+                withdraw.newprofile_profile_url = withdraw.get_profile_url()
+
+        # Add profile details to incomplete withdrawals
+        for withdraw in context['IncompleteWithdraws']:
+            user = withdraw.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                withdraw.newprofile_profile_picture_url = profile.avatar.url
+                withdraw.newprofile_profile_url = withdraw.get_profile_url()
 
         return context
 
     def get_queryset(self):
-        if self.request.user.is_authenticated:
-            # Filter completed withdrawals for the current user
-            return Withdraw.objects.filter(user=self.request.user)
-        else:
-            return Withdraw.objects.none()
+        # Default queryset for user withdrawals
+        return Withdraw.objects.filter(user=self.request.user, is_active=1)
 
 
-from django.shortcuts import render, redirect
+class WithdrawDetailView(LoginRequiredMixin, DetailView):
+    model = Withdraw
+    template_name = "withdraw_detail.html"
+
+    def get_object(self):
+        slag = self.kwargs.get('slag')
+        return get_object_or_404(Withdraw, slag=slag)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        withdraw = self.get_object()
+
+        # Add related profile details
+        profile = ProfileDetails.objects.filter(user=withdraw.user).first()
+        if profile:
+            context['profile_picture_url'] = profile.avatar.url
+            context['profile_url'] = reverse_lazy('showcase:profile', args=[str(profile.pk)])
+
+        # Add card images
+        context['card_images'] = withdraw.get_card_images()
+
+        return context
+
+
 from django.contrib.auth.decorators import login_required
 from .models import InviteCode
 from .forms import InviteCodeForm
@@ -10325,7 +10484,7 @@ class CurrencyPaymentView(EBaseView):
 
     def get(self, request, *args, **kwargs):
         if not self.request.user.is_authenticated:
-            return redirect("login")
+            return redirect("accounts/login")
 
         try:
             order = CurrencyOrder.objects.get(user=self.request.user, ordered=False)
@@ -11511,8 +11670,8 @@ class SignupView(FormMixin, ListView):
                 # login user after signing up
                 user = form.save()
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                subject = "Welcome to IntelleX!"
-                message = 'Hello {user.username}, thank you for becoming a member of the IntelleX Community!'
+                subject = "Welcome to PokeTrove!"
+                message = 'Hello {{user.username}}, thank you for becoming a member of the PokeTrove Community!'
                 email_from = settings.EMAIL_HOST_USER
                 recipent_list = [user.email, ]
                 send_mail(subject, message, email_from, recipent_list)
@@ -11927,6 +12086,12 @@ class SellerApplicationView(FormMixin, LoginRequiredMixin, ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         return context
 
+    def get(self, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            messages.warning(self.request, "Please log in to apply.")
+            return redirect("accounts/login")
+        return super().get(*args, **kwargs)
+
     # @login_required
     def post(self, request, *args, **kwargs):
         form = SellerApplicationForm(request.POST, request.FILES)
@@ -11962,6 +12127,7 @@ class SellerApplicationView(FormMixin, LoginRequiredMixin, ListView):
         else:
             form = SellerApplicationForm()
 
+        return render(request, 'submit_application.html', {'form': form})
 
 import base64
 from django.http import HttpResponse
@@ -13316,7 +13482,6 @@ def submit_answer(request, question_id):
 
 def sociallogin(request):
     return render(request, 'registration/sociallogin.html')
-
 
 
 

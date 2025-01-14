@@ -224,6 +224,7 @@ urlpatterns = [
     path('voting/', TemplateView.as_view(template_name='voting.html'), name='voting'),
     # path('contact/', TemplateView.as_view(template_name='email.html'), name='contact'),
     path('emaildone/', TemplateView.as_view(template_name='emaildone.html'), name='emaildone'),
+    path('unsubscribe/', TemplateView.as_view(template_name='unsubscribe.html'), name='unsubscribe'),
     path('ao/', TemplateView.as_view(template_name='ao.html'), name='ao'),
     path('comingsoon/', TemplateView.as_view(template_name='comingsoon.html'), name='comingsoon'),
     path('contributors/', views.ContributorBackgroundView.as_view(), name='contributors'),
@@ -363,7 +364,10 @@ urlpatterns = [
     path('dailyroom/', views.DailyRoomView.as_view(), name='dailyroom'), #game with a single game
     path('dailygame/<slug:slug>/', views.DailyChestView.as_view(), name='dailygame'), #game with a single game
     path('spin_game/', views.spin_game, name='spin_game'),
+    path('api/get-user-cash/', views.get_user_cash, name='get_user_cash'),
     path('create-card-instance/', views.create_card_instance, name='create-card-instance'), #game with a single game
+    path('top-hits/create/', views.create_top_hit, name='create_top_hit'),
+    path('tophits/', views.TopHitsListView.as_view(), name='top_hits_list'),
     path('gametemplate/', TemplateView.as_view(template_name='gametemplate.html'), name='gametemplate'),
     path('create_outcome/<slug:slug>/', views.create_outcome, name='create_outcome'),
     path('outcomehistory/', views.OutcomeHistoryView.as_view(), name='outcomehistory'),
@@ -377,6 +381,7 @@ urlpatterns = [
     path('inventory/<int:pk>/sell/',  views.PlayerInventoryView.as_view(), name='sell_inventory_object'),
     path('inventory/<int:pk>/withdraw/', views.PlayerInventoryView.as_view(), name='withdraw_inventory_object'),
     path('inventory/<int:pk>/move/', views.PlayerInventoryView.as_view(), name='move_to_trade'),
+    path('withdraw_detail/<slug:slag>/', views.WithdrawDetailView.as_view(), name='withdraw_detail'),
     path('tradeinventory/', views.TradeInventoryView.as_view(), name='tradeinventory'),
     path('update_wager/<int:wager_id>/', update_wager, name='update_wager'),
     path('place_wager/', PlaceWagerView.as_view(), name='place_wager'),

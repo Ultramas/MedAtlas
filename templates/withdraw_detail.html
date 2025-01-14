@@ -1,0 +1,309 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        :root {
+    --primary-color: #3498db;
+    --secondary-color: #2c3e50;
+    --background-color: #f4f7f9;
+    --card-background: #ffffff;
+    --text-color: #333333;
+    --label-color: #7f8c8d;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.withdraw-detail {
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+h1 {
+    color: var(--secondary-color);
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+}
+
+h2 {
+    color: var(--secondary-color);
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.detail-card {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-weight: 600;
+    color: var(--label-color);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.value {
+    font-size: 1.1rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.cards-list {
+    list-style-type: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.card-item {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: transform 0.2s ease-in-out;
+}
+
+.card-item:hover {
+    transform: translateY(-2px);
+}
+
+.fees-section {
+    margin-top: 2rem;
+    text-align: right;
+}
+
+.fees-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .withdraw-detail {
+        padding: 1.5rem;
+    }
+
+    .detail-card {
+        grid-template-columns: 1fr;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="withdraw-detail">
+            <h1>Withdraw Details</h1>
+            <div class="detail-card">
+                <div class="detail-item">
+                    <span class="label">User:</span>
+                    <span class="value">{{ withdraw.user.username }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Number of Cards:</span>
+                    <span class="value">{{ withdraw.number_of_cards }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Condition:</span>
+                    <span class="value">{{ withdraw.get_condition_display }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Status:</span>
+                    <span class="value status-badge" data-status="{{ withdraw.status }}">{{ withdraw.get_status_display }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Shipping State:</span>
+                    <span class="value">{{ withdraw.get_shipping_state_display }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Date and Time:</span>
+                    <span class="value">{{ withdraw.date_and_time }}</span>
+                </div>
+            </div>
+            <div class="cards-section">
+                <h2>Cards</h2>
+                <ul class="cards-list">
+                    {% for card in withdraw.cards.all %}
+                        <li class="card-item">{{ card.choice_text }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="fees-section">
+                <h2>Fees</h2>
+                <span class="fees-amount">${{ withdraw.fees }}</span>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/script.js' %}"></script>
+<script>
+    :root {
+    --primary-color: #3498db;
+    --secondary-color: #2c3e50;
+    --background-color: #f4f7f9;
+    --card-background: #ffffff;
+    --text-color: #333333;
+    --label-color: #7f8c8d;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.withdraw-detail {
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+h1 {
+    color: var(--secondary-color);
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+}
+
+h2 {
+    color: var(--secondary-color);
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.detail-card {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-weight: 600;
+    color: var(--label-color);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.value {
+    font-size: 1.1rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.cards-list {
+    list-style-type: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.card-item {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: transform 0.2s ease-in-out;
+}
+
+.card-item:hover {
+    transform: translateY(-2px);
+}
+
+.fees-section {
+    margin-top: 2rem;
+    text-align: right;
+}
+
+.fees-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .withdraw-detail {
+        padding: 1.5rem;
+    }
+
+    .detail-card {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+</script>
+</body>
+</html>
