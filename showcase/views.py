@@ -8313,10 +8313,10 @@ class CreateChestView(FormView):
         context = super().get_context_data(**kwargs)
 
         # Initialize forms
-        if 'game_form' not in kwargs:
-            context['game_form'] = InventoryGameForm()
-        if 'choice_formset' not in kwargs:
-            context['choice_formset'] = ChoiceFormSet(queryset=Choice.objects.filter(game__isnull=True))
+        context['game_form'] = InventoryGameForm(self.request.POST or None)
+        context['choice_formset'] = ChoiceFormSet(
+            queryset=Choice.objects.filter(user__isnull=True)
+        )
 
         # Add your additional context (e.g., background images)
         context.update({

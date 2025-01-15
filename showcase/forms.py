@@ -366,24 +366,16 @@ class ChoiceForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Add non-editable fields
-        self.fields['choice_text'] = forms.CharField(
-            initial=self.instance.choice_text if self.instance else '',
-            required=False,
-            disabled=True,
-            widget=forms.TextInput(attrs={'readonly': 'readonly'})
-        )
-        self.fields['category'] = forms.CharField(
-            initial=self.instance.category if self.instance else '',
-            required=False,
-            disabled=True,
-            widget=forms.TextInput(attrs={'readonly': 'readonly'})
-        )
-        self.fields['value'] = forms.CharField(
-            initial=self.instance.value if self.instance else '',
-            required=False,
-            disabled=True,
-            widget=forms.TextInput(attrs={'readonly': 'readonly'})
+
+        # Filter choices where user is null or username is 'poketrove'
+        self.fields['choice_text'] = forms.ModelChoiceField(
+            queryset=Choice.objects.filter(
+                user__isnull=True
+            ) | Choice.objects.filter(
+                user__username__iexact='poketrove'
+            ),
+            required=True,
+            empty_label="Select a Choice",
         )
 
 
@@ -393,6 +385,7 @@ ChoiceFormSet = modelformset_factory(
     extra=1,
     can_delete=True,
 )
+
 
 class AscensionCreateForm(forms.ModelForm):
     class Meta:

@@ -8,11 +8,21 @@
     <table>
         {% for form in choice_formset %}
         <tr>
-            <td>{{ form.as_p }}</td>
             <td>
-                {% if form.instance.pk %}
-                <a href="{% url 'delete_choice' form.instance.pk %}">Delete</a>
-                {% endif %}
+                {{ form.choice_text.label_tag }}
+                {{ form.choice_text }}
+            </td>
+            <td>
+                {{ form.rarity.label_tag }}
+                {{ form.rarity }}
+            </td>
+            <td>
+                {{ form.lower_nonce.label_tag }}
+                {{ form.lower_nonce }}
+            </td>
+            <td>
+                {{ form.upper_nonce.label_tag }}
+                {{ form.upper_nonce }}
             </td>
         </tr>
         {% endfor %}

@@ -1596,7 +1596,7 @@ admin.site.register(AdminRoles, AdministrationRoleAdmin)
 class ChoiceAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Choice Information - Categorial Descriptions', {
-            'fields': ('choice_text', 'category', 'tier',),
+            'fields': ('user', 'choice_text', 'category', 'tier',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Choice Information - Attributes', {
@@ -1612,6 +1612,14 @@ class ChoiceAdmin(admin.ModelAdmin):
 
     readonly_fields = ('mfg_date',)
 
+    list_display = (
+        'user',
+        'choice_text',
+        'category',
+        'condition',
+        'value',
+        'is_active',
+    )
 
 admin.site.register(Choice, ChoiceAdmin)
 
