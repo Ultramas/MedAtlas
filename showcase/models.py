@@ -379,7 +379,8 @@ class Level(models.Model):
     full_row = models.BooleanField(default=True)
     affiliation = models.ForeignKey(Affiliation, blank=True, null=True, on_delete=models.CASCADE)
     icon = models.ImageField(blank=True, null=True)
-    color = ColorField(samples=COLOR_PALETTE, blank=True, null=True)
+    color_wheel = ColorField(samples=COLOR_PALETTE, blank=True, null=True)
+    color = models.CharField(max_length=500, blank=True, null=True, help_text="Comma-separated hex colors for gradient")
     games = models.ManyToManyField(
         'Game',  # Refer to Game using a string
         blank=True,
@@ -506,6 +507,22 @@ class Level(models.Model):
 
         except Exception as e:
             print(f"Error adjusting related levels: {e}")
+
+    def get_background_style(self):
+        """
+        Generate a CSS background style and metadata based on the color field.
+        """
+        if not self.color:
+            return {"style": "background: none;", "is_gradient": False}
+        colors = self.color.split(",")  # Split comma-separated values
+        if len(colors) > 1:
+            # Linear gradient for multiple colors
+            return {
+                "style": f"background: linear-gradient(30deg, {', '.join(colors)});",
+                "is_gradient": True,
+            }
+        # Single color
+        return f"{colors[0]}"
 
     class Meta:
         verbose_name = "Level"
@@ -3595,7 +3612,7 @@ class Battle(models.Model):
     battle_name = models.CharField(max_length=100, blank=True, null=True)
     chests = models.ManyToManyField('Game', through='BattleGame', related_name='battles')
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    price = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     participants = models.ManyToManyField(
         BattleParticipant, blank=True, related_name='battles', limit_choices_to={'is_bot': False}
@@ -3659,7 +3676,7 @@ class Battle(models.Model):
                 total_price += game.cost
 
         self.price = total_price
-
+        print('price set to total_price')
         # Save again to ensure currency and price updates
         super().save(*args, **kwargs)
 

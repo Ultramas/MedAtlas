@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
+from django.core.exceptions import ValidationError
+import re
 
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
     SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
@@ -2340,8 +2342,28 @@ class AffiliationAdmin(admin.ModelAdmin):
 admin.site.register(Affiliation, AffiliationAdmin)
 
 
+def validate_colors(value):
+    colors = value.split(",")
+    hex_pattern = r'^#(?:[0-9a-fA-F]{3}){1,2}$'
+    for color in colors:
+        if not re.match(hex_pattern, color.strip()):
+            raise ValidationError(f"'{color.strip()}' is not a valid hex color.")
+
+
+class LevelAdminForm(forms.ModelForm):
+    class Meta:
+        model = Level
+        fields = "__all__"
+
+    def clean_color(self):
+        color = self.cleaned_data.get("color")
+        if color:
+            validate_colors(color)
+        return color
+
+
 class LevelAdmin(admin.ModelAdmin):
-    list_display = ('level', 'level_name', 'experience',  'icon',  'color', 'affiliation', 'is_active')
+    list_display = ('level', 'level_name', 'experience',  'icon', 'color', 'affiliation', 'is_active')
     filter_horizontal = ('games',)  # Use horizontal filter for the ManyToManyField
     ordering = ('level',)
     list_per_page = 1000
@@ -2352,7 +2374,8 @@ class LevelAdmin(admin.ModelAdmin):
         Mass save selected Level instances.
         """
         for level in queryset:
-            # You can add any custom logic here before saving
+            formulaic_experience = level.level * 2
+            level.experience = formulaic_experience ** 2
             level.save()  # Save the instance
         self.message_user(request, f"{queryset.count()} levels have been saved successfully.")
 

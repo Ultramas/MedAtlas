@@ -1,8 +1,318 @@
+{% if signed_in_user %}
+  {% include 'supportroom.html' %}
+{% endif %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
+
+  	{% for BackgroundImage in Titles %}
+	{% if BackgroundImage.page == "index.html" or BackgroundImage.page == "base.html" %}
+    <title>{{BackgroundImage.overtitle}}</title>
+  	{% endif %}
+  	{% endfor %}
+
+	<!-- favicon -->
+	<link rel="shortcut icon" type="image/png" href="static/img/favicon.png">
+	<!-- google font -->
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+<script>
+	$(document).ready(function() {
+    $('.popup-youtube').magnificPopup({
+        type: 'iframe',
+        mainClass: 'mfp-fade',
+        removalDelay: 160,
+        preloader: false,
+        fixedContentPos: false
+    });
+});
+
+function toggleChatWidget() {
+    var chatWidget = document.getElementById("chatwidget2");
+    if (chatWidget.style.display === "none") {
+        chatWidget.style.display = "block";
+    } else {
+        chatWidget.style.display = "none";
+    }
+}
+
+</script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+<style>
+	html, body{
+	height: 100%;
+	}
+.hero-area {
+    position: relative;
+    overflow: hidden;
+}
+
+.video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+}
+
+.container {
+    position: relative;
+    z-index: 2;
+}
+
+/* Style the popup button */
+.button {
+  cursor: pointer;
+}
+
+/* Style the popup menu content - hidden by default */
+.popup-menu {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  padding: 12px 16px;
+  z-index: 1;
+}
+
+
+.cart-btn{
+  background-image: url("{% static 'css/images/fireimage.png' %}"); /* Default image */
+  image-width: 100px;
+  image-height: 100px;
+  background-size: cover; /* Ensure image covers the button */
+  position: relative; /* Needed for proper stacking */
+}
+
+.cart-btn:hover {
+  background-image: url("{% static 'css/images/invertedfireimage.png' %}"); /* Hover image path */
+  opacity: 1; /* Ensure hover image is fully visible */
+}
+
+
+    .hero-text-tablecell {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+    }
+	#sticker {
+    position: fixed;
+    width: 100%;
+    transition: background 1s;
+}
+
+	.contented{
+	background: url("{% static 'css/images/blue-message-text-bubble.png' %}");
+	}
+
+	.image-container {
+    position: relative;
+    display: inline-block; /* Ensures the size adjusts to the image */
+    width: 100px;
+    height: 100px;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.image-container h3 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white; /* Change to a contrasting color */
+    font-size: 14px; /* Adjust font size as needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Optional: Add a background for better readability */
+    padding: 5px; /* Optional: Add padding */
+    border-radius: 5px; /* Optional: Add rounded corners */
+    text-align: center;
+}
+
+</style>
+
+<script>
+window.onscroll = function() {
+    var sticker = document.getElementById('sticker');
+    if (window.pageYOffset > window.innerHeight / 2) {
+        sticker.style.background = 'rgba(0, 0, 0, 1)';
+        sticker.style.color = 'white';
+        currency_designation.style.color = 'white';
+    } else {
+        sticker.style.background = 'linear-gradient(rgba(0, 0, 0, 1), rgba(0,0,0,0))';
+        sticker.style.color = 'black';
+        currency_designation.style.color = 'black';
+    }
+};
+</script>
+</head>
+<body>
+
+	<!--PreLoader-->
+    <div class="loader">
+        <div class="loader-inner">
+            <div class="circle"></div>
+        </div>
+    </div>
+    <!--PreLoader Ends-->
+
+	<!-- header -->
+	<div class="top-header-area" id="sticker" style="background: linear-gradient(rgba(0, 0, 0, 1) 5%, rgba(0,0,0,0));">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-12 col-sm-12 text-center">
+					<div class="main-menu-wrap">
+						<!-- logo -->
+						<div class="site-logo">
+							<a href="index.html">
+							{% for BackgroundView in Logo %}
+								{% if BackgroundView.page == 'index.html' %}
+								<a class="logo" href="{{BackgroundView.hyperlink}}">
+								  <img class="imageicon" src="{{BackgroundView.logocover.url}}"
+										alt="{{BackgroundView.alternate}}" style="length: {{BackgroundView.length_for_resize}}px; width: {{BackgroundView.width_for_resize}}px;"></a>
+								{% endif %}
+							{% endfor %}
+							</a>
+						</div>
+						<!-- logo -->
+
+						<!-- menu start -->
+						<nav class="main-menu">
+							<ul>
+							  {% for column in Header %}
+
+      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
+									<ul class="sub-menu">
+										{% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% else %}
+              {% if row.opennew %}
+										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+									</ul>
+        {% endfor %}
+								</li>
+								<li>
+									<div class="header-icons" style="display: flex; flex-direction: right;">
+										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
+											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
+										</a>
+										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
+									</div>
+
+
+
+								</li>
+								<li style="display: flex; flex-direction: column;">
+								<li style="display: flex; align-items: center; margin-right: -10%;">
+									{% for userprofile in Profiles %}
+									{% if userprofile.newprofile_profile_picture_url %}
+									<a href="{{ userprofile.newprofile_profile_url }}">
+										<img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
+									</a>
+									{% else %}
+									<!-- Placeholder image or default avatar -->
+									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
+									{% endif %}
+									{% if userprofile.currency == Rubies %}
+									<a href="{% url 'showcase:currencymarket' %}" style="display: flex; justify-content: center; align-items: center; margin: auto; text-decoration: none;">
+										<h3 class="currency_designation" style="text-align: center; margin-right: 5px; color: white;">
+											{{userprofile.currency_amount}} {{userprofile.currency}}
+										</h3>
+									</a>
+									{% else %}
+									<a href="{% url 'showcase:currencymarket' %}" style="display: flex; justify-content: center; align-items: center; margin: auto; text-decoration: none;">
+										<h3 class="currency_designation" style="text-align: center; margin-right: 5px; color: white;">
+											{{userprofile.currency_amount}}
+
+										</h3>
+										<img src="static/css/images/ruby.png" style="width: 40px; height: 40px;">
+									</a>
+									{% endif %}
+									<br>
+											{{userprofile.level}}
+										{% endfor %}
+								</li>
+								</li>
+							</ul>
+						</nav>
+						<a class="mobile-show search-bar-icon" href="#"><i class="fas fa-search"></i></a>
+						<div class="mobile-menu"></div>
+						<!-- menu end -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end header -->
+
+	<!-- search area -->
+<div class="search-area">
+    <div class="container">
+       <div class="row">
+          <div class="col-lg-12">
+             <span class="close-btn"><img src=""></i></span>
+             <div class="search-bar">
+                <div class="search-bar-tablecell">
+                   <h3>What are you looking for?</h3>
+                   <form action="{% url 'showcase:pagesearch' %}" method="post">
+                       {% csrf_token %}
+                       <input type="text" name="search_query" placeholder="Keywords">
+                       <select name="search_type">
+                           <option value="text">Text</option>
+                           <option value="url">URL</option>
+                       </select>
+                       <button type="submit">Search <i class="fas fa-search"></i></button>
+                   </form>
+                </div>
+             </div>
+          </div>
+       </div>
+    </div>
+</div>
+	<!-- end search area -->
+
+
 
 {% load static %}
 
 {% block head %}
-    <title>{% if profile %}{{ profile.user.username }}'s Profile{% else %}No Profile Found{% endif %}</title>
+    <title>{% if Profile %}{{ Profile.user.username }}'s Level{% else %}No Profile Found{% endif %}</title>
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
     <link rel="icon" type="image/x-icon" href="
         {% if profile and profile.avatar %}
@@ -70,6 +380,30 @@
     }
 }
 
+.level-card {
+    display: flex; /* Enable Flexbox */
+    flex-direction: column; /* Keep column structure for smaller screens */
+    padding: 20px;
+    background-color: #f9f9f9; /* Example background */
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.level-card-content {
+    display: flex; /* Enable horizontal Flexbox layout */
+    justify-content: space-between; /* Space between content and icon */
+    align-items: center; /* Vertically align content and icon */
+}
+
+.level-card-icon {
+    margin-left: 20px; /* Add some space between content and icon */
+}
+
+.icon-img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain; /* Ensure the icon scales properly */
+}
 
 </style>
 {% endblock %}
@@ -83,7 +417,12 @@
             {% endif %}
         {% endfor %}
     </div>
-
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
     <div class="profile-container">
     {% if Profile %}
     <h2>Welcome, {{ Profile.user.username }}</h2>
@@ -92,20 +431,37 @@
     <p>No profile found for the current user.</p>
 {% endif %}
 
-        <div id="levels-container">
-            {% for level in levels %}
-                <div class="level-card" data-level="{{ level.level }}">
-                    <h2>Level: {{ level.level }}</h2>
-                    <p>Level Name: {{ level.level_name }}</p>
-                    <p>Experience Required: {{ level.experience }}</p>
-                    <p>Games with Daily Mode:</p>
-                    <ul>
-                        {% for game in level.games.all %}
-                            <li>{{ game.name }}</li>
-                        {% endfor %}
-                    </ul>
+                <div id="levels-container">
+                    {% for level_data in levels %}
+                {% if level_data.background.is_gradient %}
+            <div class="level-card" data-level="{{ level_data.level.level }}" style="{{ level_data.background.style }}">
+
+                {% else %}
+                <div class="level-card" data-level="{{ level.level }}" style="background: linear-gradient(45deg, #FFFFFF, {{ level_data.background }});">
+                {% endif %}
+                   <div class="level-card-content">
+                   <div class="level-card-moment" style="display: flex; flex-direction: column;">
+
+                <h2>Level {{ level_data.level.level }}</h2>
+                <p style=" margin-top: -5px;">Level Name: {{ level_data.level.level_name }}</p>
+                <p style=" margin-top: -5px;">Experience Required: {{ level_data.level.experience }}</p>
+                <p style=" margin-top: -5px;">Games with Daily Mode:</p>
+                <ul style=" margin-top: -5px;margin-left: 10px;">
+                    {% for game in level_data.level.games.all %}
+                        <li style=" margin-top: -5px;">{{ game.name }}</li>
+                    {% endfor %}
+                </ul>
+                   </div>
+
+            {% if level_data.level.icon and level_data.level.icon.url %}
+                <div class="level-card-icon">
+                    <img src="{{ level_data.level.icon.url }}" alt="Image" class="icon-img">
                 </div>
-            {% endfor %}
+            {% endif %}
+            </div>
+            </div>
+{% endfor %}
+
         </div>
     </div>
 <script>
@@ -134,3 +490,27 @@
 
 </script>
     <script src="{% static 'js/profile.js' %}"></script>
+
+	<!-- end copyright -->
+     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+     <script src="{% static 'css/js/main.js' %}"></script>
+     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+     <script src="{% static 'css/js/waypoints.js' %}"></script>
+	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+     <script src="{% static 'css/js/sticker.js' %}"></script>
+<!-- jquery -->
+<!-- bootstrap -->
+<!-- count down -->
+<!-- isotope -->
+<!-- waypoints -->
+<!-- owl carousel -->
+<!-- magnific popup -->
+<!-- mean menu -->
+<!-- sticker js -->
+	<!-- main js -->
+</body>
+</html>

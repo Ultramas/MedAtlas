@@ -2818,10 +2818,13 @@ class BattleCreationView(CreateView):
     success_url = reverse_lazy('showcase:battle')  # Redirect to the open battles list
 
     def form_valid(self, form):
+        form.instance.creator = self.request.user
+        # Save the form instance and create associated BattleGame objects
         response = super().form_valid(form)
         quantities = form.cleaned_data.get('quantities', {})
         battle = form.instance
-
+        if not battle.creator:
+            battle.creator = self.request.user
         for game_id, quantity in quantities.items():
             game = Game.objects.get(id=game_id)
             BattleGame.objects.create(battle=battle, game=game, quantity=quantity)
@@ -9673,17 +9676,23 @@ class MyLevelView(LoginRequiredMixin, ListView):
 
         # Add Level objects and fields
         levels = Level.objects.filter(is_active=1).order_by("level")
-        context['levels'] = levels  # Use a plural name for clarity
+        context['levels'] = [
+            {
+                "level": level,
+                "background": level.get_background_style()
+            }
+            for level in levels
+        ]
 
         # Add the ProfileDetails instance for the current user
         if user.is_authenticated:
-            profile = ProfileDetails.objects.filter(user=user, is_active=1).first()  # Retrieve active profile for user
+            profile = ProfileDetails.objects.filter(user=user, is_active=1).first()
             if profile:
                 context['Profile'] = profile
                 context['profile_pk'] = profile.pk
                 context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
             else:
-                context['Profile'] = None  # If no profile is found, ensure this is handled gracefully in the template
+                context['Profile'] = None
         else:
             context['Profile'] = None
 
