@@ -711,7 +711,7 @@ window.onscroll = function() {
     {% if BackgroundImage.page == "index.html" and BackgroundImage.position == 6 %}
     <div id="video-popup" class="mfp-hide">
         <div class="mfp-iframe-scalere">
-            <video autoplay loop muted playsinline controls>
+            <video autoplay loop muted playsinline controls style="display: flex; flex-direction: row; margin: auto;">
                 <source src="{{ BackgroundImage.file.url }}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
@@ -1988,7 +1988,44 @@ Bounce
 }
 
 		</style>
+<style>
+	.chat-button {
+            position: fixed;
+            bottom: 10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #0070f3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px 0 rgba(0, 118, 255, 0.39);
+            transition: all 0.2s ease;
+            font-size: 24px;
+        }
 
+        .chat-toggle-button {
+            right: 20px;
+        }
+
+        .chat2e-toggle-button {
+            left: 20px;
+            z-index: 10;
+        }
+
+        .chat-button:hover {
+            background-color: #0051a2;
+            transform: translateY(-2px);
+        }
+
+        .chat-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 118, 255, 0.3);
+        }
+</style>
 
 <section class="avenue-messenger" id="chatwidget">
     <div class="chat2">
@@ -2026,11 +2063,15 @@ Bounce
 </section>
 
 	<div class="chat-toggle-button" style="position: fixed; right: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
-		<button type="button" onclick="showChatWidget()">...</button>
+		<button class="chat-button chat-toggle-button" type="button" onclick="showChatWidget()" aria-label="Open chat">
+        &#8942;
+    </button>
 	</div>
 
 <div class="chat2e-toggle-button" style="position: fixed; left: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
-  <button type="button" onclick="toggleChatWidget()">...</button>
+  <button class="chat-button chat2e-toggle-button" type="button" onclick="toggleChatWidget()" aria-label="Toggle chat">
+        &#10005;
+    </button>
 </div>
 
 </div>

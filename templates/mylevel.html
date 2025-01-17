@@ -153,9 +153,53 @@ function toggleChatWidget() {
     text-align: center;
 }
 
+
+    .level-card-wrapper {
+  position: relative;
+  padding: 3px;
+  background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff, #ff0000);
+  background-size: 400% 400%;
+  animation: rgbBorder 15s ease infinite;
+  border-radius: 10px; /* Adjust as needed */
+}
+
+.level-card {
+  background: white; /* Or any background color you prefer */
+  border-radius: 7px; /* Slightly smaller than the wrapper */
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes rgbBorder {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
 </style>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+  const cards = document.querySelectorAll('.level-card-wrapper');
+
+  cards.forEach(card => {
+    card.addEventListener('mouseover', function() {
+      this.style.animationDuration = '5s';
+    });
+
+    card.addEventListener('mouseout', function() {
+      this.style.animationDuration = '15s';
+    });
+  });
+});
+</script>
+
+    <script>
 window.onscroll = function() {
     var sticker = document.getElementById('sticker');
     if (window.pageYOffset > window.innerHeight / 2) {
@@ -433,11 +477,15 @@ window.onscroll = function() {
 
                 <div id="levels-container">
                     {% for level_data in levels %}
+
+                    {% if Profile %}
+                    {% if level_data.level.level < Profile.level.level %}
+                    <div class="level-card-wrapper">
                 {% if level_data.background.is_gradient %}
-            <div class="level-card" data-level="{{ level_data.level.level }}" style="{{ level_data.background.style }}">
+            <div class="level-card" data-level="{{ level_data.level.level }}" style="{{ level_data.background.style }};">
 
                 {% else %}
-                <div class="level-card" data-level="{{ level.level }}" style="background: linear-gradient(45deg, #FFFFFF, {{ level_data.background }});">
+                <div class="level-card" data-level="{{ level.level }}" style="background: linear-gradient(45deg, #FFFFFF, {{ level_data.background }}); border: 3px gold;">
                 {% endif %}
                    <div class="level-card-content">
                    <div class="level-card-moment" style="display: flex; flex-direction: column;">
@@ -458,8 +506,72 @@ window.onscroll = function() {
                     <img src="{{ level_data.level.icon.url }}" alt="Image" class="icon-img">
                 </div>
             {% endif %}
+                   </div>
+                </div>
+
+                {% elif level_data.level.level == Profile.level.level  %}
+
+                    <div class="level-card-wrappert">
+                {% if level_data.background.is_gradient %}
+            <div class="level-card" data-level="{{ level_data.level.level }}" style="{{ level_data.background.style }};">
+
+                {% else %}
+                <div class="level-card" data-level="{{ level.level }}" style="background: linear-gradient(45deg, #FFFFFF, {{ level_data.background }}); border: 3px gold;">
+                {% endif %}
+                   <div class="level-card-content">
+                   <div class="level-card-moment" style="display: flex; flex-direction: column;">
+
+                <h2>Level {{ level_data.level.level }}</h2>
+                <p style=" margin-top: -5px;">Level Name: {{ level_data.level.level_name }}</p>
+                <p style=" margin-top: -5px;">Experience Required: {{ level_data.level.experience }}</p>
+                <p style=" margin-top: -5px;">Games with Daily Mode:</p>
+                <ul style=" margin-top: -5px;margin-left: 10px;">
+                    {% for game in level_data.level.games.all %}
+                        <li style=" margin-top: -5px;">{{ game.name }}</li>
+                    {% endfor %}
+                </ul>
+                   </div>
+
+            {% if level_data.level.icon and level_data.level.icon.url %}
+                <div class="level-card-icon">
+                    <img src="{{ level_data.level.icon.url }}" alt="Image" class="icon-img">
+                </div>
+            {% endif %}
+                   </div>
+                </div>
+                       {% else %}
+
+                                       {% if level_data.background.is_gradient %}
+            <div class="level-card" data-level="{{ level_data.level.level }}" style="{{ level_data.background.style }}">
+
+                {% else %}
+                <div class="level-card" data-level="{{ level.level }}" style="background: linear-gradient(45deg, #FFFFFF, {{ level_data.background }});">
+                {% endif %}
+                   <div class="level-card-content">
+                   <div class="level-card-moment" style="display: flex; flex-direction: column;">
+
+                <h2>Level {{ level_data.level.level }}</h2>
+                <p style=" margin-top: -5px;">Level Name: Locked</p>
+                <p style=" margin-top: -5px;">Experience Required: {{ level_data.level.experience }}</p>
+                <p style=" margin-top: -5px;">Games with Daily Mode:</p>
+                <ul style=" margin-top: -5px;margin-left: 10px;">
+                    {% for game in level_data.level.games.all %}
+                        <li style=" margin-top: -5px;">{{ game.name }}</li>
+                    {% endfor %}
+                </ul>
+                   </div>
+
+            {% if level_data.level.icon and level_data.level.icon.url %}
+                <div class="level-card-icon">
+                    <h3>Icon Locked</h3>
+                </div>
+            {% endif %}
+
+            {% endif %}
             </div>
+            {% endif %}
             </div>
+
 {% endfor %}
 
         </div>
