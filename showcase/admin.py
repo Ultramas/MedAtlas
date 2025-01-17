@@ -10,7 +10,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
-    TopHits
+    TopHits, Address
 from .models import Idea
 from .models import Vote
 from .models import Product
@@ -903,6 +903,7 @@ class OrderAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('start_date', 'id',)
+    list_display = ('user', 'coupon', 'orderprice', 'currencyorderprice')
 
 
 admin.site.register(Order, OrderAdmin)
@@ -1311,6 +1312,15 @@ class TextBaseAdmin(admin.ModelAdmin):
             'fields': ('header_or_textfield', 'section', 'text_size', 'hyperlink', 'is_active'),
             'classes': ('collapse-open',),  # Open by default
         }),
+    )
+    list_display = (
+        'text',
+        'page',
+        'text_color',
+        'header_or_textfield',
+        'section',
+        'hyperlink',
+        'is_active',
     )
 
     class Media:
@@ -1964,6 +1974,28 @@ class CheckoutAddressAdmin(admin.ModelAdmin):
 
 admin.site.register(CheckoutAddress, CheckoutAddressAdmin)
 
+class AddressAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Saved Address Information-Personal Information', {
+            'fields': ('user', 'street_address', 'apartment_address', 'country', 'zip')
+        }),
+        ('Saved Address Information-Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+
+    list_display = (
+        'user',
+        'street_address',
+        'apartment_address',
+        'country',
+        'zip',
+        'is_active',
+    )
+
+
+admin.site.register(Address, AddressAdmin)
+
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
@@ -2309,13 +2341,25 @@ admin.site.register(Affiliation, AffiliationAdmin)
 
 
 class LevelAdmin(admin.ModelAdmin):
-    list_display = ('level', 'level_name', 'experience', 'affiliation', 'is_active')
+    list_display = ('level', 'level_name', 'experience',  'icon',  'color', 'affiliation', 'is_active')
     filter_horizontal = ('games',)  # Use horizontal filter for the ManyToManyField
     ordering = ('level',)
+    list_per_page = 1000
 
+    # Define the action
+    def mass_save(self, request, queryset):
+        """
+        Mass save selected Level instances.
+        """
+        for level in queryset:
+            # You can add any custom logic here before saving
+            level.save()  # Save the instance
+        self.message_user(request, f"{queryset.count()} levels have been saved successfully.")
+
+    # Add the action to the admin
+    actions = ['mass_save']
 
 admin.site.register(Level, LevelAdmin)
-
 
 class MonstrosityAdmin(admin.ModelAdmin):
     fieldsets = (

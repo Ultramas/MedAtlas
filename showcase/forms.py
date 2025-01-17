@@ -173,7 +173,7 @@ class ProfileForm(forms.ModelForm):
 class ShippingForm(forms.ModelForm):
     class Meta:
         model = UserProfile2
-        fields = ('address', 'city', 'state', 'phone_number', 'profile_picture')
+        fields = ('first_name', 'last_name', 'address', 'city', 'state', 'phone_number', 'profile_picture')
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -362,20 +362,16 @@ class InventoryGameForm(forms.ModelForm):
 class ChoiceForm(forms.ModelForm):
     class Meta:
         model = Choice
-        fields = ['rarity', 'lower_nonce', 'upper_nonce']  # Editable fields
+        fields = ['choice_text', 'rarity', 'lower_nonce', 'upper_nonce']  # Include 'choice_text'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Filter choices where user is null or username is 'poketrove'
-        self.fields['choice_text'] = forms.ModelChoiceField(
-            queryset=Choice.objects.filter(
-                user__isnull=True
-            ) | Choice.objects.filter(
-                user__username__iexact='poketrove'
-            ),
-            required=True,
-            empty_label="Select a Choice",
+        # Apply filtering logic to the queryset of the ChoiceForm
+        self.fields['choice_text'].queryset = Choice.objects.filter(
+            user__isnull=True
+        ) | Choice.objects.filter(
+            user__username__iexact='poketrove'
         )
 
 

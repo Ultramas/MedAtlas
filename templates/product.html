@@ -339,7 +339,7 @@ function showSlides(n) {
               <span style="color: white;">💎{{ object.discount_currency_price }}</span> <!--consider either only allowing inventory
               purchases or creating a second currency to embody the necessary currency rather than Rubies-->
             {% else %}
-              <del>${{ object.currency_price }}</del>
+                <span style="color: white;">💎{{ object.currency_price }}</span>
             {% endif %}
             {% endif %}
             </p>

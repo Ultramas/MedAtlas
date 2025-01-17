@@ -257,6 +257,7 @@ urlpatterns = [
 
     path('profile_edit/', views.ProfileEditView.as_view(), name="profile_edit"),
     #path('profile/', views.profile, name="profile"),
+    path('mylevel/', views.MyLevelView.as_view(), name='mylevel'),
     path('like/<username>/', profile, name='like'), #consider making it views.profile
     path('administration/', AdministrationView.as_view(), name='administration'),
     path('administrativeroles/', views.AdminRolesView.as_view(), name='administrativeroles'),
@@ -514,6 +515,7 @@ urlpatterns = [
     path('add-coupon/', AddCouponView.as_view(), name='add-coupon'),
     path('remove-from-cart/<slug>/', remove_from_cart, name='remove-from-cart'),
     path('reduce-quantity-item/<slug>/', reduce_quantity_item, name='reduce-quantity-item'),
+    path('orderdone/', views.OrderDoneView.as_view(), name='orderdone'),
     path('ebase/', EBaseView.as_view(), name='ebase'),
     path("backgroundimagechange/", BackgroundView.as_view(), name="backgroundimagechange"),
     path("ebackgroundimagechange/", EBackgroundView.as_view(), name="ebackgroundimagechange"),

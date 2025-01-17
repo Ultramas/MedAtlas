@@ -7,7 +7,7 @@
             <p><strong>Color:</strong> {{ hit.color }}</p>
             <p><strong>Date:</strong> {{ hit.mfg_date }}</p>
             {% if hit.file %}
-                <p><strong>File:</strong> <a href="{{ hit.file.url }}" download>{{ hit.file.name }}</a></p>
+                <a href="{{ hit.file.url }}"> <img src="{{ hit.file.url }}"></a>
             {% endif %}
         </div>
         <hr>

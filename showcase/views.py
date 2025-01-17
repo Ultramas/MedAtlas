@@ -1,6 +1,7 @@
 from urllib import request
 from venv import logger
 
+import pytz
 from celery import shared_task
 from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError
@@ -202,7 +203,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic import ListView, DetailView, View
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
 from .forms import CheckoutForm
 
@@ -2256,6 +2257,19 @@ class DailyRoomView(BaseView):
         return context
 
 
+def get_next_5pm_pst():
+    # Set the timezone to PST
+    pst = pytz.timezone('US/Pacific')
+    now = datetime.now(pst)
+
+    # Determine the next 5 PM
+    next_5pm = now.replace(hour=17, minute=0, second=0, microsecond=0)
+    if now >= next_5pm:
+        next_5pm += timedelta(days=1)  # Move to the next day if past 5 PM today
+
+    return next_5pm
+
+
 class DailyChestView(BaseView):
     template_name = "game.html"
 
@@ -2429,6 +2443,8 @@ class DailyChestView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['next_5pm'] = get_next_5pm_pst()
+        context['is_daily'] = game.daily
         return context
 
     def game_detail(request, slug):
@@ -2567,13 +2583,16 @@ def spin_game(request):
             effective_cost = game.get_effective_cost()
             total_cost = effective_cost * spin_multiplier
 
-            # Check if the user has enough currency
-            if profile.currency_amount < total_cost:
-                return JsonResponse({"success": False, "error": "Insufficient currency."})
+            if game.daily:
+                print('daily game spin initiated, do not charge')
+            else:
+                # Check if the user has enough currency
+                if profile.currency_amount < total_cost:
+                    return JsonResponse({"success": False, "error": "Insufficient currency."})
 
-            # Deduct the cost
-            profile.currency_amount -= total_cost
-            profile.save()
+                # Deduct the cost
+                profile.currency_amount -= total_cost
+                profile.save()
 
             # Return updated data in the response
             return JsonResponse({
@@ -2581,6 +2600,7 @@ def spin_game(request):
                 "message": f"Spin charged {total_cost} {profile.currency.name}",
                 "updated_currency_amount": profile.currency_amount,
                 "currency_name": profile.currency.name,
+                "daily": game.daily
             })
 
         except json.JSONDecodeError:
@@ -4578,8 +4598,6 @@ from .models import StaffProfile
 from .models import Event
 from .models import City, Vote, UpdateProfile, Idea, PartnerApplication
 from .models import Support
-from .models import CheckoutAddress
-from .models import Item
 from .models import FaviconBase
 from .models import BackgroundImage
 from .models import EBackgroundImage
@@ -6410,6 +6428,7 @@ class BackgroundView(FormMixin, BaseView):
         context['show_chat'] = True
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['tophit'] = TopHits.objects.filter(is_active=True).order_by('-mfg_date')[:4]
         print(FaviconBase.objects.all())
         print(213324)
         # Retrieve the signed-in user's profile and profile picture URL
@@ -9633,6 +9652,44 @@ def edit_profile(request):
         return render(request, 'edit_profile.html', args)
 
 
+class MyLevelView(LoginRequiredMixin, ListView):
+    model = Level
+    template_name = 'mylevel.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        # Add static/contextual data
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
+
+        # Add Level objects and fields
+        levels = Level.objects.filter(is_active=1).order_by("level")
+        context['levels'] = levels  # Use a plural name for clarity
+
+        # Add the ProfileDetails instance for the current user
+        if user.is_authenticated:
+            profile = ProfileDetails.objects.filter(user=user, is_active=1).first()  # Retrieve active profile for user
+            if profile:
+                context['Profile'] = profile
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+            else:
+                context['Profile'] = None  # If no profile is found, ensure this is handled gracefully in the template
+        else:
+            context['Profile'] = None
+
+        return context
+
+
 class StaffJoine(ListView):
     paginate_by = 10
     template_name = 'staffapplication.html'
@@ -10805,14 +10862,19 @@ class OrderSummaryView(EBaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+
+        # Adding data to the context dictionary
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        # Checking user profile existence
+        user_profile_exists = UserProfile2.objects.filter(user=self.request.user, is_active=1).exists()
+        context['user_profile_exists'] = user_profile_exists
+
         return context
 
     def get(self, *args, **kwargs):
@@ -10850,8 +10912,8 @@ class CheckoutView(EBaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['address'] = Address.objects.filter(is_active=1, user=self.request.user).first()
         context.update(kwargs)
         return context
 
@@ -10888,11 +10950,13 @@ class CheckoutView(EBaseView):
 
                     # Calculate the total currency amount required for the order
                     total_order_currency_amount = sum(
-                        item.item.currency_price for item in OrderItem.objects.filter(order=order))
+                        item.item.currency_price for item in OrderItem.objects.filter(order=order)
+                    )
 
                     # Check and deduct currency
-                    sufficient_funds, remaining_amount = check_and_deduct_currency(request.user,
-                                                                                   total_order_currency_amount)
+                    sufficient_funds, remaining_amount = check_and_deduct_currency(
+                        request.user, total_order_currency_amount
+                    )
                     if not sufficient_funds:
                         messages.warning(request, "You do not have enough currency to complete this order.")
                         context = self.get_context_data(form=form)
@@ -10902,7 +10966,13 @@ class CheckoutView(EBaseView):
                     # Deduct the currency amount from the order
                     order.deduct_currency_amount()
 
-                    return redirect('showcase:index')
+                    # Set the order as ordered and save the instance
+                    order.ordered = True
+                    order.ordered_date = timezone.now()
+                    order.save()
+
+                    return redirect('showcase:orderdone')
+
             else:
                 print("Form errors:", form.errors)  # Debug print
                 messages.warning(request, "Form is not valid. Please correct the errors below.")
@@ -11212,6 +11282,28 @@ class PaypalFormView(FormView):
         }
 
 
+class OrderDoneView(ListView):
+    model = CheckoutBackgroundImage
+    template_name = "orderdone.html"
+
+    def get_context_data(self, **kwargs):
+        context = {}
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+
+        # Get the last completed order for the current user
+        try:
+            order = Order.objects.filter(user=self.request.user, ordered=True).order_by('-ordered_date').first()
+            context['order'] = order
+        except Order.DoesNotExist:
+            context['order'] = None
+
+        context.update(kwargs)
+        return context
+
+
 @allow_guest_user
 def add_to_cart(request, slug):
     item = get_object_or_404(Item, slug=slug)
@@ -11224,6 +11316,11 @@ def add_to_cart(request, slug):
     order_qs = Order.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
+        address = Address.objects.filter(user=request.user, is_active=1).first()
+        if address:
+            order.shipping_address = address
+            order.billing_address = address  # get billing address from templates, if provided
+
         # check if the order item is in the order
         if order.items.filter(item__slug=item.slug).exists():
             order_item.quantity += 1
@@ -11237,10 +11334,20 @@ def add_to_cart(request, slug):
             messages.info(request, "This item was added to your cart.")
             return redirect("showcase:order-summary")
     else:
-        order_qs = Order.objects.create(user=request.user,
-                                        ordered=False,
-                                        ordered_date=timezone.now())
+        order_qs = Order.objects.create(
+            user=request.user,
+            ordered=False,
+            ordered_date=timezone.now()
+        )
         print("Order created")
+
+        address = Address.objects.filter(user=request.user, is_active=1).first()
+        if address:
+            order_qs.shipping_address = address
+            order_qs.billing_address = address  # Get billing address from templates if provided
+            order_qs.save()  # Save the order instance to persist the changes
+            print('Added an address to the created order')
+
         # check if the order item is in the order
         if order_qs.items.filter(item__slug=item.slug).exists():
             order_item.quantity += 1

@@ -126,14 +126,46 @@ function toggleChatWidget() {
 	.contented{
 	background: url("{% static 'css/images/blue-message-text-bubble.png' %}");
 	}
+
+	.image-container {
+    position: relative;
+    display: inline-block; /* Ensures the size adjusts to the image */
+    width: 100px;
+    height: 100px;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.image-container h3 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white; /* Change to a contrasting color */
+    font-size: 14px; /* Adjust font size as needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Optional: Add a background for better readability */
+    padding: 5px; /* Optional: Add padding */
+    border-radius: 5px; /* Optional: Add rounded corners */
+    text-align: center;
+}
+
 </style>
+
 <script>
 window.onscroll = function() {
     var sticker = document.getElementById('sticker');
     if (window.pageYOffset > window.innerHeight / 2) {
         sticker.style.background = 'rgba(0, 0, 0, 1)';
+        sticker.style.color = 'white';
+        currency_designation.style.color = 'white';
     } else {
         sticker.style.background = 'linear-gradient(rgba(0, 0, 0, 1), rgba(0,0,0,0))';
+        sticker.style.color = 'black';
+        currency_designation.style.color = 'black';
     }
 };
 </script>
@@ -206,6 +238,7 @@ window.onscroll = function() {
 
 
 								</li>
+								<li style="display: flex; flex-direction: column;">
 								<li style="display: flex; align-items: center; margin-right: -10%;">
 									{% for userprofile in Profiles %}
 									{% if userprofile.newprofile_profile_picture_url %}
@@ -216,10 +249,25 @@ window.onscroll = function() {
 									<!-- Placeholder image or default avatar -->
 									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
 									{% endif %}
-									<a href="{% url 'showcase:currencymarket' %}">
-									<h3 class="currency_designation" style="text-align: center; space-between: 5px;">{{userprofile.currency_amount}} {{userprofile.currency}}</h3>
+									{% if userprofile.currency == Rubies %}
+									<a href="{% url 'showcase:currencymarket' %}" style="display: flex; justify-content: center; align-items: center; margin: auto; text-decoration: none;">
+										<h3 class="currency_designation" style="text-align: center; margin-right: 5px; color: white;">
+											{{userprofile.currency_amount}} {{userprofile.currency}}
+										</h3>
 									</a>
+									{% else %}
+									<a href="{% url 'showcase:currencymarket' %}" style="display: flex; justify-content: center; align-items: center; margin: auto; text-decoration: none;">
+										<h3 class="currency_designation" style="text-align: center; margin-right: 5px; color: white;">
+											{{userprofile.currency_amount}}
+
+										</h3>
+										<img src="static/css/images/ruby.png" style="width: 40px; height: 40px;">
+									</a>
+									{% endif %}
+									<br>
+											{{userprofile.level}}
 										{% endfor %}
+								</li>
 								</li>
 							</ul>
 						</nav>
@@ -264,7 +312,12 @@ window.onscroll = function() {
         {% for BackgroundImage in Background %}
             {% if BackgroundImage.page == "index.html" %}
                 {% if BackgroundImage.position == 1 %}
-    <div class="video-background" style="background: url('{{BackgroundImage.file.url}}'); background-size: cover; background-attachment: fixed;">
+<div class="video-background"
+     style="background: url('{% if BackgroundImage.file and BackgroundImage.file.url %}{{ BackgroundImage.file.url }}{% else %}{{ BackgroundImage.cover.url }}{% endif %}');
+            background-size: cover;
+            background-attachment: fixed;">
+
+
                 {% endif %}
             {% endif %}
         {% endfor %}
@@ -277,14 +330,22 @@ window.onscroll = function() {
 							{% for BackgroundImage in TextFielde %}
 							{% if BackgroundImage.page == "index.html" %}
 							{% if BackgroundImage.section == 1 %}
-							<h1>{{BackgroundImage.text}}</h1>
+							{% if BackgroundImage.text_color %}
+							<h1 style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h1>
+							{% else %}
+							<h1 style="color: white;">{{BackgroundImage.text}}</h1>
+						  	{% endif %}
 						  	{% endif %}
 							{% endif %}
 							{% endfor %}
 							{% for BackgroundImage in TextFielde %}
 							{% if BackgroundImage.page == "index.html" %}
 							{% if BackgroundImage.section == 2 %}
-              <p class="subtitle">{{BackgroundImage.text}}</p>
+							{% if BackgroundImage.text_color %}
+              <p style="color: {{BackgroundImage.text_color}}" class="subtitle">{{BackgroundImage.text}}</p>
+							{% else %}
+              <p style="color: #F28123" class="subtitle">{{BackgroundImage.text}}</p>
+						  	{% endif %}
 						  	{% endif %}
 							{% endif %}
 							{% endfor %}
@@ -324,75 +385,22 @@ window.onscroll = function() {
 				<div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
 						<div class="list-icon">
 
-						{% for BackgroundImage in Image %}
-						{% if BackgroundImage.image_position == 1 %}
-								{% if BackgroundImage.page == 'index.html' %}
-							<img src="{{ BackgroundImage.image.url }}" style="width: 100px; height: 100px;">
-							{% endif %}
-							{% endif %}
-							{% endfor %}
 						</div>
+						</div>
+						{% for TopHits in tophit %}
 					<div class="list-box d-flex align-items-center">
-						<div class="content">
-							{% for BackgroundImage in TextFielde %}
-							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 5 %}
-							<h3>{{BackgroundImage.text}}</h3>
-						  	{% endif %}
-							{% endif %}
-							{% endfor %}
-
-							{% for BackgroundImage in TextFielde %}
-							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 6 %}
-							<p>{{BackgroundImage.text}}</p>
-						  	{% endif %}
-							{% endif %}
-							{% endfor %}
-
+						<div class="content" style="padding: 25px; margin: 10px; background: radial-gradient(circle at center, blue,{{TopHits.color}}, white 100%)">
+							<div class="image-container">
+								<img src="{{ TopHits.file.url }}" alt="Image" style="width: 100px; height: 100px;">
+								<h3>{{ TopHits.user.username }}</h3>
+							</div>
 						</div>
 					</div>
+							{% endfor %}
 				</div>
-				<div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
-						<div class="list-icon">
-							{% for BackgroundImage in Image %}
-							{% if BackgroundImage.image_position == 2 %}
-								{% if BackgroundImage.page == 'index.html' %}
-							<img src="{{ BackgroundImage.image.url }}" style="length: 100px; width: 100px;">
-							{% endif %}
-							{% endif %}
-							{% endfor %}
-						</div>
-					<div class="list-box d-flex align-items-center">
-						<div class="content">
-							{% for BackgroundImage in TextFielde %}
-							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 7 %}
-							<h3>{{BackgroundImage.text}}</h3>
-						  	{% endif %}
-							{% endif %}
-							{% endfor %}
 
-							{% for BackgroundImage in TextFielde %}
-							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 8 %}
-							<p>{{BackgroundImage.text}}</p>
-						  	{% endif %}
-							{% endif %}
-							{% endfor %}
-						</div>
-					</div>
-				</div>
 				<div class="col-lg-4 col-md-6">
-						<div class="list-icon">
-							{% for BackgroundImage in Image %}
-							{% if BackgroundImage.image_position == 3 %}
-								{% if BackgroundImage.page == 'index.html' %}
-							<img src="{{ BackgroundImage.image.url }}" style="length: 100px; width: 100px;">
-							{% endif %}
-							{% endif %}
-							{% endfor %}
-						</div>
+
 					<div class="list-box d-flex justify-content-start align-items-center">
 						<div class="content">
 							{% for BackgroundImage in TextFielde %}
@@ -423,7 +431,7 @@ window.onscroll = function() {
         {% for BackgroundImage in Background %}
             {% if BackgroundImage.page == "index.html" %}
                 {% if BackgroundImage.position == 2 %}
-	<div class="product-section mt-150 mb-150" style="background: url('{{BackgroundImage.image.url}}'); background-size: cover;">
+	<div class="product-section mt-150 mb-150" style="background: url('{{BackgroundImage.cover.url}}'); background-size: cover;">
                 {% endif %}
             {% endif %}
         {% endfor %}
@@ -437,7 +445,7 @@ window.onscroll = function() {
             {% endif %}
         {% endfor %}
 
-			<div class="row">
+			<div class="row" id="#game">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="section-title">
 						<br>
@@ -502,7 +510,7 @@ window.onscroll = function() {
                 {% endif %}
             {% endif %}
         {% endfor %}
-		<div class="container">
+		<div class="container" id="game">
 			<div class="row">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="section-title">
@@ -648,20 +656,75 @@ window.onscroll = function() {
 	<div class="abt-section mb-150">
 		<div class="container">
 			<div class="row">
-				<div class="col-lg-6 col-md-12">
-						{% for BackgroundImage in Image %}
-						{% if BackgroundImage.image_position == 4 %}
-					<div class="abt-bg" style="background: url({{ BackgroundImage.image.url }}); background-size: cover;">
-					<a href="{{ BackgroundImage.hyperlink }}" class="video-play-btn popup-youtube"><img src="{% static 'css/images/play-button-arrowhead.png' %}" style="width: 25px; length: 25px; margin-top: 30px;"></a>
+				<style>
+    /* Ensure the iframe scaler container is styled correctly */
+    .mfp-iframe-scaler {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #000; /* Black background for better visibility */
+        max-width: 800px;
+        margin: auto;
+    }
 
-					</div>
-						{% endif %}
-						{% endfor %}
-				</div>
+    .mfp-iframe-scaler video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Custom popup styling */
+    .mfp-hide {
+        display: none; /* Hide the popup initially */
+    }
+</style>
+<script>
+    $(document).ready(function() {
+        // Initialize Magnific Popup for the play button
+        $('.popup-youtube').magnificPopup({
+            type: 'inline', // Inline popup for the video container
+            midClick: true, // Allow opening popup on middle mouse click or touch
+            closeOnContentClick: false, // Do not close on content click
+            mainClass: 'mfp-fade', // Add fade effect
+        });
+    });
+</script>
+
+				<div class="col-lg-6 col-md-12">
+    {% for BackgroundImage in Background %}
+    {% if BackgroundImage.position == 5 %}
+    <div class="abt-bg" style="background: url({{ BackgroundImage.cover.url }}); background-size: cover;">
+        <!-- Trigger popup with the play button -->
+        <a href="#video-popup" class="video-play-btn popup-youtube">
+            <img src="{% static 'css/images/play-button-arrowhead.png' %}" style="width: 25px; height: 25px; margin-top: 30px;">
+        </a>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Video popup (hidden by default) -->
+    {% for BackgroundImage in Background %}
+    {% if BackgroundImage.page == "index.html" and BackgroundImage.position == 6 %}
+    <div id="video-popup" class="mfp-hide">
+        <div class="mfp-iframe-scalere">
+            <video autoplay loop muted playsinline controls>
+                <source src="{{ BackgroundImage.file.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+
 				<div class="col-lg-6 col-md-12">
 					<div class="abt-text">
-						<p class="top-sub">Est 2024</p>
-						<h2>We are <span class="orange-text">PokeTrove</span></h2>
+						<p class="top-sub">Est 2018</p>
+						<h2>We are <span class="orange-text">Folsom TCS</span></h2>
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
 						{% if BackgroundImage.section == 13 %}
@@ -704,7 +767,7 @@ window.onscroll = function() {
                                 </span>
                             </div>
                         </div>
-                    	<img src="{{BackgroundImage.image.url}}" style="margin-left: 32%;" alt="">
+                    	<img src="{{BackgroundImage.cover.url}}" style="margin-left: 32%;" alt="">
                     </div>
                 </div>
                 <!--Content Column-->
@@ -812,9 +875,9 @@ window.onscroll = function() {
 			<div class="row">
 				<div class="col-lg-12">
 					<div class="logo-carousel-inner">
-						{% for BackgroundImage in Image %}
+						{% for BackgroundImage in Background %}
 						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.image_position == 5 %}
+                  		{% if BackgroundImage.position == 6 %}
 						<div class="single-logo-item">
 							<a href="{{ BackgroundImage.hyperlink }}">
 							<img src="{{ BackgroundImage.image.url }}" alt="">
@@ -824,9 +887,9 @@ window.onscroll = function() {
 						{% endif %}
 						{% endfor %}
 
-						{% for BackgroundImage in Image %}
+						{% for BackgroundImage in Background %}
 						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.image_position == 6 %}
+                  		{% if BackgroundImage.position == 7 %}
 						<div class="single-logo-item">
 							<a href="{{ BackgroundImage.hyperlink }}">
 							<img src="{{ BackgroundImage.image.url }}" alt="">
@@ -836,9 +899,9 @@ window.onscroll = function() {
 						{% endif %}
 						{% endfor %}
 
-						{% for BackgroundImage in Image %}
+						{% for BackgroundImage in Background %}
 						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.image_position == 7 %}
+                  		{% if BackgroundImage.position == 8 %}
 						<div class="single-logo-item">
 							<a href="{{ BackgroundImage.hyperlink }}">
 							<img src="{{ BackgroundImage.image.url }}" alt="">
@@ -848,9 +911,9 @@ window.onscroll = function() {
 						{% endif %}
 						{% endfor %}
 
-						{% for BackgroundImage in Image %}
+						{% for BackgroundImage in Background %}
 						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.image_position == 8 %}
+                  		{% if BackgroundImage.position == 9 %}
 						<div class="single-logo-item">
 							<a href="{{ BackgroundImage.hyperlink }}">
 							<img src="{{ BackgroundImage.image.url }}" alt="">
@@ -860,9 +923,9 @@ window.onscroll = function() {
 						{% endif %}
 						{% endfor %}
 
-						{% for BackgroundImage in Image %}
+						{% for BackgroundImage in Background %}
 						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.image_position == 9 %}
+                  		{% if BackgroundImage.position == 10 %}
 						<div class="single-logo-item">
 							<a href="{{ BackgroundImage.hyperlink }}">
 							<img src="{{ BackgroundImage.image.url }}" alt="">
@@ -2238,7 +2301,9 @@ function showChatWidget() {
   popup.style.display = popup.style.display === "none" ? "block" : "none";
 }
 </script>
+<script>
 
+</script>
 		<i class="icon"></i>
 
 	<!-- end copyright -->

@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from PIL import Image
 from decimal import Decimal
+from colorfield.fields import ColorField
 import logging
 
 from autoslug import AutoSlugField
@@ -368,11 +369,17 @@ class Affiliation(models.Model):
 
 
 class Level(models.Model):
+    COLOR_PALETTE = [
+        ("#FFFFFF", "white", ),
+        ("#000000", "black", ),
+    ]
     level = models.IntegerField(default=1, blank=True, null=True)
     level_name = models.CharField(max_length=200)
     experience = models.IntegerField(default=0, blank=True, null=True)
     full_row = models.BooleanField(default=True)
     affiliation = models.ForeignKey(Affiliation, blank=True, null=True, on_delete=models.CASCADE)
+    icon = models.ImageField(blank=True, null=True)
+    color = ColorField(samples=COLOR_PALETTE, blank=True, null=True)
     games = models.ManyToManyField(
         'Game',  # Refer to Game using a string
         blank=True,
@@ -4362,19 +4369,23 @@ class UserProfile2(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='ship_profile')
     first_name = models.CharField(max_length=100, default='')
     last_name = models.CharField(max_length=100, default='')
-    description = models.CharField(max_length=100, default='')
+    description = models.CharField(max_length=100, default='', blank=True, null=True)
     address = models.CharField(max_length=250, blank=True, null=True)
     address2 = models.CharField(max_length=250, blank=True, null=True)
     city = models.CharField(max_length=100, default='')
     state = models.CharField(max_length=100, default='')
-    zip_code = models.CharField(max_length=5, default=00000)
+    country = CountryField(multiple=False, default="United States of America")
+    zip_code = models.CharField(max_length=5, default='00000')
     phone_number = models.CharField(default='000-000-0000', max_length=12)
     profile_picture = models.ImageField(upload_to='profile_image', null=True, blank=True)
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?",
+    )
 
     def __str__(self):
         return str(self.user) + "'s shipping profile"
@@ -4390,18 +4401,44 @@ class UserProfile2(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
     def save(self, *args, **kwargs):
-        try:
-            # Check if existing profile exists for the current user
-            existing_profile = UserProfile2.objects.get(user=self.user)
-            # If found, delete it before saving the new data
-            if existing_profile:
-                existing_profile.delete()
-                print("Previous shipping profile deleted successfully.")
-        except UserProfile2.DoesNotExist:
-            # No existing profile found, proceed with normal save
-            pass
+        with transaction.atomic():
+            # Check if the user already has a UserProfile2 instance
+            try:
+                existing_profile = UserProfile2.objects.get(user=self.user)
+                if existing_profile and existing_profile != self:
+                    existing_profile.delete()
+            except UserProfile2.DoesNotExist:
+                pass
 
-        super().save(*args, **kwargs)
+            # Save the profile
+            super().save(*args, **kwargs)
+
+            # Deactivate any existing active address for the user
+            Address.objects.filter(user=self.user, is_active=1).update(is_active=0)
+
+            # Prepare the defaults dictionary
+            defaults = {
+                'street_address': self.address,
+                'zip': self.zip_code,
+                'country': self.country,  # Replace 'US' with a relevant country code or self.country
+                'address_type': 'shipping',  # Adjust as necessary
+                'default': True,
+            }
+
+            # Include apartment_address only if self.address2 has a value
+            if self.address2:
+                defaults['apartment_address'] = self.address2
+            else:
+                defaults['apartment_address'] = 'None'
+
+            # Create or update the active address
+            address, created = Address.objects.update_or_create(
+                user=self.user,
+                is_active=1,  # Ensure the query respects the unique constraint
+                defaults=defaults,
+            )
+
+            print(f"{'Created' if created else 'Updated'} address for user {self.user.username}.")
 
 
 class SettingsBackgroundImage(models.Model):
@@ -6837,22 +6874,34 @@ class Order(models.Model):
 class Address(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     street_address = models.CharField(max_length=100)
-    apartment_address = models.CharField(max_length=100)
+    apartment_address = models.CharField(max_length=100, blank=True, null=True)
     country = CountryField(multiple=False)
     zip = models.CharField(max_length=100)
     address_type = models.CharField(max_length=1000, choices=ADDRESS_CHOICES)
     default = models.BooleanField(default=False)
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active address?")
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Is this an active address?",
+    )
+
+    def save(self, *args, **kwargs):
+        # If this address is marked as active, deactivate any other active address for the user
+        if self.is_active == 1:
+            Address.objects.filter(user=self.user, is_active=1).exclude(pk=self.pk).update(is_active=0)
+
+        # Save the current address
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.user.username
 
     class Meta:
-        verbose_name_plural = 'Addresses'
+        verbose_name_plural = 'Saved Address'
+        verbose_name_plural = 'Saved Addresses'
 
 
 class Payment(models.Model):
@@ -7038,6 +7087,7 @@ def handle_withdraw_class_logic(sender, instance, created, **kwargs):
                 number_of_cards=instance.number_of_cards
             )
             withdraw_class.withdraw.add(instance)
+
 
 class WithdrawClass(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -1,0 +1,136 @@
+
+{% load static %}
+
+{% block head %}
+    <title>{% if profile %}{{ profile.user.username }}'s Profile{% else %}No Profile Found{% endif %}</title>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="icon" type="image/x-icon" href="
+        {% if profile and profile.avatar %}
+            {{ profile.avatar.url }}
+        {% else %}
+            {% for favicon in favicons %}
+                {% if favicon.faviconpage == 'profile.html' %}
+                    {{ favicon.faviconcover.url }}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    ">
+<style>
+
+    body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+.sticky-logo {
+    position: sticky;
+    top: 10px;
+    left: -10px;
+    z-index: 100;
+}
+
+.logo img {
+    width: 145px;
+    height: 100px;
+}
+
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.level-card {
+    background-color: #f4f4f4;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.level-card h2 {
+    margin-top: 0;
+}
+
+.level-card ul {
+    padding-left: 20px;
+}
+
+@media (max-width: 768px) {
+    .sticky-logo {
+        position: static;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .profile-container {
+        padding: 10px;
+    }
+}
+
+
+</style>
+{% endblock %}
+
+    <div class="sticky-logo">
+        {% for logo in logos %}
+            {% if logo.page == "profile.html" %}
+                <a class="logo" href="{{ logo.hyperlink }}">
+                    <img class="imageicon" src="{{ logo.logocover.url }}" alt="{{ logo.alternate }}" width="145" height="100">
+                </a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="profile-container">
+    {% if Profile %}
+    <h2>Welcome, {{ Profile.user.username }}</h2>
+    <p>My Level: {{ Profile.level }}</p>
+{% else %}
+    <p>No profile found for the current user.</p>
+{% endif %}
+
+        <div id="levels-container">
+            {% for level in levels %}
+                <div class="level-card" data-level="{{ level.level }}">
+                    <h2>Level: {{ level.level }}</h2>
+                    <p>Level Name: {{ level.level_name }}</p>
+                    <p>Experience Required: {{ level.experience }}</p>
+                    <p>Games with Daily Mode:</p>
+                    <ul>
+                        {% for game in level.games.all %}
+                            <li>{{ game.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const levelsContainer = document.getElementById('levels-container');
+    const levelCards = levelsContainer.querySelectorAll('.level-card');
+
+    // Sort level cards by level number
+    const sortedLevelCards = Array.from(levelCards).sort((a, b) => {
+        const levelA = parseInt(a.dataset.level);
+        const levelB = parseInt(b.dataset.level);
+        return levelA - levelB;
+    });
+
+    // Reorder the level cards in the DOM
+    sortedLevelCards.forEach(card => levelsContainer.appendChild(card));
+
+    // Add click event to level cards to toggle additional info
+    levelCards.forEach(card => {
+        card.addEventListener('click', function() {
+            this.classList.toggle('expanded');
+        });
+    });
+});
+
+
+</script>
+    <script src="{% static 'js/profile.js' %}"></script>

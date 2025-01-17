@@ -383,7 +383,7 @@ border: none;
             document.addEventListener("DOMContentLoaded", function () {
                 const costDisplayElement = document.getElementById("cost-display");
                 if (costDisplayElement) {
-                    costDisplayElement.innerHTML = `<span id="base-cost">0</span> 💎`; // Set cost to 0
+                    costDisplayElement.innerHTML = `<span id="base-cost"> {{ game.cost }}</span> 💎`; // Set cost to 0
                 }
             });
         </script>
@@ -475,7 +475,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 parent.replaceWith(startButton);
                 container.appendChild(startButton);
             }
-            startButton.disabled = false;
         }
     }
 
@@ -506,10 +505,133 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </script>
 
-<button class="start" id="start" data-game-id="{{ game.id }}" data-nonce="{{ nonce }}" data-slug="{{ game.slug }}" style="margin-top: 5%; margin-right: 25%;">Spin!</button>
+{% if game.daily %}
+<button class="start"
+        id="start"
+        data-game-id="{{ game.id }}"
+        data-nonce="{{ nonce }}"
+        data-slug="{{ game.slug }}"
+        data-daily="true"
+        data-next-5pm="{{ next_5pm.timestamp }}"
+        style="margin-top: 5%; margin-right: 25%;"
+        disabled>
+    Spin!
+</button>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+    const startButton = document.getElementById("start");
+
+    if (startButton) {
+        const isDaily = startButton.getAttribute("data-daily") === "true";
+        const next5pmTimestamp = parseInt(startButton.getAttribute("data-next-5pm"), 10);
+
+        if (isDaily) {
+            const now = Date.now() / 1000; // Current time in seconds
+            const timeRemaining = next5pmTimestamp - now;
+
+            if (timeRemaining > 0) {
+                startButton.disabled = true;
+
+                // Optionally display a countdown
+                const countdownInterval = setInterval(() => {
+                    const now = Date.now() / 1000;
+                    const timeLeft = next5pmTimestamp - now;
+
+                    if (timeLeft <= 0) {
+                        clearInterval(countdownInterval);
+                        startButton.disabled = false;
+                    }
+
+                    // Update button text or display countdown (optional)
+                    const hours = Math.floor(timeLeft / 3600);
+                    const minutes = Math.floor((timeLeft % 3600) / 60);
+                    const seconds = Math.floor(timeLeft % 60);
+                    startButton.innerText = `Spin in ${hours}h ${minutes}m ${seconds}s`;
+                }, 1000);
+            } else {
+                startButton.disabled = false; // Enable immediately if past 5 PM
+            }
+        }
+    }
+});
+
+        </script>
+{% else %}
+<button class="start"
+        id="start"
+        data-game-id="{{ game.id }}"
+        data-nonce="{{ nonce }}"
+        data-slug="{{ game.slug }}"
+        data-daily="false"
+        style="margin-top: 5%; margin-right: 25%;">
+    Spin!
+</button>
+{% endif %}
+
+        {% if game.daily %}
+<button class="start"
+        id="start2"
+        data-game-id="{{ game.id }}"
+        data-nonce="{{ nonce }}"
+        data-slug="{{ game.slug }}"
+        data-daily="true"
+        data-next-5pm="{{ next_5pm.timestamp }}"
+        style="margin-top: 5%; margin-left: 25%;"
+        disabled>
+   Demo Spin
+</button>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+    const startButton = document.getElementById("start2");
+
+    if (startButton) {
+        const isDaily = startButton.getAttribute("data-daily") === "true";
+        const next5pmTimestamp = parseInt(startButton.getAttribute("data-next-5pm"), 10);
+
+        if (isDaily) {
+            const now = Date.now() / 1000; // Current time in seconds
+            const timeRemaining = next5pmTimestamp - now;
+
+            if (timeRemaining > 0) {
+                startButton.disabled = true;
+
+                // Optionally display a countdown
+                const countdownInterval = setInterval(() => {
+                    const now = Date.now() / 1000;
+                    const timeLeft = next5pmTimestamp - now;
+
+                    if (timeLeft <= 0) {
+                        clearInterval(countdownInterval);
+                        startButton.disabled = false;
+                    }
+
+                    // Update button text or display countdown (optional)
+                    const hours = Math.floor(timeLeft / 3600);
+                    const minutes = Math.floor((timeLeft % 3600) / 60);
+                    const seconds = Math.floor(timeLeft % 60);
+                    startButton.innerText = `Spin in ${hours}h ${minutes}m ${seconds}s`;
+                }, 1000);
+            } else {
+                startButton.disabled = false; // Enable immediately if past 5 PM
+            }
+        }
+    }
+});
+
+        </script>
+{% else %}
+<button class="start"
+        id="start2"
+        data-game-id="{{ game.id }}"
+        data-nonce="{{ nonce }}"
+        data-slug="{{ game.slug }}"
+        data-daily="false"
+        style="margin-top: 5%; margin-left: 25%;">
+    Demo Spin
+</button>
+{% endif %}
 
 
-<button class="start" id="start2" data-game-id="{{ game.id }}" data-nonce="{{ nonce }}" data-slug="{{ game.slug }}" style="margin-top: 5%; margin-left: 25%;">Demo Spin</button>
 
 
 <script>
@@ -551,18 +673,22 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.json())
         .then(data => {
             console.log("Response data:", data); // Debug log
-            //if box is not daily
-            if (data.success) {
-                // Update the currency amount automatically
-                const currencyElement = document.getElementById("currency-amount");
-                if (currencyElement) {
-                    currencyElement.innerText = `${data.updated_currency_amount} ${data.currency_name}`;
+            if (data.daily === false) { // Check if daily is explicitly false
+                if (data.success) {
+                    // Update the currency amount automatically
+                    const currencyElement = document.getElementById("currency-amount");
+                    if (currencyElement) {
+                        currencyElement.innerText = `${data.updated_currency_amount} ${data.currency_name}`;
+                    }
+                    // Optionally, display a success message
+                    console.log("Spin successful:", data.message);
+                } else {
+                    alert(data.error); // Show error message if the spin fails
                 }
-                // Optionally, display a success message
-                console.log("Spin successful:", data.message);
             } else {
-                alert(data.error); // Show error message if the spin fails
+                console.log("The game is marked as daily, action skipped.");
             }
+
         })
         .catch(error => {
             console.error("Error during fetch:", error); // Log any fetch errors
