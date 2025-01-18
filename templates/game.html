@@ -338,7 +338,9 @@ border: none;
 									{% else %}
                                         <h3 class="currency_designation" id="currency-amount" style="text-align: center; space-between: 5px; color: white;">{{userprofile.currency_amount}} {{userprofile.currency}}</h3>
                                     {% endif %}
-                                    Level: {{ userprofile.level }}
+                                   <a href='{% url "showcase:mylevel" %}' style="decoration: none; margin-top: -55px;">
+                                       Level: {{ userprofile.level }}
+                                   </a>
                                     </div>
                                     {% endfor %}
 								</li>

@@ -3580,6 +3580,8 @@ class BattleGame(models.Model):
     game_discount_cost.short_description = "Discounted Cost"  # Label in the admin interface
 
 
+
+
 class Battle(models.Model):
     BATTLE_SLOTS = (
         ('2', '1v1'),
@@ -3638,6 +3640,7 @@ class Battle(models.Model):
         choices=((1, 'Active'), (0, 'Inactive')),
         verbose_name="Set active?",
     )
+
 
     def get_game_quantities(self):
         """Returns a dictionary of games and their quantities in this battle."""

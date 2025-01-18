@@ -1967,10 +1967,8 @@ class GameChestBackgroundView(BaseView):
         action = self.request.POST.get('action')
         pk = self.request.POST.get('pk')
 
-        def post(self, request, *args, **kwargs):
-            action = self.request.POST.get('action')
-            if action == 'sell':
-                return self.sell_game_inventory_object(request)
+        if action == 'sell':
+            return self.sell_game_inventory_object(request)
 
     def sell_game_inventory_object(self, request):
         # Get the most recently created InventoryObject for the current user

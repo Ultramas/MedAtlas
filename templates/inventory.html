@@ -328,25 +328,25 @@
         <p class="product-condition">Card Condition: {{ Inventory.condition }}</p>
         <p class="product-description">{{ Inventory.description }}</p>
         <div class="action-buttons" style="position: fixed;">
-       <form id="sell-form-{{ Inventory.pk }}" action="" method="post" class="ajax-form">
-			{% csrf_token %}
-			<input type="hidden" name="action" value="sell">
-			<input type="hidden" name="pk" value="{{ Inventory.pk }}">
-			<button type="submit" class="action-button sell-button">Sell</button>
-		</form>
+			<form id="sell-form-{{ Inventory.pk }}" action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post" class="ajax-form">
+				{% csrf_token %}
+				<input type="hidden" name="action" value="sell">
+				<input type="hidden" name="pk" value="{{ Inventory.pk }}">
+				<button type="submit" class="action-button sell-button">Sell</button>
+			</form>
 
-            <form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' pk=Inventory.pk %}" method="post" class="ajax-form">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="withdraw">
-                <input type="hidden" name="pk" value="{{ Inventory.pk }}">
-                <button type="submit" class="action-button withdraw-button">Withdraw</button>
-            </form>
+			<form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' pk=Inventory.pk %}" method="post" class="ajax-form">
+				{% csrf_token %}
+				<input type="hidden" name="action" value="withdraw">
+				<input type="hidden" name="pk" value="{{ Inventory.pk }}">
+				<button type="submit" class="action-button withdraw-button">Withdraw</button>
+			</form>
 
-				<form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post">
-					{% csrf_token %}
-					<input type="hidden" name="action" value="move">
-					<button type="submit" class="cart-btn">Set Tradable</button>
-				</form>
+			<form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post">
+				{% csrf_token %}
+				<input type="hidden" name="action" value="move">
+				<button type="submit" class="cart-btn">Set Tradable</button>
+			</form>
 
         </div>
       </div>
@@ -559,9 +559,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
             fetch(url, {
                 method: "POST",
-                headers: {
-                    "X-CSRFToken": csrfToken,
-                },
+				headers: {
+					"X-Requested-With": "XMLHttpRequest",
+					"X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+				},
+
                 body: formData,
             })
             .then(response => {
@@ -601,7 +603,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </script>
 <script>
-	document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const withdrawButtons = document.querySelectorAll(".withdraw-button");
 
     withdrawButtons.forEach((button) => {
@@ -612,40 +614,45 @@ document.addEventListener("DOMContentLoaded", function () {
             const formData = new FormData(form);
             const actionUrl = form.getAttribute("action") || window.location.href;
 
+            console.log("Submitting form to:", actionUrl); // Debug URL
+            console.log("Form Data:", [...formData.entries()]); // Debug form data
+
             fetch(actionUrl, {
                 method: "POST",
                 body: formData,
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
                 },
             })
-                .then((response) => response.json())
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP status ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then((data) => {
                     if (data.success) {
-                        // Remove the withdrawn inventory item from the DOM
                         const inventoryItem = form.closest(".inventory-item");
-                        if (inventoryItem) {
-                            inventoryItem.remove();
-                        }
+                        if (inventoryItem) inventoryItem.remove();
 
-                        // Update the stock count
                         const stockCountElement = document.getElementById("stock-count");
                         if (stockCountElement) {
-                            const newCount = parseInt(stockCountElement.textContent) - 1;
-                            stockCountElement.textContent = newCount;
+                            stockCountElement.textContent = data.stock_count;
                         }
-
                     } else {
-                        alert(data.error || "An error occurred while processing your request.");
+                        console.error("Server error:", data.error);
+                        alert(data.error || "An error occurred.");
                     }
                 })
                 .catch((error) => {
-                    console.error("Error:", error);
+                    console.error("Fetch error:", error);
                     alert("An unexpected error occurred. Please try again.");
                 });
         });
     });
 });
+
 
 </script>
 	<!-- jquery -->
