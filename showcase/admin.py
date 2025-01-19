@@ -1639,7 +1639,7 @@ admin.site.register(Choice, ChoiceAdmin)
 class InventoryAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Inventory Application Information - Categorial Description', {
-            'fields': ('user', 'name', 'image', 'image_length', 'image_width', 'is_active',),
+            'fields': ('user', 'name', 'number_of_cards', 'image', 'image_length', 'image_width', 'is_active',),
             'classes': ('collapse',),
         }),
     )

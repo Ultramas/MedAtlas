@@ -1316,6 +1316,7 @@ class Inventory(models.Model):
     name = models.CharField(max_length=200, verbose_name="Inventory Name",
                             help_text="Name your inventory. Leave blank to use (your name)'s inventory", blank=True,
                             null=True)
+    number_of_cards = models.IntegerField(blank=True, null=True)
     image = models.ImageField(help_text='Inventory Image.')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the inventory (use for original ratio).',
@@ -1331,6 +1332,10 @@ class Inventory(models.Model):
 
     def __str__(self):
         return str(self.user) + "'s Inventory"
+
+    def update_inventory_count(self):
+        self.number_of_cards = InventoryObject.objects.filter(inventory=self).count()
+        self.save()
 
     def save(self, *args, **kwargs):
         if not self.pk:  # Check if it's a new object being saved
@@ -7018,9 +7023,9 @@ class Withdraw(models.Model):
         is_new = self.pk is None
 
         if is_new:
-            self.number_of_cards = self.cards.count()
             # Create the withdrawal first to ensure ID is generated
             super().save(*args, **kwargs)
+
 
             # Update number of cards
 
@@ -7052,7 +7057,6 @@ class Withdraw(models.Model):
         else:
             # Handle updates if not new
             self.number_of_cards = self.cards.count()
-
             super().save(*args, **kwargs)
 
     @receiver(pre_delete, sender=InventoryObject)
@@ -7079,6 +7083,7 @@ def update_number_of_cards(sender, instance, action, **kwargs):
     if action in ['post_add', 'post_remove', 'post_clear']:
         # Update the number_of_cards whenever the ManyToMany field changes
         instance.number_of_cards = instance.cards.count()
+        print('number of cards is ' + str(instance.number_of_cards))
         instance.save(update_fields=['number_of_cards'])
 
 @receiver(post_save, sender=Withdraw)
@@ -7153,13 +7158,13 @@ class WithdrawClass(models.Model):
         verbose_name = 'Withdrawal Class'
         verbose_name_plural = 'Withdrawal Classes'
 
-
+"""
 @receiver(m2m_changed, sender=WithdrawClass.withdraw.through)
 def update_number_of_cards(sender, instance, **kwargs):
     if kwargs.get('action') in ['post_add', 'post_remove', 'post_clear']:
         instance.number_of_cards = instance.withdraw.count()
         instance.save(update_fields=['number_of_cards'])
-
+"""
 
 class OfficialShipping(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

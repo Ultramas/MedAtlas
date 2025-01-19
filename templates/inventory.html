@@ -316,6 +316,60 @@
   }
 </style>
 
+<script>
+    // Load audio files
+    const sellAudio = new Audio("/static/css/sounds/sell_coin.mp3");
+    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
+    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
+
+    // Add event listeners to sell forms
+    document.querySelectorAll('.sell-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            sellAudio.play(); // Play the sell sound
+            console.log('')
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
+
+    // Add event listeners to withdraw forms
+    document.querySelectorAll('.withdraw-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            withdrawAudio.play(); // Play the withdraw sound
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
+
+	document.querySelectorAll('.trade-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            tradeAudio.play(); // Play the withdraw sound
+        });
+    });
+
+    // Generic AJAX form submission handler
+    function handleAjaxFormSubmission(form) {
+        const formData = new FormData(form);
+        const actionUrl = form.getAttribute('action');
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('stock-count').textContent = data.number_of_cards;
+            } else {
+                console.error(data.error);
+            }
+        });
+    }
+</script>
+
 <div class="inventory-container">
   {% for Inventory in StockObject %}
     <div class="inventory-item">
@@ -328,24 +382,25 @@
         <p class="product-condition">Card Condition: {{ Inventory.condition }}</p>
         <p class="product-description">{{ Inventory.description }}</p>
         <div class="action-buttons" style="position: fixed;">
-			<form id="sell-form-{{ Inventory.pk }}" action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post" class="ajax-form">
+
+			<form id="sell-form-{{ Inventory.pk }}" action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post" class="ajax-form sell-form">
 				{% csrf_token %}
 				<input type="hidden" name="action" value="sell">
 				<input type="hidden" name="pk" value="{{ Inventory.pk }}">
 				<button type="submit" class="action-button sell-button">Sell</button>
 			</form>
 
-			<form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' pk=Inventory.pk %}" method="post" class="ajax-form">
+			<form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' Inventory.pk %}" method="post" class="ajax-form withdraw-form">
 				{% csrf_token %}
 				<input type="hidden" name="action" value="withdraw">
 				<input type="hidden" name="pk" value="{{ Inventory.pk }}">
 				<button type="submit" class="action-button withdraw-button">Withdraw</button>
 			</form>
 
-			<form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post">
+			<form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post" class="trade-form">
 				{% csrf_token %}
 				<input type="hidden" name="action" value="move">
-				<button type="submit" class="cart-btn">Set Tradable</button>
+				<button type="submit" class="action-button trade-button" class="cart-btn">Set Tradable</button>
 			</form>
 
         </div>

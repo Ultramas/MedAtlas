@@ -8070,6 +8070,13 @@ from django.db import transaction
 from django.urls import reverse
 
 
+@login_required
+def inventory_view(request):
+    inventory = Inventory.objects.get(user=request.user)
+    number_of_cards = inventory.inventoryobject_set.filter(is_active=1).count()
+    return render(request, 'inventory.html', {'number_of_cards': number_of_cards})
+
+
 class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
     model = InventoryObject
     template_name = "inventory.html"
@@ -8112,15 +8119,26 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         action = request.POST.get('action')
         pk = kwargs.get('pk')
 
+        try:
+            inventory_object = InventoryObject.objects.get(pk=pk, user=request.user)
+        except InventoryObject.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Inventory object not found'}, status=404)
+
         if action == 'sell':
-            return self.sell_inventory_object(request, pk)
+            response = self.sell_inventory_object(request, pk)
         elif action == 'withdraw':
-            return self.withdraw_inventory_object(request, pk)
+            response = self.withdraw_inventory_object(request, pk)
         elif action == 'move':
             print("Move action triggered")  # Debugging line
-            return self.move_to_trade(request, pk)
+            response = self.move_to_trade(request, pk)
         else:
             return JsonResponse({'success': False, 'error': 'Invalid action'}, status=400)
+
+        # Update inventory count after performing the action
+        inventory_object.inventory.update_inventory_count()
+        updated_count = inventory_object.inventory.number_of_cards
+
+        return response
 
     def withdraw_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
@@ -8144,13 +8162,17 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
                 withdraw.cards.add(inventory_object)
             else:
                 withdraw = Withdraw.objects.create(user=user, is_active=1, shipping_state='S')
-                withdraw.cards.add(inventory_object)
+                withdraw.save()  # Save the object to generate an ID
+                withdraw.cards.add(inventory_object)  # Add the InventoryObject
 
             withdraw.number_of_cards = withdraw.cards.count()
-            withdraw.save()
+            withdraw.save()  # Update the number of cards
 
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # AJAX check
-            return JsonResponse({'success': True})
+            stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+            return JsonResponse({
+                'success': True,
+                'stock_count': stock_count})
         return redirect('showcase:inventory')
 
     def sell_inventory_object(self, request, pk):
