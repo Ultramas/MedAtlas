@@ -10950,19 +10950,31 @@ class CheckoutView(EBaseView):
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
             all_items_currency_based = self.are_all_items_currency_based(order)
-            print(f'all_items_currency_based: {all_items_currency_based}')  # Debug print
             form = CheckoutForm(all_items_currency_based=all_items_currency_based)
+
+            # Get the existing addresses if available
+            shipping_address_qs = Address.objects.filter(user=self.request.user, address_type='S', is_active=1)
+            if shipping_address_qs.exists():
+                shipping_address = shipping_address_qs.first()
+                # Prepopulate the form with the shipping address
+                form.fields['shipping_address'].initial = shipping_address.street_address
+                form.fields['shipping_address2'].initial = shipping_address.apartment_address
+                form.fields['shipping_country'].initial = shipping_address.country
+                form.fields['shipping_zip'].initial = shipping_address.zip
+
+            billing_address_qs = Address.objects.filter(user=self.request.user, address_type='B', is_active=1)
+            if billing_address_qs.exists():
+                billing_address = billing_address_qs.first()
+                # Prepopulate the form with the billing address
+                form.fields['billing_address'].initial = billing_address.street_address
+                form.fields['billing_address2'].initial = billing_address.apartment_address
+                form.fields['billing_country'].initial = billing_address.country
+                form.fields['billing_zip'].initial = billing_address.zip
+
             context = self.get_context_data(form=form, couponform=CouponForm(), order=order, DISPLAY_COUPON_FORM=True)
 
-            shipping_address_qs = Address.objects.filter(user=self.request.user, address_type='S', default=True)
-            if shipping_address_qs.exists():
-                context['default_shipping_address'] = shipping_address_qs[0]
-
-            billing_address_qs = Address.objects.filter(user=self.request.user, address_type='B', default=True)
-            if billing_address_qs.exists():
-                context['default_billing_address'] = billing_address_qs[0]
-
             return render(self.request, self.template_name, context)
+
         except ObjectDoesNotExist:
             messages.info(self.request, "You do not have an active order")
             return redirect("showcase:checkout")
@@ -11044,8 +11056,14 @@ class CheckoutView(EBaseView):
                         shipping_address.default = True
                         shipping_address.save()
                 else:
-                    messages.info(self.request, "Please fill in the required shipping address fields")
-                    return redirect('showcase:checkout')
+                    address_qs = Address.objects.filter(user=self.request.user, address_type='S', default=True)
+                    if address_qs.exists():
+                        shipping_address = address_qs[0]
+                        order.shipping_address = shipping_address
+                        order.save()
+                    else:
+                        messages.info(self.request, "kindly Please fill in the required shipping address fields")
+                        return redirect('showcase:checkout')
 
             use_default_billing = form.cleaned_data.get('use_default_billing')
             same_billing_address = form.cleaned_data.get('same_billing_address')
@@ -11091,8 +11109,14 @@ class CheckoutView(EBaseView):
                         billing_address.default = True
                         billing_address.save()
                 else:
-                    messages.info(self.request, "Please fill in the required billing address fields")
-                    return redirect('showcase:checkout')
+                    address_qs = Address.objects.filter(user=self.request.user, address_type='S', default=True)
+                    if address_qs.exists():
+                        shipping_address = address_qs[0]
+                        order.shipping_address = shipping_address
+                        order.save()
+                    else:
+                        messages.info(self.request, "Please fill in the required billing address fields")
+                        return redirect('showcase:checkout')
 
             payment_option = form.cleaned_data.get('payment_option')
             return redirect('showcase:payment', payment_option=payment_option)
@@ -11165,21 +11189,27 @@ class PaymentView(EBaseView):
 
     def post(self, *args, **kwargs):
         order = Order.objects.get(user=self.request.user, ordered=False)
-        form = PaymentForm(self.request.POST)
-        userprofile = User.objects.get(username=self.request.user.username)
+        token = self.request.POST.get('token')
         payment_method = self.request.POST.get('payment_method')
 
-        if form.is_valid():
-            token = stripe.Token.create(
-                card={
-                    "number": form.cleaned_data.get("number"),
-                    "exp_month": form.cleaned_data.get("exp_month"),
-                    "exp_year": form.cleaned_data.get("exp_year"),
-                    "cvc": form.cleaned_data.get("cvc"),
-                },
-            )
-            save = form.cleaned_data.get('save')
-            use_default = form.cleaned_data.get('use_default')
+        if token:
+            try:
+                # Use the token to create a charge or attach a payment method
+                stripe.PaymentMethod.attach(
+                    token,
+                    customer=userprofile.stripe_customer_id,
+                )
+                # Process payment
+                charge = stripe.Charge.create(
+                    amount=int(order.get_total_price() * 100),  # Amount in cents
+                    currency="usd",
+                    source=token,
+                    description=f"Order {order.id}",
+                )
+                # Handle success
+                return JsonResponse({"success": "Payment processed successfully!"})
+            except stripe.error.StripeError as e:
+                return JsonResponse({"error": str(e)}, status=400)
 
             if save:
                 if userprofile.stripe_customer_id:

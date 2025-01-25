@@ -77,24 +77,23 @@
         <div class="address-section">
             <h3>Ship To:</h3>
             <div class="address-content">
-                {{address.street_address}}<br>
+                Address - {{address.street_address}}<br>
                 {% if apartment_address %}
-                {{address.apartment_address}}<br>
+                Apartment - {{address.apartment_address}}<br>
                 {% endif %}
-                {{address.country}}<br>
-                {{address.zip}}
+                Country - {{address.country}}<br>
+                ZIP - {{address.zip}}
             </div>
         </div>
         <div class="address-section">
             <h3>Bill To:</h3>
             <div class="address-content">
+                Address - {{address.street_address}}<br>
                 {% if apartment_address %}
-                {{address.apartment_address}}<br>
-                {% else %}
-                {{address.street_address}}<br>
+                Apartment - {{address.apartment_address}}<br>
                 {% endif %}
-                {{address.country}}<br>
-                {{address.zip}}
+                Country - {{address.country}}<br>
+                ZIP - {{address.zip}}
             </div>
         </div>
         <div class="barcode">
