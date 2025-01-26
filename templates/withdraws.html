@@ -27,7 +27,18 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-
+<style>
+	.col-xl-auto {
+    position: relative;
+    width: 100%;
+    padding-right: -15px;
+    padding-left: -15px
+}    .col-lg-4 {
+        -ms-flex: 0 0 33.333333%;
+        flex: 0 0 33.333333%;
+        max-width:50%;
+    }
+</style>
 </head>
 <body>
 
@@ -145,12 +156,13 @@
 
 	<!-- latest news -->
 	<div class="latest-news mt-150 mb-150">
-    <div class="container">
-    <div class="row">
+    <div class="container" style="display: flex; flex-direction: column;">
+    <div class="row" style="display: flex; flex-direction: column;">
         <h2>Completed Withdrawals</h2>
+		<br>
         {% for newprofile in CompletedWithdraws %}
 		<br>
-            <div class="col-lg-4 col-md-63w" style="">
+            <div class="col-lg-4 col-md-63w" style="padding-right: -0px; padding-left: -0px;">
                 <div class="single-latest-news">
                     <a href="{% url 'showcase:withdraw_detail' newprofile.slag %}">
                         <div class="latest-news-bg news-bg-1"
@@ -191,9 +203,9 @@
                                          style="background: url({{ card.image.url }}); background-size: cover; height: 200px; border: 1px solid #ddd;">
                                     </div>
                                     <div class="card-info">
-                                        <p><strong>User:</strong> {{ card.user.username }}</p>
+                                        <p><strong>Owner:</strong> {{ user.username }}</p>
                                         <p><strong>Category:</strong> {{ card.get_category_display }}</p>
-                                        <p><strong>Choice Text:</strong> {{ card.choice_text }}</p>
+                                        <p><strong>Card Name:</strong> {{ card.choice_text }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -248,8 +260,9 @@
                                          style="background: url({{ card.image.url }}); background-size: cover; height: 200px; border: 1px solid #ddd;">
                                     </div>
                                     <div class="card-info">
-                                        <p><strong>User:</strong> {{ card.user.username }}</p>
+                                        <p><strong>Address:</strong> {{ user.username }}</p>
                                         <p><strong>Category:</strong> {{ card.get_category_display }}</p>
+                                        <p><strong>Condition:</strong> {{ card.condition }}</p>
                                         <p><strong>Choice Text:</strong> {{ card.choice_text }}</p>
                                     </div>
                                 </div>
