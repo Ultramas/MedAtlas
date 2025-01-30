@@ -128,7 +128,7 @@ ul {
     .dl,
     ol,
     ul {
-        margin-left: -5.3vh;
+       /* margin-left: -5.3vh; */
     }
 }
 
@@ -5007,7 +5007,7 @@ input[type=submit].btn-block {
     flex-direction: column;
     min-width: 0;
     word-wrap: break-word;
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.3);
     background-clip: border-box;
     border: 1px solid rgba(0, 0, 0, .125);
     border-radius: .25rem
@@ -8773,7 +8773,7 @@ button.bg-dark:hover {
 
 .mt-5,
 .my-5 {
-    margin-top: 3rem !important
+    margin-top: 0rem !important
 }
 
 .mr-5,
@@ -8783,7 +8783,7 @@ button.bg-dark:hover {
 
 .mb-5,
 .my-5 {
-    margin-bottom: 3rem !important
+    margin-bottom: 0rem !important
 }
 
 .ml-5,

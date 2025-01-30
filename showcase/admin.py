@@ -2216,7 +2216,7 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
                 'user', 'email', 'avatar', 'alternate', 'about_me', 'level', 'unlocked_daily_chests', 'subscription',
                 'currency', 'currency_amount', 'total_currency_amount', 'total_currency_spent', 'rubies_spent',
                 'green_cards_hit', 'yellow_cards_hit', 'orange_cards_hit', 'red_cards_hit', 'black_cards_hit',
-                'gold_cards_hit', 'red_gold_cards_hit', 'times_subtract_called', 'monstrosity', 'seller', 'membership',
+                'gold_cards_hit', 'red_gold_cards_hit', 'times_subtract_called', 'monstrosity', 'seller', 'trader', 'membership',
                 'position', 'is_active'
             )
         }),
@@ -2225,7 +2225,7 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
     inlines = [ProfileCurrencyInline]
 
     # Display user, selling status, and membership as separate columns in the admin list view
-    list_display = ('user', 'get_selling_status', 'get_membership')
+    list_display = ('user', 'trader', 'get_selling_status', 'get_membership')
 
     def get_selling_status(self, obj):
         return 'Yes' if obj.seller else 'No'

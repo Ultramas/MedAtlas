@@ -1,43 +1,649 @@
-  {% for newprofile in CompletedWithdraws %}
-            <div class="col-lg-12">
-                <div class="single-latest-news">
-                    <h3>{{ newprofile.user.username }}'s Withdrawal</h3>
-                    <p><strong>Number of Cards:</strong> {{ newprofile.number_of_cards }}</p>
-                    <p><strong>Fees:</strong> ${{ newprofile.fees }}</p>
-                    <p><strong>Shipping State:</strong> {{ newprofile.get_shipping_state_display }}</p>
-                    <p><strong>Condition:</strong> {{ newprofile.get_condition_display }}</p>
-                    <div class="row">
-                        {% for card in newprofile.cards.all %}
-                            <div class="col-md-4">
-                                <div class="card-item">
-                                    <div class="card-image"
-                                         style="background: url({{ card.image.url }}); background-size: cover; height: 200px; border: 1px solid #ddd;">
-                                    </div>
-                                    <div class="card-info">
-                                        <p><strong>User:</strong> {{ card.user.username }}</p>
-                                        <p><strong>Category:</strong> {{ card.get_category_display }}</p>
-                                        <p><strong>Choice Text:</strong> {{ card.choice_text }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
+
+	<!-- title -->
+  {% for AboutBackgroundImage in Titles %}
+  {% if AboutBackgroundImage.page == "about.html" or AboutBackgroundImage.page == "base.html" %}
+  <title>{{AboutBackgroundImage.overtitle}}</title>
+  {% endif %}
+  {% endfor %}
+
+	<!-- favicon -->
+	<link rel="shortcut icon" type="image/png" href="static/img/favicon.png">
+	<!-- google font -->
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
+	<!-- fontawesome -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+{% for AboutBackgroundImage in Image %}
+    {% if AboutBackgroundImage.page == "about.html" %}
+    {% if AboutBackgroundImage.image_position == 1 %}
+	qwrEZRtxcgh
+        <style>
+            .feature-bg:after {
+                background-image: url({{ AboutBackgroundImage.image.url }});
+                /* Other CSS properties */
+            }
+        </style>
+    {% endif %}
+    {% endif %}
+{% endfor %}
+
+</head>
+<body>
+
+
+
+	<!-- header -->
+	<div class="top-header-area" id="sticker">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-12 col-sm-12 text-center">
+					<div class="main-menu-wrap">
+						<!-- logo -->
+        {% for AboutBackgroundImage in Logo %}
+        {% if AboutBackgroundImage.page == 'about.html' %}
+
+        <a class="logo" href="{{AboutBackgroundImage.hyperlink}}">
+          <img class="imageicon" src="{{AboutBackgroundImage.logocover.url}}"
+                alt="{{AboutBackgroundImage.alternate}}" style="length: {{AboutBackgroundImage.length_for_resize}}px; width: {{AboutBackgroundImage.width_for_resize}}px;"></a>
+        {% endif %}
         {% endfor %}
+						<!-- logo -->
+
+						<!-- menu start -->
+						<nav class="main-menu">
+							<ul>
+							  {% for column in Header %}
+
+      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
+									<ul class="sub-menu">
+										{% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% else %}
+              {% if row.opennew %}
+										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+									</ul>
+        {% endfor %}
+								</li>
+								<li>
+									<div class="header-icons">
+										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
+											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
+										</a>
+										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
+									</div>
+								</li>
+							</ul>
+						</nav>
+						<a class="mobile-show search-bar-icon" href="#"><i class="fas fa-search"></i></a>
+						<div class="mobile-menu"></div>
+						<!-- menu end -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end header -->
 
 
+	<!-- search area -->
+	<div class="search-area">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-12">
+					<span class="close-btn"><i class="fas fa-window-close"></i></span>
+					<div class="search-bar">
+						<div class="search-bar-tablecell">
+							<h3>Search For:</h3>
+							<input type="text" placeholder="Keywords">
+							<button type="submit">Search <i class="fas fa-search"></i></button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end search arewa -->
+
+	<!-- breadcrumb-section -->
+
+{% for AboutBackgroundImage in Background %}
+  {% if AboutBackgroundImage.page == "about.html" %}
+  {% if AboutBackgroundImage.position == 1 %}
+	<div class="breadcrumb-section breadcrumb-bg" style="background: url({{AboutBackgroundImage.file.url}}); background-size: cover; min-height: 70vh;">
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 offset-lg-2 text-center">
+					<div class="breadcrumb-text">
+									    {% for AboutBackgroundImage in TextFielde %}
+										{% if AboutBackgroundImage.page == "about.html" %}
+										{% if AboutBackgroundImage.section == 1 %}
+						<p>Straight From The Source</p>
+										{% endif %}
+										{% endif %}
+										{% endfor %}
+						<h1>About Us</h1>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end breadcrumb section -->
+
+	<!-- featured section -->
+	<div class="feature-bg">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-7">
+					<div class="featured-text">
+						<h2 class="pb-3">Why <span class="orange-text">PokeTrove?</span></h2>
+						<div class="row">
+							<div class="col-lg-6 col-md-6 mb-4 mb-md-5">
+								<div class="list-box d-flex">
+									<div class="list-icon">
+										<i class="fas fa-shipping-fast"></i>
+									</div>
+									<div class="content">
+									    {% for AboutBackgroundImage in TextFielde %}
+										{% if AboutBackgroundImage.page == "about.html" %}
+										{% if AboutBackgroundImage.section == 2 %}
+										{% if AboutBackgroundImage.hyperlink %}
+										<a href="{{AboutBackgroundImage.hyperlink}}">
+										{% endif %}
+										<h3 style="text-align: left; color: {{AboutBackgroundImage.text_color}};">{{AboutBackgroundImage.text}}</h3>
+										{% endif %}
+										{% endif %}
+										{% endfor %}
+										{% for AboutBackgroundImage in TextFielde %}
+										{% if AboutBackgroundImage.page == "about.html" %}
+										{% if AboutBackgroundImage.section == 3 %}
+										{% if AboutBackgroundImage.hyperlink %}
+										<a href="{{AboutBackgroundImage.hyperlink}}">
+											{% endif %}
+										<p style="text-align: left; color: {{AboutBackgroundImage.text_color}};">{{AboutBackgroundImage.text}}</p>
+											</a>
+										{% endif %}
+										{% endif %}
+										{% endfor %}
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-6 col-md-6 mb-5 mb-md-5">
+								<div class="list-box d-flex">
+									<div class="list-icon">
+										<i class="fas fa-money-bill-alt"></i>
+									</div>
+									<div class="content">
+										{% for AboutBackgroundImage in TextFielde %}
+										{% if AboutBackgroundImage.page == "about.html" %}
+										{% if AboutBackgroundImage.section == 4 %}
+										{% if AboutBackgroundImage.hyperlink %}
+										<a href="{{AboutBackgroundImage.hyperlink}}">
+											{% endif %}
+										<h3 style="text-align: left; color: {{AboutBackgroundImage.text_color}};">{{AboutBackgroundImage.text}}</h3>
+										{% endif %}
+										{% endif %}
+										{% endfor %}
+										{% for AboutBackgroundImage in TextFielde %}
+										{% if AboutBackgroundImage.page == "about.html" %}
+										{% if AboutBackgroundImage.section == 5 %}
+										{% if AboutBackgroundImage.hyperlink %}
+										<a href="{{AboutBackgroundImage.hyperlink}}">
+										{% endif %}
+										<p style="text-align: left; color: {{AboutBackgroundImage.text_color}};">{{AboutBackgroundImage.text}}</p>
+										{% endif %}
+										{% endif %}
+										{% endfor %}
+										</a>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-6 col-md-6 mb-5 mb-md-5">
+								<div class="list-box d-flex">
+									<div class="list-icon">
+										<i class="fas fa-briefcase"></i>
+									</div>
+									<div class="content">
+										{% for AboutBackgroundImage in TextFielde %}
+										{% if AboutBackgroundImage.page == "about.html" %}
+										{% if AboutBackgroundImage.section == 6 %}
+										{% if AboutBackgroundImage.hyperlink %}
+										<a href="{{AboutBackgroundImage.hyperlink}}">
+										{% endif %}
+										<h3 style="text-align: left; color: {{AboutBackgroundImage.text_color}};">{{AboutBackgroundImage.text}}</h3>
+										</a>
+										{% endif %}
+										{% endif %}
+										{% endfor %}
+										{% for AboutBackgroundImage in TextFielde %}
+										{% if AboutBackgroundImage.page == "about.html" %}
+										{% if AboutBackgroundImage.section == 7 %}
+										{% if AboutBackgroundImage.hyperlink %}
+										<a href="{{AboutBackgroundImage.hyperlink}}">
+										{% endif %}
+										<p style="text-align: left; color: {{AboutBackgroundImage.text_color}};">{{AboutBackgroundImage.text}}</p>
+										{% endif %}
+										{% endif %}
+										{% endfor %}
+										</a>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-6 col-md-6">
+								<div class="list-box d-flex">
+									<div class="list-icon">
+										<i class="fas fa-sync-alt"></i>
+									</div>
+									<div class="content">
+										{% for AboutBackgroundImage in TextFielde %}
+										{% if AboutBackgroundImage.page == "about.html" %}
+										{% if AboutBackgroundImage.section == 8 %}
+										{% if AboutBackgroundImage.hyperlink %}
+										<a href="{{AboutBackgroundImage.hyperlink}}">
+										{% endif %}
+										<h3 style="text-align: left; color: {{AboutBackgroundImage.text_color}};">{{AboutBackgroundImage.text}}</h3>
+										</a>
+										{% endif %}
+										{% endif %}
+										{% endfor %}
+										{% for AboutBackgroundImage in TextFielde %}
+										{% if AboutBackgroundImage.page == "about.html" %}
+										{% if AboutBackgroundImage.section == 9 %}
+										{% if AboutBackgroundImage.hyperlink %}
+										<a href="{{AboutBackgroundImage.hyperlink}}">
+										{% endif %}
+										<p style="text-align: left; color: {{AboutBackgroundImage.text_color}};">{{AboutBackgroundImage.text}}</p>
+										{% endif %}
+										{% endif %}
+										{% endfor %}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end featured section -->
+
+	<!-- shop banner -->
+	<section class="shop-banner">
+    	<div class="container">
+			{% for AboutBackgroundImage in TextFielde %}
+			{% if AboutBackgroundImage.page == 'about.html' %}
+			{% if AboutBackgroundImage.section == 10 %}
+        	<h3>{{AboutBackgroundImage.text}}
+			{% endif %}
+			{% endif %}
+			{% endfor %}
+
+			{% for AboutBackgroundImage in TextFielde %}
+			{% if AboutBackgroundImage.page == 'about.html' %}
+			{% if AboutBackgroundImage.section == 11 %}
+				<span class="orange-text">{{AboutBackgroundImage.text}}</span></h3>
+
+			{% endif %}
+			{% endif %}
+			{% endfor %}
+
+			{% for AboutBackgroundImage in TextFielde %}
+			{% if AboutBackgroundImage.page == 'about.html' %}
+			{% if AboutBackgroundImage.section == 12 %}
+            <div class="sale-percent"><span style="max-width: 80%;">{{AboutBackgroundImage.text}}</span><span></span></div>
+			{% endif %}
+			{% endif %}
+			{% endfor %}
+			{% for AboutBackgroundImage in TextFielde %}
+			{% if AboutBackgroundImage.page == 'about.html' %}
+			{% if AboutBackgroundImage.section == 13 %}
+            <a href="{{AboutBackgroundImage.hyperlink}}" class="cart-btn btn-lg">{{AboutBackgroundImage.text}}</a>
+			{% endif %}
+			{% endif %}
+			{% endfor %}
+        </div>
+{% for AboutBackgroundImage in Image %}
+    {% if AboutBackgroundImage.image_position == 2 %}
+		<img src="{{ AboutBackgroundImage.image.url }}" alt='{{ AboutBackgroundImage.title }}' style="margin-left: 75%; margin-top: -60%; height: 400px; width: 400px;">
+	{% endif %}
+{% endfor %}
+    </section>
+	<!-- end shop banner -->
+
+	<!-- team section -->
+	<div class="mt-150">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 offset-lg-2 text-center">
+					<div class="section-title">
+						<h3>Our <span class="orange-text">Team</span></h3>
+
+			{% for AboutBackgroundImage in TextFielde %}
+			{% if AboutBackgroundImage.page == 'about.html' %}
+			{% if AboutBackgroundImage.section == 14 %}
+						<p>{{AboutBackgroundImage.text}}</p>
+			{% endif %}
+			{% endif %}
+			{% endfor %}
+					</div>
+				</div>
+			</div>
+			<div class="row">
+			{% for AboutBackgroundImage in Staff %}
+    <div class="col-lg-4 col-md-6" style="margin-left: 20px; background-color: black; padding: 0px;">
+        <div class="single-team-item">
+            <div class="team-bg team-bg-1" style="background: url({{AboutBackgroundImage.image.url}}); background-size: cover; position: relative;">
+              {% for staff in Staff %}
+				{% if staff.user == AboutBackgroundImage.user %}
+					<ul class="social-link-team" style="position: absolute; bottom: 10px;">
+						{% for social in staff.socialmedia_set.all %}
+							<li style="">
+								<a href="{{ social.hyperlink }}">
+									<img src="{{ social.icon.url }}" alt="{{ social.alternate }}" style="width: 25px; height: 25px;">
+								</a>
+							</li>
+						{% endfor %}
+					</ul>
+				{% endif %}
+			{% endfor %}
+            </div>
+            <h4 style="color: white; margin-left: 10px; margin-right: 10px;">{{AboutBackgroundImage.name}}<span style="color: white;">{{AboutBackgroundImage.role_position}}</span></h4>
+            <h5 style="color: white; margin-left: 10px; margin-right: 10px;">About Me: {{AboutBackgroundImage.description}} <span></span></h5>
+            <h5 style="color: white; margin-left: 10px; margin-right: 10px;">Fun Fact: {{AboutBackgroundImage.staff_feats}} <span></span></h5>
+			<br>
+        </div>
+    </div>
+{% endfor %}
+
+	</div>
+
+		</div>
+	</div>
+	<!-- end team section -->
+
+	<!-- testimonail-section -->
+	<div class="testimonail-section mt-150 mb-150">
+		<h1 style="text-align: center;">The PokeTrove Pillars</h1>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-10 offset-lg-1 text-center">
+					<div class="testimonial-sliders">
+					{% for AboutBackgroundImage in TextFielde %}
+					{% if AboutBackgroundImage.page == 'about.html' %}
+						<div class="single-testimonial-slider">
+							<div class="client-meta">
+								{% if AboutBackgroundImage.section == 15 %}
+								<h3>{{AboutBackgroundImage.text}}<span>What do we mean by {{AboutBackgroundImage.text}}?</span></h3>
+								{% endif %}
+								{% endif %}
+								{% endfor %}
+
+								{% for AboutBackgroundImage in TextFielde %}
+								{% if AboutBackgroundImage.page == 'about.html' %}
+								{% if AboutBackgroundImage.section == 16 %}
+								<p class="testimonial-body">
+									" {{AboutBackgroundImage.text}} "
+								</p>
+								<div class="last-icon">
+									<i class="fas fa-quote-right"></i>
+								</div>
+								{% endif %}
+							</div>
+						</div>
+						{% endif %}
+								{% endfor %}
+
+					{% for AboutBackgroundImage in TextFielde %}
+								{% if AboutBackgroundImage.page == 'about.html' %}
+								{% if AboutBackgroundImage.section == 17 %}
+						<div class="single-testimonial-slider">
+							<div class="client-meta">
+							<h3>{{AboutBackgroundImage.text}}<span>What do we mean by {{AboutBackgroundImage.text}}?</span></h3>
+								{% endif %}
+								{% endif %}
+								{% if AboutBackgroundImage.page == 'about.html' %}
+								{% if AboutBackgroundImage.section == 18 %}
 
 
+								<p class="testimonial-body">
+									" {{AboutBackgroundImage.text}} "
+								</p>
+								<div class="last-icon">
+									<i class="fas fa-quote-right"></i>
+								</div>
+								{% endif %}
+								{% endif %}
+								{% endfor %}
+							</div>
+						</div>
+					{% for AboutBackgroundImage in TextFielde %}
+								{% if AboutBackgroundImage.page == 'about.html' %}
+								{% if AboutBackgroundImage.section == 19 %}
+						<div class="single-testimonial-slider">
+							<div class="client-meta">
+								<h3>{{AboutBackgroundImage.text}}<span>What do we mean by {{AboutBackgroundImage.text}}?</span></h3>
 
+								{% endif %}
+								{% endif %}
+								{% endfor %}
 
+								{% for AboutBackgroundImage in TextFielde %}
+								{% if AboutBackgroundImage.page == 'about.html' %}
+								{% if AboutBackgroundImage.section == 20 %}
+								<p class="testimonial-body">
+									"  {{AboutBackgroundImage.text}} "
+								</p>
+								{% endif %}
+								{% endif %}
+								{% endfor %}
+								<div class="last-icon">
+									<i class="fas fa-quote-right"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end testimonail-section -->
 
+	<!-- powered by/partnered with carousel -->
+	<div class="logo-carousel-section">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="logo-carousel-inner">
+						{% for AboutBackgroundImage in Image %}
+						{% if AboutBackgroundImage.page == 'about.html' %}
+                  		{% if AboutBackgroundImage.image_position == 3 %}
+						<div class="single-logo-item">
+							<a href="{{ AboutBackgroundImage.hyperlink }}">
+							<img src="{{ AboutBackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
 
+						{% for AboutBackgroundImage in Image %}
+						{% if AboutBackgroundImage.page == 'about.html' %}
+                  		{% if AboutBackgroundImage.image_position == 4 %}
+						<div class="single-logo-item">
+							<a href="{{ AboutBackgroundImage.hyperlink }}">
+							<img src="{{ AboutBackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
 
+						{% for AboutBackgroundImage in Image %}
+						{% if AboutBackgroundImage.page == 'about.html' %}
+                  		{% if AboutBackgroundImage.image_position == 5 %}
+						<div class="single-logo-item">
+							<a href="{{ AboutBackgroundImage.hyperlink }}">
+							<img src="{{ AboutBackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
 
+						{% for AboutBackgroundImage in Image %}
+						{% if AboutBackgroundImage.page == 'about.html' %}
+                  		{% if AboutBackgroundImage.image_position == 6 %}
+						<div class="single-logo-item">
+							<a href="{{ AboutBackgroundImage.hyperlink }}">
+							<img src="{{ AboutBackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
 
+						{% for AboutBackgroundImage in Image %}
+						{% if AboutBackgroundImage.page == 'about.html' %}
+                  		{% if AboutBackgroundImage.image_position == 7 %}
+						<div class="single-logo-item">
+							<a href="{{ AboutBackgroundImage.hyperlink }}">
+							<img src="{{ AboutBackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end logo carousel -->
 
+	<!-- footer -->
+	<div class="footer-area">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-3 col-md-6">
+					<div class="footer-box about-widget">
+						<h2 class="widget-title">About Us</h2>
+                            {% for AboutBackgroundImage in TextFielde %}
+							{% if AboutBackgroundImage.page == "about.html" %}
+							{% if AboutBackgroundImage.section == 21 %}
+							<p>{{AboutBackgroundImage.text}}</p>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6">
+					<div class="footer-box get-in-touch">
+						<h2 class="widget-title">Get in Touch</h2>
+						<ul>
+							<li>34/8, East Hukupara, Gifirtok, Sadan.</li>
+							<li><a href="{% url 'showcase:contact' %}" target='_blank' style="text-decoration: none;">IntelleXCompany1@gmail.com</a></li>
+							<li>+00 111 222 3333</li>
+                            <li><a href="{% url 'showcase:home' %}" target='_blank' style="text-decoration: none;">Live Communitiies</li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6">
+					<div class="footer-box pages">
+						<h2 class="widget-title">Pages</h2>
+						<ul>
+                            <li><a href="{% url 'showcase:index' %}">Home</a></li>
+							<li><a href="{% url 'showcase:about' %}">About</a></li>
+							<li><a href="{% url 'showcase:ehome' %}">Shop</a></li>
+							<li><a href="{% url 'showcase:newsfeed' %}">News</a></li>
+							<li><a href="{% url 'showcase:contact' %}">Contact</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6">
+					<div class="footer-box subscribe">
+						<h2 class="widget-title">Subscribe</h2>
+						<p>Subscribe to our mailing list to get the latest updates.</p>
+						<form method="post" action="">
+    						{% csrf_token %}
+							{{ form.email }}
 
+							<button type="submit"><i class="fas fa-paper-plane"></i></button>
+													<br>
+							I agree to the Terms & Conditions: {{ form.confirmation }}
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end footer -->
 
+	<!-- copyright -->
+	<div class="copyright">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-6 col-md-12">
+					{% for AboutBackgroundImage in BaseCopyrightTextFielded %}
+					{% if AboutBackgroundImage.page == "about.html" %}
+					<p>{{AboutBackgroundImage.copyright}}</p>
+					{% endif %}
+					{% endfor %}
+				</div>
+				<div class="col-lg-6 text-right col-md-12">
+					<div class="social-icons">
+						<ul>
+							<li><a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a></li>
+							<li><a href="#" target="_blank"><i class="fab fa-twitter"></i></a></li>
+							<li><a href="#" target="_blank"><i class="fab fa-instagram"></i></a></li>
+							<li><a href="#" target="_blank"><i class="fab fa-linkedin"></i></a></li>
+							<li><a href="#" target="_blank"><i class="fab fa-dribbble"></i></a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end copyright -->
 
+	<!-- jquery -->
+     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+     <script src="{% static 'css/js/main.js' %}"></script>
+     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+     <script src="{% static 'css/js/waypoints.js' %}"></script>
+	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+     <script src="{% static 'css/js/sticker.js' %}"></script>
 
+</body>
+</html>

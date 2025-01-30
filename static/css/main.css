@@ -677,6 +677,7 @@ nav.main-menu ul ul.sub-menu li a {
   font-weight: 600;
 }
 
+/*
 nav.main-menu ul li.current-list-item > a {
   color: #F28123;
 }
@@ -684,6 +685,7 @@ nav.main-menu ul li.current-list-item > a {
 nav.main-menu li:hover > a {
   color: #F28123;
 }
+*/
 
 nav.main-menu li a {
   -webkit-transition: 0.3s;

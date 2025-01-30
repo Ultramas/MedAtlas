@@ -1,24 +1,721 @@
-{% extends 'ebase.html' %}
 {% load static %}
-{% load crispy_forms_tags %}
 
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeTrove - Marketplace</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+    <style>
+    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
+    .copyright-section {
+        background: linear-gradient(
+            to right,
+            rgba(191, 151, 255, 0.1),
+            rgba(255, 255, 255, 0.05),
+            rgba(191, 151, 255, 0.1)
+        );
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        text-align: center;
+        position: relative;
+        z-index: 100;
+    }
 
-{% block logos %}
-    {% for EBaseView in Logos %}
-    {% if EBaseView.page == 'checkout.html' %}
-        <a class="logo" href="{{ EBaseView.hyperlink }}">
-            <img class="imageicon" src="media/{{ EBaseView.logocover }}" alt="{{ EBaseView.alternate }}"
-                 width="145vh" height="100vh" style="z-index: 100;">
-        </a>
-    {% endif %}
-    {% endfor %}
-{% endblock %}
+    .copyright-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
 
-  <main >
-    <div class="container wow fadeIn">
-      <h2 class="my-5 h2 text-center" style="color: white;">Checkout</h2>
-      <div class="row">
+    .copyright-section p {
+        color: var(--text);
+        font-family: 'Cinzel', serif;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        margin: 0;
+    }
+</style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
+
+        :root {
+            --primary: #bf97ff;
+            --primary-dark: #9a6bff;
+            --background: #0a0a13;
+            --text: #ffffff;
+            --accent: #4db2ea;
+            --accent2: #ffd700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            font-family: 'Cormorant Garamond', serif;
+            background-image:
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+
+        .main-menu {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(
+                to right,
+                rgba(191, 151, 255, 0.1),
+                rgba(255, 255, 255, 0.05),
+                rgba(191, 151, 255, 0.1)
+            );
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+            position: relative;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 3rem;
+        }
+
+        .nav-links a {
+
+    color: var(--primary);
+            text-decoration: none;
+            position: relative;
+            padding: 0.5rem 0;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            /*font-size: 1rem;*/
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+    .logo-icon h1::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+    }
+        .container {
+            display: flex;
+            gap: 3rem;
+            padding: 3rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+        .user-profile {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-profile::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .profile-picture {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--accent2);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .username {
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
+        }
+
+        .user-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 1rem;
+        }
+
+        .user-stat {
+            background: rgba(191, 151, 255, 0.1);
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid var(--primary);
+        }
+
+        .user-stat-icon {
+            font-size: 1.5rem;
+        }
+
+        .filters {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters h2, .collection-title {
+            color: var(--primary);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .filters h2::after, .collection-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .type-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .view-collection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-collection::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .view-collection:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .view-collection:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .main-content h1 {
+            color: var(--primary);
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+        }
+
+        .main-content h1::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+
+        .nav-links h1::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .pokemon-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+        .pokemon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
+            z-index: 1;
+        }
+
+        .pokemon-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pokemon-image::after {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pokemon-info {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .pokemon-name {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+            font-family: 'Cinzel', serif;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .pokemon-type {
+            color: white;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .add-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .add-button:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .add-button:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .legendary-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: var(--accent);
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.75rem;
+            border-radius: 50%;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--accent2);
+            font-size: 1.5rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+        }
+
+                .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 1200px) {
+            .inventory-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .inventory-item {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .inventory-item:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+
+
+.view-toggle {
+    text-align: right;
+    margin-bottom: 1rem;
+}
+
+.toggle-btn {
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+    border: 2px solid var(--primary);
+    color: var(--text);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
+}
+
+.inventory-grid.compact-view {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.inventory-grid.compact-view .inventory-item {
+    font-size: 0.9em;
+}
+
+.inventory-grid.compact-view .pokemon-image {
+    aspect-ratio: 16/9;
+}
+
+.inventory-grid.compact-view .product-description {
+    display: none;
+}
+
+.inventory-grid.compact-view .action-buttons {
+    flex-direction: column;
+}
+
+.inventory-grid.compact-view .action-buttons form {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.legendary-icon {
+    font-size: 2em;
+    margin-bottom: 0.5rem;
+}
+
+.empty-inventory {
+    text-align: center;
+}
+
+.empty-inventory img {
+    max-width: 50%;
+    margin: 2rem auto;
+}
+
+nav.main-menu ul li a {
+    color: #fff;
+    font-weight: 700;
+    display: block;
+    padding: 15px;
+}
+
+.product-condition{
+    color: var(--accent);
+}
+    </style>
+</head>
+<body>
+
+<script>
+    // Load audio files
+    const sellAudio = new Audio("/static/css/sounds/sell_coin.mp3");
+    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
+    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
+
+    // Add event listeners to sell forms
+    document.querySelectorAll('.sell-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            sellAudio.play(); // Play the sell sound
+            console.log('')
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
+
+    // Add event listeners to withdraw forms
+    document.querySelectorAll('.withdraw-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            withdrawAudio.play(); // Play the withdraw sound
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
+
+	document.querySelectorAll('.trade-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            tradeAudio.play(); // Play the withdraw sound
+        });
+    });
+
+    // Generic AJAX form submission handler
+    function handleAjaxFormSubmission(form) {
+        const formData = new FormData(form);
+        const actionUrl = form.getAttribute('action');
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('stock-count').textContent = data.number_of_cards;
+            } else {
+                console.error(data.error);
+            }
+        });
+    }
+</script>
+
+{% include 'navtrove.html' %}
+
+  <main class="main-content" style="align-items: center; justify-content: center;">
+
+
+    <div class="container wow fadeIn" style="display: flex; flex-direction: column;">
+        <h2 class="my-5 h2 text-center" style="color: white; margin-bottom: -20%;">Checkout</h2>
+
+            <div class="row">
         <div class="col-md-8 mb-4">
           <div class="card">
               {% if address %}
@@ -76,7 +773,7 @@
         </div>
         <div class="address-section">
             <h3>Ship To:</h3>
-            <div class="address-content">
+            <div class="address-content" style="color: black;">
                 Address - {{address.street_address}}<br>
                 {% if apartment_address %}
                 Apartment - {{address.apartment_address}}<br>
@@ -85,7 +782,7 @@
                 ZIP - {{address.zip}}
             </div>
         </div>
-        <div class="address-section">
+        <div class="address-section" style="color: black;">
             <h3>Bill To:</h3>
             <div class="address-content">
                 Address - {{address.street_address}}<br>
@@ -97,7 +794,7 @@
             </div>
         </div>
         <div class="barcode">
-            <div class="barcode-placeholder">||||| |||| || |||||||</div>
+            <div class="barcode-placeholder" style="color:black;">||||| |||| || |||||||</div>
         </div>
     </div>
               {% else %}
@@ -290,7 +987,7 @@
 
 
     {% if not form.payment_option.is_hidden %}
-    <h3>Payment Options</h3>
+    <h3 style="">Payment Options</h3>
     <div class="d-block my-3">
         {% for value, name in form.fields.payment_option.choices %}
         <div class="custom-control custom-radio">
@@ -352,11 +1049,20 @@
       </div>
 
     </div>
-  </main>
+        </main>
+    </div>
 
-{% endblock content %}
+<footer class="copyright-section">
+    <div class="container">
+        <p>{% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
 
-{% block extra_scripts %}
+        {{BaseCopyrightTextField.copyright}}
+
+            {% endfor %}
+        </p>
+    </div>
+</footer>
+
 <script>
 var hideable_shipping_form = $('.hideable_shipping_form');
 var hideable_billing_form = $('.hideable_billing_form');
@@ -381,6 +1087,18 @@ use_default_billing.addEventListener('change', function() {
 })
 
 </script>
-{% endblock extra_scripts %}
+	<!-- jquery -->
+     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+     <script src="{% static 'css/js/main.js' %}"></script>
+     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+     <script src="{% static 'css/js/waypoints.js' %}"></script>
+	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+     <script src="{% static 'css/js/sticker.js' %}"></script>
 
+</body>
+</html>
 

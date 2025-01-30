@@ -90,6 +90,8 @@ BATTLE_STATUS = (
 TYPE_CHOICES = (('S', 'Singles'), ('BP', 'Booster Pack'),
                 ('BB', 'Booster Box'), ('PP', 'Pokemon Product'), ('O',
                                                                    'Other'))
+CARD_CATEGORIES = (('P', 'Pokemon'), ('M', 'Magic The Gathering'),
+                ('B', 'Bakugo'), ('Y', 'Yu-Gi-Oh!'), ('A', 'Anime'), ('O', 'Other'))
 
 ADDRESS_CHOICES = (
     ('B', 'Billing'),
@@ -750,6 +752,8 @@ class ProfileDetails(models.Model):
     monstrosity = models.ForeignKey(Monstrosity, blank=True, null=True, on_delete=models.CASCADE,
                                     related_name="monster")
     seller = models.BooleanField(default=False, null=True)
+    trader = models.BooleanField(default=False, null=True)
+    partner = models.BooleanField(default=False, null=True)
     membership = models.ForeignKey(Membership, blank=True, null=True, on_delete=models.CASCADE)
     position = models.UUIDField(
         default=uuid.uuid4,
@@ -5795,6 +5799,8 @@ class Item(models.Model):
     discount_price = models.DecimalField(max_digits=16, decimal_places=2, blank=True, null=True)
     discount_currency_price = models.IntegerField(blank=True, null=True)
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
+    card_category = models.CharField(choices=CARD_CATEGORIES, max_length=1, default='P')
+    condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2, blank=True, null=True)
 
     type = models.ForeignKey(ItemFilter, on_delete=models.CASCADE, blank=True, null=True)
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)

@@ -1,0 +1,213 @@
+{% load static %}
+<head>
+    <style>
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 1000;
+}
+
+.sidebar {
+  width: 300px;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.99);
+  overflow-y: auto;
+  transition: transform 0.3s ease-in-out;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  z-index: 1001;
+  background-color: #fff;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0px 10px;
+  border-radius: 5px;
+}
+
+.sidebar-hidden {
+  transform: translateX(-100%);
+}
+
+.main-content {
+  margin-left: 300px;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.main-content-expanded {
+  margin-left: 125px;
+}
+
+.nav-links{
+    margin-left: 5%;
+}
+.nav-links h1::after {
+    margin-left: 5%;
+}
+
+/* Ensure the sidebar is scrollable independently */
+body {
+  overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+
+    </style>
+</head>
+  	<nav class="main-menu" style=" z-index: 100;">
+        <div class="nav-links">
+        <h1><a href="#" class="logo">
+            <span class="logo-icon">🐉</span>
+            PokeTrove
+        </a>
+            </h1>
+							<ul style="display: flex; flex-direction: row; align-items: center;">
+							  {% for column in Header %}
+
+      <li class="current-list-item" style="color: white;">
+          <a href="#{{ column.section }}">{{ column.text }}</a>
+									<ul class="sub-menu">
+										{% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% else %}
+              {% if row.opennew %}
+										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+									</ul>
+        {% endfor %}
+								</li>
+								<li>
+									<div class="header-icons" style="display: flex; flex-direction: right;">
+										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
+											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
+										</a>
+										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
+									</div>
+
+
+
+								</li>
+								<li style="margin-right: -10%;">
+									{% for userprofile in NewsProfiles %}
+									{% if userprofile.newprofile_profile_picture_url %}
+									<a href="{{ userprofile.newprofile_profile_url }}">
+										<img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
+									</a>
+									{% else %}
+									<!-- Placeholder image or default avatar -->
+									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
+									{% endif %}
+									{% endfor %}
+								</li>
+							</ul>
+        </div>
+						</nav>
+
+    <div class="container">
+        <div class="sidebar-container">
+          <button id="sidebarToggle" class="sidebar-toggle"  style="background-color: #0a0a13; color: #bf97ff;
+    border: none; /* Remove default border */
+    box-shadow: inset 0 0 0 1.5px #bf97ff; /* Creates an inward border effect */">☰</button>
+          <aside class="sidebar">
+            <div class="user-profile" style="margin-top: 5px;">
+                <div class="profile-picture">
+                    {% for userprofile in NewsProfiles %}
+
+									{% if userprofile.newprofile_profile_picture_url %}
+									<a href="{{ userprofile.newprofile_profile_url }}">
+										<img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
+									</a>
+									{% else %}
+									<!-- Placeholder image or default avatar -->
+									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
+									{% endif %}
+                </div>
+                <div class="user-info">
+                    <h2 class="username">{{ userprofile.user.username }}</h2>
+                    <div class="user-stats">
+                        <div class="user-stat">
+                            <span class="user-stat-icon">💎</span>
+                            <span id="currency-amount">{{ userprofile.currency_amount }}</span>
+                        </div>
+                        <div class="user-stat">
+                            <span class="user-stat-icon">🏆</span>
+											{{userprofile.level}}
+                        </div>
+									{% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="filters">
+                <h2>Filters</h2>
+                <input type="search" placeholder="Search..." class="search-box">
+
+                <h3 class="collection-title">Sort By</h3>
+                <select class="type-select" style="color: var(--primary)">
+                    <option>Most Recent First</option>
+                    <option>Highest Value First</option>
+                    <option>Lowest Value First</option>
+                    <option>A-Z</option>
+                    <option>Z-A</option>
+                </select>
+
+<div class="view-toggle">
+    <button id="toggleViewBtn" class="toggle-btn">Toggle View</button>
+</div>
+
+
+            </div>
+
+            <div class="collection">
+                <h2 class="collection-title">My Collection</h2>
+                <button class="view-collection">
+                    🐉 View Collection (0)
+                </button>
+            </div>
+        </aside>
+        </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+  const sidebarToggle = document.getElementById("sidebarToggle")
+  const sidebar = document.querySelector(".sidebar")
+  const mainContent = document.querySelector(".main-content")
+
+  sidebarToggle.addEventListener("click", () => {
+    sidebar.classList.toggle("sidebar-hidden")
+    mainContent.classList.toggle("main-content-expanded")
+  })
+})
+
+
+</script>

@@ -48,7 +48,7 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            width: 100%:
+            width: 100%;
             padding: 20px;
 
         }
@@ -250,14 +250,40 @@ border: none;
     position: absolute;
     top: 30vh;
 }
-        .button{
-        padding: 5px;
+        .button {
+            padding: 5px;
         }
 
 
+    .slider {
+        display: flex;
+        gap: 10px; /* Adjust spacing between elements */
+        justify-content: center; /* Centers the grid horizontally */
+        align-items: center; /* Centers the items vertically */
+        width: 100%; /* Full width */
+        max-width: 1200px; /* Adjust for responsiveness */
+        margin: auto; /* Centers the grid */
+        white-space: nowrap; /* Prevent wrapping */
+    }
+
+    .cards {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .lootelement {
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        width: 20em;
+        height: 20em;
+    }
+</style>
 
 
-    </style>
 
 
 </head>
@@ -266,7 +292,7 @@ border: none;
 
 	<!-- header -->
 	<div class="top-header-area" id="sticker" style="background: linear-gradient(rgba(0, 0, 0, 1) 5%, rgba(0,0,0,0));">
-		<div class="container">
+		<div class="container" style="">
 			<div class="row">
 				<div class="col-lg-12 col-sm-12 text-center">
 					<div class="main-menu-wrap">
@@ -580,7 +606,7 @@ document.addEventListener("DOMContentLoaded", function () {
         data-next-5pm="{{ next_5pm.timestamp }}"
         style="margin-top: 5%; margin-left: 25%;"
         disabled>
-   Demo Spin
+   Demo
 </button>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -629,7 +655,7 @@ document.addEventListener("DOMContentLoaded", function () {
         data-slug="{{ game.slug }}"
         data-daily="false"
         style="margin-top: 5%; margin-left: 25%;">
-    Demo Spin
+    Demo 
 </button>
 {% endif %}
 
@@ -846,25 +872,29 @@ $(document).ready(function() {
     </div>
 
   <div class="wrapper">
-        <div class="containerre" style="margin-top: 3%;">
+        <div class="containerre" style="margin-top: 3%; background: radial-gradient(#949494, transparent);">
             <div class="slider" id="slider">
 <!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
             {% for item in choices_with_nonce %}
                 {% with choice=item.choice %}
-                    <div id="{{ choice.choice_text }}" class="cards">
+                    <div id="{{ choice.choice_text }}"  class="cards" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
                         {% with color=game|get_color:choice %}
                             <div class="lootelement"
                                  data-price="{{ choice.value }}"
                                  data-currency-file="{{ item.currency.file_url }}"
                                  data-currency-symbol="{{ item.currency.symbol }}"
-                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-left: 22px;">
-                                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %});
+                                 background-image: url('{{ choice.file.url }}');
+       background-size: contain;
+       background-position: center;
+       background-repeat: no-repeat;
+       width: 10em;
+       height: 10em;">
+
                             </div>
                         {% endwith %}
-                        <h5 style="margin-left: 22px;">{{ choice.value }} 💎</h5>
-                        <p>Noncevalue: {{ item.nonce }}</p>
-                        <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
-                        <p>Random Amount: {{ random_amount }}</p>
+                        <h5 style="">{{ choice.value }} 💎</h5>
+
                     </div>
                 {% endwith %}
             {% endfor %}
@@ -958,10 +988,10 @@ fetch(`/create_outcome/${slug}/`, {
                     <div class="lootelement"
                          data-price="100"
                          data-nonce="${data.nonce}"
-                         style="background: url('${choiceFile}'); padding: 6%; margin-left: 22px;">
+                         style="background: url('${choiceFile}'); padding: 6%; ">
                         <p><img src="${choiceFile}" alt="Generated Card"></p>
                     </div>
-                    <h2 style="margin-left: 22px;">100 💎</h2>
+                    <h2 style="">100 💎</h2>
                     <p>Nonce: ${data.nonce}</p>
                 `;
                 slider.appendChild(newCard);
