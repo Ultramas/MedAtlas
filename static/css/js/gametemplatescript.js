@@ -121,14 +121,16 @@ async function randomizeContents() {
             targetCardElement.setAttribute('data-upper_nonce', attributes.upperNonce);
 
             targetCardElement.innerHTML = `
-                <div class="lge" style="background-color: white;" data-file="${attributes.file}">
-                    <div class="lootelement" style="background-color: ${attributes.color}; padding: 6%; margin-left: 22px; margin-top: 12px;">
-                        ${attributes.file ? `<img src="${attributes.file}" alt="${attributes.text}" width="100" height="100">` : ''}
-                    </div>
+                <div class="lge" style="background: rgba(255, 255, 255, 0.3); margin-right: 20px;" data-file="${attributes.file}">
+                        <div class="lootelement" 
+         data-price="${attributes.value || ''}" 
+         data-currency-file="${attributes.currencyFile || ''}" 
+         data-currency-symbol="${attributes.currencySymbol || ''}" 
+         style="background: url('/static/css/images/${attributes.color}.png'); padding: 6%; margin-left: -8px; padding-right: 45px; width: 115%;">
+        ${attributes.file ? `<p style="text-align: center;"><img src="${attributes.file}" alt="${attributes.text}" width="100" height="100" style="justify-content: center; "><b>${attributes.value} 💎</b></p>` : ''}
+    </div>
                 </div>
-                <h5>${attributes.value} 💎</h5>
-                <p>${attributes.text}</p>
-                <p>Nonce: ${attributes.nonce}</p>
+                <h5></h5>
             `;
 
 

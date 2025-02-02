@@ -1,32 +1,63 @@
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <h2>Create Game</h2>
-    {{ game_form.as_p }}
 
-    <h3>Choices</h3>
-    {{ choice_formset.management_form }}
-    <table>
-        {% for form in choice_formset %}
-        <tr>
-            <td>
-                {{ form.choice_text.label_tag }}
-                {{ form.choice_text }}
-            </td>
-            <td>
-                {{ form.rarity.label_tag }}
-                {{ form.rarity }}
-            </td>
-            <td>
-                {{ form.lower_nonce.label_tag }}
-                {{ form.lower_nonce }}
-            </td>
-            <td>
-                {{ form.upper_nonce.label_tag }}
-                {{ form.upper_nonce }}
-            </td>
-        </tr>
+  <h1>Existing Choices</h1>
+  <ul>
+  </ul>
+
+  <!-- If you still need to display the forms for editing/adding new choices,
+       you can include the formset as well -->
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+    <div>
+    {{ game_form.name.label_tag }} {{ game_form.name }}
+  </div>
+  <div>
+    {{ game_form.cost.label_tag }} {{ game_form.cost }}
+  </div>
+  <div>
+    {{ game_form.discount_cost.label_tag }} {{ game_form.discount_cost }}
+  </div>
+  <div>
+    {{ game_form.type.label_tag }} {{ game_form.type }}
+  </div>
+  <div>
+    {{ game_form.category.label_tag }} {{ game_form.category }}
+  </div>
+  <div>
+    {{ game_form.image.label_tag }} {{ game_form.image }}
+  </div>
+  {{ choice_formset.management_form }}
+  <h1>Select Prizes</h1>
+{{ choice_formset.management_form }}
+<h1>Select Prizes</h1>
+<ul style="display: flex;flex-wrap: wrap;">
+  {% for choice in game_form.choices.field.queryset %}
+    <ul style="display: flex;flex-direction: column;">
+      <label>
+        <input type="checkbox" name="{{ game_form.choices.name }}" value="{{ choice.id }}"
+          {% if choice in game_form.instance.choices.all %}checked{% endif %}>
+        {{ choice.choice_text }}
+      </label><br>
+      <h3>{{ choice.value }} Rubies</h3><br>
+      {% if choice.file %}
+        <img src="{{ choice.file.url }}" style="width: 150px; height: 200px;">
+      {% else %}
+        <span>No file uploaded</span>
+      {% endif %}
+
+      <!-- Include InventoryGameForm fields here -->
+      <div class="inventory-form-fields">
+        {% for field in inventory_game_form %}
+          <div class="form-field">
+            <label>{{ field.label }}</label>
+            {{ field }}
+          </div>
         {% endfor %}
-    </table>
+      </div>
+    </ul>
+  {% endfor %}
+</ul>
 
-    <button type="submit">Save</button>
+
+
+  <button type="submit">Submit</button>
 </form>

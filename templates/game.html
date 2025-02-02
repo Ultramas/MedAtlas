@@ -36,7 +36,7 @@
      <style>
         body{
 
-        background-color: rgba(0, 0, 0, 0.4);
+        background-color: #0a0a13;
         }
         .wrapperlootlist {
             display: flex;
@@ -125,24 +125,25 @@ border: none;
     }
 
     .cards {
-        margin-right: 15px;
-        margin-left: 15px;
+        /*margin-right: 15px;
+        margin-left: 15px;*/
         flex: 1 1 200px;
-        margin: 10px;
+       /*margin: 10px;*/
         box-sizing: border-box;
         display: flex;
         flex-direction: column; /* Align elements vertically */
-        align-items: flex-start; /* Align items to the start */
-        align-items: left;
+    align-items: center; /* Centers horizontally */
+    justify-content: center; /* Centers vertically */
+    text-align: center;
     }
-    .slider img{
+
+    .slider img {
         width: 15vh;
         height: 20vh;
-        margin-top: -2vh;
-        margin-left: -0.5vh;
         border: 2px solid;
-        border-color: transparent; /*to change later*/
+        border-color: transparent; /* To change later */
         border-radius: 7px;
+        object-fit: contain; /* Ensures image fits without cropping */
     }
 
         :root {
@@ -250,40 +251,11 @@ border: none;
     position: absolute;
     top: 30vh;
 }
-        .button {
-            padding: 5px;
+        .button{
+        padding: 5px;
         }
 
-
-    .slider {
-        display: flex;
-        gap: 10px; /* Adjust spacing between elements */
-        justify-content: center; /* Centers the grid horizontally */
-        align-items: center; /* Centers the items vertically */
-        width: 100%; /* Full width */
-        max-width: 1200px; /* Adjust for responsiveness */
-        margin: auto; /* Centers the grid */
-        white-space: nowrap; /* Prevent wrapping */
-    }
-
-    .cards {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-    }
-
-    .lootelement {
-        background-size: contain;
-        background-position: center;
-        background-repeat: no-repeat;
-        width: 20em;
-        height: 20em;
-    }
-</style>
-
-
+    </style>
 
 
 </head>
@@ -291,100 +263,20 @@ border: none;
 
 
 	<!-- header -->
-	<div class="top-header-area" id="sticker" style="background: linear-gradient(rgba(0, 0, 0, 1) 5%, rgba(0,0,0,0));">
-		<div class="container" style="">
-			<div class="row">
-				<div class="col-lg-12 col-sm-12 text-center">
-					<div class="main-menu-wrap">
-						<!-- logo -->
-						<div class="site-logo">
-							<a href="index.html">
-							{% for BackgroundView in Logo %}
-								{% if BackgroundView.page == 'index.html' %}
-								<a class="logo" href="{{BackgroundView.hyperlink}}">
-								  <img class="imageicon" src="{{BackgroundView.logocover.url}}"
-										alt="{{BackgroundView.alternate}}" style="length: {{BackgroundView.length_for_resize}}px; width: {{BackgroundView.width_for_resize}}px;"></a>
-								{% endif %}
-							{% endfor %}
-							</a>
-						</div>
-						<!-- logo -->
 
-						<!-- menu start -->
-						<nav class="main-menu">
-							<ul>
-							  {% for column in Header %}
-
-      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
-									<ul class="sub-menu">
-										{% for row in DropDown %}
-          {% if row.row == column.row %}
-            {% if row.url == 'http://127.0.0.1:8000/profile' %}
-              {% if row.opennew %}
-										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
-              {% else %}
-										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
-              {% endif %}
-            {% else %}
-              {% if row.opennew %}
-										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
-              {% else %}
-										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
-              {% endif %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-									</ul>
-        {% endfor %}
-								</li>
-								<li>
-									<div class="header-icons" style="display: flex; flex-direction: right;">
-										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
-											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
-										</a>
-										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
-									</div>
-
-
-
-								</li>
-<li style="display: flex; align-items: center; margin-right: -10%;">
-									{% for userprofile in Profiles %}
-									{% if userprofile.newprofile_profile_picture_url %}
-									<a href="{{ userprofile.newprofile_profile_url }}">
-										<img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
-									</a>
-									{% else %}
-									<!-- Placeholder image or default avatar -->
-									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
-									{% endif %}
-                                    <div class="currency_level" style="display: column; color: white;">
-                                        {% if userprofile.currency|lower == 'rubies' %}
-									<h3 class="currency_designation" id="currency-amount" style="text-align: center; space-between: 5px; color: white;">{{userprofile.currency_amount}} 💎</h3>
-									{% else %}
-                                        <h3 class="currency_designation" id="currency-amount" style="text-align: center; space-between: 5px; color: white;">{{userprofile.currency_amount}} {{userprofile.currency}}</h3>
-                                    {% endif %}
-                                   <a href='{% url "showcase:mylevel" %}' style="decoration: none; margin-top: -55px;">
-                                       Level: {{ userprofile.level }}
-                                   </a>
-                                    </div>
-                                    {% endfor %}
-								</li>
-
-
-							</ul>
-						</nav>
-						<a class="mobile-show search-bar-icon" href="#"><i class="fas fa-search"></i></a>
-						<div class="mobile-menu"></div>
-						<!-- menu end -->
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
 	<!-- end header -->
 
-<div class="boxes" style="left: 0%; position: absolute; width: 100%; height: 50%; background: url('{{ game.image.url }}'); alt='{{ game.name }}'; background-size: cover; background-repeat: no-repeat ">
+<div class="boxes" style="
+    left: 0%;
+    position: absolute;
+    width: 100%;
+    height: 80%;
+    opacity: 0.20;
+    background: linear-gradient(to bottom, rgba(0,0,255,0) 70%, rgb(10, 10, 19) 100%), url('{{ game.image.url }}');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+" alt="{{ game.name }}">
 </div>
     <div>
 <div class="selections" style="border: 2px solid black; margin-bottom: 120%;">
@@ -655,7 +547,7 @@ document.addEventListener("DOMContentLoaded", function () {
         data-slug="{{ game.slug }}"
         data-daily="false"
         style="margin-top: 5%; margin-left: 25%;">
-    Demo 
+    Demo
 </button>
 {% endif %}
 
@@ -872,29 +764,26 @@ $(document).ready(function() {
     </div>
 
   <div class="wrapper">
-        <div class="containerre" style="margin-top: 3%; background: radial-gradient(#949494, transparent);">
+        <div class="containerre" style="margin-top: 3%;">
             <div class="slider" id="slider">
 <!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
             {% for item in choices_with_nonce %}
                 {% with choice=item.choice %}
-                    <div id="{{ choice.choice_text }}"  class="cards" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div id="{{ choice.choice_text }}" class="cards" style="background: rgba(255, 255, 255, 0.3);">
                         {% with color=game|get_color:choice %}
                             <div class="lootelement"
                                  data-price="{{ choice.value }}"
                                  data-currency-file="{{ item.currency.file_url }}"
                                  data-currency-symbol="{{ item.currency.symbol }}"
-                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %});
-                                 background-image: url('{{ choice.file.url }}');
-       background-size: contain;
-       background-position: center;
-       background-repeat: no-repeat;
-       width: 10em;
-       height: 10em;">
-
+                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-right: 18px;">
+                                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}">
+                                {{ choice.value }} 💎</p>
+                        <h5 style="margin-left: 22px;"></h5>
                             </div>
                         {% endwith %}
-                        <h5 style="">{{ choice.value }} 💎</h5>
-
+                        <!--<p>Noncevalue: {{ item.nonce }}</p>
+                        <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
+                        <p>Random Amount: {{ random_amount }}</p>-->
                     </div>
                 {% endwith %}
             {% endfor %}
@@ -988,10 +877,10 @@ fetch(`/create_outcome/${slug}/`, {
                     <div class="lootelement"
                          data-price="100"
                          data-nonce="${data.nonce}"
-                         style="background: url('${choiceFile}'); padding: 6%; ">
-                        <p><img src="${choiceFile}" alt="Generated Card"></p>
+                         style="background: url('${choiceFile}'); padding: 6%; margin-left: 22px;">
+                       <img src="${choiceFile}" alt="Generated Card">
                     </div>
-                    <h2 style="">100 💎</h2>
+                    <h2 style="margin-left: 22px;">100 💎</h2>
                     <p>Nonce: ${data.nonce}</p>
                 `;
                 slider.appendChild(newCard);

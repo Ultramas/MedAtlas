@@ -2745,6 +2745,7 @@ class Game(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)  # game creator
     cost = models.IntegerField(default=0, blank=True, null=True)
     discount_cost = models.IntegerField(blank=True, null=True)
+    choices = models.ManyToManyField('Choice', blank=True, related_name="gamechoices")
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
     category = models.CharField(max_length=100,
                                 help_text='Category of choice (Pokemon, Yu-Gi-Oh, Bakugo, Magic The Gathering, etc.).')
@@ -3028,7 +3029,14 @@ class Choice(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
-    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='choices', null=True, blank=True)
+    game = models.ForeignKey(
+        Game,
+        on_delete=models.CASCADE,
+        related_name='choice_fk_set',  # Changed from 'choices' to 'choice_fk_set'
+        null=True,
+        blank=True
+    )
+
 
     def save(self, *args, **kwargs):
         if not self.pk:  # Check if this is a new object

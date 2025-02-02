@@ -11746,7 +11746,31 @@ def sell_game_inventory_object(self, request, pk):
 
 
 from .forms import ChoiceFormSet
+def game_create_or_update(request, game_id=None):
+    if game_id:
+        game = get_object_or_404(Game, id=game_id)
+    else:
+        game = None
 
+    if request.method == 'POST':
+        inventory_game_form = InventoryGameForm(request.POST, request.FILES, instance=game)
+        choice_formset = ChoiceFormSet(request.POST, request.FILES, instance=game)
+
+        if inventory_game_form.is_valid() and choice_formset.is_valid():
+            # Save the game first so the inline formset can reference it
+            game_instance = inventory_game_form.save()
+            choice_formset.instance = game_instance
+            choice_formset.save()
+            return redirect('some-success-url')
+    else:
+        inventory_game_form = InventoryGameForm(instance=game)
+        choice_formset = ChoiceFormSet(instance=game)
+
+    context = {
+        'inventory_game_form': inventory_game_form,
+        'choice_formset': choice_formset,
+    }
+    return render(request, 'create_chest.html', context)
 
 class CreateChestView(FormView):
     model = Game
@@ -11755,14 +11779,16 @@ class CreateChestView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        qs = Choice.objects.filter(user__isnull=True)
 
-        # Initialize forms
+        # Add the queryset directly to the context
+        context['choices'] = qs
+
+        # Initialize forms as needed
         context['game_form'] = InventoryGameForm(self.request.POST or None)
-        context['choice_formset'] = ChoiceFormSet(
-            queryset=Choice.objects.filter(user__isnull=True)
-        )
+        context['choice_formset'] = ChoiceFormSet(queryset=qs)
 
-        # Add your additional context (e.g., background images)
+        # Add your additional context as before
         context.update({
             'Background': BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position"),
             'PostBackgroundImage': PostBackgroundImage.objects.all(),
@@ -11774,6 +11800,7 @@ class CreateChestView(FormView):
             'Shuffle': Shuffler.objects.filter(is_active=1).order_by("category"),
         })
 
+        # Handle user profile logic (if needed)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -11784,7 +11811,7 @@ class CreateChestView(FormView):
         else:
             context['NewsProfiles'] = None
 
-        if context['NewsProfiles'] == None:
+        if context['NewsProfiles'] is None:
             # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
@@ -11802,12 +11829,9 @@ class CreateChestView(FormView):
     def post(self, request, *args, **kwargs):
         # Bind forms and formset with POST data
         game_form = InventoryGameForm(request.POST, request.FILES)
-        choice_formset = ChoiceFormSet(request.POST)
-
-        if game_form.is_valid() and choice_formset.is_valid():
-            # Save the Game instance
+        if game_form.is_valid():
             game = game_form.save()
-
+            # Save the Game instance
             # Save Choices and associate them with the Game
             choices = choice_formset.save(commit=False)
             for choice in choices:

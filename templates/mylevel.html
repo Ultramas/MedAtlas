@@ -1,609 +1,925 @@
-{% if signed_in_user %}
-  {% include 'supportroom.html' %}
-{% endif %}
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
-
-  	{% for BackgroundImage in Titles %}
-	{% if BackgroundImage.page == "index.html" or BackgroundImage.page == "base.html" %}
-    <title>{{BackgroundImage.overtitle}}</title>
-  	{% endif %}
-  	{% endfor %}
-
-	<!-- favicon -->
-	<link rel="shortcut icon" type="image/png" href="static/img/favicon.png">
-	<!-- google font -->
-	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeTrove - Withdraws</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
-<script>
-	$(document).ready(function() {
-    $('.popup-youtube').magnificPopup({
-        type: 'iframe',
-        mainClass: 'mfp-fade',
-        removalDelay: 160,
-        preloader: false,
-        fixedContentPos: false
-    });
-});
 
-function toggleChatWidget() {
-    var chatWidget = document.getElementById("chatwidget2");
-    if (chatWidget.style.display === "none") {
-        chatWidget.style.display = "block";
-    } else {
-        chatWidget.style.display = "none";
+    <style>
+    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
+    .copyright-section {
+        background: linear-gradient(
+            to right,
+            rgba(191, 151, 255, 0.1),
+            rgba(255, 255, 255, 0.05),
+            rgba(191, 151, 255, 0.1)
+        );
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        text-align: center;
+        position: relative;
+        z-index: 100;
     }
-}
 
-</script>
-<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-
-<style>
-	html, body{
-	height: 100%;
-	}
-.hero-area {
-    position: relative;
-    overflow: hidden;
-}
-
-.video-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    z-index: 1;
-}
-
-.container {
-    position: relative;
-    z-index: 2;
-}
-
-/* Style the popup button */
-.button {
-  cursor: pointer;
-}
-
-/* Style the popup menu content - hidden by default */
-.popup-menu {
-  display: none;
-  position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  padding: 12px 16px;
-  z-index: 1;
-}
-
-
-.cart-btn{
-  background-image: url("{% static 'css/images/fireimage.png' %}"); /* Default image */
-  image-width: 100px;
-  image-height: 100px;
-  background-size: cover; /* Ensure image covers the button */
-  position: relative; /* Needed for proper stacking */
-}
-
-.cart-btn:hover {
-  background-image: url("{% static 'css/images/invertedfireimage.png' %}"); /* Hover image path */
-  opacity: 1; /* Ensure hover image is fully visible */
-}
-
-
-    .hero-text-tablecell {
+    .copyright-section::before {
+        content: '';
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 1;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
     }
-	#sticker {
-    position: fixed;
+
+    .copyright-section p {
+        color: var(--text);
+        font-family: 'Cinzel', serif;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        margin: 0;
+    }
+            .levels-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .level-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            padding: 1.5rem;
+        }
+
+        .level-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+        .level-card h2 {
+            font-family: 'Cinzel', serif;
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .level-card p {
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .level-card ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .level-card li {
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .level-card-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--accent);
+        }
+
+        .level-card-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .level-card.locked {
+            filter: grayscale(1);
+            opacity: 0.7;
+        }
+
+        .level-card.locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: var(--accent);
+        }
+</style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
+
+        :root {
+            --primary: #bf97ff;
+            --primary-dark: #9a6bff;
+            --background: #0a0a13;
+            --text: #ffffff;
+            --accent: #4db2ea;
+            --accent2: #ffd700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            font-family: 'Cormorant Garamond', serif;
+            background-image:
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+
+        .main-menu {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(
+                to right,
+                rgba(191, 151, 255, 0.1),
+                rgba(255, 255, 255, 0.05),
+                rgba(191, 151, 255, 0.1)
+            );
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            background-color: transparent;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+            position: relative;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 3rem;
+        }
+
+        .nav-links a {
+
+    color: var(--primary);
+            text-decoration: none;
+            position: relative;
+            padding: 0.5rem 0;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            /*font-size: 1rem;*/
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+    .logo-icon h1::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+    }
+        .container {
+            display: flex;
+            gap: 3rem;
+            padding: 3rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+        .user-profile {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-profile::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .profile-picture {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--accent2);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .username {
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
+        }
+
+        .user-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 1rem;
+        }
+
+        .user-stat {
+            background: rgba(191, 151, 255, 0.1);
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid var(--primary);
+        }
+
+        .user-stat-icon {
+            font-size: 1.5rem;
+        }
+
+        .filters {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters h2, .collection-title {
+            color: var(--primary);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .filters h2::after, .collection-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .type-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .view-collection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-collection::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .view-collection:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .view-collection:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .main-content h1 {
+            color: var(--primary);
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+        }
+
+        .main-content h1::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .nav-links h1::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .pokemon-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+        .pokemon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
+            z-index: 1;
+        }
+
+        .pokemon-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pokemon-image::after {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pokemon-info {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .pokemon-name {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+            font-family: 'Cinzel', serif;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .pokemon-type {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .add-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .add-button:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .add-button:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .legendary-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: var(--accent);
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.75rem;
+            border-radius: 50%;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--accent2);
+            font-size: 1.5rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+        }
+
+                .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1100px) {
+            .inventory-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .inventory-item {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .inventory-item:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+
+
+.view-toggle {
+    text-align: right;
+    margin-bottom: 1rem;
+}
+
+.toggle-btn {
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+    border: 2px solid var(--primary);
+    color: var(--text);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
+}
+
+.inventory-grid.compact-view {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.inventory-grid.compact-view .inventory-item {
+    font-size: 0.9em;
+}
+
+.inventory-grid.compact-view .pokemon-image {
+    aspect-ratio: 16/9;
+}
+
+.inventory-grid.compact-view .product-description {
+    display: none;
+}
+
+.inventory-grid.compact-view .action-buttons {
+    flex-direction: column;
+}
+
+.inventory-grid.compact-view .action-buttons form {
     width: 100%;
-    transition: background 1s;
+    margin-bottom: 0.5rem;
 }
 
-	.contented{
-	background: url("{% static 'css/images/blue-message-text-bubble.png' %}");
-	}
-
-	.image-container {
-    position: relative;
-    display: inline-block; /* Ensures the size adjusts to the image */
-    width: 100px;
-    height: 100px;
+.legendary-icon {
+    font-size: 2em;
+    margin-bottom: 0.5rem;
 }
 
-.image-container img {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-.image-container h3 {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white; /* Change to a contrasting color */
-    font-size: 14px; /* Adjust font size as needed */
-    background-color: rgba(0, 0, 0, 0.5); /* Optional: Add a background for better readability */
-    padding: 5px; /* Optional: Add padding */
-    border-radius: 5px; /* Optional: Add rounded corners */
+.empty-inventory {
     text-align: center;
 }
 
-
-    .level-card-wrapper {
-  position: relative;
-  padding: 3px;
-  background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff, #ff0000);
-  background-size: 400% 400%;
-  animation: rgbBorder 15s ease infinite;
-  border-radius: 10px; /* Adjust as needed */
+.empty-inventory img {
+    max-width: 50%;
+    margin: 2rem auto;
 }
 
-.level-card {
-  background: white; /* Or any background color you prefer */
-  border-radius: 7px; /* Slightly smaller than the wrapper */
-  position: relative;
-  z-index: 1;
+nav.main-menu ul li a {
+    color: #fff;
+    font-weight: 700;
+    display: block;
+    padding: 15px;
 }
 
-@keyframes rgbBorder {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+p.blog-meta span {
+    margin-right: 15px;
+    opacity: 0.6;
+    color: rgba(255, 255, 255, 1);
+    font-size: 0.85em;
 }
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-  const cards = document.querySelectorAll('.level-card-wrapper');
-
-  cards.forEach(card => {
-    card.addEventListener('mouseover', function() {
-      this.style.animationDuration = '5s';
-    });
-
-    card.addEventListener('mouseout', function() {
-      this.style.animationDuration = '15s';
-    });
-  });
-});
-</script>
-
-    <script>
-window.onscroll = function() {
-    var sticker = document.getElementById('sticker');
-    if (window.pageYOffset > window.innerHeight / 2) {
-        sticker.style.background = 'rgba(0, 0, 0, 1)';
-        sticker.style.color = 'white';
-        currency_designation.style.color = 'white';
-    } else {
-        sticker.style.background = 'linear-gradient(rgba(0, 0, 0, 1), rgba(0,0,0,0))';
-        sticker.style.color = 'black';
-        currency_designation.style.color = 'black';
-    }
-};
-</script>
+    </style>
 </head>
 <body>
 
-	<!--PreLoader-->
-    <div class="loader">
-        <div class="loader-inner">
-            <div class="circle"></div>
-        </div>
-    </div>
-    <!--PreLoader Ends-->
-
-	<!-- header -->
-	<div class="top-header-area" id="sticker" style="background: linear-gradient(rgba(0, 0, 0, 1) 5%, rgba(0,0,0,0));">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-12 col-sm-12 text-center">
-					<div class="main-menu-wrap">
-						<!-- logo -->
-						<div class="site-logo">
-							<a href="index.html">
-							{% for BackgroundView in Logo %}
-								{% if BackgroundView.page == 'index.html' %}
-								<a class="logo" href="{{BackgroundView.hyperlink}}">
-								  <img class="imageicon" src="{{BackgroundView.logocover.url}}"
-										alt="{{BackgroundView.alternate}}" style="length: {{BackgroundView.length_for_resize}}px; width: {{BackgroundView.width_for_resize}}px;"></a>
-								{% endif %}
-							{% endfor %}
-							</a>
-						</div>
-						<!-- logo -->
-
-						<!-- menu start -->
-						<nav class="main-menu">
-							<ul>
-							  {% for column in Header %}
-
-      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
-									<ul class="sub-menu">
-										{% for row in DropDown %}
-          {% if row.row == column.row %}
-            {% if row.url == 'http://127.0.0.1:8000/profile' %}
-              {% if row.opennew %}
-										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
-              {% else %}
-										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
-              {% endif %}
-            {% else %}
-              {% if row.opennew %}
-										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
-              {% else %}
-										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
-              {% endif %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-									</ul>
-        {% endfor %}
-								</li>
-								<li>
-									<div class="header-icons" style="display: flex; flex-direction: right;">
-										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
-											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
-										</a>
-										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
-									</div>
-
-
-
-								</li>
-								<li style="display: flex; flex-direction: column;">
-								<li style="display: flex; align-items: center; margin-right: -10%;">
-									{% for userprofile in Profiles %}
-									{% if userprofile.newprofile_profile_picture_url %}
-									<a href="{{ userprofile.newprofile_profile_url }}">
-										<img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
-									</a>
-									{% else %}
-									<!-- Placeholder image or default avatar -->
-									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
-									{% endif %}
-									{% if userprofile.currency == Rubies %}
-									<a href="{% url 'showcase:currencymarket' %}" style="display: flex; justify-content: center; align-items: center; margin: auto; text-decoration: none;">
-										<h3 class="currency_designation" style="text-align: center; margin-right: 5px; color: white;">
-											{{userprofile.currency_amount}} {{userprofile.currency}}
-										</h3>
-									</a>
-									{% else %}
-									<a href="{% url 'showcase:currencymarket' %}" style="display: flex; justify-content: center; align-items: center; margin: auto; text-decoration: none;">
-										<h3 class="currency_designation" style="text-align: center; margin-right: 5px; color: white;">
-											{{userprofile.currency_amount}}
-
-										</h3>
-										<img src="static/css/images/ruby.png" style="width: 40px; height: 40px;">
-									</a>
-									{% endif %}
-									<br>
-											{{userprofile.level}}
-										{% endfor %}
-								</li>
-								</li>
-							</ul>
-						</nav>
-						<a class="mobile-show search-bar-icon" href="#"><i class="fas fa-search"></i></a>
-						<div class="mobile-menu"></div>
-						<!-- menu end -->
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end header -->
-
-	<!-- search area -->
-<div class="search-area">
-    <div class="container">
-       <div class="row">
-          <div class="col-lg-12">
-             <span class="close-btn"><img src=""></i></span>
-             <div class="search-bar">
-                <div class="search-bar-tablecell">
-                   <h3>What are you looking for?</h3>
-                   <form action="{% url 'showcase:pagesearch' %}" method="post">
-                       {% csrf_token %}
-                       <input type="text" name="search_query" placeholder="Keywords">
-                       <select name="search_type">
-                           <option value="text">Text</option>
-                           <option value="url">URL</option>
-                       </select>
-                       <button type="submit">Search <i class="fas fa-search"></i></button>
-                   </form>
-                </div>
-             </div>
-          </div>
-       </div>
-    </div>
-</div>
-	<!-- end search area -->
-
-
-
-{% load static %}
-
-{% block head %}
-    <title>{% if Profile %}{{ Profile.user.username }}'s Level{% else %}No Profile Found{% endif %}</title>
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
-    <link rel="icon" type="image/x-icon" href="
-        {% if profile and profile.avatar %}
-            {{ profile.avatar.url }}
-        {% else %}
-            {% for favicon in favicons %}
-                {% if favicon.faviconpage == 'profile.html' %}
-                    {{ favicon.faviconcover.url }}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    ">
-<style>
-
-    body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-}
-
-.sticky-logo {
-    position: sticky;
-    top: 10px;
-    left: -10px;
-    z-index: 100;
-}
-
-.logo img {
-    width: 145px;
-    height: 100px;
-}
-
-.profile-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.level-card {
-    background-color: #f4f4f4;
-    border-radius: 5px;
-    padding: 15px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.level-card h2 {
-    margin-top: 0;
-}
-
-.level-card ul {
-    padding-left: 20px;
-}
-
-@media (max-width: 768px) {
-    .sticky-logo {
-        position: static;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    .profile-container {
-        padding: 10px;
-    }
-}
-
-.level-card {
-    display: flex; /* Enable Flexbox */
-    flex-direction: column; /* Keep column structure for smaller screens */
-    padding: 20px;
-    background-color: #f9f9f9; /* Example background */
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-.level-card-content {
-    display: flex; /* Enable horizontal Flexbox layout */
-    justify-content: space-between; /* Space between content and icon */
-    align-items: center; /* Vertically align content and icon */
-}
-
-.level-card-icon {
-    margin-left: 20px; /* Add some space between content and icon */
-}
-
-.icon-img {
-    width: 100px;
-    height: 100px;
-    object-fit: contain; /* Ensure the icon scales properly */
-}
-
-</style>
-{% endblock %}
-
-    <div class="sticky-logo">
-        {% for logo in logos %}
-            {% if logo.page == "profile.html" %}
-                <a class="logo" href="{{ logo.hyperlink }}">
-                    <img class="imageicon" src="{{ logo.logocover.url }}" alt="{{ logo.alternate }}" width="145" height="100">
-                </a>
-            {% endif %}
-        {% endfor %}
-    </div>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-    <div class="profile-container">
-    {% if Profile %}
-    <h2>Welcome, {{ Profile.user.username }}</h2>
-    <p>My Level: {{ Profile.level }}</p>
-{% else %}
-    <p>No profile found for the current user.</p>
-{% endif %}
-
-                <div id="levels-container">
-                    {% for level_data in levels %}
-
-                    {% if Profile %}
-                    {% if level_data.level.level < Profile.level.level %}
-                    <div class="level-card-wrapper">
-                {% if level_data.background.is_gradient %}
-            <div class="level-card" data-level="{{ level_data.level.level }}" style="{{ level_data.background.style }};">
-
-                {% else %}
-                <div class="level-card" data-level="{{ level.level }}" style="background: linear-gradient(45deg, #FFFFFF, {{ level_data.background }}); border: 3px gold;">
-                {% endif %}
-                   <div class="level-card-content">
-                   <div class="level-card-moment" style="display: flex; flex-direction: column;">
-
-                <h2>Level {{ level_data.level.level }}</h2>
-                <p style=" margin-top: -5px;">Level Name: {{ level_data.level.level_name }}</p>
-                <p style=" margin-top: -5px;">Experience Required: {{ level_data.level.experience }}</p>
-                <p style=" margin-top: -5px;">Games with Daily Mode:</p>
-                <ul style=" margin-top: -5px;margin-left: 10px;">
-                    {% for game in level_data.level.games.all %}
-                        <li style=" margin-top: -5px;">{{ game.name }}</li>
-                    {% endfor %}
-                </ul>
-                   </div>
-
-            {% if level_data.level.icon and level_data.level.icon.url %}
-                <div class="level-card-icon">
-                    <img src="{{ level_data.level.icon.url }}" alt="Image" class="icon-img">
-                </div>
-            {% endif %}
-                   </div>
-                </div>
-
-                {% elif level_data.level.level == Profile.level.level  %}
-
-                    <div class="level-card-wrappert">
-                {% if level_data.background.is_gradient %}
-            <div class="level-card" data-level="{{ level_data.level.level }}" style="{{ level_data.background.style }};">
-
-                {% else %}
-                <div class="level-card" data-level="{{ level.level }}" style="background: linear-gradient(45deg, #FFFFFF, {{ level_data.background }}); border: 3px gold;">
-                {% endif %}
-                   <div class="level-card-content">
-                   <div class="level-card-moment" style="display: flex; flex-direction: column;">
-
-                <h2>Level {{ level_data.level.level }}</h2>
-                <p style=" margin-top: -5px;">Level Name: {{ level_data.level.level_name }}</p>
-                <p style=" margin-top: -5px;">Experience Required: {{ level_data.level.experience }}</p>
-                <p style=" margin-top: -5px;">Games with Daily Mode:</p>
-                <ul style=" margin-top: -5px;margin-left: 10px;">
-                    {% for game in level_data.level.games.all %}
-                        <li style=" margin-top: -5px;">{{ game.name }}</li>
-                    {% endfor %}
-                </ul>
-                   </div>
-
-            {% if level_data.level.icon and level_data.level.icon.url %}
-                <div class="level-card-icon">
-                    <img src="{{ level_data.level.icon.url }}" alt="Image" class="icon-img">
-                </div>
-            {% endif %}
-                   </div>
-                </div>
-                       {% else %}
-
-                                       {% if level_data.background.is_gradient %}
-            <div class="level-card" data-level="{{ level_data.level.level }}" style="{{ level_data.background.style }}">
-
-                {% else %}
-                <div class="level-card" data-level="{{ level.level }}" style="background: linear-gradient(45deg, #FFFFFF, {{ level_data.background }});">
-                {% endif %}
-                   <div class="level-card-content">
-                   <div class="level-card-moment" style="display: flex; flex-direction: column;">
-
-                <h2>Level {{ level_data.level.level }}</h2>
-                <p style=" margin-top: -5px;">Level Name: Locked</p>
-                <p style=" margin-top: -5px;">Experience Required: {{ level_data.level.experience }}</p>
-                <p style=" margin-top: -5px;">Games with Daily Mode:</p>
-                <ul style=" margin-top: -5px;margin-left: 10px;">
-                    {% for game in level_data.level.games.all %}
-                        <li style=" margin-top: -5px;">{{ game.name }}</li>
-                    {% endfor %}
-                </ul>
-                   </div>
-
-            {% if level_data.level.icon and level_data.level.icon.url %}
-                <div class="level-card-icon">
-                    <h3>Icon Locked</h3>
-                </div>
-            {% endif %}
-
-            {% endif %}
-            </div>
-            {% endif %}
-            </div>
-
-{% endfor %}
-
-        </div>
-    </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    const levelsContainer = document.getElementById('levels-container');
-    const levelCards = levelsContainer.querySelectorAll('.level-card');
 
-    // Sort level cards by level number
-    const sortedLevelCards = Array.from(levelCards).sort((a, b) => {
-        const levelA = parseInt(a.dataset.level);
-        const levelB = parseInt(b.dataset.level);
-        return levelA - levelB;
-    });
+</script>
 
-    // Reorder the level cards in the DOM
-    sortedLevelCards.forEach(card => levelsContainer.appendChild(card));
 
-    // Add click event to level cards to toggle additional info
-    levelCards.forEach(card => {
-        card.addEventListener('click', function() {
-            this.classList.toggle('expanded');
+{% include 'navtrove.html' %}
+
+    <main class="main-content">
+        <div class="profile-container">
+            {% if Profile %}
+                <h1>My Level - <span id="stock-count">{{ Profile.level }}</span></h1>
+            {% else %}
+                <p>No profile found for the current user.</p>
+            {% endif %}
+        </div>
+
+        <div class="levels-container">
+            {% for level_data in levels %}
+                <div class="level-card {% if level_data.level.level > Profile.level.level %}locked{% endif %}"
+                     data-level="{{ level_data.level.level }}"
+                     style="{% if level_data.background.is_gradient %}{{ level_data.background.style }}{% else %}background: linear-gradient(45deg, #FFFFFF, {{ level_data.background }});{% endif %}">
+                    <h2>Level {{ level_data.level.level }}</h2>
+                    <p>Level Name: {% if level_data.level.level <= Profile.level.level %}{{ level_data.level.level_name }}{% else %}Locked{% endif %}</p>
+                    <p>Experience Required: {{ level_data.level.experience }}</p>
+                    <p>Games with Daily Mode:</p>
+                    <ul>
+                        {% for game in level_data.level.games.all %}
+                            <li>{{ game.name }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% if level_data.level.icon and level_data.level.icon.url %}
+                        <div class="level-card-icon">
+                            {% if level_data.level.level <= Profile.level.level %}
+                                <img src="{{ level_data.level.icon.url }}" alt="Level Icon">
+                            {% else %}
+                                <img src="{% static 'path/to/locked-icon.png' %}" alt="Locked Icon">
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+<footer class="copyright-section">
+    <div class="container">
+        <p>{% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
+
+        {{BaseCopyrightTextField.copyright}}
+
+            {% endfor %}
+        </p>
+    </div>
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const forms = document.querySelectorAll(".ajax-form");
+
+    forms.forEach(form => {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const url = this.getAttribute("action");
+            const csrfToken = formData.get("csrfmiddlewaretoken");
+
+            fetch(url, {
+                method: "POST",
+				headers: {
+					"X-Requested-With": "XMLHttpRequest",
+					"X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+				},
+
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Update stock count
+                    const stockCountElement = document.querySelector("#stock-count");
+                    if (stockCountElement) {
+                        stockCountElement.textContent = data.stock_count;
+                    }
+
+                    // Update currency amount
+                    const currencyAmountElement = document.querySelector("#currency-amount");
+                    if (currencyAmountElement) {
+                        currencyAmountElement.textContent = data.currency_amount;
+                    }
+
+                    // Example: Remove the item from the UI
+                    this.closest(".inventory-item").remove();
+                } else {
+                    console.error("Action failed.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
         });
     });
 });
 
 
-</script>
-    <script src="{% static 'js/profile.js' %}"></script>
 
-	<!-- end copyright -->
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const withdrawButtons = document.querySelectorAll(".withdraw-button");
+
+    withdrawButtons.forEach((button) => {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            const form = button.closest("form");
+            const formData = new FormData(form);
+            const actionUrl = form.getAttribute("action") || window.location.href;
+
+            console.log("Submitting form to:", actionUrl); // Debug URL
+            console.log("Form Data:", [...formData.entries()]); // Debug form data
+
+            fetch(actionUrl, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP status ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        const inventoryItem = form.closest(".inventory-item");
+                        if (inventoryItem) inventoryItem.remove();
+
+                        const stockCountElement = document.getElementById("stock-count");
+                        if (stockCountElement) {
+                            stockCountElement.textContent = data.stock_count;
+                        }
+                    } else {
+                        console.error("Server error:", data.error);
+                        alert(data.error || "An error occurred.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error);
+                    alert("An unexpected error occurred. Please try again.");
+                });
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    const toggleBtn = document.getElementById("toggleViewBtn");
+    const inventoryGrid = document.getElementById("inventoryGrid");
+
+    toggleBtn.addEventListener("click", function() {
+        inventoryGrid.classList.toggle("compact-view");
+        inventoryGrid.classList.toggle("comfortable-view");
+
+        // Save the current view preference to localStorage
+        const isCompact = inventoryGrid.classList.contains("compact-view");
+        localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
+    });
+
+    // Load the saved view preference on page load
+    const savedViewPreference = localStorage.getItem("inventoryViewPreference");
+    if (savedViewPreference === "compact") {
+        inventoryGrid.classList.remove("comfortable-view");
+        inventoryGrid.classList.add("compact-view");
+    }
+});
+</script>
+	<!-- jquery -->
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
      <script src="{% static 'css/js/main.js' %}"></script>
      <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
@@ -614,15 +930,7 @@ window.onscroll = function() {
      <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
      <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
      <script src="{% static 'css/js/sticker.js' %}"></script>
-<!-- jquery -->
-<!-- bootstrap -->
-<!-- count down -->
-<!-- isotope -->
-<!-- waypoints -->
-<!-- owl carousel -->
-<!-- magnific popup -->
-<!-- mean menu -->
-<!-- sticker js -->
-	<!-- main js -->
+
 </body>
 </html>
+

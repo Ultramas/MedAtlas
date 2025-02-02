@@ -20,7 +20,7 @@ body{
    border-color: #323c52;
    border-radius: 15px;
    width: 120vh; /* or any specific width */
-   height: 45vh;
+   height: 26vh;
    backdrop-filter: blur(20px);
    overflow: hidden;
    margin: 0 auto; /* Centers the container horizontally */
@@ -40,8 +40,6 @@ body{
 .slider img{
     width: 15vh;
     height: 20vh;
-    margin-top: 2vh;
-    margin-left: 3vh;
     border: 2px solid;
     border-color: transparent; /*to change later*/
     border-radius: 7px;
@@ -113,9 +111,9 @@ body{
 
 .start{
     position: absolute;
-    left: 50%;
+    left: 40%;
     transform: translateX(-50%); /* Centers the element horizontally */
-    top: 50vh;
+    top: 55vh;
     height: 10vh;
     width: 23vh;
     background-color: rgba(255, 255, 255, 0.3);

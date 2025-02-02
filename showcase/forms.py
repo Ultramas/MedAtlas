@@ -350,29 +350,50 @@ class PlayerInventoryGameForm(forms.ModelForm):
 # used when the user wants to use cards owned by PokeTrove; user gets commission
 
 class InventoryGameForm(forms.ModelForm):
+    choices = forms.ModelMultipleChoiceField(
+        queryset=Choice.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
     class Meta:
         model = Game
         fields = [
             'name', 'cost', 'discount_cost', 'type', 'category', 'image', 'power_meter',
-            'player_made', 'player_inventory', 'daily', 'unlocking_level', 'cooldown',
-            'locked'
+            'player_made', 'player_inventory',
         ]
+
+from django.db.models import Q
 
 
 class ChoiceForm(forms.ModelForm):
+    # If you want to display a select box for an existing choice, use ModelChoiceField
+    # rather than ModelMultipleChoiceField:
+    choice_text = forms.ModelChoiceField(
+        queryset=Choice.objects.filter(
+            Q(user__isnull=True) | Q(user__username__iexact='poketrove')
+        ),
+        label="Choice Text",
+        widget=forms.Select
+    )
+    lower_nonce = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={'placeholder': 'Lower nonce'})
+    )
+    upper_nonce = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={'placeholder': 'Upper nonce'})
+    )
+
     class Meta:
         model = Choice
-        fields = ['choice_text', 'rarity', 'lower_nonce', 'upper_nonce']  # Include 'choice_text'
+        fields = ['choice_text', 'rarity', 'lower_nonce', 'upper_nonce']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Apply filtering logic to the queryset of the ChoiceForm
-        self.fields['choice_text'].queryset = Choice.objects.filter(
-            user__isnull=True
-        ) | Choice.objects.filter(
-            user__username__iexact='poketrove'
-        )
+ChoiceFormSet = inlineformset_factory(
+    Game, Choice, form=ChoiceForm,
+    extra=1,  # Allows adding new choices
+    can_delete=True  # Allows removing choices
+)
 
 
 ChoiceFormSet = modelformset_factory(

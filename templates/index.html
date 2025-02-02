@@ -153,6 +153,62 @@ function toggleChatWidget() {
     text-align: center;
 }
 
+
+
+        .hero-section {
+            background-image: url('https://via.placeholder.com/1920x1080');
+            background-size: cover;
+            background-position: center;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--foreground);
+            position: relative;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-subtitle {
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+
+        .cta-button {
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: var(--background);
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: var(--accent);
+        }
 </style>
 
 <script>
