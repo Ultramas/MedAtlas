@@ -5862,10 +5862,15 @@ class Item(models.Model):
             first_currency = Currency.objects.first()
             if first_currency:
                 self.currency = first_currency
+
+        # Ensure that slug is set
         if not self.slug:
-            slug = slugify(self.title)
+            self.slug = slugify(self.title)
+            print('selugified')  # This should now appear in the console if the condition is met
+
         if not self.price and not self.discount_price:
             self.is_currency_based = True
+
         super().save(*args, **kwargs)
 
     def get_profile_url(self):

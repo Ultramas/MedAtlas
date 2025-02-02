@@ -765,7 +765,8 @@ nav.main-menu ul li a {
             letter-spacing: 2px;
         }
     </style>
-                          <form method="POST" class="card-body"  action="{% url 'showcase:checkout' %}">
+             <form id="checkout-form" method="POST" class="card-body" action="{% url 'showcase:payment' payment_option='card' %}">
+
               {% csrf_token %}
           <div class="shipping-label">
         <div class="label-header">
@@ -798,7 +799,7 @@ nav.main-menu ul li a {
         </div>
     </div>
               {% else %}
-            <form method="POST" class="card-body"  action="{% url 'showcase:checkout' %}">
+            <form method="POST" class="card-body"  action="{% url 'showcase:payment' payment_option='card' %}">
               {% csrf_token %}
               {{ form.non_field_errors }}
 
@@ -989,12 +990,12 @@ nav.main-menu ul li a {
     {% if not form.payment_option.is_hidden %}
     <h3 style="">Payment Options</h3>
     <div class="d-block my-3">
-        {% for value, name in form.fields.payment_option.choices %}
-        <div class="custom-control custom-radio">
-            <input id="{{ name }}" name="payment_option" value="{{ value }}" type="radio" class="custom-control-input" required>
-            <label class="custom-control-label" for="{{ name }}">{{ name }}</label>
-        </div>
-        {% endfor %}
+    {% for value, name in form.fields.payment_option.choices %}
+      <div class="custom-control custom-radio">
+        <input id="{{ name }}" name="payment_option" value="{{ value }}" type="radio" class="custom-control-input" required>
+        <label class="custom-control-label" for="{{ name }}">{{ name }}</label>
+      </div>
+    {% endfor %}
     </div>
     {% endif %}
 
@@ -1003,36 +1004,31 @@ nav.main-menu ul li a {
     <button type="submit" class="btn btn-primary btn-lg btn-block" >Continue To Payment</button>
 
   <script>
-      document.getElementById('checkout-form').onsubmit = function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkoutForm = document.getElementById('checkout-form');
+    if (checkoutForm) {
+      checkoutForm.onsubmit = function(event) {
         const selectedOption = document.querySelector('input[name="payment_option"]:checked');
         if (selectedOption) {
-            const paymentOption = selectedOption.value;
-            // Set the action based on selected payment option
-            if (paymentOption === 'stripe') {
-                this.action = "{% url 'showcase:payment' payment_option='stripe' %}";
-            } else if (paymentOption === 'paypal') {
-                this.action = "{% url 'showcase:payment' payment_option='paypal' %}";
-            } else if (paymentOption === 'card') {
-                this.action = "{% url 'showcase:payment' payment_option='card' %}";
-            }
-        }
-    };
-
-    function submitPaymentForm() {
-      const selectedOption = document.querySelector('input[name="payment_option"]:checked');
-      if (selectedOption) {
-        const paymentOption = selectedOption.value;
-        const form = document.getElementById('payment-form');
-        if (form) {
-          form.action = `/payment/${paymentOption}/`;
-          form.submit();
+          const paymentOption = selectedOption.value;
+          // Set the action based on selected payment option
+          if (paymentOption === 'stripe') {
+            this.action = "{% url 'showcase:payment' payment_option='stripe' %}";
+          } else if (paymentOption === 'paypal') {
+            this.action = "{% url 'showcase:payment' payment_option='paypal' %}";
+          } else if (paymentOption === 'card') {
+            this.action = "{% url 'showcase:payment' payment_option='card' %}";
+          }
         } else {
-          console.error('Form with id "payment-form" not found.');
+          // Optionally prevent submission if no option is selected
+          event.preventDefault();
+          alert('Please select a payment option.');
         }
-      } else {
-        alert('Please select a payment option.');
-      }
+      };
+    } else {
+      console.error('Checkout form not found.');
     }
+  });
   </script>
               <!--<button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>-->
 
