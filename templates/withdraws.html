@@ -668,7 +668,7 @@ p.blog-meta span {
   <main class="main-content">
             <h1>Completed Withdraws - (<span id="stock-count">{{ CompletedWithdraws|length }}</span>)</h1>
 
-            <section id="inventoryGrid" class="inventory-grid comfortable-view">
+            <section id="inventoryGrid" class="inventory-grid comfortable-view" style="display: flex;">
 
         {% for newprofile in CompletedWithdraws %}
                     <div class="inventory-item">
@@ -703,7 +703,7 @@ p.blog-meta span {
 									<!-- Placeholder image or default avatar -->
 									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
 									{% endif %}
-									<h5 style="margin-left: 15px; color: var(--primary);">{{ newprofile.name }}</h5>
+									<h5 style="margin-left: 15px; color: var(--primary);">{{ user.username }}</h5>
 								</span>
 						</ul>
 
@@ -728,7 +728,7 @@ p.blog-meta span {
 						<a href="{% url 'showcase:withdraw_detail' newprofile.slag %}">
                         <div class="legendary-icon">🐉</div>
                         <div class="pokemon-image">
-                            <img src="{{ newprofile.cards.first.image.url }}" alt="{{gamehub.choice_text}} Image"> {{user.username}}
+                            <img src="{{ newprofile.cards.first.image.url }}" alt="{{gamehub.choice_text}} Image">
                         </div>
                         <div class="pokemon-info">
 							<h3 class="pokemon-name"><a href="{% url 'showcase:withdraw_detail' newprofile.slag %}">{{newprofile.title}}</a></h3>
@@ -756,26 +756,33 @@ p.blog-meta span {
 									<!-- Placeholder image or default avatar -->
 									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
 									{% endif %}
-									<h5 style="margin-left: 15px; color: var(--primary);">{{ newprofile.name }}</h5>
+									<h5 style="margin-left: 15px; color: var(--primary);">{{ user.username }}</h5>
 								</span>
 						</ul>
- <div class="row">
-                        {% for card in newprofile.cards.all %}
-                            <div class="col-md-4">
-                                <div class="card-item">
-                                    <div class="card-image"
-                                         style="background: url({{ card.image.url }}); background-size: cover; height: 200px; ">
-                                    </div>
-                                    <div class="card-info" style="color: white;">
-                                        <p><strong>Address:</strong> {{ user.username }}</p>
-                                        <p><strong>Category:</strong> {{ card.get_category_display }}</p>
-                                        <p><strong>Condition:</strong> {{ card.condition }}</p>
-                                        <p><strong>Name:</strong> {{ card.choice_text }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
+                     <div class="row" style="margin: -4px;">  <!-- Negative margin to compensate -->
+    {% for card in newprofile.cards.all %}
+        <div class="col-md-4 p-1">  <!-- Add padding instead of direct margin -->
+            <div class="card-item" style="
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                padding: 8px;
+                height: 100%;
+            ">
+                <div class="card-image"
+                     style="background: url({{ card.image.url }});
+                            background-size: cover;
+                            height: 200px;">
+                </div>
+                <div class="card-info" style="color: white;">
+                    <p><strong>Address:</strong> {{ user.username }}</p>
+                    <p><strong>Category:</strong> {{ card.get_category_display }}</p>
+                    <p><strong>Condition:</strong> {{ card.condition }}</p>
+                    <p><strong>Name:</strong> {{ card.choice_text }}</p>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
                         </div>
 						</a>
                     </div>

@@ -14,7 +14,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
     TopHits, Address
 from .models import Idea
-from .models import Vote
+from .models import VoteQuery
 from .models import Product
 from .models import City
 from .models import StaffApplication
@@ -258,22 +258,29 @@ class LotteryAdmin(admin.ModelAdmin):
 admin.site.register(Lottery, LotteryAdmin)
 
 
+from django.contrib import admin
+from .models import VoteQuery, VoteOption, Ballot
+
+# Create an inline admin for VoteOption
+class VoteOptionInline(admin.TabularInline):  # You can also use StackedInline if you prefer a different layout.
+    model = VoteOption
+    extra = 2  # Number of extra empty vote option forms to display
+
 
 class authorAdmin(admin.ModelAdmin):
+    list_display = ('user', 'category', 'is_active', 'mfg_date')
+    inlines = [VoteOptionInline]
+
+    # Optionally, you can define fieldsets to organize your fields.
     fieldsets = (
-        ('Vote Information - Categorial Descriptions', {
-            'fields': ('user', 'name', 'category', 'is_active')
+        ('Vote Information', {
+            'fields': ('user', 'description', 'category', 'is_active')
         }),
     )
-    readonly_fields = ('mfg_date',)
-    pass
 
 
-# Register your models here.
-admin.site.register(UpdateProfile, categoryAdmin)
-admin.site.register(Idea, categoryAdmin)
 
-admin.site.register(Vote, authorAdmin)
+admin.site.register(VoteQuery, authorAdmin)
 
 
 class StaffApplicationAdmin(admin.ModelAdmin):

@@ -26,7 +26,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
     UserNotification, TopHits
 from .models import Idea
-from .models import Vote
+from .models import VoteQuery
 from .models import StaffApplication
 from .models import Contact
 from .models import BusinessMailingContact
@@ -37,7 +37,7 @@ from .models import ReportIssue
 from .models import NewsFeed
 from .models import StaffProfile
 from .models import Event
-from .models import City, Vote, UpdateProfile, Idea, PartnerApplication
+from .models import City, VoteQuery, UpdateProfile, Idea, PartnerApplication
 from .models import ItemFilter
 from .models import Support
 from .models import CheckoutAddress
@@ -112,7 +112,7 @@ from .models import Ascension
 from .models import (Item, OrderItem, Order, Address, Payment, Coupon, Refund,
                      UserProfile)
 # from .models import Background2aImage
-from .forms import PosteForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, SellerApplicationForm, \
+from .forms import VoteQueryForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, SellerApplicationForm, \
     MemeForm, CurrencyCheckoutForm, CurrencyPaymentForm, CurrencyPaypalPaymentForm, HitStandForm, WagerForm, \
     DirectedTradeOfferForm, FriendRequestForm, RespondingTradeOfferForm, ShippingForm, EndowmentForm, UploadCardsForm, \
     RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, InventoryGameForm, PlayerInventoryGameForm, \
@@ -1005,9 +1005,9 @@ class votingview(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Vote'] = Vote.objects.all()
+        context['VoteQuery'] = VoteQuery.objects.all()
 
-        newprofile = Vote.objects.filter(is_active=1)
+        newprofile = VoteQuery.objects.filter(is_active=1)
         # Retrieve the author's profile avatar
 
         context['Profiles'] = newprofile
@@ -1045,7 +1045,7 @@ class votingview(ListView):
         return context
 
     def get_queryset(self):
-        return Vote.objects.all()
+        return VoteQuery.objects.all()
 """
 
 
@@ -6317,7 +6317,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import ListView
 from .models import UpdateProfile, EmailField
 from .models import Idea
-from .models import Vote
+from .models import VoteQuery
 from .models import Choice
 from .models import StaffApplication
 from .models import Contact
@@ -6329,7 +6329,7 @@ from .models import ReportIssue
 from .models import NewsFeed
 from .models import StaffProfile
 from .models import Event
-from .models import City, Vote, UpdateProfile, Idea, PartnerApplication
+from .models import City, VoteQuery, UpdateProfile, Idea, PartnerApplication
 from .models import Support
 from .models import FaviconBase
 from .models import BackgroundImage
@@ -6396,7 +6396,7 @@ from .models import AdminRoles
 from .models import AdminTasks
 from .models import AdminPages
 # from .models import Background2aImage
-from .forms import PosteForm, EmailForm
+from .forms import VoteQueryForm, EmailForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -7446,6 +7446,36 @@ class PostList(BaseView):
         return Blog.objects.filter(status=1).order_by('-created_on')
 
 
+# views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import VoteQuery, VoteOption, Ballot
+from .forms import VoteQueryForm, VoteOptionFormSet
+
+
+def vote(request, poll_id):
+    poll = get_object_or_404(VoteQuery, pk=poll_id, is_active=True)
+
+    if request.method == 'POST':
+        option_id = request.POST.get('option')
+        selected_option = get_object_or_404(VoteOption, pk=option_id)
+
+        # Check if user already voted
+        if not Ballot.objects.filter(user=request.user, vote_query=poll).exists():
+            Ballot.objects.create(
+                user=request.user,
+                vote_query=poll,
+                selected_option=selected_option
+            )
+            return redirect('showcase:poll_results', poll_id=poll.id)
+
+    return render(request, 'ballot.html', {'poll': poll})
+
+
+def poll_results(request, poll_id):
+    poll = get_object_or_404(VoteQuery, pk=poll_id)
+    return render(request, 'results.html', {'poll': poll})
+
+
 class votingview(ListView):
     model = VoteBackgroundImage
     paginate_by = 10
@@ -7458,21 +7488,17 @@ class votingview(ListView):
             form.instance.user = request.user
             post.save()
             messages.success(request, 'Form submitted successfully.')
-
             return render(request, "emaildone.html", {'form': form})
-            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
         else:
             messages.error(request, "Form submission invalid")
-            print(form.errors)
-            print(form.non_field_errors())
-            print(form.cleaned_data)
             return render(request, "voting.html", {'form': form})
-            return redirect('showcase:voting')
 
     def get(self, request, *args, **kwargs):
         form = EmailForm()
-        self.object_list = self.get_queryset()  # Add this line
-        context = self.get_context_data(**kwargs)  # Call get_context_data here
+        self.object_list = self.get_queryset()
+        context = self.get_context_data(**kwargs)
+        # Integrate active polls (formerly in def active_polls)
+        context['polls'] = VoteQuery.objects.filter(is_active=True)
         return render(request, "voting.html", {'form': form, **context})
 
     def get_queryset(self):
@@ -7487,35 +7513,31 @@ class votingview(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Vote'] = Vote.objects.all()
+        context['VoteQuery'] = VoteQuery.objects.all()
 
-        newprofile = Vote.objects.filter(is_active=1)
-        # Retrieve the author's profile avatar
+        profiles = VoteQuery.objects.filter(is_active=1)
+        context['Profiles'] = profiles
 
-        context['Profiles'] = newprofile
-
-        for newprofile in context['Profiles']:
-            user = newprofile.user
+        for poll in context['Profiles']:
+            user = poll.user
             profile = ProfileDetails.objects.filter(user=user).first()
             if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+                poll.newprofile_profile_picture_url = profile.avatar.url
+                poll.newprofile_profile_url = poll.get_profile_url()
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
             userprofile = None
 
-        if userprofile:
-            context['NewsProfiles'] = userprofile
-        else:
-            context['NewsProfiles'] = None
+        context['NewsProfiles'] = userprofile if userprofile else None
 
-        if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
+        if context['NewsProfiles'] is None:
+            # Create a dummy profile with default attributes
+            dummy_profile = type('DummyProfile', (), {})()
+            dummy_profile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            dummy_profile.newprofile_profile_url = None
+            context['NewsProfiles'] = dummy_profile
         else:
             for userprofile in context['NewsProfiles']:
                 user = userprofile.user
@@ -7526,8 +7548,6 @@ class votingview(ListView):
 
         return context
 
-    def get_queryset(self):
-        return Vote.objects.all()
 
 
 class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
@@ -11341,7 +11361,7 @@ class PollResultsView(View):
         return context
 
 
-# Vote for a question choice
+# VoteQuery for a question choice
 
 class PollingView(View):
     model = Choice
@@ -11376,7 +11396,7 @@ class PollingView(View):
 class InventoryView(FormMixin, ListView):
     model = PrizePool
     template_name = "pokespinner.html"
-    form_class = PosteForm
+    form_class = VoteQueryForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -11745,51 +11765,68 @@ def sell_game_inventory_object(self, request, pk):
     return redirect('showcase:inventory')
 
 
-from .forms import ChoiceFormSet
-def game_create_or_update(request, game_id=None):
-    if game_id:
-        game = get_object_or_404(Game, id=game_id)
-    else:
-        game = None
-
-    if request.method == 'POST':
-        inventory_game_form = InventoryGameForm(request.POST, request.FILES, instance=game)
-        choice_formset = ChoiceFormSet(request.POST, request.FILES, instance=game)
-
-        if inventory_game_form.is_valid() and choice_formset.is_valid():
-            # Save the game first so the inline formset can reference it
-            game_instance = inventory_game_form.save()
-            choice_formset.instance = game_instance
-            choice_formset.save()
-            return redirect('some-success-url')
-    else:
-        inventory_game_form = InventoryGameForm(instance=game)
-        choice_formset = ChoiceFormSet(instance=game)
-
-    context = {
-        'inventory_game_form': inventory_game_form,
-        'choice_formset': choice_formset,
-    }
-    return render(request, 'create_chest.html', context)
-
 class CreateChestView(FormView):
-    model = Game
     template_name = "create_chest.html"
-    form_class = InventoryGameForm
+    form_class = InventoryGameForm  # Now without the M2M field
+
+    def get_game_instance(self):
+        """
+        Returns a Game instance. If a game_id is provided in the URL kwargs,
+        return the corresponding Game, otherwise return a new instance.
+        """
+        game_id = self.kwargs.get('game_id')
+        if game_id:
+            return get_object_or_404(Game, id=game_id)
+        return Game()
+
+    def form_valid(self, form):
+        game_form = InventoryGameForm(self.request.POST, self.request.FILES, instance=self.get_game_instance())
+        choice_formset = ChoiceFormSet(self.request.POST, self.request.FILES)
+
+        if game_form.is_valid() and choice_formset.is_valid():
+            game = game_form.save()  # Save the game instance
+            print('saved game instance here')
+            # Save the formset choices and associate them with the game
+            choices = choice_formset.save(commit=False)
+            for choice in choices:
+                choice.save()
+            game.choices.set(choices)
+
+            return redirect('showcase:game', pk=game.pk)
+        return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        qs = Choice.objects.filter(user__isnull=True)
+        game = self.get_game_instance()
 
-        # Add the queryset directly to the context
-        context['choices'] = qs
+        # Initialize formsets and forms
+        if self.request.method == 'POST':
+            game_form = InventoryGameForm(self.request.POST, self.request.FILES, instance=game)
+            choice_formset = ChoiceFormSet(self.request.POST, self.request.FILES)
+        else:
+            game_form = InventoryGameForm(instance=game)
+            # Prepopulate with all Choices, marking selected ones
+            choices_queryset = Choice.objects.all()
 
-        # Initialize forms as needed
-        context['game_form'] = InventoryGameForm(self.request.POST or None)
-        context['choice_formset'] = ChoiceFormSet(queryset=qs)
+            # Check if the game exists in DB before querying M2M
+            if game.pk:  # Game has been saved
+                selected_choices = game.choices.all()
+            else:  # New unsaved game
+                selected_choices = []
 
-        # Add your additional context as before
+            initial_data = [
+                {'selected': choice in selected_choices}  # Use the precomputed list
+                for choice in choices_queryset
+            ]
+
+            choice_formset = ChoiceFormSet(
+                queryset=choices_queryset,
+                initial=initial_data
+            )
+
         context.update({
+            'game_form': game_form,
+            'choice_formset': choice_formset,
             'Background': BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position"),
             'PostBackgroundImage': PostBackgroundImage.objects.all(),
             'BaseCopyrightTextFielded': BaseCopyrightTextField.objects.filter(is_active=1),
@@ -11800,7 +11837,7 @@ class CreateChestView(FormView):
             'Shuffle': Shuffler.objects.filter(is_active=1).order_by("category"),
         })
 
-        # Handle user profile logic (if needed)
+        # Example user profile handling (customize as needed)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -11811,51 +11848,43 @@ class CreateChestView(FormView):
         else:
             context['NewsProfiles'] = None
 
+        # Optionally add a default profile if none exists
         if context['NewsProfiles'] is None:
-            # Create a new object with the necessary attributes
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
+            dummy_profile = type('Dummy', (), {})()
+            dummy_profile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            dummy_profile.newprofile_profile_url = None
+            context['NewsProfiles'] = dummy_profile
         else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+            for profile in context['NewsProfiles']:
+                user = profile.user
+                prof = ProfileDetails.objects.filter(user=user).first()
+                if prof:
+                    profile.newprofile_profile_picture_url = prof.avatar.url
+                    profile.newprofile_profile_url = profile.get_profile_url()
 
         return context
 
     def post(self, request, *args, **kwargs):
-        # Bind forms and formset with POST data
-        game_form = InventoryGameForm(request.POST, request.FILES)
-        if game_form.is_valid():
-            game = game_form.save()
-            # Save the Game instance
-            # Save Choices and associate them with the Game
+        game = self.get_game_instance()
+        game_form = InventoryGameForm(request.POST, request.FILES, instance=game)
+        choice_formset = ChoiceFormSet(request.POST, request.FILES)
+
+        if game_form.is_valid() and choice_formset.is_valid():
+            saved_game = game_form.save()
+            print('saved the game here')
             choices = choice_formset.save(commit=False)
+            print('the choices are' + str(choices))
             for choice in choices:
                 choice.game = game
-
-                # Default values for fields if null
-                if not choice.color:
-                    choice.color = 'DefaultColor'  # Replace with your logic
-                if not choice.value:
-                    choice.value = 10  # Replace with your logic
                 choice.save()
-
-            # Handle deleted choices
-            for choice in choice_formset.deleted_objects:
-                choice.delete()
-
-            # Redirect to the game detail page
-            return redirect('game_detail', pk=game.pk)
+                print(choice) #saves choice one time, not displayed choice instance form properly
+            saved_game.choices.set(choices)
+            return redirect('showcase:game', slug=saved_game.slug)
         else:
-            # Re-render the form with validation errors
-            return self.render_to_response(self.get_context_data(
-                game_form=game_form,
-                choice_formset=choice_formset,
-            ))
+            print("game_form errors:", game_form.errors)
+            print("choice_formset errors:", choice_formset.errors)
+            return self.render_to_response(self.get_context_data(game_form=game_form,
+                                                                 choice_formset=choice_formset))
 
 
 class CreateInventoryChestView(FormView):
@@ -11949,7 +11978,7 @@ from .forms import ChoiceFormSet
 class SecretRoomView(LoginRequiredMixin, FormMixin, ListView):
     model = SecretRoom
     template_name = "secretrooms.html"
-    form_class = PosteForm
+    form_class = VoteQueryForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -12262,7 +12291,7 @@ class Lottereal(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Vote'] = Vote.objects.all()
+        context['VoteQuery'] = VoteQuery.objects.all()
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -12292,10 +12321,16 @@ class Lottereal(BaseView):
 class PosteView(FormMixin, ListView):
     model = VoteBackgroundImage
     template_name = "vote.html"
-    form_class = PosteForm
+    form_class = VoteQueryForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # Ensure the form and formset are in the context for GET requests
+        if 'form' not in context:
+            context['form'] = self.get_form(self.get_form_class())
+        if 'formset' not in context:
+            context['formset'] = VoteOptionFormSet()
+
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
@@ -12303,54 +12338,45 @@ class PosteView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Vote'] = Vote.objects.all()
+        context['VoteQuery'] = VoteQuery.objects.all()
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
             userprofile = None
 
-        if userprofile:
-            context['NewsProfiles'] = userprofile
-        else:
-            context['NewsProfiles'] = None
+        context['NewsProfiles'] = userprofile if userprofile else None
 
-        if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
+        if context['NewsProfiles'] is None:
+            dummy_profile = type('DummyProfile', (), {})()
+            dummy_profile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            dummy_profile.newprofile_profile_url = None
+            context['NewsProfiles'] = dummy_profile
         else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+            for profile in context['NewsProfiles']:
+                user = profile.user
+                user_profile = ProfileDetails.objects.filter(user=user).first()
+                if user_profile:
+                    profile.newprofile_profile_picture_url = user_profile.avatar.url
+                    profile.newprofile_profile_url = profile.get_profile_url()
 
         return context
 
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
-        if request.method == "POST":
-            form = PosteForm(request.POST, request.FILES)
-            if form.is_valid():
-                post = form.save(commit=False)
-                form.instance.user = request.user
-                post.save()
-                messages.success(request, 'Form submitted successfully.')
-                return redirect('showcase:voting')
-            else:
-                print(form.errors)
-                print(form.non_field_errors())
-                print(form.cleaned_data)
-                messages.error(request, "Form submission invalid")
-                return render(request, "vote.html", {'form': form})
+        form = VoteQueryForm(request.POST)
+        formset = VoteOptionFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            poll = form.save(commit=False)
+            poll.user = request.user
+            poll.save()
+            # Attach the poll to the formset and save the vote options
+            formset.instance = poll
+            formset.save()
+            return redirect('showcase:voting')
         else:
-            form = PostForm()
-            messages.error(request, 'Form submission failed to register, please try again.')
-            messages.error(request, form.errors)
-            return render(request, "vote.html", {'form': form})
-
+            # Re-render the page with validation errors for both form and formset
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 def is_ajax(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
@@ -12970,7 +12996,7 @@ class GameSearchResultsView(ListView):
 
 from django.views.generic import ListView
 from django.db.models import Q
-from showcase.models import City, Vote, UpdateProfile, Idea, PartnerApplication, SearchResult
+from showcase.models import City, VoteQuery, UpdateProfile, Idea, PartnerApplication, SearchResult
 
 
 class SearchResultsView(ListView):
@@ -12987,8 +13013,8 @@ class SearchResultsView(ListView):
 
         if filter_by == 'city':
             search_lists.append(City.objects.filter(Q(name__icontains=query) | Q(state__icontains=query)))
-        elif filter_by == 'vote':
-            search_lists.append(Vote.objects.filter(
+        elif filter_by == 'VoteQuery':
+            search_lists.append(VoteQuery.objects.filter(
                 Q(name__icontains=query) | Q(category__icontains=query) | Q(description__icontains=query)))
         elif filter_by == 'profile':
             search_lists.append(UpdateProfile.objects.filter(
@@ -13006,7 +13032,7 @@ class SearchResultsView(ListView):
         else:
             # If no filter is specified, search all lists
             search_lists = [City.objects.filter(Q(name__icontains=query) | Q(state__icontains=query)),
-                            Vote.objects.filter(Q(name__icontains=query) | Q(category__icontains=query) | Q(
+                            VoteQuery.objects.filter(Q(name__icontains=query) | Q(category__icontains=query) | Q(
                                 description__icontains=query)),
                             UpdateProfile.objects.filter(
                                 Q(name__icontains=query) | Q(description__icontains=query) | Q(image__icontains=query)),
@@ -13043,8 +13069,8 @@ class SearchResultsView(ListView):
             if isinstance(result.content_object, City):
                 result.type = 'City'
                 result.url = ''
-            elif isinstance(result.content_object, Vote):
-                result.type = 'Vote'
+            elif isinstance(result.content_object, VoteQuery):
+                result.type = 'VoteQuery'
                 result.url = reverse_lazy('showcase:voting')
             elif isinstance(result.content_object, UpdateProfile):
                 result.type = 'Profile'
@@ -16359,58 +16385,33 @@ class DonateView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['Change'] = ChangePasswordBackgroundImage.objects.all()
+
+        # Add all context variables first
         context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1).order_by("section")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
-        context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['donation'] = Donate.objects.filter(is_active=1)
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1)
-        if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-        else:
-            userprofile = None
+        context['stripe_public_key'] = settings.STRIPE_PUBLIC_KEY  # Add Stripe key here
 
-        if userprofile:
-            context['NewsProfiles'] = userprofile
-        else:
-            context['NewsProfiles'] = None
+        # TextBase grouped by section
+        texts = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
+        context['TextBySection'] = {text.section: text for text in texts}
 
-        if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
-        else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-        return context
-
-    def donate(request):
-        return render(request, 'donate.html')
-
-        # Retrieve the author's profile avatar
+        # Handle Donors
         donors = Donate.objects.filter(is_active=1)
-
         context['Donator'] = donors
-
-        for donors in context['Donator']:
-            image = donors.image
-            profile = ProfileDetails.objects.filter(user=user).first()
+        for donor in context['Donator']:
+            profile = ProfileDetails.objects.filter(user=donor.user).first()  # Use donor.user
             if profile:
-                donors.donor_profile_picture_url = profile.avatar.url
-                donors.donor_profile_url = donors.get_profile_url()
+                donor.donor_profile_picture_url = profile.avatar.url
+                donor.donor_profile_url = donor.get_profile_url()
 
+        # User Profile Handling
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -16435,7 +16436,6 @@ class DonateView(ListView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
-
 
 def charge(request):
     if request.method == 'POST':

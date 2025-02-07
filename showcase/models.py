@@ -1858,10 +1858,9 @@ class UserNotification(models.Model):
         verbose_name = "User Notification"
 
 
-class Vote(models.Model):
+class VoteQuery(models.Model):
     """Used for voting on different new ideas"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, help_text='Your name goes here.')
     description = models.TextField()
     category = models.CharField(max_length=100,
                                 help_text='Type the category that you are voting on (server layout, event idea, administration position, etc).')
@@ -1891,6 +1890,19 @@ class Vote(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
+class VoteOption(models.Model):
+    vote_query = models.ForeignKey(VoteQuery, on_delete=models.CASCADE, related_name='options')
+    text = models.CharField(max_length=200)
+
+class Ballot(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    vote_query = models.ForeignKey(VoteQuery, on_delete=models.CASCADE)
+    selected_option = models.ForeignKey(VoteOption, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'vote_query')
 
 
 class EmailField(models.Model):
@@ -2747,11 +2759,11 @@ class Game(models.Model):
     discount_cost = models.IntegerField(blank=True, null=True)
     choices = models.ManyToManyField('Choice', blank=True, related_name="gamechoices")
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
-    category = models.CharField(max_length=100,
-                                help_text='Category of choice (Pokemon, Yu-Gi-Oh, Bakugo, Magic The Gathering, etc.).')
+    category = models.CharField(max_length=2,
+                                choices=CARD_CATEGORIES, blank=True, null=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     power_meter = models.CharField(choices=POWER, max_length=4, default=1)
-    items = models.ManyToManyField(PrizePool, related_name='official_items')
+    items = models.ManyToManyField(PrizePool, related_name='official_items', blank=True)
     slug = models.SlugField(max_length=200, unique=True, blank=True, null=True)
     filter = models.CharField(choices=GAMEHUB_CHOICES, max_length=1, blank=True, null=True)
     player_made = models.BooleanField(default=True)
@@ -2783,7 +2795,15 @@ class Game(models.Model):
 
         # Ensure slug is generated if not provided
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name)
+            slug = base_slug
+            num = 0
+            while Game.objects.filter(slug=slug).exists():
+                num += 1
+                # You can also append a random string if you prefer:
+                # random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+                slug = f"{base_slug}-{num}"
+            self.slug = slug
 
         # Default discount cost to 0 for daily games
         if self.daily and not self.discount_cost:
@@ -2965,8 +2985,8 @@ class Game(models.Model):
 class Choice(models.Model):
     """Used for voting on different new ideas"""
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
-    choice_text = models.CharField(max_length=200, verbose_name='Choice Text')
-    file = models.FileField(null=True, verbose_name='File')
+    choice_text = models.CharField(max_length=200, verbose_name='Name', blank=True, null=True)
+    file = models.FileField(null=True, verbose_name='File', blank=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
                                                verbose_name="image length")
@@ -2976,9 +2996,8 @@ class Choice(models.Model):
     color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
     votes = models.IntegerField(default=0)
     value = models.IntegerField(default=0)
-    category = models.CharField(max_length=100,
-                                help_text='Category of choice (Pokemon, Yu-Gi-Oh, Bakugo, Magic The Gathering, etc.).',
-                                blank=True, null=True)
+    category = models.CharField(max_length=2,
+                                choices=CARD_CATEGORIES, blank=True, null=True)
     subcategory = models.CharField(max_length=200, help_text='Subcategory of choice (Pokemon, trainers, etc.).',
                                    blank=True, null=True)
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
@@ -2992,25 +3011,19 @@ class Choice(models.Model):
     number_of_choice = models.IntegerField(default=1)
     total_number_of_choice = models.IntegerField(blank=True,
                                                  null=True)  # make it pull from the total_number_of_choice field in the related PrizePool
-    lower_nonce = models.DecimalField(
-        max_digits=7,
-        decimal_places=0,
+    lower_nonce = models.IntegerField(
         validators=[MaxValueValidator(1000000), MinValueValidator(0)],
         help_text="Lower bound nonce of Choice",
         blank=True,
         null=True
     )
-    upper_nonce = models.DecimalField(
-        max_digits=7,
-        decimal_places=0,
+    upper_nonce = models.IntegerField(
         validators=[MaxValueValidator(1000000), MinValueValidator(0)],
         help_text="Upper bound nonce of Choice",
         blank=True,
         null=True
     )
-    generated_nonce = models.DecimalField(
-        max_digits=7,
-        decimal_places=0,
+    generated_nonce = models.IntegerField(
         validators=[MaxValueValidator(1000000), MinValueValidator(0)],
         help_text="Do NOT fill out manually.",
         blank=True,
@@ -3069,7 +3082,7 @@ class Choice(models.Model):
         if self.prizes:
             return f"{self.choice_text} with prize {self.prizes}"
         else:
-            return self.choice_text
+            return str(self.choice_text)
 
     def formatted_rarity(self):
         if self.rarity is not None:

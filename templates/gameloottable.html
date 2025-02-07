@@ -21,11 +21,12 @@ font-family: 'Lato', sans-serif;
     padding: 20px;
     border-radius: 20px;
     text-align: center;
-    width: 80%;
     top: 120%;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
 ">
     <h1>Loot Drop Table</h1>
     <div class="loot-grid" style="padding: 20px; border-radius: 20px;">
@@ -52,6 +53,17 @@ font-family: 'Lato', sans-serif;
         <p>No choices available for this game.</p>
         {% endfor %}
     </div>
+    <footer class="copyright-section" style="display: flex;">
+    <div class="container">
+        <p>{% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
+
+        {{BaseCopyrightTextField.copyright}}
+
+            {% endfor %}
+        </p>
+    </div>
+</footer>
+
 </div>
 
 {% else %}
@@ -65,11 +77,12 @@ font-family: 'Lato', sans-serif;
     padding: 20px;
     border-radius: 20px;
     text-align: center;
-    width: 80%;
     top: 100%;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
 ">
     <h1>Loot Drop Table</h1>
     <div class="loot-grid" style="padding: 20px; border-radius: 20px;">
@@ -126,6 +139,17 @@ font-family: 'Lato', sans-serif;
         <p>No choices available for this game.</p>
         {% endfor %}
     </div>
+    <footer class="copyright-section" style="display: flex;">
+    <div class="container">
+        <p>{% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
+
+        {{BaseCopyrightTextField.copyright}}
+
+            {% endfor %}
+        </p>
+    </div>
+</footer>
+
 </div>
 {% endif %}
 

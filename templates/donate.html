@@ -1,374 +1,443 @@
-{% extends 'donatebase.html' %}
 {% load static %}
-{% block content %}
 <head>
-    {% for DonorBackgroundImage in Titles %}
-      {% if DonorBackgroundImage.page == 'donate.html' %}
-         <title>{{ DonorBackgroundImage.overtitle }}</title>
+    {% for DonateView in Titles %}
+      {% if DonateView.page == 'donate.html' %}
+         <title>{{ DonateView.overtitle }}</title>
       {% endif %}
     {% endfor %}
-	<style type="text/css">
-		/**
-		 * The CSS shown here will not be introduced in the Quickstart guide, but shows
-		 * how you can use CSS to style your Element's container.
-		 */
-		.StripeElement {
-		  box-sizing: border-box;
 
-		  height: 40px;
+    <style>
+        :root {
+            --primary-color: #4a0e4e;
+            --secondary-color: #8e44ad;
+            --accent-color: #f1c40f;
+            --text-dark: #2c3e50;
+            --text-light: #ecf0f1;
+        }
 
-		  padding: 10px 12px;
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background-color: #f9f4f0;
+            color: var(--text-dark);
+        }
 
-		  border: 1px solid transparent;
-		  border-radius: 4px;
-		  background-color: white;
+        .hero-section {
+            background: linear-gradient(135deg, rgba(74,14,78,0.9) 0%, rgba(142,68,173,0.9) 100%),
+                        url('{% static "images/royal-background.jpg" %}');
+            background-size: cover;
+            background-position: center;
+            padding: 10rem 2rem;
+            text-align: center;
+            color: var(--text-light);
+            border-radius: 0 0 50px 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
 
-		  box-shadow: 0 1px 3px 0 #e6ebf1;
-		  -webkit-transition: box-shadow 150ms ease;
-		  transition: box-shadow 150ms ease;
-		}
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
 
-		.StripeElement--focus {
-		  box-shadow: 0 1px 3px 0 #cfd7df;
-		}
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-		.StripeElement--invalid {
-		  border-color: #fa755a;
-		}
+        .donation-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            max-width: 1200px;
+            margin: -5rem auto 3rem;
+            padding: 0 2rem;
+        }
 
-		.StripeElement--webkit-autofill {
-		  background-color: #fefde5 !important;
-		}
-	</style>
+        .donation-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
 
+        .donation-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .impact-meter {
+            background: var(--text-light);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .meter-progress {
+            height: 10px;
+            background: var(--accent-color);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .donation-options {
+            display: grid;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .donation-amount {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .donation-amount:hover {
+            border-color: var(--secondary-color);
+            transform: scale(1.02);
+        }
+
+        .donation-amount.selected {
+            border-color: var(--secondary-color);
+            background: rgba(142,68,173,0.1);
+        }
+
+        .custom-amount {
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        .custom-amount input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 2.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1.1rem;
+        }
+
+        .currency-symbol {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input[type="email"],
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input[type="email"]:focus,
+        .form-group input[type="text"]:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+
+        .security-badges {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            opacity: 0.8;
+        }
+
+        .testimonial-carousel {
+            background: var(--text-light);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+        }
+
+        /* Stripe Element Styling */
+        .StripeElement {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1rem 0;
+            transition: border-color 0.3s ease;
+        }
+
+        .StripeElement--focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(142,68,173,0.2);
+        }
+
+        .submit-button {
+            background: var(--primary-color);
+            color: white;
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .submit-button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .donation-container {
+                grid-template-columns: 1fr;
+                margin-top: -3rem;
+            }
+
+            .hero-section {
+                padding: 5rem 1rem;
+            }
+        }
+    </style>
 </head>
+
 <body>
-<div class="column three mobile-twelve section_header_logo vertical-align-middle"
-        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
-        {% for DonorBackgroundImage in Logo %}
-        {% if DonorBackgroundImage.page == 'donate.html' %}
-
-        <a class="logo" href="{{DonorBackgroundImage.hyperlink}}">
-          <img class="imageicon" src="{{DonorBackgroundImage.logocover.url}}"
-                alt="{{DonorBackgroundImage.alternate}}" style="length: {{DonorBackgroundImage.length_for_resize}}px; width: {{DonorBackgroundImage.width_for_resize}}px;"></a>
-        {% endif %}
-        {% endfor %}
-    </div>
-
-    {% for DonorBackgroundImage in Background %}
-    {% if DonorBackgroundImage.page == "donate.html" %}
-<div class="poste1" style="background-image: url({{ DonorBackgroundImage.cover.url }}); background-position: fixed; background-size: cover;">
+    {% for DonateView in Background %}
+    {% if DonateView.page == "donate.html" %}
+    <div class="poste1" style="background-image: url({{ DonateView.cover.url }});">
     {% endif %}
-{% endfor %}
+    {% endfor %}
 
-	<script src="https://js.stripe.com/v3/"></script>
+        <section class="hero-section">
+                    <h1 class="hero-title">
+{% for section, text in TextBySection.items %}
+  <div class="section-{{ section }}">
+    {{ text.text }}
+  </div>
+{% endfor %}</h1>
+            <div class="hero-content">
+                {% for DonateView in TextFielde %}
+                    {% if DonateView.page == 'donate.html' and DonateView.section == 1 %}
+                    <h1 class="hero-title">{{ DonateView.text }}</h1>
+                    {% endif %}
+                {% endfor %}
 
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+                {% for DonateView in TextFielde %}
+                    {% if DonateView.page == 'donate.html' and DonateView.section == 2 %}
+                    <p class="hero-subtitle">{{ DonateView.text }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </section>
 
+        <div class="donation-container">
+            <!-- Donation Form Column -->
+            <div class="donation-card">
+                <div class="impact-meter">
+                    <h3>Royal Progress 👑</h3>
+                    <p>Raised $15,000 of $25,000 goal</p>
+                    <div class="meter-progress" style="width: 60%"></div>
+                </div>
 
-	
+                <form action="{% url 'showcase:charge' %}" method="post" id="payment-form">
+                    {% csrf_token %}
 
-	<div id="container">
-		<div class="column-6">
-			<div id="left-wrapper">
-			{% for BackgroundImage in Image %}
-            {% if BackgroundImage.page == 'donate.html' %}
-            {% if BackgroundImage.image_position == 1 %}
-				<img id="profile-pic" src="{% static 'images/qs.jpg' %}">
-            {% endif %}
-            {% endif %}
-            {% endfor %}
-				<div id="left-wrapper-header">
-					<!--h3-->
-				{% for DonorBackgroundImage in TextFielde %}
-					{% if DonorBackgroundImage.page == 'donate.html' and DonorBackgroundImage.section == 1 %}
-							{% if DonorBackgroundImage.hyperlink %}
-									<a href="{{DonorBackgroundImage.hyperlink}}">
-										{% if DonorBackgroundImage.text_size == 1 %}
-											<h1>{{ DonorBackgroundImage.text }}</h1>
-										{% elif DonorBackgroundImage.text_size == 2 %}
-											<h2>{{ DonorBackgroundImage.text }}</h2>
-										{% elif DonorBackgroundImage.text_size == 3 %}
-											<h3>{{ DonorBackgroundImage.text }}</h3>
-										{% elif DonorBackgroundImage.text_size == 4 %}
-											<h4>{{ DonorBackgroundImage.text }}</h4>
-										{% elif DonorBackgroundImage.text_size == 5 %}
-											<h5>{{ DonorBackgroundImage.text }}</h5>
-										{% elif DonorBackgroundImage.text_size == 6 %}
-											<h6>{{ DonorBackgroundImage.text }}</h6>
-										{% else %}
-											<p>{{ DonorBackgroundImage.text }}</p>
-										{% endif %}
-									</a>
-								{% else %}
-									{% if DonorBackgroundImage.text_size == 1 %}
-										<h1>{{ DonorBackgroundImage.text }}</h1>
-									{% elif DonorBackgroundImage.text_size == 2 %}
-										<h2>{{ DonorBackgroundImage.text }}</h2>
-									{% elif DonorBackgroundImage.text_size == 3 %}
-										<h3>{{ DonorBackgroundImage.text }}</h3>
-									{% elif DonorBackgroundImage.text_size == 4 %}
-										<h4>{{ DonorBackgroundImage.text }}</h4>
-									{% elif DonorBackgroundImage.text_size == 5 %}
-										<h5>{{ DonorBackgroundImage.text }}</h5>
-									{% elif DonorBackgroundImage.text_size == 6 %}
-										<h6>{{ DonorBackgroundImage.text }}</h6>
-									{% else %}
-										<p>{{ DonorBackgroundImage.text }}</p>
-									{% endif %}
-								{% endif %}
+                    <div class="donation-options">
+                        <div class="donation-amount" data-amount="3">
+                            <span style="font-size: 1.5rem;">🐱</span>
+                            <div style="margin-left: 1rem;">
+                                <h4>Schrödinger's Cat Tier</h4>
+                                <p>$3 - Support our noble cause</p>
+                            </div>
+                        </div>
 
-								{% endif %}
-				{% endfor %}
+                        <div class="donation-amount" data-amount="5">
+                            <span style="font-size: 1.5rem;">👑</span>
+                            <div style="margin-left: 1rem;">
+                                <h4>Royal Supporter Tier</h4>
+                                <p>$5 - Join our court of patrons</p>
+                            </div>
+                        </div>
 
-					<!--h5-->
-				{% for DonorBackgroundImage in TextFielde %}
-										{% if DonorBackgroundImage.page == 'donate.html' and DonorBackgroundImage.section == 2 %}
-							{% if DonorBackgroundImage.hyperlink %}
-									<a href="{{DonorBackgroundImage.hyperlink}}">
-										{% if DonorBackgroundImage.text_size == 1 %}
-											<h1>{{ DonorBackgroundImage.text }}</h1>
-										{% elif DonorBackgroundImage.text_size == 2 %}
-											<h2>{{ DonorBackgroundImage.text }}</h2>
-										{% elif DonorBackgroundImage.text_size == 3 %}
-											<h3>{{ DonorBackgroundImage.text }}</h3>
-										{% elif DonorBackgroundImage.text_size == 4 %}
-											<h4>{{ DonorBackgroundImage.text }}</h4>
-										{% elif DonorBackgroundImage.text_size == 5 %}
-											<h5>{{ DonorBackgroundImage.text }}</h5>
-										{% elif DonorBackgroundImage.text_size == 6 %}
-											<h6>{{ DonorBackgroundImage.text }}</h6>
-										{% else %}
-											<p>{{ DonorBackgroundImage.text }}</p>
-										{% endif %}
-									</a>
-								{% else %}
-									{% if DonorBackgroundImage.text_size == 1 %}
-										<h1>{{ DonorBackgroundImage.text }}</h1>
-									{% elif DonorBackgroundImage.text_size == 2 %}
-										<h2>{{ DonorBackgroundImage.text }}</h2>
-									{% elif DonorBackgroundImage.text_size == 3 %}
-										<h3>{{ DonorBackgroundImage.text }}</h3>
-									{% elif DonorBackgroundImage.text_size == 4 %}
-										<h4>{{ DonorBackgroundImage.text }}</h4>
-									{% elif DonorBackgroundImage.text_size == 5 %}
-										<h5>{{ DonorBackgroundImage.text }}</h5>
-									{% elif DonorBackgroundImage.text_size == 6 %}
-										<h6>{{ DonorBackgroundImage.text }}</h6>
-									{% else %}
-										<p>{{ DonorBackgroundImage.text }}</p>
-									{% endif %}
-								{% endif %}
+                        <div class="donation-amount" data-amount="10">
+                            <span style="font-size: 1.5rem;">💎</span>
+                            <div style="margin-left: 1rem;">
+                                <h4>Crown Jewel Tier</h4>
+                                <p>$10 - Become a treasured benefactor</p>
+                            </div>
+                        </div>
 
-								{% endif %}
-				{% endfor %}
-				</div>
-				<div style="clear:left"></div>
-				<hr>
-				<!-- Add form here -->
-				<form action="{% url 'showcase:charge' %}" method="post" id="payment-form">
-					{% csrf_token %}
-					<div class="form-field-12">
-						<label for="amount">Choose Amount:</label>
-						<br>
-						<br>
-						<select required name="amount" id="amount">
-						  <option selected value="3">$3 --- Schrödinger's Cat Tier</option>
-						  <option value="5">$5 --- You helped me, so I am going to help you</option>
-						  <option value="10">$10 --- I love your channel!</option>
-              <option value="10">Other Amount</option>
-						</select>
-					</div>
+                        <div class="custom-amount">
+                            <span class="currency-symbol">$</span>
+                            <input type="number" name="customAmount" placeholder="Custom royal gift" min="1" step="1">
+                        </div>
+                    </div>
 
-					<div class="form-field-6">
-						<input required type="text" name="email" placeholder="Email...">
-					</div>
+                    <div class="form-group">
+                        <label for="email">Royal Email Address</label>
+                        <input type="email" id="email" name="email" required placeholder="your.highness@kingdom.com">
+                    </div>
 
-					<div class="form-field-6">
-						<input required type="text" name="nickname" placeholder="Nickname...">
-					</div>
-					   <div class="form-field-12">
-						   <input type="checkbox" name="anonymous" id="anonymous">
-						   <label for="anonymous">Donate Anonymously</label>
-					   </div>
+                    <div class="form-group">
+                        <label for="nickname">Noble Nickname</label>
+                        <input type="text" id="nickname" name="nickname" required placeholder="Sir Lancelot">
+                    </div>
 
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="anonymous" name="anonymous">
+                        <label for="anonymous">Donate as an Anonymous Benefactor</label>
+                    </div>
 
-				  <div class="form-row">
-				    <label for="card-element">
-				      Credit or Debit card
-				    </label>
-            <br>
-            <br>
-				    <div id="card-element">
-				      <!-- A Stripe Element will be inserted here. -->
-				    </div>
+                    <div class="form-group">
+                        <label for="card-element">Royal Treasury (Credit Card Information)</label>
+                        <div id="card-element"></div>
+                        <div id="card-errors" role="alert"></div>
+                    </div>
 
-				    <!-- Used to display form errors. -->
-				    <div id="card-errors" role="alert"></div>
-				  </div>
-				  
-				  <div style="clear:left"></div>
-				  <hr>
+                    <button type="submit" class="submit-button">
+                        🏰 Bestow Your Royal Gift
+                    </button>
+                </form>
 
-				 	<input  class="myButton" style="background-color:#10a195" type="submit" value="Submit Payment" name="">
+                <div class="security-badges">
+                    <img src="{% static 'images/royal-seal.png' %}" alt="Royal Seal of Security" width="80">
+                    <img src="{% static 'images/stripe-badge.png' %}" alt="Stripe Verified" width="80">
+                </div>
+            </div>
 
-				</form>
+            <!-- Impact Story Column -->
+            <div class="donation-card">
+                <h2>Your Royal Impact 🌟</h2>
+                <div class="impact-story">
+                    <img src="{% static 'images/royal-impact.svg' %}" alt="Kingdom Impact" style="width: 100%">
+                    <div class="testimonial-carousel">
+                        <blockquote>
+                            "Thanks to noble supporters like you, we've been able to [specific royal achievement].
+                            Your generosity directly helps [specific benefit to the realm]."
+                        </blockquote>
+                        <div class="testimonial-author">
+                            <img src="{% static 'images/royal-supporter.jpg' %}" alt="Royal Supporter" width="40" style="border-radius: 50%">
+                            <p>Lady Elizabeth, Esteemed Patron</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-			
-			</div>
-		</div>
+        <script src="https://js.stripe.com/v3/"></script>
+        <script>
+            var stripe = Stripe('{{ stripe_public_key }}');
+            var elements = stripe.elements();
 
-		<div class="column-6">
-			<div id="right-wrapper">
-			{% for BackgroundImage in Image %}
-            {% if BackgroundImage.page == 'donate.html' %}
-            {% if BackgroundImage.image_position == 2 %}
-				<img class="coffee-cup" src="{{BackgroundImage.image.url}}">
-			{% endif %}
-            {% endif %}
-            {% endfor %}
-			{% for BackgroundImage in Image %}
-            {% if BackgroundImage.page == 'donate.html' %}
-            {% if BackgroundImage.image_position == 3 %}
-				<img class="coffee-cup2" src="{{BackgroundImage.image.url}}">
-			{% endif %}
-            {% endif %}
-            {% endfor %}
-			{% for BackgroundImage in Image %}
-            {% if BackgroundImage.page == 'donate.html' %}
-            {% if BackgroundImage.image_position == 4 %}
-				<img class="coffee-cup3" src="{{BackgroundImage.image.url}}">
-			{% endif %}
-            {% endif %}
-            {% endfor %}
-				{% for DonorBackgroundImage in TextFielde %}
-					{% if DonorBackgroundImage.page == 'donate.html' and DonorBackgroundImage.section == 3 %}
-							{% if DonorBackgroundImage.hyperlink %}
-									<a href="{{DonorBackgroundImage.hyperlink}}">
-										{% if DonorBackgroundImage.text_size == 1 %}
-											<h1>{{ DonorBackgroundImage.text }}</h1>
-										{% elif DonorBackgroundImage.text_size == 2 %}
-											<h2>{{ DonorBackgroundImage.text }}</h2>
-										{% elif DonorBackgroundImage.text_size == 3 %}
-											<h3>{{ DonorBackgroundImage.text }}</h3>
-										{% elif DonorBackgroundImage.text_size == 4 %}
-											<h4>{{ DonorBackgroundImage.text }}</h4>
-										{% elif DonorBackgroundImage.text_size == 5 %}
-											<h5>{{ DonorBackgroundImage.text }}</h5>
-										{% elif DonorBackgroundImage.text_size == 6 %}
-											<h6>{{ DonorBackgroundImage.text }}</h6>
-										{% else %}
-											<p>{{ DonorBackgroundImage.text }}</p>
-										{% endif %}
-									</a>
-								{% else %}
-									{% if DonorBackgroundImage.text_size == 1 %}
-										<h1>{{ DonorBackgroundImage.text }}</h1>
-									{% elif DonorBackgroundImage.text_size == 2 %}
-										<h2>{{ DonorBackgroundImage.text }}</h2>
-									{% elif DonorBackgroundImage.text_size == 3 %}
-										<h3>{{ DonorBackgroundImage.text }}</h3>
-									{% elif DonorBackgroundImage.text_size == 4 %}
-										<h4>{{ DonorBackgroundImage.text }}</h4>
-									{% elif DonorBackgroundImage.text_size == 5 %}
-										<h5>{{ DonorBackgroundImage.text }}</h5>
-									{% elif DonorBackgroundImage.text_size == 6 %}
-										<h6>{{ DonorBackgroundImage.text }}</h6>
-									{% else %}
-										<p>{{ DonorBackgroundImage.text }}</p>
-									{% endif %}
-								{% endif %}
+            var style = {
+                base: {
+                    color: '#32325d',
+                    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+                    fontSmoothing: 'antialiased',
+                    fontSize: '16px',
+                    '::placeholder': {
+                        color: '#aab7c4'
+                    }
+                },
+                invalid: {
+                    color: '#fa755a',
+                    iconColor: '#fa755a'
+                }
+            };
 
-								{% endif %}
-				{% endfor %}
-				<hr>
-				<a href="{% url 'showcase:whydonate'%}" class="myButton">Back To Donation Home</a>
-			</div>
-		</div>
-	</div>
+            var card = elements.create('card', {style: style});
+            card.mount('#card-element');
 
+            card.addEventListener('change', function(event) {
+                var displayError = document.getElementById('card-errors');
+                if (event.error) {
+                    displayError.textContent = event.error.message;
+                } else {
+                    displayError.textContent = '';
+                }
+            });
 
+            var form = document.getElementById('payment-form');
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
 
-</div>
+                stripe.createToken(card).then(function(result) {
+                    if (result.error) {
+                        var errorElement = document.getElementById('card-errors');
+                        errorElement.textContent = result.error.message;
+                    } else {
+                        stripeTokenHandler(result.token);
+                    }
+                });
+            });
 
+            function stripeTokenHandler(token) {
+                var form = document.getElementById('payment-form');
+                var hiddenInput = document.createElement('input');
+                hiddenInput.setAttribute('type', 'hidden');
+                hiddenInput.setAttribute('name', 'stripeToken');
+                hiddenInput.setAttribute('value', token.id);
+                form.appendChild(hiddenInput);
+                form.submit();
+            }
 
-	<script>
-		// Create a Stripe client.
-		var stripe = Stripe('pk_test_51JSB5LH4sbqF1dn7kyJNCn1e226c4HMl3qFxrbmmygrrkISz4sdMK8QoRF1pJmOqXPTwAsg6DOChKFCxWK0kpHFh00B3wDol8M');
+            // Add interactive donation amount selection
+            document.querySelectorAll('.donation-amount').forEach(item => {
+                item.addEventListener('click', () => {
+                    // Remove previous selection
+                    document.querySelectorAll('.donation-amount').forEach(el => el.classList.remove('selected'));
+                    item.classList.add('selected');
 
-		// Create an instance of Elements.
-		var elements = stripe.elements();
+                    // Update hidden input value
+                    const amount = item.dataset.amount;
+                    document.querySelector('input[name="customAmount"]').value = amount;
+                });
+            });
 
-		// Custom styling can be passed to options when creating an Element.
-		// (Note that this demo uses a wider set of styles than the guide below.)
-		var style = {
-		  base: {
-		    color: '#32325d',
-		    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-		    fontSmoothing: 'antialiased',
-		    fontSize: '16px',
-		    '::placeholder': {
-		      color: '#aab7c4'
-		    }
-		  },
-		  invalid: {
-		    color: '#fa755a',
-		    iconColor: '#fa755a'
-		  }
-		};
+            // Animate progress bar on scroll into view
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.width = entry.target.dataset.width;
+                    }
+                });
+            });
 
-		// Create an instance of the card Element.
-		var card = elements.create('card', {style: style});
-
-		// Add an instance of the card Element into the `card-element` <div>.
-		card.mount('#card-element');
-
-		// Handle real-time validation errors from the card Element.
-		card.addEventListener('change', function(event) {
-		  var displayError = document.getElementById('card-errors');
-		  if (event.error) {
-		    displayError.textContent = event.error.message;
-		  } else {
-		    displayError.textContent = '';
-		  }
-		});
-
-		// Handle form submission.
-		var form = document.getElementById('payment-form');
-		form.addEventListener('submit', function(event) {
-		  event.preventDefault();
-
-		  stripe.createToken(card).then(function(result) {
-		    if (result.error) {
-		      // Inform the user if there was an error.
-		      var errorElement = document.getElementById('card-errors');
-		      errorElement.textContent = result.error.message;
-		    } else {
-		      // Send the token to your server.
-		      stripeTokenHandler(result.token);
-		    }
-		  });
-		});
-
-		// Submit the form with the token ID.
-		function stripeTokenHandler(token) {
-		  // Insert the token ID into the form so it gets submitted to the server
-		  var form = document.getElementById('payment-form');
-		  var hiddenInput = document.createElement('input');
-		  hiddenInput.setAttribute('type', 'hidden');
-		  hiddenInput.setAttribute('name', 'stripeToken');
-		  hiddenInput.setAttribute('value', token.id);
-		  form.appendChild(hiddenInput);
-
-		  // Submit the form
-		  form.submit();
-		}
-	</script>
-
+            document.querySelectorAll('.meter-progress').forEach(progress => {
+                progress.dataset.width = progress.style.width;
+                progress.style.width = '0';
+                observer.observe(progress);
+            });
+        </script>
+    </div>
 </body>
-{% endblock content %}

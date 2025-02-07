@@ -15,11 +15,12 @@
   left: 0;
   height: 100vh;
   z-index: 1000;
+  overflow-y: auto;
 }
 
 .sidebar {
   width: 300px;
-  height: 10f0%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.99);
   overflow-y: auto;
   transition: transform 0.3s ease-in-out;
@@ -208,9 +209,12 @@ body {
 
             <div class="collection">
                 <h2 class="collection-title">My Collection</h2>
+                <a href="{% url 'showcase:inventory' %}" class="collection-item">
                 <button class="view-collection">
+
                     🐉 View Collection (0)
                 </button>
+                    </a>
             </div>
         </aside>
         </div>

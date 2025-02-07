@@ -42,7 +42,6 @@ h6, .h6 {
   font-family: "Poppins", sans-serif;
   font-weight: 700;
   margin: 0 0 1.25rem 0;
-  color: #051922;
 }
 
 h1:last-child, .h1:last-child,
@@ -138,7 +137,7 @@ p {
   font-size: 1rem;
   letter-spacing: 0.1px;
   line-height: 1.8;
-  color: #051922;
+  color: #e5e4e2;
   margin: 0 0 1.25rem 0;
 }
 
@@ -1551,8 +1550,7 @@ div.owl-controls, .owl-controls div {
 
 ----------------------------------------------------------------------------- */
 .list-section {
-  background: rgb(52,72,73);
-background: linear-gradient(0deg, rgba(52,72,73,0.32647653788077735) 0%, rgba(213,213,213,0) 100%);
+  background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(0,0,0,1) 60%);
 }
 
 .list-box {
@@ -1631,7 +1629,7 @@ background: linear-gradient(0deg, rgba(52,72,73,0.32647653788077735) 0%, rgba(21
 }
 
 .single-latest-news h3 a {
-  color: #051922;
+  color: #e5e4e2;
 }
 
 p.blog-meta span {

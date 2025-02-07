@@ -8,9 +8,12 @@ body{
 }
 
 
-.wrapper{
-    margin-left: 35vh;
-    margin-top: 40%;
+.wrapper {
+    display: flex;
+    justify-content: center; /* Centers the flex items horizontally */
+    align-items: center; /* Centers the flex items vertically */
+    height: 100vh; /* Ensures full height for vertical centering */
+    margin-top: 10%; /* Reset margin-top if not needed */
 
 }
 
@@ -108,12 +111,8 @@ body{
 
 
 
-
 .start{
-    position: absolute;
-    left: 40%;
-    transform: translateX(-50%); /* Centers the element horizontally */
-    top: 55vh;
+    position: relative;
     height: 10vh;
     width: 23vh;
     background-color: rgba(255, 255, 255, 0.3);
@@ -121,6 +120,7 @@ body{
     color: black;
     font-size: 30px;
     padding: 10px;
+    right: 8px;
     border-radius: 10px;
 }
 
@@ -129,7 +129,7 @@ body{
     top: 30vh;
     left: 50%;
     transform: translateX(-50%); /* Centers the element horizontally */
-    height: 12vh;
+    height: 45vh;
     background-color: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
     color: black;

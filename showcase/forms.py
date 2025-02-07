@@ -13,9 +13,9 @@ from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewTy
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
     SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame, Monstrosity, \
-    MonstrositySprite, Ascension, InventoryTradeOffer
+    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption
 from .models import UpdateProfile
-from .models import Vote
+from .models import VoteQuery
 from .models import StaffApplication
 from .models import PartnerApplication
 from .models import PunishmentAppeal
@@ -138,17 +138,18 @@ class Postit(forms.ModelForm):
         fields = ('name', 'category', 'description', 'image')
 
 
-class PosteForm(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
-    category = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Choose a category you want your vote to affect.'}))
-
-    # altered image URLField to ImageField, check for bugs please
-
+class VoteQueryForm(forms.ModelForm):
     class Meta:
-        model = Vote
-        fields = ('name', 'category')
+        model = VoteQuery
+        fields = ['description', 'category']
 
+VoteOptionFormSet = inlineformset_factory(
+    VoteQuery,
+    VoteOption,
+    fields=('text',),
+    extra=2,
+    can_delete=False
+)
 
 # Profile Form
 class ProfileForm(forms.ModelForm):
@@ -346,7 +347,6 @@ class PlayerInventoryGameForm(forms.ModelForm):
         fields = ['name', 'cost', 'discount_cost', 'type', 'category', 'image', 'power_meter', 'items']
 
 
-
 # used when the user wants to use cards owned by PokeTrove; user gets commission
 
 class InventoryGameForm(forms.ModelForm):
@@ -359,48 +359,22 @@ class InventoryGameForm(forms.ModelForm):
     class Meta:
         model = Game
         fields = [
-            'name', 'cost', 'discount_cost', 'type', 'category', 'image', 'power_meter',
-            'player_made', 'player_inventory',
+            'name', 'cost', 'discount_cost', 'type', 'category', 'image',
         ]
-
-from django.db.models import Q
 
 
 class ChoiceForm(forms.ModelForm):
-    # If you want to display a select box for an existing choice, use ModelChoiceField
-    # rather than ModelMultipleChoiceField:
-    choice_text = forms.ModelChoiceField(
-        queryset=Choice.objects.filter(
-            Q(user__isnull=True) | Q(user__username__iexact='poketrove')
-        ),
-        label="Choice Text",
-        widget=forms.Select
-    )
-    lower_nonce = forms.DecimalField(
-        required=False,
-        widget=forms.NumberInput(attrs={'placeholder': 'Lower nonce'})
-    )
-    upper_nonce = forms.DecimalField(
-        required=False,
-        widget=forms.NumberInput(attrs={'placeholder': 'Upper nonce'})
-    )
-
     class Meta:
         model = Choice
-        fields = ['choice_text', 'rarity', 'lower_nonce', 'upper_nonce']
-
-ChoiceFormSet = inlineformset_factory(
-    Game, Choice, form=ChoiceForm,
-    extra=1,  # Allows adding new choices
-    can_delete=True  # Allows removing choices
-)
-
+        fields = ['rarity', 'lower_nonce', 'upper_nonce', 'number_of_choice']
+        widgets = {
+            'file': forms.FileInput(attrs={'class': 'form-control-file'}),
+        }
 
 ChoiceFormSet = modelformset_factory(
     Choice,
-    form=ChoiceForm,  # Use ChoiceForm here
-    extra=1,
-    can_delete=True,
+    form=ChoiceForm,
+    extra=0,
 )
 
 
@@ -413,7 +387,7 @@ class AscensionCreateForm(forms.ModelForm):
 class CardUploading(forms.ModelForm):
     class Meta:
         model = Choice
-        fields = 'choice_text', 'file', 'category', 'tier', 'rarity', 'number_of_choice', 'total_number_of_choice', 'value', 'number'
+        fields = 'choice_text', 'file', 'category', 'tier', 'rarity', 'total_number_of_choice', 'value', 'number'
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)

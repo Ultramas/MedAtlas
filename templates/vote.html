@@ -58,12 +58,16 @@
   <br>
   <br>
 <div class="post2y">
-     <h1 class = "banh1">Cast Your Ballot</h1>
+     <h1 class = "banh1">Create A Ballot</h1>
      <br>
      <br>
   <form method="POST"  enctype="multipart/form-data" class="post">
     {% csrf_token %}
     {{form.as_p}}
+    {{ formset.management_form }}
+    {% for option_form in formset %}
+        {{ option_form.as_p }}
+    {% endfor %}
     <button type="submit">Submit</button>
                <div class="drops">
     <div class="drop drop-1"></div>
