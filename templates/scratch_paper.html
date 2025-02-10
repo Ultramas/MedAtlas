@@ -1,15 +1,11 @@
 {% load static %}
 
-
-{% load random_nonce %}
-<!--manually count-->
-{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeTrove - Game</title>
+    <title>PokeTrove - Marketplace</title>
         <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
@@ -17,7 +13,6 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-
     <style>
     /* Add this to the existing <style> tag or create a new one if it doesn't exist */
     .copyright-section {
@@ -95,14 +90,9 @@
             backdrop-filter: blur(10px);
             position: sticky;
             top: 0;
-            height: 100%;
             z-index: 100;
         }
-        a {
-            color: var(--primary);
-            text-decoration: none;
-            background-color: transparent;
-        }
+
         .logo {
             display: flex;
             align-items: center;
@@ -152,6 +142,7 @@
         }
 
         .nav-links a:hover {
+            color: var(--accent);
         }
 
         .nav-links a::after {
@@ -161,6 +152,7 @@
             left: 0;
             width: 0;
             height: 2px;
+            background: var(--accent);
             transition: width 0.3s ease;
         }
 
@@ -392,6 +384,7 @@
             background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
+
         .nav-links h1::after {
             content: '';
             position: absolute;
@@ -475,7 +468,7 @@
         }
 
         .pokemon-type {
-            color: rgba(255, 255, 255, 0.8);
+            color: white;
             font-size: 1.1rem;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -547,11 +540,10 @@
 
                 .inventory-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 2rem;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
+            align-items: center;
+            justify-content: center;
         }
 
         @media (max-width: 1200px) {
@@ -654,1073 +646,200 @@ nav.main-menu ul li a {
     padding: 15px;
 }
 
-p.blog-meta span {
-    margin-right: 15px;
-    opacity: 0.6;
-    color: rgba(255, 255, 255, 1);
-    font-size: 0.85em;
+.product-condition{
+    color: var(--accent);
 }
     </style>
 </head>
 <body>
 
 <script>
+    // Load audio files
+    const sellAudio = new Audio("/static/css/sounds/sell_coin.mp3");
+    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
+    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
 
-</script>
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prize Picker</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/gametemplate.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/spinboost.css' %}">
-     <script defer src="{% static 'css/js/gametemplatescript.js' %}"></script>
-     <script defer src="{% static 'css/js/spinboostscript.js' %}"></script>
-
-     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-     <script src="{% static 'css/js/main.js' %}"></script>
-     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
-     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
-     <script src="{% static 'css/js/waypoints.js' %}"></script>
-	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
-     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
-     <script src="{% static 'css/js/sticker.js' %}"></script>
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-
-    <script src="{% static 'css/js/build.js' %}"></script>
-    <script src="{% static 'css/js/start.js' %}"></script>
-    <script src="{% static 'css/js/test.js' %}"></script>
-     <style>
-        body{
-
-        background-color: #0a0a13;
-        }
-        .wrapperlootlist {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: left;
-        }
-
-        .game {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: 100%;
-            padding: 20px;
-
-        }
-        .cardslootlist {
-            flex: 1 1 200px; /* Adjust the width as needed */
-            margin: 10px;
-            box-sizing: border-box;
-        }
-
-        .sliderlootlist {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: left;
-        }
-
-        .spinner-arrow {
-            width: 50px;
-            height: 50px;
-            z-index: 10; /* Ensure it's on top */
-        }
-
-.cards-container {
-    display: flex;
-    flex-wrap: nowrap; /* Prevent wrapping to a new line */
-    overflow-x: auto; /* Allows horizontal scrolling */
-    overflow-y: hidden; /* Hides vertical scrolling */
-    padding: 10px;
-    gap: 10px; /* Optional: adds space between cards */
-    max-height: 100%; /* Ensure the height is properly constrained */
-    position: relative; /* Ensure positioning is correct */
-}
-
-.cards-container .popup-card:first-child {
-    margin-left: 250px; /* Adjust as needed to make the first card fully visible */
-}
-
-.cards-container::-webkit-scrollbar {
-    height: 8px; /* Custom scrollbar height */
-}
-
-.cards-container::-webkit-scrollbar-thumb {
-    background-color: #888; /* Custom scrollbar color */
-    border-radius: 4px;
-}
-
-.cards-container::-webkit-scrollbar-thumb:hover {
-    background-color: #555; /* Darker color on hover */
-}
-
-.card{
-background: none;
-background-color: nonce;
-border: none;
-}
-
-.popup-card {
-    min-width: 200px;
-    max-width: 250px;
-    flex-shrink: 0;
-    margin-left: 10px;
-    text-align: center;
-    overflow: hidden; /* Hides both vertical and horizontal scrollbars */
-}
-
-
-    .individuallootelement {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start; /* Align items to the start */
-        padding: 15px;
-    }
-       .individuallootelement p {
-        margin: 5px 0;
-    }
-
-    .cards {
-        /*margin-right: 15px;
-        margin-left: 15px;*/
-        flex: 1 1 200px;
-       /*margin: 10px;*/
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column; /* Align elements vertically */
-    align-items: center; /* Centers horizontally */
-    justify-content: center; /* Centers vertically */
-    text-align: center;
-    }
-
-    .slider img {
-        width: 15vh;
-        height: 20vh;
-        border: 2px solid;
-        border-color: transparent; /* To change later */
-        border-radius: 7px;
-        object-fit: contain; /* Ensures image fits without cropping */
-    }
-
-        :root {
-            --gold: #FFD700;
-            --dark-gold: #B8860B;
-            --light-gold: #FFF8DC;
-            --background: #1A1A1A;
-        }
-
-
-
-        .containerev {
-            width: 100%;
-            left: 50%;
-            transform: translateX(-50%); /* Centers the element horizontally */
-            padding: 20px;
-        }
-
-        h1 {
-            font-family: 'Cinzel', serif;
-            font-size: 3rem;
-            text-align: center;
-            color: var(--gold);
-            margin-bottom: 2rem;
-            text-shadow: 0 0 10px var(--gold);
-        }
-
-        .loot-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .loot-item {
-            background: linear-gradient(135deg, var(--dark-gold), var(--gold));
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .loot-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 30px rgba(255, 215, 0, 0.5);
-        }
-
-        .loot-item h2 {
-            font-family: 'Cinzel', serif;
-            font-size: 1.5rem;
-            color: var(--background);
-            margin-top: 0;
-            margin-bottom: 1rem;
-        }
-
-        .loot-item img {
-            width: 25%;
-            height: auto;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-        }
-
-        .loot-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-        }
-
-        .loot-details p {
-            margin: 0;
-            color: var(--background);
-        }
-
-        .loot-details strong {
-            color: var(--light-gold);
-        }
-
-        .rarity {
-            font-weight: bold;
-            color: #FF4500;
-        }
-
-        .tier {
-            font-weight: bold;
-            color: #4B0082;
-        }
-
-        .nerd-stats {
-            background-color: rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            padding: 0.5rem;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .nerd-stats p {
-            margin: 0.25rem 0;
-        }
-
-        @media (max-width: 600px) {
-            .loot-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        .selections {
-    position: absolute;
-    top: 30vh;
-}
-        .button{
-        padding: 5px;
-        }
-
-    </style>
-
-
-</head>
-<body>
-
-<div class="total" style="display: flex; flex-direction: column;">
-	<!-- header -->
-
-{% include 'navtrove.html' %}
-	<!-- end header -->
-
-<div class="boxes" style="
-    left: 0%;
-    position: absolute;
-    width: 100%;
-    height: 80%;
-    opacity: 0.20;
-    background: linear-gradient(to bottom, rgba(0,0,255,0) 70%, rgb(10, 10, 19) 100%), url('{{ game.image.url }}');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-" alt="{{ game.name }}">
-</div>
-    <div>
-<div class="selections" style="border: 2px solid black; margin-bottom: 120%;">
-    <div class="flame-effect"></div>
-    <div class="content">
-        <label style="background: rgba(255, 255, 255, 0.3); padding: 2px; border-radius: 10px;"> Spin Boost Power</label>
-        <div id="spinCount">
-            <button class="spin-option" data-value="1">1x</button>
-            <button class="spin-option" data-value="2">2x</button>
-            <button class="spin-option" data-value="3">3x</button>
-            <button class="spin-option" data-value="4">4x</button>
-            <button class="spin-option" data-value="5">5x</button>
-            <button class="spin-option" data-value="10">10x</button>
-        </div>
-        <br>
-        <h3 id="cost-display">
-            {% if game.daily %}
-                {% if game.discount_cost == 0 %}
-                    <span id="base-cost" style="display: none;">{{ game.discount_cost }} 💎</span>
-
-                    <span>Chest Value: {{ game.cost }}</span> 💎
-             <script>
-            // Disable the cost calculation JavaScript
-            document.addEventListener("DOMContentLoaded", function () {
-                const costDisplayElement = document.getElementById("cost-display");
-                if (costDisplayElement) {
-                    costDisplayElement.innerHTML = `<span id="base-cost"> {{ game.cost }}</span> 💎`; // Set cost to 0
-                }
-            });
-        </script>
-                {% endif %}
-            {% else %}
-                {% if game.discount_cost %}
-                    <span id="base-cost">{{ game.discount_cost }}</span> 💎
-                {% else %}
-                    <span id="base-cost">{{ game.cost }}</span> 💎
-                {% endif %}
-            {% endif %}
-        </h3>
-
-        <script type="text/javascript">
-document.addEventListener("DOMContentLoaded", function () {
-    const spinButtons = document.querySelectorAll(".spin-option");
-    const baseCostElement = document.getElementById("base-cost");
-    const costDisplayElement = document.getElementById("cost-display");
-
-    // Parse the base cost as a number (default to 0 if not a number)
-    const baseCost = parseFloat(baseCostElement.textContent) || 0;
-
-    spinButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            const spinMultiplier = parseInt(this.dataset.value, 10); // Get the spin multiplier
-            const totalCost = baseCost * spinMultiplier; // Calculate the total cost
-            costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`; // Update the display
-        });
-    });
-});
-</script>
-
-        <input type="checkbox" id="quickspin-checkbox">
-        <label for="quickspin-checkbox">Quick Spin</label>
-        <input type="checkbox" id="persist-spin-checkbox">
-        <label for="persist-spin-checkbox">Save Spin Boost</label>
-    </div>
-</div>
-        <label>
-        </label>
-<script>
-    function getCSRFToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]').value;
-    }
-</script>
-
-<script type="text/javascript">
-document.addEventListener("DOMContentLoaded", function () {
-    const spinButtons = document.querySelectorAll(".spin-option");
-    const baseCostElement = document.getElementById("base-cost");
-    const costDisplayElement = document.getElementById("cost-display");
-    const startButton = document.getElementById("start");
-    const baseCost = parseFloat(baseCostElement.textContent) || 0;
-
-    // Initialize user cash as a proxy
-    let userCash = parseFloat({{ user_cash|safe }});
-    const userCashProxy = new Proxy({ value: userCash }, {
-        set(target, key, newValue) {
-            if (key === "value") {
-                target[key] = newValue;
-                updateStartButton(); // Re-run the logic on change
-            }
-            return true;
-        }
-    });
-
-    function updateStartButton() {
-        const spinMultiplier = parseInt(
-            document.querySelector(".spin-option.active")?.dataset.value || 1,
-            10
-        );
-        const totalCost = baseCost * spinMultiplier;
-
-        costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`;
-
-        if (userCashProxy.value < totalCost) {
-            if (!startButton.parentElement.matches("a")) {
-                const link = document.createElement("a");
-                link.href = "currencymarket.html";
-                link.style.textDecoration = "none";
-                startButton.parentNode.replaceChild(link, startButton);
-                link.appendChild(startButton);
-            }
-            startButton.disabled = true;
-        } else {
-            if (startButton.parentElement.matches("a")) {
-                const parent = startButton.parentElement;
-                const container = parent.parentNode;
-                parent.replaceWith(startButton);
-                container.appendChild(startButton);
-            }
-        }
-    }
-
-    // Add event listeners for spin buttons
-    spinButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            spinButtons.forEach(btn => btn.classList.remove("active"));
-            this.classList.add("active");
-            updateStartButton();
+    // Add event listeners to sell forms
+    document.querySelectorAll('.sell-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            sellAudio.play(); // Play the sell sound
+            console.log('')
+            handleAjaxFormSubmission(form); // Handle the AJAX request
         });
     });
 
-    // Periodically fetch the updated user cash from the API
-    function fetchUserCash() {
-        fetch('/api/get-user-cash/')
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.user_cash !== undefined) {
-                    userCashProxy.value = data.user_cash; // Update proxy value
-                }
-            })
-            .catch(error => console.error('Error fetching user cash:', error));
-    }
-
-    // Poll the API every 0.5 seconds
-    setInterval(fetchUserCash, 500);
-});
-
-</script>
-
-{% if game.daily %}
-<button class="start"
-        id="start"
-        data-game-id="{{ game.id }}"
-        data-nonce="{{ nonce }}"
-        data-slug="{{ game.slug }}"
-        data-daily="true"
-        data-next-5pm="{{ next_5pm.timestamp }}"
-        style="margin-top: 5%; margin-right: 25%;"
-        disabled>
-    Spin!
-</button>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-    const startButton = document.getElementById("start");
-
-    if (startButton) {
-        const isDaily = startButton.getAttribute("data-daily") === "true";
-        const next5pmTimestamp = parseInt(startButton.getAttribute("data-next-5pm"), 10);
-
-        if (isDaily) {
-            const now = Date.now() / 1000; // Current time in seconds
-            const timeRemaining = next5pmTimestamp - now;
-
-            if (timeRemaining > 0) {
-                startButton.disabled = true;
-
-                // Optionally display a countdown
-                const countdownInterval = setInterval(() => {
-                    const now = Date.now() / 1000;
-                    const timeLeft = next5pmTimestamp - now;
-
-                    if (timeLeft <= 0) {
-                        clearInterval(countdownInterval);
-                        startButton.disabled = false;
-                    }
-
-                    // Update button text or display countdown (optional)
-                    const hours = Math.floor(timeLeft / 3600);
-                    const minutes = Math.floor((timeLeft % 3600) / 60);
-                    const seconds = Math.floor(timeLeft % 60);
-                    startButton.innerText = `Spin in ${hours}h ${minutes}m ${seconds}s`;
-                }, 1000);
-            } else {
-                startButton.disabled = false; // Enable immediately if past 5 PM
-            }
-        }
-    }
-});
-
-        </script>
-{% else %}
-<button class="start"
-        id="start"
-        data-game-id="{{ game.id }}"
-        data-nonce="{{ nonce }}"
-        data-slug="{{ game.slug }}"
-        data-daily="false"
-        style="margin-top: 5%; margin-right: 25%;">
-    Spin!
-</button>
-{% endif %}
-
-        {% if game.daily %}
-<button class="start"
-        id="start2"
-        data-game-id="{{ game.id }}"
-        data-nonce="{{ nonce }}"
-        data-slug="{{ game.slug }}"
-        data-daily="true"
-        data-next-5pm="{{ next_5pm.timestamp }}"
-        style="margin-top: 5%; margin-left: 25%;"
-        disabled>
-   Demo
-</button>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-    const startButton = document.getElementById("start2");
-
-    if (startButton) {
-        const isDaily = startButton.getAttribute("data-daily") === "true";
-        const next5pmTimestamp = parseInt(startButton.getAttribute("data-next-5pm"), 10);
-
-        if (isDaily) {
-            const now = Date.now() / 1000; // Current time in seconds
-            const timeRemaining = next5pmTimestamp - now;
-
-            if (timeRemaining > 0) {
-                startButton.disabled = true;
-
-                // Optionally display a countdown
-                const countdownInterval = setInterval(() => {
-                    const now = Date.now() / 1000;
-                    const timeLeft = next5pmTimestamp - now;
-
-                    if (timeLeft <= 0) {
-                        clearInterval(countdownInterval);
-                        startButton.disabled = false;
-                    }
-
-                    // Update button text or display countdown (optional)
-                    const hours = Math.floor(timeLeft / 3600);
-                    const minutes = Math.floor((timeLeft % 3600) / 60);
-                    const seconds = Math.floor(timeLeft % 60);
-                    startButton.innerText = `Spin in ${hours}h ${minutes}m ${seconds}s`;
-                }, 1000);
-            } else {
-                startButton.disabled = false; // Enable immediately if past 5 PM
-            }
-        }
-    }
-});
-
-        </script>
-{% else %}
-<button class="start"
-        id="start2"
-        data-game-id="{{ game.id }}"
-        data-nonce="{{ nonce }}"
-        data-slug="{{ game.slug }}"
-        data-daily="false"
-        style="margin-top: 5%; margin-left: 25%;">
-    Demo
-</button>
-{% endif %}
-
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    let selectedMultiplier = 1; // Default multiplier
-
-    // Add event listener to each spin-option button
-    document.querySelectorAll(".spin-option").forEach(button => {
-        button.addEventListener("click", function () {
-            selectedMultiplier = parseInt(this.getAttribute("data-value"));
-            console.log("Selected multiplier:", selectedMultiplier); // For debugging
+    // Add event listeners to withdraw forms
+    document.querySelectorAll('.withdraw-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            withdrawAudio.play(); // Play the withdraw sound
+            handleAjaxFormSubmission(form); // Handle the AJAX request
         });
     });
 
-    // Add event listener to the spin button
-    document.getElementById("start").addEventListener("click", function () {
-        console.log("Spin button clicked!"); // Debug log
+	document.querySelectorAll('.trade-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            tradeAudio.play(); // Play the withdraw sound
+        });
+    });
 
-        const button = this;
-        const gameId = button.getAttribute("data-game-id");
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value; // Fetch CSRF token
+    // Generic AJAX form submission handler
+    function handleAjaxFormSubmission(form) {
+        const formData = new FormData(form);
+        const actionUrl = form.getAttribute('action');
 
-        console.log("Game ID:", gameId); // Debug log
-        console.log("CSRF Token:", csrfToken); // Debug log
-        console.log("Spin Multiplier:", selectedMultiplier); // Debug log
-
-        // Perform the fetch request to initiate the spin
-        fetch("{% url 'showcase:spin_game' %}", {
-            method: "POST",
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
             headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrfToken
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
             },
-            body: JSON.stringify({
-                game_id: gameId,
-                spin_multiplier: selectedMultiplier
-            })
         })
         .then(response => response.json())
         .then(data => {
-            console.log("Response data:", data); // Debug log
-            if (data.daily === false) { // Check if daily is explicitly false
-                if (data.success) {
-                    // Update the currency amount automatically
-                    const currencyElement = document.getElementById("currency-amount");
-                    if (currencyElement) {
-                        currencyElement.innerText = `${data.updated_currency_amount} ${data.currency_name}`;
-                    }
-                    // Optionally, display a success message
-                    console.log("Spin successful:", data.message);
-                } else {
-                    alert(data.error); // Show error message if the spin fails
-                }
+            if (data.success) {
+                document.getElementById('stock-count').textContent = data.number_of_cards;
             } else {
-                console.log("The game is marked as daily, action skipped.");
+                console.error(data.error);
             }
-
-        })
-        .catch(error => {
-            console.error("Error during fetch:", error); // Log any fetch errors
         });
-    });
-});
-</script>
-
-
-
-<!-- Embed choices and other data in a script tag -->
-
-
-<script type="text/javascript">
-$(document).ready(function() {
-    console.log("jQuery is loaded.");
-
-    let spinMultiplier = 1; // Default to 1 spin if no option is selected
-
-    // Set spin multiplier based on selected option
-    $('.spin-option').on('click', function() {
-        $('.spin-option').removeClass('selected');
-        $(this).addClass('selected');
-        spinMultiplier = parseInt($(this).data('value'));
-        console.log("Spin multiplier selected:", spinMultiplier);
-    });
-
-    $('#start').on('click', function() {
-        const gameId = $(this).data('game-id');
-        const slug = $(this).data('slug');
-        const csrfToken = '{{ csrf_token }}';
-        const url = '{% url "showcase:create_outcome" "SLUG_PLACEHOLDER" %}'.replace('SLUG_PLACEHOLDER', slug);
-
-        let completedSpins = 0;
-        let allChoices = [];
-
-        // Check if Quick Spin is active
-        const isQuickSpin = $('#quickspin-checkbox').is(':checked');
-        console.log("Quick Spin mode:", isQuickSpin);
-
-        for (let i = 0; i < spinMultiplier; i++) {
-            $.ajax({
-                type: 'POST',
-                url: url,
-                data: {
-                    csrfmiddlewaretoken: csrfToken,
-                    game_id: gameId,
-                    console.log('the game id is ', game_id);
-                },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        completedSpins++;
-                        allChoices = allChoices.concat(response.choices);
-                        console.log('Choice received successfully for spin', i + 1);
-
-                        // Update the UI only after all spins are completed
-                        if (completedSpins === spinMultiplier) {
-                            console.log('All spins completed.');
-                            //updateWheelContents(allChoices); // Display all outcomes at once
-                            initializeAnimation(response.nonce, isQuickSpin); // Pass Quick Spin mode to the animation
-                        }
-                    } else {
-                        console.error(response.message);
-                    }
-                },
-                error: function(error) {
-                    console.error('Error during spin', i + 1, ':', error);
-                }
-            });
-        }
-    });
-
-    function initializeAnimation(targetNonce, isQuickSpin) {
-        // Disable the spin button to avoid multiple clicks
-        $(".start").prop('disabled', true);
-
-        function addAnimation() {
-            document.querySelectorAll('.slider').forEach(scroller => {
-                scroller.style.animation = 'none';
-                scroller.offsetHeight;
-                const animationDuration = isQuickSpin ? '9s' : '18s'; // Adjust duration based on Quick Spin
-                scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
-                scroller.style.animationPlayState = 'running';
-            });
-        }
-
-        function stopAtSelectedCard() {
-            document.querySelectorAll('.cards').forEach(card => {
-                const cardNonce = card.getAttribute('data-nonce');
-
-                // Highlight and position the card with matching nonce
-                if (cardNonce === targetNonce) {
-                    $(card).addClass('highlighted');
-                    card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-                } else {
-                    $(card).removeClass('highlighted');
-                }
-            });
-
-            // Enable the button after animation ends
-            $(".start").prop('disabled', false);
-        }
-
-        // Start spinning
-        addAnimation();
-
-        // Stop the animation after a delay
-        setTimeout(() => {
-            document.querySelectorAll('.slider').forEach(scroller => {
-                scroller.style.animationPlayState = 'paused';
-            });
-
-            // Find and stop at the selected card
-            stopAtSelectedCard();
-        }, isQuickSpin ? 4500 : 9000);  // Adjust time based on Quick Spin setting
     }
-});
-
 </script>
 
+{% include 'navtrove.html' %}
 
+  <main class="main-content" style="align-items: center; justify-content: center;">
+
+
+    <div class= "container" style="background: rgb(255, 255, 255, 0.3);
+    border-radius: 16px; width: 140%;">
+      <br>
+      <br>
+        <div class="table-responsive text-nowrap">
+    <h3>
+        <strong style="color: white;">My Cart</strong>
+    </h3>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col" style="color: white;">#</th>
+            <th scope="col" style="color: white;">Item Name</th>
+            <th scope="col" style="color: white;">Price</th>
+            <th scope="col" style="color: white;">Quantity</th>
+            <th scope="col" style="color: white;">Total Item Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for order_item in object.items.all %}
+        <tr><b>
+            <th scope="row" style="color: white;">{{ forloop.counter }}</th>
+            <td style="color: white;">{{ order_item.item.title }}</td>
+            <td style="color: white;">
+            {% if order_item.item.price %}
+                {% if order_item.item.discount_price %}
+                    <del style="color: white;">${{ order_item.item.price}}</del>
+                    ${{ order_item.item.discount_price }}
+                {% else %}
+                    ${{ order_item.item.price}}
+                {% endif %}
+                {% else %}
+                {% if order_item.item.discount_currency_price %}
+                    <del style="color: white;">💎{{ order_item.item.currency_price}}</del>
+                    💎{{ order_item.item.discount_currency_price }}
+                {% else %}
+                    💎{{ order_item.item.currency_price}}
+                {% endif %}
+            {% endif %}
+
+            </td>
+            <td style="color: white;">
+                <a href="{% url 'showcase:reduce-quantity-item' order_item.item.slug %}"><i class="fas fa-minus mr-2" style="color: white;"></i></a>
+                {{ order_item.quantity }}
+                <a href="{% url 'showcase:add-to-cart' order_item.item.slug %}"><i class="fas fa-plus ml-2" style="color: white;"></i></a>
+            </td>
+            <td>
+                {% if order_item.item.price %}
+                {% if order_item.item.discount_price %}
+                    <span style="color: white;"> ${{ order_item.get_discount_item_price }}</span>
+                    <span class="badge badge-success" style="color: white;" >Saved ${{ order_item.get_amount_saved }}</span>
+                {% else %}
+                   <span style="color: white;"> ${{ order_item.get_total_item_price}}</span>
+                {% endif %}
+                {% else %}
+                {% if order_item.item.discount_currency_price %}
+                <span style="color: white;">💎{{ order_item.get_discount_item_currency_price}}</span>
+
+                    <span class="badge badge-success" style="color: white;" >Saved 💎{{ order_item.get_currency_amount_saved }}</span>
+                {% else %}
+                <span style="color: white;">💎{{ order_item.get_item_currency_price}}</span>
+                {% endif %}
+            {% endif %}
+             <a href="{% url 'showcase:remove-from-cart' order_item.item.slug %}">
+                <i class="fas fa-trash float-right text-danger" style="color: white;"></i>
+             </a>
+
+            </td></b>
+        </tr>
+
+        {% empty %}
+        <tr>
+            <td colspan="5" style="color: white;">Your Cart Is Empty</td>
+        </tr>
+
+         <tr>
+            <td colspan="5">
+                <a href="{% url 'showcase:ehome' %}" class="btn btn-primary float-right" style="color: white;">Continue Shopping</a>
+            </td>
+        </tr>
+
+        {% endfor %}
+
+        {% if object.get_total_price %}
+        <tr>
+            <td colspan="4" style="color: white;"><b>Total Order Price</b></td>
+            <td style="color: white;">${{ object.get_total_price }}</td>
+        </tr>
+
+        {% endif %}
+        {% if object.get_total_currency_price %}
+        <tr>
+            <td colspan="4" style="color: white;"><b>Total Exchange Cost (💎)</b></td>
+            <td style="color: white;">💎{{ object.get_total_currency_price }}</td>
+        </tr>
+
+        {% endif %}
+         <tr>
+            <td colspan="5">
+                {% if user_profile_exists %}
+    <a href="{% url 'showcase:checkout' %}" class="btn btn-warning float-right ml-2" style="color: black;">Checkout</a>
+  <!--<a href="{% url 'showcase:payment' payment_option='card' %}" class="btn btn-warning float-right ml-2" style="color: black;">Use Saved Information</a>-->
+{% else %}
+    <a href="{% url 'showcase:checkout' %}" class="btn btn-warning float-right ml-2" style="color: black;">Checkout</a>
+{% endif %}
+<a href="{% url 'showcase:ehome' %}" class="btn btn-primary float-right" style="color: white;">Continue Shopping</a>
+
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+
+        </div>
+    </div>
+        </main>
     </div>
 
-    <div id="popup" class="popup">
-        <div class="fire-container">
-            <div class="fire">
-                <div class="flames">
-                    <div class="flame"></div>
-                    <div class="flame"></div>
-                    <div class="flame"></div>
-                    <div class="flame"></div>
-                </div>
-                <div class="glow"></div>
-            </div>
-        </div>
+<footer class="copyright-section">
+    <div class="container">
+        <p>{% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
 
-        <div class="text">
-            <h2>Congratulations!</h2>
-            <p>You got:</p>
-<p id="choice-id"></p>
-<p id="choice-text"></p>
-<p id="choice-color"></p>
-<img id="choice-file" src="" alt="Selected Choice Image" style="display:none;">
-<div id="hidden-form" style="display:none;">
-    <form method="POST" action="{% url 'showcase:sell_game_inventory_object' %}">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="sell">
-        <button type="submit" class="btn btn-danger">Sell Item</button>
-    </form>
-</div>
+        {{BaseCopyrightTextField.copyright}}
 
-        </div>
-    </div>
-
-  <div class="wrapper">
-        <div class="containerre" style="margin-top: 3%;
-  position: absolute;
-  top: 90%;
-  left: 50%;
-  transform: translate(-50%, -50%); ">
-            <div class="slider" id="slider">
-<!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
-            {% for item in choices_with_nonce %}
-                {% with choice=item.choice %}
-                    <div id="{{ choice.choice_text }}" class="cards" style="background: rgba(255, 255, 255, 0.3);">
-                        {% with color=game|get_color:choice %}
-                            <div class="lootelement"
-                                 data-price="{{ choice.value }}"
-                                 data-currency-file="{{ item.currency.file_url }}"
-                                 data-currency-symbol="{{ item.currency.symbol }}"
-                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-right: 18px;">
-                                <p style=" color: black;">
-                                    {% if choice.file.url %}
-                                    <img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}">
-                                    {% endif %}
-                                {{ choice.value }} 💎</p>
-                        <h5 style="margin-left: 22px;"></h5>
-                            </div>
-                        {% endwith %}
-                        <!--<p>Noncevalue: {{ item.nonce }}</p>
-                        <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
-                        <p>Random Amount: {{ random_amount }}</p>-->
-                    </div>
-                {% endwith %}
             {% endfor %}
-
-
-
-                {% for nonce, choice in matching_choices %}
-                    <p>Value: {{ choice.value }}</p>
-                    <p>Nonces: {{ nonce }}</p>
-                    <p>Choice: {{ choice.choice_text }}</p>
-
-            {% with cost_threshold=game.cost %}
-                {% with cost_threshold=cost_threshold|add:"0" %}
-                    {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost|mul:1 cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 %}
-                        {% if cost_threshold_10000 >= choice.value %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); padding: -10%; color: black;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_500 >= choice.value > cost_threshold_10000 %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); padding: 6%; color: black;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_200 >= choice.value > cost_threshold_500 %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); padding: 6%; color: black;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_100 >= choice.value > cost_threshold_200 %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); padding: 6%; color: black;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); padding: 6%; color: black;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
-                            <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); padding: 6%; color: black;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% else %}
-                            <p>This choice does not meet the cost requirement.</p>
-                        {% endif %}
-                    {% endwith %}
-                {% endwith %}
-            {% endwith %}
-                {% endfor %}
-
-
-            </div>
-
-            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
-        </div>
+        </p>
     </div>
-
-    <script>
-    const choicesWithNonce = {{ choices_with_nonce|safe }};
-</script>
-
-
-    <script>
-
-function createOutcome(gameId, slug) {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-fetch(`/create_outcome/${slug}/`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken,  // Ensure csrf token is being sent
-    },
-    body: JSON.stringify({
-        game_id: gameId,  // Pass the game_id as needed
-        other_data: otherData,  // Add any additional data as needed
-    })
-})
-}
-.then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            const choiceFile = data.choice_file;
-
-            if (choiceFile) {
-                const slider = document.querySelector('.slider'); // Adjust selector as needed
-                const newCard = document.createElement('div');
-                newCard.className = 'cards';
-                newCard.innerHTML = `
-                    <div class="lootelement"
-                         data-price="100"
-                         data-nonce="${data.nonce}"
-                         style="background: url('${choiceFile}'); padding: 6%; margin-left: 22px;">
-                       <img src="${choiceFile}" alt="Generated Card">
-                    </div>
-                    <h2 style="margin-left: 22px;">100 💎</h2>
-                    <p>Nonce: ${data.nonce}</p>
-                `;
-                slider.appendChild(newCard);
-            }
-        } else {
-            console.error('Error:', data.message);
-        }
-    })
-    .catch(error => console.error('Fetch error:', error));
-
-</script>
-
-
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-
-</script>
-
-<script>
-$(".start").click(function () {
-    const button = $(this);
-    button.prop('disabled', true); // Disable the button when clicked
-
-    // Step 1: Create the outcome and get the relevant choice
-   createOutcome(button.data('game-id'), button.data('slug'))
-    .then(data => {
-        if (data.status === 'success') {
-            const choice = {
-                id: data.choice_id,
-                choice_text: data.choice_text,
-                color: data.choice_color,
-                file: data.choice_file,
-                value: data.choice_value || 0,
-                lowerNonce: data.lower_nonce || 'N/A',
-                upperNonce: data.upper_nonce || 'N/A',
-            };
-
-            // Log the choice object to verify its structure
-            console.log('Choice Object:', choice);
-
-            renderChoiceDetails(choice);
-
-        } else {
-            console.error('Error:', data.message);
-            button.prop('disabled', false); // Re-enable the button if there's an error
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        button.prop('disabled', false); // Re-enable the button if there's an error
-    });
-
-                // Log the values to ensure they are correct
-                console.log('Nonce:', chosenNonce);
-                console.log('Choice ID:', choiceId);
-                console.log('Choice Text:', choiceText);
-                console.log('Choice Color:', choiceColor);
-                console.log('Choice File:', choiceFile);
-
-                // Step 2: Set the animation to randomize the cards
-                let randomizeFlag = true;
-
-                function randomizeContents() {
-                    if (randomizeFlag) {
-                        $('div#slider').each(function () {
-                            var $div_parent = $(this);
-                            var $divsArr = $div_parent.children('div.cards');
-                            $divsArr.sort(function (a, b) {
-                                var temp = parseInt(Math.random() * 10);
-                                var isOddOrEven = temp % 2;
-                                var isPosOrNeg = temp > 5 ? 1 : -1;
-                                return (isOddOrEven * isPosOrNeg);
-                            }).appendTo($div_parent);
-                        });
-                        setTimeout(randomizeContents, 2000);
-                    }
-                }
-
-                randomizeContents();
-
-                setTimeout(() => {
-                    randomizeFlag = false;
-
-                    // Step 3: Control the final stop based on the nonce or choiceId
-                    const slider = document.querySelector('.slider');
-                    const cards = slider.querySelectorAll('.card');
-
-                    // Calculate the position to center the chosen card
-                    let targetCard = null;
-                    cards.forEach(card => {
-                        if (parseInt(card.dataset.choiceId) === choiceId) {
-                            targetCard = card;
-                        }
-                    });
-
-                    if (targetCard) {
-                        const targetOffsetLeft = targetCard.offsetLeft;
-                        const sliderWidth = slider.offsetWidth;
-                        const cardWidth = targetCard.offsetWidth;
-                        const targetScrollPosition = targetOffsetLeft - (sliderWidth / 2) + (cardWidth / 2);
-
-                        slider.scrollTo({
-                            left: targetScrollPosition,
-                            behavior: 'smooth'
-                        });
-
-                        // Assuming 'choice' is an object you receive via AJAX or another method
-                        function renderChoiceDetails(choice) {
-                            document.getElementById('choice-id').innerText = `Selected Choice ID: ${choice.id || 'N/A'}`;
-                            document.getElementById('choice-text').innerText = `Selected Choice Text: ${choice.choice_text || 'N/A'}`;
-                            document.getElementById('choice-color').innerText = `Selected Choice Color: ${choice.color || 'N/A'}`;
-
-                            // Handle the file field
-                            const choiceFileElement = document.getElementById('choice-file');
-                            if (choice.file) {
-                                choiceFileElement.src = choice.file; // Assuming file is a URL
-                                choiceFileElement.style.display = 'block'; // Show the image
-                            } else {
-                                choiceFileElement.style.display = 'none'; // Hide the image if there's no file
-                            }
-                        }
-
-
-                        const choiceFileElement = document.getElementById('choice-file');
-                        if (choiceFile) {
-                            choiceFileElement.src = choiceFile;
-                            choiceFileElement.style.display = 'block';
-                        } else {
-                            choiceFileElement.style.display = 'none';
-                        }
-
-                    } else {
-                        console.error('Error: Target card not found.');
-                    }
-
-                    // Re-enable the button after the animation finishes
-                    button.prop('disabled', false);
-
-                }, 9000); // Stop after 9 seconds (adjustable)
-
-            } else {
-                console.error('Error:', data.message);
-                button.prop('disabled', false); // Re-enable the button if there's an error
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            button.prop('disabled', false); // Re-enable the button if there's an error
-        });
-});
-
-
-
-</script>
-
-    <!--sell item(s) after spins-->
-<script>
-
-</script>
-
-
-    {% include 'gameloottable.html' %}
-
-<br>
-<br></div>
-</body>
-
+</footer>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -1866,4 +985,3 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 </html>
 
-{% endblock content %}

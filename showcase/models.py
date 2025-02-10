@@ -648,6 +648,7 @@ class Subscription(models.Model):
 
 class Currency(models.Model):
     name = models.CharField(default='Rubies', max_length=200)
+    code = models.CharField(max_length=3, default='usd')
     flavor_text = models.CharField(max_length=200)
     file = models.FileField(null=True, verbose_name='Sprite')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -4468,7 +4469,7 @@ class UserProfile2(models.Model):
 
             # Prepare the defaults dictionary
             defaults = {
-                'street_address': self.address,
+                'street_address': self.address or '',
                 'zip': self.zip_code,
                 'country': self.country,  # Replace 'US' with a relevant country code or self.country
                 'address_type': 'shipping',  # Adjust as necessary
@@ -5881,7 +5882,7 @@ class Item(models.Model):
             self.slug = slugify(self.title)
             print('selugified')  # This should now appear in the console if the condition is met
 
-        if not self.price and not self.discount_price:
+        if self.price is None and self.discount_price is None:
             self.is_currency_based = True
 
         super().save(*args, **kwargs)

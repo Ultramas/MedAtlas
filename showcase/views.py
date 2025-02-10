@@ -213,6 +213,8 @@ from django.views.generic.edit import FormView
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
+from django.views.decorators.http import require_POST
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
@@ -5718,8 +5720,6 @@ def feedmonstrosity(request, monstrosity_id):
 #    return Background2aImage.objects.all()
 
 
-def home(request):
-    return render(request, 'home.html')
 
 
 from django.http import HttpRequest, JsonResponse
@@ -8935,6 +8935,21 @@ class BackgroundView(FormMixin, BaseView):
         context['About'] = Event.objects.filter(page=self.template_name, is_active=1)
         context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
         context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
+        users = User.objects.all()
+
+        # Loop through each user and attach extra attributes if available
+        for user in users:
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                # Attach new attributes to the user instance
+                user.newprofile_profile_picture_url = profile.avatar.url
+                user.newprofile_profile_url = profile.get_profile_url()
+            else:
+                # Optionally, attach default values if no profile is found
+                user.newprofile_profile_picture_url = None
+                user.newprofile_profile_url = "#"
+        context['Users'] = users
+
         context['username'] = signed_in_user  # Set 'username' to the extracted 'signed_in_user'
         context['room'] = signed_in_user
         context['show_chat'] = True
@@ -10850,9 +10865,27 @@ class PerksBackgroundView(BaseView):
 #    return Background2aImage.objects.all()
 
 
-def home(request):
-    return render(request, 'home.html')
+from django.shortcuts import render
 
+def home(request):
+    events = [
+        {
+            'title': '春节晚会 Spring Festival Gala',
+            'date': '2025-02-09',
+            'location': 'Celestial Hall'
+        },
+        {
+            'title': '中秋节 Mid-Autumn Festival',
+            'date': '2025-09-13',
+            'location': 'Moon Garden'
+        },
+        {
+            'title': '文化展览 Cultural Exhibition',
+            'date': '2025-03-15',
+            'location': 'Ethereal Gallery'
+        }
+    ]
+    return render(request, 'home.html', {'events': events})
 
 from django.http import HttpRequest, JsonResponse
 from django.views.generic import TemplateView
@@ -15066,8 +15099,6 @@ class ProductView(DetailView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
 
-
-
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -15957,6 +15988,64 @@ class UserEditView(generic.CreateView):
     template_name = 'showcase:edit_profile.html'
     success_url = reverse_lazy('login')
 
+
+class SuccessView(TemplateView):
+    template_name = 'success.html'
+
+class CancelView(TemplateView):
+    template_name = 'cancel.html'
+
+def product_view(request, slug):
+    item = get_object_or_404(Item, slug=slug)
+    context = {
+        'item': item,
+        'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY,
+    }
+    return render(request, 'product.html', context)
+
+
+@csrf_exempt
+@require_POST
+def create_checkout_session(request, slug):
+    item = get_object_or_404(Item, slug=slug)
+
+    if item.is_currency_based:
+        return JsonResponse({'error': 'This item requires in-game currency and cannot be purchased here.'}, status=400)
+
+    # Handle regular priced items
+    price = item.discount_price if item.discount_price else item.price
+    if price is None:
+        return JsonResponse({'error': 'Price not set for this item'}, status=400)
+
+    currency = item.currency.code.lower() if item.currency else 'usd'
+    print('the currency is ' + currency)
+    # Validate Stripe-supported currency
+    if currency not in ['usd', 'eur']:
+        return JsonResponse({'error': 'Currency not supported'}, status=400)
+
+    amount = int(price * 100)  # Convert to cents
+
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': currency,
+                    'product_data': {'name': item.title},
+                    'unit_amount': amount,
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=request.build_absolute_uri(reverse('showcase:success')) + '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=request.build_absolute_uri(reverse('showcase:cancel')),
+        )
+        print('one-click checkout session created')
+        return JsonResponse({'session_id': checkout_session.id})
+    except stripe.error.StripeError as e:
+        print('there were errors with the submition of the one-click checkout ')
+        print('the errors are ' + str(e))
+        return JsonResponse({'errors here': str(e)}, status=400)
 
 # from .models import PublicProfile
 # from .forms import PublicForm

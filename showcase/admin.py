@@ -1172,7 +1172,7 @@ class ItemAdmin(admin.ModelAdmin):
             'classes': ('collapse',),  # Open by default
         }),
         ('Item Information - Currency Prices', {
-            'fields': ('currency_price', 'discount_currency_price',),
+            'fields': ('currency', 'currency_price', 'discount_currency_price',),
             'classes': ('collapse',),  # Open by default
         }),
         ('Item Information - Image Display', {
@@ -1547,7 +1547,7 @@ class CurrencyAdmin(admin.ModelAdmin):
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Currency Information - Attributes', {
-            'fields': ('is_active',),
+            'fields': ('code', 'is_active',),
             'classes': ('collapse-open',),  # Open by default
         }),
         ('Currency Information - Image Display', {
