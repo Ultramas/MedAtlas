@@ -109,6 +109,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'showcase.middleware.middleware.CurrentUserMiddleware',
     'showcase.middleware.middleware.NotificationStatusMiddleware',
+    'django.middleware.locale.LocaleMiddleware'
 ]
 
 ROOT_URLCONF = 'mysite.urls'
