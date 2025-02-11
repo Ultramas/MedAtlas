@@ -1188,6 +1188,11 @@ class Endowment(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     experience = models.ForeignKey(Experience, on_delete=models.CASCADE)
     experience_increase = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
         return str(self.user) + " bestowed a gift upon " + str(self.target)

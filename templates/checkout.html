@@ -46,6 +46,10 @@
         letter-spacing: 1px;
         margin: 0;
     }
+
+    h6 {
+        color: black;
+    }
 </style>
 
     <style>
@@ -53,6 +57,7 @@
 
         :root {
             --primary: #bf97ff;
+            --primary-dark: #9a6bff;
             --primary-dark: #9a6bff;
             --background: #0a0a13;
             --text: #ffffff;
@@ -735,6 +740,7 @@ nav.main-menu ul li a {
             border-bottom: 2px solid #000;
             padding-bottom: 10px;
             margin-bottom: 15px;
+            color: black;
         }
         .label-header h2 {
             margin: 0;
@@ -743,6 +749,7 @@ nav.main-menu ul li a {
         }
         .address-section {
             margin-bottom: 15px;
+            color: black;
         }
         .address-section h3 {
             margin: 0 0 5px 0;
@@ -763,6 +770,9 @@ nav.main-menu ul li a {
             font-family: 'Courier New', monospace;
             font-size: 1.2em;
             letter-spacing: 2px;
+        }
+        .list-group-item{
+            color: black;
         }
     </style>
              <form id="checkout-form" method="POST" class="card-body" action="{% url 'showcase:payment' payment_option='card' %}">

@@ -1087,25 +1087,21 @@ from .models import Endowment
 
 
 class EndowmentForm(forms.Form):
-    # target = forms.ModelChoiceField(queryset=User.objects.exclude(pk=1))  # Exclude the superuser (with pk=1)
+    user = forms.CharField(widget=forms.HiddenInput())  # or use forms.ModelChoiceField if needed
     target = forms.CharField(widget=forms.TextInput(
-        attrs={'placeholder': 'Name of Endowed Individual'}))  # Exclude the superuser (with pk=1)
-
-    class Meta:
-        model = Endowment
-        fields = ['user', 'target', 'order']
+        attrs={'placeholder': 'Name of Endowed Individual'}))
+    order = forms.IntegerField(widget=forms.HiddenInput())  # Adjust widget/field type as needed
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        # get the current order
-
-        # Set initial values for target and user (optional, adjust as needed)
-        self.initial['user'] = self.request.user
-        self.initial['target'] = User.objects.exclude(pk=self.request.user.pk).first()
+        if self.request:
+            self.fields['user'].initial = self.request.user.username  # if using a CharField for username
+            self.fields['target'].initial = User.objects.exclude(pk=self.request.user.pk).first().username
+            # You can set an initial value for order if available
 
     def clean_user(self):
-        username = self.cleaned_data['user']
+        username = self.cleaned_data.get('user')
         try:
             user = User.objects.get(username=username)
             return user
@@ -1113,12 +1109,16 @@ class EndowmentForm(forms.Form):
             raise forms.ValidationError('Invalid username. Please enter a valid user.')
 
     def save(self, commit=True):
-        instance = Endowment(user=self.cleaned_data['user'], target=self.cleaned_data['target'],
-                             order=self.cleaned_data['order'])
-
+        # Convert the 'user' field value to an actual user instance using clean_user.
+        user = self.clean_user()
+        # You might need to adjust target if it's a username or process it accordingly.
+        instance = Endowment(
+            user=user,
+            target=self.cleaned_data['target'],
+            order=self.cleaned_data['order']
+        )
         if commit:
             instance.save()
-
         return instance
 
 

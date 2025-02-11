@@ -14645,6 +14645,8 @@ class CurrencyCheckoutView(EBaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
+
+        context['endowment_form'] = EndowmentForm(request=self.request)
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -14690,26 +14692,38 @@ class CurrencyCheckoutView(EBaseView):
 
     def post(self, *args, **kwargs):
         form = CurrencyCheckoutForm(self.request.POST or None)
-        # print(self.request.GET)
+        endowment_form = EndowmentForm(self.request.POST, request=self.request)
+        if endowment_form.is_valid():
+            endowment = endowment_form.save(commit=False)
+            # Optionally adjust endowment.user or endowment.order here if needed.
+            endowment.save()
+
         try:
             order = CurrencyFullOrder.objects.get(user=self.request.user, ordered=False)
 
             if form.is_valid():
                 payment_option = form.cleaned_data.get('payment_option')
-
                 if payment_option == 'S':
-                    return redirect('showcase:currencypayment',
-                                    payment_option='stripe')
+                    return redirect('showcase:currencypayment', payment_option='stripe')
                 elif payment_option == 'P':
-                    return redirect('showcase:currencypayment',
-                                    payment_option='paypal')
+                    return redirect('showcase:currencypayment', payment_option='paypal')
                 else:
-                    messages.warning(self.request,
-                                     "Invalid payment option selected")
+                    messages.warning(self.request, "Invalid payment option selected")
                     return redirect('showcase:currencycheckout')
+
+            # Process EndowmentForm if valid
+            if endowment_form.is_valid():
+                endowment = endowment_form.save(commit=False)
+                endowment.user = self.request.user  # Assign current user
+                endowment.order = order  # Assign the current order
+                endowment.save()
+                messages.success(self.request, "Endowment has been successfully recorded!")
+
         except ObjectDoesNotExist:
             messages.warning(self.request, "You do not have an active order")
             return redirect("showcase:currencymarket")
+
+        return redirect('showcase:currencycheckout')
 
 
 from paypalrestsdk import Payment as PayPalPayment

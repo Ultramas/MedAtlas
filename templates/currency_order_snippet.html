@@ -54,4 +54,13 @@
 
     {% endif %}
 
+    <form method="post">
+    {% csrf_token %}
+
+    <!-- Endowment Form Fields -->
+    <h3>Endowment Form</h3>
+    {{ endowment_form.as_p }}
+
+    <button type="submit">Submit</button>
+</form>
 </div>

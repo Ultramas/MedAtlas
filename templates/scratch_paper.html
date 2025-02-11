@@ -1,1857 +1,2304 @@
+{% if signed_in_user %}
+  {% include 'supportroom.html' %}
+{% endif %}
 {% load static %}
 
-
-{% load random_nonce %}
-<!--manually count-->
-{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeTrove - Game</title>
-        <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
+
+  	{% for BackgroundImage in Titles %}
+	{% if BackgroundImage.page == "index.html" or BackgroundImage.page == "base.html" %}
+    <title>{{BackgroundImage.overtitle}}</title>
+  	{% endif %}
+  	{% endfor %}
+
+	<!-- favicon -->
+	<link rel="shortcut icon" type="image/png" href="static/img/favicon.png">
+	<!-- google font -->
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+<script>
+	$(document).ready(function() {
+    $('.popup-youtube').magnificPopup({
+        type: 'iframe',
+        mainClass: 'mfp-fade',
+        removalDelay: 160,
+        preloader: false,
+        fixedContentPos: false
+    });
+});
 
-    <style>
-    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
-    .copyright-section {
-        background: linear-gradient(
-            to right,
-            rgba(191, 151, 255, 0.1),
-            rgba(255, 255, 255, 0.05),
-            rgba(191, 151, 255, 0.1)
-        );
-        backdrop-filter: blur(10px);
-        padding: 1rem 0;
-        text-align: center;
-        position: relative;
-        z-index: 100;
+function toggleChatWidget() {
+    var chatWidget = document.getElementById("chatwidget2");
+    if (chatWidget.style.display === "none") {
+        chatWidget.style.display = "block";
+    } else {
+        chatWidget.style.display = "none";
     }
+}
 
-    .copyright-section::before {
-        content: '';
+</script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+<style>
+
+	:root {
+		--primary: #bf97ff;
+		--primary-dark: #9a6bff;
+		--background: #0a0a13;
+		--text: #ffffff;
+		--accent: #4db2ea;
+		--accent2: #ffd700;
+	}
+
+	html, body{
+	height: 100%;
+	background-color: var(--background);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', serif;
+    background-image: url(data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E), radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
+
+	}
+.hero-area {
+    position: relative;
+    overflow: hidden;
+}
+
+.video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+}
+
+.container {
+    position: relative;
+    z-index: 2;
+}
+
+/* Style the popup button */
+.button {
+  cursor: pointer;
+}
+
+/* Style the popup menu content - hidden by default */
+.popup-menu {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  padding: 12px 16px;
+  z-index: 1;
+}
+
+
+.cart-btn{
+  background-image: url("{% static 'css/images/fireimage.png' %}"); /* Default image */
+  image-width: 100px;
+  image-height: 100px;
+  background-size: cover; /* Ensure image covers the button */
+  position: relative; /* Needed for proper stacking */
+}
+
+.cart-btn:hover {
+  background-image: url("{% static 'css/images/invertedfireimage.png' %}"); /* Hover image path */
+  opacity: 1; /* Ensure hover image is fully visible */
+}
+
+
+    .hero-text-tablecell {
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--primary), transparent);
-    }
-
-    .copyright-section p {
-        color: var(--text);
-        font-family: 'Cinzel', serif;
-        font-size: 0.9rem;
-        letter-spacing: 1px;
-        margin: 0;
-    }
-</style>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
-
-        :root {
-            --primary: #bf97ff;
-            --primary-dark: #9a6bff;
-            --background: #0a0a13;
-            --text: #ffffff;
-            --accent: #4db2ea;
-            --accent2: #ffd700;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: var(--background);
-            color: var(--text);
-            font-family: 'Cormorant Garamond', serif;
-            background-image:
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
-            min-height: 100vh;
-        }
-
-        .main-menu {
-            display: flex;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(
-                to right,
-                rgba(191, 151, 255, 0.1),
-                rgba(255, 255, 255, 0.05),
-                rgba(191, 151, 255, 0.1)
-            );
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            height: 100%;
-            z-index: 100;
-        }
-        a {
-            color: var(--primary);
-            text-decoration: none;
-            background-color: transparent;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
-            position: relative;
-        }
-
-        .logo::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .logo-icon {
-            color: var(--accent);
-            font-size: 2rem;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
-        }
-
-        .nav-links {
-            margin-left: auto;
-            display: flex;
-            gap: 3rem;
-        }
-
-        .nav-links a {
-
-    color: var(--primary);
-            text-decoration: none;
-            position: relative;
-            padding: 0.5rem 0;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            /*font-size: 1rem;*/
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-    .logo-icon h1::after {
-        content: '';
-        position: absolute;
-        bottom: -15px;
+        top: 50%;
         left: 50%;
-        transform: translateX(-50%);
-        width: 200px;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        transform: translate(-50%, -50%);
+        z-index: 1;
     }
-        .container {
-            display: flex;
-            gap: 3rem;
-            padding: 3rem;
-            max-width: 1800px;
-            margin: 0 auto;
-        }
+	#sticker {
+    position: fixed;
+    width: 100%;
+    transition: background 1s;
+}
 
-        .sidebar {
-            width: 320px;
-            flex-shrink: 0;
-        }
+	.contented{
+	background: url("{% static 'css/images/blue-message-text-bubble.png' %}");
+	}
 
-        .user-profile {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            position: relative;
-            overflow: hidden;
-        }
+	.image-container {
+    position: relative;
+    display: inline-block; /* Ensures the size adjusts to the image */
+    width: 100px;
+    height: 100px;
+}
 
-        .user-profile::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
+.image-container img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
 
-        .profile-picture {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid var(--accent2);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
+.image-container h3 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white; /* Change to a contrasting color */
+    font-size: 14px; /* Adjust font size as needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Optional: Add a background for better readability */
+    padding: 5px; /* Optional: Add padding */
+    border-radius: 5px; /* Optional: Add rounded corners */
+    text-align: center;
+}
 
-        .profile-picture img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
 
-        .user-info {
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
 
-        .username {
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            color: var(--primary);
-            margin-bottom: 0.75rem;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
-        }
-
-        .user-stats {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            font-size: 1rem;
-        }
-
-        .user-stat {
-            background: rgba(191, 151, 255, 0.1);
-            padding: 0.75rem 1.25rem;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid var(--primary);
-        }
-
-        .user-stat-icon {
-            font-size: 1.5rem;
-        }
-
-        .filters {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .filters h2, .collection-title {
-            color: var(--primary);
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-            font-family: 'Cinzel', serif;
-            text-align: center;
-            position: relative;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
-        }
-
-        .filters h2::after, .collection-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .search-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 100%;
-            color: var(--text);
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-        }
-
-        .type-select {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 100%;
-            color: var(--text);
-            margin-bottom: 2rem;
-            cursor: pointer;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-        }
-
-        .view-collection {
+        .hero-section {
+            background-image: url('https://via.placeholder.com/1920x1080');
+            background-size: cover;
+            background-position: center;
+            height: 500px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.75rem;
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-            border: 2px solid var(--primary);
-            color: var(--text);
-            padding: 1rem;
-            border-radius: 8px;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 1.1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .view-collection::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
-            transition: transform 0.5s ease;
-        }
-
-        .view-collection:hover::before {
-            transform: translate(25%, 25%);
-        }
-
-        .view-collection:hover {
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-            border-color: var(--accent);
-            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
-            transform: translateY(-2px);
-            color: var(--accent);
-        }
-
-        .main-content h1 {
-            color: var(--primary);
-            font-size: 3rem;
-            margin-bottom: 3rem;
-            font-family: 'Cinzel', serif;
             text-align: center;
+            color: var(--foreground);
             position: relative;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
         }
 
-        .main-content h1::after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .nav-links h1::after {
-            content: '';
-            position: absolute;
-            left: 10%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .pokemon-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
-        }
-
-        .pokemon-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            overflow: hidden;
-            position: relative;
-            border: 2px solid var(--primary);
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
-        }
-
-        .pokemon-card:hover {
-            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
-            border-color: var(--accent);
-        }
-
-        .pokemon-card::before {
+        .hero-section::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-content {
+            position: relative;
             z-index: 1;
         }
 
-        .pokemon-image {
-            width: 100%;
-            aspect-ratio: 1;
-            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .pokemon-image::after {
-            content: '';
-            position: absolute;
-            width: 150%;
-            height: 150%;
-            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
-            animation: rotate 20s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .pokemon-info {
-            padding: 1.5rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        .pokemon-name {
-            font-size: 1.75rem;
-            margin-bottom: 0.75rem;
-            font-family: 'Cinzel', serif;
+        .hero-title {
+            font-size: 48px;
+            margin-bottom: 20px;
             color: var(--primary);
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
-        .pokemon-type {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 1rem;
+        .hero-subtitle {
+            font-size: 24px;
+            margin-bottom: 30px;
         }
 
-        .add-button {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-            border: 2px solid var(--primary);
-            color: var(--text);
-            border-radius: 8px;
+        .cta-button {
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: var(--background);
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
             cursor: pointer;
-            margin-top: 1.5rem;
-            transition: all 0.3s ease;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 1.1rem;
-            position: relative;
-            overflow: hidden;
+            transition: background-color 0.3s ease;
         }
 
-        .add-button::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
-            transition: transform 0.5s ease;
+        .cta-button:hover {
+            background-color: var(--accent);
         }
 
-        .add-button:hover::before {
-            transform: translate(25%, 25%);
-        }
+		.product-image{
+			background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0%, rgba(0, 0, 0, 1) 80%);
+			border-radius: 15px;
+		}
+</style>
 
-        .add-button:hover {
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-            border-color: var(--accent);
-            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
-            transform: translateY(-2px);
-            color: var(--accent);
-        }
-
-        .legendary-icon {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            color: var(--accent);
-            background: rgba(255, 215, 0, 0.1);
-            padding: 0.75rem;
-            border-radius: 50%;
-            z-index: 2;
-            backdrop-filter: blur(5px);
-            border: 2px solid var(--accent2);
-            font-size: 1.5rem;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
-            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-        }
-
-                .inventory-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        @media (max-width: 1200px) {
-            .inventory-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .inventory-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .inventory-item {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            overflow: hidden;
-            position: relative;
-            border: 2px solid var(--primary);
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
-        }
-
-        .inventory-item:hover {
-            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
-            border-color: var(--accent);
-        }
+<script>
+window.onscroll = function() {
+    var sticker = document.getElementById('sticker');
+    if (window.pageYOffset > window.innerHeight / 2) {
+        sticker.style.background = 'rgba(0, 0, 0, 1)';
+        sticker.style.color = 'white';
+        currency_designation.style.color = 'white';
+    } else {
+        sticker.style.background = 'linear-gradient(rgba(0, 0, 0, 1), rgba(0,0,0,0))';
+        sticker.style.color = 'black';
+        currency_designation.style.color = 'black';
+    }
+};
+</script>
+</head>
+<body>
 
 
+	<!--PreLoader-->
+    <div class="loader">
+        <div class="loader-inner">
+            <div class="circle"></div>
+        </div>
+    </div>
+    <!--PreLoader Ends-->
 
-.view-toggle {
-    text-align: right;
-    margin-bottom: 1rem;
+
+{% include 'navtrove.html' %}
+<div class="hero-area hero-bg" style="margin-top: 0%;">
+        {% for BackgroundImage in Background %}
+            {% if BackgroundImage.page == "index.html" %}
+                {% if BackgroundImage.position == 1 %}
+	l';knjbk
+<div class="video-background"
+     style="background: url('{% if BackgroundImage.file and BackgroundImage.file.url %}{{ BackgroundImage.file.url }}{% else %}{{ BackgroundImage.cover.url }}{% endif %}');
+            background-size: cover;
+            background-attachment: fixed;">
+
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </div>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-9 offset-lg-2 text-center">
+					<div class="hero-text">
+						<div class="hero-text-tablecell">
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 1 %}
+							{% if BackgroundImage.text_color %}
+							<h1 style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h1>
+							{% else %}
+							<h1 style="color: white;">{{BackgroundImage.text}}</h1>
+						  	{% endif %}
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 2 %}
+							{% if BackgroundImage.text_color %}
+              <p style="color: {{BackgroundImage.text_color}}" class="subtitle">{{BackgroundImage.text}}</p>
+							{% else %}
+              <p style="color: #F28123" class="subtitle">{{BackgroundImage.text}}</p>
+						  	{% endif %}
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+							<div class="hero-btns">
+
+
+                            {% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 3 %}
+                            <a href="{{BackgroundImage.hyperlink}}" class="boxed-btn">{{BackgroundImage.text}}</a>
+                            {% endif %}
+							{% endif %}
+							{% endfor %}
+
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 4 %}
+								<a href="{{BackgroundImage.hyperlink}}" class="bordered-btn">{{BackgroundImage.text}}</a>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end hero area -->
+
+	<!-- features list section -->
+	<div class="list-section pt-80 pb-80" style="=">
+		<div class="container">
+
+			<div class="row">
+				<div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+						<div class="list-icon">
+
+						</div>
+						</div>
+						{% for TopHits in tophit %}
+					<div class="list-box d-flex align-items-center">
+						<div class="content" style="padding: 25px; margin: 10px; background: radial-gradient(circle at center, blue,{{TopHits.color}}, white 100%)">
+							<div class="image-container">
+								<img src="{{ TopHits.file.url }}" alt="Image" style="width: 100px; height: 100px;">
+								<h3>{{ TopHits.user.username }}</h3>
+							</div>
+						</div>
+					</div>
+							{% endfor %}
+				</div>
+
+				<div class="col-lg-4 col-md-6">
+
+					<div class="list-box d-flex justify-content-start align-items-center">
+						<div class="content">
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 9 %}
+							<h3>{{BackgroundImage.text}}</h3>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+
+							{% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 10 %}
+							<p>{{BackgroundImage.text}}</p>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+						</div>
+					</div>
+				</div>
+			</div>
+
+            </div>
+		</div>
+	<!-- end features list section -->
+
+	<!-- chests section -->
+        {% for BackgroundImage in Background %}
+            {% if BackgroundImage.page == "index.html" %}
+                {% if BackgroundImage.position == 2 %}
+	<div class="product-section mt-150 mb-150" style="background: url('{{BackgroundImage.cover.url}}'); background-size: cover;">
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+
+        {% for BackgroundImage in Background %}
+            {% if BackgroundImage.page == "index.html" %}
+                {% if BackgroundImage.position == 3 %}
+		<div class="container" style="background: url('{{BackgroundImage.cover.url}}');  alt='{{ BackgroundImage.image.url }}'; background-size: cover; background-repeat: no-repeat;">
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+			<div class="row" id="#game">
+				<div class="col-lg-8 offset-lg-2 text-center">
+					<div class="section-title">
+						<br>
+						<br>
+						<h3 ><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h3>
+						{% for BackgroundImage in TextFielde %}
+						{% if BackgroundImage.page == "index.html" %}
+						{% if BackgroundImage.section == 11 %}
+						<p>{{BackgroundImage.text}}</p>
+					    {% endif %}
+						{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				      {% for Game in FeaturedGame %}
+				<div class="col-lg-4 col-md-6 text-center">
+					<div class="single-product-item">
+						<div class="product-image">
+							<a href="{{ Game.get_profile_url2 }}">
+								<img src="{{Game.image.url}}" alt="{{ Game.image.url }}">
+							</a>
+						</div>
+						<h3 style="color: white;">{{Game.name}}</h3>
+
+
+                 {% if Game.discount_cost %}
+                 <p class="product-price">
+					 {% if Game.discount_cost %}
+                        <span style="text-decoration: line-through;">{{ Game.cost }}💎</span>
+                        {{ Game.discount_cost }}💎
+                    {% else %}
+                        {{ Game.cost }}💎
+                    {% endif %} </p>
+						 <a href="{{ product.get_profile_url }}" class="cart-btn">
+                                  <div class="cart-btn-fire"></div>Check It Out!</a>
+
+						 {% else %}
+						 <p class="product-price"> {{ Game.cost }}💎 </p>
+						 <a href="{{ Game.get_profile_url2 }}" class="cart-btn">
+                                  <div class="cart-btn-fire"></div> Check It Out!</a>
+
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+      </div>
+				{% endfor %}
+
+
+	<!-- end chests section -->
+
+	<!-- product section -->
+
+        {% for BackgroundImage in Background %}
+            {% if BackgroundImage.page == "index.html" %}
+                {% if BackgroundImage.position == 4 %}
+		<div class="product-section mt-150 mb-150" style="background: url('{{BackgroundImage.cover.url}}');  alt='{{ BackgroundImage.image.url }}'; background-size: cover;">
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+		<div class="container" id="game">
+			<div class="row">
+				<div class="col-lg-8 offset-lg-2 text-center">
+					<div class="section-title">
+						<br>
+						<br>
+						<br>
+						<h3 style="color: #e5e4e2;"><span class="orange-text" style="color: #bf97ff;">PokeTrove</span> Marketplace</h3>
+						{% for BackgroundImage in TextFielde %}
+						{% if BackgroundImage.page == "index.html" %}
+						{% if BackgroundImage.section == 12 %}
+						<p>{{BackgroundImage.text}}</p>
+					    {% endif %}
+						{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				      {% for product in Products %}
+				<div class="col-lg-4 col-md-6 text-center">
+					<div class="single-product-item">
+						<div class="product-image">
+							<a href="{{ product.get_profile_url }}">
+								<img src="{{product.image.url}}" alt="{{ product.image.url }}">
+							</a>
+						</div>
+						<h3 style="color: white;">{{product.title}}</h3>
+
+
+                 {% if product.price %}
+					 {% if product.discount_price %}
+                 <p class="product-price">
+					 {% if product.discount_price %}
+                        <span style="text-decoration: line-through;">${{ product.price }}</span>
+                        ${{ product.discount_price }}
+                    {% else %}
+                        {{ product.price }}
+                    {% endif %} </p>
+						 <a href="{{ product.get_profile_url }}" class="cart-btn">
+                                  <div class="cart-btn-fire"></div>Check It Out!</a>
+
+						 {% else %}
+						 <p class="product-price"> ${{ product.price }} </p>
+						 <a href="{{ product.get_profile_url }}" class="cart-btn">
+                                  <div class="cart-btn-fire"></div> Check It Out!</a>
+
+						{% endif %}
+						{% else %}
+						 {% if product.discount_currency_price %}
+                 <p class="product-price">
+						                 {% if product.discount_currency_price %}
+                        <span style="text-decoration: line-through;">💎{{ product.currency_price }}</span>
+                        💎{{ product.discount_currency_price }}
+                    {% else %}
+                        💎{{ product.currency_price }}
+                    {% endif %} </p>
+						 <a href="{{ product.get_profile_url }}" class="cart-btn">
+                                  <div class="cart-btn-fire"></div>Check It Out!</a>
+
+						 {% else %}
+						 <p class="product-price"> 💎{{ product.currency_price }} </p>
+						 <a href="{{ product.get_profile_url }}" class="cart-btn">
+                                  <div class="cart-btn-fire"></div> Check It Out!</a>
+						{% endif %}
+						{% endif %}
+					</div>
+				</div>
+				{% endfor %}
+
+		</div>
+	</div>
+
+	</div>
+	<!-- end product section -->
+
+	<!-- shop banner -->
+{% for BackgroundImage in Advertisement %}
+	<section class="shop-banner">
+    	<div class="container">
+        	<h3>Daily Deal: {{ BackgroundImage.advertisementtitle }}</span></h3>
+            <div class="sale-percent"><span>{{ BackgroundImage.relevance }}</span></div>
+		    <a href="{{ BackgroundImage.advertisement_hyperlink }}" class="cart-btn btn-lg" target="_blank">Get Mine Now!</a>
+		    </div>
+		<img src="{{ BackgroundImage.advertisement.url }}" alt='{{ BackgroundImage.advertisementtitle }}' style="margin-left: 50%; margin-top: -50%; height='{{BackgroundImage.length_for_resize}}'; width='{{BackgroundImage.width_for_resize}};'">
+
+    </section>
+		{% endfor %}
+	<!-- end shop banner -->
+
+	<!-- testimonail-section -->
+	<div class="testimonail-section mt-150 mb-150">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-10 offset-lg-1 text-center">
+					<div class="testimonial-sliders">
+					{% for BackgroundImage in Feedback %}
+					{% if BackgroundImage.showcase == 1 %}
+						<div class="single-testimonial-slider">
+								{% for feed in FeedBacking %}
+								{% if feed.feedback_profile_url %}
+								<a href="{{feed.feedback_profile_url}}">
+								{% endif %}
+								{% endfor %}
+									  {% if feedback_objects.newprofile_profile_picture_url %}
+
+                                  <a href="{{ feedback_objects.newprofile_profile_url }}">
+									  <div class="client-avater">
+									  <img src="{{ feedback_objects.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
+									  </div>
+                                  </a>
+                                {% else %}
+                                   <!-- Placeholder image or default avatar -->
+                                  <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
+                                {% endif %}
+
+
+									</a>
+							<div class="client-meta">
+								<h3>
+								<a href="{{ feedback_objects.newprofile_profile_url }}">
+							    <h2>{{feedback_objects.username}}</h2>
+    							</a>
+ 								</h3>
+								<p class="testimonial-body">
+									" {{BackgroundImage.comment}} "
+								</p>
+								<div class="last-icon">
+									<h6>→</h6>
+								</div>
+							</div>
+						</div>
+						{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end testimonail-section -->
+
+	<!-- advertisement section -->
+	<div class="abt-section mb-150">
+		<div class="container">
+			<div class="row">
+				<style>
+    /* Ensure the iframe scaler container is styled correctly */
+    .mfp-iframe-scaler {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #000; /* Black background for better visibility */
+        max-width: 800px;
+        margin: auto;
+    }
+
+    .mfp-iframe-scaler video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Custom popup styling */
+    .mfp-hide {
+        display: none; /* Hide the popup initially */
+    }
+</style>
+<script>
+    $(document).ready(function() {
+        // Initialize Magnific Popup for the play button
+        $('.popup-youtube').magnificPopup({
+            type: 'inline', // Inline popup for the video container
+            midClick: true, // Allow opening popup on middle mouse click or touch
+            closeOnContentClick: false, // Do not close on content click
+            mainClass: 'mfp-fade', // Add fade effect
+        });
+    });
+</script>
+
+				<div class="col-lg-6 col-md-12">
+    {% for BackgroundImage in Background %}
+    {% if BackgroundImage.position == 5 %}
+    <div class="abt-bg" style="background: url({{ BackgroundImage.cover.url }}); background-size: cover;">
+        <!-- Trigger popup with the play button -->
+        <a href="#video-popup" class="video-play-btn popup-youtube" style="color: #bf97ff;">
+            <img src="{% static 'css/images/play-button-arrowhead.png' %}" style="width: 25px; height: 25px; margin-top: 30px;">
+        </a>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Video popup (hidden by default) -->
+    {% for BackgroundImage in Background %}
+    {% if BackgroundImage.page == "index.html" and BackgroundImage.position == 6 %}
+    <div id="video-popup" class="mfp-hide">
+        <div class="mfp-iframe-scalere">
+            <video autoplay loop muted playsinline controls style="display: flex; flex-direction: row; margin: auto;">
+                <source src="{{ BackgroundImage.file.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+
+				<div class="col-lg-6 col-md-12">
+					<div class="abt-text">
+						<p class="top-sub">Est 2024</p>
+						<h2 style="color: #e5e4e2;">We are <span class="orange-text" style="color: #bf97ff;">PokeTrove</span></h2>
+						{% for BackgroundImage in TextFielde %}
+						{% if BackgroundImage.page == "index.html" %}
+						{% if BackgroundImage.section == 13 %}
+						<p>{{BackgroundImage.text}}</p>
+					  	{% endif %}
+						{% endif %}
+						{% endfor %}
+
+						{% for BackgroundImage in TextFielde %}
+						{% if BackgroundImage.page == "index.html" %}
+						{% if BackgroundImage.section == 14 %}
+						<p>{{BackgroundImage.text}}</p>
+					  	{% endif %}
+						{% endif %}
+						{% endfor %}
+						<a href="about" class="boxed-btn mt-4" style="">About Us</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end advertisement section -->
+
+
+	<!-- end advertisement section -->
+	<!-- cart banner section -->
+	<section class="cart-banner pt-100 pb-100">
+
+	  	{% for BackgroundImage in Events %}
+        {% if BackgroundImage.page == "index.html" %}
+    	<div class="container">
+        	<div class="row clearfix">
+            	<!--Image Column-->
+            	<div class="image-column col-lg-6">
+                	<div class="image">
+                    	<div class="price-box">
+                        	<div class="inner-price">
+                                <span class="price">
+                                    <strong>{{BackgroundImage.numeric_quantifier}}%</strong> <br> {{BackgroundImage.qualitative_qualifier}}
+                                </span>
+                            </div>
+                        </div>
+                    	<img src="{{BackgroundImage.cover.url}}" style="margin-left: 32%;" alt="">
+                    </div>
+                </div>
+                <!--Content Column-->
+                <div class="content-column col-lg-6">
+					<h3 style="width: 1030%;"><span class="orange-text">{{BackgroundImage.name}}</span> Event</h3>
+                    <h4>Hosted By {{BackgroundImage.user}}</h4>
+                    <div class="text">{{BackgroundImage.description}}</div>
+                    <!--Countdown Timer-->
+                    <div class="time-counter"><div class="time-countdown clearfix" data-countdown="2020/2/01"><div class="counter-column"><div class="inner"><span class="count">00</span>Days</div></div> <div class="counter-column"><div class="inner"><span class="count">00</span>Hours</div></div>  <div class="counter-column"><div class="inner"><span class="count">00</span>Mins</div></div>  <div class="counter-column"><div class="inner"><span class="count">00</span>Secs</div></div></div></div>
+
+                    <h5>Event on {{BackgroundImage.date}} at {{BackgroundImage.time}}</h5>
+                	<a href="events.html" class="cart-btn mt-3"><i class="fas fa-shopping-cart"></i> What's a {{BackgroundImage.name}}??</a>
+                </div>
+				{% endif %}
+				{% endfor %}
+
+            </div>
+        </div>
+    </section>
+    <!-- end cart banner section -->
+
+	<!-- latest news -->
+	<div class="latest-news pt-150 pb-150">
+		<div class="container">
+
+			<div class="row">
+				<div class="col-lg-8 offset-lg-2 text-center">
+					<div class="section-title">
+						<h3 style="color: #e5e4e2;"><span class="orange-text" style="color: #bf97ff;">Our</span> News</h3>
+						{% for BackgroundImage in TextFielde %}
+						{% if BackgroundImage.page == "index.html" %}
+						{% if BackgroundImage.section == 15 %}
+						<p>{{BackgroundImage.text}}</p>
+					  	{% endif %}
+						{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+	<!-- latest news -->
+	<div class="latest-news mt-150 mb-150" style="margin-top: -3%;">
+		<div class="container">
+			<div class="row">
+	{% for newprofile in News %}
+				<div class="col-lg-4 col-md-6">
+					<div class="single-latest-news">
+						<a href="{{newprofile.get_profile_url2}}">
+							<div class="latest-news-bg news-bg-1" style="background: url({{newprofile.image.url}}); background-size: cover;"></div></a>
+						<div class="news-text-box">
+							<h3 style="color: #e5e4e2;"><a href="{{newprofile.get_profile_url2}}">{{newprofile.title}}</a></h3>
+							<p class="blog-meta">
+								<span class="author"><i class="fas fa-user"></i> {{ newprofile.category }} </span>
+								<span class="date"><i class="fas fa-calendar"></i> {{newprofile.date_and_time}} </span>
+								<br>
+							</p>
+							{% with description=newprofile.description %}
+							<p class="excerpt">
+								{% if description|length > 200 %}
+									{{ description|slice:":200" }}...
+								{% else %}
+									{{ description }}
+								{% endif %}
+							</p>
+						{% endwith %}
+						<ul style="width: 100%;">
+								<span class="author" style="display: flex; align-items: center;">
+									{% if newprofile.newprofile_profile_picture_url %}
+									<a href="{{ newprofile.newprofile_profile_url }}">
+										<img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
+									</a>
+									{% else %}
+									<!-- Placeholder image or default avatar -->
+									<img src="{% static 'css/images/a.jpg' %}" alt="qwww Avatar" width="50" height="50" style="border-radius: 50px;">>
+									{% endif %}
+									<h5 style="">{{ newprofile.name }}</h5>
+								</span>
+						</ul>
+
+							<br>
+							<a href="{{newprofile.get_profile_url2}}" class="read-more-btn">Read More → </a>
+
+						</div>
+					</div>
+				</div>
+					{% endfor %}
+
+				</div>
+
+
+			</div>
+			<div class="row">
+				<div class="col-lg-12 text-center">
+					<a href="{% url 'showcase:newsfeed' %}" class="boxed-btn">More News</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+	<!-- end latest news -->
+
+	<!-- trending communities carousel -->
+	<div class="logo-carousel-section">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="logo-carousel-inner">
+						{% for BackgroundImage in Background %}
+						{% if BackgroundImage.page == 'index.html' %}
+                  		{% if BackgroundImage.position == 6 %}
+						<div class="single-logo-item">
+							<a href="{{ BackgroundImage.hyperlink }}">
+							<img src="{{ BackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
+
+						{% for BackgroundImage in Background %}
+						{% if BackgroundImage.page == 'index.html' %}
+                  		{% if BackgroundImage.position == 7 %}
+						<div class="single-logo-item">
+							<a href="{{ BackgroundImage.hyperlink }}">
+							<img src="{{ BackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
+
+						{% for BackgroundImage in Background %}
+						{% if BackgroundImage.page == 'index.html' %}
+                  		{% if BackgroundImage.position == 8 %}
+						<div class="single-logo-item">
+							<a href="{{ BackgroundImage.hyperlink }}">
+							<img src="{{ BackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
+
+						{% for BackgroundImage in Background %}
+						{% if BackgroundImage.page == 'index.html' %}
+                  		{% if BackgroundImage.position == 9 %}
+						<div class="single-logo-item">
+							<a href="{{ BackgroundImage.hyperlink }}">
+							<img src="{{ BackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
+
+						{% for BackgroundImage in Background %}
+						{% if BackgroundImage.page == 'index.html' %}
+                  		{% if BackgroundImage.position == 10 %}
+						<div class="single-logo-item">
+							<a href="{{ BackgroundImage.hyperlink }}">
+							<img src="{{ BackgroundImage.image.url }}" alt="">
+							</a>
+						</div>
+						{% endif %}
+						{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end logo carousel -->
+
+	<!-- footer -->
+	<div class="footer-area" style="margin-bottom: -450px;">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-3 col-md-6">
+					<div class="footer-box about-widget">
+						<h2 class="widget-title">About Us</h2>
+                            {% for BackgroundImage in TextFielde %}
+							{% if BackgroundImage.page == "index.html" %}
+							{% if BackgroundImage.section == 16 %}
+							<p>{{BackgroundImage.text}}</p>
+						  	{% endif %}
+							{% endif %}
+							{% endfor %}
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6">
+					<div class="footer-box get-in-touch">
+						<h2 class="widget-title">Join Our Community! </h2>
+						<ul>
+							<li>Address To Be Added</li>
+							<li><a href="{% url 'showcase:contact' %}" target='_blank' style="text-decoration: none;">PokeTroveCompany@gmail.com</a></li>
+							<li>Number To Be Added</li>
+							<li><a href="{% url 'showcase:home' %}" target='_blank' style="text-decoration: none;">Find Your Community</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6">
+					<div class="footer-box pages">
+						<h2 class="widget-title">Pages</h2>
+						<br>
+						<ul>
+							<li><a href="{% url 'showcase:index' %}">Home</a></li>
+							<li><a href="{% url 'showcase:about' %}">About</a></li>
+							<li><a href="{% url 'showcase:ehome' %}">Shop</a></li>
+							<li><a href="{% url 'showcase:newsfeed' %}">News</a></li>
+							<li><a href="{% url 'showcase:contact' %}">Contact</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6">
+					<div class="footer-box subscribe">
+						<h2 class="widget-title">Subscribe</h2>
+						<p>Subscribe to our mailing list to get the latest updates!</p>
+						<form method="post" action="">
+    						{% csrf_token %}
+							{{ form.email }}
+							<a href="{% url 'showcase:emaildone' %}">
+								<button type="submit" style="height: 50px;"><img src="{% static 'css/images/sendemailairplane.png' %}" style="width: 30px; height: 16px; "></button>
+							</a>
+													<br>
+							I agree to the Terms & Conditions: {{ form.confirmation }}
+						</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end footer -->
+
+	<!-- copyright -->
+	<div class="copyright" style="margin-bottom: -10%;">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-6 col-md-12">
+					{% for BackgroundImage in BaseCopyrightTextFielded %}
+					{% if BackgroundImage.page == "index.html" %}
+					<p>{{BackgroundImage.copyright}}</p>
+					{% endif %}
+					{% endfor %}
+				</div>
+				<div class="col-lg-6 text-right col-md-12">
+					<div class="social-icons">
+						<ul>
+					{% for BackgroundImage in Social %}
+					{% if BackgroundImage.page == "index.html" %}
+							<li><a href="{{BackgroundImage.hyperlink}}" target="_blank"><img src="{{BackgroundImage.icon.url}}" alt="{{ BackgroundImage.alternate }}" style="width: 30px; height: 30px;"></a></li>
+					{% endif %}
+					{% endfor %}
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<style>
+
+.bg {
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  /* background: url('https://images.unsplash.com/photo-1451186859696-371d9477be93?crop=entropy&fit=crop&fm=jpg&h=975&ixjsv=2.1.0&ixlib=rb-0.3.5&q=80&w=1925') no-repeat 0 0;*/
+  filter: blur(80px);
+  transform: scale(1.2);
+  background: #fff;
 }
 
-.toggle-btn {
-    background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-    border: 2px solid var(--primary);
-    color: var(--text);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
+/*--------------------
+Chat
+--------------------*/
+.chat {
+  position: relative;
+  /*  top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);*/
+  width: 100%;
+  height: calc(100% - 15px);
+  max-height: 500px;
+  z-index: 10;
+  overflow: hidden;
+  /*box-shadow: 0 5px 30px rgba(0, 0, 0, .2);*/
+  /* background: rgba(0, 0, 0, .5);*/
+  background: transparent;
+  border-radius: 20px;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+.chat2 {
+  /*  top: 50%;
+    left: 10%;
+    transform: translate(-50%, -50%);*/
+  position: relative;
+  height: calc(100% - 15px);
+  max-height: 500px;
+  z-index: 10;
+  overflow: hidden;
+  /*box-shadow: 0 5px 30px rgba(0, 0, 0, .2);*/
+  /* background: rgba(0, 0, 0, .5);*/
+  background: transparent;
+  border-radius: 20px;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+/*--------------------
+Chat Title
+--------------------*/
+.chat-title {
+  flex: 0 1 45px;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  border-bottom: 1px solid #ccc;
+  color: #777;
+  padding-top: 50px;
+  padding-bottom: 5px;
+  background-color: rgba(245, 245, 245, 1);
+  text-transform: uppercase;
+  text-align: center;
+}
+.chat2-title {
+    flex: 0 1 45px;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    border-bottom: 1px solid #ccc;
+    color: #777;
+    padding-top: 50px;
+    padding-bottom: 5px;
+    background-color: rgba(245, 245, 245, 1);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
+    text-align: center;
 }
 
-.toggle-btn:hover {
-    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-    border-color: var(--accent);
-    box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
-}
-
-.inventory-grid.compact-view {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-}
-
-.inventory-grid.compact-view .inventory-item {
-    font-size: 0.9em;
-}
-
-.inventory-grid.compact-view .pokemon-image {
-    aspect-ratio: 16/9;
-}
-
-.inventory-grid.compact-view .product-description {
-    display: none;
-}
-
-.inventory-grid.compact-view .action-buttons {
+/* Style for the avenue2-messenger section */
+.avenue2-messenger {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    width: 320px;
+    max-height: 460px;
+    min-height: 220px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
+    z-index: 10;
+    overflow: hidden; /* Ensure no overflow */
+    display: flex;
     flex-direction: column;
 }
 
-.inventory-grid.compact-view .action-buttons form {
+/* Ensure .chat2e takes up the full space within .avenue2-messenger */
+.chat2e {
+    position: relative;
     width: 100%;
-    margin-bottom: 0.5rem;
-}
-
-.legendary-icon {
-    font-size: 2em;
-    margin-bottom: 0.5rem;
-}
-
-.empty-inventory {
-    text-align: center;
-}
-
-.empty-inventory img {
-    max-width: 50%;
-    margin: 2rem auto;
-}
-
-nav.main-menu ul li a {
-    color: #fff;
-    font-weight: 700;
-    display: block;
-    padding: 15px;
-}
-
-p.blog-meta span {
-    margin-right: 15px;
-    opacity: 0.6;
-    color: rgba(255, 255, 255, 1);
-    font-size: 0.85em;
-}
-    </style>
-</head>
-<body>
-
-<script>
-
-</script>
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prize Picker</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/gametemplate.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/spinboost.css' %}">
-     <script defer src="{% static 'css/js/gametemplatescript.js' %}"></script>
-     <script defer src="{% static 'css/js/spinboostscript.js' %}"></script>
-
-     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-     <script src="{% static 'css/js/main.js' %}"></script>
-     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
-     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
-     <script src="{% static 'css/js/waypoints.js' %}"></script>
-	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
-     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
-     <script src="{% static 'css/js/sticker.js' %}"></script>
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-
-    <script src="{% static 'css/js/build.js' %}"></script>
-    <script src="{% static 'css/js/start.js' %}"></script>
-    <script src="{% static 'css/js/test.js' %}"></script>
-     <style>
-        body{
-
-        background-color: #0a0a13;
-        }
-        .wrapperlootlist {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: left;
-        }
-
-        .game {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: 100%;
-            padding: 20px;
-
-        }
-        .cardslootlist {
-            flex: 1 1 200px; /* Adjust the width as needed */
-            margin: 10px;
-            box-sizing: border-box;
-        }
-
-        .sliderlootlist {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: left;
-        }
-
-        .spinner-arrow {
-            width: 50px;
-            height: 50px;
-            z-index: 10; /* Ensure it's on top */
-        }
-
-.cards-container {
-    display: flex;
-    flex-wrap: nowrap; /* Prevent wrapping to a new line */
-    overflow-x: auto; /* Allows horizontal scrolling */
-    overflow-y: hidden; /* Hides vertical scrolling */
+    flex: 1;
     padding: 10px;
-    gap: 10px; /* Optional: adds space between cards */
-    max-height: 100%; /* Ensure the height is properly constrained */
-    position: relative; /* Ensure positioning is correct */
+    box-sizing: border-box;
+    color: #232323;
+    overflow-y: auto; /* Ensure it scrolls if needed */
 }
 
-.cards-container .popup-card:first-child {
-    margin-left: 250px; /* Adjust as needed to make the first card fully visible */
+/* Title and message box alignment */
+.chat2e-title, .message2-box {
+    margin-bottom: 10px;
 }
 
-.cards-container::-webkit-scrollbar {
-    height: 8px; /* Custom scrollbar height */
-}
-
-.cards-container::-webkit-scrollbar-thumb {
-    background-color: #888; /* Custom scrollbar color */
-    border-radius: 4px;
-}
-
-.cards-container::-webkit-scrollbar-thumb:hover {
-    background-color: #555; /* Darker color on hover */
-}
-
-.card{
-background: none;
-background-color: nonce;
-border: none;
-}
-
-.popup-card {
-    min-width: 200px;
-    max-width: 250px;
-    flex-shrink: 0;
-    margin-left: 10px;
-    text-align: center;
-    overflow: hidden; /* Hides both vertical and horizontal scrollbars */
-}
-
-
-    .individuallootelement {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start; /* Align items to the start */
-        padding: 15px;
-    }
-       .individuallootelement p {
-        margin: 5px 0;
-    }
-
-    .cards {
-        /*margin-right: 15px;
-        margin-left: 15px;*/
-        flex: 1 1 200px;
-       /*margin: 10px;*/
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column; /* Align elements vertically */
-    align-items: center; /* Centers horizontally */
-    justify-content: center; /* Centers vertically */
-    text-align: center;
-    }
-
-    .slider img {
-        width: 15vh;
-        height: 20vh;
-        border: 2px solid;
-        border-color: transparent; /* To change later */
-        border-radius: 7px;
-        object-fit: contain; /* Ensures image fits without cropping */
-    }
-
-        :root {
-            --gold: #FFD700;
-            --dark-gold: #B8860B;
-            --light-gold: #FFF8DC;
-            --background: #1A1A1A;
-        }
-
-
-
-        .containerev {
-            width: 100%;
-            left: 50%;
-            transform: translateX(-50%); /* Centers the element horizontally */
-            padding: 20px;
-        }
-
-        h1 {
-            font-family: 'Cinzel', serif;
-            font-size: 3rem;
-            text-align: center;
-            color: var(--gold);
-            margin-bottom: 2rem;
-            text-shadow: 0 0 10px var(--gold);
-        }
-
-        .loot-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .loot-item {
-            background: linear-gradient(135deg, var(--dark-gold), var(--gold));
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .loot-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 30px rgba(255, 215, 0, 0.5);
-        }
-
-        .loot-item h2 {
-            font-family: 'Cinzel', serif;
-            font-size: 1.5rem;
-            color: var(--background);
-            margin-top: 0;
-            margin-bottom: 1rem;
-        }
-
-        .loot-item img {
-            width: 25%;
-            height: auto;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-        }
-
-        .loot-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-        }
-
-        .loot-details p {
-            margin: 0;
-            color: var(--background);
-        }
-
-        .loot-details strong {
-            color: var(--light-gold);
-        }
-
-        .rarity {
-            font-weight: bold;
-            color: #FF4500;
-        }
-
-        .tier {
-            font-weight: bold;
-            color: #4B0082;
-        }
-
-        .nerd-stats {
-            background-color: rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            padding: 0.5rem;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .nerd-stats p {
-            margin: 0.25rem 0;
-        }
-
-        @media (max-width: 600px) {
-            .loot-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        .selections {
-    position: absolute;
-    top: 30vh;
-}
-        .button{
-        padding: 5px;
-        }
-
-    </style>
-
-
-</head>
-<body>
-
-<div class="total" style="display: flex; flex-direction: column;">
-	<!-- header -->
-
-{% include 'navtrove.html' %}
-	<!-- end header -->
-
-<div class="boxes" style="
-    left: 0%;
-    position: absolute;
+/* Message box styling */
+.message2-box {
+    position: relative;
     width: 100%;
-    height: 80%;
-    opacity: 0.20;
-    background: linear-gradient(to bottom, rgba(0,0,255,0) 70%, rgb(10, 10, 19) 100%), url('{{ game.image.url }}');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-" alt="{{ game.name }}">
-</div>
-    <div>
-<div class="selections" style="border: 2px solid black; margin-bottom: 120%;">
-    <div class="flame-effect"></div>
-    <div class="content">
-        <label style="background: rgba(255, 255, 255, 0.3); padding: 2px; border-radius: 10px;"> Spin Boost Power</label>
-        <div id="spinCount">
-            <button class="spin-option" data-value="1">1x</button>
-            <button class="spin-option" data-value="2">2x</button>
-            <button class="spin-option" data-value="3">3x</button>
-            <button class="spin-option" data-value="4">4x</button>
-            <button class="spin-option" data-value="5">5x</button>
-            <button class="spin-option" data-value="10">10x</button>
-        </div>
-        <br>
-        <h3 id="cost-display">
-            {% if game.daily %}
-                {% if game.discount_cost == 0 %}
-                    <span id="base-cost" style="display: none;">{{ game.discount_cost }} 💎</span>
-
-                    <span>Chest Value: {{ game.cost }}</span> 💎
-             <script>
-            // Disable the cost calculation JavaScript
-            document.addEventListener("DOMContentLoaded", function () {
-                const costDisplayElement = document.getElementById("cost-display");
-                if (costDisplayElement) {
-                    costDisplayElement.innerHTML = `<span id="base-cost"> {{ game.cost }}</span> 💎`; // Set cost to 0
-                }
-            });
-        </script>
-                {% endif %}
-            {% else %}
-                {% if game.discount_cost %}
-                    <span id="base-cost">{{ game.discount_cost }}</span> 💎
-                {% else %}
-                    <span id="base-cost">{{ game.cost }}</span> 💎
-                {% endif %}
-            {% endif %}
-        </h3>
-
-        <script type="text/javascript">
-document.addEventListener("DOMContentLoaded", function () {
-    const spinButtons = document.querySelectorAll(".spin-option");
-    const baseCostElement = document.getElementById("base-cost");
-    const costDisplayElement = document.getElementById("cost-display");
-
-    // Parse the base cost as a number (default to 0 if not a number)
-    const baseCost = parseFloat(baseCostElement.textContent) || 0;
-
-    spinButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            const spinMultiplier = parseInt(this.dataset.value, 10); // Get the spin multiplier
-            const totalCost = baseCost * spinMultiplier; // Calculate the total cost
-            costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`; // Update the display
-        });
-    });
-});
-</script>
-
-        <input type="checkbox" id="quickspin-checkbox">
-        <label for="quickspin-checkbox">Quick Spin</label>
-        <input type="checkbox" id="persist-spin-checkbox">
-        <label for="persist-spin-checkbox">Save Spin Boost</label>
-    </div>
-</div>
-        <label>
-        </label>
-<script>
-    function getCSRFToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]').value;
-    }
-</script>
-
-<script type="text/javascript">
-document.addEventListener("DOMContentLoaded", function () {
-    const spinButtons = document.querySelectorAll(".spin-option");
-    const baseCostElement = document.getElementById("base-cost");
-    const costDisplayElement = document.getElementById("cost-display");
-    const startButton = document.getElementById("start");
-    const baseCost = parseFloat(baseCostElement.textContent) || 0;
-
-    // Initialize user cash as a proxy
-    let userCash = parseFloat({{ user_cash|safe }});
-    const userCashProxy = new Proxy({ value: userCash }, {
-        set(target, key, newValue) {
-            if (key === "value") {
-                target[key] = newValue;
-                updateStartButton(); // Re-run the logic on change
-            }
-            return true;
-        }
-    });
-
-    function updateStartButton() {
-        const spinMultiplier = parseInt(
-            document.querySelector(".spin-option.active")?.dataset.value || 1,
-            10
-        );
-        const totalCost = baseCost * spinMultiplier;
-
-        costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`;
-
-        if (userCashProxy.value < totalCost) {
-            if (!startButton.parentElement.matches("a")) {
-                const link = document.createElement("a");
-                link.href = "currencymarket.html";
-                link.style.textDecoration = "none";
-                startButton.parentNode.replaceChild(link, startButton);
-                link.appendChild(startButton);
-            }
-            startButton.disabled = true;
-        } else {
-            if (startButton.parentElement.matches("a")) {
-                const parent = startButton.parentElement;
-                const container = parent.parentNode;
-                parent.replaceWith(startButton);
-                container.appendChild(startButton);
-            }
-        }
-    }
-
-    // Add event listeners for spin buttons
-    spinButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            spinButtons.forEach(btn => btn.classList.remove("active"));
-            this.classList.add("active");
-            updateStartButton();
-        });
-    });
-
-    // Periodically fetch the updated user cash from the API
-    function fetchUserCash() {
-        fetch('/api/get-user-cash/')
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.user_cash !== undefined) {
-                    userCashProxy.value = data.user_cash; // Update proxy value
-                }
-            })
-            .catch(error => console.error('Error fetching user cash:', error));
-    }
-
-    // Poll the API every 0.5 seconds
-    setInterval(fetchUserCash, 500);
-});
-
-</script>
-
-{% if game.daily %}
-<button class="start"
-        id="start"
-        data-game-id="{{ game.id }}"
-        data-nonce="{{ nonce }}"
-        data-slug="{{ game.slug }}"
-        data-daily="true"
-        data-next-5pm="{{ next_5pm.timestamp }}"
-        style="margin-top: 5%; margin-right: 25%;"
-        disabled>
-    Spin!
-</button>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-    const startButton = document.getElementById("start");
-
-    if (startButton) {
-        const isDaily = startButton.getAttribute("data-daily") === "true";
-        const next5pmTimestamp = parseInt(startButton.getAttribute("data-next-5pm"), 10);
-
-        if (isDaily) {
-            const now = Date.now() / 1000; // Current time in seconds
-            const timeRemaining = next5pmTimestamp - now;
-
-            if (timeRemaining > 0) {
-                startButton.disabled = true;
-
-                // Optionally display a countdown
-                const countdownInterval = setInterval(() => {
-                    const now = Date.now() / 1000;
-                    const timeLeft = next5pmTimestamp - now;
-
-                    if (timeLeft <= 0) {
-                        clearInterval(countdownInterval);
-                        startButton.disabled = false;
-                    }
-
-                    // Update button text or display countdown (optional)
-                    const hours = Math.floor(timeLeft / 3600);
-                    const minutes = Math.floor((timeLeft % 3600) / 60);
-                    const seconds = Math.floor(timeLeft % 60);
-                    startButton.innerText = `Spin in ${hours}h ${minutes}m ${seconds}s`;
-                }, 1000);
-            } else {
-                startButton.disabled = false; // Enable immediately if past 5 PM
-            }
-        }
-    }
-});
-
-        </script>
-{% else %}
-<button class="start"
-        id="start"
-        data-game-id="{{ game.id }}"
-        data-nonce="{{ nonce }}"
-        data-slug="{{ game.slug }}"
-        data-daily="false"
-        style="margin-top: 5%; margin-right: 25%;">
-    Spin!
-</button>
-{% endif %}
-
-        {% if game.daily %}
-<button class="start"
-        id="start2"
-        data-game-id="{{ game.id }}"
-        data-nonce="{{ nonce }}"
-        data-slug="{{ game.slug }}"
-        data-daily="true"
-        data-next-5pm="{{ next_5pm.timestamp }}"
-        style="margin-top: 5%; margin-left: 25%;"
-        disabled>
-   Demo
-</button>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-    const startButton = document.getElementById("start2");
-
-    if (startButton) {
-        const isDaily = startButton.getAttribute("data-daily") === "true";
-        const next5pmTimestamp = parseInt(startButton.getAttribute("data-next-5pm"), 10);
-
-        if (isDaily) {
-            const now = Date.now() / 1000; // Current time in seconds
-            const timeRemaining = next5pmTimestamp - now;
-
-            if (timeRemaining > 0) {
-                startButton.disabled = true;
-
-                // Optionally display a countdown
-                const countdownInterval = setInterval(() => {
-                    const now = Date.now() / 1000;
-                    const timeLeft = next5pmTimestamp - now;
-
-                    if (timeLeft <= 0) {
-                        clearInterval(countdownInterval);
-                        startButton.disabled = false;
-                    }
-
-                    // Update button text or display countdown (optional)
-                    const hours = Math.floor(timeLeft / 3600);
-                    const minutes = Math.floor((timeLeft % 3600) / 60);
-                    const seconds = Math.floor(timeLeft % 60);
-                    startButton.innerText = `Spin in ${hours}h ${minutes}m ${seconds}s`;
-                }, 1000);
-            } else {
-                startButton.disabled = false; // Enable immediately if past 5 PM
-            }
-        }
-    }
-});
-
-        </script>
-{% else %}
-<button class="start"
-        id="start2"
-        data-game-id="{{ game.id }}"
-        data-nonce="{{ nonce }}"
-        data-slug="{{ game.slug }}"
-        data-daily="false"
-        style="margin-top: 5%; margin-left: 25%;">
-    Demo
-</button>
-{% endif %}
-
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    let selectedMultiplier = 1; // Default multiplier
-
-    // Add event listener to each spin-option button
-    document.querySelectorAll(".spin-option").forEach(button => {
-        button.addEventListener("click", function () {
-            selectedMultiplier = parseInt(this.getAttribute("data-value"));
-            console.log("Selected multiplier:", selectedMultiplier); // For debugging
-        });
-    });
-
-    // Add event listener to the spin button
-    document.getElementById("start").addEventListener("click", function () {
-        console.log("Spin button clicked!"); // Debug log
-
-        const button = this;
-        const gameId = button.getAttribute("data-game-id");
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value; // Fetch CSRF token
-
-        console.log("Game ID:", gameId); // Debug log
-        console.log("CSRF Token:", csrfToken); // Debug log
-        console.log("Spin Multiplier:", selectedMultiplier); // Debug log
-
-        // Perform the fetch request to initiate the spin
-        fetch("{% url 'showcase:spin_game' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrfToken
-            },
-            body: JSON.stringify({
-                game_id: gameId,
-                spin_multiplier: selectedMultiplier
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Response data:", data); // Debug log
-            if (data.daily === false) { // Check if daily is explicitly false
-                if (data.success) {
-                    // Update the currency amount automatically
-                    const currencyElement = document.getElementById("currency-amount");
-                    if (currencyElement) {
-                        currencyElement.innerText = `${data.updated_currency_amount} ${data.currency_name}`;
-                    }
-                    // Optionally, display a success message
-                    console.log("Spin successful:", data.message);
-                } else {
-                    alert(data.error); // Show error message if the spin fails
-                }
-            } else {
-                console.log("The game is marked as daily, action skipped.");
-            }
-
-        })
-        .catch(error => {
-            console.error("Error during fetch:", error); // Log any fetch errors
-        });
-    });
-});
-</script>
-
-
-
-<!-- Embed choices and other data in a script tag -->
-
-
-<script type="text/javascript">
-$(document).ready(function() {
-    console.log("jQuery is loaded.");
-
-    let spinMultiplier = 1; // Default to 1 spin if no option is selected
-
-    // Set spin multiplier based on selected option
-    $('.spin-option').on('click', function() {
-        $('.spin-option').removeClass('selected');
-        $(this).addClass('selected');
-        spinMultiplier = parseInt($(this).data('value'));
-        console.log("Spin multiplier selected:", spinMultiplier);
-    });
-
-    $('#start').on('click', function() {
-        const gameId = $(this).data('game-id');
-        const slug = $(this).data('slug');
-        const csrfToken = '{{ csrf_token }}';
-        const url = '{% url "showcase:create_outcome" "SLUG_PLACEHOLDER" %}'.replace('SLUG_PLACEHOLDER', slug);
-
-        let completedSpins = 0;
-        let allChoices = [];
-
-        // Check if Quick Spin is active
-        const isQuickSpin = $('#quickspin-checkbox').is(':checked');
-        console.log("Quick Spin mode:", isQuickSpin);
-
-        for (let i = 0; i < spinMultiplier; i++) {
-            $.ajax({
-                type: 'POST',
-                url: url,
-                data: {
-                    csrfmiddlewaretoken: csrfToken,
-                    game_id: gameId,
-                    console.log('the game id is ', game_id);
-                },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        completedSpins++;
-                        allChoices = allChoices.concat(response.choices);
-                        console.log('Choice received successfully for spin', i + 1);
-
-                        // Update the UI only after all spins are completed
-                        if (completedSpins === spinMultiplier) {
-                            console.log('All spins completed.');
-                            //updateWheelContents(allChoices); // Display all outcomes at once
-                            initializeAnimation(response.nonce, isQuickSpin); // Pass Quick Spin mode to the animation
-                        }
-                    } else {
-                        console.error(response.message);
-                    }
-                },
-                error: function(error) {
-                    console.error('Error during spin', i + 1, ':', error);
-                }
-            });
-        }
-    });
-
-    function initializeAnimation(targetNonce, isQuickSpin) {
-        // Disable the spin button to avoid multiple clicks
-        $(".start").prop('disabled', true);
-
-        function addAnimation() {
-            document.querySelectorAll('.slider').forEach(scroller => {
-                scroller.style.animation = 'none';
-                scroller.offsetHeight;
-                const animationDuration = isQuickSpin ? '9s' : '18s'; // Adjust duration based on Quick Spin
-                scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
-                scroller.style.animationPlayState = 'running';
-            });
-        }
-
-        function stopAtSelectedCard() {
-            document.querySelectorAll('.cards').forEach(card => {
-                const cardNonce = card.getAttribute('data-nonce');
-
-                // Highlight and position the card with matching nonce
-                if (cardNonce === targetNonce) {
-                    $(card).addClass('highlighted');
-                    card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-                } else {
-                    $(card).removeClass('highlighted');
-                }
-            });
-
-            // Enable the button after animation ends
-            $(".start").prop('disabled', false);
-        }
-
-        // Start spinning
-        addAnimation();
-
-        // Stop the animation after a delay
-        setTimeout(() => {
-            document.querySelectorAll('.slider').forEach(scroller => {
-                scroller.style.animationPlayState = 'paused';
-            });
-
-            // Find and stop at the selected card
-            stopAtSelectedCard();
-        }, isQuickSpin ? 4500 : 9000);  // Adjust time based on Quick Spin setting
-    }
-});
-
-</script>
-
-
-    </div>
-
-    <div id="popup" class="popup">
-        <div class="fire-container">
-            <div class="fire">
-                <div class="flames">
-                    <div class="flame"></div>
-                    <div class="flame"></div>
-                    <div class="flame"></div>
-                    <div class="flame"></div>
-                </div>
-                <div class="glow"></div>
-            </div>
-        </div>
-
-        <div class="text">
-            <h2>Congratulations!</h2>
-            <p>You got:</p>
-<p id="choice-id"></p>
-<p id="choice-text"></p>
-<p id="choice-color"></p>
-<img id="choice-file" src="" alt="Selected Choice Image" style="display:none;">
-<div id="hidden-form" style="display:none;">
-    <form method="POST" action="{% url 'showcase:sell_game_inventory_object' %}">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="sell">
-        <button type="submit" class="btn btn-danger">Sell Item</button>
-    </form>
-</div>
-
-        </div>
-    </div>
-
-  <div class="wrapper">
-        <div class="containerre" style="margin-top: 3%;
-  position: absolute;
-  top: 90%;
-  left: 50%;
-  transform: translate(-50%, -50%); ">
-            <div class="slider" id="slider">
-<!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
-            {% for item in choices_with_nonce %}
-                {% with choice=item.choice %}
-                    <div id="{{ choice.choice_text }}" class="cards" style="background: rgba(255, 255, 255, 0.3);">
-                        {% with color=game|get_color:choice %}
-                            <div class="lootelement"
-                                 data-price="{{ choice.value }}"
-                                 data-currency-file="{{ item.currency.file_url }}"
-                                 data-currency-symbol="{{ item.currency.symbol }}"
-                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-right: 18px;">
-                                <p style=" color: black;">
-                                    {% if choice.file.url %}
-                                    <img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}">
-                                    {% endif %}
-                                {{ choice.value }} 💎</p>
-                        <h5 style="margin-left: 22px;"></h5>
-                            </div>
-                        {% endwith %}
-                        <!--<p>Noncevalue: {{ item.nonce }}</p>
-                        <p>Range: {{ item.lower_nonce }} - {{ item.upper_nonce }}</p>
-                        <p>Random Amount: {{ random_amount }}</p>-->
-                    </div>
-                {% endwith %}
-            {% endfor %}
-
-
-
-                {% for nonce, choice in matching_choices %}
-                    <p>Value: {{ choice.value }}</p>
-                    <p>Nonces: {{ nonce }}</p>
-                    <p>Choice: {{ choice.choice_text }}</p>
-
-            {% with cost_threshold=game.cost %}
-                {% with cost_threshold=cost_threshold|add:"0" %}
-                    {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost|mul:1 cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 %}
-                        {% if cost_threshold_10000 >= choice.value %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); padding: -10%; color: black;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_500 >= choice.value > cost_threshold_10000 %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); padding: 6%; color: black;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_200 >= choice.value > cost_threshold_500 %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); padding: 6%; color: black;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_100 >= choice.value > cost_threshold_200 %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); padding: 6%; color: black;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
-
-                            <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); padding: 6%; color: black;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% elif cost_threshold_80 >= choice.value > cost_threshold_100 %}
-                            <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); padding: 6%; color: black;">
-                    <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                            </div>
-                        {% else %}
-                            <p>This choice does not meet the cost requirement.</p>
-                        {% endif %}
-                    {% endwith %}
-                {% endwith %}
-            {% endwith %}
-                {% endfor %}
-
-
-            </div>
-
-            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
-        </div>
-    </div>
-
-    <script>
-    const choicesWithNonce = {{ choices_with_nonce|safe }};
-</script>
-
-
-    <script>
-
-function createOutcome(gameId, slug) {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-fetch(`/create_outcome/${slug}/`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken,  // Ensure csrf token is being sent
-    },
-    body: JSON.stringify({
-        game_id: gameId,  // Pass the game_id as needed
-        other_data: otherData,  // Add any additional data as needed
-    })
-})
 }
-.then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            const choiceFile = data.choice_file;
 
-            if (choiceFile) {
-                const slider = document.querySelector('.slider'); // Adjust selector as needed
-                const newCard = document.createElement('div');
-                newCard.className = 'cards';
-                newCard.innerHTML = `
-                    <div class="lootelement"
-                         data-price="100"
-                         data-nonce="${data.nonce}"
-                         style="background: url('${choiceFile}'); padding: 6%; margin-left: 22px;">
-                       <img src="${choiceFile}" alt="Generated Card">
-                    </div>
-                    <h2 style="margin-left: 22px;">100 💎</h2>
-                    <p>Nonce: ${data.nonce}</p>
-                `;
-                slider.appendChild(newCard);
-            }
-        } else {
-            console.error('Error:', data.message);
+/* Input styling inside the message box */
+.message2-box input[type="text"] {
+    width: calc(100% - 60px);
+    padding: 10px;
+    border-radius: 5px;
+    height: 20px;
+    border: 1px solid #ccc;
+}
+
+/* Submit button alignment */
+.message-submit {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 36px;
+    background-color: #F28123;
+    color: #051922;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 0 15px;
+}
+
+/* Ensure the chat messages section scrolls properly */
+
+#display-general {
+	height: 400px;
+	overflow-y: scroll;
+	border: 1px solid #ccc;
+	padding: 10px;
+}
+
+/* Message box styling */
+.message2-box {
+    position: absolute;
+    bottom: 10px;
+    width: calc(100% - 20px);
+    left: 10px;
+}
+
+/* Input styling inside the message box */
+.message2-box input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Submit button alignment */
+.message-submit {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 50px;
+    background-color: #F28123;
+    color: #051922;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* Ensure the chat messages section scrolls properly */
+.chat-messages {
+    height: calc(100% - 160px);
+    overflow-y: scroll;
+    padding-right: 10px;
+}
+.chat-title h1,
+.chat-title h2 {
+  font-weight: normal;
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
+}
+.chat-title h2 {
+  /* color: rgba(255, 255, 255, .8);*/
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.chat-title .avatar {
+  position: absolute;
+  z-index: 1;
+  top: 8px;
+  left: 9px;
+  border-radius: 30px;
+  width: 60px;
+  height: 60px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #fff;
+}
+.chat-title .avatar img {
+  width: 100%;
+  height: auto;
+}
+
+/*--------------------
+Messages
+--------------------*/
+.messages {
+  flex: 1 1 auto;
+  /*  color: rgba(255, 255, 255, .5);
+  color: #fff;*/
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+.messages .messages-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 101%;
+  width: 100%;
+}
+.messages .message {
+  clear: both;
+  float: left;
+  padding: 6px 10px 7px;
+  border-radius: 20px 20px 20px 0;
+  background: #eee;
+  /*rgba(0, 0, 0, 0.1);*/
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.4;
+  margin-left: 35px;
+  position: relative;
+  border: 1px solid #ccc;
+  /*text-shadow: 0 1px 1px rgba(0, 0, 0, .2);*/
+}
+.messages .message .timestamp {
+  position: absolute;
+  bottom: -15px;
+  font-size: 10px;
+  color: #555;
+  right: 30px;
+  /* color: rgba(255, 255, 255, .7);*/
+}
+.messages .message .checkmark-sent-delivered {
+  position: absolute;
+  bottom: -15px;
+  right: 10px;
+  font-size: 12px;
+  color: #999;
+}
+.messages .message .checkmark-read {
+  color: blue;
+  position: absolute;
+  bottom: -15px;
+  right: 16px;
+  font-size: 12px;
+}
+.messages .message::before {
+  /*  content: '';
+    position: absolute;
+    bottom: -6px;
+    border-top: 6px solid rgba(0, 0, 0, 0.1);
+    left: 0;
+    border-right: 7px solid transparent;*/
+}
+.messages .message .avatar {
+  position: absolute;
+  z-index: 1;
+  bottom: -15px;
+  left: -35px;
+  border-radius: 30px;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+.messages .message .avatar img {
+  width: 100%;
+  height: auto;
+}
+.messages .message.message-personal {
+  float: right;
+  text-align: right;
+  /*      background: linear-gradient(120deg, #ddd, #eee);*/
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 20px 20px 0 20px;
+}
+.messages .message.message-personal::before {
+  /*
+      content:"";
+  border-color:#4A90E2 transparent;
+    width:0;
+    border-style:solid;*/
+  /*
+   left: auto;
+   right: 0;
+   border-right: none;
+  border-left: 8px solid transparent;
+   border-top: 9px solid #fff;
+
+   bottom: -8px;*/
+}
+.messages .message:last-child {
+  margin-bottom: 30px;
+}
+.messages .message.new {
+  transform: scale(0);
+  transform-origin: 0 0;
+  -webkit-animation: bounce 500ms linear both;
+          animation: bounce 500ms linear both;
+}
+.messages .message.loading::before {
+  position: relative;
+  /*  top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);*/
+  content: "";
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  /*  background: rgba(255, 255, 255, .5);*/
+  background: #888;
+  z-index: 2;
+  margin-top: 4px;
+  -webkit-animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
+          animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
+  border: none;
+  -webkit-animation-delay: 0.15s;
+          animation-delay: 0.15s;
+}
+.messages .message.loading span {
+  display: block;
+  font-size: 0;
+  width: 20px;
+  height: 10px;
+  position: relative;
+}
+.messages .message.loading span::before {
+  position: relative;
+  /*  top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);*/
+  content: "";
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  /*  background: rgba(255, 255, 255, .5);*/
+  background: #888;
+  z-index: 2;
+  margin-top: 4px;
+  -webkit-animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
+          animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
+  margin-left: -7px;
+}
+.messages .message.loading span::after {
+  position: relative;
+  /*  top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);*/
+  content: "";
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  /*  background: rgba(255, 255, 255, .5);*/
+  background: #888;
+  z-index: 2;
+  margin-top: 4px;
+  -webkit-animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
+          animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
+  margin-left: 7px;
+  -webkit-animation-delay: 0.3s;
+          animation-delay: 0.3s;
+}
+
+/*--------------------
+Message Box
+--------------------*/
+.message-box {
+  flex: 0 1 42px;
+  width: 90%;
+  background: #fff;
+  margin: 2px auto;
+  /*-webkit-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
+  -moz-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
+  box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);*/
+  /*background: rgba(0, 0, 0, 0.3);
+    border-top:1px solid #e3e3e3;*/
+  padding: 10px;
+  position: relative;
+  border-radius: 20px;
+  height: 14px;
+  border: 1px solid #ccc;
+}
+.message-box .message-input {
+  background: none;
+  border: none;
+  outline: none !important;
+  resize: none;
+  /* color: rgba(255, 255, 255, .8);*/
+  font-size: 15px;
+  height: 24px;
+  margin: 0;
+  padding-right: 20px;
+  width: 265px;
+  color: #444;
+}
+.message-box textarea:focus:-webkit-placeholder {
+  color: transparent;
+}
+.message-box .message-submit {
+  position: absolute;
+  z-index: 1;
+  top: 0px;
+  right: 0px;
+  color: #4A90E2;
+  border: none;
+  /* background: #c29d5f;*/
+  background: #fff;
+  font-size: 12px;
+  text-transform: uppercase;
+  line-height: 1;
+  padding: 6px 10px;
+  border-radius: 5px;
+  outline: none !important;
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+.message-box .message-submit:hover {
+  background: #fff;
+  color: #333;
+}
+
+/*--------------------
+Message 2 Box
+--------------------*/
+.message2-box {
+  flex: 0 1 42px;
+  width: 90%;
+  background: #fff;
+  margin: 2px auto;
+  /*-webkit-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
+  -moz-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
+  box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);*/
+  /*background: rgba(0, 0, 0, 0.3);
+    border-top:1px solid #e3e3e3;*/
+  padding: 10px;
+  position: relative;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+}
+.message2-box .message2-input {
+  background: none;
+  border: none;
+  outline: none !important;
+  resize: none;
+  /* color: rgba(255, 255, 255, .8);*/
+  font-size: 15px;
+  height: 24px;
+  margin: 0;
+  padding-right: 20px;
+  width: 265px;
+  color: #444;
+}
+.message2-box textarea:focus:-webkit-placeholder {
+  color: transparent;
+}
+.message2-box .message2-submit {
+  position: absolute;
+  z-index: 1;
+  top: 9px;
+  right: 10px;
+  color: #4A90E2;
+  border: none;
+  /* background: #c29d5f;*/
+  background: #fff;
+  font-size: 12px;
+  text-transform: uppercase;
+  line-height: 1;
+  padding: 6px 10px;
+  border-radius: 5px;
+  outline: none !important;
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+.message2-box .message2-submit:hover {
+  background: #fff;
+  color: #333;
+}
+
+/*--------------------
+Custom Srollbar
+--------------------*/
+.mCSB_scrollTools {
+  margin: 1px -3px 1px 0;
+  opacity: 0;
+}
+
+.mCSB_inside > .mCSB_container {
+  margin-right: 0px;
+  padding: 0 10px;
+}
+
+.mCSB_scrollTools .mCSB_dragger .mCSB_dragger_bar {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/*--------------------
+Bounce
+--------------------*/
+@-webkit-keyframes bounce {
+  0% {
+    transform: matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  4.7% {
+    transform: matrix3d(0.45, 0, 0, 0, 0, 0.45, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  9.41% {
+    transform: matrix3d(0.883, 0, 0, 0, 0, 0.883, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  14.11% {
+    transform: matrix3d(1.141, 0, 0, 0, 0, 1.141, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  18.72% {
+    transform: matrix3d(1.212, 0, 0, 0, 0, 1.212, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  24.32% {
+    transform: matrix3d(1.151, 0, 0, 0, 0, 1.151, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  29.93% {
+    transform: matrix3d(1.048, 0, 0, 0, 0, 1.048, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  35.54% {
+    transform: matrix3d(0.979, 0, 0, 0, 0, 0.979, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  41.04% {
+    transform: matrix3d(0.961, 0, 0, 0, 0, 0.961, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  52.15% {
+    transform: matrix3d(0.991, 0, 0, 0, 0, 0.991, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  63.26% {
+    transform: matrix3d(1.007, 0, 0, 0, 0, 1.007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  85.49% {
+    transform: matrix3d(0.999, 0, 0, 0, 0, 0.999, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  100% {
+    transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+}
+@keyframes bounce {
+  0% {
+    transform: matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  4.7% {
+    transform: matrix3d(0.45, 0, 0, 0, 0, 0.45, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  9.41% {
+    transform: matrix3d(0.883, 0, 0, 0, 0, 0.883, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  14.11% {
+    transform: matrix3d(1.141, 0, 0, 0, 0, 1.141, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  18.72% {
+    transform: matrix3d(1.212, 0, 0, 0, 0, 1.212, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  24.32% {
+    transform: matrix3d(1.151, 0, 0, 0, 0, 1.151, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  29.93% {
+    transform: matrix3d(1.048, 0, 0, 0, 0, 1.048, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  35.54% {
+    transform: matrix3d(0.979, 0, 0, 0, 0, 0.979, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  41.04% {
+    transform: matrix3d(0.961, 0, 0, 0, 0, 0.961, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  52.15% {
+    transform: matrix3d(0.991, 0, 0, 0, 0, 0.991, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  63.26% {
+    transform: matrix3d(1.007, 0, 0, 0, 0, 1.007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  85.49% {
+    transform: matrix3d(0.999, 0, 0, 0, 0, 0.999, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+  100% {
+    transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  }
+}
+@-webkit-keyframes ball {
+  from {
+    transform: translateY(0) scaleY(0.8);
+  }
+  to {
+    transform: translateY(-10px);
+  }
+}
+@keyframes ball {
+  from {
+    transform: translateY(0) scaleY(0.8);
+  }
+  to {
+    transform: translateY(-10px);
+  }
+}
+.avenue-messenger {
+  opacity: 1;
+  border-radius: 20px;
+  height: calc(100% - 60px) !important;
+  max-height: 460px !important;
+  min-height: 220px !important;
+  width: 320px;
+  /*  transform: translateY(0);
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+  */
+  background: rgba(255, 255, 255, 0.9);
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  margin: auto;
+  z-index: 10;
+  box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
+  /*  transform: translateX(300px);*/
+  -webkit-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
+  -moz-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
+}
+
+.avenue-messenger div.agent-face {
+  position: absolute;
+  left: 0;
+  top: -50px;
+  right: 0;
+  margin: auto;
+  width: 101px;
+  height: 50px;
+  background: transparent;
+  z-index: 12;
+}
+
+.avenue-messenger div {
+  font-size: 14px;
+  color: #232323;
+}
+
+
+.avenue2-messenger {
+  opacity: 1;
+  border-radius: 20px;
+  height: calc(100% - 60px) !important;
+  max-height: 460px !important;
+  min-height: 220px !important;
+  width: 320px;
+  /*  transform: translateY(0);
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+  */
+  background: rgba(255, 255, 255, 0.9);
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  margin: auto;
+  z-index: 10;
+  box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
+  /*  transform: translateX(300px);*/
+  -webkit-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
+  -moz-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
+}
+
+.avenue2-messenger div.agent-face {
+  position: absolute;
+  left: 0;
+  top: -50px;
+  right: 0;
+  margin: auto;
+  width: 101px;
+  height: 50px;
+  background: transparent;
+  z-index: 12;
+}
+
+.avenue2-messenger div {
+  font-size: 14px;
+  color: #232323;
+}
+
+
+.close {
+  display: block;
+  width: 100px;
+  height: 100px;
+  margin: 1em auto;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  border-radius: 99em;
+  opacity: 0.5;
+  /*border: 1px solid #ccc;
+  color:#ccc;*/
+  /* -webkit-box-shadow: 0px -1px 2px 0px rgba(0, 0, 0, 0.5);
+  -moz-box-shadow:    0px -1px 2px 0px rgba(0, 0, 0, 0.5);
+  box-shadow:         0px -1px 2px 0px rgba(0, 0, 0, 0.5);*/
+}
+
+.close:hover {
+  /*
+  -webkit-box-shadow:  0 1px 1px rgba(0,0,0,0.3);
+  -moz-box-shadow:  0 1px 1px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.3);*/
+  opacity: 0.9;
+}
+
+.circle {
+  display: block;
+  width: 80px;
+  height: 80px;
+  margin: 1em auto;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  border-radius: 99em;
+  border: 2px solid #fff;
+  /*#4A90E2;*/
+  /* -webkit-box-shadow: 0px 0px 10px rgba(0,0,0,.8);
+    -moz-box-shadow: 0px 0px 10px rgba(0,0,0,.8);
+  box-shadow: 0px 0px 10px rgba(0,0,0,.8);*/
+}
+
+.contact-icon .circle:hover {
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  transition: 0.2s all ease-out 0.2s;
+  -webkit-transition: 0.2s all ease-out 0.2s;
+  -moz-transition: 0.2s all ease-out 0.2s;
+}
+
+.arrow_box:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-left-color: #fff;
+  border-width: 5px;
+  margin-top: -5px;
+}
+
+.arrow_box {
+  position: relative;
+  background: #fff;
+  border: 1px solid #4A90E2;
+}
+
+.arrow_box:after, .arrow_box:before {
+  left: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.menu div.items {
+  /*  height: 140px;
+    width: 180px;
+    overflow: hidden;
+    position: absolute;
+    left: -130px;
+    z-index: 2;
+    top: 20px;*/
+}
+
+.menu .items span {
+  color: #111;
+  z-index: 12;
+  font-size: 14px;
+  text-align: center;
+  position: absolute;
+  right: 0;
+  top: 40px;
+  height: 86px;
+  line-height: 40px;
+  background: #fff;
+  border-left: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  width: 48px;
+  opacity: 0;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  transition: 0.3s all ease-in-out;
+  -webkit-transition: 0.3s all ease-in-out;
+  -moz-transition: 0.3s all ease-in-out;
+}
+
+.menu .button {
+  font-size: 30px;
+  z-index: 12;
+  text-align: right;
+  color: #333;
+  content: "...";
+  display: block;
+  width: 48px;
+  line-height: 25px;
+  height: 40px;
+  border-top-right-radius: 20px;
+  /*  border-top-left-radius:20px;*/
+  position: absolute;
+  right: 0;
+  padding-right: 10px;
+  cursor: pointer;
+  transition: 0.3s all ease-in-out;
+  -webkit-transition: 0.3s all ease-in-out;
+  -moz-transition: 0.3s all ease-in-out;
+}
+
+.menu .button.active {
+  background: #ccc;
+}
+
+/*
+.menu .button:hover .menu .items span {
+  display: block;
+  left: -2px;
+  opacity: 1;
+}*/
+.menu .items span.active {
+  opacity: 1;
+  /*border-radius:10px;
+  height: 180px;
+  width: 400px;
+  transform:translateY(0);
+  -webkit-transform:translateY(0);
+  -moz-transform:translateY(0);*/
+}
+
+.menu .items a {
+  color: #111;
+  text-decoration: none;
+}
+
+.menu .items a:hover {
+  color: #777;
+}
+
+@media only screen and (max-device-width: 667px), screen and (max-width: 450px) {
+  .avenue-messenger {
+    z-index: 2147483001 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    border-radius: 0 !important;
+    background: #fff;
+  }
+
+  .avenue-messenger div.agent-face {
+    top: -10px !important;
+    /* left:initial !important;*/
+  }
+
+  .chat {
+    border-radius: 0 !important;
+    max-height: initial !important;
+  }
+
+  .chat-title {
+    padding: 20px 20px 15px 10px !important;
+    text-align: left;
+  }
+
+  .circle {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #fff;
+  }
+
+  .menu .button {
+    border-top-right-radius: 0;
+  }
+}
+@media only screen and (min-device-width: 667px) {
+  div.half {
+    margin: auto;
+    width: 80px;
+    height: 40px;
+    background-color: #fff;
+    border-top-left-radius: 60px;
+    border-top-right-radius: 60px;
+    border-bottom: 0;
+    box-shadow: 1px 4px 20px rgba(22, 20, 19, 0.6);
+    -webkit-box-shadow: 1px 4px 20px rgba(22, 20, 19, 0.6);
+    -moz-box-shadow: 1px 4px 20px rgba(22, 20, 19, 0.6);
+  }
+}
+
+
+.chat2-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.chat-general, .chat2-support {
+  width: 45%; /* Adjust the width as needed */
+}
+
+.chat2-title, .message2-box, .message2 {
+  margin-bottom: 10px;
+}
+
+/* Additional styling to ensure both chats look consistent */
+.chat2-title h1, .chat2-title h2, .message2-box .w2 {
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure both chat message containers have the same height and overflow settings */
+.chat2-messages {
+  height: 400px;
+  overflow-y: scroll;
+}
+
+		</style>
+<style>
+	.chat-button {
+            position: fixed;
+            bottom: 10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #0070f3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px 0 rgba(0, 118, 255, 0.39);
+            transition: all 0.2s ease;
+            font-size: 24px;
         }
-    })
-    .catch(error => console.error('Fetch error:', error));
 
-</script>
-
-
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-
-</script>
-
-<script>
-$(".start").click(function () {
-    const button = $(this);
-    button.prop('disabled', true); // Disable the button when clicked
-
-    // Step 1: Create the outcome and get the relevant choice
-   createOutcome(button.data('game-id'), button.data('slug'))
-    .then(data => {
-        if (data.status === 'success') {
-            const choice = {
-                id: data.choice_id,
-                choice_text: data.choice_text,
-                color: data.choice_color,
-                file: data.choice_file,
-                value: data.choice_value || 0,
-                lowerNonce: data.lower_nonce || 'N/A',
-                upperNonce: data.upper_nonce || 'N/A',
-            };
-
-            // Log the choice object to verify its structure
-            console.log('Choice Object:', choice);
-
-            renderChoiceDetails(choice);
-
-        } else {
-            console.error('Error:', data.message);
-            button.prop('disabled', false); // Re-enable the button if there's an error
+        .chat-toggle-button {
+            right: 20px;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        button.prop('disabled', false); // Re-enable the button if there's an error
-    });
 
-                // Log the values to ensure they are correct
-                console.log('Nonce:', chosenNonce);
-                console.log('Choice ID:', choiceId);
-                console.log('Choice Text:', choiceText);
-                console.log('Choice Color:', choiceColor);
-                console.log('Choice File:', choiceFile);
+        .chat2e-toggle-button {
+            left: 20px;
+            z-index: 10;
+        }
 
-                // Step 2: Set the animation to randomize the cards
-                let randomizeFlag = true;
+        .chat-button:hover {
+            background-color: #0051a2;
+            transform: translateY(-2px);
+        }
 
-                function randomizeContents() {
-                    if (randomizeFlag) {
-                        $('div#slider').each(function () {
-                            var $div_parent = $(this);
-                            var $divsArr = $div_parent.children('div.cards');
-                            $divsArr.sort(function (a, b) {
-                                var temp = parseInt(Math.random() * 10);
-                                var isOddOrEven = temp % 2;
-                                var isPosOrNeg = temp > 5 ? 1 : -1;
-                                return (isOddOrEven * isPosOrNeg);
-                            }).appendTo($div_parent);
-                        });
-                        setTimeout(randomizeContents, 2000);
-                    }
-                }
+        .chat-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 118, 255, 0.3);
+        }
+</style>
 
-                randomizeContents();
+<section class="avenue-messenger" id="chatwidget">
+    <div class="chat2">
+        <div class="chat2-title">
+            {% if user.is_authenticated %}
+                <h5>{{ request.user.username }}'s Personal Support Line</h5>
+                <br>
+                <h6>Run By Agent Holley</h6>
+            </div>
+            <div class="message" style="overflow: auto;">
+                <div id="display-support" class="chat-messages" style="height: 400px; overflow-y: scroll;"></div>
+            </div>
+            <div class="message-box">
+                <div class="w" style="margin-top: -10px; display: flex; overflow: hidden; 30px;">
+<form id="support-post-form" method="post">
+    {% csrf_token %}
+    <input type="hidden" id="support-username" name="username" value="{{ request.user.username }}">
+    <input type="hidden" name="room_name" id="support-room_name" value="{{ room }}">
+    <input type="text" name="message" id="support-message" width="100px" placeholder="Type your message..." style="border: none; margin-bottom: 0px;height: 20px;">
+    <input type="hidden" name="page_name" id="support-page_named" value="index.html">
+    <input type="submit" class="message-submit" style="margin-left: 220px; height: 20px; overflow: hidden; position: absolute; text-align: center;
+        line-height: 0px; font-size: 14px; background-color: #F28123; color: #051922; font-weight: 700;
+        text-transform: uppercase; font-size: 15px; border: none !important; cursor: pointer;
+        padding: 16px 25px; border-radius: 3px; margin-top: 16px;" value="➤">
+</form>
 
-                setTimeout(() => {
-                    randomizeFlag = false;
+                </div>
+            </div>
+            {% else %}
+            <h5>Guest User</h5>
+            <br>
+            <h6>Please sign in to participate in the chat.</h6>
+        {% endif %}
+    </div>
+</section>
 
-                    // Step 3: Control the final stop based on the nonce or choiceId
-                    const slider = document.querySelector('.slider');
-                    const cards = slider.querySelectorAll('.card');
+	<div class="chat-toggle-button" style="position: fixed; right: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
+		<button class="chat-button chat-toggle-button" type="button" onclick="showChatWidget()" aria-label="Open chat">
+        &#8942;
+    </button>
+	</div>
 
-                    // Calculate the position to center the chosen card
-                    let targetCard = null;
-                    cards.forEach(card => {
-                        if (parseInt(card.dataset.choiceId) === choiceId) {
-                            targetCard = card;
-                        }
-                    });
+<div class="chat2e-toggle-button" style="position: fixed; left: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
+  <button class="chat-button chat2e-toggle-button" type="button" onclick="toggleChatWidget()" aria-label="Toggle chat">
+        &#10005;
+    </button>
+</div>
 
-                    if (targetCard) {
-                        const targetOffsetLeft = targetCard.offsetLeft;
-                        const sliderWidth = slider.offsetWidth;
-                        const cardWidth = targetCard.offsetWidth;
-                        const targetScrollPosition = targetOffsetLeft - (sliderWidth / 2) + (cardWidth / 2);
+</div>
 
-                        slider.scrollTo({
-                            left: targetScrollPosition,
-                            behavior: 'smooth'
-                        });
+<!-- General Chat -->
 
-                        // Assuming 'choice' is an object you receive via AJAX or another method
-                        function renderChoiceDetails(choice) {
-                            document.getElementById('choice-id').innerText = `Selected Choice ID: ${choice.id || 'N/A'}`;
-                            document.getElementById('choice-text').innerText = `Selected Choice Text: ${choice.choice_text || 'N/A'}`;
-                            document.getElementById('choice-color').innerText = `Selected Choice Color: ${choice.color || 'N/A'}`;
-
-                            // Handle the file field
-                            const choiceFileElement = document.getElementById('choice-file');
-                            if (choice.file) {
-                                choiceFileElement.src = choice.file; // Assuming file is a URL
-                                choiceFileElement.style.display = 'block'; // Show the image
-                            } else {
-                                choiceFileElement.style.display = 'none'; // Hide the image if there's no file
-                            }
-                        }
-
-
-                        const choiceFileElement = document.getElementById('choice-file');
-                        if (choiceFile) {
-                            choiceFileElement.src = choiceFile;
-                            choiceFileElement.style.display = 'block';
-                        } else {
-                            choiceFileElement.style.display = 'none';
-                        }
-
-                    } else {
-                        console.error('Error: Target card not found.');
-                    }
-
-                    // Re-enable the button after the animation finishes
-                    button.prop('disabled', false);
-
-                }, 9000); // Stop after 9 seconds (adjustable)
-
-            } else {
-                console.error('Error:', data.message);
-                button.prop('disabled', false); // Re-enable the button if there's an error
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            button.prop('disabled', false); // Re-enable the button if there's an error
-        });
-});
-
-
-
-</script>
-
-    <!--sell item(s) after spins-->
-<script>
-
-</script>
-
-
-    {% include 'gameloottable.html' %}
-
-<br>
-<br></div>
-</body>
+<section class="avenue2-messenger" id="chatwidget2" style="margin-left:10px; margin-right: 92%;">
+<div class="chat2">
+        <div class="chat2-title">
+            {% if user.is_authenticated %}
+                <h5>{{ request.user.username }} Community</h5>
+                <br>
+                <h6>PokeTrove General Chat</h6>
+            </div>
+            <div class="message2" style="overflow: auto;">
+                <div id="display-general" class="chat-messages" style="height: 400px; overflow-y: scroll; margin-left: 5px;"></div>
+            </div>
+            <div class="message2-box">
+                <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;height: 20px;">
+                   <form id="general-post-form" method="post" enctype="multipart/form-data">
+						{% csrf_token %}
+						<input type="hidden" id="general-username" name="username" value="{{ request.user.username }}">
+						<input type="text" name="message" id="general-message" width="100px" placeholder="Type your message..." style="border: none;">
+						<input type="file" name="file" id="general-file" value="📎">
+						<input type="submit" class="message-submit" style="margin-top: 15px; display: flex; overflow: hidden;padding: 0px 0px;" value="➤">
+				   </form>
+                </div>
+            </div>
+            {% else %}
+                <h5>Guest User</h5>
+                <br>
+                <h6>Please sign in to participate in the chat.</h6>
+            {% endif %}
+        </div>
+</section>
 
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const forms = document.querySelectorAll(".ajax-form");
-
-    forms.forEach(form => {
-        form.addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            const formData = new FormData(this);
-            const url = this.getAttribute("action");
-            const csrfToken = formData.get("csrfmiddlewaretoken");
-
-            fetch(url, {
-                method: "POST",
-				headers: {
-					"X-Requested-With": "XMLHttpRequest",
-					"X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-				},
-
-                body: formData,
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Update stock count
-                    const stockCountElement = document.querySelector("#stock-count");
-                    if (stockCountElement) {
-                        stockCountElement.textContent = data.stock_count;
-                    }
-
-                    // Update currency amount
-                    const currencyAmountElement = document.querySelector("#currency-amount");
-                    if (currencyAmountElement) {
-                        currencyAmountElement.textContent = data.currency_amount;
-                    }
-
-                    // Example: Remove the item from the UI
-                    this.closest(".inventory-item").remove();
-                } else {
-                    console.error("Action failed.");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-        });
-    });
-});
-
-
-
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const withdrawButtons = document.querySelectorAll(".withdraw-button");
-
-    withdrawButtons.forEach((button) => {
-        button.addEventListener("click", function (event) {
-            event.preventDefault();
-
-            const form = button.closest("form");
-            const formData = new FormData(form);
-            const actionUrl = form.getAttribute("action") || window.location.href;
-
-            console.log("Submitting form to:", actionUrl); // Debug URL
-            console.log("Form Data:", [...formData.entries()]); // Debug form data
-
-            fetch(actionUrl, {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP status ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    if (data.success) {
-                        const inventoryItem = form.closest(".inventory-item");
-                        if (inventoryItem) inventoryItem.remove();
-
-                        const stockCountElement = document.getElementById("stock-count");
-                        if (stockCountElement) {
-                            stockCountElement.textContent = data.stock_count;
-                        }
-                    } else {
-                        console.error("Server error:", data.error);
-                        alert(data.error || "An error occurred.");
-                    }
-                })
-                .catch((error) => {
-                    console.error("Fetch error:", error);
-                    alert("An unexpected error occurred. Please try again.");
-                });
-        });
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    const toggleBtn = document.getElementById("toggleViewBtn");
-    const inventoryGrid = document.getElementById("inventoryGrid");
-
-    toggleBtn.addEventListener("click", function() {
-        inventoryGrid.classList.toggle("compact-view");
-        inventoryGrid.classList.toggle("comfortable-view");
-
-        // Save the current view preference to localStorage
-        const isCompact = inventoryGrid.classList.contains("compact-view");
-        localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
-    });
-
-    // Load the saved view preference on page load
-    const savedViewPreference = localStorage.getItem("inventoryViewPreference");
-    if (savedViewPreference === "compact") {
-        inventoryGrid.classList.remove("comfortable-view");
-        inventoryGrid.classList.add("compact-view");
+function showChatWidget2() {
+    var popup = document.getElementById("chatwidget2");
+    if (popup.style.display === "none" || popup.style.display === "") {
+        popup.style.display = "block";
+    } else {
+        popup.style.display = "none";
     }
+}
+
+	document.getElementById('support-post-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent default form submission
+
+    const form = this;
+    const messageInput = document.getElementById('support-message');
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    }).then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Clear the input field after successful submission
+            messageInput.value = '';
+        } else {
+            console.error('Error:', data.message);
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+    });
 });
+
 </script>
-	<!-- jquery -->
+
+
+
+<script>
+$(document).ready(function() {
+    // Function to load and display support messages
+    function loadAndDisplaySupportMessages() {
+        var room = 'General'; // Fetch messages from the 'General' room
+
+        $.ajax({
+            type: 'GET',
+            url: "/supportgetMessages/" + room + "/",
+            success: function(response) {
+                console.log(response);
+                $("#display-support").empty();
+
+                for (var key in response.messages) {
+                    var message = response.messages[key];
+                    var messageHtml = `
+                        <div class="message">
+                            <a href="${message.user_profile_url}" style="display: flex;">
+                                <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
+                                <div class="sender" style="">${message.user}</div>
+
+                            </a>
+                            <div class="message-content" style="padding: 5px;">
+                                <div>${message.value}</div>
+                                <div class="time">${message.date}</div>
+                            </div>
+                        </div>`;
+
+                    $("#display-support").append(messageHtml);
+                }
+            },
+            error: function(response) {
+                alert('An error occurred');
+            }
+        });
+    }
+
+    // Function to load and display general messages
+    function loadAndDisplayGeneralMessages() {
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'showcase:getGeneralMessages' %}",
+            success: function(response) {
+                console.log(response);
+                $("#display-general").empty();
+
+                for (var key in response.messages) {
+                    var message = response.messages[key];
+                    var messageHtml = `
+                        <div class="message2">
+                            <a href="${message.user_profile_url}" style="display: flex;">
+                                <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
+                                <div class="sender" style="">${message.user}</div>
+
+                            </a>
+                            <div class="message2-content">
+                                <div>${message.value}</div>
+                                <div class="time">${message.date}</div>
+                            </div>
+                        </div>`;
+                    $("#display-general").append(messageHtml);
+                }
+            },
+            error: function(response) {
+                alert('An error occurred');
+            }
+        });
+    }
+
+    // Load and display messages every half-second
+    setInterval(loadAndDisplaySupportMessages, 500);
+    setInterval(loadAndDisplayGeneralMessages, 500);
+
+    // Handle support message form submission via AJAX
+    $(document).on('submit', '#support-post-form', function(e) {
+        e.preventDefault();
+        console.log('Support message submitted');
+
+        var username = $('#support-username').val();
+        var room_name = $('#support-room_name').val();
+        var message = $('#support-message').val();
+
+        if (!message.trim()) {
+            alert('Message cannot be empty');
+            return;
+        }
+
+        console.log(`Sending message: ${message}, username: ${username}, room_name: ${room_name}`);
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'showcase:supportsend' %}",
+            data: {
+                username: username,
+                room_name: room_name,
+                message: message,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+            },
+            success: function(data) {
+                if (data.status === 'success') {
+                    $('#support-message').val('');
+                    loadAndDisplaySupportMessagesAndScroll();
+                } else {
+                    $('#support-message').val('');
+                    loadAndDisplaySupportMessagesAndScroll();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    });
+
+    // Handle general message form submission via AJAX
+    $(document).on('submit', '#general-post-form', function(e) {
+        e.preventDefault();
+        console.log('General message submitted');
+
+        var username = $('#general-username').val();
+        var message = $('#general-message').val();
+
+        if (!message.trim()) {
+            alert('Message cannot be empty');
+            return;
+        }
+
+        console.log(`Sending message: ${message}, username: ${username}`);
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'showcase:generalsend' %}",
+            data: {
+                username: username,
+                message: message,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+            },
+            success: function(data) {
+                if (data.status === 'success') {
+                    $('#general-message').val('');
+                    loadAndDisplayGeneralMessagesAndScroll();
+                } else {
+                    /*alert(data.message);*/
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    });
+});
+
+// Function to load and display support messages and then scroll to bottom
+function loadAndDisplaySupportMessagesAndScroll() {
+    loadAndDisplaySupportMessages();
+    setTimeout(function() {
+        console.log("Before scrollToBottom: ", $('#display-support').scrollTop(), $('#display-support')[0].scrollHeight);
+        scrollToBottom('display-support');
+        console.log("After scrollToBottom: ", $('#display-support').scrollTop(), $('#display-support')[0].scrollHeight);
+    }, 600); // Add a slight delay to ensure DOM is updated
+}
+
+// Function to load and display general messages and then scroll to bottom
+function loadAndDisplayGeneralMessagesAndScroll() {
+    loadAndDisplayGeneralMessages();
+    setTimeout(function() {
+        scrollToBottom('display-general');
+    }, 600); // Add a slight delay to ensure DOM is updated
+}
+
+// Function to scroll to the bottom of the chat display
+function scrollToBottom(elementId) {
+    var chatDisplay = document.getElementById(elementId);
+    console.log("Scrolling to bottom of element: ", elementId);
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+}
+</script>
+
+    <script src="js/index.js"></script>
+	<script src="{% static 'css/js/script.js' %}"></script>
+<script src="{% static 'css/js/darkmode.js' %}"></script>
+<script src="{% static 'css/js/navbar.js' %}"></script>
+<script src="{% static 'css/js/scroll.js' %}"></script>
+<script>
+function showMenu() {
+  var popup = document.getElementById("myPopup");
+  popup.style.display = popup.style.display === "none" ? "block" : "none";
+}
+
+function showChatWidget() {
+  var popup = document.getElementById("chatwidget");
+  popup.style.display = popup.style.display === "none" ? "block" : "none";
+}
+</script>
+<script>
+
+</script>
+		<i class="icon"></i>
+
+	<!-- end copyright -->
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
      <script src="{% static 'css/js/main.js' %}"></script>
      <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
@@ -1862,8 +2309,15 @@ document.addEventListener("DOMContentLoaded", function() {
      <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
      <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
      <script src="{% static 'css/js/sticker.js' %}"></script>
-
+<!-- jquery -->
+<!-- bootstrap -->
+<!-- count down -->
+<!-- isotope -->
+<!-- waypoints -->
+<!-- owl carousel -->
+<!-- magnific popup -->
+<!-- mean menu -->
+<!-- sticker js -->
+	<!-- main js -->
 </body>
 </html>
-
-{% endblock content %}

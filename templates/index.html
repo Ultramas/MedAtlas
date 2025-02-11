@@ -11,6 +11,650 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
 
+    <style>
+    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
+    .copyright-section {
+        background: linear-gradient(
+            to right,
+            rgba(191, 151, 255, 0.1),
+            rgba(255, 255, 255, 0.05),
+            rgba(191, 151, 255, 0.1)
+        );
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        text-align: center;
+        position: relative;
+        z-index: 100;
+    }
+
+    .copyright-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .copyright-section p {
+        color: var(--text);
+        font-family: 'Cinzel', serif;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        margin: 0;
+    }
+</style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
+
+        :root {
+            --primary: #bf97ff;
+            --primary-dark: #9a6bff;
+            --background: #0a0a13;
+            --text: #ffffff;
+            --accent: #4db2ea;
+            --accent2: #ffd700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            font-family: 'Cormorant Garamond', serif;
+            background-image:
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+
+        .main-menu {
+            display: flex;
+			position: fixed;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(
+                to right,
+                rgba(191, 151, 255, 0.1),
+                rgba(255, 255, 255, 0.05),
+                rgba(191, 151, 255, 0.1)
+            );
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            background-color: transparent;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+            position: relative;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 3rem;
+        }
+
+        .nav-links a {
+
+    color: var(--primary);
+            text-decoration: none;
+            position: relative;
+            padding: 0.5rem 0;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            /*font-size: 1rem;*/
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+    .logo-icon h1::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+    }
+        .container {
+            display: flex;
+            max-width: 1800px;
+            margin: 0 auto;
+			display: flex;
+    		flex-direction: column;
+        }
+
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+        .user-profile {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-profile::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .profile-picture {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--accent2);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .username {
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
+        }
+
+        .user-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 1rem;
+        }
+
+        .user-stat {
+            background: rgba(191, 151, 255, 0.1);
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid var(--primary);
+        }
+
+        .user-stat-icon {
+            font-size: 1.5rem;
+        }
+
+        .filters {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters h2, .collection-title {
+            color: var(--primary);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .filters h2::after, .collection-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .type-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .view-collection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-collection::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .view-collection:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .view-collection:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .main-content h1 {
+            color: var(--primary);
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+        }
+
+        .main-content h1::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .nav-links h1::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .pokemon-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+        .pokemon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
+            z-index: 1;
+        }
+
+        .pokemon-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pokemon-image::after {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pokemon-info {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .pokemon-name {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+            font-family: 'Cinzel', serif;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .pokemon-type {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .add-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .add-button:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .add-button:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .legendary-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: var(--accent);
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.75rem;
+            border-radius: 50%;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--accent2);
+            font-size: 1.5rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+        }
+
+                .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1200px) {
+            .inventory-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .inventory-item {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .inventory-item:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+
+
+.view-toggle {
+    text-align: right;
+    margin-bottom: 1rem;
+}
+
+.toggle-btn {
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+    border: 2px solid var(--primary);
+    color: var(--text);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
+}
+
+.inventory-grid.compact-view {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.inventory-grid.compact-view .inventory-item {
+    font-size: 0.9em;
+}
+
+.inventory-grid.compact-view .pokemon-image {
+    aspect-ratio: 16/9;
+}
+
+.inventory-grid.compact-view .product-description {
+    display: none;
+}
+
+.inventory-grid.compact-view .action-buttons {
+    flex-direction: column;
+}
+
+.inventory-grid.compact-view .action-buttons form {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.legendary-icon {
+    font-size: 2em;
+    margin-bottom: 0.5rem;
+}
+
+.empty-inventory {
+    text-align: center;
+}
+
+.empty-inventory img {
+    max-width: 50%;
+    margin: 2rem auto;
+}
+
+nav.main-menu ul li a {
+    color: #fff;
+    font-weight: 700;
+    display: block;
+    padding: 15px;
+}
+
+p.blog-meta span {
+    margin-right: 15px;
+    opacity: 0.6;
+    color: rgba(255, 255, 255, 1);
+    font-size: 0.85em;
+}
+    </style>
+
   	{% for BackgroundImage in Titles %}
 	{% if BackgroundImage.page == "index.html" or BackgroundImage.page == "base.html" %}
     <title>{{BackgroundImage.overtitle}}</title>
@@ -76,8 +720,6 @@ function toggleChatWidget() {
 
 	}
 .hero-area {
-    position: relative;
-    overflow: hidden;
 }
 
 .video-background {
@@ -90,8 +732,6 @@ function toggleChatWidget() {
 }
 
 .container {
-    position: relative;
-    z-index: 2;
 }
 
 /* Style the popup button */
@@ -258,11 +898,12 @@ window.onscroll = function() {
     <!--PreLoader Ends-->
 
 
+{% include 'navtrove.html' %}
 <div class="hero-area hero-bg" style="margin-top: 0%;">
         {% for BackgroundImage in Background %}
             {% if BackgroundImage.page == "index.html" %}
                 {% if BackgroundImage.position == 1 %}
-	l';knjbk
+
 <div class="video-background"
      style="background: url('{% if BackgroundImage.file and BackgroundImage.file.url %}{{ BackgroundImage.file.url }}{% else %}{{ BackgroundImage.cover.url }}{% endif %}');
             background-size: cover;
@@ -273,15 +914,15 @@ window.onscroll = function() {
         {% endfor %}
     </div>
 		<div class="container">
-			<div class="row">
-				<div class="col-lg-9 offset-lg-2 text-center">
-					<div class="hero-text">
-						<div class="hero-text-tablecell">
+			<div class="row" style="justify-content: center;">
+				<div class="col-lg-9 offset-lg-2 text-center" style="justify-content: center;">
+					<div class="hero-text" style="justify-content: center;">
+						<div class="hero-text-tablecell" style="justify-content: center;">
 							{% for BackgroundImage in TextFielde %}
 							{% if BackgroundImage.page == "index.html" %}
 							{% if BackgroundImage.section == 1 %}
 							{% if BackgroundImage.text_color %}
-							<h1 style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h1>
+							<h1 style="color: {{BackgroundImage.text_color}}; width: 200%;">{{BackgroundImage.text}}</h1>
 							{% else %}
 							<h1 style="color: white;">{{BackgroundImage.text}}</h1>
 						  	{% endif %}
@@ -294,7 +935,7 @@ window.onscroll = function() {
 							{% if BackgroundImage.text_color %}
               <p style="color: {{BackgroundImage.text_color}}" class="subtitle">{{BackgroundImage.text}}</p>
 							{% else %}
-              <p style="color: #F28123" class="subtitle">{{BackgroundImage.text}}</p>
+              <p style="color: #bf97ff" class="subtitle">{{BackgroundImage.text}}</p>
 						  	{% endif %}
 						  	{% endif %}
 							{% endif %}
@@ -332,11 +973,6 @@ window.onscroll = function() {
 		<div class="container">
 
 			<div class="row">
-				<div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
-						<div class="list-icon">
-
-						</div>
-						</div>
 						{% for TopHits in tophit %}
 					<div class="list-box d-flex align-items-center">
 						<div class="content" style="padding: 25px; margin: 10px; background: radial-gradient(circle at center, blue,{{TopHits.color}}, white 100%)">
@@ -400,7 +1036,7 @@ window.onscroll = function() {
 					<div class="section-title">
 						<br>
 						<br>
-						<h3 style="color: #e5e4e2;"><span class="orange-text">Featured</span> Games</h3>
+						<h3 ><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h3>
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
 						{% if BackgroundImage.section == 11 %}
@@ -467,7 +1103,7 @@ window.onscroll = function() {
 						<br>
 						<br>
 						<br>
-						<h3 style="color: #e5e4e2;"><span class="orange-text">PokeTrove</span> Marketplace</h3>
+						<h3 style="color: #e5e4e2;"><span class="orange-text" style="color: #bf97ff;">PokeTrove</span> Marketplace</h3>
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
 						{% if BackgroundImage.section == 12 %}
@@ -649,7 +1285,7 @@ window.onscroll = function() {
     {% if BackgroundImage.position == 5 %}
     <div class="abt-bg" style="background: url({{ BackgroundImage.cover.url }}); background-size: cover;">
         <!-- Trigger popup with the play button -->
-        <a href="#video-popup" class="video-play-btn popup-youtube">
+        <a href="#video-popup" class="video-play-btn popup-youtube" style="color: #bf97ff;">
             <img src="{% static 'css/images/play-button-arrowhead.png' %}" style="width: 25px; height: 25px; margin-top: 30px;">
         </a>
     </div>
@@ -661,6 +1297,7 @@ window.onscroll = function() {
     {% if BackgroundImage.page == "index.html" and BackgroundImage.position == 6 %}
     <div id="video-popup" class="mfp-hide">
         <div class="mfp-iframe-scalere">
+			afsdas
             <video autoplay loop muted playsinline controls style="display: flex; flex-direction: row; margin: auto;">
                 <source src="{{ BackgroundImage.file.url }}" type="video/mp4">
                 Your browser does not support the video tag.
@@ -674,7 +1311,7 @@ window.onscroll = function() {
 				<div class="col-lg-6 col-md-12">
 					<div class="abt-text">
 						<p class="top-sub">Est 2024</p>
-						<h2 style="color: #e5e4e2;">We are <span class="orange-text">PokeTrove</span></h2>
+						<h2 style="color: #e5e4e2;">We are <span class="orange-text" style="color: #bf97ff;">PokeTrove</span></h2>
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
 						{% if BackgroundImage.section == 13 %}
@@ -690,7 +1327,7 @@ window.onscroll = function() {
 					  	{% endif %}
 						{% endif %}
 						{% endfor %}
-						<a href="about" class="boxed-btn mt-4">About Us</a>
+						<a href="about" class="boxed-btn mt-4" style="">About Us</a>
 					</div>
 				</div>
 			</div>
@@ -746,7 +1383,7 @@ window.onscroll = function() {
 			<div class="row">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="section-title">
-						<h3 style="color: #e5e4e2;"><span class="orange-text">Our</span> News</h3>
+						<h3 style="color: #e5e4e2;"><span class="orange-text" style="color: #bf97ff;">Our</span> News</h3>
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
 						{% if BackgroundImage.section == 15 %}
@@ -764,7 +1401,7 @@ window.onscroll = function() {
 			<div class="row">
 	{% for newprofile in News %}
 				<div class="col-lg-4 col-md-6">
-					<div class="single-latest-news">
+					<div class="single-latest-news" style="width: 180%;">
 						<a href="{{newprofile.get_profile_url2}}">
 							<div class="latest-news-bg news-bg-1" style="background: url({{newprofile.image.url}}); background-size: cover;"></div></a>
 						<div class="news-text-box">
@@ -1119,7 +1756,6 @@ Chat Title
     top: 50%;
     transform: translateY(-50%);
     height: 36px;
-    background-color: #F28123;
     color: #051922;
     font-weight: 700;
     text-transform: uppercase;
@@ -1161,7 +1797,7 @@ Chat Title
     top: 0;
     height: 100%;
     width: 50px;
-    background-color: #F28123;
+    background-color: #bf97ff;
     color: #051922;
     font-weight: 700;
     text-transform: uppercase;
@@ -1424,10 +2060,8 @@ Message Box
   z-index: 1;
   top: 0px;
   right: 0px;
-  color: #4A90E2;
   border: none;
   /* background: #c29d5f;*/
-  background: #fff;
   font-size: 12px;
   text-transform: uppercase;
   line-height: 1;
@@ -1997,7 +2631,7 @@ Bounce
     <input type="text" name="message" id="support-message" width="100px" placeholder="Type your message..." style="border: none; margin-bottom: 0px;height: 20px;">
     <input type="hidden" name="page_name" id="support-page_named" value="index.html">
     <input type="submit" class="message-submit" style="margin-left: 220px; height: 20px; overflow: hidden; position: absolute; text-align: center;
-        line-height: 0px; font-size: 14px; background-color: #F28123; color: #051922; font-weight: 700;
+        line-height: 0px; font-size: 14px; font-weight: 700;
         text-transform: uppercase; font-size: 15px; border: none !important; cursor: pointer;
         padding: 16px 25px; border-radius: 3px; margin-top: 16px;" value="➤">
 </form>
