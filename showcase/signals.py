@@ -174,3 +174,5 @@ def create_notification_on_message(sender, instance, created, **kwargs):
 
         except Room.DoesNotExist:
             print(f"Room '{message.room}' does not exist.")
+
+

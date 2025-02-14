@@ -7,7 +7,7 @@ register = template.Library()
 @register.filter
 def get_color(game, choice):
     if not hasattr(game, 'cost'):
-        raise AttributeError("The provided game object does not have a 'cost' attribute.")
+        return 'default_color'
 
     cost_threshold_80 = game.cost * 0.8
     cost_threshold_100 = game.cost

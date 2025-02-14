@@ -12,7 +12,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
-    TopHits, Address
+    TopHits, Address, Robot, Bet
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -2303,6 +2303,14 @@ admin.site.register(Transaction, TransactionAdmin)
 
 admin.site.register(BattleParticipant)
 
+class RobotAdmin(admin.ModelAdmin):
+    model = Robot
+    fieldsets = (
+        ('Robot Information', {
+            'fields': ('name', 'is_bot', 'image', 'is_active'),
+        }),
+    )
+admin.site.register(Robot, RobotAdmin)
 
 class BattleGameInline(admin.TabularInline):
     model = BattleGame
@@ -2330,7 +2338,7 @@ class RobotInline(admin.TabularInline):
 class BattleAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Battle Information', {
-            'fields': ('battle_name', 'currency', 'price', 'creator', 'min_human_participants', 'status', 'slots', 'type', 'bets_allowed', 'time', 'is_active'),
+            'fields': ('battle_name', 'currency', 'price', 'creator', 'min_human_participants', 'game_values', 'status', 'slots', 'type', 'bets_allowed', 'time', 'is_active'),
         }),
     )
     list_display = ('battle_name', 'creator', 'price', 'currency', 'status', 'is_active', 'time')
@@ -2341,6 +2349,14 @@ class BattleAdmin(admin.ModelAdmin):
 
 admin.site.register(Battle, BattleAdmin)
 
+class BetAdmin(admin.ModelAdmin):
+    model = Bet
+    fieldsets = (
+        ('Bet Information', {
+            'fields': ('user', 'amount', 'battle', 'is_active'),
+        }),
+    )
+admin.site.register(Bet, BetAdmin)
 
 class AffiliationAdmin(admin.ModelAdmin):
     list_display = ('type', 'flavor_text', 'icon', 'unlocking_level', 'is_active')

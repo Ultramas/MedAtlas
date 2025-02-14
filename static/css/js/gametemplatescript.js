@@ -665,12 +665,12 @@ textContainer.innerHTML = `
                 <div class="card-flame"></div>
               </div>
             </div>
-            <p>ID: ${item.id}</p>
-            <p>Nonceword: ${item.nonce}</p>
+            <!--<p>ID: ${item.id}</p>
+            <p>Nonceword: ${item.nonce}</p>-->
             <img src="${item.src || ''}" alt="${item.id}" width=150 height=225>
-            <p>Value: ${item.value} 💎</p>
-            <p>Lower Nonce: ${item.lowerNonce}</p>
-            <p>Upper Nonce: ${item.upperNonce}</p>
+            <p>${item.value} 💎</p>
+            <!--<p>Lower Nonce: ${item.lowerNonce}</p>
+            <p>Upper Nonce: ${item.upperNonce}</p>-->
         `;
 
 
@@ -692,6 +692,10 @@ textContainer.innerHTML = `
 
         const closeBtn = textContainer.querySelector('.close');
         closeBtn.addEventListener('click', () => {
+
+        const audio = new Audio('/static/css/sounds/collect.mp3');
+        audio.play();
+
             const fire = document.querySelector('.fire');
             fire.style.opacity = '0';
             document.querySelectorAll('.card-fire').forEach(fire => {

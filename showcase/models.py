@@ -3574,6 +3574,14 @@ class Robot(models.Model):
     name = models.CharField(max_length=200)
     is_bot = models.BooleanField(default=True)
     image = models.FileField()
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?",
+    )
 
     def __str__(self):
         return self.name
@@ -3596,6 +3604,7 @@ class BattleGame(models.Model):
     battle = models.ForeignKey('Battle', on_delete=models.CASCADE, related_name='battle_games')
     game = models.ForeignKey('Game', on_delete=models.CASCADE, related_name='game_battles')
     quantity = models.PositiveIntegerField(default=1)
+    order = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.game.name} x{self.quantity} in {self.battle.battle_name}"
@@ -3604,6 +3613,7 @@ class BattleGame(models.Model):
         unique_together = ('battle', 'game')  # Ensure no duplicate game-battle pairs
         verbose_name = "Battle Game"
         verbose_name_plural = "Battle Games"
+        ordering = ['order']
 
     def game_cost(self):
         return self.game.cost
@@ -3614,8 +3624,6 @@ class BattleGame(models.Model):
         return self.game.discount_cost
 
     game_discount_cost.short_description = "Discounted Cost"  # Label in the admin interface
-
-
 
 
 class Battle(models.Model):
@@ -3640,12 +3648,12 @@ class Battle(models.Model):
     )
     BATTLE_TYPE = (
         ('Free For All', 'Free For All'),
-        ('Upside-Down', 'Upside-Down'),
-        ('Teams', 'Teams'),
-        ('Dual Win', 'Dual Win'),
-        ('Team Fight', 'Team Fight'),
-        ('Do Not Lose', 'Do Not Lose'),
-        ('Share', 'Share'),
+        ('upside_down', 'Upside-Down'),
+        ('teams', 'Teams'),
+        ('dual_win', 'Dual Win'),
+        ('team_fight', 'Team Fight'),
+        ('do_not_lose', 'Do Not Lose'),
+        ('share', 'Share'),
     )
     battle_name = models.CharField(max_length=100, blank=True, null=True)
     chests = models.ManyToManyField('Game', through='BattleGame', related_name='battles')
@@ -3663,9 +3671,14 @@ class Battle(models.Model):
         validators=[MinValueValidator(0)],
         help_text='Minimum number of human participants required.',
     )
+    game_values = models.TextField(blank=True, null=True)
     status = models.CharField(choices=BATTLE_STATUS, max_length=1, default="O")
     slots = models.CharField(choices=BATTLE_SLOTS, max_length=4, default="2")
-    type = models.CharField(choices=BATTLE_TYPE, max_length=20, default='Free For All')
+    type = models.CharField(
+        choices=BATTLE_TYPE,
+        max_length=20,
+        default='Free For All'
+    )
     bets_allowed = models.BooleanField(default=False)
     time = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.IntegerField(
@@ -3686,6 +3699,27 @@ class Battle(models.Model):
         return f"{self.battle_name} submitted by {self.creator}"
 
     logger = logging.getLogger(__name__)
+    def get_total_capacity(self):
+        """
+        Compute total capacity based on the human-readable slots string.
+        For example:
+          - "1v1"  → [1, 1] → capacity 2
+          - "1v1v1"  → capacity 3
+          - "1ve5" → if intended as 1 vs 5, then capacity 6
+          - "2v2"  → [2, 2] → capacity 4
+          - "2v2v2"  → capacity 6
+        """
+        display = self.get_slots_display()
+        if 've' in display:
+            parts = display.split('ve')
+            if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+                return int(parts[0]) + int(parts[1])
+        # Otherwise split on 'v' (which covers cases like "1v1" or "1v1v1")
+        parts = display.split('v')
+        try:
+            return sum(int(part) for part in parts if part.isdigit())
+        except ValueError:
+            return 0
 
     def is_full(self):
         slot_number = int(self.slots.split('v')[-1])
@@ -3719,10 +3753,27 @@ class Battle(models.Model):
         # Save again to ensure currency and price updates
         super().save(*args, **kwargs)
 
+    @property
+    def total_game_values(self):
+        return sum(
+            bg.quantity * (bg.game.discount_cost if bg.game.discount_cost is not None else bg.game.cost)
+            for bg in self.battle_games.all()
+        )
+
     class Meta:
         verbose_name = "Battle"
         verbose_name_plural = "Battles"
 
+class Bet(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.IntegerField(default=5, validators=[MinValueValidator(1)],)
+
+    battle = models.ForeignKey(Battle, on_delete=models.CASCADE)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
 class Hits(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

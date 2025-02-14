@@ -13,7 +13,7 @@ from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewTy
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
     SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame, Monstrosity, \
-    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption
+    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet
 from .models import UpdateProfile
 from .models import VoteQuery
 from .models import StaffApplication
@@ -434,7 +434,7 @@ class BattleCreationForm(forms.ModelForm):
         choices=Battle.BATTLE_TYPE,  # Use the model's defined choices
         widget=forms.RadioSelect,
         label="Battle Type",
-        initial='F'  # Default option
+        initial='Free For All'
     )
 
     class Meta:
@@ -445,23 +445,52 @@ class BattleCreationForm(forms.ModelForm):
             'chests': forms.SelectMultiple(attrs={'id': 'id_chests'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            self.initial['type'] = 'Free For All'
 
-def clean(self):
-    cleaned_data = super().clean()
-    chests = cleaned_data.get('chests')
-    quantities = {}
+    def clean(self):
+        cleaned_data = super().clean()
+        chests = cleaned_data.get('chests')
+        quantities = {}
 
-    for game in chests:
-        quantity_key = f'quantity-{game.id}'
-        quantity = self.data.get(quantity_key, 1)  # Default to 1 if not provided
-        if not quantity.isdigit() or int(quantity) < 1:
-            raise forms.ValidationError(f"Invalid quantity for {game.name}.")
-        quantities[game.id] = int(quantity)
+        for game in chests:
+            quantity_key = f'quantity-{game.id}'
+            quantity = self.data.get(quantity_key, 1)  # Default to 1 if not provided
+            if not quantity.isdigit() or int(quantity) < 1:
+                raise forms.ValidationError(f"Invalid quantity for {game.name}.")
+            quantities[game.id] = int(quantity)
 
-    # Store quantities for use elsewhere (e.g., saving the Battle instance)
-    self.cleaned_data['quantities'] = quantities
-    return cleaned_data
+        # Store quantities for use in save()
+        self.cleaned_data['quantities'] = quantities
+        return cleaned_data
 
+    def save(self, commit=True):
+        # Save the Battle instance first
+        battle = super().save(commit=commit)
+        quantities = self.cleaned_data.get('quantities', {})
+
+        # Update or create BattleGame instances with the provided quantities
+        for game in self.cleaned_data.get('chests'):
+            qty = quantities.get(game.id, 1)
+            # Use get_or_create to ensure that a BattleGame instance exists for this game/battle pair
+            battle_game, created = BattleGame.objects.get_or_create(battle=battle, game=game)
+            if battle_game.quantity != qty:
+                battle_game.quantity = qty
+                battle_game.save()
+
+        # Optionally, recalc the total price (if using total_game_values in the template)
+        battle.price = battle.total_game_values
+        battle.save()
+
+        return battle
+
+
+class BetForm(forms.ModelForm):
+    class Meta:
+        model = Bet
+        fields = '__all__'
 
 BattleGameFormSet = inlineformset_factory(
     parent_model=Battle,

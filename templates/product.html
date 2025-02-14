@@ -1,4 +1,3 @@
-
 {% load static %}
 
 <!DOCTYPE html>
@@ -6,1812 +5,937 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天界仙境 Chinese Student Scholar Association</title>
+    <title>PokeTrove - Marketplace</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Cinzel:wght@400;700&display=swap');
+    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
+    .copyright-section {
+        background: linear-gradient(
+            to right,
+            rgba(191, 151, 255, 0.1),
+            rgba(255, 255, 255, 0.05),
+            rgba(191, 151, 255, 0.1)
+        );
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        text-align: center;
+        position: relative;
+        z-index: 100;
+    }
+
+    .copyright-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .copyright-section p {
+        color: var(--text);
+        font-family: 'Cinzel', serif;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        margin: 0;
+    }
+</style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
+
+        :root {
+            --primary: #bf97ff;
+            --primary-dark: #9a6bff;
+            --background: #0a0a13;
+            --text: #ffffff;
+            --accent: #4db2ea;
+            --accent2: #ffd700;
+        }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-			text-decoration: none;
         }
 
         body {
-            font-family: 'Cinzel', serif;
-            background: #000000;
-            color: #FFD700;
-            overflow-x: hidden;
-            height: 150vh;
+            background-color: var(--background);
+            color: var(--text);
+            font-family: 'Cormorant Garamond', serif;
+            background-image:
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
         }
 
-        .realm-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background:
-                radial-gradient(circle at 20% 20%, rgba(139, 0, 0, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.3) 0%, transparent 50%);
-            z-index: -1;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            top: -80%;
-        }
-
-        header {
-            text-align: center;
-            padding: 40px 0;
-            position: relative;
-            margin-top: 5%;
-        }
-
-        h1 {
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: 4rem;
-            color: #FFD700;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 0, 0, 0.3);
-            margin-bottom: 20px;
-            animation: glow 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from {
-                text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 0, 0, 0.3);
-            }
-            to {
-                text-shadow: 0 0 20px rgba(255, 215, 0, 0.7), 0 0 30px rgba(255, 0, 0, 0.5);
-            }
-        }
-
-        nav ul {
-            list-style-type: none;
+        .main-menu {
             display: flex;
-            justify-content: center;
-            gap: 30px;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(
+                to right,
+                rgba(191, 151, 255, 0.1),
+                rgba(255, 255, 255, 0.05),
+                rgba(191, 151, 255, 0.1)
+            );
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        nav ul li a {
-            color: #FFD700;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary);
             text-decoration: none;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
             position: relative;
         }
 
-        nav ul li a::after {
+        .logo::after {
             content: '';
             position: absolute;
             bottom: -5px;
             left: 0;
             width: 100%;
             height: 2px;
-            background: #FF0000;
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
-        nav ul li a:hover::after {
-            transform: scaleX(1);
+        .logo-icon {
+            color: var(--accent);
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
         }
 
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 70px;
-            margin-top: 50px;
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 3rem;
         }
 
-        .product-card {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid #FFD700;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.5s ease;
+        .nav-links a {
+
+    color: var(--primary);
+            text-decoration: none;
+            position: relative;
+            padding: 0.5rem 0;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            /*font-size: 1rem;*/
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+    .logo-icon h1::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+    }
+        .container {
+            display: flex;
+            gap: 3rem;
+            padding: 3rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+        .user-profile {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
             position: relative;
             overflow: hidden;
-			width: 300px;
         }
 
-        .product-card::before {
+        .user-profile::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255,0,0,0.1) 0%, rgba(255,215,0,0.1) 50%, transparent 70%);
-            transform: rotate(45deg);
-            transition: transform 0.5s ease;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
         }
 
-        .product-card:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 10px 20px rgba(255, 0, 0, 0.2), 0 6px 6px rgba(255, 215, 0, 0.2);
-        }
-
-        .product-card:hover::before {
-            transform: rotate(45deg) translate(50%, 50%);
-        }
-
-        .product-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            transition: all 0.5s ease;
-        }
-
-        .product-card:hover .product-image {
-            transform: scale(1.1);
-        }
-
-        .product-title {
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #FFD700;
-        }
-
-        .product-price {
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            color: #FF0000;
-        }
-
-        .btn {
-            background: #FFD700;
-            color: #000000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-family: 'Cinzel', serif;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
+        .profile-picture {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
             overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            transition: all 0.4s ease;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .floating-symbols-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
+            border: 3px solid var(--accent2);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            position: relative;
             z-index: 1;
         }
 
-        .floating-symbol {
-            position: fixed;
-            font-size: 2rem;
-            color: rgba(255, 215, 0, 0.3);
-            pointer-events: none;
-            will-change: transform;
-        }
-
-        @keyframes floatVertical {
-            0% {
-                transform: translateY(110vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.3;
-            }
-            90% {
-                opacity: 0.3;
-            }
-            100% {
-                transform: translateY(-10vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-        .fixed-navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .profile-picture img {
             width: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            padding: 10px 0;
-            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.2);
+            height: 100%;
+            object-fit: cover;
         }
 
-
-        .fixed-navbar3 {
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            padding: 10px 0;
-            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.2);
+        .user-info {
+            text-align: center;
+            position: relative;
+            z-index: 1;
         }
-        nav ul {
-            list-style-type: none;
+
+        .username {
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
+        }
+
+        .user-stats {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 1rem;
+            font-size: 1rem;
         }
 
-        nav ul li a {
-            color: #FFD700;
-            text-decoration: none;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
+        .user-stat {
+            background: rgba(191, 151, 255, 0.1);
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid var(--primary);
+        }
+
+        .user-stat-icon {
+            font-size: 1.5rem;
+        }
+
+        .filters {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters h2, .collection-title {
+            color: var(--primary);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
             position: relative;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
         }
 
-        nav ul li a::after {
+        .filters h2::after, .collection-title::after {
             content: '';
             position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 100%;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
             height: 2px;
-            background: #FFFFFF;
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
-        nav ul li a:hover::after {
-            transform: scaleX(1);
-        }
-
-
-        .product-card:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2), 0 6px 6px rgba(255, 215, 0, 0.2);
-        }
-
-        .product-card:hover::before {
-            transform: rotate(45deg) translate(50%, 50%);
-        }
-
-        .product-image {
+        .search-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
             width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            transition: all 0.5s ease;
-        }
-
-        .product-card:hover .product-image {
-            transform: scale(1.1);
-        }
-
-        .product-title {
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #FFD700;
-        }
-
-        .product-price {
+            color: var(--text);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            font-family: 'Cormorant Garamond', serif;
             font-size: 1.1rem;
-            margin-bottom: 15px;
-            color: #7fad92;
         }
 
-        .btn {
-            background: linear-gradient(45deg, #FFD700, #FFF8DC);
-            color: #000000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-family: 'Noto Serif SC', serif;
-            font-size: 1rem;
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .type-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .view-collection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            width: 100%;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
             position: relative;
             overflow: hidden;
         }
 
-        .btn::before {
+        .view-collection::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            transition: all 0.4s ease;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
         }
 
-        .btn:hover::before {
-            left: 100%;
-        }
-        .celestial-tree {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 0;
-    width: 300px; /* Increased width for larger tree */
-    height: calc(100vh - 200px);
-    pointer-events: none;
-    z-index: 0;
-}
-
-.tree-container {
-    position: relative;
-    height: 200vh;
-    transform-origin: bottom center;
-}
-
-.tree-trunk {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 40px;
-    background: linear-gradient(90deg,
-        #7eff00 0%,
-        #5D4037 20%,
-        #795548 50%,
-        #5D4037 80%,
-        #3E2723 100%
-    );
-    transform: translateX(-50%);
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-    height: 100%;
-    border-radius: 10px;
-}
-
-.tree-branch {
-    position: absolute;
-    background: linear-gradient(90deg,
-        #5D4037 0%,
-        #795548 50%,
-        #5D4037 100%
-    );
-    height: 8px;
-    transform-origin: left center;
-    left: 50%;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-    border-radius: 4px;
-}
-
-.branch-glow {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at center, rgba(255, 215, 0, 0.2), transparent 70%);
-    filter: blur(3px);
-}
-
-.branch-leaves {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    transform-origin: left center;
-    pointer-events: none;
-}
-
-.tree-leaf {
-    position: absolute;
-    width: 30px;
-    height: 15px;
-    background: linear-gradient(to bottom,
-        rgba(34, 139, 34, 0.8),
-        rgba(0, 100, 0, 0.8)
-    );
-    border-radius: 100% 0 100% 0;
-    animation: leafGlow 3s ease-in-out infinite alternate;
-    transform-origin: center;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-}
-
-@keyframes leafGlow {
-    0% { opacity: 0.6; transform: scale(1) rotate(0deg); }
-    100% { opacity: 0.9; transform: scale(1.1) rotate(5deg); }
-}
-
-.fortune-coin {
-    position: absolute;
-    width: 25px;
-    height: 25px;
-    background: linear-gradient(45deg, #FFD700, #FDB931);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Ma Shan Zheng', cursive;
-    color: #8B0000;
-    font-size: 14px;
-    animation: coinGlow 2s ease-in-out infinite alternate;
-    box-shadow:
-        inset 0 0 10px rgba(255, 215, 0, 0.5),
-        0 0 15px rgba(255, 215, 0, 0.3);
-}
-
-@keyframes coinGlow {
-    0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-    100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
-}
-
-        @keyframes leafGlow {
-            0% { opacity: 0.3; transform: scale(1); }
-            100% { opacity: 0.6; transform: scale(1.2); }
+        .view-collection:hover::before {
+            transform: translate(25%, 25%);
         }
 
-        .language-switcher {
-        position: fixed;
-        top: 20px;
-        right: 50px;
-        z-index: 2000;
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 215, 0, 0.3);
-        border-radius: 10px;
-        padding: 10px;
-        box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
-    }
-
-    .language-options {
-        display: flex;
-        gap: 10px;
-    }
-
-    .language-option {
-        padding: 8px 12px;
-        background: transparent;
-        border: 1px solid rgba(255, 215, 0, 0.3);
-        border-radius: 5px;
-        color: #FFD700;
-        cursor: pointer;
-        font-family: 'Ma Shan Zheng', cursive;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .language-option::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
-        transition: 0.5s;
-    }
-
-    .language-option:hover::before {
-        left: 100%;
-    }
-
-    .language-option.active {
-        background: linear-gradient(45deg, #FFD700, #FDB931);
-        color: #000;
-        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-    }
-
-    .language-option:hover:not(.active) {
-        background: rgba(255, 215, 0, 0.1);
-    }
-    </style>
-
-    <style>
-
-.officers-section {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-}
-
-.fortune-symbol {
-  position: absolute;
-  color: #d68910; /* Golden color */
-  animation: float 10s ease-in-out infinite;
-}
-
-@keyframes float {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-        .celestial-tree {
-            position: fixed;
-            left: 0;
-            bottom: 0;
-            width: 200px;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 0;
+        .view-collection:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
         }
 
-        .tree-container {
+        .main-content h1 {
+            color: var(--primary);
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
             position: relative;
-            height: 200vh;
-            transform-origin: bottom center;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
         }
 
-        .tree-trunk {
+        .main-content h1::after {
+            content: '';
             position: absolute;
-            bottom: 0;
+            bottom: -15px;
             left: 50%;
-            width: 40px;
-            background: linear-gradient(90deg,
-                #3E2723 0%,
-                #5D4037 20%,
-                #5D4037 80%,
-                #3E2723 100%
-            );
             transform: translateX(-50%);
-            height: 100%;
-            box-shadow:
-                inset -5px 0 10px rgba(0,0,0,0.3),
-                0 0 15px rgba(139, 69, 19, 0.3);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
-        .tree-trunk::before {
+
+        .nav-links h1::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .pokemon-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+        .pokemon-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background:
-                url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm20 20L0 40h40L20 20zm20-20L20 20h20V0zM0 0v20h20L0 0z' fill='%23442217' fill-opacity='0.1'/%3E%3C/svg%3E");
-            opacity: 0.3;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
+            z-index: 1;
         }
 
-        .tree-branch {
-            position: absolute;
-            left: 50%;
-            transform-origin: left center;
-            height: 8px;
-            background: linear-gradient(90deg,
-                #5D4037 0%,
-                #3E2723 100%
-            );
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        .pokemon-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .fortune-coin {
-            position: absolute;
-            right: -25px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 25px;
-            height: 25px;
-            background: linear-gradient(45deg, #FFD700, #FDB931);
-            border-radius: 50%;
-            box-shadow:
-                0 0 10px rgba(255, 215, 0, 0.5),
-                0 0 20px rgba(255, 215, 0, 0.3);
-            animation: coinGlow 3s ease-in-out infinite alternate;
-        }
-
-        .fortune-coin::before {
+        .pokemon-image::after {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 8px;
-            height: 8px;
-            background: #000;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
+            animation: rotate 20s linear infinite;
         }
 
-        .fortune-coin::after {
-            content: '福';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: 12px;
-            color: #8B0000;
-            text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
-        .branch-texture {
-            position: absolute;
+        .pokemon-info {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .pokemon-name {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+            font-family: 'Cinzel', serif;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .pokemon-type {
+            color: white;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .add-button {
             width: 100%;
-            height: 100%;
-            background:
-                url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20v20H0V0zm10 10L0 20h20L10 10zm10-10L10 10h10V0zM0 0v10h10L0 0z' fill='%23442217' fill-opacity='0.1'/%3E%3C/svg%3E");
-            opacity: 0.2;
+            padding: 1rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
         }
 
-        @keyframes coinGlow {
-            0% {
-                box-shadow: 0 0 10px rgba(255, 215, 0, 0.5),
-                            0 0 20px rgba(255, 215, 0, 0.3);
-            }
-            100% {
-                box-shadow: 0 0 15px rgba(255, 215, 0, 0.7),
-                            0 0 30px rgba(255, 215, 0, 0.5);
+        .add-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .add-button:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .add-button:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .legendary-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: var(--accent);
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.75rem;
+            border-radius: 50%;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--accent2);
+            font-size: 1.5rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+        }
+
+                .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 1200px) {
+            .inventory-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
-        @media (max-width: 1024px) {
-    .pillar-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+        @media (max-width: 768px) {
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .inventory-item {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .inventory-item:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+
+
+.view-toggle {
+    text-align: right;
+    margin-bottom: 1rem;
 }
 
-@media (max-width: 768px) {
-    .pillar-grid {
-        grid-template-columns: 1fr;
-    }
+.toggle-btn {
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+    border: 2px solid var(--primary);
+    color: var(--text);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
 }
 
-.fortune-redwood {
-  top: 200px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100px;
-  height: calc(100% - 200px);
-  z-index: 0;
-  pointer-events: none;
+.toggle-btn:hover {
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
 }
 
-.tree-trunk {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40px;
-  height: 100%;
-  background: linear-gradient(to right, #5D4037, #795548, #5D4037);
-  border-radius: 20px;
+.inventory-grid.compact-view {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-.tree-branch {
-  position: absolute;
-  background: linear-gradient(to bottom, #795548, #5D4037);
-  height: 10px;
-  transform-origin: left center;
+.inventory-grid.compact-view .inventory-item {
+    font-size: 0.9em;
 }
 
-.fortune-coin {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background: radial-gradient(circle at 30% 30%, #FFD700, #FDB931);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Ma Shan Zheng', cursive;
-  color: #8B0000;
-  font-size: 18px;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-  animation: coinGlow 2s ease-in-out infinite alternate;
+.inventory-grid.compact-view .pokemon-image {
+    aspect-ratio: 16/9;
 }
 
-@keyframes coinGlow {
-  from {
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-  }
-  to {
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-  }
+.inventory-grid.compact-view .product-description {
+    display: none;
 }
 
-.container {
-  position: relative;
-  z-index: 1;
+.inventory-grid.compact-view .action-buttons {
+    flex-direction: column;
+}
+
+.inventory-grid.compact-view .action-buttons form {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.legendary-icon {
+    font-size: 2em;
+    margin-bottom: 0.5rem;
+}
+
+.empty-inventory {
+    text-align: center;
+}
+
+.empty-inventory img {
+    max-width: 50%;
+    margin: 2rem auto;
+}
+
+nav.main-menu ul li a {
+    color: #fff;
+    font-weight: 700;
+    display: block;
+    padding: 15px;
+}
+
+.product-condition{
+    color: var(--accent);
 }
     </style>
-
 </head>
 <body>
 
-    <div id="fortune-redwood" class="fortune-redwood">
-        <div class="tree-trunk"></div>
-        <!-- Branches will be added dynamically via JavaScript -->
-      </div>
-    <nav class="pagoda-navbar">
-    <div class="pagoda-roof">
-        <div class="roof-tile"></div>
-        <ul class="nav-links">
-            <li><a href="#" class="nav-link">首页<span>Home</span></a></li>
-            <li><a href="#merchandise" class="nav-link">仙品<span>Divine Goods</span></a></li>
-            <li><a href="#about" class="nav-link">天界传说<span>CSSA Lore</span></a></li>
-            <li><a href="#join" class="nav-link">问道<span>The Gallery</span></a></li>
-            <li><a href="#commitments" class="nav-link">问道<span>Our Commitments</span></a></li>
-            <li><a href="#officers" class="nav-link">问道<span>Officers</span></a></li>
-            <li><a href="#donate" class="nav-link">问道<span>Donate</span></a></li>
-        </ul>
-        <div class="language-switcher">
-            <button class="language-option active" data-lang="en">EN</button>
-            <button class="language-option" data-lang="zh-CN">简体</button>
-            <button class="language-option" data-lang="zh-HK">繁體</button>
-        </div>
-    </div>
-</nav>
+<script>
+    // Load audio files
+    const sellAudio = new Audio("/static/css/sounds/sell_coin.mp3");
+    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
+    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
 
-<style>
-.pagoda-navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    padding-top: 0px;
-    font-family: 'Ma Shan Zheng', cursive;
-}
+    // Add event listeners to sell forms
+    document.querySelectorAll('.sell-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            sellAudio.play(); // Play the sell sound
+            console.log('')
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
 
-.pagoda-roof {
-    position: relative;
-    background: linear-gradient(to bottom, #8B0000, #A52A2A);
-    height: 80px;
-    clip-path: polygon(
-        0% 100%, 3% 75%, 5% 85%, 7% 70%, 9% 80%, 11% 65%, 13% 75%, 15% 60%,
-        17% 70%, 19% 55%, 21% 65%, 23% 50%, 25% 60%, 27% 45%, 29% 55%,
-        31% 40%, 33% 50%, 35% 35%, 37% 45%, 39% 30%, 41% 40%, 43% 25%,
-        45% 35%, 47% 20%, 49% 30%, 51% 15%, 53% 25%, 55% 10%, 57% 20%,
-        59% 5%, 61% 15%, 63% 0%, 65% 10%, 67% 0%, 69% 15%, 71% 5%, 73% 20%,
-        75% 10%, 77% 25%, 79% 15%, 81% 30%, 83% 20%, 85% 35%, 87% 25%,
-        89% 40%, 91% 30%, 93% 45%, 95% 35%, 97% 50%, 99% 40%, 100% 100%
-    );
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
+    // Add event listeners to withdraw forms
+    document.querySelectorAll('.withdraw-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            withdrawAudio.play(); // Play the withdraw sound
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
 
-.roof-tile {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: repeating-linear-gradient(
-        to right,
-        transparent 0,
-        transparent 20px,
-        rgba(0,0,0,0.1) 20px,
-        rgba(0,0,0,0.1) 40px
-    );
-    mask-image: linear-gradient(to bottom, transparent 20%, black 80%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 20%, black 80%);
-}
+	document.querySelectorAll('.trade-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            tradeAudio.play(); // Play the withdraw sound
+        });
+    });
 
-.nav-links {
-    display: flex;
-    justify-content: center;
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    height: 100%;
-}
+    // Generic AJAX form submission handler
+    function handleAjaxFormSubmission(form) {
+        const formData = new FormData(form);
+        const actionUrl = form.getAttribute('action');
 
-.nav-links li {
-    display: flex;
-    align-items: center;
-    height: 100%;
-}
-
-.nav-link {
-    color: #FFD700;
-    text-decoration: none;
-    padding: 0 20px;
-    font-size: 1.2rem;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-}
-
-.nav-link span {
-    font-size: 0.8rem;
-    opacity: 0.8;
-}
-
-.nav-link:hover {
-    color: #FFF;
-    transform: translateY(-5px);
-}
-
-.language-switcher {
-    position: absolute;
-    right: 40px;
-    bottom: 10px;
-    display: flex;
-    gap: 5px;
-}
-
-.language-option {
-    background: #FFD700;
-    border: none;
-    color: #8B0000;
-    padding: 5px 10px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Ma Shan Zheng', cursive;
-}
-
-.language-option:hover,
-.language-option.active {
-    background: #FFF;
-    color: #8B0000;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .pagoda-roof {
-        height: auto;
-        clip-path: none;
-        padding-bottom: 10px;
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('stock-count').textContent = data.number_of_cards;
+            } else {
+                console.error(data.error);
+            }
+        });
     }
+</script>
 
-    .nav-links {
-        flex-wrap: wrap;
-    }
+{% include 'navtrove.html' %}
 
-    .nav-link {
-        padding: 10px;
-    }
+  <main class="main-content" style="margin: auto; align-items: center; justify-content: center;">
 
-    .language-switcher {
-        position: static;
-        justify-content: center;
-        padding-top: 10px;
-    }
-}
-</style>
-    <div class="realm-background"></div>
-    <div class="floating-symbols-container"></div>
-    <div class="container">
-        <br>
-        <header>
-            <h1 data-translate="header-title"></h1>天界仙境 Chinese Student Scholar Association</h1>
-            <nav>
-                <ul>
-                </ul>
-            </nav>
-        </header>
-        <main>
-            <section class="product-section" style="height: 100vh;" id="merchandise" style="display: flex; justify-content: center; align-items: center;">
-                <h2 class="section-title">仙品 Divine Treasures</h2>
-                <div class="product-grid"  style="display: flex; justify-content: center; align-items: center;">
+      <h1>{{item.title}} </h1>
+      <section id="inventoryGrid" class="inventory-grid comfortable-view">
 
-<script src="https://js.stripe.com/v3/"></script>
+                    <div class="inventory-item" style="width: 200%;">
 
-<div class="product-card">
-        <div class="jade-frame">
-            <img src="{{ item.image.url }}" alt="{{item.title}}" class="product-image">
-        </div>
-        <h3 class="product-title" data-translate="{{ item.title }}" style="color: #FFD700;">{{ item.title }}</h3>
-        {% if item.price %}
+                        <div class="legendary-icon">🐉</div>
+                        <div class="pokemon-image">
+                            <img src="{{ item.image.url }}" alt="{{Inventory.choice_text}} Image">
+                        </div>
+                        <div class="pokemon-info">
+                            <h3 class="pokemon-name">{{ Inventory.choice.choice_text }}</h3>
 
+
+                                 {% if item.price %}
             {% if item.discount_price %}
-                <p class="product-price original-price">${{ item.price }}</p>
-                <p class="product-price discount-price">${{ item.discount_price }}</p>
+              <span class="mr-1" style="">
+              <del><p class="pokemon-type">${{ item.price }}</p></del>
+              </span>
+              <p class="pokemon-type">${{ item.discount_price }}</p>
             {% else %}
-                <p class="product-price">${{ item.price }}</p>
+             <p class="pokemon-type">${{ item.price }}</p>
             {% endif %}
-        {% endif %}
-      <button class="btn purchase-btn" data-slug="{{ item.slug }}">
-        <span class="btn-text-cn" style="color: #00A36C;">加入购物车</span>
-        <span class="btn-text-en" style="color: #00A36C;">Purchase</span>
-      </button>
-    </div>
 
-                </div>
+            {% else %}
+            {% if item.discount_currency_price %}
+              <span class="mr-1" style="">
+              <del><p class="pokemon-type">💎 {{ item.currency_price }}</p></del>
+              </span>
+              <p class="pokemon-type">💎 {{ item.discount_currency_price }}</p>
+            {% else %}
+                <p class="pokemon-type">💎 {{ item.currency_price }}</p>
+            {% endif %}
+            {% endif %}
+<h3 class = "product-title" style="color: var(--primary);">{{item.title}}</h3>
+                            <p class="product-condition" style="">Card Condition: {{ item.condition }}</p>
+                            {% if item.category and item.category.lower == 'p' %}
+                            <p class="product-condition" style="">Card Category: Pokemon</p>
+                            {% elif item.category.lower == 'm' %}
+                            <p class="product-condition" style="">Card Category: Magic The Gathering</p>
+                            {% elif item.category.lower == 'b' %}
+                            <p class="product-condition" style="">Card Category: Bakugo</p>
+                            {% elif item.category.lower == 'y' %}
+                            <p class="product-condition" style="">Card Category: Yu-Gi-Oh!</p>
+                            {% else %}
+                            <p class="product-condition" style="">Card Category: Other</p>
+                            {% endif %}
+
+                            {% if item.category and item.category.lower == 'g' %}
+                            <p class="product-tier" style="color: gold;">Tier: Gold</p>
+                            {% elif item.category and item.category.lower == 'p' %}
+                            <p class="product-tier" style="color: #E5E4E2;">Tier: Platinum</p>
+                            {% elif item.category and item.category.lower == 'e' %}
+                            <p class="product-tier" style="color: #50C878;">Tier: Emerald</p>
+                            {% else %}
+                            <p class="product-tier" style="color: #B9F2FF;">Tier: Diamond</p>
+                            {% endif %}
+
+                            <p class="product-description" style="color: rgba(255, 255, 255, 0.8);">{{ item.description }}</p>
+                            <div class="action-buttons">
+
+            <a href="{{ object.get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p" >Add To Cart
+                <i class="fas fa-shopping-cart ml-1"></i>
+            </a>
+
+
+
+                            </div>
+                        </div>
+
+                    </div>
             </section>
         </main>
     </div>
 
-<script>
-    // Get CSRF Token
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.startsWith(name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
+<footer class="copyright-section">
+    <div class="container">
+        <p>{% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
 
-    // Handle purchase button clicks
-    document.querySelectorAll('.purchase-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const slug = this.dataset.slug;
-            fetch(`/create-checkout-session/${slug}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken'),
-                },
-                credentials: 'same-origin',
+        {{BaseCopyrightTextField.copyright}}
+
+            {% endfor %}
+        </p>
+    </div>
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const forms = document.querySelectorAll(".ajax-form");
+
+    forms.forEach(form => {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const url = this.getAttribute("action");
+            const csrfToken = formData.get("csrfmiddlewaretoken");
+
+            fetch(url, {
+                method: "POST",
+				headers: {
+					"X-Requested-With": "XMLHttpRequest",
+					"X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+				},
+
+                body: formData,
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
             .then(data => {
-                const stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
-                return stripe.redirectToCheckout({ sessionId: data.session_id });
-            })
-            .then(result => {
-                if (result.error) {
-                    alert(result.error.message);
+                if (data.success) {
+                    // Update stock count
+                    const stockCountElement = document.querySelector("#stock-count");
+                    if (stockCountElement) {
+                        stockCountElement.textContent = data.stock_count;
+                    }
+
+                    // Update currency amount
+                    const currencyAmountElement = document.querySelector("#currency-amount");
+                    if (currencyAmountElement) {
+                        currencyAmountElement.textContent = data.currency_amount;
+                    }
+
+                    // Example: Remove the item from the UI
+                    this.closest(".inventory-item").remove();
+                } else {
+                    console.error("Action failed.");
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error("Error:", error);
             });
         });
     });
+});
+
+
+
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const withdrawButtons = document.querySelectorAll(".withdraw-button");
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap');
+    withdrawButtons.forEach((button) => {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
 
+            const form = button.closest("form");
+            const formData = new FormData(form);
+            const actionUrl = form.getAttribute("action") || window.location.href;
 
-.product-card {
-    background: radial-gradient(circle at center, rgb(251 239 47 / 50%), rgb(255 0 0 / 50%));
-    border: 2px solid #8b0000;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(139, 0, 0, 0.3);
-    padding: 20px;
-    width: 300px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-}
+            console.log("Submitting form to:", actionUrl); // Debug URL
+            console.log("Form Data:", [...formData.entries()]); // Debug form data
 
-.product-card::before {
-    content: "";
-    position: absolute;
-    top: -50px;
-    left: -50px;
-    right: -50px;
-    bottom: -50px;
-    background: url('https://i.imgur.com/XLknNKG.png') repeat;
-    opacity: 0.1;
-    z-index: -1;
-}
+            fetch(actionUrl, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP status ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        const inventoryItem = form.closest(".inventory-item");
+                        if (inventoryItem) inventoryItem.remove();
 
-.jade-frame {
-    border: 8px solid #7fad92;
-    border-radius: 50%;
-    overflow: hidden;
-    width: 200px;
-    height: 200px;
-    margin: 0 auto 20px;
-    box-shadow: 0 0 15px rgba(127, 173, 146, 0.5);
-}
-
-.product-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.product-title {
-    font-family: 'Ma Shan Zheng', cursive;
-    font-size: 24px;
-    color: #8b0000;
-    margin-bottom: 15px;
-}
-
-.product-price {
-    font-size: 18px;
-    color: #333;
-    margin: 5px 0;
-}
-
-.original-price {
-    text-decoration: line-through;
-    color: #888;
-}
-
-.discount-price {
-    color: #7fad92;
-    font-weight: bold;
-}
-
-.btn {
-    background-color: #8b0000;
-    color: #f7f2e8;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 15px;
-    position: relative;
-    overflow: hidden;
-}
-
-.btn:hover {
-    background-color: #620000;
-}
-
-.btn-text-cn, .btn-text-en {
-    display: block;
-    transition: all 0.3s ease;
-}
-
-.btn-text-en {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-}
-
-.btn:hover .btn-text-cn {
-    transform: translateY(-100%);
-}
-
-.btn:hover .btn-text-en {
-    transform: translateY(-100%);
-}
-.scroll-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.scroll-handle {
-    position: relative;
-    width: 40px;
-    height: 180px;
-    background: linear-gradient(to right,
-        #86A697 0%,
-        #B4D9C4 20%,
-        #86A697 40%,
-        #B4D9C4 60%,
-        #86A697 100%
-    );
-    border-radius: 20px;
-    box-shadow:
-        inset 0 0 15px rgba(0,0,0,0.3),
-        0 0 20px rgba(134, 166, 151, 0.3);
-    z-index: 2;
-}
-
-.jade-ornament {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 30px;
-    height: 30px;
-    background: linear-gradient(45deg, #86A697, #B4D9C4);
-    border-radius: 50%;
-    box-shadow:
-        inset 0 0 10px rgba(0,0,0,0.3),
-        0 0 15px rgba(134, 166, 151, 0.5);
-}
-
-.jade-ornament::before {
-    content: '福';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'Ma Shan Zheng', cursive;
-    color: rgba(0,0,0,0.6);
-    font-size: 18px;
-}
-
-.donation-scroll {
-    position: relative;
-    flex-grow: 1;
-    padding: 20px 40px;
-    margin: 0 -20px;
-    background: linear-gradient(to right,
-        #86A697 0%,
-        #B4D9C4 3%,
-        #D5E6D9 10%,
-        #D5E6D9 90%,
-        #B4D9C4 97%,
-        #86A697 100%
-    );
-    border-radius: 5px;
-    box-shadow:
-        inset 0 0 30px rgba(0,0,0,0.2),
-        0 0 20px rgba(134, 166, 151, 0.3);
-}
-
-.scroll-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%2386A697' fill-opacity='0.1' d='M0 0h100v100H0z'/%3E%3Cpath fill='%2386A697' fill-opacity='0.1' d='M10 10h80v80H10z'/%3E%3C/svg%3E");
-    opacity: 0.1;
-}
-
-.scroll-title {
-    font-family: 'Ma Shan Zheng', cursive;
-    color: #4A5D54;
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 20px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-}
-
-.scroll-text {
-    color: #4A5D54;
-    text-align: center;
-    /*max-width: 800px;*/
-    margin: 0 auto 20px;
-    font-size: 1.1rem;
-    line-height: 1.6;
-}
-
-.donation-options {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.jade-btn {
-    display: inline-block;
-    padding: 12px 25px;
-    background: linear-gradient(45deg, #86A697, #B4D9C4);
-    color: #4A5D54;
-    text-decoration: none;
-    border-radius: 5px;
-    font-family: 'Ma Shan Zheng', cursive;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-    box-shadow:
-        inset 0 0 10px rgba(0,0,0,0.1),
-        0 0 15px rgba(134, 166, 151, 0.3);
-    border: 1px solid rgba(134, 166, 151, 0.5);
-}
-
-.jade-btn:hover {
-    transform: translateY(-2px);
-    box-shadow:
-        inset 0 0 10px rgba(0,0,0,0.1),
-        0 0 20px rgba(134, 166, 151, 0.5);
-    background: linear-gradient(45deg, #B4D9C4, #86A697);
-}
-
-/* Add scroll texture animation */
-@keyframes scrollTexture {
-    0% { background-position: 0 0; }
-    100% { background-position: 100px 100px; }
-}
-
-.donation-scroll::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm20 20L0 40h40L20 20zm20-20L20 20h20V0zM0 0v20h20L0 0z' fill='%2386A697' fill-opacity='0.05'/%3E%3C/svg%3E");
-    animation: scrollTexture 30s linear infinite;
-    pointer-events: none;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .scroll-handle {
-        width: 30px;
-        height: 150px;
-    }
-
-    .scroll-title {
-        font-size: 2rem;
-    }
-
-    .scroll-text {
-        font-size: 1rem;
-    }
-
-    .jade-btn {
-        padding: 10px 20px;
-        font-size: 1rem;
-    }
-}
-</style>
-</section>
-  <nav class="fixed-navbar3 pagoda-footer">
-    <div class="pagoda-base">
-        <div class="pagoda-roof" style="height: 30px;"></div>
-        <div class="pagoda-body">
-            <div class="pagoda-pillar left"></div>
-
-            <div class="pagoda-items" style="display: flex; flex-direction: column;">
-            {% for SocialMedia in Social %}
-            <ul class="social-media" style="display: flex; flex-direction: row;">
-                <a href="{{SocialMedia.hyperlink}}">
-                    <li class="social-media-item">
-                        <img src="{{SocialMedia.icon.url}}" style="width: 25px; height: 25px; border-radius: 25px;">
-                    </li>
-                </a>
-            </ul>
-            {% endfor %}
-            <div class="copyright-text">
-                <h3>Chinese Student Scholar Association</h3>
-                <p>© 2025 All Rights Reserved</p>
-            </div></div>
-            <div class="pagoda-pillar right"></div>
-        </div>
-        <div class="pagoda-foundation"></div>
-    </div>
-</nav>
-
-<style>
-.pagoda-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    padding: 0;
-    background: transparent;
-}
-
-.pagoda-base {
-    position: relative;
-    /*max-width: 800px;*/
-    margin: 0 auto;
-}
-
-.pagoda-roof {
-    /*height: 30px;*/
-    background: linear-gradient(45deg, #8B0000, #FF4500);
-    clip-path: polygon(0% 100%, 5% 0%, 95% 0%, 100% 100%);
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
-}
-
-.pagoda-body {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: linear-gradient(to bottom, #FFD700, #FDB931);
-    padding: 10px 20px;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
-}
-
-.pagoda-pillar {
-    width: 30px;
-    height: 60px;
-    background: linear-gradient(to bottom, #8B0000, #A52A2A);
-    border-radius: 5px 5px 0 0;
-}
-
-.pagoda-pillar::before {
-    content: '';
-    display: block;
-    width: 100%;
-    height: 10px;
-    background: #FFD700;
-    border-radius: 5px 5px 0 0;
-}
-
-.copyright-text {
-    text-align: center;
-    color: #8B0000;
-    font-family: 'Ma Shan Zheng', cursive;
-}
-
-.copyright-text h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-}
-
-.copyright-text p {
-    margin: 5px 0 0;
-    font-size: 0.9rem;
-    opacity: 0.8;
-}
-
-.pagoda-foundation {
-    height: 15px;
-    background: linear-gradient(to bottom, #8B4513, #A0522D);
-    border-radius: 0 0 10px 10px;
-}
-
-/* Decorative elements */
-.pagoda-body::before,
-.pagoda-body::after {
-    content: '☯';
-    font-size: 24px;
-    color: #8B0000;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.pagoda-body::before {
-    left: 60px;
-}
-
-.pagoda-body::after {
-    right: 60px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-    .pagoda-base {
-        max-width: 100%;
-    }
-
-    .copyright-text h3 {
-        font-size: 1rem;
-    }
-
-    .copyright-text p {
-        font-size: 0.8rem;
-    }
-
-    .pagoda-body::before,
-    .pagoda-body::after {
-        display: none;
-    }
-}
-</style>
-            <script>
-                document.querySelector('.celestial-form').addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const successMessage = document.getElementById('successMessage');
-                    successMessage.style.display = 'block';
-
-                    // Hide message after 3 seconds
-                    setTimeout(() => {
-                        successMessage.style.display = 'none';
-                    }, 3000);
-                });
-            </script>
-            <script>
-                function createCelestialTree() {
-                    const container = document.querySelector('.tree-container');
-                    const numLayers = 12; // Number of branch layers
-                    const branchesPerLayer = 2;
-                    const symbols = ['福', '禄', '寿', '喜', '财', '运'];
-
-                    for (let layer = 0; layer < numLayers; layer++) {
-                        const layerHeight = 85 - (layer * 6); // Branches get shorter towards top
-                        const verticalPosition = 10 + (layer * 8);
-
-                        for (let i = 0; i < branchesPerLayer; i++) {
-                            const isRight = i % 2 === 0;
-                            const branch = document.createElement('div');
-                            branch.className = 'tree-branch';
-
-                            // Calculate branch angles and lengths
-                            const baseAngle = 15 + (layer * 2);
-                            const angle = isRight ? baseAngle : -baseAngle;
-                            const length = layerHeight * (1 - (layer * 0.05));
-
-                            branch.style.width = `${length}px`;
-                            branch.style.bottom = `${verticalPosition}%`;
-                            branch.style.transform = `
-                                translateX(${isRight ? '0' : '-100%'})
-                                rotate(${angle}deg)
-                            `;
-
-                            // Add leaves to branch
-                            const leaves = document.createElement('div');
-                            leaves.className = 'branch-leaves';
-
-                            for (let j = 0; j < 5; j++) {
-                                const leaf = document.createElement('div');
-                                leaf.className = 'tree-leaf';
-                                leaf.style.left = `${j * 20}%`;
-                                leaf.style.animationDelay = `${Math.random() * 2}s`;
-                                leaves.appendChild(leaf);
-                            }
-
-                            // Add fortune coin
-                            const coin = document.createElement('div');
-                            coin.className = 'fortune-coin';
-                            coin.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-                            coin.style.right = isRight ? '-15px' : 'auto';
-                            coin.style.left = isRight ? 'auto' : '-15px';
-                            coin.style.top = '50%';
-                            coin.style.transform = 'translateY(-50%)';
-
-                            branch.appendChild(leaves);
-                            branch.appendChild(coin);
-                            container.appendChild(branch);
+                        const stockCountElement = document.getElementById("stock-count");
+                        if (stockCountElement) {
+                            stockCountElement.textContent = data.stock_count;
                         }
+                    } else {
+                        console.error("Server error:", data.error);
+                        alert(data.error || "An error occurred.");
                     }
-                }
-
-                // Initialize tree and handle scroll effects
-                document.addEventListener('DOMContentLoaded', () => {
-                    createCelestialTree();
-
-                    window.addEventListener('scroll', () => {
-                        const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-                        const tree = document.querySelector('.tree-container');
-                        const translateY = scrollPercent * -50;
-
-                        requestAnimationFrame(() => {
-                            tree.style.transform = `translateY(${translateY}%)`;
-
-                            // Update coin and leaf glow based on scroll
-                            document.querySelectorAll('.fortune-coin, .tree-leaf').forEach((element, index) => {
-                                const baseOpacity = 0.6 + (scrollPercent * 0.4);
-                                const individualOffset = Math.sin(index * 0.5 + scrollPercent * Math.PI) * 0.2;
-                                element.style.opacity = Math.min(1, baseOpacity + individualOffset);
-                            });
-                        });
-                    });
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error);
+                    alert("An unexpected error occurred. Please try again.");
                 });
-                </script>
-            <style>
-                .section-title {
-                    font-family: 'Ma Shan Zheng', cursive;
-                    font-size: 2.5rem;
-                    color: #FFD700;
-                    text-align: center;
-                    margin-bottom: 30px;
-                    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-                }
-
-                .gallery-item:hover {
-                    transform: scale(1.03);
-                }
-
-                .gallery-item:hover .gallery-overlay {
-                    opacity: 1;
-                }
-
-                .video-section {
-                    background: linear-gradient(45deg, rgba(139, 0, 0, 0.1), rgba(255, 215, 0, 0.1));
-                }
-
-                @media (max-width: 768px) {
-                    .gallery-grid {
-                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                    }
-                }
-            </style>
-        </main>
-
-    </div>
-
-    <script>
-        function createFloatingSymbols() {
-            const symbols = ['☯', '龙', '凤', '仙', '道', '太极', '阴阳', '福', '禄', '寿'];
-            const container = document.querySelector('.floating-symbols-container');
-            const numSymbols = 30; // Increased number of symbols
-
-            // Remove existing symbols
-            container.innerHTML = '';
-
-            // Create new symbols
-            for (let i = 0; i < numSymbols; i++) {
-                const symbol = document.createElement('div');
-                symbol.classList.add('floating-symbol');
-                symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-
-                // Random horizontal position
-                const horizontalPos = Math.random() * 100;
-                symbol.style.left = `${horizontalPos}%`;
-
-                // Random animation duration between 15-30 seconds
-                const duration = 15 + Math.random() * 15;
-                symbol.style.animation = `floatVertical ${duration}s linear infinite`;
-
-                // Random animation delay
-                symbol.style.animationDelay = `${Math.random() * duration}s`;
-
-                // Random size variation
-                const size = 1 + Math.random();
-                symbol.style.fontSize = `${size}rem`;
-
-                // Random opacity
-                symbol.style.opacity = 0.1 + Math.random() * 0.3;
-
-                container.appendChild(symbol);
-            }
-        }
-
-        // Initialize and handle resize
-        document.addEventListener('DOMContentLoaded', () => {
-            createFloatingSymbols();
-
-            // Recreate symbols on resize for better distribution
-            let resizeTimeout;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(createFloatingSymbols, 250);
-            });
-        });
-    </script>
-
-
-    <script>
-        function createBezierPath(startX, startY, endX, endY, curveStrength) {
-            // Create natural curve for branch
-            const controlX = startX + (endX - startX) * 0.5;
-            const controlY = startY + curveStrength;
-
-            return `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`;
-        }
-
-        function createTree() {
-            const container = document.querySelector('.tree-container');
-            const trunkWidth = 40;
-            const numBranches = 24; // More branches for a fuller look
-
-            // Branch patterns for a more natural look
-            const branchPatterns = [
-                { length: 100, angle: 25 },
-                { length: 120, angle: 35 },
-                { length: 80, angle: 15 },
-                { length: 140, angle: 45 },
-                { length: 90, angle: 20 },
-            ];
-
-            // Create branches
-            for (let i = 0; i < numBranches; i++) {
-                const branch = document.createElement('div');
-                branch.className = 'tree-branch';
-
-                // Alternate sides with slight randomization
-                const isRight = i % 2 === 0;
-                const pattern = branchPatterns[Math.floor(Math.random() * branchPatterns.length)];
-                const baseAngle = isRight ? pattern.angle : -pattern.angle;
-                const angle = baseAngle + (Math.random() * 10 - 5); // Add some natural variation
-
-                // Calculate branch position and size
-                const verticalPosition = 5 + (i * (90 / numBranches)); // Start branches higher up
-                const length = pattern.length * (1 - (verticalPosition / 200)); // Branches get shorter higher up
-
-                branch.style.width = `${length}px`;
-                branch.style.bottom = `${verticalPosition}%`;
-                branch.style.transform = `
-                    translateX(${isRight ? trunkWidth/2 : -trunkWidth/2}px)
-                    rotate(${angle}deg)
-                `;
-
-                // Add branch texture
-                const texture = document.createElement('div');
-                texture.className = 'branch-texture';
-                branch.appendChild(texture);
-
-                // Add fortune coin
-                const coin = document.createElement('div');
-                coin.className = 'fortune-coin';
-                coin.style.animationDelay = `${Math.random() * 2}s`;
-                branch.appendChild(coin);
-
-                container.appendChild(branch);
-            }
-        }
-
-        function updateTreeScroll() {
-            const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-            const tree = document.querySelector('.tree-container');
-            const translateY = scrollPercent * -50;
-
-            // Smooth scroll effect
-            tree.style.transform = `translateY(${translateY}%)`;
-
-            // Update coin glow intensity based on scroll
-            const coins = document.querySelectorAll('.fortune-coin');
-            coins.forEach((coin, index) => {
-                const baseOpacity = 0.5 + (scrollPercent * 0.5);
-                const individualOffset = Math.sin(index * 0.5 + scrollPercent * Math.PI) * 0.2;
-                coin.style.opacity = Math.min(1, baseOpacity + individualOffset);
-            });
-        }
-
-        // Initialize tree with smooth scroll handling
-        document.addEventListener('DOMContentLoaded', () => {
-            createTree();
-
-            // Use requestAnimationFrame for smoother scrolling
-            let ticking = false;
-            window.addEventListener('scroll', () => {
-                if (!ticking) {
-                    window.requestAnimationFrame(() => {
-                        updateTreeScroll();
-                        ticking = false;
-                    });
-                    ticking = true;
-                }
-            });
-        });
-
-        const translations = {
-    'en': {
-        // Header
-        'header-title': 'Chinese Student Scholar Association',
-        'footer-text': 'Chinese Student Scholar Association 2025',
-
-        // Products
-        'product-talisman': 'Celestial Talisman',
-        'product-elixir': 'Ethereal Elixir',
-        'product-grimoire': 'Mythic Grimoire',
-        'product-phoenix-quill': 'Phoenix Feather Quill',
-        'product-dragon-armor': 'Dragon Scale Armor',
-        'product-mermaid-tear': 'Mermaid\'s Tear',
-
-        // Prices
-        'price-333': '¥333',
-        'price-199': '¥199',
-        // Add other prices...
-
-        // Other existing translations...
-    },
-    'zh-CN': {
-        'header-title': '天界仙境 中国学生学者联合会',
-        'footer-text': '中国学生学者联合会 2025',
-        'product-talisman': '天界符咒',
-        'product-elixir': '仙露琼浆',
-        'product-grimoire': '太古秘籍',
-        'product-phoenix-quill': '凤凰羽毛笔',
-        'product-dragon-armor': '龙鳞铠甲',
-        'product-mermaid-tear': '美人鱼之泪',
-        'price-333': '¥333',
-        'price-199': '¥199',
-        // ...
-    },
-    'zh-HK': {
-        'header-title': '天界仙境 中國學生學者聯合會',
-        'footer-text': '中國學生學者聯合會 2025',
-        'product-talisman': '天界符咒',
-        'product-elixir': '仙露瓊漿',
-        'product-grimoire': '太古秘籍',
-        'product-phoenix-quill': '鳳凰羽毛筆',
-        'product-dragon-armor': '龍鱗鎧甲',
-        'product-mermaid-tear': '美人魚之淚',
-        'price-333': '¥333',
-        'price-199': '¥199',
-        // ...
-    }
-};
-
-    // Initialize language switcher
-    document.addEventListener('DOMContentLoaded', () => {
-        const languageOptions = document.querySelectorAll('.language-option');
-        const savedLanguage = localStorage.getItem('preferred-language') || 'en';
-
-        // Set initial language
-        setLanguage(savedLanguage);
-
-        // Add click handlers
-        languageOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                const lang = option.dataset.lang;
-                setLanguage(lang);
-
-                // Update active state
-                languageOptions.forEach(opt => opt.classList.remove('active'));
-                option.classList.add('active');
-
-                // Save preference
-                localStorage.setItem('preferred-language', lang);
-            });
         });
     });
+});
 
-    function setLanguage(lang) {
-        // Update text content for all translatable elements
-        document.querySelectorAll('[data-translate]').forEach(element => {
-            const key = element.dataset.translate;
-            if (translations[lang][key]) {
-                element.textContent = translations[lang][key];
-            }
-        });
+document.addEventListener("DOMContentLoaded", function() {
+    const toggleBtn = document.getElementById("toggleViewBtn");
+    const inventoryGrid = document.getElementById("inventoryGrid");
 
-        // Update HTML lang attribute
-        document.documentElement.lang = lang;
+    toggleBtn.addEventListener("click", function() {
+        inventoryGrid.classList.toggle("compact-view");
+        inventoryGrid.classList.toggle("comfortable-view");
 
-        // Add smooth transition effect
-        document.body.style.opacity = '0.8';
-        setTimeout(() => {
-            document.body.style.opacity = '1';
-        }, 200);
+        // Save the current view preference to localStorage
+        const isCompact = inventoryGrid.classList.contains("compact-view");
+        localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
+    });
+
+    // Load the saved view preference on page load
+    const savedViewPreference = localStorage.getItem("inventoryViewPreference");
+    if (savedViewPreference === "compact") {
+        inventoryGrid.classList.remove("comfortable-view");
+        inventoryGrid.classList.add("compact-view");
     }
-
-    // Add data-translate attributes to elements
-    function initializeTranslations() {
-        // Navigation links
-        document.querySelectorAll('.nav-link').forEach(link => {
-            const text = link.textContent.trim();
-            const key = text.toLowerCase().split(' ')[0];
-            link.setAttribute('data-translate', key);
-        });
-
-        // Section titles
-        document.querySelectorAll('.section-title').forEach(title => {
-            const text = title.textContent.trim();
-            const key = text.toLowerCase().replace(/\s+/g, '-');
-            title.setAttribute('data-translate', key);
-        });
-
-        // Buttons and form labels
-        document.querySelectorAll('.btn, label').forEach(element => {
-            const text = element.textContent.trim();
-            const key = text.toLowerCase().replace(/\s+/g, '-');
-            element.setAttribute('data-translate', key);
-        });
-    }
-
-    // Initialize translations on load
-    document.addEventListener('DOMContentLoaded', initializeTranslations);
-
-    </script>
-    <script>
-        function createFortuneRedwood() {
-          const tree = document.getElementById('fortune-redwood');
-          const numBranches = 20;
-          const branchSymbols = ['福', '禄', '寿', '喜', '财'];
-
-          for (let i = 0; i < numBranches; i++) {
-            const branch = document.createElement('div');
-            branch.className = 'tree-branch';
-
-            const isRight = i % 2 === 0;
-            const verticalPosition = 5 + (i * 4.5);
-            const length = 100 - (verticalPosition * 0.5);
-            const angle = isRight ? 15 + (Math.random() * 20) : -(15 + (Math.random() * 20));
-
-            branch.style.width = `${length}px`;
-            branch.style.bottom = `${verticalPosition}%`;
-            branch.style.left = isRight ? '50%' : `calc(50% - ${length}px)`;
-            branch.style.transform = `rotate(${angle}deg)`;
-
-            const coin = document.createElement('div');
-            coin.className = 'fortune-coin';
-            coin.textContent = branchSymbols[Math.floor(Math.random() * branchSymbols.length)];
-            coin.style.right = isRight ? '0' : 'auto';
-            coin.style.left = isRight ? 'auto' : '0';
-            coin.style.transform = `translateY(-50%) ${isRight ? 'translateX(50%)' : 'translateX(-50%)'}`;
-
-            branch.appendChild(coin);
-            tree.appendChild(branch);
-          }
-        }
-
-        document.addEventListener('DOMContentLoaded', createFortuneRedwood);
-      </script>
-
+});
+</script>
+	<!-- jquery -->
+     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+     <script src="{% static 'css/js/main.js' %}"></script>
+     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+     <script src="{% static 'css/js/waypoints.js' %}"></script>
+	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+     <script src="{% static 'css/js/sticker.js' %}"></script>
 
 </body>
 </html>

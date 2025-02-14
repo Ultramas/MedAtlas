@@ -3357,10 +3357,43 @@ def create_card_instance(request):
 class OpenBattleListView(ListView):
     model = Battle
     template_name = "battle.html"
-    context_object_name = "open_battles"  # The context variable name to use in the template
+    context_object_name = "open_battles"
 
     def get_queryset(self):
         return Battle.objects.filter(status='O').order_by('-time')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['game_values'] = self.request.session.pop('game_values', '')
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+            # Create a new object with the necessary attributes
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
 
     def post(self, request, *args, **kwargs):
         battle_id = request.POST.get('battle_id')
@@ -3407,9 +3440,17 @@ class SingleBattleListView(DetailView):
         battle_id = self.kwargs.get('battle_id')
         return get_object_or_404(Battle, id=battle_id)
 
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         battle = self.get_object()
+        battle_games = battle.battle_games.all().order_by('order')
+        # Extract the actual Game objects in order
+        ordered_games = [bg.game for bg in battle_games]
+        context['ordered_games'] = ordered_games
+
+        # If you want to display the default game (first one) separately:
+        context['default_game'] = ordered_games[0] if ordered_games else None
 
         # Fetch related games via BattleGame
         related_games = Game.objects.filter(game_battles__battle=battle).distinct()
@@ -3418,12 +3459,25 @@ class SingleBattleListView(DetailView):
         # User and participation info
         user = self.request.user
         context['is_participant'] = user in battle.participants.all()
+        total_capacity = battle.get_total_capacity()
+        context['all_participants'] = list(battle.participants.all()) + list(battle.robots.all())
+        filled_slots = list(battle.participants.all()) + list(battle.robots.all())
+
+        grid = []
+        for i in range(total_capacity):
+            if i < len(filled_slots):
+                grid.append(filled_slots[i])
+            else:
+                grid.append(None)
+        context['grid'] = grid
         context['is_full'] = battle.is_full()
         context['SentProfile'] = UserProfile.objects.filter(user=user).first() if user.is_authenticated else None
-
+        print('the battle participant exists')
         # Default currency
         context['Money'] = Currency.objects.filter(is_active=1).first()
 
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         # Wager form
         context['wager_form'] = WagerForm()
 
@@ -3508,6 +3562,24 @@ class SingleBattleListView(DetailView):
                     userprofile.newprofile_profile_picture_url = profile.avatar.url
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
+        if hasattr(self, 'object') and self.object is not None:
+            battle = self.object
+            print('the battle is ' + str(battle))
+            # Check if the current user is a participant of this battle
+            context['is_participant'] = battle.participants.filter(user=self.request.user).exists()
+            # If battle.creator is a user (ForeignKey), check equality directly
+            context['is_creator'] = (battle.creator == self.request.user)
+            # Assume you have an is_full method or similar attribute
+            context['is_full'] = battle.is_full() if hasattr(battle, 'is_full') else False
+            print('participant status: true' )
+        else:
+            print('battle instance does not exist')
+            # When there is no battle instance yet (e.g., initial GET)
+            context['is_participant'] = False
+            context['is_creator'] = False
+            context['is_full'] = False
+            print('participant status: false')
+
         return context
 
     def post(self, request, *args, **kwargs):
@@ -3550,33 +3622,40 @@ class SingleBattleListView(DetailView):
 class BattleCreationView(CreateView):
     model = Battle
     form_class = BattleCreationForm
-    template_name = "battlecreator.html"  # Use the same template
-    success_url = reverse_lazy('showcase:battle')  # Redirect to the open battles list
+    template_name = "battlecreator.html"
+    success_url = reverse_lazy('showcase:battle')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Filter the 'chests' field to exclude daily games
+        form.fields['chests'].queryset = Game.objects.filter(daily=False)
+        return form
 
     def form_valid(self, form):
+        # Set the battle's creator.
         form.instance.creator = self.request.user
-        # Save the form instance and create associated BattleGame objects
         response = super().form_valid(form)
-        quantities = form.cleaned_data.get('quantities', {})
         battle = form.instance
-        if not battle.creator:
-            battle.creator = self.request.user
-        for game_id, quantity in quantities.items():
-            game = Game.objects.get(id=game_id)
-            BattleGame.objects.create(battle=battle, game=game, quantity=quantity)
+
+        # Save game_values from the form.
+        battle.game_values = form.cleaned_data.get('game_values', '')
+        battle.save(update_fields=['game_values'])
+
+        battle.price = battle.total_game_values
+        battle.save(update_fields=['price'])
 
         return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Add the games as JSON data to the context with effective cost
-        games = Game.objects.all()
+        # Filter games to exclude daily ones
+        games = Game.objects.filter(daily=False)
         context['games_json'] = json.dumps([
             {
                 'id': game.id,
                 'name': game.name,
-                'cost': game.get_effective_cost()  # Use the effective cost
+                'cost': game.get_effective_cost()
             }
             for game in games
         ])
@@ -3589,39 +3668,22 @@ class BattleCreationView(CreateView):
         if userprofile:
             context['NewsProfiles'] = userprofile
         else:
-            context['NewsProfiles'] = None
+            dummy_profile = type('', (), {})()
+            dummy_profile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            dummy_profile.newprofile_profile_url = None
+            context['NewsProfiles'] = dummy_profile
 
-        if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
+        if hasattr(self, 'object') and self.object is not None:
+            battle = self.object
+            context['is_participant'] = battle.participants.filter(user=self.request.user).exists()
+            context['is_creator'] = (battle.creator == self.request.user)
+            context['is_full'] = battle.is_full() if hasattr(battle, 'is_full') else False
         else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+            context['is_participant'] = False
+            context['is_creator'] = False
+            context['is_full'] = False
 
         return context
-
-
-def battle_detail(request, battle_id):
-    battle = get_object_or_404(Battle, id=battle_id)
-
-    # Check if the user is a participant
-    is_participant = battle.participants.filter(user=request.user).exists()
-
-    return render(
-        request,
-        'battle_detail.html',
-        {
-            'battle': battle,
-            'is_participant': is_participant,
-        },
-    )
-
 
 def join_battle(request):
     battle_id = request.POST.get('battle_id')
@@ -3666,6 +3728,7 @@ def battle_detail_view(request, battle_id):
         request,
         'battle_detail.html',
         {
+            'game': game,
             'battle': battle,
             'slots': slot_number
         }
