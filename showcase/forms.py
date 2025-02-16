@@ -598,6 +598,19 @@ class SettingsForm(forms.ModelForm):
         return instance
 
 
+class BetForm(forms.ModelForm):
+    class Meta:
+        model = Bet
+        fields = ('amount',)
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.user = self.instance.user
+        if commit:
+            instance.save()
+        return instance
+
+
 class BaseCopyrightTextFielde(forms.ModelForm):
     #    image = forms.ImageField(widget=forms.TextInput(
     #        attrs={'placeholder': 'Link an image for your post.'}))

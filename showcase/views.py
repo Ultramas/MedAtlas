@@ -118,7 +118,7 @@ from .forms import VoteQueryForm, EmailForm, AnswerForm, ItemForm, TradeItemForm
     RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, InventoryGameForm, PlayerInventoryGameForm, \
     CardUploading, MoveToTradeForm, \
     SpinPreferenceForm, BattleCreationForm, BattleJoinForm, AddMonstrosityForm, AscensionCreateForm, InventoryTradeForm, \
-    InventoryTradeOfferResponseForm
+    InventoryTradeOfferResponseForm, BetForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -3440,48 +3440,31 @@ class SingleBattleListView(DetailView):
         battle_id = self.kwargs.get('battle_id')
         return get_object_or_404(Battle, id=battle_id)
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         battle = self.get_object()
+
+        # Existing context additions for games, participants, etc.
         battle_games = battle.battle_games.all().order_by('order')
-        # Extract the actual Game objects in order
         ordered_games = [bg.game for bg in battle_games]
         context['ordered_games'] = ordered_games
-
-        # If you want to display the default game (first one) separately:
         context['default_game'] = ordered_games[0] if ordered_games else None
-
-        # Fetch related games via BattleGame
         related_games = Game.objects.filter(game_battles__battle=battle).distinct()
         context['related_games'] = related_games
 
-        # User and participation info
         user = self.request.user
         context['is_participant'] = user in battle.participants.all()
         total_capacity = battle.get_total_capacity()
-        context['all_participants'] = list(battle.participants.all()) + list(battle.robots.all())
         filled_slots = list(battle.participants.all()) + list(battle.robots.all())
-
-        grid = []
-        for i in range(total_capacity):
-            if i < len(filled_slots):
-                grid.append(filled_slots[i])
-            else:
-                grid.append(None)
+        grid = [filled_slots[i] if i < len(filled_slots) else None for i in range(total_capacity)]
         context['grid'] = grid
         context['is_full'] = battle.is_full()
         context['SentProfile'] = UserProfile.objects.filter(user=user).first() if user.is_authenticated else None
-        print('the battle participant exists')
-        # Default currency
         context['Money'] = Currency.objects.filter(is_active=1).first()
-
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        # Wager form
         context['wager_form'] = WagerForm()
 
-        # Cost thresholds for games
         cost = sum(game.discount_cost or game.cost for game in related_games)
         context.update({
             'cost_threshold_80': cost * 0.8,
@@ -3491,19 +3474,18 @@ class SingleBattleListView(DetailView):
             'cost_threshold_10000': cost * 100,
         })
 
-        # Randomized amounts and nonces
         spinpreference = None
         if user.is_authenticated:
-            spinpreference, _ = SpinPreference.objects.get_or_create(user=user, defaults={'quick_spin': False})
+            spinpreference, _ = SpinPreference.objects.get_or_create(
+                user=user, defaults={'quick_spin': False}
+            )
             random_amount = random.randint(500, 1000) if spinpreference.quick_spin else random.randint(150, 300)
         else:
             random_amount = random.randint(150, 300)
-
         context['random_amount'] = random_amount
         context['range_random_amount'] = range(random_amount)
         context['random_nonces'] = [random.randint(0, 1000000) for _ in range(random_amount)]
 
-        # Match choices with nonces
         choices = Choice.objects.filter(game__in=related_games)
         choices_with_nonce = [
             {
@@ -3523,24 +3505,20 @@ class SingleBattleListView(DetailView):
         ]
         context['choices_with_nonce'] = choices_with_nonce
 
-        # Profiles
         user_profiles = ProfileDetails.objects.filter(user=user) if user.is_authenticated else None
         context['Profiles'] = user_profiles or [
             {'newprofile_profile_picture_url': 'static/css/images/a.jpg', 'newprofile_profile_url': None}
         ]
-
-        # Spin preference form
         context['spin_preference_form'] = SpinPreferenceForm(
             instance=spinpreference) if spinpreference else SpinPreferenceForm()
 
-        # Game-specific logic (ensure `game_id` is used correctly)
         game_id = self.kwargs.get('game_id')
         if game_id:
             game = get_object_or_404(Game, id=game_id)
             context['game'] = game
 
-        if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        if user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=user)
         else:
             userprofile = None
 
@@ -3549,74 +3527,92 @@ class SingleBattleListView(DetailView):
         else:
             context['NewsProfiles'] = None
 
-        if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+        if context['NewsProfiles'] is None:
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
         else:
             for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
+                profile = ProfileDetails.objects.filter(user=userprofile.user).first()
                 if profile:
                     userprofile.newprofile_profile_picture_url = profile.avatar.url
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
+        # Update participant status and creator check
         if hasattr(self, 'object') and self.object is not None:
             battle = self.object
-            print('the battle is ' + str(battle))
-            # Check if the current user is a participant of this battle
-            context['is_participant'] = battle.participants.filter(user=self.request.user).exists()
-            # If battle.creator is a user (ForeignKey), check equality directly
-            context['is_creator'] = (battle.creator == self.request.user)
-            # Assume you have an is_full method or similar attribute
+            context['is_participant'] = battle.participants.filter(user=user).exists()
+            context['is_creator'] = (battle.creator == user)
             context['is_full'] = battle.is_full() if hasattr(battle, 'is_full') else False
-            print('participant status: true' )
         else:
-            print('battle instance does not exist')
-            # When there is no battle instance yet (e.g., initial GET)
             context['is_participant'] = False
             context['is_creator'] = False
             context['is_full'] = False
-            print('participant status: false')
+
+        # Add the BetForm with the battle already set (hidden field)
+        if 'bet_form' not in context:
+            context['bet_form'] = BetForm(initial={'battle': battle.pk})
+
+        # Also add the join battle form instance if needed
+        if 'join_form' not in context:
+            context['join_form'] = BattleJoinForm(user=user, battle=battle)
 
         return context
 
     def post(self, request, *args, **kwargs):
         battle = self.get_object()
 
-        # Check if the battle is open
-        if battle.status != 'O':
-            messages.error(request, 'This battle is not currently open for participants.')
-            return redirect('showcase:battle_detail', battle_id=battle.id)
-
-        # Check if the user is already a participant
-        if request.user in battle.participants.all():
-            messages.error(request, 'You are already a participant in this battle.')
-            return redirect('showcase:battle_detail', battle_id=battle.id)
-
-        # Check if the battle is full
-        if battle.is_full():
-            battle.status = 'R'  # Update the status to Running
-            battle.save()
-            messages.error(request, 'This battle is now full and has started.')
-            return redirect('showcase:battle_detail', battle_id=battle.id)
-
-        # Handle the form submission for joining the battle
-        form = BattleJoinForm(request.POST, user=request.user, battle=battle)
-        if form.is_valid():
-            form.save()
-            # Update the status if the battle is now full
+        # First, handle join battle form submission
+        if 'join_battle_submit' in request.POST:
+            # Basic validations for battle joining can be performed here
+            if battle.status != 'O':
+                messages.error(request, 'This battle is not currently open for participants.')
+                return redirect('showcase:battle_detail', battle_id=battle.id)
+            if request.user in battle.participants.all():
+                messages.error(request, 'You are already a participant in this battle.')
+                return redirect('showcase:battle_detail', battle_id=battle.id)
             if battle.is_full():
-                battle.status = 'R'  # Update status to Running
+                battle.status = 'R'
                 battle.save()
-                messages.success(request, 'You have successfully joined the battle, and it is now running!')
-            else:
-                messages.success(request, 'You have successfully joined the battle!')
-            return redirect('showcase:battle_detail', battle_id=battle.id)
+                messages.error(request, 'This battle is now full and has started.')
+                return redirect('showcase:battle_detail', battle_id=battle.id)
 
-        messages.error(request, 'There was an error joining the battle. Please try again.')
-        return self.get(request, *args, **kwargs)
+            join_form = BattleJoinForm(request.POST, user=request.user, battle=battle)
+            if join_form.is_valid():
+                join_form.save()
+                if battle.is_full():
+                    battle.status = 'R'
+                    battle.save()
+                    messages.success(request, 'You have successfully joined the battle, and it is now running!')
+                else:
+                    messages.success(request, 'You have successfully joined the battle!')
+                return redirect('showcase:battle_detail', battle_id=battle.id)
+            else:
+                messages.error(request, 'There was an error joining the battle. Please try again.')
+                context = self.get_context_data(join_form=join_form)
+                return self.render_to_response(context)
+
+        # Next, handle the bet form submission
+        elif 'bet_form_submit' in request.POST:
+            # Optionally, check if bets are allowed for this battle
+            if not battle.bets_allowed:
+                messages.error(request, 'Bets are not allowed in this battle.')
+                return redirect('showcase:battle_detail', battle_id=battle.id)
+            bet_form = BetForm(request.POST)
+            if bet_form.is_valid():
+                bet_form.instance.battle = battle
+                bet_form.instance.user = request.user
+                bet_form.save()
+                messages.success(request, 'Bet placed successfully.')
+                return redirect('showcase:battle_detail', battle_id=battle.id)
+            else:
+                messages.error(request, 'There was an error placing your bet. Please try again.')
+                context = self.get_context_data(bet_form=bet_form)
+                return self.render_to_response(context)
+
+        # If no known form submit key is present, simply re-render the page
+        messages.error(request, 'Invalid form submission.')
+        return redirect('showcase:battle_detail', battle_id=battle.id)
 
 
 class BattleCreationView(CreateView):

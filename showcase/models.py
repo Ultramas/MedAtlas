@@ -3774,6 +3774,9 @@ class Bet(models.Model):
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+    class Meta:
+        unique_together = ("user", "battle",)
+
 
 class Hits(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -7072,7 +7075,7 @@ from django.core.exceptions import ValidationError
 class Withdraw(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     cards = models.ManyToManyField(InventoryObject)
-    number_of_cards = models.IntegerField(blank=True, null=True)
+    number_of_cards = models.IntegerField(blank=True, null=True, verbose_name='Quantity')
     shipping_state = models.CharField(choices=SHIPPINGSTATUS, max_length=1, default='P')
     fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     #slug = models.CharField(max_length=16, blank=True, null=True)
@@ -7095,9 +7098,11 @@ class Withdraw(models.Model):
                 return f"{self.user.username} withdrew {self.number_of_cards} cards: {card_choices}"
 
     def get_card_images(self):
-        # Retrieve images from related InventoryObjects
         images = [card.image.url for card in self.cards.all() if card.image]
-        return images
+        names = [card.choice_text for card in self.cards.all() if card.choice_text]
+        prices = [card.price for card in self.cards.all() if card.price]
+        conditions = [card.condition for card in self.cards.all() if card.condition]
+        return images, names, prices, conditions
 
     def generate_unique_slug(self):
         while True:

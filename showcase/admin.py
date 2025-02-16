@@ -1685,18 +1685,25 @@ class WithdrawAdmin(admin.ModelAdmin):
         'date_and_time',
         'status',
         'is_active',
-        'display_card_images'  # Add this method to list display
+        'display_card_images',
     )
 
     def display_card_images(self, obj):
-        images = obj.get_card_images()  # Use the method defined in Withdraw model
-        if images:
-            return mark_safe(
-                '<br>'.join([f'<img src="{img}" style="width: 100px; height: auto;" />' for img in images])
-            )
-        return 'No images'
+        images, names, prices, conditions = obj.get_card_images()  # Unpack the tuple into images and names
+        if images and names and prices and conditions:
+            html_output = []
+            # For each card, display the name above the image
+            for name, img, price, condition in zip(names, images, prices, conditions):
+                html_output.append(
+                    f'<div style="margin-bottom: 10px;">'
+                    f'<strong>{name}</strong> - <strong>{price}💎</strong>  - <strong>{condition}</strong><br>'
+                    f'<img src="{img}" style="width: 100px; height: auto;" />'
+                    f'</div>'
+                )
+            return mark_safe('<br>'.join(html_output))
+        return 'No cards'
 
-    display_card_images.short_description = 'Card Images'
+    display_card_images.short_description = 'Cards'
 
 
 admin.site.register(Withdraw, WithdrawAdmin)

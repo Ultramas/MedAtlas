@@ -852,9 +852,12 @@ p.blog-meta span {
 <br>
 
         {% if battle.bets_allowed == True %}
-        <div class="battle-info">
             <h2>Battle Bets</h2>
-        </div>
+            <form method="POST">
+                {% csrf_token %}
+                {{ bet_form.as_p }}
+                <button type="submit" name="bet_form_submit">Place Bet</button>
+            </form>
         {% else %}
 
                         <div class="battle-info">
@@ -872,6 +875,11 @@ p.blog-meta span {
             {{ slot.user.username }}
           {% else %}
             {{ slot.name }}
+          <form method="POST">
+    {% csrf_token %}
+    {{ join_form.as_p }}
+    <button type="submit" name="join_battle_submit">Join Battle</button>
+</form>
           {% endif %}
         {% else %}
           <!-- Empty slot; you can leave it blank or put a placeholder -->
