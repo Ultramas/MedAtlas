@@ -195,6 +195,28 @@ async function randomizeContents() {
             if (inventoryData.status === 'success') {
                 if (inventoryData.button_id === "start") {
                     console.log("Inventory object created successfully with user.");
+                     const inventory_pk = inventoryData.inventory_object_id;
+                        console.log("inventory_pk:", inventory_pk);
+                        // Option 1: Save it in a global variable if needed.
+                        window.inventory_pk = inventory_pk;
+                        targetCardElement.setAttribute('data-inventory_pk', window.inventory_pk);
+
+                        const sellForm = document.getElementById(`sell-form-${window.inventory_pk}`);
+                        if (sellForm) {
+                          console.log("Sell form found:", sellForm);
+
+                          // Attach a submit event handler to the form
+                          sellForm.addEventListener('submit', function(event) {
+                            event.preventDefault();  // Prevent the default form submission
+                            const pk = this.querySelector('[name="pk"]').value;
+                            console.log("Sell form submitted. pk =", pk);
+
+                            // Call your AJAX function to handle the sale
+                            sellInventory(pk);
+                          });
+                        } else {
+                          console.error("Sell form not found for inventory_pk:", window.inventory_pk);
+                        }
 
                 } else if (inventoryData.button_id === "start2") {
                     console.log("Temporary inventory object created without user. ID:", inventoryData.inventory_object_id);
@@ -597,6 +619,15 @@ function findSelectedCard() {
     }
 }
 
+    const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
+    document.querySelectorAll('.sell-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            sellAudio.play(); // Play the sell sound
+            console.log('')
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
 
     document.addEventListener('submit', function (event) {
     if (event.target.matches('#sell-form')) {
@@ -623,25 +654,102 @@ function findSelectedCard() {
         .catch(error => console.error('Error:', error));
     }
 });
+function sellInventory(pk) {
+    const formData = new FormData();
+    formData.append('action', 'sell');
+    formData.append('pk', pk);
 
-    function showPopup(buttonId) {
+    fetch(sellUrl, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': window.csrfToken || getCookie('csrftoken')
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log(data.message);
+        } else {
+            console.error(data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
 
-    if (buttonId === "start") {
-        console.log("Show Regular Start");
-const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+// Example usage: when a button is clicked, call sellInventory with the appropriate primary key
+document.addEventListener('DOMContentLoaded', function() {
+    const sellButtons = document.querySelectorAll('.sell-button');
+    sellButtons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            // Assume the pk is stored as a data attribute on the button
+            const pk = this.closest('form').querySelector('[name="pk"]').value;
+            sellInventory(pk);
+        });
+    });
+});
+
+
+ async function showPopup(buttonId) {
+
+  if (buttonId === "start") {
+    console.log("Show Regular Start");
+    window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    console.log("Sell Imported CSRFToken:", csrfToken); // Debug log
+
+
 
 textContainer.innerHTML = `
-    <h2>Congratulations!</h2>
-    <p>You got:</p>
-    <div class="cards-container"></div>
-    <form id="sell-form-{{ Inventory.pk }}" action="" method="post" class="ajax-form">
-        <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
-        <input type="hidden" name="action" value="sell">
-        <input type="hidden" name="pk" value="{{ Inventory.pk }}">
-        <button type="submit" class="action-button sell-button">Sell</button>
-    </form>
-    <button class="close">Collect</button>
+  <h2>Congratulations!</h2>
+  <p>You got:</p>
+  <div class="cards-container"></div>
+  <form id="sell-form-${window.inventory_pk}" action="${sellUrl}" method="post" class="ajax-form">
+    <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
+    <input type="hidden" name="action" value="sell">
+    <input type="hidden" name="pk" value="${window.inventory_pk}">
+   <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}" style="background-color: #c2fbd7; border-radius: 100px;   box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset,rgba(44, 187, 99, .15) 0 1px 2px,rgba(44, 187, 99, .15) 0 2px 4px,rgba(44, 187, 99, .15) 0 4px 8px,rgba(44, 187, 99, .15) 0 8px 16px,rgba(44, 187, 99, .15) 0 16px 32px;
+  color: green;
+  cursor: pointer;
+  display: inline-block;
+  font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif;
+  padding: 7px 20px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 250ms;
+  border: 0;
+  font-size: 16px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;">
+      Sell
+    </button>
+  </form>
+  <button class="close">Collect</button>
 `;
+
+
+
+const newSellButton = textContainer.querySelector('.sell-button');
+newSellButton.addEventListener('click', function(event) {
+    event.preventDefault();
+    const pk = this.getAttribute('data-inventory_pk');
+    console.log("sellUrl:", sellUrl);
+    console.log("inventory_pk:", window.inventory_pk);
+    if (pk) {
+        sellInventory(pk);
+    } else {
+        console.error("No inventory_pk found on the sell button.");
+    }
+});
+
+
+
+
+
 
     } else if (buttonId === "start2") {
         console.log("Show Demo Start");
@@ -719,3 +827,6 @@ textContainer.innerHTML = `
         });
     }
 });
+
+
+

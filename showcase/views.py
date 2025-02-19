@@ -2373,31 +2373,83 @@ def get_user_cash(request):
     return JsonResponse({'user_cash': user_cash})
 
 
+def sell_game_inventory_object(self, request):
+    try:
+        print('point-blank sell hit item')
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    print('initial sell stage - directly from game')
+
+    if not inventory_object:
+        return JsonResponse({'error': 'No items available to sell!'}, status=400)
+
+    # Update InventoryObject
+    inventory_object.user = None
+    inventory_object.inventory = None
+
+    with transaction.atomic():
+        # Create the Transaction instance
+        Transaction.objects.create(
+            inventory_object=inventory_object,
+            user=request.user,
+            currency=inventory_object.currency,
+            amount=inventory_object.price
+        )
+
+        inventory_object.save()
+
+        # Update UserProfile's currency_amount
+        user_profile = get_object_or_404(UserProfile, user=request.user)
+        user_profile.currency_amount += inventory_object.price
+        user_profile.save()
+
+    return JsonResponse({
+        'success': True,
+        'message': f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!",
+    })
+
+
 class GameChestBackgroundView(BaseView):
     template_name = "game.html"
 
-    @csrf_exempt
     def post(self, request, *args, **kwargs):
+        # Debug: print all POST data
+        print("Debug: Received POST data:", request.POST)
+
         action = request.POST.get('action')
         if action == 'sell':
+            print('point-blank sell action called')
             return self.sell_game_inventory_object(request)
         return JsonResponse({'error': 'Invalid action'}, status=400)
 
     def sell_game_inventory_object(self, request):
-        inventory_object = InventoryObject.objects.filter(
-            user=request.user,
-            inventory__isnull=False,
-        ).order_by('-created_at').first()
+        # Retrieve pk directly from POST
+        pk = request.POST.get('pk')
+        if not pk:
+            print("Error: No pk provided!")
+            return JsonResponse({'error': 'No pk provided!'}, status=400)
 
-        if not inventory_object:
+        print('initial sell stage - directly from game, pk received:', pk)
+
+        # Example: Retrieve your inventory object based on pk.
+        # Make sure to replace InventoryObject with your actual model.
+        try:
+            inventory_object = InventoryObject.objects.get(pk=pk)
+        except InventoryObject.DoesNotExist:
+            print("Error: Inventory object not found for pk:", pk)
             return JsonResponse({'error': 'No items available to sell!'}, status=400)
+
+        print("Inventory object before update:", inventory_object)
 
         # Update InventoryObject
         inventory_object.user = None
         inventory_object.inventory = None
 
         with transaction.atomic():
-            # Create the Transaction instance
+            # Debug: Creating transaction for the inventory object
+            print("Creating transaction for inventory object:", inventory_object)
             Transaction.objects.create(
                 inventory_object=inventory_object,
                 user=request.user,
@@ -2407,11 +2459,14 @@ class GameChestBackgroundView(BaseView):
 
             inventory_object.save()
 
-            # Update UserProfile's currency_amount
+            # Debug: Update user profile
             user_profile = get_object_or_404(UserProfile, user=request.user)
+            print("User profile before update:", user_profile)
             user_profile.currency_amount += inventory_object.price
             user_profile.save()
+            print("User profile after update:", user_profile)
 
+        print("Final step: Transaction complete for inventory object:", inventory_object)
         return JsonResponse({
             'success': True,
             'message': f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!",
@@ -2638,6 +2693,7 @@ class GameChestBackgroundView(BaseView):
 
         if action == 'sell':
             return self.sell_game_inventory_object(request)
+
 
     def sell_game_inventory_object(self, request):
         # Get the most recently created InventoryObject for the current user
@@ -11822,39 +11878,6 @@ def delete_inventory_object(request, object_id):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
-
-
-def sell_game_inventory_object(self, request, pk):
-    inventory_object = get_object_or_404(InventoryObject, pk=pk)
-
-    # Check if user owns the inventory object
-    if inventory_object.user != request.user:
-        messages.error(request, 'You cannot sell items you do not own!')
-        return redirect('showcase:inventory')
-
-    # Update InventoryObject
-    inventory_object.user = None
-    inventory_object.inventory = None
-
-    with transaction.atomic():
-        # Create the Transaction instance
-        Transaction.objects.create(
-            inventory_object=inventory_object,
-            user=request.user,
-            currency=inventory_object.currency,
-            amount=inventory_object.price
-        )
-
-        # Save the updated InventoryObject
-        inventory_object.save()
-
-        # Update UserProfile's currency_amount
-        user_profile = get_object_or_404(UserProfile, user=request.user)
-        user_profile.currency_amount += inventory_object.price
-        user_profile.save()
-
-    messages.success(request, f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
-    return redirect('showcase:inventory')
 
 
 class CreateChestView(FormView):
