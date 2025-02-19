@@ -2413,10 +2413,10 @@ def sell_game_inventory_object(self, request):
 
 class GameChestBackgroundView(BaseView):
     template_name = "game.html"
+    print("Debug: Received POST data:")
 
     def post(self, request, *args, **kwargs):
         # Debug: print all POST data
-        print("Debug: Received POST data:", request.POST)
 
         action = request.POST.get('action')
         if action == 'sell':

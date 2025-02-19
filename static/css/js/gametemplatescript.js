@@ -197,7 +197,6 @@ async function randomizeContents() {
                     console.log("Inventory object created successfully with user.");
                      const inventory_pk = inventoryData.inventory_object_id;
                         console.log("inventory_pk:", inventory_pk);
-                        // Option 1: Save it in a global variable if needed.
                         window.inventory_pk = inventory_pk;
                         targetCardElement.setAttribute('data-inventory_pk', window.inventory_pk);
 
@@ -205,13 +204,11 @@ async function randomizeContents() {
                         if (sellForm) {
                           console.log("Sell form found:", sellForm);
 
-                          // Attach a submit event handler to the form
                           sellForm.addEventListener('submit', function(event) {
-                            event.preventDefault();  // Prevent the default form submission
+                            event.preventDefault();
                             const pk = this.querySelector('[name="pk"]').value;
                             console.log("Sell form submitted. pk =", pk);
 
-                            // Call your AJAX function to handle the sale
                             sellInventory(pk);
                           });
                         } else {
