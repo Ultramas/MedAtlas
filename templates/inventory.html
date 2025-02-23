@@ -644,42 +644,66 @@ nav.main-menu ul li a {
     display: block;
     padding: 15px;
 }
+
+/* Hide the default checkbox */
+.item-select-checkbox {
+    display: none;
+}
+
+/* Style the label to occupy the full area of the inventory item */
+.inventory-item-label {
+    display: block;
+    position: relative;
+    cursor: pointer;
+}
+
+/* Optional: Visual feedback when an item is selected */
+.item-select-checkbox:checked + .inventory-item {
+    background-color: rgba(0, 128, 0, 0.1); /* Example: light green background */
+}
+
+/* Optional: Add a visual indicator (e.g., a checkmark) when selected */
+.item-select-checkbox:checked + .inventory-item::before {
+    content: '✔'; /* Checkmark symbol */
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 20px;
+    color: green;
+}
+
     </style>
 </head>
 <body>
 
 <script>
-    // Load audio files
     const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
     const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
     const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
 
-    // Add event listeners to sell forms
     document.querySelectorAll('.sell-form').forEach(form => {
         form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            sellAudio.play(); // Play the sell sound
+            event.preventDefault();
+            sellAudio.play();
             console.log('')
-            handleAjaxFormSubmission(form); // Handle the AJAX request
+            handleAjaxFormSubmission(form);
         });
     });
 
-    // Add event listeners to withdraw forms
     document.querySelectorAll('.withdraw-form').forEach(form => {
         form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            withdrawAudio.play(); // Play the withdraw sound
-            handleAjaxFormSubmission(form); // Handle the AJAX request
+            event.preventDefault();
+            withdrawAudio.play();
+            handleAjaxFormSubmission(form);
         });
     });
 
 	document.querySelectorAll('.trade-form').forEach(form => {
         form.addEventListener('submit', function(event) {
-            tradeAudio.play(); // Play the withdraw sound
+            tradeAudio.play();
         });
     });
 
-    // Generic AJAX form submission handler
     function handleAjaxFormSubmission(form) {
         const formData = new FormData(form);
         const actionUrl = form.getAttribute('action');
@@ -711,7 +735,10 @@ nav.main-menu ul li a {
 
             <section id="inventoryGrid" class="inventory-grid comfortable-view">
 
-                {% for Inventory in StockObject %}
+                         {% for Inventory in StockObject %}
+                <label class="inventory-item-label">
+        <input type="checkbox" class="item-select-checkbox" id="checkbox-{{ Inventory.pk }}">
+
                     <div class="inventory-item">
                         <div class="legendary-icon">🐉</div>
                         <div class="pokemon-image">
@@ -746,12 +773,15 @@ nav.main-menu ul li a {
                             </div>
                         </div>
                     </div>
+    </label>
                 {% empty %}
                     <div class="empty-inventory">
                         <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy">
                         <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
                     </div>
                 {% endfor %}
+
+
             </section>
         </main>
     </div>

@@ -3679,6 +3679,7 @@ class Battle(models.Model):
         max_length=20,
         default='Free For All'
     )
+    team_battle = models.BooleanField(default=False)
     bets_allowed = models.BooleanField(default=False)
     time = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.IntegerField(
@@ -3714,6 +3715,7 @@ class Battle(models.Model):
             parts = display.split('ve')
             if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
                 return int(parts[0]) + int(parts[1])
+                self.team_battle=True
         # Otherwise split on 'v' (which covers cases like "1v1" or "1v1v1")
         parts = display.split('v')
         try:
@@ -3727,8 +3729,10 @@ class Battle(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        team_slots = ['2v2', '2ve3', '2ve4', '2ve5', '3v3', '3ve3', '4v4', '5v5']
+        if self.slots in team_slots and (self.type != 'teams' or self.type != 'team_fight'):
+            self.type = 'teams'
 
-        # Assign this Battle instance to the participants only if necessary
         for participant in self.participants.all():
             if participant.battle != self:
                 participant.battle = self
@@ -3764,18 +3768,61 @@ class Battle(models.Model):
         verbose_name = "Battle"
         verbose_name_plural = "Battles"
 
+
 class Bet(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    profile = models.ForeignKey(ProfileDetails, blank=True, null=True, on_delete=models.CASCADE)
     amount = models.IntegerField(default=5, validators=[MinValueValidator(1)],)
-
     battle = models.ForeignKey(Battle, on_delete=models.CASCADE)
+    winning_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='winninguser')
+    winning_team = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='winningteam')
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def __str__(self):
+        return str(self.user) + " " + str(self.amount) + " " + str(self.battle)
+
+    def clean(self):
+        if not self.winning_user and not self.winning_team:
+            raise ValidationError('Either user or team must be provided.')
+
+    def save(self, *args, **kwargs):
+        print('winning user: ' + str(self.winning_user))
+        print('winning team: ' + str(self.winning_team))
+
+        with atomic():
+            if self.amount <= 0:
+                print('put a positive amount')
+                raise ValidationError("Bet amount must be positive.")
+
+            try:
+                self.profile = ProfileDetails.objects.get(user=self.user)
+                print('put here profile')
+            except ProfileDetails.DoesNotExist:
+                raise ValidationError("User profile does not exist.")
+
+
+            if self.profile.currency_amount:
+                print('currency amount: ' + str(self.profile.currency_amount))
+            else:
+                print('no currency amount added')
+
+            if self.profile.currency_amount < self.amount:
+                print('insufficient funds')
+                raise ValidationError(
+                    f"Insufficient funds for this bet. You have {self.profile.currency_amount}, but the bet is {self.amount}."
+                )
+
+            self.profile.currency_amount -= self.amount
+            self.profile.save()
+
+            super().save(*args, **kwargs)
+
     class Meta:
-        unique_together = ("user", "battle",)
+        unique_together = ("user", "battle")
 
 
 class Hits(models.Model):
@@ -5925,12 +5972,10 @@ class Item(models.Model):
         return reverse("showcase:remove-from-cart", kwargs={'slug': self.slug})
 
     def clean(self):
-        # Ensure that either price or currency_price is provided
         if not self.price and not self.currency_price:
             raise ValidationError('Either price or currency price must be provided.')
 
     def save(self, *args, **kwargs):
-        # Set the default currency to the first instance of Currency if not already set
         if not self.currency:
             first_currency = Currency.objects.first()
             if first_currency:
@@ -6073,6 +6118,11 @@ class Transaction(models.Model):
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date_and_time = models.DateTimeField(null=True, verbose_name="time and date", auto_now_add=True)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
         if self.user:

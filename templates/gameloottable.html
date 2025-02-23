@@ -15,7 +15,8 @@
 
 <div class="containerev" style="
 font-family: 'Lato', sans-serif;
-    background-color: var(--background);
+    background: linear-gradient(rgba(20, 18, 39, 1), var(--background));
+
     color: var(--light-gold);
     margin: 0 auto;
     padding: 20px;
@@ -29,7 +30,7 @@ font-family: 'Lato', sans-serif;
     flex-direction: column;
 ">
     <h1>Loot Drop Table</h1>
-    <div class="loot-grid" style="padding: 20px; border-radius: 20px;">
+    <div class="loot-grid" style="padding: 20px; border-radius: 20px; background: linear-gradient(#051922, #0a0a13);">
         {% for item in choices %}
         <div class="loot-item" style="width: 80%; margin: auto;">
             <h2>{{ item.choice_text }}</h2>
@@ -71,7 +72,7 @@ font-family: 'Lato', sans-serif;
 
 <div class="containerev" style="
 font-family: 'Lato', sans-serif;
-    background-color: var(--background);
+    background: linear-gradient(rgba(20, 18, 39, 1), var(--background));
     color: var(--light-gold);
     margin: 0 auto;
     padding: 20px;

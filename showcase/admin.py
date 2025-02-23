@@ -2303,6 +2303,7 @@ class TransactionAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('date_and_time',)
+    list_display = ('inventory_object', 'user', 'currency', 'amount', 'date_and_time', 'is_active',)
 
 
 admin.site.register(Transaction, TransactionAdmin)
@@ -2349,9 +2350,9 @@ class BattleAdmin(admin.ModelAdmin):
         }),
     )
     list_display = ('battle_name', 'creator', 'price', 'currency', 'status', 'is_active', 'time')
-    list_filter = ('status', 'is_active', 'currency', 'creator')  # Add filters for quick navigation
-    search_fields = ('battle_name', 'creator__username')  # Add search functionality
-    inlines = [BattleGameInline, BattleParticipantInline, RobotInline]  # Include inlines
+    list_filter = ('status', 'is_active', 'currency', 'creator')
+    search_fields = ('battle_name', 'creator__username')
+    inlines = [BattleGameInline, BattleParticipantInline, RobotInline]
 
 
 admin.site.register(Battle, BattleAdmin)
@@ -2360,9 +2361,18 @@ class BetAdmin(admin.ModelAdmin):
     model = Bet
     fieldsets = (
         ('Bet Information', {
-            'fields': ('user', 'amount', 'battle', 'is_active'),
+            'fields': ('user', 'amount', 'battle', 'winning_user', 'winning_team', 'is_active'),
         }),
     )
+
+    list_display = (
+        'user',
+        'amount',
+        'battle',
+        'is_active',
+    )
+
+
 admin.site.register(Bet, BetAdmin)
 
 class AffiliationAdmin(admin.ModelAdmin):

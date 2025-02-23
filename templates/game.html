@@ -9,6 +9,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prize Picker</title>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PokeTrove - Game</title>
         <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
@@ -18,9 +22,256 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
 
-    <style>
-    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
-    .copyright-section {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/gametemplate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/spinboost.css' %}">
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+     <script defer src="{% static 'css/js/gametemplatescript.js' %}"></script>
+     <script defer src="{% static 'css/js/spinboostscript.js' %}"></script>
+
+     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+     <script src="{% static 'css/js/main.js' %}"></script>
+     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+     <script src="{% static 'css/js/waypoints.js' %}"></script>
+	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+     <script src="{% static 'css/js/sticker.js' %}"></script>
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+    <script src="{% static 'css/js/build.js' %}"></script>
+    <script src="{% static 'css/js/start.js' %}"></script>
+    <script src="{% static 'css/js/test.js' %}"></script>
+
+
+
+     <style>
+        body{
+
+        background-color: #0a0a13;
+        }
+        .wrapperlootlist {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: left;
+        }
+
+        .game {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            padding: 20px;
+
+        }
+        .cardslootlist {
+            flex: 1 1 200px; /* Adjust the width as needed */
+            margin: 10px;
+            box-sizing: border-box;
+        }
+
+        .sliderlootlist {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: left;
+        }
+
+        .spinner-arrow {
+            width: 50px;
+            height: 50px;
+            z-index: 10; /* Ensure it's on top */
+        }
+
+.cards-container {
+    display: flex;
+    flex-wrap: nowrap; /* Prevent wrapping to a new line */
+    overflow-x: auto; /* Allows horizontal scrolling */
+    overflow-y: hidden; /* Hides vertical scrolling */
+    padding: 10px;
+    gap: 10px; /* Optional: adds space between cards */
+    max-height: 100%; /* Ensure the height is properly constrained */
+    position: relative; /* Ensure positioning is correct */
+}
+
+.cards-container .popup-card:first-child {
+    margin-left: 250px; /* Adjust as needed to make the first card fully visible */
+}
+
+.cards-container::-webkit-scrollbar {
+    height: 8px; /* Custom scrollbar height */
+}
+
+.cards-container::-webkit-scrollbar-thumb {
+    background-color: #888; /* Custom scrollbar color */
+    border-radius: 4px;
+}
+
+.cards-container::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Darker color on hover */
+}
+
+.card{
+background: none;
+background-color: nonce;
+border: none;
+}
+
+.popup-card {
+    min-width: 200px;
+    max-width: 250px;
+    flex-shrink: 0;
+    margin-left: 10px;
+    text-align: center;
+    overflow: hidden; /* Hides both vertical and horizontal scrollbars */
+}
+
+
+    .individuallootelement {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start; /* Align items to the start */
+        padding: 15px;
+    }
+       .individuallootelement p {
+        margin: 5px 0;
+    }
+
+    .cards {
+        /*margin-right: 15px;
+        margin-left: 15px;*/
+        flex: 1 1 200px;
+       /*margin: 10px;*/
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column; /* Align elements vertically */
+    align-items: center; /* Centers horizontally */
+    justify-content: center; /* Centers vertically */
+    text-align: center;
+    }
+
+    .slider img {
+        width: 15vh;
+        height: 20vh;
+        border: 2px solid;
+        border-color: transparent; /* To change later */
+        border-radius: 7px;
+        object-fit: contain; /* Ensures image fits without cropping */
+    }
+
+        :root {
+            --gold: #FFD700;
+            --dark-gold: #B8860B;
+            --light-gold: #FFF8DC;
+            --background: #1A1A1A;
+        }
+
+
+
+        .containerev {
+            width: 100%;
+            left: 50%;
+            transform: translateX(-50%); /* Centers the element horizontally */
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            text-align: center;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px var(--gold);
+        }
+
+        .loot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .loot-item {
+            background: linear-gradient(135deg, var(--dark-gold), var(--gold));
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .loot-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .loot-item h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            color: var(--background);
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .loot-item img {
+            width: 25%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .loot-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .loot-details p {
+            margin: 0;
+            color: var(--background);
+        }
+
+        .loot-details strong {
+            color: var(--light-gold);
+        }
+
+        .rarity {
+            font-weight: bold;
+            color: #FF4500;
+        }
+
+        .tier {
+            font-weight: bold;
+            color: #4B0082;
+        }
+
+        .nerd-stats {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            padding: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .nerd-stats p {
+            margin: 0.25rem 0;
+        }
+
+        @media (max-width: 600px) {
+            .loot-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .selections {
+            position: absolute;
+            top: 30vh;
+
+}
+        .button{
+        padding: 5px;
+        }
+
+        .copyright-section {
         background: linear-gradient(
             to right,
             rgba(191, 151, 255, 0.1),
@@ -672,272 +923,20 @@ p.blog-meta span {
 
 <script>
   const csrfToken = "{{ csrf_token }}";
-  const inventory_pk = "{{ Inventory.pk }}"; // Ensure this value exists and is correct.
-  var sellUrl = "{% url 'showcase:sell_game_inventory_object' %}";
-</script>
+  const inventory_pk = "{{ Inventory.pk }}"; /*ensure each of the pks are passed rather than simply the first one*/
 
 
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prize Picker</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/gametemplate.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/spinboost.css' %}">
-     <script defer src="{% static 'css/js/gametemplatescript.js' %}"></script>
-     <script defer src="{% static 'css/js/spinboostscript.js' %}"></script>
-
-     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-     <script src="{% static 'css/js/main.js' %}"></script>
-     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
-     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
-     <script src="{% static 'css/js/waypoints.js' %}"></script>
-	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
-     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
-     <script src="{% static 'css/js/sticker.js' %}"></script>
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-
-    <script src="{% static 'css/js/build.js' %}"></script>
-    <script src="{% static 'css/js/start.js' %}"></script>
-    <script src="{% static 'css/js/test.js' %}"></script>
-     <style>
-        body{
-
-        background-color: #0a0a13;
-        }
-        .wrapperlootlist {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: left;
-        }
-
-        .game {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: 100%;
-            padding: 20px;
-
-        }
-        .cardslootlist {
-            flex: 1 1 200px; /* Adjust the width as needed */
-            margin: 10px;
-            box-sizing: border-box;
-        }
-
-        .sliderlootlist {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: left;
-        }
-
-        .spinner-arrow {
-            width: 50px;
-            height: 50px;
-            z-index: 10; /* Ensure it's on top */
-        }
-
-.cards-container {
-    display: flex;
-    flex-wrap: nowrap; /* Prevent wrapping to a new line */
-    overflow-x: auto; /* Allows horizontal scrolling */
-    overflow-y: hidden; /* Hides vertical scrolling */
-    padding: 10px;
-    gap: 10px; /* Optional: adds space between cards */
-    max-height: 100%; /* Ensure the height is properly constrained */
-    position: relative; /* Ensure positioning is correct */
-}
-
-.cards-container .popup-card:first-child {
-    margin-left: 250px; /* Adjust as needed to make the first card fully visible */
-}
-
-.cards-container::-webkit-scrollbar {
-    height: 8px; /* Custom scrollbar height */
-}
-
-.cards-container::-webkit-scrollbar-thumb {
-    background-color: #888; /* Custom scrollbar color */
-    border-radius: 4px;
-}
-
-.cards-container::-webkit-scrollbar-thumb:hover {
-    background-color: #555; /* Darker color on hover */
-}
-
-.card{
-background: none;
-background-color: nonce;
-border: none;
-}
-
-.popup-card {
-    min-width: 200px;
-    max-width: 250px;
-    flex-shrink: 0;
-    margin-left: 10px;
-    text-align: center;
-    overflow: hidden; /* Hides both vertical and horizontal scrollbars */
-}
-
-
-    .individuallootelement {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start; /* Align items to the start */
-        padding: 15px;
-    }
-       .individuallootelement p {
-        margin: 5px 0;
-    }
-
-    .cards {
-        /*margin-right: 15px;
-        margin-left: 15px;*/
-        flex: 1 1 200px;
-       /*margin: 10px;*/
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column; /* Align elements vertically */
-    align-items: center; /* Centers horizontally */
-    justify-content: center; /* Centers vertically */
-    text-align: center;
-    }
-
-    .slider img {
-        width: 15vh;
-        height: 20vh;
-        border: 2px solid;
-        border-color: transparent; /* To change later */
-        border-radius: 7px;
-        object-fit: contain; /* Ensures image fits without cropping */
-    }
-
-        :root {
-            --gold: #FFD700;
-            --dark-gold: #B8860B;
-            --light-gold: #FFF8DC;
-            --background: #1A1A1A;
-        }
+ </script>
 
 
 
-        .containerev {
-            width: 100%;
-            left: 50%;
-            transform: translateX(-50%); /* Centers the element horizontally */
-            padding: 20px;
-        }
-
-        h1 {
-            font-family: 'Cinzel', serif;
-            font-size: 3rem;
-            text-align: center;
-            color: var(--gold);
-            margin-bottom: 2rem;
-            text-shadow: 0 0 10px var(--gold);
-        }
-
-        .loot-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .loot-item {
-            background: linear-gradient(135deg, var(--dark-gold), var(--gold));
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .loot-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 30px rgba(255, 215, 0, 0.5);
-        }
-
-        .loot-item h2 {
-            font-family: 'Cinzel', serif;
-            font-size: 1.5rem;
-            color: var(--background);
-            margin-top: 0;
-            margin-bottom: 1rem;
-        }
-
-        .loot-item img {
-            width: 25%;
-            height: auto;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-        }
-
-        .loot-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-        }
-
-        .loot-details p {
-            margin: 0;
-            color: var(--background);
-        }
-
-        .loot-details strong {
-            color: var(--light-gold);
-        }
-
-        .rarity {
-            font-weight: bold;
-            color: #FF4500;
-        }
-
-        .tier {
-            font-weight: bold;
-            color: #4B0082;
-        }
-
-        .nerd-stats {
-            background-color: rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-            padding: 0.5rem;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .nerd-stats p {
-            margin: 0.25rem 0;
-        }
-
-        @media (max-width: 600px) {
-            .loot-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        .selections {
-            position: absolute;
-            top: 30vh;
-
-}
-        .button{
-        padding: 5px;
-        }
-
-    </style>
-
-
-</head>
 <body>
+  <script>
 
+  </script>
 <div class="total" style="display: flex; flex-direction: column;">
 	<!-- header -->
-
 {% include 'navtrove.html' %}
 	<!-- end header -->
 
@@ -991,6 +990,78 @@ border: none;
                 {% endif %}
             {% endif %}
         </h3>
+
+        <script>
+  function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+function sellInventory(inventoryPk) {
+  // Construct form data or JSON payload as needed. For example:
+  const formData = new FormData();
+  formData.append('action', 'sell');
+  formData.append('pk', inventoryPk);
+  // Optionally add CSRF token if required
+  formData.append('csrfmiddlewaretoken', getCSRFToken());
+
+  // Send the POST request to your sell endpoint
+  fetch('/sell/', {
+    method: 'POST',
+    body: formData,
+  })
+  .then(response => response.json())
+  .then(data => {
+    if(data.success){
+      console.log(`Sell action completed for inventory_pk ${inventoryPk}`);
+      // You might update the UI here for this particular card
+    } else {
+      console.error(data.error);
+    }
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+
+function sellAllTargetCards() {
+  const targetCards = document.querySelectorAll('.target-card');
+  targetCards.forEach(card => {
+    const inventory_pk = card.getAttribute('data-inventory_pk');
+    if (inventory_pk) {
+      sellInventory(inventory_pk);
+    } else {
+      console.warn('No inventory_pk found for card:', card);
+    }
+  });
+}
+
+document.querySelector('.sell-button').addEventListener('click', (e) => {
+  e.preventDefault();
+  // Find all target cards (assume they have the class "target-card")
+  const targetCards = document.querySelectorAll('.target-card');
+  targetCards.forEach(card => {
+    // Get the inventory_pk from the card's data attribute
+    const inventoryPk = card.getAttribute('data-inventory_pk');
+    if (inventoryPk) {
+     console.log('here it is set inventory_pk: ' + inventory_pk);')
+      sellInventory(inventoryPk);
+    }
+  });
+});
+
+
+        </script>
 
         <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function () {

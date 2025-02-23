@@ -9,6 +9,7 @@
             --accent: #4ecca3;
             --card-bg: #1a1a2e;
         }
+
 .sidebar-container {
   position: fixed;
   top: 0;
@@ -16,19 +17,20 @@
   height: 100vh;
   z-index: 1000;
   overflow-y: auto;
+  display: block;
+  padding: 5px;
+  background: #0a0a13;
+  transform: translateX(0); /* set the initial state */
+  transition: transform 0.3s ease-in-out; /* add transition here */
 }
 
-
-
+.sidebar-hidden {
+  transform: translateX(-100%);
+}
 .sidebar {
-  width: 300px;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.99);
-  overflow-y: auto;
-  transition: transform 0.3s ease-in-out;
-  padding: 20px;
-  box-sizing: border-box;
+    padding: 8px;
 }
+
 
 .sidebar-toggle {
   position: absolute;
@@ -44,10 +46,6 @@
   border-radius: 5px;
 }
 
-.sidebar-hidden {
-  transform: translateX(-100%);
-}
-
 
 .main-content {
   margin-left: 300px;
@@ -55,8 +53,10 @@
 }
 
 .main-content-expanded {
-  margin-left: 125px;
+  margin-left: 250px;
+  transition: margin-left 0.3s ease-in-out;
 }
+
 
 .nav-links{
     margin-left: 5%;
@@ -154,7 +154,7 @@ body {
             </ul>
         </div>
     </nav>
-        <div class="container" style="height: 130%;">
+        <div class="container" style="height: 0%;">
           <button id="sidebarToggle" class="sidebar-toggle"  style="position: fixed; background-color: #0a0a13; color: #bf97ff;
     border: none; box-shadow: inset 0 0 0 1.5px #bf97ff; /* Creates an inward border effect */">☰</button>
         <div class="sidebar-container">
@@ -177,7 +177,9 @@ body {
                     <div class="user-stats">
                         <div class="user-stat">
                             <span class="user-stat-icon">💎</span>
+                        <div class="sellupdate">
                             <span id="currency-amount">{{ userprofile.currency_amount }}</span>
+                        </div>
                         </div>
                         <div class="user-stat">
                             <span class="user-stat-icon">🏆</span>
@@ -189,7 +191,7 @@ body {
             </div>
 
             <div class="filters">
-                <button id="navToggle" class="nav-toggle">Toggle Navbar</button>
+                <button id="navToggle" class="nav-toggle" style="position: fixed;">Toggle Navbar</button>
 
                 <h2>Filters</h2>
                 <input type="search" placeholder="Search..." class="search-box">
@@ -221,17 +223,35 @@ body {
             </div>
         </aside>
         </div>
-        </div>
+
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", () => {
   const sidebarToggle = document.getElementById("sidebarToggle");
-  const sidebarContainer = document.querySelector(".sidebar-container");
+  const sidebar = document.querySelector(".sidebar-container");
+  const mainContent = document.querySelector(".main-content");
+
+  // Listen for the transition end event so we can hide the element after sliding out
+  sidebar.addEventListener("transitionend", () => {
+    if (sidebar.classList.contains("sidebar-hidden")) {
+      sidebar.style.display = "none";
+    }
+  });
 
   sidebarToggle.addEventListener("click", () => {
-    sidebarContainer.classList.toggle("sidebar-hidden");
+    // If the sidebar is hidden, show it first and then remove the hiding class to slide in.
+    if (sidebar.style.display === "none") {
+      sidebar.style.display = "block"; // make visible immediately
+      // Trigger a reflow to ensure the browser registers the change in display
+      void sidebar.offsetWidth;
+      sidebar.classList.remove("sidebar-hidden");
+      mainContent.classList.remove("main-content-expanded");
+    } else {
+      // Slide out the sidebar then hide it when animation completes
+      sidebar.classList.add("sidebar-hidden");
+      mainContent.classList.add("main-content-expanded");
+    }
   });
 });
-
 
 
 </script>

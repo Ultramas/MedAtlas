@@ -1,74 +1,26 @@
+if (inventoryData.button_id === "start") {
+    console.log("Inventory object created successfully with user.");
+    const inventory_pk = inventoryData.inventory_object_id;
+    console.log("inventory_pk:", inventory_pk);
+    window.inventory_pk = inventory_pk;
+    targetCardElement.setAttribute('data-inventory_pk', window.inventory_pk);
 
-class OpenBattleListView(ListView):
-    model = Battle
-    template_name = "battle.html"
-    context_object_name = "open_battles"  # The context variable name to use in the template
+    // Create sell form dynamically
+    const sellForm = document.createElement('form');
+    sellForm.id = `sell-form-${inventory_pk}`;
+    sellForm.innerHTML = `
+      <input type="hidden" name="pk" value="${inventory_pk}">
+      <button type="submit">Sell</button>
+    `;
+    targetCardElement.appendChild(sellForm);
 
-    def get_queryset(self):
-        return Battle.objects.filter(status='O').order_by('-time')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-        else:
-            userprofile = None
-
-        if userprofile:
-            context['NewsProfiles'] = userprofile
-        else:
-            context['NewsProfiles'] = None
-
-        if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
-        else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-        return context
-
-    def post(self, request, *args, **kwargs):
-        battle_id = request.POST.get('battle_id')
-        try:
-            battle = Battle.objects.get(id=battle_id)
-        except Battle.DoesNotExist:
-            messages.error(request, "Battle not found.")
-            return redirect('showcase:battle')
-
-        # Check if the battle is full
-        if battle.participants.count() >= int(battle.slots.split('v')[-1]):
-            messages.error(request, 'This battle is full. You cannot join.')
-            battle.status = '0'
-            return redirect('showcase:battle_detail', battle_id=battle.id)
-
-        # Check if the battle is open for participants
-        if battle.status != 'O':
-            messages.error(request, 'This battle is not currently open for participants.')
-            return redirect('showcase:battle_detail', battle_id=battle.id)  # Redirect to battle detail page
-
-        # Check if the user is already a participant
-        if request.user in battle.participants.all():
-            messages.error(request, 'You are already a participant in this battle.')
-            return redirect('showcase:battle_detail', battle_id=battle.id)
-
-        form = BattleJoinForm(request.POST, user=request.user, battle=battle)
-        if form.is_valid():
-            form.save()  # Add the user as a participant
-            messages.success(request, 'You have successfully joined the battle!')
-            return redirect('showcase:battle_detail', battle_id=battle.id)  # Redirect to battle detail page
-        else:
-            messages.error(request, 'There was an error joining the battle. Please try again.')
-            return redirect('showcase:battle_detail', battle_id=battle.id)
-
-        return self.get(request, *args, **kwargs)
+    // Bind event listener to the newly created form
+    sellForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const pk = this.querySelector('[name="pk"]').value;
+        console.log("Sell form submitted. pk =", pk);
+        sellInventory(pk);
+    });
+} else {
+    console.error("Sell form not found for inventory_pk:", window.inventory_pk);
+}

@@ -397,6 +397,38 @@
             background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
+
+        .main-content h1 {
+            color: var(--primary);
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+        }
+
+        .main-content h1::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .nav-links h1::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
         .pokemon-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -846,7 +878,8 @@ p.blog-meta span {
                             </ul>
                         </div>
 
-                        {% if bets_allowed %}
+
+        {% if battle.bets_allowed %}
                         <div class="battle-info">
                             <strong style="color: lightgreen;">Bets Allowed</strong>
                         </div>

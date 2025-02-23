@@ -415,7 +415,7 @@ a.bordered-btn {
 a.read-more-btn {
   display: inline-block;
   margin-top: 15px;
-  color: #051922;
+  color: #ffffff;
   -webkit-transition: 0.3s;
   -o-transition: 0.3s;
   transition: 0.3s;
@@ -1634,7 +1634,7 @@ div.owl-controls, .owl-controls div {
 p.blog-meta span {
   margin-right: 15px;
   opacity: 0.6;
-  color: #051922;
+  color: #ffffff;
   font-size: 0.85em;
 }
 

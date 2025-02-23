@@ -486,25 +486,58 @@ class BattleCreationForm(forms.ModelForm):
 
         return battle
 
-
 class BetForm(forms.ModelForm):
     class Meta:
         model = Bet
-        fields = '__all__'
+        fields = ('amount',)
+
+    def __init__(self, *args, **kwargs):
+        battle = kwargs.pop('battle', None)
+        super().__init__(*args, **kwargs)
+
+        if not battle:
+            battle_id = getattr(self.instance, 'battle_id', None)
+            if battle_id:
+                battle = self.instance.battle
+            elif 'battle' in self.initial:
+                try:
+                    battle = Battle.objects.get(pk=self.initial['battle'])
+                except Battle.DoesNotExist:
+                    battle = None
+
+        if battle and (battle.type == 'teams' or battle.type == 'team_fight'):
+            self.fields['winning_team'] = forms.ModelChoiceField(
+                queryset=User.objects.all(),
+                label="Winning Team",
+                required=True
+            )
+        else:
+            self.fields['winning_user'] = forms.ModelChoiceField(
+                queryset=User.objects.all(),
+                label="Winning User",
+                required=True
+            )
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.user = self.instance.user
+        if commit:
+            instance.save()
+        return instance
+
 
 BattleGameFormSet = inlineformset_factory(
     parent_model=Battle,
     model=BattleGame,
     fields=['game', 'quantity'],
-    extra=1,  # Number of empty forms to show initially
-    can_delete=True,  # Allow removing games from the battle
+    extra=1,
+    can_delete=True,
     widgets={
         'game': forms.Select(attrs={'class': 'form-control'}),
         'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
     }
 )
-from django import forms
-from .models import Battle, BattleParticipant
+
 
 
 class BattleJoinForm(forms.ModelForm):
@@ -589,19 +622,6 @@ class SettingsForm(forms.ModelForm):
     class Meta:
         model = SettingsModel
         fields = ('username', 'password', 'email', 'coupons', 'news')
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        instance.user = self.instance.user
-        if commit:
-            instance.save()
-        return instance
-
-
-class BetForm(forms.ModelForm):
-    class Meta:
-        model = Bet
-        fields = ('amount',)
 
     def save(self, commit=True):
         instance = super().save(commit=False)

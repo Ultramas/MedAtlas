@@ -2411,459 +2411,6 @@ def sell_game_inventory_object(self, request):
     })
 
 
-class GameChestBackgroundView(BaseView):
-    template_name = "game.html"
-    print("Debug: Received POST data:")
-
-    def post(self, request, *args, **kwargs):
-        # Debug: print all POST data
-
-        action = request.POST.get('action')
-        if action == 'sell':
-            print('point-blank sell action called')
-            return self.sell_game_inventory_object(request)
-        return JsonResponse({'error': 'Invalid action'}, status=400)
-
-    def sell_game_inventory_object(self, request):
-        # Retrieve pk directly from POST
-        pk = request.POST.get('pk')
-        if not pk:
-            print("Error: No pk provided!")
-            return JsonResponse({'error': 'No pk provided!'}, status=400)
-
-        print('initial sell stage - directly from game, pk received:', pk)
-
-        # Example: Retrieve your inventory object based on pk.
-        # Make sure to replace InventoryObject with your actual model.
-        try:
-            inventory_object = InventoryObject.objects.get(pk=pk)
-        except InventoryObject.DoesNotExist:
-            print("Error: Inventory object not found for pk:", pk)
-            return JsonResponse({'error': 'No items available to sell!'}, status=400)
-
-        print("Inventory object before update:", inventory_object)
-
-        # Update InventoryObject
-        inventory_object.user = None
-        inventory_object.inventory = None
-
-        with transaction.atomic():
-            # Debug: Creating transaction for the inventory object
-            print("Creating transaction for inventory object:", inventory_object)
-            Transaction.objects.create(
-                inventory_object=inventory_object,
-                user=request.user,
-                currency=inventory_object.currency,
-                amount=inventory_object.price
-            )
-
-            inventory_object.save()
-
-            # Debug: Update user profile
-            user_profile = get_object_or_404(UserProfile, user=request.user)
-            print("User profile before update:", user_profile)
-            user_profile.currency_amount += inventory_object.price
-            user_profile.save()
-            print("User profile after update:", user_profile)
-
-        print("Final step: Transaction complete for inventory object:", inventory_object)
-        return JsonResponse({
-            'success': True,
-            'message': f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!",
-        })
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        slug = self.kwargs.get('slug')
-        context['slug'] = slug
-
-        # Fetch data related to the user and game
-        game = get_object_or_404(Game, slug=slug)
-        context['game'] = game
-
-        user = self.request.user
-        if user.is_authenticated:
-            try:
-                context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
-            except UserProfile.DoesNotExist:
-                context['SentProfile'] = None
-        else:
-            context['SentProfile'] = None
-
-        context['Money'] = Currency.objects.filter(is_active=1).first()
-        context['wager_form'] = WagerForm()
-
-        choices = Choice.objects.filter(game=game)
-        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
-        context['spinner_choice_renders'] = spinner_choice_renders
-
-        # Fetch user profile and calculate total cost
-        user = self.request.user
-        if user.is_authenticated:
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                effective_cost = game.get_effective_cost()
-                spin_multiplier = 1  # Default value; adjust as needed
-                total_cost = effective_cost * spin_multiplier
-                context['user_cash'] = profile.currency_amount
-                context['total_cost'] = total_cost
-            else:
-                context['user_cash'] = None
-                context['total_cost'] = None
-        else:
-            context['user_cash'] = None
-            context['total_cost'] = None
-
-        # Retrieve 'button_type' from the request
-        button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
-
-        # Determine cost based on button type
-        if button_type == "start2":  # If Demo Spin is pressed
-            cost = 0
-        else:  # If normal Spin is pressed
-            cost = game.discount_cost if game.discount_cost else game.cost
-
-        context.update({
-            'cost_threshold_80': cost * 0.8,
-            'cost_threshold_100': cost,
-            'cost_threshold_200': cost * 2,
-            'cost_threshold_500': cost * 5,
-            'cost_threshold_10000': cost * 100,
-        })
-
-        newprofile = UpdateProfile.objects.filter(is_active=1)
-        context['Profiles'] = newprofile
-
-        for newprofile in context['Profiles']:
-            user = newprofile.user
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
-
-        user_profile = None  # Initialize to ensure it always exists
-        if game.user:
-            # Perform actions only if the `user` field is filled
-            user_profile, created = UserProfile.objects.get_or_create(user=game.user)
-            # Additional logic if necessary
-
-        context['SentProfile'] = user_profile
-        if game.user:
-            user_cash = user_profile.currency_amount
-
-            context = {
-                'user_cash': user_cash,
-            }
-
-        context['Money'] = Currency.objects.filter(is_active=1).first()
-
-        spinpreference = None  # Initialize spinpreference to ensure it exists
-
-        if user.is_authenticated:
-            try:
-                spinpreference = SpinPreference.objects.get(user=user)
-            except SpinPreference.DoesNotExist:
-                spinpreference = SpinPreference(user=user, quick_spin=False)
-                spinpreference.save()
-
-            context['quick_spin'] = spinpreference.quick_spin
-        else:
-            context['quick_spin'] = False
-
-        context['spinpreference'] = spinpreference
-
-        if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-        else:
-            userprofile = None
-
-        if userprofile:
-            context['Profiles'] = userprofile
-        else:
-            context['Profiles'] = None
-
-        if context['Profiles'] == None:
-            # Create a new object with the necessary attributes
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
-        else:
-            for userprofile in context['Profiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-        # Initialize the form with spinpreference instance, or None if not authenticated
-        if spinpreference:
-            spinform = SpinPreferenceForm(instance=spinpreference)
-        else:
-            spinform = SpinPreferenceForm()  # Initialize an empty form if spinpreference is None
-        context['spin_preference_form'] = spinform
-
-        if user.is_authenticated:
-            # Determine the random amount based on quick_spin preference
-            if spinpreference.quick_spin:
-                random_amount = random.randint(500, 1000)
-            else:
-                random_amount = random.randint(150, 300)
-        else:
-            random_amount = random.randint(150, 300)
-
-        context['random_amount'] = random_amount
-        context['range_random_amount'] = range(random_amount)
-        print(str('the random amount is ') + str(random_amount))
-
-        # Generate a list of random nonces
-        random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
-        context['random_nonces'] = random_nonces
-
-        # Create a list to store choices matched with the generated nonces
-        choices_with_nonce = []
-        for nonce in random_nonces:
-            for choice in choices:
-                if choice.lower_nonce <= nonce <= choice.upper_nonce:
-                    choices_with_nonce.append({
-                        'choice': choice,
-                        'nonce': nonce,
-                        'lower_nonce': choice.lower_nonce,
-                        'upper_nonce': choice.upper_nonce,
-                        'file_url': choice.file.url if choice.file else None,  # Get the URL of the file field
-                        'currency': {
-                            'symbol': choice.currency.name if choice.currency else '💎',
-                            'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
-                        }
-                    })
-                    break  # Exit after finding the first match for this nonce
-
-        context['choices_with_nonce'] = choices_with_nonce
-
-        # Get the game_id from the URL kwargs
-        game_id = self.kwargs.get('slug')
-
-        # Retrieve the Game object
-        game = get_object_or_404(Game, slug=slug)
-
-        # Retrieve related Choice objects
-        choices = Choice.objects.filter(game=game)
-
-        # Add them to the context
-        context['game'] = game
-        context['choices'] = choices
-
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        print(context['Background'])
-
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
-        if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-        else:
-            userprofile = None
-
-        if userprofile:
-            context['NewsProfiles'] = userprofile
-        else:
-            context['NewsProfiles'] = None
-
-        if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
-        else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-        return context
-
-
-    @method_decorator(login_required)
-    def post(self, request, *args, **kwargs):
-        action = self.request.POST.get('action')
-        pk = self.request.POST.get('pk')
-
-        if action == 'sell':
-            return self.sell_game_inventory_object(request)
-
-
-    def sell_game_inventory_object(self, request):
-        # Get the most recently created InventoryObject for the current user
-        inventory_object = InventoryObject.objects.filter(
-            user=request.user,
-            inventory__isnull=False,  # Ensure it's still in inventory
-        ).order_by('-created_at').first()  # Get the latest instance
-
-        if not inventory_object:
-            messages.error(request, 'No items available to sell!')
-            return redirect('showcase:inventory')
-
-        # Update InventoryObject
-        inventory_object.user = None
-        inventory_object.inventory = None
-
-        with transaction.atomic():
-            # Create the Transaction instance
-            Transaction.objects.create(
-                inventory_object=inventory_object,
-                user=request.user,
-                currency=inventory_object.currency,
-                amount=inventory_object.price
-            )
-
-            # Save the updated InventoryObject
-            inventory_object.save()
-
-            # Update UserProfile's currency_amount
-            user_profile = get_object_or_404(UserProfile, user=request.user)
-            user_profile.currency_amount += inventory_object.price
-            user_profile.save()
-
-        messages.success(request,
-                         f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
-        return redirect('showcase:inventory')
-
-    def game_detail(request, slug):
-        game = get_object_or_404(Game, slug=slug)
-        choices = game.choices.all()  # Get all related choices for the game
-        return render(request, 'game_detail.html', {'game': game, 'choices': choices})
-
-    def display_choices(request, game_id, slug):
-        game = get_object_or_404(Game, id=game_id, slug=slug)
-        choices = Choice.objects.filter(game=game)
-
-        # Ensure each choice has a nonce
-        for choice in choices:
-            if choice.lower_nonce is None or choice.upper_nonce is None:
-                choice.lower_nonce = random.randint(0, 1000000)
-                choice.upper_nonce = random.randint(0, 1000000)
-                choice.save()
-
-        return render(request, 'game.html', {'game': game, 'choices': choices})
-
-    # Example usage in a view or any other part of your application
-    def take_spinner_slot(user, game, choice):
-        SpinnerChoiceRenders.take_up_slot(user=user, game=game, choice=choice, value=100, ratio=2, type=game.type,
-                                          image=choice.image.url, color=choice.color)
-
-    def save_spin_preference(request):
-        if request.method == "POST" and request.is_ajax():
-            quick_spin = request.POST.get('quick_spin') == 'true'
-            spinpreference, created = SpinPreference.objects.get_or_create(user=request.user)
-            spinpreference.quick_spin = quick_spin
-            spinpreference.save()
-            return JsonResponse({'success': True})
-        return JsonResponse({'success': False}, status=400)
-
-    def wager(self, request, *args, **kwargs):
-        form = WagerForm(request.POST, user_profile=request.user.user_profile)
-        if form.is_valid():
-            wager = form.save(commit=False)
-            wager.user_profile = request.user.user_profile
-            wager.save()
-            return redirect('showcase:blackjack')  # replace with your actual view name
-        else:
-            # If the form is not valid, re-render the page with the form errors
-            return self.get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            quick_spin = request.POST.get('quick_spin') == 'true'
-            spinpreference, created = SpinPreference.objects.get_or_create(user=request.user)
-            spinpreference.quick_spin = quick_spin
-            spinpreference.save()
-            return JsonResponse({'success': True})
-        return JsonResponse({'success': False}, status=400)
-
-    def create_spinner_choice_render_automatically(request):
-        nonce = random.randint(0, 1000000)
-        choice = Choice.objects.filter(Q(lower_nonce__lte=nonce) & Q(upper_nonce__gte=nonce)).first()
-
-        if choice:
-            game = choice.game
-            game_hub = GameHub.objects.first()
-
-            spinner_choice_render = SpinnerChoiceRenders.objects.create(
-                user=choice.user,
-                value=choice.value,
-                ratio=choice.rarity,
-                type=game_hub,
-                image=choice.file,
-                color=choice.color,
-                game=game,
-                choice=choice,
-                nonce=nonce,
-                is_active=1,
-            )
-            return redirect('showcase:game', slug=choice.slug)
-        else:
-            return render(request, 'error.html', {'message': 'No choice found for the generated nonce'})
-
-    def spinner_choice_render_list(request):
-        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=self.game)
-        return render(request, 'game.html', {'spinner_choice_renders': spinner_choice_renders})
-
-    @csrf_exempt
-    def layoutspinner(request, slug):
-        if request.method == 'POST':
-            game_id = request.POST.get('game_id')
-            user = request.user
-
-            if not game_id:
-                return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
-
-            try:
-                game = Game.objects.get(id=game_id, slug=slug)
-                nonce = random.randint(1, 1000000)
-                choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
-
-                if not choices.exists():
-                    return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
-
-                choice = choices.order_by('?').first()
-
-                outcome = Outcome.objects.create(
-                    user=user,
-                    game=game,
-                    choice=choice,
-                    nonce=nonce,
-                    value=random.randint(1, 1000000),
-                    ratio=random.randint(1, 10),
-                    type=game.type
-                )
-                return JsonResponse({'status': 'success', 'outcome': outcome.id, 'nonce': outcome.nonce})
-            except Game.DoesNotExist:
-                return JsonResponse({'status': 'error', 'message': 'Game not found.'})
-            except Exception as e:
-                return JsonResponse({'status': 'error', 'message': str(e)})
-
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-
-    @csrf_exempt
-    def update_wager(self, request):
-        if request.method == 'POST':
-            wager_id = request.POST.get('wager_id')
-            outcome = request.POST.get('outcome')
-            try:
-                wager = Wager.objects.get(id=wager_id)
-                wager.resolve(outcome)
-                return JsonResponse({'status': 'success'})
-            except Wager.DoesNotExist:
-                return JsonResponse({'error': 'Wager not found.'}, status=404)
-            except Exception as e:
-                return JsonResponse({'error': str(e)}, status=500)
-        else:
-            return JsonResponse({'error': 'Invalid request method.'}, status=405)
-
-
 @csrf_exempt
 def create_top_hit(request):
     if request.method == 'POST':
@@ -3483,7 +3030,6 @@ class OpenBattleListView(ListView):
         else:
             messages.error(request, 'There was an error joining the battle. Please try again.')
             return redirect('showcase:battle_detail', battle_id=battle.id)
-
         return self.get(request, *args, **kwargs)
 
 
@@ -3503,6 +3049,7 @@ class SingleBattleListView(DetailView):
         # Existing context additions for games, participants, etc.
         battle_games = battle.battle_games.all().order_by('order')
         ordered_games = [bg.game for bg in battle_games]
+        context['bet_form'] = BetForm(battle=battle)
         context['ordered_games'] = ordered_games
         context['default_game'] = ordered_games[0] if ordered_games else None
         related_games = Game.objects.filter(game_battles__battle=battle).distinct()
@@ -3617,10 +3164,7 @@ class SingleBattleListView(DetailView):
 
     def post(self, request, *args, **kwargs):
         battle = self.get_object()
-
-        # First, handle join battle form submission
         if 'join_battle_submit' in request.POST:
-            # Basic validations for battle joining can be performed here
             if battle.status != 'O':
                 messages.error(request, 'This battle is not currently open for participants.')
                 return redirect('showcase:battle_detail', battle_id=battle.id)
@@ -3650,7 +3194,7 @@ class SingleBattleListView(DetailView):
 
         # Next, handle the bet form submission
         elif 'bet_form_submit' in request.POST:
-            # Optionally, check if bets are allowed for this battle
+
             if not battle.bets_allowed:
                 messages.error(request, 'Bets are not allowed in this battle.')
                 return redirect('showcase:battle_detail', battle_id=battle.id)
@@ -3664,9 +3208,9 @@ class SingleBattleListView(DetailView):
             else:
                 messages.error(request, 'There was an error placing your bet. Please try again.')
                 context = self.get_context_data(bet_form=bet_form)
+                context['bet_form_errors'] = bet_form.errors
                 return self.render_to_response(context)
 
-        # If no known form submit key is present, simply re-render the page
         messages.error(request, 'Invalid form submission.')
         return redirect('showcase:battle_detail', battle_id=battle.id)
 
@@ -8894,7 +8438,6 @@ def getGeneralMessages(request):
         # Get profile details if they exist
         profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
 
-        # Determine avatar URL and user profile URL
         avatar_url = (
             profile_details.avatar.url if profile_details and profile_details.avatar else
             default_avatar_data['default_avatar_url'] if default_avatar_data else None
@@ -9245,10 +8788,10 @@ def unsubscribe(request):
                 email_entry = EmailField.objects.get(email=email)
                 email_entry.delete()
                 messages.success(request, "The email has been unsubscribed successfully.")
-                return redirect('home')  # Redirect to a suitable page
+                return redirect('showcase:home')
             except EmailField.DoesNotExist:
                 messages.error(request, "The email you entered is not subscribed.")
-                return redirect('unsubscribe')  # Reload the page for further input
+                return redirect('showcase:unsubscribe')
         return render(request, 'unsubscribe.html')
 
 
@@ -11656,7 +11199,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         context['Money'] = Currency.objects.filter(is_active=1)
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user)
+        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by("created_at")
         context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
         context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
         if self.request.user.is_authenticated:
@@ -11811,6 +11354,57 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
             # Redirect to the trade inventory page
             return redirect('showcase:tradeinventory')
+
+
+@method_decorator(login_required, name='dispatch')
+class SellAllInventoryObjectsView(View):
+    def post(self, request, *args, **kwargs):
+        selected_ids_str = request.POST.get('selected_ids', '')
+        if not selected_ids_str:
+            return JsonResponse({'success': False, 'error': 'No inventory objects selected'}, status=400)
+
+        try:
+            # Create a list of integer IDs from the comma-separated string
+            selected_ids = [int(pk.strip()) for pk in selected_ids_str.split(',') if pk.strip()]
+        except ValueError:
+            return JsonResponse({'success': False, 'error': 'Invalid inventory IDs provided'}, status=400)
+
+        # Filter only those inventory objects that belong to the user
+        inventory_objects = InventoryObject.objects.filter(pk__in=selected_ids, user=request.user)
+        if not inventory_objects.exists():
+            return JsonResponse({'success': False, 'error': 'No valid inventory objects found'}, status=404)
+
+        total_price = 0
+        with transaction.atomic():
+            for inventory_object in inventory_objects:
+                # Sum up the total sale price
+                total_price += inventory_object.price
+
+                # "Sell" the inventory object by dissociating it from the user
+                inventory_object.user = None
+                inventory_object.inventory = None
+
+                # Create a transaction record for the sale
+                Transaction.objects.create(
+                    inventory_object=inventory_object,
+                    user=request.user,
+                    currency=inventory_object.currency,
+                    amount=inventory_object.price
+                )
+                inventory_object.save()
+
+            # Update the user's profile with the new currency amount
+            user_profile = get_object_or_404(ProfileDetails, user=request.user)
+            user_profile.currency_amount += total_price
+            user_profile.save()
+
+        # Get updated stock count after selling items
+        stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+        return JsonResponse({
+            'success': True,
+            'stock_count': stock_count,
+            'currency_amount': user_profile.currency_amount
+        })
 
 
 @csrf_exempt
@@ -12000,6 +11594,441 @@ class CreateChestView(FormView):
             print("choice_formset errors:", choice_formset.errors)
             return self.render_to_response(self.get_context_data(game_form=game_form,
                                                                  choice_formset=choice_formset))
+
+class GameChestBackgroundView(BaseView):
+    template_name = "game.html"
+    print("Debug: Received POST data:")
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action')
+        pk = kwargs.get('pk')
+
+        try:
+            inventory_object = InventoryObject.objects.get(pk=pk, user=request.user)
+        except InventoryObject.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Inventory object not found'}, status=404)
+
+        if action == 'sell':
+            print('point-blank sell action called')
+            response = self.sell_inventory_object(request, pk)
+        return JsonResponse({'error': 'Invalid action'}, status=400)
+
+    def sell_game_inventory_object(self, request, pk):
+        inventory_object = get_object_or_404(InventoryObject, pk=pk)
+
+        if inventory_object.user != request.user:
+            return JsonResponse({'success': False}, status=403)
+
+        inventory_object.user = None
+        inventory_object.inventory = None
+
+        with transaction.atomic():
+            Transaction.objects.create(
+                inventory_object=inventory_object,
+                user=request.user,
+                currency=inventory_object.currency,
+                amount=inventory_object.price
+            )
+            inventory_object.save()
+
+            user_profile = get_object_or_404(ProfileDetails, user=request.user) #was UserProfile, also has a currency_amount attribute
+            user_profile.currency_amount += inventory_object.price
+            user_profile.save()
+
+        stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+        return JsonResponse({
+            'success': True,
+            'stock_count': stock_count,
+            'currency_amount': user_profile.currency_amount
+        })
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        slug = self.kwargs.get('slug')
+        context['slug'] = slug
+
+        # Fetch data related to the user and game
+        game = get_object_or_404(Game, slug=slug)
+        context['game'] = game
+
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+            except UserProfile.DoesNotExist:
+                context['SentProfile'] = None
+        else:
+            context['SentProfile'] = None
+
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['wager_form'] = WagerForm()
+
+        choices = Choice.objects.filter(game=game)
+        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
+        context['spinner_choice_renders'] = spinner_choice_renders
+
+        user = self.request.user
+        if user.is_authenticated:
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                effective_cost = game.get_effective_cost()
+                spin_multiplier = 1  # Default value; adjust as needed
+                total_cost = effective_cost * spin_multiplier
+                context['user_cash'] = profile.currency_amount
+                context['total_cost'] = total_cost
+            else:
+                context['user_cash'] = None
+                context['total_cost'] = None
+        else:
+            context['user_cash'] = None
+            context['total_cost'] = None
+
+        # Retrieve 'button_type' from the request
+        button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
+
+        # Determine cost based on button type
+        if button_type == "start2":  # If Demo Spin is pressed
+            cost = 0
+        else:  # If normal Spin is pressed
+            cost = game.discount_cost if game.discount_cost else game.cost
+
+        context.update({
+            'cost_threshold_80': cost * 0.8,
+            'cost_threshold_100': cost,
+            'cost_threshold_200': cost * 2,
+            'cost_threshold_500': cost * 5,
+            'cost_threshold_10000': cost * 100,
+        })
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        user_profile = None
+        if game.user:
+            user_profile, created = UserProfile.objects.get_or_create(user=game.user)
+
+
+        context['SentProfile'] = user_profile
+        if game.user:
+            user_cash = user_profile.currency_amount
+
+            context = {
+                'user_cash': user_cash,
+            }
+
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+
+        spinpreference = None  # Initialize spinpreference to ensure it exists
+
+        if user.is_authenticated:
+            try:
+                spinpreference = SpinPreference.objects.get(user=user)
+            except SpinPreference.DoesNotExist:
+                spinpreference = SpinPreference(user=user, quick_spin=False)
+                spinpreference.save()
+
+            context['quick_spin'] = spinpreference.quick_spin
+        else:
+            context['quick_spin'] = False
+
+        context['spinpreference'] = spinpreference
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['Profiles'] = userprofile
+        else:
+            context['Profiles'] = None
+
+        if context['Profiles'] == None:
+            # Create a new object with the necessary attributes
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['Profiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        # Initialize the form with spinpreference instance, or None if not authenticated
+        if spinpreference:
+            spinform = SpinPreferenceForm(instance=spinpreference)
+        else:
+            spinform = SpinPreferenceForm()  # Initialize an empty form if spinpreference is None
+        context['spin_preference_form'] = spinform
+
+        if user.is_authenticated:
+            # Determine the random amount based on quick_spin preference
+            if spinpreference.quick_spin:
+                random_amount = random.randint(500, 1000)
+            else:
+                random_amount = random.randint(150, 300)
+        else:
+            random_amount = random.randint(150, 300)
+
+        context['random_amount'] = random_amount
+        context['range_random_amount'] = range(random_amount)
+        print(str('the random amount is ') + str(random_amount))
+
+        # Generate a list of random nonces
+        random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
+        context['random_nonces'] = random_nonces
+
+        # Create a list to store choices matched with the generated nonces
+        choices_with_nonce = []
+        for nonce in random_nonces:
+            for choice in choices:
+                if choice.lower_nonce <= nonce <= choice.upper_nonce:
+                    choices_with_nonce.append({
+                        'choice': choice,
+                        'nonce': nonce,
+                        'lower_nonce': choice.lower_nonce,
+                        'upper_nonce': choice.upper_nonce,
+                        'file_url': choice.file.url if choice.file else None,  # Get the URL of the file field
+                        'currency': {
+                            'symbol': choice.currency.name if choice.currency else '💎',
+                            'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                        }
+                    })
+                    break  # Exit after finding the first match for this nonce
+
+        context['choices_with_nonce'] = choices_with_nonce
+
+        # Get the game_id from the URL kwargs
+        game_id = self.kwargs.get('slug')
+
+        # Retrieve the Game object
+        game = get_object_or_404(Game, slug=slug)
+
+        # Retrieve related Choice objects
+        choices = Choice.objects.filter(game=game)
+
+        # Add them to the context
+        context['game'] = game
+        context['choices'] = choices
+
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        print(context['Background'])
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+            # Create a new object with the necessary attributes
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        action = self.request.POST.get('action')
+        pk = self.request.POST.get('pk')
+
+        if action == 'sell':
+            return self.sell_game_inventory_object(request)
+
+
+    def sell_game_inventory_object(self, request):
+        # Get the most recently created InventoryObject for the current user
+        inventory_object = InventoryObject.objects.filter(
+            user=request.user,
+            inventory__isnull=False,  # Ensure it's still in inventory
+        ).order_by('-created_at').first()  # Get the latest instance
+
+        if not inventory_object:
+            messages.error(request, 'No items available to sell!')
+            return redirect('showcase:inventory')
+
+        # Update InventoryObject
+        inventory_object.user = None
+        inventory_object.inventory = None
+
+        with transaction.atomic():
+            # Create the Transaction instance
+            Transaction.objects.create(
+                inventory_object=inventory_object,
+                user=request.user,
+                currency=inventory_object.currency,
+                amount=inventory_object.price
+            )
+
+            # Save the updated InventoryObject
+            inventory_object.save()
+
+            # Update UserProfile's currency_amount
+            user_profile = get_object_or_404(UserProfile, user=request.user)
+            user_profile.currency_amount += inventory_object.price
+            user_profile.save()
+
+        messages.success(request,
+                         f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
+        return redirect('showcase:inventory')
+
+    def game_detail(request, slug):
+        game = get_object_or_404(Game, slug=slug)
+        choices = game.choices.all()  # Get all related choices for the game
+        return render(request, 'game_detail.html', {'game': game, 'choices': choices})
+
+    def display_choices(request, game_id, slug):
+        game = get_object_or_404(Game, id=game_id, slug=slug)
+        choices = Choice.objects.filter(game=game)
+
+        # Ensure each choice has a nonce
+        for choice in choices:
+            if choice.lower_nonce is None or choice.upper_nonce is None:
+                choice.lower_nonce = random.randint(0, 1000000)
+                choice.upper_nonce = random.randint(0, 1000000)
+                choice.save()
+
+        return render(request, 'game.html', {'game': game, 'choices': choices})
+
+    # Example usage in a view or any other part of your application
+    def take_spinner_slot(user, game, choice):
+        SpinnerChoiceRenders.take_up_slot(user=user, game=game, choice=choice, value=100, ratio=2, type=game.type,
+                                          image=choice.image.url, color=choice.color)
+
+    def save_spin_preference(request):
+        if request.method == "POST" and request.is_ajax():
+            quick_spin = request.POST.get('quick_spin') == 'true'
+            spinpreference, created = SpinPreference.objects.get_or_create(user=request.user)
+            spinpreference.quick_spin = quick_spin
+            spinpreference.save()
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False}, status=400)
+
+    def wager(self, request, *args, **kwargs):
+        form = WagerForm(request.POST, user_profile=request.user.user_profile)
+        if form.is_valid():
+            wager = form.save(commit=False)
+            wager.user_profile = request.user.user_profile
+            wager.save()
+            return redirect('showcase:blackjack')  # replace with your actual view name
+        else:
+            # If the form is not valid, re-render the page with the form errors
+            return self.get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            quick_spin = request.POST.get('quick_spin') == 'true'
+            spinpreference, created = SpinPreference.objects.get_or_create(user=request.user)
+            spinpreference.quick_spin = quick_spin
+            spinpreference.save()
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False}, status=400)
+
+    def create_spinner_choice_render_automatically(request):
+        nonce = random.randint(0, 1000000)
+        choice = Choice.objects.filter(Q(lower_nonce__lte=nonce) & Q(upper_nonce__gte=nonce)).first()
+
+        if choice:
+            game = choice.game
+            game_hub = GameHub.objects.first()
+
+            spinner_choice_render = SpinnerChoiceRenders.objects.create(
+                user=choice.user,
+                value=choice.value,
+                ratio=choice.rarity,
+                type=game_hub,
+                image=choice.file,
+                color=choice.color,
+                game=game,
+                choice=choice,
+                nonce=nonce,
+                is_active=1,
+            )
+            return redirect('showcase:game', slug=choice.slug)
+        else:
+            return render(request, 'error.html', {'message': 'No choice found for the generated nonce'})
+
+    def spinner_choice_render_list(request):
+        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=self.game)
+        return render(request, 'game.html', {'spinner_choice_renders': spinner_choice_renders})
+
+    @csrf_exempt
+    def layoutspinner(request, slug):
+        if request.method == 'POST':
+            game_id = request.POST.get('game_id')
+            user = request.user
+
+            if not game_id:
+                return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
+
+            try:
+                game = Game.objects.get(id=game_id, slug=slug)
+                nonce = random.randint(1, 1000000)
+                choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
+
+                if not choices.exists():
+                    return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
+
+                choice = choices.order_by('?').first()
+
+                outcome = Outcome.objects.create(
+                    user=user,
+                    game=game,
+                    choice=choice,
+                    nonce=nonce,
+                    value=random.randint(1, 1000000),
+                    ratio=random.randint(1, 10),
+                    type=game.type
+                )
+                return JsonResponse({'status': 'success', 'outcome': outcome.id, 'nonce': outcome.nonce})
+            except Game.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'Game not found.'})
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': str(e)})
+
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+    @csrf_exempt
+    def update_wager(self, request):
+        if request.method == 'POST':
+            wager_id = request.POST.get('wager_id')
+            outcome = request.POST.get('outcome')
+            try:
+                wager = Wager.objects.get(id=wager_id)
+                wager.resolve(outcome)
+                return JsonResponse({'status': 'success'})
+            except Wager.DoesNotExist:
+                return JsonResponse({'error': 'Wager not found.'}, status=404)
+            except Exception as e:
+                return JsonResponse({'error': str(e)}, status=500)
+        else:
+            return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 
 class CreateInventoryChestView(FormView):

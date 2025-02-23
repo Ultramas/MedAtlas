@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const slider = document.getElementById('slider');
     const popup = document.getElementById('popup');
-    const closeButton = popup.querySelector('.close');
+    const buttons = popup.querySelectorAll('.close, .sell-button');
     const fire = popup.querySelector('.fire');
     const textContainer = popup.querySelector('.text');
 
@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
-
 
     // Set the checkbox state based on localStorage value
     if (persistSpin) {
@@ -110,7 +109,6 @@ async function randomizeContents() {
                 upperNonce: data.upper_nonce || 'N/A',
             };
 
-            // Create the target card
             const targetCardElement = document.createElement('div');
             targetCardElement.classList.add('card', 'target-card');
             targetCardElement.setAttribute('id', `card-${attributes.id}`);
@@ -147,7 +145,6 @@ async function randomizeContents() {
                 upperNonce: attributes.upperNonce
             });
 
-            // Get the container of the cards
             const cardContainer = document.querySelector('.slider'); // Adjust selector if necessary
 
             // Calculate the position to insert: 4 cards to the right of the middle
@@ -162,9 +159,6 @@ async function randomizeContents() {
             } else {
                 cardContainer.appendChild(targetCardElement);
             }
-
-            // Adjust the slider to center the new card
-            //centerCard(targetCardElement);
 
             console.log("Target card inserted 4 cards to the right of the middle.");
 
@@ -195,12 +189,14 @@ async function randomizeContents() {
             if (inventoryData.status === 'success') {
                 if (inventoryData.button_id === "start") {
                     console.log("Inventory object created successfully with user.");
-                     const inventory_pk = inventoryData.inventory_object_id;
+                     let inventory_pk = inventoryData.inventory_object_id;
                         console.log("inventory_pk:", inventory_pk);
-                        window.inventory_pk = inventory_pk;
+                        inventory_pk = inventory_pk;
                         targetCardElement.setAttribute('data-inventory_pk', window.inventory_pk);
 
+                        window.sellUrl = `/inventory/${inventory_pk}/sell/`;
                         const sellForm = document.getElementById(`sell-form-${window.inventory_pk}`);
+                        console.log('sellform: ' + sellForm);
                         if (sellForm) {
                           console.log("Sell form found:", sellForm);
 
@@ -234,7 +230,6 @@ async function randomizeContents() {
 }
 
 
-// Function to clear all cards
 function clearCards() {
     const cardContainer = document.querySelector('.slider');
     const targetCards = cardContainer.querySelectorAll('.target-card');
@@ -603,7 +598,6 @@ function findSelectedCard() {
                 text: card.dataset.text, // Include additional data like text
             };
 
-            // Highlight the target card specifically
             if (card.classList.contains('target-card')) {
                 card.classList.add('highlight'); // Apply a class for visual indication
                 console.log('Target card landed:', currentSelection);
@@ -619,152 +613,104 @@ function findSelectedCard() {
     const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
     document.querySelectorAll('.sell-form').forEach(form => {
         form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            sellAudio.play(); // Play the sell sound
+            event.preventDefault();
+            sellAudio.play();
             console.log('')
-            handleAjaxFormSubmission(form); // Handle the AJAX request
+            handleAjaxFormSubmission(form);
         });
     });
 
-    document.addEventListener('submit', function (event) {
-    if (event.target.matches('#sell-form')) {
-        event.preventDefault();
+    function handleAjaxFormSubmission(form) {
+        const formData = new FormData(form);
+        const actionUrl = form.getAttribute('action');
 
-        const formData = new FormData(event.target);
-
-        fetch('', {
+        fetch(actionUrl, {
             method: 'POST',
             body: formData,
             headers: {
-                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
             },
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert(data.message);
-                // Update the UI to reflect the sold item
+                document.getElementById('stock-count').textContent = data.number_of_cards;
             } else {
-                alert(data.error);
+                console.error(data.error);
             }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-});
-function sellInventory(pk) {
-    const formData = new FormData();
-    formData.append('action', 'sell');
-    formData.append('pk', pk);
-
-    fetch(sellUrl, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': window.csrfToken || getCookie('csrftoken')
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log(data.message);
-        } else {
-            console.error(data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-
-
-// Example usage: when a button is clicked, call sellInventory with the appropriate primary key
-document.addEventListener('DOMContentLoaded', function() {
-    const sellButtons = document.querySelectorAll('.sell-button');
-    sellButtons.forEach(button => {
-        button.addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent the default form submission
-            // Assume the pk is stored as a data attribute on the button
-            const pk = this.closest('form').querySelector('[name="pk"]').value;
-            sellInventory(pk);
         });
-    });
-});
-
+    }
 
  async function showPopup(buttonId) {
 
-  if (buttonId === "start") {
-    console.log("Show Regular Start");
-    window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    console.log("Sell Imported CSRFToken:", csrfToken); // Debug log
+if (buttonId === "start") {
+  console.log("Show Regular Start");
+  window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  console.log("Sell Imported CSRFToken:", window.csrfToken);
 
+  // Attach the event handler (using delegated binding in case the form is inserted dynamically)
+  $(document).ready(function() {
+    $(document).on("submit", "#sell-form-" + window.inventory_pk, function(e) {
+      e.preventDefault();
+      console.log('submitting here'); // Debug output
 
+      var form = $(this);
 
-textContainer.innerHTML = `
-  <h2>Congratulations!</h2>
-  <p>You got:</p>
-  <div class="cards-container"></div>
-  <form id="sell-form-${window.inventory_pk}" action="${sellUrl}" method="post" class="ajax-form">
-    <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
-    <input type="hidden" name="action" value="sell">
-    <input type="hidden" name="pk" value="${window.inventory_pk}">
-   <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}" style="background-color: #c2fbd7; border-radius: 100px;   box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset,rgba(44, 187, 99, .15) 0 1px 2px,rgba(44, 187, 99, .15) 0 2px 4px,rgba(44, 187, 99, .15) 0 4px 8px,rgba(44, 187, 99, .15) 0 8px 16px,rgba(44, 187, 99, .15) 0 16px 32px;
-  color: green;
-  cursor: pointer;
-  display: inline-block;
-  font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif;
-  padding: 7px 20px;
-  text-align: center;
-  text-decoration: none;
-  transition: all 250ms;
-  border: 0;
-  font-size: 16px;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;">
-      Sell
-    </button>
-  </form>
-  <button class="close">Collect</button>
+      // Send the form data via AJAX
+      $.ajax({
+        type: "POST",
+        url: form.attr("action"),
+        data: form.serialize(),
+        success: function(response) {
+          console.log('Sell request succeeded:', response);
+          // Instead of refreshing the page, update the relevant part of your page.
+          // For example, update a container with the new HTML provided by the server:
+          if(response.html) {
+            $("#updated-content-container").html(response.html);
+          }
+          // Alternatively, perform other DOM updates here if needed.
+        },
+        error: function(error) {
+          console.error("Sell request failed:", error);
+        }
+      });
+    });
+  });
+
+   textContainer.innerHTML = `
+    <h2>Congratulations!</h2>
+    <p>You got:</p>
+    <div class="cards-container"></div>
+    <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
+      <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
+      <input type="hidden" name="action" value="sell">
+      <input type="hidden" name="pk" value="${window.inventory_pk}">
+      <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}" 
+        style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
+          Sell
+      </button>
+    </form>
+
+  <button class="close" style="">Collect</button>
 `;
 
+  } else if (buttonId === "start2") {
+      console.log("Show Demo Start");
 
-
-const newSellButton = textContainer.querySelector('.sell-button');
-newSellButton.addEventListener('click', function(event) {
-    event.preventDefault();
-    const pk = this.getAttribute('data-inventory_pk');
-    console.log("sellUrl:", sellUrl);
-    console.log("inventory_pk:", window.inventory_pk);
-    if (pk) {
-        sellInventory(pk);
-    } else {
-        console.error("No inventory_pk found on the sell button.");
-    }
-});
-
-
-
-
-
-
-    } else if (buttonId === "start2") {
-        console.log("Show Demo Start");
-
-        textContainer.innerHTML = `
+      textContainer.innerHTML = `
             <h2></h2>
             <p>You would have hit:</p>
             <div class="cards-container"></div>
 
             <button class="close">I see</button>
         `;
-    }
+  }
 
 
-        const cardsContainer = textContainer.querySelector('.cards-container');
-    selectedItems.forEach((item, index) => {
-        const cardElement = document.createElement('div');
-        cardElement.innerHTML = `
+     const cardsContainer = textContainer.querySelector('.cards-container');
+     selectedItems.forEach((item, index) => {
+         const cardElement = document.createElement('div');
+         cardElement.innerHTML = `
             <div class="card-fire" data-color="${item.color}">
               <div class="card-flames">
                 <div class="card-flame"></div>
@@ -809,7 +755,7 @@ newSellButton.addEventListener('click', function(event) {
 
             setTimeout(() => {
                 popup.style.display = 'none';
-            }, 500);
+            }, 200);
 
             $(".spin-option").prop('disabled', false);
             $(".start").prop('disabled', false);
@@ -822,6 +768,53 @@ newSellButton.addEventListener('click', function(event) {
                 $(".spin-option[data-value='1']").addClass("selected");
             }
         });
+
+const sellBtn = textContainer.querySelector('.sell-button');
+sellBtn.addEventListener('click', () => {
+    const audio = new Audio('/static/css/sounds/collect.mp3');
+    audio.play();
+
+    const fire = document.querySelector('.fire');
+    fire.style.opacity = '0';
+    document.querySelectorAll('.card-fire').forEach(fire => {
+        fire.style.opacity = '0';
+    });
+
+    setTimeout(() => {
+        popup.style.display = 'none';
+    }, 0);
+
+    $(".spin-option").prop('disabled', false);
+    $(".start").prop('disabled', false);
+
+    if (!persistSpin) {
+        totalSpins = 1;
+        console.log(`persist spin not enabled; reset spins to 1`);
+        sessionStorage.setItem("totalSpins", totalSpins);
+        $(".spin-option").removeClass("selected");
+        $(".spin-option[data-value='1']").addClass("selected");
+    }
+
+    // Fetch and update only the .sell.update div without affecting the rest of the page
+    setTimeout(() => {
+        $.ajax({
+            url: window.location.href,
+            type: 'GET',
+            success: function(response) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = response;
+                const newContent = $(tempDiv).find('.sellupdate').html();
+                $('.sellupdate').html(newContent);
+            },
+            error: function(xhr, status, error) {
+                console.error("Ajax reload failed: " + xhr.status + " " + xhr.statusText);
+            }
+        });
+    }, 0);
+});
+
+
+
     }
 });
 
