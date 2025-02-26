@@ -113,15 +113,14 @@ body{
 
 .start{
     position: relative;
-    height: 10vh;
     width: 23vh;
     background-color: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
     color: black;
     font-size: 30px;
-    padding: 10px;
     right: 8px;
     border-radius: 10px;
+    margin-top: 10px;
 }
 
 .selections {

@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PokeTrove - My Inventory</title>
-        <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
@@ -557,6 +558,27 @@
             }
         }
 
+  .inventory-items-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1200px) {
+            .inventory-items-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .inventory-items-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .inventory-item {
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
             border-radius: 16px;
@@ -565,6 +587,8 @@
             border: 2px solid var(--primary);
             transition: all 0.3s ease;
             transform-style: preserve-3d;
+            width: 350px;
+            height: 800px;
         }
 
         .inventory-item:hover {
@@ -650,9 +674,7 @@ nav.main-menu ul li a {
     display: none;
 }
 
-/* Style the label to occupy the full area of the inventory item */
 .inventory-item-label {
-    display: block;
     position: relative;
     cursor: pointer;
 }
@@ -662,7 +684,6 @@ nav.main-menu ul li a {
     background-color: rgba(0, 128, 0, 0.1); /* Example: light green background */
 }
 
-/* Optional: Add a visual indicator (e.g., a checkmark) when selected */
 .item-select-checkbox:checked + .inventory-item::before {
     content: '✔'; /* Checkmark symbol */
     position: absolute;
@@ -670,11 +691,13 @@ nav.main-menu ul li a {
     left: 8px;
     font-size: 20px;
     color: green;
+    z-index: 100;
 }
 
     </style>
 </head>
 <body>
+
 
 <script>
     const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
@@ -682,7 +705,7 @@ nav.main-menu ul li a {
     const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
 
     document.querySelectorAll('.sell-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
+        form.addEventListener('submit', function (event) {
             event.preventDefault();
             sellAudio.play();
             console.log('')
@@ -691,18 +714,19 @@ nav.main-menu ul li a {
     });
 
     document.querySelectorAll('.withdraw-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
+        form.addEventListener('submit', function (event) {
             event.preventDefault();
             withdrawAudio.play();
             handleAjaxFormSubmission(form);
         });
     });
 
-	document.querySelectorAll('.trade-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
+    document.querySelectorAll('.trade-form').forEach(form => {
+        form.addEventListener('submit', function (event) {
             tradeAudio.play();
         });
     });
+
 
     function handleAjaxFormSubmission(form) {
         const formData = new FormData(form);
@@ -715,75 +739,100 @@ nav.main-menu ul li a {
                 'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
             },
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('stock-count').textContent = data.number_of_cards;
-            } else {
-                console.error(data.error);
-            }
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('stock-count').textContent = data.number_of_cards;
+                } else {
+                    console.error(data.error);
+                }
+            });
     }
 </script>
+
 {% include 'navtrove.html' %}
 
-    <div class="container">
+<div class="container">
 
 
-  <main class="main-content">
-            <h1>My Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)</h1>
+    <main class="main-content">
+        <h1>My Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)</h1>
 
-            <section id="inventoryGrid" class="inventory-grid comfortable-view">
+        <section id="inventoryGrid" class="inventory-grid comfortable-view">
+            <!-- Sell All Form (hidden by default) -->
+          <!-- Bulk Sell Form -->
+<form id="sell-all-form" class="sell-all-form" action="{% url 'showcase:sell_all_inventory_objects' %}" method="post"
+      style="display: none; position: fixed; top: 210px; right: 50px; z-index: 50;">
+    {% csrf_token %}
+    <input type="hidden" name="selected_ids" id="sell-all-selected-ids">
+    <button type="submit" class="sell-all-button" style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">Sell Selected</button>
+</form>
 
-                         {% for Inventory in StockObject %}
-                <label class="inventory-item-label">
-        <input type="checkbox" class="item-select-checkbox" id="checkbox-{{ Inventory.pk }}">
+<!-- Inventory Items -->
+<div id="inventory-items-container" style="display: grid; grid-template-columns: repeat(3, 1fr); space-between: 10px;">
+    {% include "inventory_items.html" with StockObject=StockObject %}
+</div>
 
-                    <div class="inventory-item">
-                        <div class="legendary-icon">🐉</div>
-                        <div class="pokemon-image">
-                            <img src="{{ Inventory.image.url }}" alt="{{Inventory.choice_text}} Image">
-                        </div>
-                        <div class="pokemon-info">
-                            <h3 class="pokemon-name">{{ Inventory.choice.choice_text }}</h3>
-                            <p class="pokemon-type">{{ Inventory.price }} 💎</p>
-                            <p class="product-condition" style="color: rgba(255, 255, 255, 0.8);">Card Condition: {{ Inventory.condition }}</p>
-                            <p class="product-description">{{ Inventory.description }}</p>
-                            <div class="action-buttons">
-                                <form id="sell-form-{{ Inventory.pk }}" action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post" class="ajax-form sell-form">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="sell">
-                                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
-                                    <button type="submit" class="add-button sell-button">Sell</button>
-                                </form>
+<script>
+$(document).ready(function() {
+  // Cache selectors
+  const $checkboxes = $('.item-select-checkbox');
+  const $sellAllForm = $('#sell-all-form');
+  const $sellAllSelectedIds = $('#sell-all-selected-ids');
 
-                                <form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' Inventory.pk %}" method="post" class="ajax-form withdraw-form">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="withdraw">
-                                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
-                                    <button type="submit" class="add-button withdraw-button">Withdraw</button>
-                                </form>
+  // Function to update the hidden input and toggle form visibility
+  function updateSellAllButton() {
+      let selectedIds = [];
+      $checkboxes.each(function() {
+          if ($(this).prop('checked')) {
+              selectedIds.push($(this).data('id'));
+          }
+      });
+      if (selectedIds.length > 0) {
+          $sellAllForm.show();
+          $sellAllSelectedIds.val(selectedIds.join(','));
+      } else {
+          $sellAllForm.hide();
+      }
+  }
 
-                                <form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post" class="trade-form">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="move">
-                                    <button type="submit" class="add-button trade-button" class="cart-btn">Set Tradable</button>
-                                </form>
+  // Bind change event for checkboxes
+  $checkboxes.on('change', updateSellAllButton);
 
-                            </div>
-                        </div>
-                    </div>
-    </label>
-                {% empty %}
-                    <div class="empty-inventory">
-                        <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy">
-                        <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
-                    </div>
-                {% endfor %}
+  $sellAllForm.on('submit', function(event) {
+      event.preventDefault();
+      console.log('called the method to sell selected inventory objects');
+
+      const sellselectedAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
+      sellselectedAudio.play();
+
+      $.ajax({
+    url: "{% url 'showcase:sell_all_inventory_objects' %}",
+    type: 'POST',
+    data: $sellAllForm.serialize(),
+    dataType: 'json',  // expect JSON response
+    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+    success: function(response) {
+        $('#stock-count').html(response.stock_count);
+        $('#inventory-items-container').html(response.inventory_html);
+        $('#sellupdate').html(response.currency_amount);
+        console.log('Successfully sold selected inventory objects');
+    },
+    error: function(xhr, status, error) {
+        console.error("Error: ", error);
+    }
+});
 
 
-            </section>
-        </main>
+
+
+
+  });
+});
+</script>
+
+        </section>
+    </main>
     </div>
 
 

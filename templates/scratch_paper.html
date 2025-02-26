@@ -1,28 +1,24 @@
-{% if signed_in_user %}
-  {% include 'supportroom.html' %}
-{% endif %}
 {% load static %}
 
-<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
 
-  	{% for BackgroundImage in Titles %}
-	{% if BackgroundImage.page == "index.html" or BackgroundImage.page == "base.html" %}
-    <title>{{BackgroundImage.overtitle}}</title>
-  	{% endif %}
-  	{% endfor %}
+	<!-- title -->
+  {% for InventoryObject in Titles %}
+  {% if InventoryObject.page == "inventory.html" or InventoryObject.page == "base.html" %}
+  <title>{{InventoryObject.overtitle}}</title>
+  {% endif %}
+  {% endfor %}
 
 	<!-- favicon -->
 	<link rel="shortcut icon" type="image/png" href="static/img/favicon.png">
 	<!-- google font -->
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
-
+	<!-- fontawesome -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
@@ -30,856 +26,427 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
-<script>
-	$(document).ready(function() {
-    $('.popup-youtube').magnificPopup({
-        type: 'iframe',
-        mainClass: 'mfp-fade',
-        removalDelay: 160,
-        preloader: false,
-        fixedContentPos: false
-    });
-});
 
-function toggleChatWidget() {
-    var chatWidget = document.getElementById("chatwidget2");
-    if (chatWidget.style.display === "none") {
-        chatWidget.style.display = "block";
-    } else {
-        chatWidget.style.display = "none";
-    }
-}
-
-</script>
-<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-
-<style>
-
-	:root {
-		--primary: #bf97ff;
-		--primary-dark: #9a6bff;
-		--background: #0a0a13;
-		--text: #ffffff;
-		--accent: #4db2ea;
-		--accent2: #ffd700;
-	}
-
-	html, body{
-	height: 100%;
-	background-color: var(--background);
-    color: var(--text);
-    font-family: 'Cormorant Garamond', serif;
-    background-image: url(data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E), radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
-
-	}
-.hero-area {
-    position: relative;
-    overflow: hidden;
-}
-
-.video-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    z-index: 1;
-}
-
-.container {
-    position: relative;
-    z-index: 2;
-}
-
-/* Style the popup button */
-.button {
-  cursor: pointer;
-}
-
-/* Style the popup menu content - hidden by default */
-.popup-menu {
-  display: none;
-  position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  padding: 12px 16px;
-  z-index: 1;
-}
-
-
-.cart-btn{
-  background-image: url("{% static 'css/images/fireimage.png' %}"); /* Default image */
-  image-width: 100px;
-  image-height: 100px;
-  background-size: cover; /* Ensure image covers the button */
-  position: relative; /* Needed for proper stacking */
-}
-
-.cart-btn:hover {
-  background-image: url("{% static 'css/images/invertedfireimage.png' %}"); /* Hover image path */
-  opacity: 1; /* Ensure hover image is fully visible */
-}
-
-
-    .hero-text-tablecell {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 1;
-    }
-	#sticker {
-    position: fixed;
-    width: 100%;
-    transition: background 1s;
-}
-
-	.contented{
-	background: url("{% static 'css/images/blue-message-text-bubble.png' %}");
-	}
-
-	.image-container {
-    position: relative;
-    display: inline-block; /* Ensures the size adjusts to the image */
-    width: 100px;
-    height: 100px;
-}
-
-.image-container img {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-.image-container h3 {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white; /* Change to a contrasting color */
-    font-size: 14px; /* Adjust font size as needed */
-    background-color: rgba(0, 0, 0, 0.5); /* Optional: Add a background for better readability */
-    padding: 5px; /* Optional: Add padding */
-    border-radius: 5px; /* Optional: Add rounded corners */
-    text-align: center;
-}
-
-
-
-        .hero-section {
-            background-image: url('https://via.placeholder.com/1920x1080');
-            background-size: cover;
-            background-position: center;
-            height: 500px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: var(--foreground);
-            position: relative;
-        }
-
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-title {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: var(--primary);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .hero-subtitle {
-            font-size: 24px;
-            margin-bottom: 30px;
-        }
-
-        .cta-button {
-            padding: 12px 24px;
-            background-color: var(--primary);
-            color: var(--background);
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .cta-button:hover {
-            background-color: var(--accent);
-        }
-
-		.product-image{
-			background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0%, rgba(0, 0, 0, 1) 80%);
-			border-radius: 15px;
-		}
-</style>
-
-<script>
-window.onscroll = function() {
-    var sticker = document.getElementById('sticker');
-    if (window.pageYOffset > window.innerHeight / 2) {
-        sticker.style.background = 'rgba(0, 0, 0, 1)';
-        sticker.style.color = 'white';
-        currency_designation.style.color = 'white';
-    } else {
-        sticker.style.background = 'linear-gradient(rgba(0, 0, 0, 1), rgba(0,0,0,0))';
-        sticker.style.color = 'black';
-        currency_designation.style.color = 'black';
-    }
-};
-</script>
 </head>
-<body>
+<body style="">
+{% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+      {{ message }}
+    </div>
+  {% endfor %}
 
-
-	<!--PreLoader-->
-    <div class="loader">
+<!--PreLoader-->
+  <div class="loader">
         <div class="loader-inner">
             <div class="circle"></div>
         </div>
     </div>
     <!--PreLoader Ends-->
 
-
-{% include 'navtrove.html' %}
-<div class="hero-area hero-bg" style="margin-top: 0%;">
-        {% for BackgroundImage in Background %}
-            {% if BackgroundImage.page == "index.html" %}
-                {% if BackgroundImage.position == 1 %}
-	l';knjbk
-<div class="video-background"
-     style="background: url('{% if BackgroundImage.file and BackgroundImage.file.url %}{{ BackgroundImage.file.url }}{% else %}{{ BackgroundImage.cover.url }}{% endif %}');
-            background-size: cover;
-            background-attachment: fixed;">
-
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-    </div>
+	<!-- header -->
+	<div class="top-header-area" id="sticker" style="background: linear-gradient(rgba(0, 0, 0, 1) 5%, rgba(0,0,0,0)); position: fixed;">
 		<div class="container">
 			<div class="row">
-				<div class="col-lg-9 offset-lg-2 text-center">
-					<div class="hero-text">
-						<div class="hero-text-tablecell">
-							{% for BackgroundImage in TextFielde %}
-							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 1 %}
-							{% if BackgroundImage.text_color %}
-							<h1 style="color: {{BackgroundImage.text_color}};">{{BackgroundImage.text}}</h1>
-							{% else %}
-							<h1 style="color: white;">{{BackgroundImage.text}}</h1>
-						  	{% endif %}
-						  	{% endif %}
-							{% endif %}
-							{% endfor %}
-							{% for BackgroundImage in TextFielde %}
-							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 2 %}
-							{% if BackgroundImage.text_color %}
-              <p style="color: {{BackgroundImage.text_color}}" class="subtitle">{{BackgroundImage.text}}</p>
-							{% else %}
-              <p style="color: #F28123" class="subtitle">{{BackgroundImage.text}}</p>
-						  	{% endif %}
-						  	{% endif %}
-							{% endif %}
-							{% endfor %}
-							<div class="hero-btns">
-
-
-                            {% for BackgroundImage in TextFielde %}
-							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 3 %}
-                            <a href="{{BackgroundImage.hyperlink}}" class="boxed-btn">{{BackgroundImage.text}}</a>
-                            {% endif %}
-							{% endif %}
-							{% endfor %}
-
-							{% for BackgroundImage in TextFielde %}
-							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 4 %}
-								<a href="{{BackgroundImage.hyperlink}}" class="bordered-btn">{{BackgroundImage.text}}</a>
-						  	{% endif %}
-							{% endif %}
-							{% endfor %}
-							</div>
-						</div>
-
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end hero area -->
-
-	<!-- features list section -->
-	<div class="list-section pt-80 pb-80" style="=">
-		<div class="container">
-
-			<div class="row">
-				<div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
-						<div class="list-icon">
-
-						</div>
-						</div>
-						{% for TopHits in tophit %}
-					<div class="list-box d-flex align-items-center">
-						<div class="content" style="padding: 25px; margin: 10px; background: radial-gradient(circle at center, blue,{{TopHits.color}}, white 100%)">
-							<div class="image-container">
-								<img src="{{ TopHits.file.url }}" alt="Image" style="width: 100px; height: 100px;">
-								<h3>{{ TopHits.user.username }}</h3>
-							</div>
-						</div>
-					</div>
-							{% endfor %}
-				</div>
-
-				<div class="col-lg-4 col-md-6">
-
-					<div class="list-box d-flex justify-content-start align-items-center">
-						<div class="content">
-							{% for BackgroundImage in TextFielde %}
-							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 9 %}
-							<h3>{{BackgroundImage.text}}</h3>
-						  	{% endif %}
-							{% endif %}
-							{% endfor %}
-
-							{% for BackgroundImage in TextFielde %}
-							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 10 %}
-							<p>{{BackgroundImage.text}}</p>
-						  	{% endif %}
-							{% endif %}
-							{% endfor %}
-						</div>
-					</div>
-				</div>
-			</div>
-
-            </div>
-		</div>
-	<!-- end features list section -->
-
-	<!-- chests section -->
-        {% for BackgroundImage in Background %}
-            {% if BackgroundImage.page == "index.html" %}
-                {% if BackgroundImage.position == 2 %}
-	<div class="product-section mt-150 mb-150" style="background: url('{{BackgroundImage.cover.url}}'); background-size: cover;">
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-
-
-        {% for BackgroundImage in Background %}
-            {% if BackgroundImage.page == "index.html" %}
-                {% if BackgroundImage.position == 3 %}
-		<div class="container" style="background: url('{{BackgroundImage.cover.url}}');  alt='{{ BackgroundImage.image.url }}'; background-size: cover; background-repeat: no-repeat;">
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-
-			<div class="row" id="#game">
-				<div class="col-lg-8 offset-lg-2 text-center">
-					<div class="section-title">
-						<br>
-						<br>
-						<h3 ><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h3>
-						{% for BackgroundImage in TextFielde %}
-						{% if BackgroundImage.page == "index.html" %}
-						{% if BackgroundImage.section == 11 %}
-						<p>{{BackgroundImage.text}}</p>
-					    {% endif %}
-						{% endif %}
-						{% endfor %}
-					</div>
-				</div>
-			</div>
-
-			<div class="row">
-				      {% for Game in FeaturedGame %}
-				<div class="col-lg-4 col-md-6 text-center">
-					<div class="single-product-item">
-						<div class="product-image">
-							<a href="{{ Game.get_profile_url2 }}">
-								<img src="{{Game.image.url}}" alt="{{ Game.image.url }}">
-							</a>
-						</div>
-						<h3 style="color: white;">{{Game.name}}</h3>
-
-
-                 {% if Game.discount_cost %}
-                 <p class="product-price">
-					 {% if Game.discount_cost %}
-                        <span style="text-decoration: line-through;">{{ Game.cost }}💎</span>
-                        {{ Game.discount_cost }}💎
-                    {% else %}
-                        {{ Game.cost }}💎
-                    {% endif %} </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn">
-                                  <div class="cart-btn-fire"></div>Check It Out!</a>
-
-						 {% else %}
-						 <p class="product-price"> {{ Game.cost }}💎 </p>
-						 <a href="{{ Game.get_profile_url2 }}" class="cart-btn">
-                                  <div class="cart-btn-fire"></div> Check It Out!</a>
-
-						{% endif %}
-					</div>
-				</div>
-			</div>
-		</div>
-      </div>
-				{% endfor %}
-
-
-	<!-- end chests section -->
-
-	<!-- product section -->
-
-        {% for BackgroundImage in Background %}
-            {% if BackgroundImage.page == "index.html" %}
-                {% if BackgroundImage.position == 4 %}
-		<div class="product-section mt-150 mb-150" style="background: url('{{BackgroundImage.cover.url}}');  alt='{{ BackgroundImage.image.url }}'; background-size: cover;">
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-		<div class="container" id="game">
-			<div class="row">
-				<div class="col-lg-8 offset-lg-2 text-center">
-					<div class="section-title">
-						<br>
-						<br>
-						<br>
-						<h3 style="color: #e5e4e2;"><span class="orange-text" style="color: #bf97ff;">PokeTrove</span> Marketplace</h3>
-						{% for BackgroundImage in TextFielde %}
-						{% if BackgroundImage.page == "index.html" %}
-						{% if BackgroundImage.section == 12 %}
-						<p>{{BackgroundImage.text}}</p>
-					    {% endif %}
-						{% endif %}
-						{% endfor %}
-					</div>
-				</div>
-			</div>
-
-			<div class="row">
-				      {% for product in Products %}
-				<div class="col-lg-4 col-md-6 text-center">
-					<div class="single-product-item">
-						<div class="product-image">
-							<a href="{{ product.get_profile_url }}">
-								<img src="{{product.image.url}}" alt="{{ product.image.url }}">
-							</a>
-						</div>
-						<h3 style="color: white;">{{product.title}}</h3>
-
-
-                 {% if product.price %}
-					 {% if product.discount_price %}
-                 <p class="product-price">
-					 {% if product.discount_price %}
-                        <span style="text-decoration: line-through;">${{ product.price }}</span>
-                        ${{ product.discount_price }}
-                    {% else %}
-                        {{ product.price }}
-                    {% endif %} </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn">
-                                  <div class="cart-btn-fire"></div>Check It Out!</a>
-
-						 {% else %}
-						 <p class="product-price"> ${{ product.price }} </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn">
-                                  <div class="cart-btn-fire"></div> Check It Out!</a>
-
-						{% endif %}
-						{% else %}
-						 {% if product.discount_currency_price %}
-                 <p class="product-price">
-						                 {% if product.discount_currency_price %}
-                        <span style="text-decoration: line-through;">💎{{ product.currency_price }}</span>
-                        💎{{ product.discount_currency_price }}
-                    {% else %}
-                        💎{{ product.currency_price }}
-                    {% endif %} </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn">
-                                  <div class="cart-btn-fire"></div>Check It Out!</a>
-
-						 {% else %}
-						 <p class="product-price"> 💎{{ product.currency_price }} </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn">
-                                  <div class="cart-btn-fire"></div> Check It Out!</a>
-						{% endif %}
-						{% endif %}
-					</div>
-				</div>
-				{% endfor %}
-
-		</div>
-	</div>
-
-	</div>
-	<!-- end product section -->
-
-	<!-- shop banner -->
-{% for BackgroundImage in Advertisement %}
-	<section class="shop-banner">
-    	<div class="container">
-        	<h3>Daily Deal: {{ BackgroundImage.advertisementtitle }}</span></h3>
-            <div class="sale-percent"><span>{{ BackgroundImage.relevance }}</span></div>
-		    <a href="{{ BackgroundImage.advertisement_hyperlink }}" class="cart-btn btn-lg" target="_blank">Get Mine Now!</a>
-		    </div>
-		<img src="{{ BackgroundImage.advertisement.url }}" alt='{{ BackgroundImage.advertisementtitle }}' style="margin-left: 50%; margin-top: -50%; height='{{BackgroundImage.length_for_resize}}'; width='{{BackgroundImage.width_for_resize}};'">
-
-    </section>
-		{% endfor %}
-	<!-- end shop banner -->
-
-	<!-- testimonail-section -->
-	<div class="testimonail-section mt-150 mb-150">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-10 offset-lg-1 text-center">
-					<div class="testimonial-sliders">
-					{% for BackgroundImage in Feedback %}
-					{% if BackgroundImage.showcase == 1 %}
-						<div class="single-testimonial-slider">
-								{% for feed in FeedBacking %}
-								{% if feed.feedback_profile_url %}
-								<a href="{{feed.feedback_profile_url}}">
+				<div class="col-lg-12 col-sm-12 text-center">
+					<div class="main-menu-wrap">
+						<!-- logo -->
+						<div class="site-logo">
+							{% for GameChestBackgroundView in Logo %}
+								{% if GameChestBackgroundView.page == 'game.html' %}
+								<a class="logo" href="{{GameChestBackgroundView.hyperlink}}">
+								  <img class="imageicon" src="{{GameChestBackgroundView.logocover.url}}"
+										alt="{{GameChestBackgroundView.alternate}}" style="length: {{GameChestBackgroundView.length_for_resize}}px; width: {{GameChestBackgroundView.width_for_resize}}px;"></a>
 								{% endif %}
-								{% endfor %}
-									  {% if feedback_objects.newprofile_profile_picture_url %}
-
-                                  <a href="{{ feedback_objects.newprofile_profile_url }}">
-									  <div class="client-avater">
-									  <img src="{{ feedback_objects.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50">
-									  </div>
-                                  </a>
-                                {% else %}
-                                   <!-- Placeholder image or default avatar -->
-                                  <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
-                                {% endif %}
-
-
-									</a>
-							<div class="client-meta">
-								<h3>
-								<a href="{{ feedback_objects.newprofile_profile_url }}">
-							    <h2>{{feedback_objects.username}}</h2>
-    							</a>
- 								</h3>
-								<p class="testimonial-body">
-									" {{BackgroundImage.comment}} "
-								</p>
-								<div class="last-icon">
-									<h6>→</h6>
-								</div>
-							</div>
+							{% endfor %}
 						</div>
-						{% endif %}
-						{% endfor %}
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end testimonail-section -->
+						<!-- logo -->
 
-	<!-- advertisement section -->
-	<div class="abt-section mb-150">
-		<div class="container">
-			<div class="row">
-				<style>
-    /* Ensure the iframe scaler container is styled correctly */
-    .mfp-iframe-scaler {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background-color: #000; /* Black background for better visibility */
-        max-width: 800px;
-        margin: auto;
-    }
+						<!-- menu start -->
+						<nav class="main-menu">
+							<ul>
+							  {% for column in Header %}
 
-    .mfp-iframe-scaler video {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* Custom popup styling */
-    .mfp-hide {
-        display: none; /* Hide the popup initially */
-    }
-</style>
-<script>
-    $(document).ready(function() {
-        // Initialize Magnific Popup for the play button
-        $('.popup-youtube').magnificPopup({
-            type: 'inline', // Inline popup for the video container
-            midClick: true, // Allow opening popup on middle mouse click or touch
-            closeOnContentClick: false, // Do not close on content click
-            mainClass: 'mfp-fade', // Add fade effect
-        });
-    });
-</script>
-
-				<div class="col-lg-6 col-md-12">
-    {% for BackgroundImage in Background %}
-    {% if BackgroundImage.position == 5 %}
-    <div class="abt-bg" style="background: url({{ BackgroundImage.cover.url }}); background-size: cover;">
-        <!-- Trigger popup with the play button -->
-        <a href="#video-popup" class="video-play-btn popup-youtube" style="color: #bf97ff;">
-            <img src="{% static 'css/images/play-button-arrowhead.png' %}" style="width: 25px; height: 25px; margin-top: 30px;">
-        </a>
-    </div>
-    {% endif %}
-    {% endfor %}
-
-    <!-- Video popup (hidden by default) -->
-    {% for BackgroundImage in Background %}
-    {% if BackgroundImage.page == "index.html" and BackgroundImage.position == 6 %}
-    <div id="video-popup" class="mfp-hide">
-        <div class="mfp-iframe-scalere">
-            <video autoplay loop muted playsinline controls style="display: flex; flex-direction: row; margin: auto;">
-                <source src="{{ BackgroundImage.file.url }}" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-    </div>
-    {% endif %}
-    {% endfor %}
-</div>
-
-				<div class="col-lg-6 col-md-12">
-					<div class="abt-text">
-						<p class="top-sub">Est 2024</p>
-						<h2 style="color: #e5e4e2;">We are <span class="orange-text" style="color: #bf97ff;">PokeTrove</span></h2>
-						{% for BackgroundImage in TextFielde %}
-						{% if BackgroundImage.page == "index.html" %}
-						{% if BackgroundImage.section == 13 %}
-						<p>{{BackgroundImage.text}}</p>
-					  	{% endif %}
-						{% endif %}
-						{% endfor %}
-
-						{% for BackgroundImage in TextFielde %}
-						{% if BackgroundImage.page == "index.html" %}
-						{% if BackgroundImage.section == 14 %}
-						<p>{{BackgroundImage.text}}</p>
-					  	{% endif %}
-						{% endif %}
-						{% endfor %}
-						<a href="about" class="boxed-btn mt-4" style="">About Us</a>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end advertisement section -->
+      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
+									<ul class="sub-menu">
+										{% for row in DropDown %}
+          {% if row.row == column.row %}
+            {% if row.url == 'http://127.0.0.1:8000/profile' %}
+              {% if row.opennew %}
+										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% else %}
+              {% if row.opennew %}
+										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
+              {% else %}
+										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+									</ul>
+        {% endfor %}
+								</li>
+								<li>
+									<div class="header-icons" style="display: flex; flex-direction: right;">
+										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
+											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
+										</a>
+										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
+									</div>
 
 
-	<!-- end advertisement section -->
-	<!-- cart banner section -->
-	<section class="cart-banner pt-100 pb-100">
 
-	  	{% for BackgroundImage in Events %}
-        {% if BackgroundImage.page == "index.html" %}
-    	<div class="container">
-        	<div class="row clearfix">
-            	<!--Image Column-->
-            	<div class="image-column col-lg-6">
-                	<div class="image">
-                    	<div class="price-box">
-                        	<div class="inner-price">
-                                <span class="price">
-                                    <strong>{{BackgroundImage.numeric_quantifier}}%</strong> <br> {{BackgroundImage.qualitative_qualifier}}
-                                </span>
-                            </div>
-                        </div>
-                    	<img src="{{BackgroundImage.cover.url}}" style="margin-left: 32%;" alt="">
-                    </div>
-                </div>
-                <!--Content Column-->
-                <div class="content-column col-lg-6">
-					<h3 style="width: 1030%;"><span class="orange-text">{{BackgroundImage.name}}</span> Event</h3>
-                    <h4>Hosted By {{BackgroundImage.user}}</h4>
-                    <div class="text">{{BackgroundImage.description}}</div>
-                    <!--Countdown Timer-->
-                    <div class="time-counter"><div class="time-countdown clearfix" data-countdown="2020/2/01"><div class="counter-column"><div class="inner"><span class="count">00</span>Days</div></div> <div class="counter-column"><div class="inner"><span class="count">00</span>Hours</div></div>  <div class="counter-column"><div class="inner"><span class="count">00</span>Mins</div></div>  <div class="counter-column"><div class="inner"><span class="count">00</span>Secs</div></div></div></div>
-
-                    <h5>Event on {{BackgroundImage.date}} at {{BackgroundImage.time}}</h5>
-                	<a href="events.html" class="cart-btn mt-3"><i class="fas fa-shopping-cart"></i> What's a {{BackgroundImage.name}}??</a>
-                </div>
-				{% endif %}
-				{% endfor %}
-
-            </div>
-        </div>
-    </section>
-    <!-- end cart banner section -->
-
-	<!-- latest news -->
-	<div class="latest-news pt-150 pb-150">
-		<div class="container">
-
-			<div class="row">
-				<div class="col-lg-8 offset-lg-2 text-center">
-					<div class="section-title">
-						<h3 style="color: #e5e4e2;"><span class="orange-text" style="color: #bf97ff;">Our</span> News</h3>
-						{% for BackgroundImage in TextFielde %}
-						{% if BackgroundImage.page == "index.html" %}
-						{% if BackgroundImage.section == 15 %}
-						<p>{{BackgroundImage.text}}</p>
-					  	{% endif %}
-						{% endif %}
-						{% endfor %}
-					</div>
-				</div>
-			</div>
-
-	<!-- latest news -->
-	<div class="latest-news mt-150 mb-150" style="margin-top: -3%;">
-		<div class="container">
-			<div class="row">
-	{% for newprofile in News %}
-				<div class="col-lg-4 col-md-6">
-					<div class="single-latest-news">
-						<a href="{{newprofile.get_profile_url2}}">
-							<div class="latest-news-bg news-bg-1" style="background: url({{newprofile.image.url}}); background-size: cover;"></div></a>
-						<div class="news-text-box">
-							<h3 style="color: #e5e4e2;"><a href="{{newprofile.get_profile_url2}}">{{newprofile.title}}</a></h3>
-							<p class="blog-meta">
-								<span class="author"><i class="fas fa-user"></i> {{ newprofile.category }} </span>
-								<span class="date"><i class="fas fa-calendar"></i> {{newprofile.date_and_time}} </span>
-								<br>
-							</p>
-							{% with description=newprofile.description %}
-							<p class="excerpt">
-								{% if description|length > 200 %}
-									{{ description|slice:":200" }}...
-								{% else %}
-									{{ description }}
-								{% endif %}
-							</p>
-						{% endwith %}
-						<ul style="width: 100%;">
-								<span class="author" style="display: flex; align-items: center;">
-									{% if newprofile.newprofile_profile_picture_url %}
-									<a href="{{ newprofile.newprofile_profile_url }}">
-										<img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
+								</li>
+								<li style="margin-right: -10%;">
+									{% for userprofile in Profiles %}
+									{% if userprofile.newprofile_profile_picture_url %}
+									<a href="{{ userprofile.newprofile_profile_url }}">
+										<img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
 									</a>
 									{% else %}
 									<!-- Placeholder image or default avatar -->
-									<img src="{% static 'css/images/a.jpg' %}" alt="qwww Avatar" width="50" height="50" style="border-radius: 50px;">>
+									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
 									{% endif %}
-									<h5 style="">{{ newprofile.name }}</h5>
-								</span>
-						</ul>
-
-							<br>
-							<a href="{{newprofile.get_profile_url2}}" class="read-more-btn">Read More → </a>
-
-						</div>
+									{% endfor %}
+								</li>
+							</ul>
+						</nav>
+						<a class="mobile-show search-bar-icon" href="#"><i class="fas fa-search"></i></a>
+						<div class="mobile-menu"></div>
+						<!-- menu end -->
 					</div>
-				</div>
-					{% endfor %}
-
-				</div>
-
-
-			</div>
-			<div class="row">
-				<div class="col-lg-12 text-center">
-					<a href="{% url 'showcase:newsfeed' %}" class="boxed-btn">More News</a>
 				</div>
 			</div>
 		</div>
 	</div>
+	<!-- end header -->
+
+	<!-- search area -->
+<div class="search-area">
+    <div class="container">
+       <div class="row">
+          <div class="col-lg-12">
+             <span class="close-btn"><img src=""></i></span>
+             <div class="search-bar">
+                <div class="search-bar-tablecell">
+                   <h3>What are you looking for?</h3>
+                   <form action="{% url 'showcase:pagesearch' %}" method="post">
+                       {% csrf_token %}
+                       <input type="text" name="search_query" placeholder="Keywords">
+                       <select name="search_type">
+                           <option value="text">Text</option>
+                           <option value="url">URL</option>
+                       </select>
+                       <button type="submit">Search <i class="fas fa-search"></i></button>
+                   </form>
+                </div>
+             </div>
+          </div>
+       </div>
+    </div>
 </div>
+
+<!-- end search area -->
+
+	<!-- breadcrumb-section -->
+{% for InventoryObject in Background %}
+  {% if InventoryObject.page == "inventory.html" %}
+  {% if InventoryObject.position == 1 %}
+	<div class="breadcrumb-section breadcrumb-bg" style="background: url({{InventoryObject.cover.url}}); background-size: cover; min-height: 70vh;">
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 offset-lg-2 text-center">
+					<div class="breadcrumb-text">
+						<p>PokeTrove INC</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end breadcrumb section -->
+
+			<!-- product section -->
+	<div class="product-section mt-150 mb-150">
+<strong>{{ user.username }}</strong> -
+    <span id="currency-amount">{{ SentProfile.currency_amount }} Rubies </span>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 offset-lg-2 text-center">
+					<div class="section-title">
+						<h3><span class="orange-text">My</span> Trade Inventory - (<span id="stock-count">{{ TradeItems|length }}</span>)</h3>
+
+						{% for BackgroundImage in TextFielde %}
+						{% if BackgroundImage.page == "inventory.html" %}
+						{% if BackgroundImage.section == 1 %}
+						<p>{{BackgroundImage.text}}</p>
+					    {% endif %}
+						{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+			</div><style>
+  .inventory-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+  }
+
+  .inventory-item {
+    position: relative;
+    width: 300px;
+    height: 450px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .inventory-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  .product-image {
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+  }
+
+  .product-image img {
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .inventory-item:hover .product-image img {
+    transform: scale(1.1);
+  }
+
+  .product-info {
+    padding: 1.5rem;
+    color: #fff;
+    padding-bottom: 1rem;
+  }
+
+  .product-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .product-condition {
+    font-size: 0.9rem;
+    color: green;
+    margin-bottom: 0.5rem;
+  }
+
+  .product-description {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .action-button {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .sell-button {
+    background-color: #4caf50;
+    color: white;
+  }
+
+  .withdraw-button {
+    background-color: #f44336;
+    color: white;
+  }
+
+  .trade-button {
+    background-color: #2196f3;
+    color: white;
+  }
+
+  .action-button:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+  }
+
+  .empty-inventory {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: #fff;
+    text-align: center;
+  }
+
+  .empty-inventory img {
+    width: 300px;
+    height: 300px;
+    margin-bottom: 2rem;
+    border-radius: 50%;
+    box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+  }
+
+  .empty-inventory h3 {
+    font-size: 1.5rem;
+    max-width: 80%;
+    line-height: 1.5;
+  }
+</style>
+
+<div class="inventory-container">
+  {% for TradeItem in TradeItems %}
+    <div class="inventory-item">
+      <div class="product-image">
+        <img src="{{ TradeItem.image.url }}" alt="Product Image">
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">{{ TradeItem.title }}</h3>
+        <h3 class="product-name">{{ TradeItem.value }} 💎</h3>
+        <p class="product-condition">Card Condition: {{ TradeItem.condition }}</p>
+        <p class="product-description">{{ TradeItem.description }}</p>
+        <div class="action-buttons" style="position: fixed;">
+			{% if TradeItem.certified == True %}
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="inventory_remove">
+                    <input type="hidden" name="pk" value="{{ TradeItem.pk }}">
+
+                    <button type="submit" class="cart-btn">Move To My Inventory</button>
+				</form>
+			 {% else %}
+               <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="pk" value="{{ TradeItem.pk }}">
+
+                    <button type="submit" class="cart-btn">Remove From Trade Inventory</button>
+				</form>
+			 {% endif %}
+
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="empty-inventory">
+      <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy">
+      <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
+    </div>
+  {% endfor %}
+</div>
+
+
+
+
+			</div>
+				</div>
+		</div>
+		</div>
+	</div>
+	<!-- end product section -->
+
+
+			<div class="row">
+				<div class="container">
+					<div class="row">
+						<div class="col-lg-12 text-center">
+							<div class="pagination-wrap">
+								<ul>
+									<li><a href="#">Prev</a></li>
+									<li><a href="#">1</a></li>
+									<li><a class="active" href="#">2</a></li>
+									<li><a href="#">3</a></li>
+									<li><a href="#">Next</a></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 	<!-- end latest news -->
 
-	<!-- trending communities carousel -->
+	<!-- PokeTrove Logos carousel -->
 	<div class="logo-carousel-section">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-12">
 					<div class="logo-carousel-inner">
-						{% for BackgroundImage in Background %}
-						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.position == 6 %}
+						{% for InventoryObject in Image %}
+						{% if InventoryObject.page == 'inventory.html' %}
+                  		{% if InventoryObject.image_position == 2 %}
 						<div class="single-logo-item">
-							<a href="{{ BackgroundImage.hyperlink }}">
-							<img src="{{ BackgroundImage.image.url }}" alt="">
+							<a href="{{ InventoryObject.hyperlink }}">
+							<img src="{{ InventoryObject.image.url }}" alt="">
 							</a>
 						</div>
 						{% endif %}
 						{% endif %}
 						{% endfor %}
 
-						{% for BackgroundImage in Background %}
-						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.position == 7 %}
+						{% for InventoryObject in Image %}
+						{% if InventoryObject.page == 'inventory.html' %}
+                  		{% if InventoryObject.image_position == 3 %}
 						<div class="single-logo-item">
-							<a href="{{ BackgroundImage.hyperlink }}">
-							<img src="{{ BackgroundImage.image.url }}" alt="">
+							<a href="{{ InventoryObject.hyperlink }}">
+							<img src="{{ InventoryObject.image.url }}" alt="">
 							</a>
 						</div>
 						{% endif %}
 						{% endif %}
 						{% endfor %}
 
-						{% for BackgroundImage in Background %}
-						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.position == 8 %}
+						{% for InventoryObject in Image %}
+						{% if InventoryObject.page == 'inventory.html' %}
+                  		{% if InventoryObject.image_position == 4 %}
 						<div class="single-logo-item">
-							<a href="{{ BackgroundImage.hyperlink }}">
-							<img src="{{ BackgroundImage.image.url }}" alt="">
+							<a href="{{ InventoryObject.hyperlink }}">
+							<img src="{{ InventoryObject.image.url }}" alt="">
 							</a>
 						</div>
 						{% endif %}
 						{% endif %}
 						{% endfor %}
 
-						{% for BackgroundImage in Background %}
-						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.position == 9 %}
+						{% for InventoryObject in Image %}
+						{% if InventoryObject.page == 'inventory.html' %}
+                  		{% if InventoryObject.image_position == 5 %}
 						<div class="single-logo-item">
-							<a href="{{ BackgroundImage.hyperlink }}">
-							<img src="{{ BackgroundImage.image.url }}" alt="">
+							<a href="{{ InventoryObject.hyperlink }}">
+							<img src="{{ InventoryObject.image.url }}" alt="">
 							</a>
 						</div>
 						{% endif %}
 						{% endif %}
 						{% endfor %}
 
-						{% for BackgroundImage in Background %}
-						{% if BackgroundImage.page == 'index.html' %}
-                  		{% if BackgroundImage.position == 10 %}
+						{% for InventoryObject in Image %}
+						{% if InventoryObject.page == 'inventory.html' %}
+                  		{% if InventoryObject.image_position == 6 %}
 						<div class="single-logo-item">
-							<a href="{{ BackgroundImage.hyperlink }}">
-							<img src="{{ BackgroundImage.image.url }}" alt="">
+							<a href="{{ InventoryObject.hyperlink }}">
+							<img src="{{ InventoryObject.image.url }}" alt="">
 							</a>
 						</div>
 						{% endif %}
@@ -893,16 +460,16 @@ window.onscroll = function() {
 	<!-- end logo carousel -->
 
 	<!-- footer -->
-	<div class="footer-area" style="margin-bottom: -450px;">
+	<div class="footer-area">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-3 col-md-6">
 					<div class="footer-box about-widget">
 						<h2 class="widget-title">About Us</h2>
-                            {% for BackgroundImage in TextFielde %}
-							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 16 %}
-							<p>{{BackgroundImage.text}}</p>
+                            {% for InventoryObject in TextFielde %}
+							{% if InventoryObject.page == "inventory.html" %}
+							{% if InventoryObject.section == 1 %}
+							<p>{{InventoryObject.text}}</p>
 						  	{% endif %}
 							{% endif %}
 							{% endfor %}
@@ -912,17 +479,16 @@ window.onscroll = function() {
 					<div class="footer-box get-in-touch">
 						<h2 class="widget-title">Join Our Community! </h2>
 						<ul>
-							<li>Address To Be Added</li>
-							<li><a href="{% url 'showcase:contact' %}" target='_blank' style="text-decoration: none;">PokeTroveCompany@gmail.com</a></li>
-							<li>Number To Be Added</li>
-							<li><a href="{% url 'showcase:home' %}" target='_blank' style="text-decoration: none;">Find Your Community</a></li>
+							<li>34/8, East Hukupara, Gifirtok, Sadan.</li>
+							<li><a href="{% url 'showcase:contact' %}" target='_blank' style="text-decoration: none;">IntelleXCompany1@gmail.com</a></li>
+							<li>+00 111 222 3333</li>
+                            <li><a href="{% url 'showcase:home' %}" target='_blank' style="text-decoration: none;">Live Communitiies</a></li>
 						</ul>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6">
 					<div class="footer-box pages">
 						<h2 class="widget-title">Pages</h2>
-						<br>
 						<ul>
 							<li><a href="{% url 'showcase:index' %}">Home</a></li>
 							<li><a href="{% url 'showcase:about' %}">About</a></li>
@@ -935,16 +501,16 @@ window.onscroll = function() {
 				<div class="col-lg-3 col-md-6">
 					<div class="footer-box subscribe">
 						<h2 class="widget-title">Subscribe</h2>
-						<p>Subscribe to our mailing list to get the latest updates!</p>
+						<p>Subscribe to our mailing list to get the latest updates.</p>
 						<form method="post" action="">
     						{% csrf_token %}
 							{{ form.email }}
-							<a href="{% url 'showcase:emaildone' %}">
-								<button type="submit" style="height: 50px;"><img src="{% static 'css/images/sendemailairplane.png' %}" style="width: 30px; height: 16px; "></button>
-							</a>
+
+							<button type="submit"><i class="fas fa-paper-plane"></i></button>
 													<br>
 							I agree to the Terms & Conditions: {{ form.confirmation }}
 						</form>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -952,1353 +518,135 @@ window.onscroll = function() {
 	<!-- end footer -->
 
 	<!-- copyright -->
-	<div class="copyright" style="margin-bottom: -10%;">
+	<div class="copyright">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-6 col-md-12">
-					{% for BackgroundImage in BaseCopyrightTextFielded %}
-					{% if BackgroundImage.page == "index.html" %}
-					<p>{{BackgroundImage.copyright}}</p>
+					{% for InventoryObject in BaseCopyrightTextFielded %}
+					{% if InventoryObject.page == "inventory.html" %}
+					<p>{{InventoryObject.copyright}}</p>
 					{% endif %}
 					{% endfor %}
 				</div>
 				<div class="col-lg-6 text-right col-md-12">
 					<div class="social-icons">
 						<ul>
-					{% for BackgroundImage in Social %}
-					{% if BackgroundImage.page == "index.html" %}
-							<li><a href="{{BackgroundImage.hyperlink}}" target="_blank"><img src="{{BackgroundImage.icon.url}}" alt="{{ BackgroundImage.alternate }}" style="width: 30px; height: 30px;"></a></li>
-					{% endif %}
-					{% endfor %}
+							<li><a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a></li>
+							<li><a href="#" target="_blank"><i class="fab fa-twitter"></i></a></li>
+							<li><a href="#" target="_blank"><i class="fab fa-instagram"></i></a></li>
+							<li><a href="#" target="_blank"><i class="fab fa-linkedin"></i></a></li>
+							<li><a href="#" target="_blank"><i class="fab fa-dribbble"></i></a></li>
 						</ul>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
-
-		<style>
-
-.bg {
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  /* background: url('https://images.unsplash.com/photo-1451186859696-371d9477be93?crop=entropy&fit=crop&fm=jpg&h=975&ixjsv=2.1.0&ixlib=rb-0.3.5&q=80&w=1925') no-repeat 0 0;*/
-  filter: blur(80px);
-  transform: scale(1.2);
-  background: #fff;
-}
-
-/*--------------------
-Chat
---------------------*/
-.chat {
-  position: relative;
-  /*  top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);*/
-  width: 100%;
-  height: calc(100% - 15px);
-  max-height: 500px;
-  z-index: 10;
-  overflow: hidden;
-  /*box-shadow: 0 5px 30px rgba(0, 0, 0, .2);*/
-  /* background: rgba(0, 0, 0, .5);*/
-  background: transparent;
-  border-radius: 20px;
-  -webkit-border-radius: 20px;
-  -moz-border-radius: 20px;
-  display: flex;
-  justify-content: space-between;
-  flex-direction: column;
-}
-
-.chat2 {
-  /*  top: 50%;
-    left: 10%;
-    transform: translate(-50%, -50%);*/
-  position: relative;
-  height: calc(100% - 15px);
-  max-height: 500px;
-  z-index: 10;
-  overflow: hidden;
-  /*box-shadow: 0 5px 30px rgba(0, 0, 0, .2);*/
-  /* background: rgba(0, 0, 0, .5);*/
-  background: transparent;
-  border-radius: 20px;
-  -webkit-border-radius: 20px;
-  -moz-border-radius: 20px;
-  display: flex;
-  justify-content: space-between;
-  flex-direction: column;
-}
-
-/*--------------------
-Chat Title
---------------------*/
-.chat-title {
-  flex: 0 1 45px;
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  border-bottom: 1px solid #ccc;
-  color: #777;
-  padding-top: 50px;
-  padding-bottom: 5px;
-  background-color: rgba(245, 245, 245, 1);
-  text-transform: uppercase;
-  text-align: center;
-}
-.chat2-title {
-    flex: 0 1 45px;
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    border-bottom: 1px solid #ccc;
-    color: #777;
-    padding-top: 50px;
-    padding-bottom: 5px;
-    background-color: rgba(245, 245, 245, 1);
-    text-transform: uppercase;
-    text-align: center;
-}
-
-/* Style for the avenue2-messenger section */
-.avenue2-messenger {
-    position: fixed;
-    left: 20px;
-    bottom: 20px;
-    width: 320px;
-    max-height: 460px;
-    min-height: 220px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 20px;
-    box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
-    z-index: 10;
-    overflow: hidden; /* Ensure no overflow */
-    display: flex;
-    flex-direction: column;
-}
-
-/* Ensure .chat2e takes up the full space within .avenue2-messenger */
-.chat2e {
-    position: relative;
-    width: 100%;
-    flex: 1;
-    padding: 10px;
-    box-sizing: border-box;
-    color: #232323;
-    overflow-y: auto; /* Ensure it scrolls if needed */
-}
-
-/* Title and message box alignment */
-.chat2e-title, .message2-box {
-    margin-bottom: 10px;
-}
-
-/* Message box styling */
-.message2-box {
-    position: relative;
-    width: 100%;
-}
-
-/* Input styling inside the message box */
-.message2-box input[type="text"] {
-    width: calc(100% - 60px);
-    padding: 10px;
-    border-radius: 5px;
-    height: 20px;
-    border: 1px solid #ccc;
-}
-
-/* Submit button alignment */
-.message-submit {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 36px;
-    background-color: #F28123;
-    color: #051922;
-    font-weight: 700;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    padding: 0 15px;
-}
-
-/* Ensure the chat messages section scrolls properly */
-
-#display-general {
-	height: 400px;
-	overflow-y: scroll;
-	border: 1px solid #ccc;
-	padding: 10px;
-}
-
-/* Message box styling */
-.message2-box {
-    position: absolute;
-    bottom: 10px;
-    width: calc(100% - 20px);
-    left: 10px;
-}
-
-/* Input styling inside the message box */
-.message2-box input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-/* Submit button alignment */
-.message-submit {
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    width: 50px;
-    background-color: #F28123;
-    color: #051922;
-    font-weight: 700;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
-/* Ensure the chat messages section scrolls properly */
-.chat-messages {
-    height: calc(100% - 160px);
-    overflow-y: scroll;
-    padding-right: 10px;
-}
-.chat-title h1,
-.chat-title h2 {
-  font-weight: normal;
-  font-size: 14px;
-  margin: 0;
-  padding: 0;
-}
-.chat-title h2 {
-  /* color: rgba(255, 255, 255, .8);*/
-  font-size: 11px;
-  letter-spacing: 1px;
-}
-.chat-title .avatar {
-  position: absolute;
-  z-index: 1;
-  top: 8px;
-  left: 9px;
-  border-radius: 30px;
-  width: 60px;
-  height: 60px;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  border: 1px solid #fff;
-}
-.chat-title .avatar img {
-  width: 100%;
-  height: auto;
-}
-
-/*--------------------
-Messages
---------------------*/
-.messages {
-  flex: 1 1 auto;
-  /*  color: rgba(255, 255, 255, .5);
-  color: #fff;*/
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-}
-.messages .messages-content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 101%;
-  width: 100%;
-}
-.messages .message {
-  clear: both;
-  float: left;
-  padding: 6px 10px 7px;
-  border-radius: 20px 20px 20px 0;
-  background: #eee;
-  /*rgba(0, 0, 0, 0.1);*/
-  margin: 8px 0;
-  font-size: 14px;
-  line-height: 1.4;
-  margin-left: 35px;
-  position: relative;
-  border: 1px solid #ccc;
-  /*text-shadow: 0 1px 1px rgba(0, 0, 0, .2);*/
-}
-.messages .message .timestamp {
-  position: absolute;
-  bottom: -15px;
-  font-size: 10px;
-  color: #555;
-  right: 30px;
-  /* color: rgba(255, 255, 255, .7);*/
-}
-.messages .message .checkmark-sent-delivered {
-  position: absolute;
-  bottom: -15px;
-  right: 10px;
-  font-size: 12px;
-  color: #999;
-}
-.messages .message .checkmark-read {
-  color: blue;
-  position: absolute;
-  bottom: -15px;
-  right: 16px;
-  font-size: 12px;
-}
-.messages .message::before {
-  /*  content: '';
-    position: absolute;
-    bottom: -6px;
-    border-top: 6px solid rgba(0, 0, 0, 0.1);
-    left: 0;
-    border-right: 7px solid transparent;*/
-}
-.messages .message .avatar {
-  position: absolute;
-  z-index: 1;
-  bottom: -15px;
-  left: -35px;
-  border-radius: 30px;
-  width: 30px;
-  height: 30px;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-}
-.messages .message .avatar img {
-  width: 100%;
-  height: auto;
-}
-.messages .message.message-personal {
-  float: right;
-  text-align: right;
-  /*      background: linear-gradient(120deg, #ddd, #eee);*/
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 20px 20px 0 20px;
-}
-.messages .message.message-personal::before {
-  /*
-      content:"";
-  border-color:#4A90E2 transparent;
-    width:0;
-    border-style:solid;*/
-  /*
-   left: auto;
-   right: 0;
-   border-right: none;
-  border-left: 8px solid transparent;
-   border-top: 9px solid #fff;
-
-   bottom: -8px;*/
-}
-.messages .message:last-child {
-  margin-bottom: 30px;
-}
-.messages .message.new {
-  transform: scale(0);
-  transform-origin: 0 0;
-  -webkit-animation: bounce 500ms linear both;
-          animation: bounce 500ms linear both;
-}
-.messages .message.loading::before {
-  position: relative;
-  /*  top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);*/
-  content: "";
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  /*  background: rgba(255, 255, 255, .5);*/
-  background: #888;
-  z-index: 2;
-  margin-top: 4px;
-  -webkit-animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
-          animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
-  border: none;
-  -webkit-animation-delay: 0.15s;
-          animation-delay: 0.15s;
-}
-.messages .message.loading span {
-  display: block;
-  font-size: 0;
-  width: 20px;
-  height: 10px;
-  position: relative;
-}
-.messages .message.loading span::before {
-  position: relative;
-  /*  top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);*/
-  content: "";
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  /*  background: rgba(255, 255, 255, .5);*/
-  background: #888;
-  z-index: 2;
-  margin-top: 4px;
-  -webkit-animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
-          animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
-  margin-left: -7px;
-}
-.messages .message.loading span::after {
-  position: relative;
-  /*  top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);*/
-  content: "";
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  /*  background: rgba(255, 255, 255, .5);*/
-  background: #888;
-  z-index: 2;
-  margin-top: 4px;
-  -webkit-animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
-          animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
-  margin-left: 7px;
-  -webkit-animation-delay: 0.3s;
-          animation-delay: 0.3s;
-}
-
-/*--------------------
-Message Box
---------------------*/
-.message-box {
-  flex: 0 1 42px;
-  width: 90%;
-  background: #fff;
-  margin: 2px auto;
-  /*-webkit-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
-  -moz-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
-  box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);*/
-  /*background: rgba(0, 0, 0, 0.3);
-    border-top:1px solid #e3e3e3;*/
-  padding: 10px;
-  position: relative;
-  border-radius: 20px;
-  height: 14px;
-  border: 1px solid #ccc;
-}
-.message-box .message-input {
-  background: none;
-  border: none;
-  outline: none !important;
-  resize: none;
-  /* color: rgba(255, 255, 255, .8);*/
-  font-size: 15px;
-  height: 24px;
-  margin: 0;
-  padding-right: 20px;
-  width: 265px;
-  color: #444;
-}
-.message-box textarea:focus:-webkit-placeholder {
-  color: transparent;
-}
-.message-box .message-submit {
-  position: absolute;
-  z-index: 1;
-  top: 0px;
-  right: 0px;
-  color: #4A90E2;
-  border: none;
-  /* background: #c29d5f;*/
-  background: #fff;
-  font-size: 12px;
-  text-transform: uppercase;
-  line-height: 1;
-  padding: 6px 10px;
-  border-radius: 5px;
-  outline: none !important;
-  transition: background 0.2s ease;
-  cursor: pointer;
-}
-.message-box .message-submit:hover {
-  background: #fff;
-  color: #333;
-}
-
-/*--------------------
-Message 2 Box
---------------------*/
-.message2-box {
-  flex: 0 1 42px;
-  width: 90%;
-  background: #fff;
-  margin: 2px auto;
-  /*-webkit-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
-  -moz-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
-  box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);*/
-  /*background: rgba(0, 0, 0, 0.3);
-    border-top:1px solid #e3e3e3;*/
-  padding: 10px;
-  position: relative;
-  border-radius: 20px;
-  border: 1px solid #ccc;
-}
-.message2-box .message2-input {
-  background: none;
-  border: none;
-  outline: none !important;
-  resize: none;
-  /* color: rgba(255, 255, 255, .8);*/
-  font-size: 15px;
-  height: 24px;
-  margin: 0;
-  padding-right: 20px;
-  width: 265px;
-  color: #444;
-}
-.message2-box textarea:focus:-webkit-placeholder {
-  color: transparent;
-}
-.message2-box .message2-submit {
-  position: absolute;
-  z-index: 1;
-  top: 9px;
-  right: 10px;
-  color: #4A90E2;
-  border: none;
-  /* background: #c29d5f;*/
-  background: #fff;
-  font-size: 12px;
-  text-transform: uppercase;
-  line-height: 1;
-  padding: 6px 10px;
-  border-radius: 5px;
-  outline: none !important;
-  transition: background 0.2s ease;
-  cursor: pointer;
-}
-.message2-box .message2-submit:hover {
-  background: #fff;
-  color: #333;
-}
-
-/*--------------------
-Custom Srollbar
---------------------*/
-.mCSB_scrollTools {
-  margin: 1px -3px 1px 0;
-  opacity: 0;
-}
-
-.mCSB_inside > .mCSB_container {
-  margin-right: 0px;
-  padding: 0 10px;
-}
-
-.mCSB_scrollTools .mCSB_dragger .mCSB_dragger_bar {
-  background-color: rgba(0, 0, 0, 0.5) !important;
-}
-
-/*--------------------
-Bounce
---------------------*/
-@-webkit-keyframes bounce {
-  0% {
-    transform: matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  4.7% {
-    transform: matrix3d(0.45, 0, 0, 0, 0, 0.45, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  9.41% {
-    transform: matrix3d(0.883, 0, 0, 0, 0, 0.883, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  14.11% {
-    transform: matrix3d(1.141, 0, 0, 0, 0, 1.141, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  18.72% {
-    transform: matrix3d(1.212, 0, 0, 0, 0, 1.212, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  24.32% {
-    transform: matrix3d(1.151, 0, 0, 0, 0, 1.151, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  29.93% {
-    transform: matrix3d(1.048, 0, 0, 0, 0, 1.048, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  35.54% {
-    transform: matrix3d(0.979, 0, 0, 0, 0, 0.979, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  41.04% {
-    transform: matrix3d(0.961, 0, 0, 0, 0, 0.961, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  52.15% {
-    transform: matrix3d(0.991, 0, 0, 0, 0, 0.991, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  63.26% {
-    transform: matrix3d(1.007, 0, 0, 0, 0, 1.007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  85.49% {
-    transform: matrix3d(0.999, 0, 0, 0, 0, 0.999, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  100% {
-    transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-}
-@keyframes bounce {
-  0% {
-    transform: matrix3d(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  4.7% {
-    transform: matrix3d(0.45, 0, 0, 0, 0, 0.45, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  9.41% {
-    transform: matrix3d(0.883, 0, 0, 0, 0, 0.883, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  14.11% {
-    transform: matrix3d(1.141, 0, 0, 0, 0, 1.141, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  18.72% {
-    transform: matrix3d(1.212, 0, 0, 0, 0, 1.212, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  24.32% {
-    transform: matrix3d(1.151, 0, 0, 0, 0, 1.151, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  29.93% {
-    transform: matrix3d(1.048, 0, 0, 0, 0, 1.048, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  35.54% {
-    transform: matrix3d(0.979, 0, 0, 0, 0, 0.979, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  41.04% {
-    transform: matrix3d(0.961, 0, 0, 0, 0, 0.961, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  52.15% {
-    transform: matrix3d(0.991, 0, 0, 0, 0, 0.991, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  63.26% {
-    transform: matrix3d(1.007, 0, 0, 0, 0, 1.007, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  85.49% {
-    transform: matrix3d(0.999, 0, 0, 0, 0, 0.999, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-  100% {
-    transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-  }
-}
-@-webkit-keyframes ball {
-  from {
-    transform: translateY(0) scaleY(0.8);
-  }
-  to {
-    transform: translateY(-10px);
-  }
-}
-@keyframes ball {
-  from {
-    transform: translateY(0) scaleY(0.8);
-  }
-  to {
-    transform: translateY(-10px);
-  }
-}
-.avenue-messenger {
-  opacity: 1;
-  border-radius: 20px;
-  height: calc(100% - 60px) !important;
-  max-height: 460px !important;
-  min-height: 220px !important;
-  width: 320px;
-  /*  transform: translateY(0);
-    -webkit-transform: translateY(0);
-    -moz-transform: translateY(0);
-  */
-  background: rgba(255, 255, 255, 0.9);
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  margin: auto;
-  z-index: 10;
-  box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
-  /*  transform: translateX(300px);*/
-  -webkit-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
-  -moz-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
-}
-
-.avenue-messenger div.agent-face {
-  position: absolute;
-  left: 0;
-  top: -50px;
-  right: 0;
-  margin: auto;
-  width: 101px;
-  height: 50px;
-  background: transparent;
-  z-index: 12;
-}
-
-.avenue-messenger div {
-  font-size: 14px;
-  color: #232323;
-}
-
-
-.avenue2-messenger {
-  opacity: 1;
-  border-radius: 20px;
-  height: calc(100% - 60px) !important;
-  max-height: 460px !important;
-  min-height: 220px !important;
-  width: 320px;
-  /*  transform: translateY(0);
-    -webkit-transform: translateY(0);
-    -moz-transform: translateY(0);
-  */
-  background: rgba(255, 255, 255, 0.9);
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  margin: auto;
-  z-index: 10;
-  box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
-  /*  transform: translateX(300px);*/
-  -webkit-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
-  -moz-transition: 0.3s all ease-out 0.1s, transform 0.2s ease-in;
-}
-
-.avenue2-messenger div.agent-face {
-  position: absolute;
-  left: 0;
-  top: -50px;
-  right: 0;
-  margin: auto;
-  width: 101px;
-  height: 50px;
-  background: transparent;
-  z-index: 12;
-}
-
-.avenue2-messenger div {
-  font-size: 14px;
-  color: #232323;
-}
-
-
-.close {
-  display: block;
-  width: 100px;
-  height: 100px;
-  margin: 1em auto;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
-  border-radius: 99em;
-  opacity: 0.5;
-  /*border: 1px solid #ccc;
-  color:#ccc;*/
-  /* -webkit-box-shadow: 0px -1px 2px 0px rgba(0, 0, 0, 0.5);
-  -moz-box-shadow:    0px -1px 2px 0px rgba(0, 0, 0, 0.5);
-  box-shadow:         0px -1px 2px 0px rgba(0, 0, 0, 0.5);*/
-}
-
-.close:hover {
-  /*
-  -webkit-box-shadow:  0 1px 1px rgba(0,0,0,0.3);
-  -moz-box-shadow:  0 1px 1px rgba(0,0,0,0.3);
-  box-shadow: 0 1px 1px rgba(0,0,0,0.3);*/
-  opacity: 0.9;
-}
-
-.circle {
-  display: block;
-  width: 80px;
-  height: 80px;
-  margin: 1em auto;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
-  border-radius: 99em;
-  border: 2px solid #fff;
-  /*#4A90E2;*/
-  /* -webkit-box-shadow: 0px 0px 10px rgba(0,0,0,.8);
-    -moz-box-shadow: 0px 0px 10px rgba(0,0,0,.8);
-  box-shadow: 0px 0px 10px rgba(0,0,0,.8);*/
-}
-
-.contact-icon .circle:hover {
-  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
-  -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
-  -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
-  transition: 0.2s all ease-out 0.2s;
-  -webkit-transition: 0.2s all ease-out 0.2s;
-  -moz-transition: 0.2s all ease-out 0.2s;
-}
-
-.arrow_box:after {
-  border-color: rgba(255, 255, 255, 0);
-  border-left-color: #fff;
-  border-width: 5px;
-  margin-top: -5px;
-}
-
-.arrow_box {
-  position: relative;
-  background: #fff;
-  border: 1px solid #4A90E2;
-}
-
-.arrow_box:after, .arrow_box:before {
-  left: 100%;
-  top: 50%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-}
-
-.menu div.items {
-  /*  height: 140px;
-    width: 180px;
-    overflow: hidden;
-    position: absolute;
-    left: -130px;
-    z-index: 2;
-    top: 20px;*/
-}
-
-.menu .items span {
-  color: #111;
-  z-index: 12;
-  font-size: 14px;
-  text-align: center;
-  position: absolute;
-  right: 0;
-  top: 40px;
-  height: 86px;
-  line-height: 40px;
-  background: #fff;
-  border-left: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-  width: 48px;
-  opacity: 0;
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
-  transition: 0.3s all ease-in-out;
-  -webkit-transition: 0.3s all ease-in-out;
-  -moz-transition: 0.3s all ease-in-out;
-}
-
-.menu .button {
-  font-size: 30px;
-  z-index: 12;
-  text-align: right;
-  color: #333;
-  content: "...";
-  display: block;
-  width: 48px;
-  line-height: 25px;
-  height: 40px;
-  border-top-right-radius: 20px;
-  /*  border-top-left-radius:20px;*/
-  position: absolute;
-  right: 0;
-  padding-right: 10px;
-  cursor: pointer;
-  transition: 0.3s all ease-in-out;
-  -webkit-transition: 0.3s all ease-in-out;
-  -moz-transition: 0.3s all ease-in-out;
-}
-
-.menu .button.active {
-  background: #ccc;
-}
-
-/*
-.menu .button:hover .menu .items span {
-  display: block;
-  left: -2px;
-  opacity: 1;
-}*/
-.menu .items span.active {
-  opacity: 1;
-  /*border-radius:10px;
-  height: 180px;
-  width: 400px;
-  transform:translateY(0);
-  -webkit-transform:translateY(0);
-  -moz-transform:translateY(0);*/
-}
-
-.menu .items a {
-  color: #111;
-  text-decoration: none;
-}
-
-.menu .items a:hover {
-  color: #777;
-}
-
-@media only screen and (max-device-width: 667px), screen and (max-width: 450px) {
-  .avenue-messenger {
-    z-index: 2147483001 !important;
-    width: 100% !important;
-    height: 100% !important;
-    max-height: none !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    border-radius: 0 !important;
-    background: #fff;
-  }
-
-  .avenue-messenger div.agent-face {
-    top: -10px !important;
-    /* left:initial !important;*/
-  }
-
-  .chat {
-    border-radius: 0 !important;
-    max-height: initial !important;
-  }
-
-  .chat-title {
-    padding: 20px 20px 15px 10px !important;
-    text-align: left;
-  }
-
-  .circle {
-    width: 80px;
-    height: 80px;
-    border: 1px solid #fff;
-  }
-
-  .menu .button {
-    border-top-right-radius: 0;
-  }
-}
-@media only screen and (min-device-width: 667px) {
-  div.half {
-    margin: auto;
-    width: 80px;
-    height: 40px;
-    background-color: #fff;
-    border-top-left-radius: 60px;
-    border-top-right-radius: 60px;
-    border-bottom: 0;
-    box-shadow: 1px 4px 20px rgba(22, 20, 19, 0.6);
-    -webkit-box-shadow: 1px 4px 20px rgba(22, 20, 19, 0.6);
-    -moz-box-shadow: 1px 4px 20px rgba(22, 20, 19, 0.6);
-  }
-}
-
-
-.chat2-container {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.chat-general, .chat2-support {
-  width: 45%; /* Adjust the width as needed */
-}
-
-.chat2-title, .message2-box, .message2 {
-  margin-bottom: 10px;
-}
-
-/* Additional styling to ensure both chats look consistent */
-.chat2-title h1, .chat2-title h2, .message2-box .w2 {
-  margin: 0;
-  padding: 0;
-}
-
-/* Ensure both chat message containers have the same height and overflow settings */
-.chat2-messages {
-  height: 400px;
-  overflow-y: scroll;
-}
-
-		</style>
-<style>
-	.chat-button {
-            position: fixed;
-            bottom: 10px;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: #0070f3;
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 14px 0 rgba(0, 118, 255, 0.39);
-            transition: all 0.2s ease;
-            font-size: 24px;
-        }
-
-        .chat-toggle-button {
-            right: 20px;
-        }
-
-        .chat2e-toggle-button {
-            left: 20px;
-            z-index: 10;
-        }
-
-        .chat-button:hover {
-            background-color: #0051a2;
-            transform: translateY(-2px);
-        }
-
-        .chat-button:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 118, 255, 0.3);
-        }
-</style>
-
-<section class="avenue-messenger" id="chatwidget">
-    <div class="chat2">
-        <div class="chat2-title">
-            {% if user.is_authenticated %}
-                <h5>{{ request.user.username }}'s Personal Support Line</h5>
-                <br>
-                <h6>Run By Agent Holley</h6>
-            </div>
-            <div class="message" style="overflow: auto;">
-                <div id="display-support" class="chat-messages" style="height: 400px; overflow-y: scroll;"></div>
-            </div>
-            <div class="message-box">
-                <div class="w" style="margin-top: -10px; display: flex; overflow: hidden; 30px;">
-<form id="support-post-form" method="post">
-    {% csrf_token %}
-    <input type="hidden" id="support-username" name="username" value="{{ request.user.username }}">
-    <input type="hidden" name="room_name" id="support-room_name" value="{{ room }}">
-    <input type="text" name="message" id="support-message" width="100px" placeholder="Type your message..." style="border: none; margin-bottom: 0px;height: 20px;">
-    <input type="hidden" name="page_name" id="support-page_named" value="index.html">
-    <input type="submit" class="message-submit" style="margin-left: 220px; height: 20px; overflow: hidden; position: absolute; text-align: center;
-        line-height: 0px; font-size: 14px; background-color: #F28123; color: #051922; font-weight: 700;
-        text-transform: uppercase; font-size: 15px; border: none !important; cursor: pointer;
-        padding: 16px 25px; border-radius: 3px; margin-top: 16px;" value="➤">
-</form>
-
-                </div>
-            </div>
-            {% else %}
-            <h5>Guest User</h5>
-            <br>
-            <h6>Please sign in to participate in the chat.</h6>
-        {% endif %}
-    </div>
-</section>
-
-	<div class="chat-toggle-button" style="position: fixed; right: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
-		<button class="chat-button chat-toggle-button" type="button" onclick="showChatWidget()" aria-label="Open chat">
-        &#8942;
-    </button>
-	</div>
-
-<div class="chat2e-toggle-button" style="position: fixed; left: 6px; border-radius: 230px; bottom: 10px; z-index: 10;">
-  <button class="chat-button chat2e-toggle-button" type="button" onclick="toggleChatWidget()" aria-label="Toggle chat">
-        &#10005;
-    </button>
-</div>
-
-</div>
-
-<!-- General Chat -->
-
-<section class="avenue2-messenger" id="chatwidget2" style="margin-left:10px; margin-right: 92%;">
-<div class="chat2">
-        <div class="chat2-title">
-            {% if user.is_authenticated %}
-                <h5>{{ request.user.username }} Community</h5>
-                <br>
-                <h6>PokeTrove General Chat</h6>
-            </div>
-            <div class="message2" style="overflow: auto;">
-                <div id="display-general" class="chat-messages" style="height: 400px; overflow-y: scroll; margin-left: 5px;"></div>
-            </div>
-            <div class="message2-box">
-                <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;height: 20px;">
-                   <form id="general-post-form" method="post" enctype="multipart/form-data">
-						{% csrf_token %}
-						<input type="hidden" id="general-username" name="username" value="{{ request.user.username }}">
-						<input type="text" name="message" id="general-message" width="100px" placeholder="Type your message..." style="border: none;">
-						<input type="file" name="file" id="general-file" value="📎">
-						<input type="submit" class="message-submit" style="margin-top: 15px; display: flex; overflow: hidden;padding: 0px 0px;" value="➤">
-				   </form>
-                </div>
-            </div>
-            {% else %}
-                <h5>Guest User</h5>
-                <br>
-                <h6>Please sign in to participate in the chat.</h6>
-            {% endif %}
-        </div>
-</section>
-
-
-<script>
-function showChatWidget2() {
-    var popup = document.getElementById("chatwidget2");
-    if (popup.style.display === "none" || popup.style.display === "") {
-        popup.style.display = "block";
-    } else {
-        popup.style.display = "none";
-    }
-}
-
-	document.getElementById('support-post-form').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent default form submission
-
-    const form = this;
-    const messageInput = document.getElementById('support-message');
-    const formData = new FormData(form);
-
-    fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
-        }
-    }).then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            // Clear the input field after successful submission
-            messageInput.value = '';
-        } else {
-            console.error('Error:', data.message);
-        }
-    }).catch(error => {
-        console.error('Error:', error);
-    });
-});
-
-</script>
-
-
-
-<script>
-$(document).ready(function() {
-    // Function to load and display support messages
-    function loadAndDisplaySupportMessages() {
-        var room = 'General'; // Fetch messages from the 'General' room
-
-        $.ajax({
-            type: 'GET',
-            url: "/supportgetMessages/" + room + "/",
-            success: function(response) {
-                console.log(response);
-                $("#display-support").empty();
-
-                for (var key in response.messages) {
-                    var message = response.messages[key];
-                    var messageHtml = `
-                        <div class="message">
-                            <a href="${message.user_profile_url}" style="display: flex;">
-                                <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-                                <div class="sender" style="">${message.user}</div>
-
-                            </a>
-                            <div class="message-content" style="padding: 5px;">
-                                <div>${message.value}</div>
-                                <div class="time">${message.date}</div>
-                            </div>
-                        </div>`;
-
-                    $("#display-support").append(messageHtml);
-                }
-            },
-            error: function(response) {
-                alert('An error occurred');
-            }
-        });
-    }
-
-    // Function to load and display general messages
-    function loadAndDisplayGeneralMessages() {
-        $.ajax({
-            type: 'GET',
-            url: "{% url 'showcase:getGeneralMessages' %}",
-            success: function(response) {
-                console.log(response);
-                $("#display-general").empty();
-
-                for (var key in response.messages) {
-                    var message = response.messages[key];
-                    var messageHtml = `
-                        <div class="message2">
-                            <a href="${message.user_profile_url}" style="display: flex;">
-                                <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-                                <div class="sender" style="">${message.user}</div>
-
-                            </a>
-                            <div class="message2-content">
-                                <div>${message.value}</div>
-                                <div class="time">${message.date}</div>
-                            </div>
-                        </div>`;
-                    $("#display-general").append(messageHtml);
-                }
-            },
-            error: function(response) {
-                alert('An error occurred');
-            }
-        });
-    }
-
-    // Load and display messages every half-second
-    setInterval(loadAndDisplaySupportMessages, 500);
-    setInterval(loadAndDisplayGeneralMessages, 500);
-
-    // Handle support message form submission via AJAX
-    $(document).on('submit', '#support-post-form', function(e) {
-        e.preventDefault();
-        console.log('Support message submitted');
-
-        var username = $('#support-username').val();
-        var room_name = $('#support-room_name').val();
-        var message = $('#support-message').val();
-
-        if (!message.trim()) {
-            alert('Message cannot be empty');
-            return;
-        }
-
-        console.log(`Sending message: ${message}, username: ${username}, room_name: ${room_name}`);
-
-        $.ajax({
-            type: 'POST',
-            url: "{% url 'showcase:supportsend' %}",
-            data: {
-                username: username,
-                room_name: room_name,
-                message: message,
-                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-            },
-            success: function(data) {
-                if (data.status === 'success') {
-                    $('#support-message').val('');
-                    loadAndDisplaySupportMessagesAndScroll();
-                } else {
-                    $('#support-message').val('');
-                    loadAndDisplaySupportMessagesAndScroll();
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error(xhr.responseText);
-            }
-        });
-    });
-
-    // Handle general message form submission via AJAX
-    $(document).on('submit', '#general-post-form', function(e) {
-        e.preventDefault();
-        console.log('General message submitted');
-
-        var username = $('#general-username').val();
-        var message = $('#general-message').val();
-
-        if (!message.trim()) {
-            alert('Message cannot be empty');
-            return;
-        }
-
-        console.log(`Sending message: ${message}, username: ${username}`);
-
-        $.ajax({
-            type: 'POST',
-            url: "{% url 'showcase:generalsend' %}",
-            data: {
-                username: username,
-                message: message,
-                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-            },
-            success: function(data) {
-                if (data.status === 'success') {
-                    $('#general-message').val('');
-                    loadAndDisplayGeneralMessagesAndScroll();
-                } else {
-                    /*alert(data.message);*/
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error(xhr.responseText);
-            }
-        });
-    });
-});
-
-// Function to load and display support messages and then scroll to bottom
-function loadAndDisplaySupportMessagesAndScroll() {
-    loadAndDisplaySupportMessages();
-    setTimeout(function() {
-        console.log("Before scrollToBottom: ", $('#display-support').scrollTop(), $('#display-support')[0].scrollHeight);
-        scrollToBottom('display-support');
-        console.log("After scrollToBottom: ", $('#display-support').scrollTop(), $('#display-support')[0].scrollHeight);
-    }, 600); // Add a slight delay to ensure DOM is updated
-}
-
-// Function to load and display general messages and then scroll to bottom
-function loadAndDisplayGeneralMessagesAndScroll() {
-    loadAndDisplayGeneralMessages();
-    setTimeout(function() {
-        scrollToBottom('display-general');
-    }, 600); // Add a slight delay to ensure DOM is updated
-}
-
-// Function to scroll to the bottom of the chat display
-function scrollToBottom(elementId) {
-    var chatDisplay = document.getElementById(elementId);
-    console.log("Scrolling to bottom of element: ", elementId);
-    chatDisplay.scrollTop = chatDisplay.scrollHeight;
-}
-</script>
-
-    <script src="js/index.js"></script>
-	<script src="{% static 'css/js/script.js' %}"></script>
-<script src="{% static 'css/js/darkmode.js' %}"></script>
-<script src="{% static 'css/js/navbar.js' %}"></script>
-<script src="{% static 'css/js/scroll.js' %}"></script>
-<script>
-function showMenu() {
-  var popup = document.getElementById("myPopup");
-  popup.style.display = popup.style.display === "none" ? "block" : "none";
-}
-
-function showChatWidget() {
-  var popup = document.getElementById("chatwidget");
-  popup.style.display = popup.style.display === "none" ? "block" : "none";
-}
-</script>
-<script>
-
-</script>
-		<i class="icon"></i>
-
 	<!-- end copyright -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const forms = document.querySelectorAll(".ajax-form");
+
+    forms.forEach(form => {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const url = this.getAttribute("action");
+            const csrfToken = formData.get("csrfmiddlewaretoken");
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                },
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Update stock count
+                    const stockCountElement = document.querySelector("#stock-count");
+                    if (stockCountElement) {
+                        stockCountElement.textContent = data.stock_count;
+                    }
+
+                    // Update currency amount
+                    const currencyAmountElement = document.querySelector("#currency-amount");
+                    if (currencyAmountElement) {
+                        currencyAmountElement.textContent = data.currency_amount;
+                    }
+
+                    // Example: Remove the item from the UI
+                    this.closest(".inventory-item").remove();
+                } else {
+                    console.error("Action failed.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    });
+});
+
+
+
+</script>
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+    const withdrawButtons = document.querySelectorAll(".withdraw-button");
+
+    withdrawButtons.forEach((button) => {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            const form = button.closest("form");
+            const formData = new FormData(form);
+            const actionUrl = form.getAttribute("action") || window.location.href;
+
+            fetch(actionUrl, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        // Remove the withdrawn inventory item from the DOM
+                        const inventoryItem = form.closest(".inventory-item");
+                        if (inventoryItem) {
+                            inventoryItem.remove();
+                        }
+
+                        // Update the stock count
+                        const stockCountElement = document.getElementById("stock-count");
+                        if (stockCountElement) {
+                            const newCount = parseInt(stockCountElement.textContent) - 1;
+                            stockCountElement.textContent = newCount;
+                        }
+
+                    } else {
+                        alert(data.error || "An error occurred while processing your request.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    alert("An unexpected error occurred. Please try again.");
+                });
+        });
+    });
+});
+
+</script>
+	<!-- jquery -->
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
      <script src="{% static 'css/js/main.js' %}"></script>
      <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
@@ -2309,15 +657,48 @@ function showChatWidget() {
      <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
      <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
      <script src="{% static 'css/js/sticker.js' %}"></script>
-<!-- jquery -->
-<!-- bootstrap -->
-<!-- count down -->
-<!-- isotope -->
-<!-- waypoints -->
-<!-- owl carousel -->
-<!-- magnific popup -->
-<!-- mean menu -->
-<!-- sticker js -->
-	<!-- main js -->
+
 </body>
 </html>
+
+
+
+
+			{% for TradeItem in TradeItems %}
+			<div class="row" style="display: flex; max-width: 100%;">
+				<div class="col-lg-4 col-md-6 text-center">
+					<div class="single-product-item">
+						<div class="product-image">
+							<a href="single-product.html">
+								<img src="{{TradeItem.image.url}}" style="height: 200px;">
+							</a>
+						</div>
+						<h3>{{TradeItem.title}}</h3>
+
+                 <p class="product-price">
+                        <span style="">{{TradeItem.condition}}</span> </p>
+                        <span style="">{{TradeItem.description}}</span> </p>
+						 <div class="cart-btn">
+
+			{% if TradeItem.certified == True %}
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="inventory_remove">
+                    <input type="hidden" name="pk" value="{{ TradeItem.pk }}">
+
+                    <button type="submit" class="cart-btn">Move To My Inventory</button>
+				</form>
+			 {% else %}
+               <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="pk" value="{{ TradeItem.pk }}">
+
+                    <button type="submit" class="cart-btn">Remove From Trade Inventory</button>
+				</form>
+			 {% endif %}
+						 </div></a></div>
+
+					</div>
+				</div>
+				{% endfor %}

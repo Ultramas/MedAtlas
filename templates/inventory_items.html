@@ -1,0 +1,46 @@
+{% load static %}
+{% for Inventory in StockObject %}
+    <label class="inventory-item-label" style="padding: 10px;">
+        <input type="checkbox" class="item-select-checkbox" id="checkbox-{{ Inventory.pk }}"
+               data-id="{{ Inventory.pk }}">
+        <div class="inventory-item">
+            <div class="legendary-icon">🐉</div>
+            <div class="pokemon-image">
+                <img src="{{ Inventory.image.url }}" alt="{{ Inventory.choice_text }} Image">
+            </div>
+            <div class="pokemon-info">
+                <h3 class="pokemon-name">{{ Inventory.choice.choice_text }}</h3>
+                <p class="pokemon-type">{{ Inventory.price }} 💎</p>
+                <p class="product-condition" style="color: rgba(255, 255, 255, 0.8);">
+                    Card Condition: {{ Inventory.condition }}
+                </p>
+                <p class="product-description">{{ Inventory.description }}</p>
+                            <div class="action-buttons">
+                <form id="sell-form-{{ Inventory.pk }}" action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post" class="ajax-form sell-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="sell">
+                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
+                    <button type="submit" class="add-button sell-button">Sell</button>
+                </form>
+                <!-- Additional forms for withdraw and trade -->
+                <form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' Inventory.pk %}" method="post" class="ajax-form withdraw-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="withdraw">
+                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
+                    <button type="submit" class="add-button withdraw-button">Withdraw</button>
+                </form>
+                <form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post" class="trade-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="move">
+                    <button type="submit" class="add-button trade-button cart-btn">Set Tradable</button>
+                </form>
+            </div>
+            </div>
+        </div>
+    </label>
+{% empty %}
+    <div class="empty-inventory">
+        <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy">
+        <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
+    </div>
+{% endfor %}

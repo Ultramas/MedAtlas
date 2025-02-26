@@ -11310,7 +11310,6 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             user_profile.currency_amount += inventory_object.price
             user_profile.save()
 
-        # Include updated values in the response
         stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
         return JsonResponse({
             'success': True,
@@ -11364,27 +11363,31 @@ class SellAllInventoryObjectsView(View):
             return JsonResponse({'success': False, 'error': 'No inventory objects selected'}, status=400)
 
         try:
-            # Create a list of integer IDs from the comma-separated string
             selected_ids = [int(pk.strip()) for pk in selected_ids_str.split(',') if pk.strip()]
         except ValueError:
             return JsonResponse({'success': False, 'error': 'Invalid inventory IDs provided'}, status=400)
 
-        # Filter only those inventory objects that belong to the user
         inventory_objects = InventoryObject.objects.filter(pk__in=selected_ids, user=request.user)
         if not inventory_objects.exists():
-            return JsonResponse({'success': False, 'error': 'No valid inventory objects found'}, status=404)
+            # If no inventory objects found, re-render the updated inventory list (which may be empty)
+            updated_inventory_html = render_to_string(
+                "inventory_items.html",
+                {"StockObject": InventoryObject.objects.filter(is_active=1, user=request.user)},
+                request=request
+            )
+            return JsonResponse({
+                'success': True,
+                'stock_count': 0,
+                'currency_amount': get_object_or_404(ProfileDetails, user=request.user).currency_amount,
+                'inventory_html': updated_inventory_html
+            })
 
         total_price = 0
         with transaction.atomic():
             for inventory_object in inventory_objects:
-                # Sum up the total sale price
                 total_price += inventory_object.price
-
-                # "Sell" the inventory object by dissociating it from the user
                 inventory_object.user = None
                 inventory_object.inventory = None
-
-                # Create a transaction record for the sale
                 Transaction.objects.create(
                     inventory_object=inventory_object,
                     user=request.user,
@@ -11393,17 +11396,21 @@ class SellAllInventoryObjectsView(View):
                 )
                 inventory_object.save()
 
-            # Update the user's profile with the new currency amount
             user_profile = get_object_or_404(ProfileDetails, user=request.user)
             user_profile.currency_amount += total_price
             user_profile.save()
 
-        # Get updated stock count after selling items
         stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+        updated_inventory_html = render_to_string(
+            "inventory_items.html",
+            {"StockObject": InventoryObject.objects.filter(is_active=1, user=request.user)},
+            request=request
+        )
         return JsonResponse({
             'success': True,
             'stock_count': stock_count,
-            'currency_amount': user_profile.currency_amount
+            'currency_amount': user_profile.currency_amount,
+            'inventory_html': updated_inventory_html
         })
 
 

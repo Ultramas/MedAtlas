@@ -1527,7 +1527,7 @@ $(document).ready(function() {
                                  data-price="{{ choice.value }}"
                                  data-currency-file="{{ item.currency.file_url }}"
                                  data-currency-symbol="{{ item.currency.symbol }}"
-                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; margin-right: 18px;">
+                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; display: flex; margin-right: 18px;">
                                 <p style=" color: black;">
                                     {% if choice.file.url %}
                                     <img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}">
