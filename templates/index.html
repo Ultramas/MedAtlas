@@ -11,6 +11,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
 				<style>
+					.fromorange {
+    --tw-gradient-from: #a600c0;
+    --tw-gradient-stops: var(--tw-gradient-from), #bf97ff;
+}
     /* Ensure the iframe scaler container is styled correctly */
     .mfp-iframe-scaler {
         position: relative;
@@ -1114,42 +1118,50 @@ window.onscroll = function() {
 			</div>
 
 						<h2 style="margin-top: 30%; text-align: center;"><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h2>
-			<div class="row">
-				<br>
-				      {% for Game in FeaturedGame %}
-				<div class="col-lg-4 col-md-6 text-center">
-					<div class="single-product-item">
-						<div class="product-image">
-							<a href="{{ Game.get_profile_url2 }}">
-								<img src="{{Game.image.url}}" alt="{{ Game.image.url }}">
-							</a>
-						</div>
-						<h3 style="color: white;">{{Game.name}}</h3>
+<div class="container mx-auto px-4 mt-24">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {% for Game in FeaturedGame %}
+    <div class="flex flex-col items-center">
+      <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg w-full flex flex-col h-full">
+        <!-- Image container with fixed aspect ratio -->
+        <div class="relative w-full pt-[100%]">
+          <a href="{{ Game.get_profile_url2 }}" class="absolute inset-0">
+            <img
+              src="{{ Game.image.url }}"
+              alt="{{ Game.name }}"
+              class="absolute inset-0 w-full h-full object-cover"
+            >
+          </a>
+        </div>
 
+        <!-- Content container with equal height -->
+        <div class="p-4 flex flex-col flex-grow">
+          <h3 class="text-white text-xl font-semibold text-center mb-2">
+            {{ Game.name }}
+          </h3>
 
-                 {% if Game.discount_cost %}
-                 <p class="product-price">
-					 {% if Game.discount_cost %}
-                        <span style="text-decoration: line-through;">{{ Game.cost }}💎</span>
-                        {{ Game.discount_cost }}💎
-                    {% else %}
-                        {{ Game.cost }}💎
-                    {% endif %} </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn">
-                                  <div class="cart-btn-fire"></div>Check It Out!</a>
+          <div class="mt-auto">
+            <p class="text-center text-lg font-bold mb-3">
+              {% if Game.discount_cost %}
+                <span class="line-through text-gray-400 mr-2">{{ Game.cost }}💎</span>
+                <span class="text-green-400">{{ Game.discount_cost }}💎</span>
+              {% else %}
+                <span>{{ Game.cost }}💎</span>
+              {% endif %}
+            </p>
 
-						 {% else %}
-						 <p class="product-price"> {{ Game.cost }}💎 </p>
-						 <a href="{{ Game.get_profile_url2 }}" class="cart-btn">
-                                  <div class="cart-btn-fire"></div> Check It Out!</a>
-
-						{% endif %}
-					</div>
-				</div>
-			</div>
-		</div>
+            <a href="{{ Game.get_profile_url2 }}"
+              class="block w-full py-2 px-4 bg-gradient-to-r fromorange to-red-600 text-white text-center rounded-md transition-transform hover:scale-105 relative overflow-hidden">
+              <div class="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-yellow-300 to-transparent opacity-30 animate-pulse"></div>
+              Check It Out!
+            </a>
+          </div>
+        </div>
       </div>
-				{% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
 
 
 	<!-- end chests section -->

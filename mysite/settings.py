@@ -204,7 +204,7 @@ STATIC_URL = '/static/'
 
 X_FRAME_OPTIONS = '*'
 
-LOGIN_REDIRECT_URL = '/showcase'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 import environ
