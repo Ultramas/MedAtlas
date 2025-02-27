@@ -139,6 +139,7 @@ app_name = 'showcase'
 
 from django.contrib.auth import views as auth_views
 
+
 urlpatterns = [
 
     re_path(r'^(id)/$', detail_post_view, name='like'),
@@ -382,7 +383,7 @@ urlpatterns = [
     path('battlecreator/', views.BattleCreationView.as_view(), name='battlecreator'),
     path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
     path('inventory/', views.PlayerInventoryView.as_view(), name='inventory'),
-    path('inventory2/', views.PlayerInventoryView.as_view(), name='inventory'),
+    path('inventory2/', TemplateView.as_view(template_name='inventory2.html'), name='inventory2'),
     path('navtrove/', views.NavView.as_view(), name='navtrove'),
     path('inventory/<int:pk>/sell/',  views.PlayerInventoryView.as_view(), name='sell_inventory_object'),
     path('inventory/<int:pk>/withdraw/', views.PlayerInventoryView.as_view(), name='withdraw_inventory_object'),
@@ -585,7 +586,6 @@ urlpatterns = [
         template_name='commons/password-reset/password_reset_complete.html'),
          name='password_reset_complete')
 ]
-
 # remove these
 # urlpatterns += staticfiles_urlpatterns()
 # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
