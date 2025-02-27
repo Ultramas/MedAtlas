@@ -2797,41 +2797,52 @@ $(document).ready(function() {
         });
     }
 
-    // Function to load and display general messages
-    function loadAndDisplayGeneralMessages() {
-        $.ajax({
-            type: 'GET',
-            url: "{% url 'showcase:getGeneralMessages' %}",
-            success: function(response) {
-                console.log(response);
-                $("#display-general").empty();
+function loadAndDisplayGeneralMessages() {
+    $.ajax({
+        type: 'GET',
+        url: "{% url 'showcase:getGeneralMessages' %}",
+        success: function(response) {
+            console.log(response);
+            $("#display-general").empty();
 
-                for (var key in response.messages) {
-                    var message = response.messages[key];
-                    var messageHtml = `
-                        <div class="message2">
-                            <a href="${message.user_profile_url}" style="display: flex;">
-                                <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-                                <div class="sender" style="">${message.user}</div>
-
-                            </a>
-                            <div class="message2-content">
-                                <div>${message.value}</div>
-                                <div class="time">${message.date}</div>
-                            </div>
-                        </div>`;
-                    $("#display-general").append(messageHtml);
-                }
-            },
-            error: function(response) {
-                alert('An error occurred');
+            // Limit messages to the latest 3
+            var messages = response.messages;
+            if (messages.length > 3) {
+                messages = messages.slice(messages.length - 3);
             }
-        });
-    }
 
+            for (var i = 0; i < messages.length; i++) {
+                var message = messages[i];
+                var messageHtml = `
+                    <div class="message2">
+                        <a href="${message.user_profile_url}" style="display: flex;">
+                            <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
+                            <div class="sender">${message.user}</div>
+                        </a>
+                        <div class="message2-content">
+                            <div>${message.value}</div>
+                            <div class="time">${message.date}</div>
+                        </div>
+                    </div>`;
+                $("#display-general").append(messageHtml);
+            }
+        },
+        error: function(response) {
+            alert('An error occurred');
+        }
+    });
+}
+
+function loadAndDisplayGeneralMessagesAndScroll() {
+    loadAndDisplayGeneralMessages();
+    // Scroll after messages have rendered
+    setTimeout(function(){
+       $("#display-general").scrollTop($("#display-general")[0].scrollHeight);
+    }, 100);
+}
     // Load and display messages every half-second
     setInterval(loadAndDisplaySupportMessages, 500);
-    setInterval(loadAndDisplayGeneralMessages, 500);
+	setInterval(loadAndDisplayGeneralMessages, 500);
 
     // Handle support message form submission via AJAX
     $(document).on('submit', '#support-post-form', function(e) {

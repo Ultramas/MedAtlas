@@ -8719,8 +8719,8 @@ class BackgroundView(FormMixin, BaseView):
         context['Messanger'] = messages_data
 
         # General Messages
-        general_messages = Message.objects.filter(room="General").order_by('date')
-        context['GeneralMessanger'] = general_messages
+        # Get the three most recent messages, then reverse for chronological order
+        general_messages = Message.objects.filter(room="General").order_by('-date')[:3][::-1]
         general_messages_data = []
 
         for general_message in general_messages:
@@ -8734,6 +8734,7 @@ class BackgroundView(FormMixin, BaseView):
             }
             general_messages_data.append(general_message_data)
 
+        # Set the limited messages in context
         context['GeneralMessanger'] = general_messages_data
 
         if self.request.user.is_authenticated:

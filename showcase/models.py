@@ -3426,8 +3426,6 @@ class EarnedAchievements(models.Model):
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
-
-    type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
     category = models.CharField(choices=AchievementCategory, max_length=4, blank=True, null=True)
     rubies_spent = models.IntegerField(blank=True,
                                        null=True)  # make sure it does not show unless the selected category is RS

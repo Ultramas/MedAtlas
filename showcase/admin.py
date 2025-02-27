@@ -2076,6 +2076,13 @@ class NavBarAdmin(admin.ModelAdmin):
         ('Navigational Bar Dropdown Information', {
             'fields': ('row', 'position', 'opennew', 'is_active',)
         }),
+
+    )
+    list_display = ('text', 'url', 'is_active',)
+    list_filter = (
+        'text',
+        'url',
+        'is_active',
     )
 
 
@@ -2090,6 +2097,13 @@ class NavBarHeaderAdmin(admin.ModelAdmin):
         ('Navigational Bar Header Information', {
             'fields': ('section', 'row', 'is_active',)
         }),
+    )
+    list_display = ('text', 'section', 'row', 'is_active',)
+    list_filter = (
+        'text',
+        'section',
+        'row',
+        'is_active',
     )
 
 
