@@ -294,17 +294,17 @@ body {
 <nav class="main-menu" style="z-index: 100;">
         <div class="nav-links">
             <h1>
-                <a href="#" class="logo">
-                    {% if Logo %}
-                        <p>Logo instance: {{ Logo }}</p>
+                    {% for LogoBase in Logo %}
+                rgewfadwrewfqd
+                <a href="{{Logo.hyperlink}}" class="logo">
                         <p>Title: {{ Logo.title }}</p>
                         <p>Image URL: {{ Logo.logocover.url }}</p>
-                    {% else %}
+                    {% empty %}
                         <p>PokeTrove</p>
-                    {% endif %}
 
 
                 </a>
+                    {% endfor %}
             </h1>
             <ul id="fullNavbar" style="display: flex; flex-direction: row; align-items: center;">
                 {% for column in Header %}
