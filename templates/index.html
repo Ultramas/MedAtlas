@@ -721,6 +721,45 @@ p.blog-meta span {
     opacity: 0.9;
     text-decoration: none;
 }
+/* Base button styles */
+.boxed-btn {
+  display: inline-block;
+  background: #f28123;
+  color: #fff;
+  padding: 10px 30px;
+  border-radius: 50px;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  cursor: pointer;
+  text-decoration: none;
+  /* Add transform to enable hardware acceleration */
+  transform: translateZ(0);
+}
+
+.boxed-btn:hover {
+  background: #051922;
+  color: #f28123;
+}
+
+/* Animation on click */
+.boxed-btn:active {
+  animation: jumpdown 3s ease-in-out;
+}
+
+/* Jump down animation */
+@keyframes jumpdown {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
     </style>
 
   	{% for BackgroundImage in Titles %}
@@ -1105,7 +1144,7 @@ window.onscroll = function() {
 					<div class="section-title">
 						<br>
 						<br>
-						<h3 ><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h3>
+						<h3><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h3>
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
 						{% if BackgroundImage.section == 11 %}
@@ -1440,7 +1479,7 @@ window.onscroll = function() {
 			<div class="row">
 	{% for newprofile in News %}
 				<div class="col-lg-4 col-md-6">
-					<div class="single-latest-news" style="width: 180%;">
+					<div class="single-latest-news" style="width: 180%; border-radius: 8px;">
 						<a href="{{newprofile.get_profile_url2}}">
 							<div class="latest-news-bg news-bg-1" style="background: url({{newprofile.image.url}}); background-size: cover;"></div></a>
 						<div class="news-text-box">

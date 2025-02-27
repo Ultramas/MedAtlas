@@ -6538,6 +6538,50 @@ class BlogBaseView(ListView):
         return context
 
 
+class NavView(ListView):
+    template_name = "navtrove.html"
+    model = LogoBase
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(is_active=1).first()
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        user = self.request.user
+        if user.is_authenticated:
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+            # Create a new object with the necessary attributes
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
+
 from .models import Preference
 
 
