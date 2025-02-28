@@ -6548,8 +6548,9 @@ class NavView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
-        context['Logo'] = LogoBase.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(is_active=1)  # Fixed assignment for Logo
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)

@@ -294,14 +294,15 @@ body {
 <nav class="main-menu" style="z-index: 100;">
         <div class="nav-links">
 <h1>
-  {% for LogoBase in Logo %}
-    <a href="{{ Logo.hyperlink }}" class="logo">
-      <p>Title: {{ Logo.title }}</p>
-      <p>Image URL: {{ Logo.logocover.url }}</p>
+{% for logo in Logo %}
+    <a href="{{ logo.hyperlink }}" class="logo">
+      <p>Title: {{ logo.title }}</p>
+      <p>Image URL: {{ logo.logocover.url }}</p>
     </a>
-  {% empty %}
+{% empty %}
     PokeTrove
-  {% endfor %}
+{% endfor %}
+
 </h1>
 
 
