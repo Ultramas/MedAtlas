@@ -13,8 +13,13 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+
+  <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/inventory2.css' %}">
     <style>
-    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
+ /* Add this to the existing <style> tag or create a new one if it doesn't exist */
     .copyright-section {
         background: linear-gradient(
             to right,
@@ -474,46 +479,6 @@
             margin-bottom: 1rem;
         }
 
-        .add-button {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-            border: 2px solid var(--primary);
-            color: var(--text);
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 1.5rem;
-            transition: all 0.3s ease;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 1.1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .add-button::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
-            transition: transform 0.5s ease;
-        }
-
-        .add-button:hover::before {
-            transform: translate(25%, 25%);
-        }
-
-        .add-button:hover {
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-            border-color: var(--accent);
-            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
-            transform: translateY(-2px);
-            color: var(--accent);
-        }
 
         .legendary-icon {
             position: absolute;
@@ -579,19 +544,16 @@
             }
         }
 
-        .inventory-item {
+        .gridCardItem {
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
             overflow: hidden;
             position: relative;
             border: 2px solid var(--primary);
             transition: all 0.3s ease;
             transform-style: preserve-3d;
-            width: 350px;
-            height: 800px;
         }
 
-        .inventory-item:hover {
+        .gridCardItem:hover {
             transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
             box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
             border-color: var(--accent);
@@ -627,7 +589,7 @@
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-.inventory-grid.compact-view .inventory-item {
+.inventory-grid.compact-view .gridCardItem {
     font-size: 0.9em;
 }
 
@@ -674,17 +636,17 @@ nav.main-menu ul li a {
     display: none;
 }
 
-.inventory-item-label {
+.outerContainer {
     position: relative;
     cursor: pointer;
 }
 
 /* Optional: Visual feedback when an item is selected */
-.item-select-checkbox:checked + .inventory-item {
+.item-select-checkbox:checked + .gridCardItem {
     background-color: rgba(0, 128, 0, 0.1); /* Example: light green background */
 }
 
-.item-select-checkbox:checked + .inventory-item::before {
+.item-select-checkbox:checked + .gridCardItem::before {
     content: '✔'; /* Checkmark symbol */
     position: absolute;
     top: 8px;
@@ -879,7 +841,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
 
                     // Example: Remove the item from the UI
-                    this.closest(".inventory-item").remove();
+                    this.closest(".gridCardItem").remove();
                 } else {
                     console.error("Action failed.");
                 }
@@ -925,7 +887,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
                 .then((data) => {
                     if (data.success) {
-                        const inventoryItem = form.closest(".inventory-item");
+                        const inventoryItem = form.closest(".gridCardItem");
                         if (inventoryItem) inventoryItem.remove();
 
                         const stockCountElement = document.getElementById("stock-count");

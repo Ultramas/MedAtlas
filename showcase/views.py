@@ -24,7 +24,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
-    UserNotification, TopHits
+    UserNotification, TopHits, Card
 from .models import Idea
 from .models import VoteQuery
 from .models import StaffApplication
@@ -4725,6 +4725,7 @@ class NewsBackgroundView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['News'] = NewsFeed.objects.all()
+        context['Logo'] = LogoBase.objects.filter(is_active=1).first()
 
         newprofile = NewsFeed.objects.filter(is_active=1)
         # Retrieve the author's profile avatar
@@ -6547,7 +6548,7 @@ class NavView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
-        context['Logo'] = LogoBase.objects.filter(is_active=1).first()
+        context['Logo'] = LogoBase.objects.filter(is_active=1)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
@@ -11646,6 +11647,33 @@ class CreateChestView(FormView):
             print("choice_formset errors:", choice_formset.errors)
             return self.render_to_response(self.get_context_data(game_form=game_form,
                                                                  choice_formset=choice_formset))
+
+# views.py
+from django.shortcuts import render
+from .models import Card
+
+def card_list(request):
+    supertype = request.GET.get('supertype')
+    type = request.GET.get('type')
+    view = request.GET.get('view', 'compact')  # Default to 'compact' if not specified
+
+    # Filter cards based on the parameters
+    cards = Card.objects.all()
+    if supertype:
+        cards = cards.filter(supertype=supertype)
+    if type:
+        cards = cards.filter(types__contains=type)
+
+    sort_by = request.GET.get('sort_by', 'name')
+    sort_order = request.GET.get('sort_order', 'asc')
+    if sort_order == 'desc':
+        sort_by = f'-{sort_by}'
+
+    cards = cards.order_by(sort_by)
+
+    return render(request, 'card_list.html', {'cards': cards, 'view': view})
+
+
 
 class GameChestBackgroundView(BaseView):
     template_name = "game.html"

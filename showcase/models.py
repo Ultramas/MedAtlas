@@ -811,7 +811,7 @@ class ProfileDetails(models.Model):
             # Set default level and currency or customize as needed
             default_level = Level.objects.first()  # You can specify a default level
             default_currency = Currency.objects.first()  # You can specify a default currency
-            profile_image = 'static/css/images/a.jpg'
+            profile_image = '/bed.jpg'
 
             # Create ProfileDetails instance
             ProfileDetails.objects.create(
@@ -840,7 +840,7 @@ class ProfileDetails(models.Model):
 
         # Set a default avatar if not provided
         if not self.avatar:
-            self.avatar = 'static/css/images/a.jpg'
+            self.avatar = os.path.join(settings.BASE_DIR, 'static', 'css', 'images', 'a.jpg')
             print('saved the profile avatar to default image')
 
         # Check if rubies_spent has changed
@@ -3109,6 +3109,28 @@ class Choice(models.Model):
     class Meta:
         verbose_name = "Choice"
         verbose_name_plural = "Choices"
+
+class Card(models.Model):
+    card_id = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
+    supertype = models.CharField(max_length=50)
+    subtypes = models.CharField(max_length=100)
+    hp = models.CharField(max_length=10, null=True, blank=True)
+    types = models.CharField(max_length=100, null=True, blank=True)
+    evolves_to = models.CharField(max_length=100, null=True, blank=True)
+    rules = models.TextField(null=True, blank=True)
+    attacks = models.TextField(null=True, blank=True)
+    weaknesses = models.TextField(null=True, blank=True)
+    retreat_cost = models.CharField(max_length=50, null=True, blank=True)
+    set_name = models.CharField(max_length=100)
+    set_series = models.CharField(max_length=100)
+    set_release_date = models.DateField(null=True, blank=True)
+    image_small = models.URLField()
+    image_large = models.URLField()
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 
 class TopHits(models.Model):

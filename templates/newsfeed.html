@@ -667,7 +667,14 @@ p.blog-meta span {
 
   <main class="main-content">
             <h1>My News - (<span id="stock-count">{{ Profiles|length }}</span>)</h1>
-
+{% if Logo %}
+    <a href="{{ Logo.hyperlink }}" class="logo">
+      <p>Title: {{ Logo.title }}</p>
+      <p>Image URL: {{ Logo.logocover.url }}</p>
+    </a>
+  {% else %}
+    PokeTrove
+  {% endif %}
             <section id="inventoryGrid" class="inventory-grid comfortable-view">
 
                 {% for newprofile in Profiles %}

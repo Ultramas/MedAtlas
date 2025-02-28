@@ -141,6 +141,16 @@ class TradeContractAdmin(admin.ModelAdmin):
 admin.site.register(TradeContract, TradeContractAdmin)
 
 
+class CardAPIAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Card API Information - Data', {
+            'fields': ('card_id', 'name', 'last_name')
+        }),
+        ('Card API Information - Attributes', {
+            'fields': ('description', 'address', 'city', 'state', 'zip_code', 'phone_number', 'profile_picture', 'is_active',)
+        }),
+    )
+
 class BlogTipsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Blog Tips Information - Personal Information', {

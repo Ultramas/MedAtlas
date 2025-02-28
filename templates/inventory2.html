@@ -1,10 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+{% load static %}
+{% for Inventory in StockObject %}
+     <div class="outerContainer">
+        <div class="outerGridContainer">
+            <div class="gridCardItem">
+                <div class="gridCardInnerContainer">
+                    <div class="gridCardImg" style="background-image: url('/media/kyogre_44foaPp.png');">
+                    </div>
+                    <div class="gridCardContent">
+                        <div class="gridCardName">Card Name:</div>
+                        <div class="gridCardPrice">Price:</div>
+                        <div class="gridCardCondition">Card Condition:</div>
+                        <div class="card-buttons">
+                            <button class="card-button">Sell</button>
+                            <button class="card-button">Withdraw</button>
+                            <button class="card-button">Set Tradable</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- manually added, i expect you to just use a for loop to generate these auto, these are placeholder duplicates-->
+            <div class="gridCardItem">
+                <div class="gridCardInnerContainer">
+                    <div class="gridCardImg" style="background-image: url('/media/kyogre_44foaPp.png');">
+                    </div>
+                    <div class="gridCardContent">
+                        <div class="gridCardName">Card Name:</div>
+                        <div class="gridCardPrice">Price:</div>
+                        <div class="gridCardCondition">Card Condition:</div>
+                        <div class="card-buttons">
+                            <button class="card-button">Sell</button>
+                            <button class="card-button">Withdraw</button>
+                            <button class="card-button">Set Tradable</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+{% empty %}
+    <div class="empty-inventory">
+        <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy">
+        <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
+    </div>
+{% endfor %}

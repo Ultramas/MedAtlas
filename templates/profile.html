@@ -429,8 +429,8 @@
         }
 
         .pokemon-image {
-            width: 100%;
-            aspect-ratio: 1;
+            width: 500px;
+            height: 400px;
             background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
             display: flex;
             align-items: center;
@@ -721,7 +721,7 @@ p.blog-meta span {
                     <div class="inventory-item">
                         <div class="legendary-icon">🐉</div>
                         <div class="pokemon-image">
-                            <img src="{{profile.avatar.url}}" alt="{{profile.choice_text}} Image">
+                            <img src="{{profile.avatar.url}}" alt="{{profile.choice_text}} Image" onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
                         </div>
                         <div class="pokemon-info">
 							<h3 class="pokemon-name">{{profile.user}}</h3>
@@ -781,6 +781,8 @@ p.blog-meta span {
 
                         </div>
                     </div>
+                        <br>
+                        <br>
                 {% else %}
         <h1 style="color: white;">No Profile Image Found</h1>
                 {% endif %}

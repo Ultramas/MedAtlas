@@ -1,0 +1,98 @@
+<form method="get">
+    <!-- Existing filters -->
+    <label for="supertype">Supertype:</label>
+    <select name="supertype" id="supertype">
+        <option value="">All</option>
+        <option value="Pokémon">Pokémon</option>
+        <option value="Trainer">Trainer</option>
+        <option value="Energy">Energy</option>
+    </select>
+
+    <label for="type">Type:</label>
+    <select name="type" id="type">
+        <option value="">All</option>
+        <option value="Fire">Fire</option>
+        <option value="Water">Water</option>
+        <option value="Grass">Grass</option>
+        <!-- Add more types as needed -->
+    </select>
+
+    <!-- View Selector -->
+    <label for="view">View:</label>
+    <select name="view" id="view">
+        <option value="compact" {% if view == 'compact' %}selected{% endif %}>Compact</option>
+        <option value="detailed" {% if view == 'detailed' %}selected{% endif %}>Detailed</option>
+    </select>
+
+    <button type="submit">Filter</button>
+</form>
+
+<table id="cardTable">
+    <thead>
+        <tr>
+            <th data-sort="string" onclick="sortTable(0)">Name</th>
+            <th data-sort="string">Supertype</th>
+            <th data-sort="string">Subtypes</th>
+            <th data-sort="number">HP</th>
+            <th data-sort="string">Types</th>
+            <th data-sort="string">Set</th>
+            <th data-sort="number">Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if view == 'detailed' %}
+            {% for card in cards %}
+                <tr>
+                    <td>{{ card.name }}</td>
+                    <td>{{ card.supertype }}</td>
+                    <td>{{ card.subtypes }}</td>
+                    <td>{{ card.hp }}</td>
+                    <td>{{ card.types }}</td>
+                    <td>{{ card.set_name }} ({{ card.set_series }})</td>
+                    <td>${{ card.price }}</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            {% for card in cards %}
+                <tr>
+                    <td>{{ card.name }}</td>
+                    <td>{{ card.supertype }}</td>
+                    <td>{{ card.subtypes }}</td>
+                    <td>{{ card.hp }}</td>
+                    <td>{{ card.types }}</td>
+                    <td>{{ card.set_name }} ({{ card.set_series }})</td>
+                    <td>${{ card.price }}</td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+
+
+<script>
+function sortTable(columnIndex) {
+    const table = document.getElementById("cardTable");
+    const rows = Array.from(table.rows).slice(1); // Exclude header row
+    const header = table.rows[0].cells[columnIndex];
+    const sortType = header.getAttribute('data-sort');
+    const isNumeric = sortType === 'number';
+
+    const sortedRows = rows.sort((rowA, rowB) => {
+        const cellA = rowA.cells[columnIndex].innerText.trim();
+        const cellB = rowB.cells[columnIndex].innerText.trim();
+
+        let valueA = isNumeric ? parseFloat(cellA.replace(/[^0-9.-]+/g, "")) : cellA.toLowerCase();
+        let valueB = isNumeric ? parseFloat(cellB.replace(/[^0-9.-]+/g, "")) : cellB.toLowerCase();
+
+        if (isNaN(valueA)) valueA = 0;
+        if (isNaN(valueB)) valueB = 0;
+
+        return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+    });
+
+    // Reattach sorted rows to the table body
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML = '';
+    tbody.append(...sortedRows);
+}
+</script>

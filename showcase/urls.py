@@ -129,7 +129,6 @@ from .views import (
     MemberHomeBackgroundView,
 
 )
-
 from django.contrib.auth.views import (PasswordResetView,
                                        PasswordResetDoneView,
                                        PasswordResetConfirmView,
@@ -550,6 +549,7 @@ urlpatterns = [
     # path("user", views.userpage, name = "userpage"),
     path('theories/', TemplateView.as_view(template_name='theories.html'), name='theories'),
     path('donatebase/', DonateBaseView.as_view(), name='donatebase'),
+    path('card_list/', views.card_list, name='card_list'),
     #path('donate/', views.donate, name='donate'),
     path('donate/', views.DonateView.as_view(), name='donate'),
     path('mydonationhistory/', views.DonateHistoryView.as_view(), name='donationhistory'),
