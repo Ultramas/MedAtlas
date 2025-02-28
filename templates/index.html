@@ -860,10 +860,9 @@ function toggleChatWidget() {
 
 .cart-btn{
   background-image: url("{% static 'css/images/fireimage.png' %}"); /* Default image */
-  image-width: 100px;
-  image-height: 100px;
   background-size: cover; /* Ensure image covers the button */
   position: relative; /* Needed for proper stacking */
+  margin-top: auto;
 }
 
 .cart-btn:hover {
@@ -976,7 +975,16 @@ function toggleChatWidget() {
 			background: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(255, 255, 255, 0.5) 80%);
 			margin-bottom: 10px;
 			border-radius: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: center;
+      height: 35em;
 		}
+
+    .single-product-item {
+      height: 50em;
+    }
 </style>
 
 <script>
@@ -1214,7 +1222,7 @@ window.onscroll = function() {
                 {% endif %}
             {% endif %}
         {% endfor %}
-		<div class="container" id="game">
+		<div class="marketplaceOuterContainer" id="game">
 			<div class="row">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="section-title">
@@ -1233,58 +1241,63 @@ window.onscroll = function() {
 				</div>
 			</div>
 
-			<div class="row">
+      <style>
+        .cartBtn{
+          background-image: url("{% static 'css/images/fireimage.png' %}"); /* Default image */
+        }
+
+        .cartBtn:hover {
+          background-image: url("{% static 'css/images/invertedfireimage.png' %}"); /* Hover image path */
+          opacity: 1; /* Ensure hover image is fully visible */
+        }
+      </style>
+
+			<div class="outerGridContainer">
 				      {% for product in Products %}
-				<div class="col-lg-4 col-md-6 text-center">
-					<div class="single-product-item">
-						<div class="product-image">
-							<a href="{{ product.get_profile_url }}">
-								<img src="{{product.image.url}}" alt="{{ product.image.url }}">
-							</a>
+				<div class="gridCardItem">
+						<div class="gridCardImg" style="background-image: url('{{ product.image.url }}');"> 
 						</div>
-						<h3 style="color: white;">{{product.title}}</h3>
+            <div class="gridCardContent">
+              <div class="gridCardTitle">{{product.title}}</div>
+              {% if product.price %}
+        {% if product.discount_price %}
+              <p class="product-price">
+        {% if product.discount_price %}
+                     <span style="text-decoration: line-through;">${{ product.price }}</span>
+                     ${{ product.discount_price }}
+                 {% else %}
+                     {{ product.price }}
+                 {% endif %} </p>
+          <a href="{{ product.get_profile_url }}" class="cartBtn">
+          <div class="cartBtnFire"></div>Check It Out!</a>
 
+          {% else %}
+          <p class="product-price"> ${{ product.price }} </p>
+          <a href="{{ product.get_profile_url }}" class="cartBtn">
+          <div class="cartBtnFire" style=background-image: url("{% static 'css/images/fireimage.png' %}"); /* Default image */></div> Check It Out!</a>
 
-                 {% if product.price %}
-					 {% if product.discount_price %}
-                 <p class="product-price">
-					 {% if product.discount_price %}
-                        <span style="text-decoration: line-through;">${{ product.price }}</span>
-                        ${{ product.discount_price }}
-                    {% else %}
-                        {{ product.price }}
-                    {% endif %} </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn">
-                                  <div class="cart-btn-fire"></div>Check It Out!</a>
+         {% endif %}
+         {% else %}
+          {% if product.discount_currency_price %}
+              <p class="product-price">
+                          {% if product.discount_currency_price %}
+                     <span style="text-decoration: line-through;">💎{{ product.currency_price }}</span>
+                     💎{{ product.discount_currency_price }}
+                 {% else %}
+                     💎{{ product.currency_price }}
+                 {% endif %} </p>
+          <a href="{{ product.get_profile_url }}" class="cart-btn">
+                               <div class="cart-btn-fire"></div>Check It Out!</a>
 
-						 {% else %}
-						 <p class="product-price"> ${{ product.price }} </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn">
-                                  <div class="cart-btn-fire"></div> Check It Out!</a>
-
-						{% endif %}
-						{% else %}
-						 {% if product.discount_currency_price %}
-                 <p class="product-price">
-						                 {% if product.discount_currency_price %}
-                        <span style="text-decoration: line-through;">💎{{ product.currency_price }}</span>
-                        💎{{ product.discount_currency_price }}
-                    {% else %}
-                        💎{{ product.currency_price }}
-                    {% endif %} </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn">
-                                  <div class="cart-btn-fire"></div>Check It Out!</a>
-
-						 {% else %}
-						 <p class="product-price"> 💎{{ product.currency_price }} </p>
-						 <a href="{{ product.get_profile_url }}" class="cart-btn">
-                                  <div class="cart-btn-fire"></div> Check It Out!</a>
-						{% endif %}
-						{% endif %}
-					</div>
+          {% else %}
+          <p class="product-price"> 💎{{ product.currency_price }} </p>
+          <a href="{{ product.get_profile_url }}" class="cart-btn">
+                               <div class="cart-btn-fire"></div> Check It Out!</a>
+         {% endif %}
+         {% endif %}
+            </div>
 				</div>
 				{% endfor %}
-
 		</div>
 	</div>
 
