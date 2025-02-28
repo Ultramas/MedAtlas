@@ -51,7 +51,7 @@ body {
 
 .gridCardItem {
     width: 15em;
-    /*height: 30em;*/
+    height: 30em;
     border: 0.1em solid #bf97ff;
     border-radius: 1em;
     transition: transform 0.25s ease-in-out;
@@ -101,6 +101,7 @@ body {
     font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
+    transition: all 0.2s ease;
     width: 100%;
     background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
     box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
@@ -113,12 +114,4 @@ body {
     border-color: #4ecca3;
     background: linear-gradient(45deg, #95E0C8, #4ECCA3, #2F7A62);
 
-}
-
-.sell-form{
-margin-bottom: 5px;
-}
-
-.withdraw-form{
-margin-bottom: 5px;
 }
