@@ -487,7 +487,7 @@ class BaseView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         print(f'User: {user.username}, is_authenticated: {user.is_authenticated}, is_staff: {user.is_staff}')
@@ -4725,7 +4725,7 @@ class NewsBackgroundView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['News'] = NewsFeed.objects.all()
-        context['Logo'] = LogoBase.objects.filter(is_active=1).first()
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1).first()
 
         newprofile = NewsFeed.objects.filter(is_active=1)
         # Retrieve the author's profile avatar
@@ -6416,7 +6416,7 @@ class BaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
-        context['Logo'] = LogoBase.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
@@ -6504,7 +6504,7 @@ class BlogBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
-        context['Logo'] = LogoBase.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
@@ -6547,7 +6547,7 @@ class NavView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
-        context['Logo'] = LogoBase.objects.filter(is_active=1)  # Fetch active logos
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)  # Fetch active logos
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
 
         # Check and print the title field of each logo in the queryset
@@ -10963,7 +10963,10 @@ class PollQuestionsView(View):
             'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
             'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
             'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
-            'Logo': LogoBase.objects.filter(page=self.template_name, is_active=1),
+            'Logo': LogoBase.objects.filter(
+                Q(page='navtrove.html') | Q(page=self.template_name),
+                is_active=1
+            ),
         }
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -11030,7 +11033,10 @@ class PollDetailView(TemplateView):
             'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
             'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
             'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
-            'Logo': LogoBase.objects.filter(page=self.template_name, is_active=1),
+            'Logo': LogoBase.objects.filter(
+                Q(page='navtrove.html') | Q(page=self.template_name),
+                is_active=1
+            ),
         }
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -11075,7 +11081,10 @@ class PollResultsView(View):
             'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
             'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
             'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
-            'Logo': LogoBase.objects.filter(page=self.template_name, is_active=1),
+            'Logo': LogoBase.objects.filter(
+                Q(page='navtrove.html') | Q(page=self.template_name),
+                is_active=1
+            ),
         }
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -11209,6 +11218,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         try:
             context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user) #specifically used to get ruby amount
         except UserProfile.DoesNotExist:

@@ -288,6 +288,15 @@ body {
     #fullNavbar.inactive {
         display: none;
     }
+
+    .navLogo {
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 5em;
+        width: 15em;
+
+    }
     </style>
 </head>
 
@@ -295,9 +304,12 @@ body {
         <div class="nav-links">
 <h1>
 {% for logo in Logo %}
-    <a href="{{ logo.hyperlink }}" class="logo">
-      <img src="{{ logo.logocover.url }}">
-    </a>
+<!--    <a href="{{ logo.hyperlink }}" class="logo">-->
+<!--      <img src="{{ logo.logocover.url }}">-->
+<!--    </a>-->
+     <a href="{{ logo.hyperlink }}" class="logo">
+    <div class="navLogo" style="background-image: url('{{ logo.logocover.url }}');"></div>
+     </a>
 {% empty %}
     PokeTrove
 {% endfor %}
