@@ -55,6 +55,9 @@
   .gridCardTitle {
     font-size: 1.5em;
     height: 4em;
+    padding: 0;
+    line-height: unset;
+    margin: 0;
   }
 
   .gridCardPriceWrapper {
