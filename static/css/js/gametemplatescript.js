@@ -205,6 +205,12 @@ async function randomizeContents() {
                             const pk = this.querySelector('[name="pk"]').value;
                             console.log("Sell form submitted. pk =", pk);
 
+                            $(".spin-option").removeClass("selected");
+
+
+                            $(this).addClass("selected");
+                            totalSpins = parseInt($(this).data("value"));
+                            sessionStorage.setItem("totalSpins", totalSpins);
                             sellInventory(pk);
                           });
                         } else {
@@ -564,7 +570,13 @@ setTimeout(() => {
 
         if (!persistSpin) {
             totalSpins = 1;
+
+            console.log(`persist spin not enabled; reset spins to 1`); // Debug: Log the button's ID
             sessionStorage.setItem("totalSpins", totalSpins);
+            $(".spin-option").removeClass("selected");
+            $('.spin-option').removeClass('active');
+            $(".spin-option[data-value='1']").addClass("selected");
+            $('.spin-option[data-value="1"]').addClass('active');
         }
 
         $(".spin-option").prop('disabled', false);
@@ -671,6 +683,7 @@ if (buttonId === "start") {
           // Alternatively, perform other DOM updates here if needed.
         },
         error: function(error) {
+
           console.error("Sell request failed:", error);
         }
       });
@@ -744,6 +757,12 @@ if (buttonId === "start") {
         const closeBtn = textContainer.querySelector('.close');
         closeBtn.addEventListener('click', () => {
 
+
+
+
+        $(this).addClass("selected");
+        totalSpins = parseInt($(this).data("value"));
+        sessionStorage.setItem("totalSpins", totalSpins);
         const audio = new Audio('/static/css/sounds/collect.mp3');
         audio.play();
 
@@ -762,10 +781,13 @@ if (buttonId === "start") {
 
             if (!persistSpin) {
                 totalSpins = 1;
+
                 console.log(`persist spin not enabled; reset spins to 1`); // Debug: Log the button's ID
                 sessionStorage.setItem("totalSpins", totalSpins);
                 $(".spin-option").removeClass("selected");
+                $('.spin-option').removeClass('active');
                 $(".spin-option[data-value='1']").addClass("selected");
+                $('.spin-option[data-value="1"]').addClass('active');
             }
         });
 
@@ -789,10 +811,13 @@ sellBtn.addEventListener('click', () => {
 
     if (!persistSpin) {
         totalSpins = 1;
-        console.log(`persist spin not enabled; reset spins to 1`);
+
+        console.log(`persist spin not enabled; reset spins to 1`); // Debug: Log the button's ID
         sessionStorage.setItem("totalSpins", totalSpins);
         $(".spin-option").removeClass("selected");
+        $('.spin-option').removeClass('active');
         $(".spin-option[data-value='1']").addClass("selected");
+        $('.spin-option[data-value="1"]').addClass('active');
     }
 
     // Fetch and update only the .sell.update div without affecting the rest of the page

@@ -293,19 +293,18 @@ body {
 
 <nav class="main-menu" style="z-index: 100;">
         <div class="nav-links">
-            <h1>
-                    {% for LogoBase in Logo %}
-                rgewfadwrewfqd
-                <a href="{{Logo.hyperlink}}" class="logo">
-                        <p>Title: {{ Logo.title }}</p>
-                        <p>Image URL: {{ Logo.logocover.url }}</p>
-                    {% empty %}
-                        <p>PokeTrove</p>
+<h1>
+{% for logo in Logo %}
+    <a href="{{ logo.hyperlink }}" class="logo">
+      <img src="{{ logo.logocover.url }}">
+    </a>
+{% empty %}
+    PokeTrove
+{% endfor %}
+
+</h1>
 
 
-                </a>
-                    {% endfor %}
-            </h1>
             <ul id="fullNavbar" style="display: flex; flex-direction: row; align-items: center;">
                 {% for column in Header %}
                 <li class="current-list-item" style="color: white;">
@@ -351,14 +350,15 @@ body {
                 <div class="profile-picture">
                     {% for userprofile in NewsProfiles %}
 
-									{% if userprofile.newprofile_profile_picture_url %}
-									<a href="{{ userprofile.newprofile_profile_url }}">
-										<img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
-									</a>
-									{% else %}
-									<!-- Placeholder image or default avatar -->
-									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
-									{% endif %}
+                    {% if userprofile.newprofile_profile_picture_url %}
+                        <a href="{{ userprofile.newprofile_profile_url }}">
+                            <img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;" onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
+                        </a>
+                    {% else %}
+                        <!-- Placeholder image or default avatar -->
+                        <img src="/static/css/images/a.jpg" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
+                    {% endif %}
+
                 </div>
                 <div class="user-info">
                     <h2 class="username">{{ userprofile.user.username }}</h2>
@@ -417,6 +417,7 @@ body {
   const sidebarToggle = document.getElementById("sidebarToggle");
   const sidebar = document.querySelector(".sidebar-container");
   const mainContent = document.querySelector(".main-content");
+  sidebar.classList.add("sidebar-hidden");
 
   // Listen for the transition end event so we can hide the element after sliding out
   sidebar.addEventListener("transitionend", () => {
