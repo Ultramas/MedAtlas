@@ -1,0 +1,157 @@
+
+.eventsection
+{
+  width: 100%;
+  height: 100vh;
+  background-size: cover;
+}
+.eventsection .leftBox
+{
+  width: 50%;
+  height: 100%;
+  float: left;
+  padding: 50px;
+  box-sizing: border-box;
+
+}
+.eventsection .leftBox .content{
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 40px;
+  transition: .5s;
+
+}
+
+.eventsection .leftBox .content:hover
+{
+  background: blue;
+}
+
+.eventsection .leftBox .content h1{
+margin: 0;
+padding: 0;
+font-size: 50px;
+text-transform: uppercase;
+
+}
+
+.eventsection .leftBox .content p{
+margin: 10px 0 0;
+padding: 0;
+font-size: 50px;
+text-transform: uppercase;
+
+}
+
+.eventsection .eventtimeline
+{
+  position: relative;
+  width: 50%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0,5);
+  float: right;
+  box-sizing: border-box;
+
+}
+
+.eventsection .eventtimeline ul
+{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  padding: 40px;
+  box-sizing: bosky-rder-box;
+}
+
+.eventsection .eventtimeline ul li
+{
+  list-style: none;
+  background: #fff;
+  box-sizing: border-box;
+  height: 200px;
+  margin: 15px 0;
+}
+.eventsection .eventtimeline ul li .time
+{
+  position: relative;
+  padding: 20px;
+  background: #262626;
+  box-sizing: border-box;
+  width: 30%;
+  height: 100%;
+  float: left;
+  text-align: center;
+  transition: 0.5s;
+
+}
+
+.eventsection .eventtimeline ul li:hover .time
+{
+  background: blue;
+}
+
+.eventsection .eventtimeline ul li .time h2
+{
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 60px;
+  line-height: 30px;
+}
+
+.eventsection .eventtimeline ul li .time h2 span
+{
+  font-size: 30px;
+}
+
+
+.eventsection .eventtimeline ul li .eventdetails
+{
+  padding: 20px;
+  background: #fff;
+  box-sizing: border-box;
+  width: 70%;
+  height: 100%;
+  float: left;
+}
+
+.eventsection .eventtimeline ul li .eventdetails h3
+{
+  position: relative;
+  margin: 0;
+  padding: 0;
+  font-size: 22px;
+}
+
+.eventsection .eventtimeline ul li .eventdetails p
+{
+  position: relative;
+  margin: 10px 0 0;
+  padding: 0;
+  font-size: 16px;
+}
+
+.eventsection .eventtimeline ul li .eventdetails a
+{
+  display: inline-block;
+  text-decoration: none;
+  text-transform: uppercase;
+  padding: 10px 15px;
+  border: 2px solid #262626;
+  margin-top: 15px;
+  font-size: 18px;
+  transition: 0.5s;
+}
+
+.eventsection .eventtimeline ul li .eventdetails a:hover
+{
+  background: blue;
+  color: #fff;
+  border-color: blue;
+
+}

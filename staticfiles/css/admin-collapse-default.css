@@ -1,0 +1,8 @@
+/* Remove the collapse behavior and keep the fieldset open by default */
+.collapse-open.collapsed .fieldsets.collapsable .collapse-toggle {
+    display: none;  /* Hide the collapse toggle button */
+}
+
+.collapse-open .fieldsets.collapsable .collapse-content {
+    display: block;  /* Show the fieldset content */
+}

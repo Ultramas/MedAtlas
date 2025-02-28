@@ -1,0 +1,117 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    background-color: #0a0a13;
+    background-image:
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+        radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
+    min-height: 100vh;
+    color: white;
+    font-family: 'Cinzel', serif;
+}
+
+.outerContainer {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.inventoryTitle {
+    font-size: 3em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0.5em;
+    color: #bf97ff;
+    text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+}
+
+.outerGridContainer {
+    margin: 1em 0;
+    padding: 1em 0;
+    width: 80%;
+    box-sizing: border-box;
+    border: 0.1em solid black;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15em, 1fr));
+    gap: 0.1em;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+    align-content: center;
+    row-gap: 1.5em;
+}
+
+.gridCardItem {
+    width: 15em;
+    height: 30em;
+    border: 0.1em solid #bf97ff;
+    border-radius: 1em;
+    transition: transform 0.25s ease-in-out;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.gridCardItem:hover {
+    transform: scale(1.015);
+    border: 0.1em solid #4ecca3;
+}
+
+.gridCardImg {
+    height: 12.5em;
+    width: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.gridCardContent {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9em;
+    margin-top: 1em;
+}
+
+.card-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+    margin-top: 1em;
+    align-items: center;
+    width: 14em;
+}
+
+.card-button {
+    border: 2px solid #bf97ff;
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+    width: 100%;
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+    box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+    transform: translateY(-2px);
+    color: #bf97ff;
+}
+
+.card-button:hover {
+    color: white;
+    border-color: #4ecca3;
+    background: linear-gradient(45deg, #95E0C8, #4ECCA3, #2F7A62);
+
+}

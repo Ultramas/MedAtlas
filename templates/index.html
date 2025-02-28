@@ -10,6 +10,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}">
 				<style>
 					.fromorange {
     --tw-gradient-from: #a600c0;
@@ -848,7 +849,7 @@ function toggleChatWidget() {
 }
 
 .cart-btn:hover {
-  background-image: url("{% static 'css/images/invertedfireimage.png' %}"); /* Hover image path */
+  background-image: url("{% static 'css/images/bluefireimage.png' %}"); /* Hover image path */
   opacity: 1; /* Ensure hover image is fully visible */
 }
 
@@ -1229,7 +1230,7 @@ window.onscroll = function() {
         }
 
         .cartBtn:hover {
-          background-image: url("{% static 'css/images/invertedfireimage.png' %}"); /* Hover image path */
+          background-image: url("{% static 'css/images/bluefireimage.png' %}"); /* Hover image path */
           opacity: 1; /* Ensure hover image is fully visible */
         }
       </style>
@@ -1240,41 +1241,44 @@ window.onscroll = function() {
 						<div class="gridCardImg" style="background-image: url('{{ product.image.url }}');"> 
 						</div>
             <div class="gridCardContent">
-              <div class="gridCardTitle">{{product.title}}</div>
+              <h1 class="gridCardTitle">{{product.title}}</h1>
               {% if product.price %}
         {% if product.discount_price %}
-              <p class="product-price">
+              <div class="gridCardPriceWrapper">
         {% if product.discount_price %}
-                     <span style="text-decoration: line-through;">${{ product.price }}</span>
+                     <div class="gridCardDiscountPrice">
                      ${{ product.discount_price }}
+                     </div>
+                     <div class="gridCardPrice"  style="color: rgb(6, 227, 6);">${{ product.price }}</div>
                  {% else %}
-                     {{ product.price }}
+                 <div class="gridCardPrice">${{ product.price }}</div>
                  {% endif %} </p>
+              </div>
           <a href="{{ product.get_profile_url }}" class="cartBtn">
-          <div class="cartBtnFire"></div>Check It Out!</a>
+          <h2 class="cartBtnFire">Check It Out!</h2></a>
 
           {% else %}
-          <p class="product-price"> ${{ product.price }} </p>
+          <div class="gridCardPrice"> ${{ product.price }} </div>
           <a href="{{ product.get_profile_url }}" class="cartBtn">
-          <div class="cartBtnFire" style=background-image: url("{% static 'css/images/fireimage.png' %}"); /* Default image */></div> Check It Out!</a>
+          <h2 class="cartBtnFire" style=background-image: url("{% static 'css/images/fireimage.png' %}"); /* Default image */>Check It Out</h2> !</a>
 
          {% endif %}
          {% else %}
           {% if product.discount_currency_price %}
-              <p class="product-price">
+              <div class="gridCardPrice"   style="color: rgb(6, 227, 6);">
                           {% if product.discount_currency_price %}
-                     <span style="text-decoration: line-through;">💎{{ product.currency_price }}</span>
+                     <div class="gridCardDiscountPrice">💎{{ product.currency_price }}</div>
                      💎{{ product.discount_currency_price }}
                  {% else %}
                      💎{{ product.currency_price }}
-                 {% endif %} </p>
-          <a href="{{ product.get_profile_url }}" class="cart-btn">
-                               <div class="cart-btn-fire"></div>Check It Out!</a>
+                 {% endif %} </div>
+          <a href="{{ product.get_profile_url }}" class="cartBtn">
+                               <h2 class="cartBtnFire">Check It Out!</h2></a>
 
           {% else %}
-          <p class="product-price"> 💎{{ product.currency_price }} </p>
-          <a href="{{ product.get_profile_url }}" class="cart-btn">
-                               <div class="cart-btn-fire"></div> Check It Out!</a>
+          <div class="gridCardPrice"> 💎{{ product.currency_price }} </div>
+          <a href="{{ product.get_profile_url }}" class="cartBtn">
+                               <h2 class="cartBtnFire">Check It Out!</h2> </a>
          {% endif %}
          {% endif %}
             </div>
@@ -1353,7 +1357,7 @@ window.onscroll = function() {
 
 	<!-- advertisement section -->
 
-<div class="container" style="display: none;"> <!--video link temporarily disabled-->
+<div class="container">
     <div class="row">
         <!-- Left Column (Video Section) -->
         <div class="col-lg-6 col-md-12" style="display: flex; flex-direction: row;">

@@ -1,0 +1,7 @@
+/* dynamic_css.css */
+{% for BackgroundImage in BackgroundImageBase %}
+.BackgroundImage{{ BackgroundImage.position }} {
+    background-image: url('{{ BackgroundImage.image.url }}');
+    /* Set width and height as needed */
+}
+{% endfor %}
