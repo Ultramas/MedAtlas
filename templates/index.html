@@ -1455,6 +1455,7 @@ window.onscroll = function() {
     <!-- end cart banner section -->
 
 	<!-- latest news -->
+			<!--
 	<div class="latest-news pt-150 pb-150">
 		<div class="container">
 
@@ -1471,10 +1472,11 @@ window.onscroll = function() {
 						{% endfor %}
 					</div>
 				</div>
-			</div>
+			</div>-->
 
 	<!-- latest news -->
-	<div class="latest-news mt-150 mb-150" style="margin-top: -3%;">
+
+			<!--<div class="latest-news mt-150 mb-150" style="margin-top: -3%;">
 		<div class="container">
 			<div class="row">
 	{% for newprofile in News %}
@@ -1505,7 +1507,6 @@ window.onscroll = function() {
 										<img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
 									</a>
 									{% else %}
-									<!-- Placeholder image or default avatar -->
 									<img src="{% static 'css/images/a.jpg' %}" alt="qwww Avatar" width="50" height="50" style="border-radius: 50px;">>
 									{% endif %}
 									<h5 style="">{{ newprofile.name }}</h5>
@@ -1531,7 +1532,7 @@ window.onscroll = function() {
 			</div>
 		</div>
 	</div>
-</div>
+</div>-->
 	<!-- end latest news -->
 
 	<!-- trending communities carousel -->

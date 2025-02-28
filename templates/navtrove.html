@@ -296,8 +296,7 @@ body {
 <h1>
 {% for logo in Logo %}
     <a href="{{ logo.hyperlink }}" class="logo">
-      <p>Title: {{ logo.title }}</p>
-      <p>Image URL: {{ logo.logocover.url }}</p>
+      <img src="{{ logo.logocover.url }}">
     </a>
 {% empty %}
     PokeTrove
@@ -418,6 +417,7 @@ body {
   const sidebarToggle = document.getElementById("sidebarToggle");
   const sidebar = document.querySelector(".sidebar-container");
   const mainContent = document.querySelector(".main-content");
+  sidebar.classList.add("sidebar-hidden");
 
   // Listen for the transition end event so we can hide the element after sliding out
   sidebar.addEventListener("transitionend", () => {
