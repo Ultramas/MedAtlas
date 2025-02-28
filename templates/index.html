@@ -188,7 +188,15 @@
         .nav-links a:hover {
         }
 
-
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            transition: width 0.3s ease;
+        }
 
         .nav-links a:hover::after {
             width: 100%;
@@ -413,6 +421,16 @@
             position: absolute;
             bottom: -15px;
             left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .nav-links h1::after {
+            content: '';
+            position: absolute;
+            left: 10%;
             transform: translateX(-50%);
             width: 200px;
             height: 2px;
