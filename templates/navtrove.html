@@ -1,5 +1,10 @@
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaming Sidebar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --background: #0a0a13;
@@ -8,295 +13,661 @@
             --secondary: #ff6b6b;
             --accent: #4ecca3;
             --card-bg: #1a1a2e;
+            --glow-primary: 0 0 15px rgba(191, 151, 255, 0.7);
+            --glow-accent: 0 0 15px rgba(78, 204, 163, 0.7);
+            --border-gradient: linear-gradient(135deg, #bf97ff, #4ecca3);
+            --sidebar-width: 320px;
+            --sidebar-collapsed-width: 80px;
         }
-/* Add these styles to your CSS file if you're not using Tailwind */
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
 
-.grid {
-  display: grid;
-  gap: 1.5rem;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', 'Orbitron', sans-serif;
+        }
 
-@media (min-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
 
-@media (min-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
+        /* Main Navigation */
+        .main-menu {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(
+                to right,
+                rgba(191, 151, 255, 0.1),
+                rgba(255, 255, 255, 0.05),
+                rgba(191, 151, 255, 0.1)
+            );
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(191, 151, 255, 0.3);
+        }
 
-@media (min-width: 1280px) {
-  .grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 3rem;
+        }
 
-.flex {
-  display: flex;
-}
+        .nav-links h1 {
+            position: relative;
+        }
 
-.flex-col {
-  flex-direction: column;
-}
+        .nav-links h1::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
 
-.items-center {
-  align-items: center;
-}
+        .navLogo {
+            background-size: 100% auto;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 1.2em;
+            width: 2em;
+            margin-left: 48%;
+        }
 
-.w-full {
-  width: 100%;
-}
+        /* Sidebar Styles */
+        .sidebar-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background: linear-gradient(180deg, #0a0a13 0%, #12121f 100%);
+            box-shadow: 5px 0 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border-right: 1px solid rgba(191, 151, 255, 0.2);
+        }
 
-.h-full {
-  height: 100%;
-}
+        .sidebar-hidden {
+            transform: translateX(calc(-1 * var(--sidebar-width)));
+        }
 
-.relative {
-  position: relative;
-}
+        .sidebar-collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
 
-.absolute {
-  position: absolute;
-}
+        .sidebar {
+            height: 100%;
+            width: 100%;
+            padding: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--background);
+        }
 
-.inset-0 {
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
+        .sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
 
-.pt-\[100\%\] {
-  padding-top: 100%;
-}
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(10, 10, 19, 0.5);
+        }
 
-.object-cover {
-  object-fit: cover;
-}
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
 
-.text-center {
-  text-align: center;
-}
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: rgba(10, 10, 19, 0.8);
+            color: var(--primary);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(191, 151, 255, 0.3);
+        }
 
-.line-through {
-  text-decoration: line-through;
-}
+        .sidebar-toggle:hover {
+            background: rgba(191, 151, 255, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(191, 151, 255, 0.5);
+        }
 
-.text-white {
-  color: white;
-}
+        .sidebar-toggle.active {
+            left: calc(var(--sidebar-width) - 60px);
+        }
 
-.text-gray-400 {
-  color: #9ca3af;
-}
+        .sidebar-toggle.collapsed {
+            left: calc(var(--sidebar-collapsed-width) - 60px);
+        }
 
-.text-green-400 {
-  color: #4ade80;
-}
+        /* User Profile Section */
+        .user-profile {
+            position: relative;
+            padding: 25px 20px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(191, 151, 255, 0.1), rgba(10, 10, 19, 0.9));
+            border-bottom: 1px solid rgba(191, 151, 255, 0.2);
+            overflow: hidden;
+        }
 
-.bg-gray-800 {
-  background-color: #1f2937;
-}
+        .user-profile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border-gradient);
+        }
 
-.rounded-lg {
-  border-radius: 0.5rem;
-}
+        .user-profile::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(191, 151, 255, 0.5), transparent);
+        }
 
-.overflow-hidden {
-  overflow: hidden;
-}
+        .profile-picture {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+            border: 2px solid transparent;
+            background: var(--border-gradient);
+            padding: 2px;
+            transition: all 0.3s ease;
+        }
 
-.shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
+        .profile-picture:hover {
+            transform: scale(1.05);
+            box-shadow: var(--glow-primary);
+        }
 
-.p-4 {
-  padding: 1rem;
-}
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
 
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
+        .profile-picture::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(191, 151, 255, 0.5), rgba(78, 204, 163, 0.5));
+            z-index: -1;
+            animation: pulse 2s infinite;
+        }
 
-.mb-3 {
-  margin-bottom: 0.75rem;
-}
+        .level-badge {
+            position: absolute;
+            z-index: 200;
+            bottom: -5px;
+            right: -5px;
+            background: var(--card-bg);
+            color: var(--accent);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 10px rgba(78, 204, 163, 0.5);
+            font-size: 14px;
+        }
 
-.mt-auto {
-  margin-top: auto;
-}
+        .user-info {
+            text-align: center;
+            width: 100%;
+        }
 
-.mr-2 {
-  margin-right: 0.5rem;
-}
+        .username {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
+            position: relative;
+            display: inline-block;
+        }
 
-.py-2 {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
+        .username::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
 
-.px-4 {
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
+        .user-stats {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
 
-.rounded-md {
-  border-radius: 0.375rem;
-}
+        .user-stat {
+            background: rgba(10, 10, 19, 0.6);
+            padding: 8px 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(191, 151, 255, 0.3);
+            transition: all 0.3s ease;
+        }
 
-.bg-gradient-to-r {
-  background-image: linear-gradient(to right, var(--tw-gradient-stops));
-}
+        .user-stat:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--glow-primary);
+            border-color: var(--primary);
+        }
 
-.from-orange-500 {
-  --tw-gradient-from: #f97316;
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(249, 115, 22, 0));
-}
+        .user-stat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(191, 151, 255, 0.1), transparent);
+            z-index: -1;
+        }
 
-.to-red-600 {
-  --tw-gradient-to: #dc2626;
-}
+        .user-stat-icon {
+            font-size: 1.2rem;
+        }
 
-.transition-transform {
-  transition-property: transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
+        /* Navigation Section */
+        .sidebar-nav {
+            padding: 0;
+            margin-bottom: 20px;
+        }
 
-.hover\:scale-105:hover {
-  transform: scale(1.05);
-}
+        .nav-section {
+            margin-bottom: 20px;
+        }
 
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
+        .section-title {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary);
+            position: relative;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 0.6;
-  }
-}
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+        }
+
+        .section-title i {
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .nav-item {
+            list-style: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--foreground);
+            position: relative;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            gap: 15px;
+        }
+
+        .nav-link:hover {
+            background: rgba(191, 151, 255, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, rgba(191, 151, 255, 0.2), transparent);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .nav-link i {
+            font-size: 1.2rem;
+            min-width: 25px;
+            text-align: center;
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover i {
+            transform: translateX(3px);
+            color: var(--accent);
+        }
+
+        .nav-link .nav-text {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .nav-badge {
+            background: var(--secondary);
+            color: var(--foreground);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* Collection Section */
+        .collection {
+            padding: 0 20px 20px;
+        }
+
+        .collection-title {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .collection-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        .view-collection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(191, 151, 255, 0.2), rgba(10, 10, 19, 0.8));
+            color: var(--foreground);
+            padding: 12px;
+            border-radius: 10px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(191, 151, 255, 0.3);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-collection::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(191, 151, 255, 0.3), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .view-collection:hover::before {
+            left: 100%;
+        }
+
+        .view-collection:hover {
+            background: linear-gradient(135deg, rgba(191, 151, 255, 0.3), rgba(10, 10, 19, 0.9));
+            transform: translateY(-3px);
+            box-shadow: var(--glow-primary);
+            border-color: var(--primary);
+        }
+
+        .view-collection i {
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            padding: 0 20px 20px;
+        }
+
+        .progress-title {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--foreground);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 4px;
+            position: relative;
+            width: 65%; /* Example value */
+            transition: width 1s ease;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--foreground);
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* Collapsed Sidebar Styles */
+        .sidebar-collapsed .nav-text,
+        .sidebar-collapsed .username,
+        .sidebar-collapsed .user-stats,
+        .sidebar-collapsed .section-title::after,
+        .sidebar-collapsed .collection-title::after,
+        .sidebar-collapsed .progress-section,
+        .sidebar-collapsed .nav-badge {
+            display: none;
+        }
+
+        .sidebar-collapsed .profile-picture {
+            width: 50px;
+            height: 50px;
+            margin: 10px auto;
+        }
+
+        .sidebar-collapsed .user-profile {
+            padding: 10px;
+        }
+
+        .sidebar-collapsed .section-title {
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+        .sidebar-collapsed .nav-link {
+            justify-content: center;
+            padding: 15px 0;
+            border-left: none;
+            border-bottom: 3px solid transparent;
+        }
+
+        .sidebar-collapsed .nav-link:hover,
+        .sidebar-collapsed .nav-link.active {
+            border-left: none;
+            border-bottom-color: var(--primary);
+        }
+
+        .sidebar-collapsed .nav-link i {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .sidebar-collapsed .view-collection {
+            padding: 12px 0;
+            justify-content: center;
+        }
+
+        .sidebar-collapsed .view-collection span {
+            display: none;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+            100% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 5px rgba(191, 151, 255, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(191, 151, 255, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 5px rgba(191, 151, 255, 0.5);
+            }
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .main-content-expanded {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar-container {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar-toggle.active {
+                left: calc(300px - 60px);
+            }
+            
+            .sidebar-collapsed {
+                width: 70px;
+            }
+            
+            .main-content-expanded {
+                margin-left: 0;
+            }
+        }
 
 
-.sidebar-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  z-index: 1000;
-  overflow-y: auto;
-  display: block;
-  padding: 5px;
-  background: #0a0a13;
-  transform: translateX(0); /* set the initial state */
-  transition: transform 0.3s ease-in-out; /* add transition here */
-}
 
-.sidebar-hidden {
-  transform: translateX(-100%);
-}
-.sidebar {
-    padding: 8px;
-}
+        .main-menu {
+            display: flex;
+			position: fixed;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(
+                to right,
+                rgba(191, 151, 255, 0.1),
+                rgba(255, 255, 255, 0.05),
+                rgba(191, 151, 255, 0.1)
+            );
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-
-.sidebar-toggle {
-  position: absolute;
-  top: 25px;
-  left: 25px;
-  z-index: 1001;
-  background-color: #fff;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  transition: transform 0.3s ease-in-out;
-  padding: 0px 10px;
-  border-radius: 5px;
-}
-
-
-.main-content {
-  margin-left: 300px;
-  transition: margin-left 0.3s ease-in-out;
-}
-
-.main-content-expanded {
-  margin-left: 250px;
-  transition: margin-left 0.3s ease-in-out;
-}
-
-
-.nav-links{
-}
-.nav-links h1::after {
-}
-
-/* Ensure the sidebar is scrollable independently */
-body {
-  overflow-y: auto;
-}
-
-.sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background-color: #888;
-  border-radius: 3px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-  background-color: #f1f1f1;
-}
-
-.nav-toggle {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        z-index: 1000;
-        padding: 10px 15px;
-        background-color: #333;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    #simpleNavbar {
-        display: none;
-    }
-
-    #simpleNavbar.active {
-        display: flex;
-    }
-
-    #fullNavbar.inactive {
-        display: none;
-    }
-
-    .navLogo {
-        background-size: 100% auto;
-        background-position: center;
-        background-repeat: no-repeat;
-        height: 3em;
-        width: 5em;
-
-    }
     </style>
 </head>
+<body>
+    <!-- Main Navigation -->
 
 <nav class="main-menu" style="z-index: 100;">
         <div class="nav-links">
@@ -318,7 +689,12 @@ body {
             <ul id="fullNavbar" style="display: flex; flex-direction: row; align-items: center;">
                 {% for column in Header %}
                 <li class="current-list-item" style="color: white;">
-                    <a href="#{{ column.section }}">{{ column.text }}</a>
+                    <a href="#{{ column.section }}" style="color: var(--light);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 1px;
+    transition: all 0.3sease;">{{ column.text }}</a>
                     <ul class="sub-menu">
                         {% for row in DropDown %}
                             {% if row.row == column.row %}
@@ -351,106 +727,221 @@ body {
             </ul>
         </div>
     </nav>
-        <div class="container" style="height: 0%;">
-          <button id="sidebarToggle" class="sidebar-toggle"  style="position: fixed; background-color: #0a0a13; color: #bf97ff;
-    border: none; box-shadow: inset 0 0 0 1.5px #bf97ff; /* Creates an inward border effect */">☰</button>
-        <div class="sidebar-container">
-          <aside class="sidebar">
-            <div class="user-profile" style="margin-top: 5px;">
-                <div class="profile-picture">
-                    {% for userprofile in NewsProfiles %}
+    <!-- Sidebar Toggle Button -->
+    <button id="sidebarToggle" class="sidebar-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar-container sidebar-hidden">
+        <aside class="sidebar">
+            <!-- User Profile Section -->
+            <div class="user-profile">
+                 <div class="profile-picture">
+               {% for userprofile in NewsProfiles %}
 
                     {% if userprofile.newprofile_profile_picture_url %}
                         <a href="{{ userprofile.newprofile_profile_url }}">
-                            <img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;" onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
+                            <img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;" onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
+
+                          <div class="level-badge">42</div>
                         </a>
+
                     {% else %}
                         <!-- Placeholder image or default avatar -->
-                        <img src="/static/css/images/a.jpg" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
+                        <img src="/static/css/images/a.jpg" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;">
                     {% endif %}
 
                 </div>
+
                 <div class="user-info">
-                    <h2 class="username">{{ userprofile.user.username }}</h2>
+                    <h2 class="username">{{user.username}}</h2>
                     <div class="user-stats">
                         <div class="user-stat">
-                            <span class="user-stat-icon">💎</span>
-                        <div class="sellupdate" id="sellupdate">
-                            <span id="currency-amount">{{ userprofile.currency_amount }}</span>
-                        </div>
+                            <i class="fas fa-gem user-stat-icon" style="color: var(--primary);"></i>
+                            <div class="sellupdate" id="sellupdate">
+                                <span id="currency-amount">{{ userprofile.currency_amount }}</span>
+                            </div>
                         </div>
                         <div class="user-stat">
-                            <span class="user-stat-icon">🏆</span>
-											{{userprofile.level}}
+                            <i class="fas fa-trophy user-stat-icon" style="color: var(--accent);"></i>
+                            <span>{{userprofile.level}}</span>
                         </div>
-									{% endfor %}
                     </div>
                 </div>
             </div>
+                {% endfor %}
 
-            <div class="filters">
-               <!-- <button id="navToggle" class="nav-toggle" style="position: fixed;">Toggle Navbar</button>
+            <!-- Navigation Section -->
+            <div class="sidebar-nav">
+                <!-- Main Navigation -->
+                <div class="nav-section">
+                    <h3 class="section-title"><i class="fas fa-compass"></i> Navigation</h3>
+                    <ul>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active">
+                                <i class="fas fa-home"></i>
+                                <span class="nav-text">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-store"></i>
+                                <span class="nav-text">Marketplace</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span class="nav-text">Trades</span>
+                                <span class="nav-badge">3</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-users"></i>
+                                <span class="nav-text">Community</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
 
-                <h2>Filters</h2>
-                <input type="search" placeholder="Search..." class="search-box">
+                <!-- Collection Navigation -->
+                <div class="nav-section">
+                    <h3 class="section-title"><i class="fas fa-layer-group"></i> Collections</h3>
+                    <ul>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-fire"></i>
+                                <span class="nav-text">Rare Items</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-star"></i>
+                                <span class="nav-text">Favorites</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-history"></i>
+                                <span class="nav-text">Recent</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
 
-                <h3 class="collection-title">Sort By</h3>
-                <select class="type-select" style="color: var(--primary)">
-                    <option>Most Recent First</option>
-                    <option>Highest Value First</option>
-                    <option>Lowest Value First</option>
-                    <option>A-Z</option>
-                    <option>Z-A</option>
-                </select>
-
-<div class="view-toggle">
-    <button id="toggleViewBtn" class="toggle-btn">Toggle View</button>
-</div>
-
--->
+                <!-- Settings Navigation -->
+                <div class="nav-section">
+                    <h3 class="section-title"><i class="fas fa-cog"></i> Settings</h3>
+                    <ul>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-user-cog"></i>
+                                <span class="nav-text">Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-bell"></i>
+                                <span class="nav-text">Notifications</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-shield-alt"></i>
+                                <span class="nav-text">Security</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span class="nav-text">Logout</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
+            <!-- Progress Section -->
+            <div class="progress-section">
+                <h3 class="section-title"><i class="fas fa-chart-line"></i> Progress</h3>
+                <div class="progress-title">
+                    <span>Level Progress</span>
+                    <span>65%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+
+            <!-- Collection Section -->
             <div class="collection">
                 <h2 class="collection-title">My Collection</h2>
-                <a href="{% url 'showcase:inventory' %}" class="collection-item">
                 <button class="view-collection">
-
-                    🐉 View Collection (0)
+                    <i class="fas fa-dragon"></i>
+                    <span>View Collection (42)</span>
                 </button>
-                    </a>
             </div>
         </aside>
-        </div>
-        </div>
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-  const sidebarToggle = document.getElementById("sidebarToggle");
-  const sidebar = document.querySelector(".sidebar-container");
-  const mainContent = document.querySelector(".main-content");
-  sidebar.classList.add("sidebar-hidden");
-
-  // Listen for the transition end event so we can hide the element after sliding out
-  sidebar.addEventListener("transitionend", () => {
-    if (sidebar.classList.contains("sidebar-hidden")) {
-      sidebar.style.display = "none";
-    }
-  });
-
-  sidebarToggle.addEventListener("click", () => {
-    // If the sidebar is hidden, show it first and then remove the hiding class to slide in.
-    if (sidebar.style.display === "none") {
-      sidebar.style.display = "block"; // make visible immediately
-      // Trigger a reflow to ensure the browser registers the change in display
-      void sidebar.offsetWidth;
-      sidebar.classList.remove("sidebar-hidden");
-      mainContent.classList.remove("main-content-expanded");
-    } else {
-      // Slide out the sidebar then hide it when animation completes
-      sidebar.classList.add("sidebar-hidden");
-      mainContent.classList.add("main-content-expanded");
-    }
-  });
-});
+    </div>
 
 
-</script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const sidebarToggle = document.getElementById("sidebarToggle");
+            const sidebar = document.querySelector(".sidebar-container");
+            const mainContent = document.querySelector(".main-content");
+            let isCollapsed = false;
+
+            // Function to toggle sidebar visibility
+            function toggleSidebar() {
+                if (sidebar.classList.contains("sidebar-hidden")) {
+                    // Show sidebar
+                    sidebar.style.display = "block";
+                    setTimeout(() => {
+                        sidebar.classList.remove("sidebar-hidden");
+                        sidebarToggle.classList.add("active");
+                        mainContent.classList.remove("main-content-expanded");
+                    }, 10);
+                } else if (isCollapsed) {
+                    // Expand sidebar from collapsed state
+                    sidebar.classList.remove("sidebar-collapsed");
+                    sidebarToggle.classList.remove("collapsed");
+                    mainContent.classList.remove("main-content-expanded");
+                    isCollapsed = false;
+                } else {
+                    // Collapse sidebar
+                    sidebar.classList.add("sidebar-collapsed");
+                    sidebarToggle.classList.add("collapsed");
+                    mainContent.classList.add("main-content-expanded");
+                    isCollapsed = true;
+                }
+            }
+
+            // Double-click to hide sidebar completely
+            sidebarToggle.addEventListener("dblclick", () => {
+                sidebar.classList.add("sidebar-hidden");
+                sidebarToggle.classList.remove("active");
+                sidebarToggle.classList.remove("collapsed");
+                mainContent.classList.remove("main-content-expanded");
+                isCollapsed = false;
+                
+                // Delay hiding to allow animation to complete
+                setTimeout(() => {
+                    if (sidebar.classList.contains("sidebar-hidden")) {
+                        sidebar.style.display = "none";
+                    }
+                }, 400);
+            });
+
+            // Single click to toggle between expanded and collapsed
+            sidebarToggle.addEventListener("click", toggleSidebar);
+
+            // Initialize sidebar state
+            toggleSidebar(); // Show sidebar on load
+        });
+    </script>
+</body>
+</html>
