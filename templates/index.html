@@ -761,6 +761,9 @@ p.blog-meta span {
   }
 }
 
+		.slot-container{
+		top: 100px;
+		}
     </style>
 
   	{% for BackgroundImage in Titles %}
@@ -786,11 +789,11 @@ p.blog-meta span {
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
 <script>
-	$(document).ready(function() {
+$(document).ready(function() {
     $('.popup-youtube').magnificPopup({
         type: 'iframe',
         mainClass: 'mfp-fade',
-        removalDelay: 160,
+        removalDelay: 300,
         preloader: false,
         fixedContentPos: false
     });
@@ -986,6 +989,46 @@ function toggleChatWidget() {
     .single-product-item {
       height: 50em;
     }
+
+
+  #slots-animation {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  }
+
+  .slot-container {
+    height: 50px;
+    position: relative;
+    display: inline-block;
+    margin: 80px;
+  }
+
+  .slot {
+    position: absolute;
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    min-width: 150px;
+  }
+
+  @keyframes spin {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-100%); }
+  }
+
+  .spinning {
+    animation: spin 0.1s linear infinite;
+  }
+
+  .slot-item {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 </style>
 
 <script>
@@ -1001,6 +1044,121 @@ window.onscroll = function() {
         currency_designation.style.color = 'black';
     }
 };
+
+
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const wordLists = [
+      ['Discover', 'Collect', 'Hit'],
+      ['Vintage', 'Nostalgic', 'Modern'],
+      ['Pokemon', 'Magic', 'Yu-Gi-Oh']
+    ];
+
+    const slots = [
+      document.getElementById('slot1'),
+      document.getElementById('slot2'),
+      document.getElementById('slot3')
+    ];
+
+    // Initialize slots with all possible words
+    function initializeSlots() {
+      slots.forEach((slot, slotIndex) => {
+        const list = wordLists[slotIndex];
+        slot.innerHTML = '';
+
+        // Add each word as a slot item
+        list.forEach(word => {
+          const item = document.createElement('div');
+          item.className = 'slot-item';
+          item.textContent = word;
+          slot.appendChild(item);
+        });
+
+        // Clone the first few items and add them to the end for smooth looping
+        for (let i = 0; i < 3; i++) {
+          const clone = list[i % list.length];
+          const item = document.createElement('div');
+          item.className = 'slot-item';
+          item.textContent = clone;
+          slot.appendChild(item);
+        }
+      });
+    }
+
+    // Spin animation for a single slot
+    function spinSlot(slotIndex, duration = 1000) {
+      const slot = slots[slotIndex];
+      const list = wordLists[slotIndex];
+      const container = slot.parentElement;
+
+      // Reset position
+      slot.style.transform = 'translateY(0)';
+
+      // Create temporary items for spinning
+      slot.innerHTML = '';
+
+      // Generate random sequence for spinning effect
+      const spinSequence = [];
+      for (let i = 0; i < 20; i++) {
+        spinSequence.push(list[Math.floor(Math.random() * list.length)]);
+      }
+
+      // Add final selected word
+      const selectedWord = list[Math.floor(Math.random() * list.length)];
+      spinSequence.push(selectedWord);
+
+      // Create elements for spinning
+      spinSequence.forEach(word => {
+        const item = document.createElement('div');
+        item.className = 'slot-item';
+        item.textContent = word;
+        slot.appendChild(item);
+      });
+
+      // Start spinning
+      slot.classList.add('spinning');
+
+      // Stop spinning after duration
+      setTimeout(() => {
+        slot.classList.remove('spinning');
+
+        // Show only the final word
+        slot.innerHTML = '';
+        const finalItem = document.createElement('div');
+        finalItem.className = 'slot-item';
+        finalItem.textContent = selectedWord;
+        slot.appendChild(finalItem);
+
+        // Apply a small bounce effect
+        slot.animate([
+          { transform: 'translateY(-10px)' },
+          { transform: 'translateY(5px)' },
+          { transform: 'translateY(0)' }
+        ], {
+          duration: 300,
+          easing: 'ease-out'
+        });
+      }, duration);
+    }
+
+    // Initialize all slots
+    initializeSlots();
+
+    // Initial spin for all slots
+    slots.forEach((_, index) => {
+      spinSlot(index, 1200 + index * 300);
+    });
+
+    // Set interval to spin all slots every 3 seconds
+    setInterval(() => {
+      slots.forEach((_, index) => {
+        // Stagger the spins slightly
+        setTimeout(() => {
+          spinSlot(index, 1200);
+        }, index * 300);
+      });
+    }, 5000);
+  });
 </script>
 </head>
 <body>
@@ -1025,7 +1183,17 @@ window.onscroll = function() {
      style="background: url('{% if BackgroundImage.file and BackgroundImage.file.url %}{{ BackgroundImage.file.url }}{% else %}{{ BackgroundImage.cover.url }}{% endif %}');
             background-size: cover;
             background-attachment: fixed;">
-
+			<div id="slots-animation" style=" width: 100%; text-align: center; top: 2250px; z-index: 10;">
+			  <div class="slot-container">
+				<div id="slot1" class="slot"></div>
+			  </div>
+			  <div class="slot-container">
+				<div id="slot2" class="slot"></div>
+			  </div>
+			  <div class="slot-container">
+				<div id="slot3" class="slot"></div>
+			  </div>
+			</div>
                 {% endif %}
             {% endif %}
         {% endfor %}
@@ -1256,7 +1424,7 @@ window.onscroll = function() {
 			<div class="outerGridContainer">
 				      {% for product in Products %}
 				<div class="gridCardItem">
-						<div class="gridCardImg" style="background-image: url('{{ product.image.url }}');"> 
+						<div class="gridCardImg" style="background-image: url('{{ product.image.url }}');">
 						</div>
             <div class="gridCardContent">
               <h1 class="gridCardTitle">{{product.title}}</h1>
@@ -1377,7 +1545,7 @@ window.onscroll = function() {
 
 <div class="container">
     <div class="row">
-        <!-- Left Column (Video Section) -->
+ <!-- Left Column (Video Section) -->
         <div class="col-lg-6 col-md-12" style="display: flex; flex-direction: row;">
             {% for BackgroundImage in Background %}
                 {% if BackgroundImage.position == 5 %}
