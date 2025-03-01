@@ -1008,7 +1008,8 @@ window.onscroll = function() {
 					<div class="section-title">
 						<br>
 						<br>
-						<h3><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h3>
+                        <h3 style="color: #e5e4e2;"><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h3>
+						<!-- <h3><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h3> -->
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
 						{% if BackgroundImage.section == 11 %}
@@ -1021,7 +1022,7 @@ window.onscroll = function() {
 			</div>
 
             <div class="marketplaceOuterContainer">
-                <h2 style="margin-top: 30%; text-align: center;"><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h2>
+                <!-- <h2 style="text-align: center;"><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h2> -->
                 <div class="outerGridContainer" style="width: 40%;">
                 {% for Game in FeaturedGame %}
                     <div class="gridCardItem">
@@ -1159,7 +1160,7 @@ window.onscroll = function() {
 	<!-- end shop banner -->
 
 	<!-- testimonail-section -->
-	<div class="testimonail-section mt-150 mb-150">
+	<!-- <div class="testimonail-section mt-150 mb-150">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-10 offset-lg-1 text-center">
@@ -1180,7 +1181,7 @@ window.onscroll = function() {
 									  </div>
                                   </a>
                                 {% else %}
-                                   <!-- Placeholder image or default avatar -->
+                       
                                   <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
                                 {% endif %}
 
@@ -1207,14 +1208,11 @@ window.onscroll = function() {
 			</div>
 		</div>
 	</div>
-	<!-- end testimonail-section -->
 
-	<!-- advertisement section -->
 
 <div class="container">
     <div class="row">
- <!-- Left Column (Video Section) -->
-        <div class="col-lg-6 col-md-12" style="display: flex; flex-direction: row;">
+        <<div class="col-lg-6 col-md-12" style="display: flex; flex-direction: row;">
             {% for BackgroundImage in Background %}
                 {% if BackgroundImage.position == 5 %}
                     <div class="abt-bg w-100" style="background: url({{ BackgroundImage.cover.url }}); background-size: cover; min-height: 400px;">
@@ -1225,7 +1223,6 @@ window.onscroll = function() {
                 {% endif %}
             {% endfor %}
 
-            <!-- Video Popup -->
             {% for BackgroundImage in Background %}
                 {% if BackgroundImage.page == "index.html" and BackgroundImage.position == 6 %}
                     <div id="video-popup" class="mfp-hide">
@@ -1238,11 +1235,10 @@ window.onscroll = function() {
                     </div>
                 {% endif %}
             {% endfor %}
-        </div>
+        </div> 
 
-        <!-- Right Column (Content Section) -->
         <div class="col-lg-6 col-md-12 d-flex align-items-center">
-            <div class="abt-text py-5 px-lg-5 w-100">
+            <div class="abt-text py-5 px-lg-5 w-100" style="display: flex; flex-direction: column; justify-content: center; align-items: center">
                 <p class="top-sub">Est 2024</p>
                 <h2 class="mb-4" style="color: #e5e4e2;">We are <span style="color: #bf97ff;">PokeTrove</span></h2>
 
@@ -1262,20 +1258,20 @@ window.onscroll = function() {
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 	<!-- end advertisement section -->
 
 
 	<!-- end advertisement section -->
 	<!-- cart banner section -->
-	<section class="cart-banner pt-100 pb-100">
+	<!-- <section class="cart-banner pt-100 pb-100">
 
 	  	{% for BackgroundImage in Events %}
-        {% if BackgroundImage.page == "index.html" %}
-    	<div class="container">
+        {% if BackgroundImage.page == "index.html" %} -->
+    	<!-- <div class="container">
         	<div class="row clearfix">
-            	<!--Image Column-->
+            	
             	<div class="image-column col-lg-6">
                 	<div class="image">
                     	<div class="price-box">
@@ -1288,23 +1284,24 @@ window.onscroll = function() {
                     	<img src="{{BackgroundImage.cover.url}}" style="margin-left: 32%;" alt="">
                     </div>
                 </div>
-                <!--Content Column-->
+                
+
                 <div class="content-column col-lg-6">
 					<h3 style="width: 1030%;"><span class="orange-text">{{BackgroundImage.name}}</span> Event</h3>
                     <h4>Hosted By {{BackgroundImage.user}}</h4>
                     <div class="text">{{BackgroundImage.description}}</div>
-                    <!--Countdown Timer-->
+                 
                     <div class="time-counter"><div class="time-countdown clearfix" data-countdown="2020/2/01"><div class="counter-column"><div class="inner"><span class="count">00</span>Days</div></div> <div class="counter-column"><div class="inner"><span class="count">00</span>Hours</div></div>  <div class="counter-column"><div class="inner"><span class="count">00</span>Mins</div></div>  <div class="counter-column"><div class="inner"><span class="count">00</span>Secs</div></div></div></div>
 
                     <h5>Event on {{BackgroundImage.date}} at {{BackgroundImage.time}}</h5>
                 	<a href="events.html" class="cart-btn mt-3"><i class="fas fa-shopping-cart"></i> What's a {{BackgroundImage.name}}??</a>
-                </div>
+                </div> 
 				{% endif %}
 				{% endfor %}
 
             </div>
         </div>
-    </section>
+    </section> -->
     <!-- end cart banner section -->
 
 	<!-- latest news -->
@@ -1389,7 +1386,7 @@ window.onscroll = function() {
 	<!-- end latest news -->
 
 	<!-- trending communities carousel -->
-	<div class="logo-carousel-section">
+	<!-- <div class="logo-carousel-section">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-12">
@@ -1457,11 +1454,11 @@ window.onscroll = function() {
 				</div>
 			</div>
 		</div>
-	</div>
+	</div> -->
 	<!-- end logo carousel -->
 
 	<!-- footer -->
-	<div class="footer-area" style="margin-bottom: -450px;">
+	<div class="footer-area" style="">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-3 col-md-6">
