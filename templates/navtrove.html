@@ -627,19 +627,19 @@
                 width: 100%;
                 max-width: 300px;
             }
-            
+
             .main-content {
                 margin-left: 0;
             }
-            
+
             .sidebar-toggle.active {
                 left: calc(300px - 60px);
             }
-            
+
             .sidebar-collapsed {
                 width: 70px;
             }
-            
+
             .main-content-expanded {
                 margin-left: 0;
             }
@@ -716,7 +716,6 @@
                     </ul>
                 </li>
                 {% endfor %}
-                <!-- ... (rest of your existing navbar code) ... -->
             </ul>
             <ul id="simpleNavbar" style="display: none; flex-direction: row; align-items: center;">
                 {% for column in Header %}
@@ -758,7 +757,7 @@
                     <h2 class="username">{{user.username}}</h2>
                     <div class="user-stats">
                         <div class="user-stat">
-                            <i class="fas fa-gem user-stat-icon" style="color: var(--primary);"></i>
+                            <i class="fas fa-gem user-stat-icon" style="color: #ED2221;"></i>
                             <div class="sellupdate" id="sellupdate">
                                 <span id="currency-amount">{{ userprofile.currency_amount }}</span>
                             </div>
@@ -785,7 +784,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="{% url 'showcase:ehome' %}" class="nav-link">
                                 <i class="fas fa-store"></i>
                                 <span class="nav-text">Marketplace</span>
                             </a>
@@ -798,7 +797,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="{% url 'showcase:home' %}" class="nav-link">
                                 <i class="fas fa-users"></i>
                                 <span class="nav-text">Community</span>
                             </a>
@@ -836,10 +835,23 @@
                     <h3 class="section-title"><i class="fas fa-cog"></i> Settings</h3>
                     <ul>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+               {% for userprofile in NewsProfiles %}
+
+                    {% if userprofile.newprofile_profile_picture_url %}
+                      <a href="{{ userprofile.newprofile_profile_url }}" class="nav-link">
                                 <i class="fas fa-user-cog"></i>
                                 <span class="nav-text">Profile</span>
                             </a>
+                    {% else %}
+                      <a href="{{ userprofile.newprofile_profile_url }}" class="nav-link">
+                                <i class="fas fa-user-cog"></i>
+                                <span class="nav-text">Profile</span>
+                            </a>
+
+                    {% endif %}
+
+
+                {% endfor %}
                         </li>
                         <li class="nav-item">
                             <a href="#" class="nav-link">
@@ -854,7 +866,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="" class="nav-link">
                                 <i class="fas fa-sign-out-alt"></i>
                                 <span class="nav-text">Logout</span>
                             </a>
@@ -879,8 +891,11 @@
             <div class="collection">
                 <h2 class="collection-title">My Collection</h2>
                 <button class="view-collection">
-                    <i class="fas fa-dragon"></i>
-                    <span>View Collection (42)</span>
+                    <a href="{% url 'showcase:inventory' %}" class="collection-item">
+
+                    🐉 View Collection (0)
+
+                    </a>
                 </button>
             </div>
         </aside>
@@ -913,10 +928,10 @@
                     isCollapsed = false;
                 } else {
                     // Collapse sidebar
-                    sidebar.classList.add("sidebar-collapsed");
-                    sidebarToggle.classList.add("collapsed");
-                    mainContent.classList.add("main-content-expanded");
-                    isCollapsed = true;
+                    sidebar.classList.remove("sidebar-collapsed");
+                    sidebarToggle.classList.remove("collapsed");
+                    mainContent.classList.remove("main-content-expanded");
+                    isCollapsed = false;
                 }
             }
 
@@ -927,7 +942,7 @@
                 sidebarToggle.classList.remove("collapsed");
                 mainContent.classList.remove("main-content-expanded");
                 isCollapsed = false;
-                
+
                 // Delay hiding to allow animation to complete
                 setTimeout(() => {
                     if (sidebar.classList.contains("sidebar-hidden")) {
