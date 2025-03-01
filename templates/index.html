@@ -116,327 +116,6 @@
             min-height: 100vh;
         }
 
-        .main-menu {
-            display: flex;
-			position: fixed;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(
-                to right,
-                rgba(191, 151, 255, 0.1),
-                rgba(255, 255, 255, 0.05),
-                rgba(191, 151, 255, 0.1)
-            );
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        a {
-            color: var(--primary);
-            text-decoration: none;
-            background-color: transparent;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
-            position: relative;
-        }
-
-        .logo::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .logo-icon {
-            color: var(--accent);
-            font-size: 2rem;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
-        }
-
-        .nav-links {
-            margin-left: auto;
-            display: flex;
-            gap: 3rem;
-        }
-
-        .nav-links a {
-
-    color: var(--primary);
-            text-decoration: none;
-            position: relative;
-            padding: 0.5rem 0;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            /*font-size: 1rem;*/
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-    .logo-icon h1::after {
-        content: '';
-        position: absolute;
-        bottom: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 200px;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-    }
-        .container {
-            display: flex;
-            max-width: 1800px;
-            margin: 0 auto;
-			display: flex;
-    		flex-direction: column;
-        }
-
-        .sidebar {
-            width: 320px;
-            flex-shrink: 0;
-
-        }
-
-        .user-profile {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .user-profile::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-
-        .profile-picture {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid var(--accent2);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-
-        .profile-picture img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .user-info {
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .username {
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            color: var(--primary);
-            margin-bottom: 0.75rem;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
-        }
-
-        .user-stats {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            font-size: 1rem;
-        }
-
-        .user-stat {
-            background: rgba(191, 151, 255, 0.1);
-            padding: 0.75rem 1.25rem;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid var(--primary);
-        }
-
-        .user-stat-icon {
-            font-size: 1.5rem;
-        }
-
-        .filters {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .filters h2, .collection-title {
-            color: var(--primary);
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-            font-family: 'Cinzel', serif;
-            text-align: center;
-            position: relative;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
-        }
-
-        .filters h2::after, .collection-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .search-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 100%;
-            color: var(--text);
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-        }
-
-        .type-select {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 100%;
-            color: var(--text);
-            margin-bottom: 2rem;
-            cursor: pointer;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-        }
-
-        .view-collection {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-            border: 2px solid var(--primary);
-            color: var(--text);
-            padding: 1rem;
-            border-radius: 8px;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 1.1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .view-collection::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
-            transition: transform 0.5s ease;
-        }
-
-        .view-collection:hover::before {
-            transform: translate(25%, 25%);
-        }
-
-        .view-collection:hover {
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-            border-color: var(--accent);
-            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
-            transform: translateY(-2px);
-            color: var(--accent);
-        }
-
-        .main-content h1 {
-            color: var(--primary);
-            font-size: 3rem;
-            margin-bottom: 3rem;
-            font-family: 'Cinzel', serif;
-            text-align: center;
-            position: relative;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
-        }
-
-        .main-content h1::after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .nav-links h1::after {
-            content: '';
-            position: absolute;
-            left: 10%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
         .pokemon-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -761,6 +440,18 @@ p.blog-meta span {
   }
 }
 
+		.slot-container{
+		top: 100px;
+		}
+
+		.sidebar {
+    padding: 8px;
+}
+
+.sidebar {
+    width: 320px;
+    flex-shrink: 0;
+}
     </style>
 
   	{% for BackgroundImage in Titles %}
@@ -786,11 +477,11 @@ p.blog-meta span {
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
 <script>
-	$(document).ready(function() {
+$(document).ready(function() {
     $('.popup-youtube').magnificPopup({
         type: 'iframe',
         mainClass: 'mfp-fade',
-        removalDelay: 160,
+        removalDelay: 300,
         preloader: false,
         fixedContentPos: false
     });
@@ -986,6 +677,46 @@ function toggleChatWidget() {
     .single-product-item {
       height: 50em;
     }
+
+
+  #slots-animation {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  }
+
+  .slot-container {
+    height: 50px;
+    position: relative;
+    display: inline-block;
+    margin: 80px;
+  }
+
+  .slot {
+    position: absolute;
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    min-width: 150px;
+  }
+
+  @keyframes spin {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-100%); }
+  }
+
+  .spinning {
+    animation: spin 0.1s linear infinite;
+  }
+
+  .slot-item {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 </style>
 
 <script>
@@ -1001,6 +732,121 @@ window.onscroll = function() {
         currency_designation.style.color = 'black';
     }
 };
+
+
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const wordLists = [
+      ['Discover', 'Collect', 'Hit'],
+      ['Vintage', 'Nostalgic', 'Modern'],
+      ['Pokemon', 'Magic', 'Yu-Gi-Oh']
+    ];
+
+    const slots = [
+      document.getElementById('slot1'),
+      document.getElementById('slot2'),
+      document.getElementById('slot3')
+    ];
+
+    // Initialize slots with all possible words
+    function initializeSlots() {
+      slots.forEach((slot, slotIndex) => {
+        const list = wordLists[slotIndex];
+        slot.innerHTML = '';
+
+        // Add each word as a slot item
+        list.forEach(word => {
+          const item = document.createElement('div');
+          item.className = 'slot-item';
+          item.textContent = word;
+          slot.appendChild(item);
+        });
+
+        // Clone the first few items and add them to the end for smooth looping
+        for (let i = 0; i < 3; i++) {
+          const clone = list[i % list.length];
+          const item = document.createElement('div');
+          item.className = 'slot-item';
+          item.textContent = clone;
+          slot.appendChild(item);
+        }
+      });
+    }
+
+    // Spin animation for a single slot
+    function spinSlot(slotIndex, duration = 1000) {
+      const slot = slots[slotIndex];
+      const list = wordLists[slotIndex];
+      const container = slot.parentElement;
+
+      // Reset position
+      slot.style.transform = 'translateY(0)';
+
+      // Create temporary items for spinning
+      slot.innerHTML = '';
+
+      // Generate random sequence for spinning effect
+      const spinSequence = [];
+      for (let i = 0; i < 20; i++) {
+        spinSequence.push(list[Math.floor(Math.random() * list.length)]);
+      }
+
+      // Add final selected word
+      const selectedWord = list[Math.floor(Math.random() * list.length)];
+      spinSequence.push(selectedWord);
+
+      // Create elements for spinning
+      spinSequence.forEach(word => {
+        const item = document.createElement('div');
+        item.className = 'slot-item';
+        item.textContent = word;
+        slot.appendChild(item);
+      });
+
+      // Start spinning
+      slot.classList.add('spinning');
+
+      // Stop spinning after duration
+      setTimeout(() => {
+        slot.classList.remove('spinning');
+
+        // Show only the final word
+        slot.innerHTML = '';
+        const finalItem = document.createElement('div');
+        finalItem.className = 'slot-item';
+        finalItem.textContent = selectedWord;
+        slot.appendChild(finalItem);
+
+        // Apply a small bounce effect
+        slot.animate([
+          { transform: 'translateY(-10px)' },
+          { transform: 'translateY(5px)' },
+          { transform: 'translateY(0)' }
+        ], {
+          duration: 300,
+          easing: 'ease-out'
+        });
+      }, duration);
+    }
+
+    // Initialize all slots
+    initializeSlots();
+
+    // Initial spin for all slots
+    slots.forEach((_, index) => {
+      spinSlot(index, 1200 + index * 300);
+    });
+
+    // Set interval to spin all slots every 3 seconds
+    setInterval(() => {
+      slots.forEach((_, index) => {
+        // Stagger the spins slightly
+        setTimeout(() => {
+          spinSlot(index, 1200);
+        }, index * 300);
+      });
+    }, 5000);
+  });
 </script>
 </head>
 <body>
@@ -1025,7 +871,17 @@ window.onscroll = function() {
      style="background: url('{% if BackgroundImage.file and BackgroundImage.file.url %}{{ BackgroundImage.file.url }}{% else %}{{ BackgroundImage.cover.url }}{% endif %}');
             background-size: cover;
             background-attachment: fixed;">
-
+			<div id="slots-animation" style=" width: 100%; text-align: center; top: 2250px; z-index: 10;">
+			  <div class="slot-container">
+				<div id="slot1" class="slot"></div>
+			  </div>
+			  <div class="slot-container">
+				<div id="slot2" class="slot"></div>
+			  </div>
+			  <div class="slot-container">
+				<div id="slot3" class="slot"></div>
+			  </div>
+			</div>
                 {% endif %}
             {% endif %}
         {% endfor %}
@@ -1236,7 +1092,7 @@ window.onscroll = function() {
 			<div class="outerGridContainer">
 				      {% for product in Products %}
 				<div class="gridCardItem">
-						<div class="gridCardImg" style="background-image: url('{{ product.image.url }}');"> 
+						<div class="gridCardImg" style="background-image: url('{{ product.image.url }}');">
 						</div>
             <div class="gridCardContent">
               <h1 class="gridCardTitle">{{product.title}}</h1>
@@ -1358,7 +1214,7 @@ window.onscroll = function() {
 
 <div class="container">
     <div class="row">
-        <!-- Left Column (Video Section) -->
+ <!-- Left Column (Video Section) -->
         <div class="col-lg-6 col-md-12" style="display: flex; flex-direction: row;">
             {% for BackgroundImage in Background %}
                 {% if BackgroundImage.position == 5 %}

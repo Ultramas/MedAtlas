@@ -723,6 +723,15 @@ class CurrencyMarket(models.Model):
         verbose_name_plural = "Currency Markets"
 
 
+class LevelIcon(models.Model):
+    name = models.CharField(max_length=200, blank=True, null=True)
+    level_icon = models.ImageField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Logo Item"
+        verbose_name_plural = "Logo Items"
+
+
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(blank=True, null=True)
@@ -739,7 +748,7 @@ class ProfileDetails(models.Model):
     currency_amount = models.IntegerField(default=0)
     total_currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_currency_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    rubies_spent = models.IntegerField(blank=True, null=True, default=0)  # linked to experiencek
+    rubies_spent = models.IntegerField(blank=True, null=True, default=0)  # linked to experience
     other_currencies_amount = models.ManyToManyField(Currency, through='ProfileCurrency',
                                                      related_name="profile_currencies")  # get the integer fieds of all the other currencies besides the first (Rubies)
     green_cards_hit = models.IntegerField(blank=True, null=True)
@@ -752,6 +761,7 @@ class ProfileDetails(models.Model):
     times_subtract_called = models.IntegerField(default=0)
     monstrosity = models.ForeignKey(Monstrosity, blank=True, null=True, on_delete=models.CASCADE,
                                     related_name="monster")
+    level_icon = models.ForeignKey(LevelIcon, blank=True, null=True, on_delete=models.CASCADE)
     seller = models.BooleanField(default=False, null=True)
     trader = models.BooleanField(default=False, null=True)
     partner = models.BooleanField(default=False, null=True)
