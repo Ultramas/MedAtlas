@@ -1031,8 +1031,8 @@ window.onscroll = function() {
                         <h1 class="gridCardTitle">{{ Game.name }}</h1>
                         <div class="gridCardPriceWrapper">
                             {% if Game.discount_cost %}
-                            <div class="gridCardDiscountPrice">{{ Game.discount_cost }}💎</div>
-                            <div class="gridCardPrice" style="color: rgb(6, 227, 6);">{{ Game.cost }}</div>
+                            <div class="gridCardDiscountPrice">{{ Game.cost }}💎</div>
+                            <div class="gridCardPrice" style="color: rgb(6, 227, 6);">{{ Game.discount_cost }}</div>
                             {% else %}
                             <div class="gridCardPrice">{{ Game.cost }}</div>
                             {% endif %}
@@ -1100,9 +1100,9 @@ window.onscroll = function() {
               <div class="gridCardPriceWrapper">
         {% if product.discount_price %}
                      <div class="gridCardDiscountPrice">
-                     ${{ product.discount_price }}
+                     ${{ product.price }}
                      </div>
-                     <div class="gridCardPrice"  style="color: rgb(6, 227, 6);">${{ product.price }}</div>
+                     <div class="gridCardPrice"  style="color: rgb(6, 227, 6);">${{ product.discount_price }}</div>
                  {% else %}
                  <div class="gridCardPrice">${{ product.price }}</div>
                  {% endif %} </p>
