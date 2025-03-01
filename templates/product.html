@@ -184,6 +184,10 @@
         .inventory-grid {
             display: grid;
             gap: 30px;
+            justify-content: center;
+            align-items: center;
+            justify-items: center;
+            align-content: center;
         }
 
         .comfortable-view {
@@ -262,9 +266,9 @@
             filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.5));
         }
 
-        .inventory-item:hover .pokemon-image img {
+        /* .inventory-item:hover .pokemon-image img {
             transform: rotate(0deg) scale(1.05);
-        }
+        } */
 
         .pokemon-info {
             flex: 1;
@@ -612,6 +616,10 @@
             .cyber-button {
                 width: 100%;
             }
+        }
+
+        .inventory-item {
+            width: 50%;
         }
     </style>
 </head>
