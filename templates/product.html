@@ -633,7 +633,7 @@
             <section id="inventoryGrid" class="inventory-grid comfortable-view">
                 <div class="inventory-item">
                     <div class="card-frame">
-                        <div class="legendary-icon">🐉</div>
+                        <div class="legendary-icon"></div>
                         <div class="card-rarity-glow legendary"></div>
                         <div class="pokemon-image">
                             <img src="{{ item.image.url }}" alt="{{ Inventory.choice.choice_text }} Image">
@@ -644,8 +644,8 @@
                                 <div class="price-container">
                                     {% if item.price %}
                                         {% if item.discount_price %}
-                                            <del class="old-price">${{ item.price }}</del>
-                                            <p class="current-price">${{ item.discount_price }}</p>
+                                            <del class="old-price">${{ item.discount_price }}</del>
+                                            <p class="current-price">${{ item.price }}</p>
                                         {% else %}
                                             <p class="current-price">${{ item.price }}</p>
                                         {% endif %}
