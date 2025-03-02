@@ -44,7 +44,6 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            max-width: 1400px;
             margin: 0 auto;
             padding: 0 20px;
         }
@@ -134,9 +133,10 @@
         }
 
         /* MAIN CONTENT */
-        .main-content {
+        .main-content-product {
             flex: 1;
             padding: 20px 0;
+            margin: 0 10%;
         }
 
         .content-header {
@@ -624,7 +624,7 @@
 {% include 'navtrove.html' %}
 
 
-        <main class="main-content">
+        <main class="main-content-product">
             <div class="content-header">
                 <h1>{{ item.title }}</h1>
                 <!-- <button id="toggleViewBtn" class="neon-button">TOGGLE VIEW</button> -->
