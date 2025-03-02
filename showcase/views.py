@@ -14884,7 +14884,7 @@ class CurrencyCheckoutView(EBaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['endowment_form'] = EndowmentForm(request=self.request)
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         if self.request.user.is_authenticated:
@@ -15336,6 +15336,7 @@ class OrderSummaryView(EBaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -15406,6 +15407,7 @@ class CheckoutView(EBaseView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['address'] = Address.objects.filter(is_active=1, user=self.request.user).first()
         context.update(kwargs)
 
@@ -15704,9 +15706,18 @@ class PaymentView(EBaseView):
 
     def post(self, *args, **kwargs):
         order = Order.objects.get(user=self.request.user, ordered=False)
-        data = json.loads(self.request.body.decode('utf-8'))
-        token = data.get('token')
-        payment_method = data.get('payment_method')
+        if self.request.content_type == 'application/json':
+            try:
+                data = json.loads(self.request.body.decode('utf-8'))
+            except json.JSONDecodeError:
+                messages.warning(self.request, "Invalid JSON received")
+                return redirect("/payment/stripe")
+            token = data.get('token')
+            payment_method = data.get('payment_method')
+        else:
+            # Handle form data from request.POST
+            token = self.request.POST.get('token')
+            payment_method = self.request.POST.get('payment_method')
 
         if token:
             try:
@@ -15721,7 +15732,6 @@ class PaymentView(EBaseView):
                 return JsonResponse({"error": str(e)}, status=400)
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
-
 
 
 class PayPalExecuteView(View):
