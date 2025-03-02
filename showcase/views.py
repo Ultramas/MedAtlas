@@ -15740,7 +15740,6 @@ class PaymentView(EBaseView):
 
         if token:
             try:
-                # Process payment with Stripe...
                 charge = stripe.Charge.create(
                     amount=int(order.get_total_price() * 100),
                     currency="usd",
