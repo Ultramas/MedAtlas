@@ -5,7 +5,7 @@ from django.db.models.signals import m2m_changed, post_save, post_delete
 from django.dispatch import receiver
 
 from .models import Outcome, Achievements, ProfileDetails
-from .models import User, Profile, AdministrationChangeLog, Battle, Room, Message, Notification
+from .models import User, Profile, AdministrationChangeLog, Battle, Room, Message, Notification, Game
 from .views import get_changes
 
 
@@ -174,5 +174,3 @@ def create_notification_on_message(sender, instance, created, **kwargs):
 
         except Room.DoesNotExist:
             print(f"Room '{message.room}' does not exist.")
-
-

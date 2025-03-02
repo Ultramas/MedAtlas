@@ -151,7 +151,7 @@ async function randomizeContents() {
             const middleIndex = Math.floor(cardContainer.children.length / 2);
             const targetIndex = Math.min(
                 cardContainer.children.length,
-                middleIndex + 4
+                middleIndex + 3
             );
 
             if (cardContainer.children[targetIndex]) {

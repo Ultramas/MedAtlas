@@ -2778,10 +2778,10 @@ class GameHub(models.Model):
 
 class Game(models.Model):
     name = models.CharField(max_length=200, verbose_name="Game Name")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)  # game creator
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     cost = models.IntegerField(default=0, blank=True, null=True)
     discount_cost = models.IntegerField(blank=True, null=True)
-    choices = models.ManyToManyField('Choice', blank=True, related_name="gamechoices")
+    #choices = models.ManyToManyField('Choice', blank=True, related_name="gamechoices")
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
     category = models.CharField(max_length=2,
                                 choices=CARD_CATEGORIES, blank=True, null=True)
@@ -2796,8 +2796,7 @@ class Game(models.Model):
     daily = models.BooleanField(default=False)
     unlocking_level = models.OneToOneField(Level, blank=True, null=True, on_delete=models.CASCADE)
     cooldown = models.DateTimeField(null=True, blank=True)
-    locked = models.BooleanField(default=True)  # if cooldown is reached & level is unlocked, set locked to False
-    # remaining time until 5:00pm each day; only activates if locked is true
+    locked = models.BooleanField(default=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2815,63 +2814,53 @@ class Game(models.Model):
             raise ValidationError("An unlocking level must be set for daily games.")
 
     def save(self, *args, **kwargs):
-        self.full_clean()  # Call full_clean() to trigger validation
+        self.full_clean()  # Trigger validation
 
-        # Ensure slug is generated if not provided
+        # Generate slug if missing.
         if not self.slug:
             base_slug = slugify(self.name)
             slug = base_slug
             num = 0
             while Game.objects.filter(slug=slug).exists():
                 num += 1
-                # You can also append a random string if you prefer:
-                # random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
                 slug = f"{base_slug}-{num}"
             self.slug = slug
 
-        # Default discount cost to 0 for daily games
+        # Set default discount cost for daily games.
         if self.daily and not self.discount_cost:
             self.discount_cost = 0
 
-        # Save the instance to generate a primary key if it doesn't already exist
-        is_new_instance = self.pk is None
-        if is_new_instance:
-            super().save(*args, **kwargs)
+        # Save the instance (so it gets a primary key).
+        super().save(*args, **kwargs)
 
-        # Handle cost calculation only if choices exist
-        if self.cost == 0:
-            total_cost = 0
-            for choice in self.choices.all():
+        total_cost = 0
+        if self.choice_fk_set.exists():
+            for choice in self.choice_fk_set.all():
                 if choice.value and choice.rarity:
                     choice_cost = (choice.value * float(choice.rarity)) / 100
                     total_cost += choice_cost
             self.cost = int(total_cost * 1.12)
 
-        # Set 5:00 PM PST logic
+        # 5:00 PM PST logic for cooldown and locked status.
         pst = pytz.timezone('US/Pacific')
         current_time_pst = now().astimezone(pst)
         today = current_time_pst.date()
         today_5pm_pst = make_aware(datetime.combine(today, time(17, 0)), pst)
 
-        # If before 5:00 PM PST, window started yesterday
         if current_time_pst < today_5pm_pst:
             cycle_start = today_5pm_pst - timedelta(days=1)
         else:
             cycle_start = today_5pm_pst
 
-        # Set cooldown for next unlock at 5:00 PM PST
         if not self.cooldown or self.cooldown < cycle_start:
-            self.cooldown = cycle_start + timedelta(days=1)  # Next 5:00 PM PST window
+            self.cooldown = cycle_start + timedelta(days=1)
 
-        # Update locked status: unlock at 5:00 PM PST
         if self.daily:
-            if current_time_pst >= self.cooldown:  # After 5:00 PM PST, unlock automatically
-                self.locked = False
-            else:  # Keep it locked until the cooldown expires
-                self.locked = True
+            self.locked = not (current_time_pst >= self.cooldown)
 
-        # Save the instance again to persist changes
+        # Save the updates.
         super().save(*args, **kwargs)
+
 
     def _get_pst_time(self):
         """Get the current time in PST and determine today's 5 PM PST."""

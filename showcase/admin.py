@@ -637,18 +637,38 @@ class GameAdmin(admin.ModelAdmin):
     inlines = [GameChoiceInline]
 
     def save_formset(self, request, form, formset, change):
-        # Call the original save_formset to save the related objects
-        instances = formset.save(commit=False)
-        for instance in instances:
-            # Check if the instance is a Choice object and set its category to the game's category
+        # Save inline instances without committing immediately.
+        inline_instances = formset.save(commit=False)
+        for instance in inline_instances:
             if isinstance(instance, Choice):
+                # Set additional fields if needed.
                 instance.category = form.instance.category
-                instance.save()
-        formset.save_m2m()  # Save any many-to-many relationships
+                instance.save()  # Ensure instance has a primary key.
+                # Now, add the saved Choice to the Game’s many-to-many field.
+                form.instance.choices.add(instance)
+        formset.save_m2m()
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        # Only display already linked choices in the admin widget.
+        if db_field.name == "choices":
+            object_id = request.resolver_match.kwargs.get('object_id')
+            if object_id:
+                try:
+                    game = Game.objects.get(pk=object_id)
+                    kwargs["queryset"] = game.choices.all()
+                except Game.DoesNotExist:
+                    kwargs["queryset"] = Choice.objects.none()
+            else:
+                kwargs["queryset"] = Choice.objects.none()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     fieldsets = (
         ('Game Information - Categorial Description', {
-            'fields': ('name', 'user', 'type', 'category', 'cost', 'discount_cost', 'image', 'power_meter', 'slug', 'filter', 'player_made', 'player_inventory', 'daily', 'is_active'),
+            'fields': (
+                'name', 'user', 'type', 'category', 'cost', 'discount_cost',
+                'image', 'power_meter', 'slug', 'filter',
+                'player_made', 'player_inventory', 'daily', 'is_active'
+            ),
             'classes': ('collapse',),
         }),
         ('Unlocking (Daily Games Only)', {
@@ -663,19 +683,14 @@ class GameAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj)
-
-        # If player_made is not selected, make 'player_inventory' fields non-editable
         if obj and not obj.player_made:
             readonly_fields += ('player_inventory', 'items')
-
-        # If daily is not selected, make 'Unlocking' fields non-editable
         if obj and not obj.daily:
             readonly_fields += ('unlocking_level', 'cooldown', 'locked')
-
         return readonly_fields
 
     class Media:
-        js = ('admin/js/game_admin.js',)  # Path to the custom JavaScript file
+        js = ('admin/js/game_admin.js',)
 
 
 admin.site.register(Game, GameAdmin)

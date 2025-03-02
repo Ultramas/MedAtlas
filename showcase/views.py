@@ -2087,9 +2087,8 @@ class PokeChestBackgroundView(BaseView):
             wager = form.save(commit=False)
             wager.user_profile = request.user.user_profile
             wager.save()
-            return redirect('showcase:blackjack')  # replace with your actual view name
+            return redirect('showcase:blackjack')
         else:
-            # If the form is not valid, re-render the page with the form errors
             return self.get(request, *args, **kwargs)
 
     @csrf_exempt  # Handle CSRF if needed
