@@ -12,7 +12,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
-    TopHits, Address, Robot, Bet
+    TopHits, Address, Robot, Bet, LevelIcon
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -2447,6 +2447,16 @@ class LevelAdmin(admin.ModelAdmin):
     actions = ['mass_save']
 
 admin.site.register(Level, LevelAdmin)
+
+
+class LevelIconAdmin(admin.ModelAdmin):
+    list_display = ('name', 'level_icon','is_active')
+    fieldsets = (
+        ('Monstrosity Information', {
+            'fields': ('name', 'level_icon', 'is_active',)
+        }),
+    )
+admin.site.register(LevelIcon, LevelIconAdmin)
 
 class MonstrosityAdmin(admin.ModelAdmin):
     fieldsets = (

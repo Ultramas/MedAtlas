@@ -726,10 +726,18 @@ class CurrencyMarket(models.Model):
 class LevelIcon(models.Model):
     name = models.CharField(max_length=200, blank=True, null=True)
     level_icon = models.ImageField(blank=True, null=True)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
 
     class Meta:
-        verbose_name = "Logo Item"
-        verbose_name_plural = "Logo Items"
+        verbose_name = "Level Icon"
+        verbose_name_plural = "Level Icon"
 
 
 class ProfileDetails(models.Model):

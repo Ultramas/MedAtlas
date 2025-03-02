@@ -184,10 +184,6 @@
         .inventory-grid {
             display: grid;
             gap: 30px;
-            justify-content: center;
-            align-items: center;
-            justify-items: center;
-            align-content: center;
         }
 
         .comfortable-view {
@@ -266,9 +262,9 @@
             filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.5));
         }
 
-        /* .inventory-item:hover .pokemon-image img {
+        .inventory-item:hover .pokemon-image img {
             transform: rotate(0deg) scale(1.05);
-        } */
+        }
 
         .pokemon-info {
             flex: 1;
@@ -617,29 +613,13 @@
                 width: 100%;
             }
         }
-
-        .inventory-item {
-            width: 50%;
-        }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <div class="cyber-header">
-            <div class="logo">NEXUS<span>CARDS</span></div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="#" class="active">SHOP</a></li>
-                    <li><a href="#">INVENTORY</a></li>
-                    <li><a href="#">PROFILE</a></li>
-                    <li><a href="#">LEADERBOARD</a></li>
-                </ul>
-            </nav>
-            <div class="user-stats">
-                <div class="currency"><span class="icon">💎</span><span id="currency-amount">2,450</span></div>
-                <div class="level">LVL <span>42</span></div>
-            </div>
-        </div>
+
+{% include 'navtrove.html' %}
+
 
         <main class="main-content">
             <div class="content-header">

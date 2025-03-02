@@ -11,47 +11,29 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
     <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
 				<style>
-					.fromorange {
-    --tw-gradient-from: #a600c0;
-    --tw-gradient-stops: var(--tw-gradient-from), #bf97ff;
-}
-    /* Ensure the iframe scaler container is styled correctly */
-    .mfp-iframe-scaler {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background-color: #000; /* Black background for better visibility */
-        max-width: 800px;
-        margin: auto;
-    }
+		.fromorange {
+			--tw-gradient-from: #a600c0;
+			--tw-gradient-stops: var(--tw-gradient-from), #bf97ff;
+		}
 
-    .mfp-iframe-scaler video {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+		.mfp-content {
+			max-width: 800px;
+			margin: 0 auto;
+		}
 
-    /* Custom popup styling */
-    .mfp-hide {
-        display: none;
-    }
+		/* Responsive adjustments */
+		@media (max-width: 768px) {
+			.mfp-content {
+				width: 100%;
+				padding: 10px;
+			}
+		}
+
 </style>
-<script>
-    $(document).ready(function() {
-        // Initialize Magnific Popup for the play button
-        $('.popup-youtube').magnificPopup({
-            type: 'inline', // Inline popup for the video container
-            midClick: true, // Allow opening popup on middle mouse click or touch
-            closeOnContentClick: false, // Do not close on content click
-            mainClass: 'mfp-fade', // Add fade effect
-        });
-    });
-</script>
     <style>
     /* Add this to the existing <style> tag or create a new one if it doesn't exist */
     .copyright-section {
@@ -472,13 +454,10 @@ p.blog-meta span {
     <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
 <script>
 $(document).ready(function() {
     $('.popup-youtube').magnificPopup({
-        type: 'iframe',
+        type: 'inline',  // Change this from 'iframe' to 'inline'
         mainClass: 'mfp-fade',
         removalDelay: 300,
         preloader: false,
@@ -494,7 +473,6 @@ function toggleChatWidget() {
         chatWidget.style.display = "none";
     }
 }
-
 </script>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 
@@ -511,13 +489,12 @@ function toggleChatWidget() {
 
 	html, body{
 	height: 100%;
-	background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.7));
+    background: #050510;
+	background-image: radial-gradient(circle at 20% 35%, rgba(0, 240, 255, 0.15) 0%, transparent 40%), radial-gradient(circle at 75% 65%, rgba(255, 0, 229, 0.15) 0%, transparent 40%);
     color: var(--text);
     font-family: 'Cormorant Garamond', serif;
-    background-image: url(data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E), radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
 
 	}
-
 
 .video-background {
     position: absolute;
@@ -676,7 +653,7 @@ function toggleChatWidget() {
       height: 50em;
     }
 
-
+/*
   #slots-animation {
     display: flex;
     justify-content: center;
@@ -715,6 +692,7 @@ function toggleChatWidget() {
     align-items: center;
     justify-content: center;
   }
+	*/
 </style>
 
 <script>
@@ -858,8 +836,8 @@ window.onscroll = function() {
     </div>
     <!--PreLoader Ends-->
 
-
 {% include 'navtrove.html' %}
+
 <div class="hero-area hero-bg" style="margin-top: 0%; background: rgba(0, 255, 255, 0); height: 92%">
         {% for BackgroundImage in Background %}
             {% if BackgroundImage.page == "index.html" %}
@@ -869,7 +847,7 @@ window.onscroll = function() {
      style="background: url('{% if BackgroundImage.file and BackgroundImage.file.url %}{{ BackgroundImage.file.url }}{% else %}{{ BackgroundImage.cover.url }}{% endif %}');
             background-size: cover;
             background-attachment: fixed;">
-			<!-- <div id="slots-animation" style=" width: 100%; text-align: center; top: 2250px; z-index: 10;">
+			<!--<div id="slots-animation" style="width: 100%; text-align: center; top: 2250px; z-index: 10;">
 			  <div class="slot-container">
 				<div id="slot1" class="slot"></div>
 			  </div>
@@ -879,7 +857,7 @@ window.onscroll = function() {
 			  <div class="slot-container">
 				<div id="slot3" class="slot"></div>
 			  </div>
-			</div> -->
+			</div>-->
                 {% endif %}
             {% endif %}
         {% endfor %}
@@ -940,7 +918,7 @@ window.onscroll = function() {
 	<!-- end hero area -->
 
 	<!-- features list section -->
-	<!-- <div class="list-section pt-80 pb-80" style="background: rgba(0, 255, 255, 0);">
+	<!--<div class="list-section pt-80 pb-80" style="background: rgba(0, 255, 255, 0);">
 		<div class="container" >
 
 			<div class="row">
@@ -955,7 +933,7 @@ window.onscroll = function() {
 					</div>
 							{% endfor %}
 				</div>
-
+-->
 				<div class="col-lg-4 col-md-6">
 
 					<div class="list-box d-flex justify-content-start align-items-center">
@@ -981,7 +959,7 @@ window.onscroll = function() {
 			</div>
 
             </div>
-		</div> -->
+		</div>
 	<!-- end features list section -->
 
 	<!-- chests section -->
@@ -993,6 +971,7 @@ window.onscroll = function() {
             {% endif %}
         {% endfor %}
 
+<!--
 
         {% for BackgroundImage in Background %}
             {% if BackgroundImage.page == "index.html" %}
@@ -1001,14 +980,12 @@ window.onscroll = function() {
                 {% endif %}
             {% endif %}
         {% endfor %}
-
 			<div class="row" id="#game">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="section-title">
 						<br>
 						<br>
-                        <h3 style="color: #e5e4e2;"><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h3>
-						<!-- <h3><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h3> -->
+						<h3><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h3>
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
 						{% if BackgroundImage.section == 11 %}
@@ -1019,9 +996,9 @@ window.onscroll = function() {
 					</div>
 				</div>
 			</div>
-
+-->
             <div class="marketplaceOuterContainer">
-                <!-- <h2 style="text-align: center;"><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h2> -->
+                <h2 style="margin-top: 0%; text-align: center;"><span class="orange-text" style="color: #bf97ff;">Featured</span> Games</h2>
                 <div class="outerGridContainer" style="width: 40%;">
                 {% for Game in FeaturedGame %}
                     <div class="gridCardItem">
@@ -1031,8 +1008,8 @@ window.onscroll = function() {
                         <h1 class="gridCardTitle">{{ Game.name }}</h1>
                         <div class="gridCardPriceWrapper">
                             {% if Game.discount_cost %}
-                            <div class="gridCardDiscountPrice">{{ Game.cost }}💎</div>
-                            <div class="gridCardPrice" style="color: rgb(6, 227, 6);">{{ Game.discount_cost }}</div>
+                            <div class="gridCardDiscountPrice">{{ Game.discount_cost }}💎</div>
+                            <div class="gridCardPrice" style="color: rgb(6, 227, 6);">{{ Game.cost }}</div>
                             {% else %}
                             <div class="gridCardPrice">{{ Game.cost }}</div>
                             {% endif %}
@@ -1040,7 +1017,7 @@ window.onscroll = function() {
                         <a href="{{ Game.get_profile_url2 }}" class="cartBtn">
                             <h2 class="cartBtnFire">Check It Out!</h2>
                         </a>
-                        </div> 
+                        </div>
                     </div>
                 {% endfor %}
                 </div>
@@ -1100,9 +1077,9 @@ window.onscroll = function() {
               <div class="gridCardPriceWrapper">
         {% if product.discount_price %}
                      <div class="gridCardDiscountPrice">
-                     ${{ product.price }}
+                     ${{ product.discount_price }}
                      </div>
-                     <div class="gridCardPrice"  style="color: rgb(6, 227, 6);">${{ product.discount_price }}</div>
+                     <div class="gridCardPrice"  style="color: rgb(6, 227, 6);">${{ product.price }}</div>
                  {% else %}
                  <div class="gridCardPrice">${{ product.price }}</div>
                  {% endif %} </p>
@@ -1131,7 +1108,7 @@ window.onscroll = function() {
           {% else %}
           <div class="gridCardPrice"> 💎{{ product.currency_price }} </div>
           <a href="{{ product.get_profile_url }}" class="cartBtn">
-            <h2 class="cartBtnFire">Check It Out!</h2> 
+            <h2 class="cartBtnFire">Check It Out!</h2>
           </a>
          {% endif %}
          {% endif %}
@@ -1159,7 +1136,7 @@ window.onscroll = function() {
 	<!-- end shop banner -->
 
 	<!-- testimonail-section -->
-	<!-- <div class="testimonail-section mt-150 mb-150">
+	<div class="testimonail-section mt-150 mb-150">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-10 offset-lg-1 text-center">
@@ -1180,7 +1157,7 @@ window.onscroll = function() {
 									  </div>
                                   </a>
                                 {% else %}
-                       
+                                   <!-- Placeholder image or default avatar -->
                                   <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50">
                                 {% endif %}
 
@@ -1207,70 +1184,114 @@ window.onscroll = function() {
 			</div>
 		</div>
 	</div>
+	<!-- end testimonail-section -->
 
+	<!-- advertisement section -->
+		<!--
+	<div class="abt-section mb-150">
+		<div class="container">
+			<div class="row">
+				<style>
+    /* Ensure the iframe scaler container is styled correctly */
+    .mfp-iframe-scaler {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #000; /* Black background for better visibility */
+        max-width: 800px;
+        margin: auto;
+    }
 
-<div class="container">
-    <div class="row">
-        <<div class="col-lg-6 col-md-12" style="display: flex; flex-direction: row;">
-            {% for BackgroundImage in Background %}
-                {% if BackgroundImage.position == 5 %}
-                    <div class="abt-bg w-100" style="background: url({{ BackgroundImage.cover.url }}); background-size: cover; min-height: 400px;">
-                        <a href="#video-popup" class="video-play-btn popup-youtube d-flex justify-content-center align-items-center" style="color: #bf97ff; text-decoration: none;">
-                            <img src="{% static 'css/images/play-button-arrowhead.png' %}" style="width: 60px; height: 60px; opacity: 0.8;">
-                        </a>
-                    </div>
-                {% endif %}
-            {% endfor %}
+    .mfp-iframe-scaler video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-            {% for BackgroundImage in Background %}
-                {% if BackgroundImage.page == "index.html" and BackgroundImage.position == 6 %}
-                    <div id="video-popup" class="mfp-hide">
-                        <div class="mfp-iframe-scaler">
-                            <video class="w-100 h-auto" autoplay loop muted playsinline controls>
-                                <source src="{{ BackgroundImage.file.url }}" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        </div>
-                    </div>
-                {% endif %}
-            {% endfor %}
-        </div> 
+    /* Custom popup styling */
+    .mfp-hide {
+        display: none; /* Hide the popup initially */
+    }
+</style>
+<script>
+    $(document).ready(function() {
+        // Initialize Magnific Popup for the play button
+        $('.popup-youtube').magnificPopup({
+            type: 'inline', // Inline popup for the video container
+            midClick: true, // Allow opening popup on middle mouse click or touch
+            closeOnContentClick: false, // Do not close on content click
+            mainClass: 'mfp-fade', // Add fade effect
+        });
+    });
+</script>
 
-        <div class="col-lg-6 col-md-12 d-flex align-items-center">
-            <div class="abt-text py-5 px-lg-5 w-100" style="display: flex; flex-direction: column; justify-content: center; align-items: center">
-                <p class="top-sub">Est 2024</p>
-                <h2 class="mb-4" style="color: #e5e4e2;">We are <span style="color: #bf97ff;">PokeTrove</span></h2>
+				<div class="col-lg-6 col-md-12">
+    {% for BackgroundImage in Background %}
+    {% if BackgroundImage.position == 5 %}
 
-                {% for BackgroundImage in TextFielde %}
-                    {% if BackgroundImage.page == "index.html" and BackgroundImage.section == 13 %}
-                        <p class="mb-3">{{ BackgroundImage.text }}</p>
-                    {% endif %}
-                {% endfor %}
+    <div class="abt-bg" style="background: url({{ BackgroundImage.cover.url }}); background-size: cover; height: 50%; width: 50%;">
 
-                {% for BackgroundImage in TextFielde %}
-                    {% if BackgroundImage.page == "index.html" and BackgroundImage.section == 14 %}
-                        <p class="mb-4">{{ BackgroundImage.text }}</p>
-                    {% endif %}
-                {% endfor %}
+        <a href="#video-popup" class="video-play-btn popup-youtube">
+            <img src="{% static 'css/images/play-button-arrowhead.png' %}" style="width: 25px; height: 25px; margin-top: 30px;">
+        </a>
+    </div>
+    {% endif %}
+    {% endfor %}
 
-                <a href="about" class="boxed-btn mt-4" style="background-color: #bf97ff; color: white;">About Us</a>
-            </div>
+    {% for BackgroundImage in Background %}
+    {% if BackgroundImage.page == "index.html" and BackgroundImage.position == 6 %}
+    <div id="video-popup" class="mfp-hide">
+        <div class="mfp-iframe-scalere">
+            <video autoplay loop muted playsinline controls style="display: flex; flex-direction: row; margin: auto;">
+                <source src="{{ BackgroundImage.file.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
         </div>
     </div>
-</div> -->
+    {% endif %}
+    {% endfor %}
+</div>
 
+				<div class="col-lg-6 col-md-12">
+					<div class="abt-text">
+						<p class="top-sub">Est 2018</p>
+						<h2>We are <span class="orange-text">Folsom TCS</span></h2>
+						{% for BackgroundImage in TextFielde %}
+						{% if BackgroundImage.page == "index.html" %}
+						{% if BackgroundImage.section == 13 %}
+						<p>{{BackgroundImage.text}}</p>
+					  	{% endif %}
+						{% endif %}
+						{% endfor %}
+
+						{% for BackgroundImage in TextFielde %}
+						{% if BackgroundImage.page == "index.html" %}
+						{% if BackgroundImage.section == 14 %}
+						<p>{{BackgroundImage.text}}</p>
+					  	{% endif %}
+						{% endif %}
+						{% endfor %}
+						<a href="about" class="boxed-btn mt-4">About Us</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>-->
 	<!-- end advertisement section -->
-
 
 	<!-- end advertisement section -->
 	<!-- cart banner section -->
-	<!-- <section class="cart-banner pt-100 pb-100">
+		<!--
+	<section class="cart-banner pt-100 pb-100">
 
 	  	{% for BackgroundImage in Events %}
-        {% if BackgroundImage.page == "index.html" %} -->
-    	<!-- <div class="container">
+        {% if BackgroundImage.page == "index.html" %}
+    	<div class="container">
         	<div class="row clearfix">
-            	
             	<div class="image-column col-lg-6">
                 	<div class="image">
                     	<div class="price-box">
@@ -1283,24 +1304,21 @@ window.onscroll = function() {
                     	<img src="{{BackgroundImage.cover.url}}" style="margin-left: 32%;" alt="">
                     </div>
                 </div>
-                
-
                 <div class="content-column col-lg-6">
 					<h3 style="width: 1030%;"><span class="orange-text">{{BackgroundImage.name}}</span> Event</h3>
                     <h4>Hosted By {{BackgroundImage.user}}</h4>
                     <div class="text">{{BackgroundImage.description}}</div>
-                 
                     <div class="time-counter"><div class="time-countdown clearfix" data-countdown="2020/2/01"><div class="counter-column"><div class="inner"><span class="count">00</span>Days</div></div> <div class="counter-column"><div class="inner"><span class="count">00</span>Hours</div></div>  <div class="counter-column"><div class="inner"><span class="count">00</span>Mins</div></div>  <div class="counter-column"><div class="inner"><span class="count">00</span>Secs</div></div></div></div>
 
                     <h5>Event on {{BackgroundImage.date}} at {{BackgroundImage.time}}</h5>
                 	<a href="events.html" class="cart-btn mt-3"><i class="fas fa-shopping-cart"></i> What's a {{BackgroundImage.name}}??</a>
-                </div> 
+                </div>
 				{% endif %}
 				{% endfor %}
 
             </div>
         </div>
-    </section> -->
+    </section>-->
     <!-- end cart banner section -->
 
 	<!-- latest news -->
@@ -1385,7 +1403,8 @@ window.onscroll = function() {
 	<!-- end latest news -->
 
 	<!-- trending communities carousel -->
-	<!-- <div class="logo-carousel-section">
+		<!--
+	<div class="logo-carousel-section">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-12">
@@ -1453,11 +1472,11 @@ window.onscroll = function() {
 				</div>
 			</div>
 		</div>
-	</div> -->
+	</div>-->
 	<!-- end logo carousel -->
 
 	<!-- footer -->
-	<div class="footer-area" style="">
+	<div class="footer-area" style="margin-bottom: -450px;">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-3 col-md-6">
@@ -2874,7 +2893,6 @@ function showChatWidget() {
      <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
      <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
      <script src="{% static 'css/js/waypoints.js' %}"></script>
-	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
      <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
      <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
      <script src="{% static 'css/js/sticker.js' %}"></script>

@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gaming Sidebar</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -16,6 +18,7 @@
             --glow-primary: 0 0 15px rgba(191, 151, 255, 0.7);
             --glow-accent: 0 0 15px rgba(78, 204, 163, 0.7);
             --border-gradient: linear-gradient(135deg, #bf97ff, #4ecca3);
+            --border-gradient: linear-gradient(135deg, rgb(191, 151, 255, 0.2), rgb(78, 204, 163, 0.2));
             --sidebar-width: 320px;
             --sidebar-collapsed-width: 80px;
         }
@@ -53,7 +56,7 @@
         }
 
         .nav-links {
-            margin-left: auto;
+            justify-content: center;
             display: flex;
             gap: 3rem;
         }
@@ -62,23 +65,12 @@
             position: relative;
         }
 
-        .nav-links h1::after {
-            content: '';
-            position: absolute;
-            left: 10%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
         .navLogo {
             background-size: 100% auto;
             background-position: center;
             background-repeat: no-repeat;
-            height: 1.2em;
-            width: 2em;
-            margin-left: 48%;
+            height: 2em;
+            width: 3.5em;
         }
 
         /* Sidebar Styles */
@@ -194,7 +186,8 @@
             left: 0;
             width: 100%;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(191, 151, 255, 0.5), transparent);
+            background: linear-gradient(90deg, transparent, rgba(191, 151, 255, 0.1), transparent);
+            background-image: url("{% static 'css/images/a.jpg' %}");
         }
 
         .profile-picture {
@@ -229,7 +222,8 @@
             right: -5px;
             bottom: -5px;
             border-radius: 50%;
-            background: linear-gradient(135deg, rgba(191, 151, 255, 0.5), rgba(78, 204, 163, 0.5));
+            background: linear-gradient(135deg, rgba(191, 151, 255, 0.1), rgba(78, 204, 163, 0.1));
+            background-image: var(--profile-bg-image);
             z-index: -1;
             animation: pulse 2s infinite;
         }
@@ -652,18 +646,20 @@
 			position: fixed;
             align-items: center;
             padding: 1rem 2rem;
-            background: linear-gradient(
-                to right,
-                rgba(191, 151, 255, 0.1),
-                rgba(255, 255, 255, 0.05),
-                rgba(191, 151, 255, 0.1)
-            );
+            background: linear-gradient(90deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 229, 0.05));
             backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
+nav.main-menu ul li a {
+    color: #fff;
+    font-weight: 700;
+    display: block;
+    padding: 15px;
+}
     </style>
 </head>
 <body>
@@ -735,41 +731,54 @@
     <div class="sidebar-container sidebar-hidden">
         <aside class="sidebar">
             <!-- User Profile Section -->
-            <div class="user-profile">
-                 <div class="profile-picture">
-               {% for userprofile in NewsProfiles %}
-
-                    {% if userprofile.newprofile_profile_picture_url %}
-                        <a href="{{ userprofile.newprofile_profile_url }}">
-                            <img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;" onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
-
-                          <div class="level-badge">42</div>
-                        </a>
-
-                    {% else %}
-                        <!-- Placeholder image or default avatar -->
-                        <img src="/static/css/images/a.jpg" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;">
-                    {% endif %}
-
-                </div>
-
-                <div class="user-info">
-                    <h2 class="username">{{user.username}}</h2>
-                    <div class="user-stats">
-                        <div class="user-stat">
-                            <i class="fas fa-gem user-stat-icon" style="color: #ED2221;"></i>
-                            <div class="sellupdate" id="sellupdate">
-                                <span id="currency-amount">{{ userprofile.currency_amount }}</span>
-                            </div>
-                        </div>
-                        <div class="user-stat">
-                            <i class="fas fa-trophy user-stat-icon" style="color: var(--accent);"></i>
-                            <span>{{userprofile.level}}</span>
-                        </div>
+             {% for userprofile in NewsProfiles %}
+    <div class="user-profile">
+        <div class="profile-picture" style="--profile-bg-image: url('{{ userprofile.newprofile_profile_picture_url|default:'/static/css/images/a.jpg' }}');">
+            <a href="{{ userprofile.newprofile_profile_url }}">
+                <img src="{{ userprofile.newprofile_profile_picture_url|default:'/static/css/images/a.jpg' }}" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;" onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
+                <div class="level-badge">{{ userprofile.level.icon }}</div>
+            </a>
+        </div>
+        <div class="user-info">
+            <h2 class="username">{{ userprofile.username }}</h2>
+            <div class="user-stats">
+                <div class="user-stat">
+                    <i class="fas fa-gem user-stat-icon" style="color: #ED2221;"></i>
+                    <div class="sellupdate" id="sellupdate">
+                        <span id="currency-amount">{{ userprofile.currency_amount }}</span>
                     </div>
                 </div>
+                <div class="user-stat">
+                    <i class="fas fa-trophy user-stat-icon" style="color: var(--accent);"></i>
+                    <span>{{ userprofile.level }}</span>
+                </div>
             </div>
-                {% endfor %}
+        </div>
+    </div>
+{% empty %}
+    <div class="user-profile">
+        <div class="profile-picture" style="--profile-bg-image: url('/static/css/images/a.jpg');">
+            <a href="{% url 'login' %}">
+                <img src="/static/css/images/a.jpg" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;">
+            </a>
+        </div>
+        <div class="user-info">
+            <h2 class="username">Guest</h2>
+            <div class="user-stats">
+                <div class="user-stat">
+                    <i class="fas fa-gem user-stat-icon" style="color: #ED2221;"></i>
+                    <div class="sellupdate" id="sellupdate">
+                        <span id="currency-amount">Login To Earn Rubies!</span>
+                    </div>
+                </div>
+                <div class="user-stat">
+                    <i class="fas fa-trophy user-stat-icon" style="color: var(--accent);"></i>
+                    <span>Login To Level!</span>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
 
             <!-- Navigation Section -->
             <div class="sidebar-nav">
@@ -778,9 +787,9 @@
                     <h3 class="section-title"><i class="fas fa-compass"></i> Navigation</h3>
                     <ul>
                         <li class="nav-item">
-                            <a href="#" class="nav-link active">
+                            <a href="{% url 'showcase:index' %}" class="nav-link active">
                                 <i class="fas fa-home"></i>
-                                <span class="nav-text">Dashboard</span>
+                                <span class="nav-text">Home</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -865,11 +874,12 @@
                                 <span class="nav-text">Security</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="" class="nav-link">
+                       <li class="nav-item">
+                            <form action="{% url 'logout' %}" class="nav-link" method="post" id="logout-form">
+                                {% csrf_token %}
                                 <i class="fas fa-sign-out-alt"></i>
-                                <span class="nav-text">Logout</span>
-                            </a>
+                                <span class="nav-text" onclick="document.getElementById('logout-form').submit();" style="cursor: pointer;">Logout</span>
+                            </form>
                         </li>
                     </ul>
                 </div>
@@ -904,59 +914,91 @@
 
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const sidebarToggle = document.getElementById("sidebarToggle");
-            const sidebar = document.querySelector(".sidebar-container");
-            const mainContent = document.querySelector(".main-content");
-            let isCollapsed = false;
+    document.addEventListener("DOMContentLoaded", () => {
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.querySelector(".sidebar-container");
+        const mainContent = document.querySelector(".main-content");
+        const navbar = document.querySelector(".main-menu");
+        let isCollapsed = false;
 
-            // Function to toggle sidebar visibility
-            function toggleSidebar() {
-                if (sidebar.classList.contains("sidebar-hidden")) {
-                    // Show sidebar
-                    sidebar.style.display = "block";
+        // Function to update navbar position
+        function updateNavbarPosition() {
+            if (sidebar.classList.contains("sidebar-hidden")) {
+                navbar.style.left = "0";
+            } else if (sidebar.classList.contains("sidebar-collapsed")) {
+                navbar.style.left = "var(--sidebar-collapsed-width)";
+            } else {
+                navbar.style.left = "var(--sidebar-width)";
+            }
+        }
+
+        // Function to handle sidebar state changes
+        function setSidebarState(state) {
+            sidebar.style.display = "block";
+            sidebar.classList.remove("sidebar-hidden", "sidebar-collapsed");
+            sidebarToggle.classList.remove("active", "collapsed");
+            mainContent?.classList.remove("main-content-expanded");
+
+            switch (state) {
+                case "expanded":
+                    sidebarToggle.classList.add("active");
+                    isCollapsed = false;
+                    break;
+                case "collapsed":
+                    sidebar.classList.add("sidebar-collapsed");
+                    sidebarToggle.classList.add("collapsed");
+                    mainContent?.classList.add("main-content-expanded");
+                    isCollapsed = true;
+                    break;
+                case "hidden":
+                    sidebar.classList.add("sidebar-hidden");
                     setTimeout(() => {
-                        sidebar.classList.remove("sidebar-hidden");
-                        sidebarToggle.classList.add("active");
-                        mainContent.classList.remove("main-content-expanded");
-                    }, 10);
+                        if (sidebar.classList.contains("sidebar-hidden")) {
+                            sidebar.style.display = "none";
+                        }
+                    }, 400);
+                    isCollapsed = false;
+                    break;
+            }
+
+            updateNavbarPosition();
+        }
+
+        // Handle click events
+        let lastClickTime = 0;
+        const doubleClickDelay = 300; // milliseconds
+
+        sidebarToggle.addEventListener("click", (e) => {
+            const currentTime = new Date().getTime();
+            const timeDiff = currentTime - lastClickTime;
+
+            if (timeDiff < doubleClickDelay) {
+                // Double click detected
+                setSidebarState("hidden");
+            } else {
+                // Single click handling
+                if (sidebar.classList.contains("sidebar-hidden")) {
+                    setSidebarState("expanded");
                 } else if (isCollapsed) {
-                    // Expand sidebar from collapsed state
-                    sidebar.classList.remove("sidebar-collapsed");
-                    sidebarToggle.classList.remove("collapsed");
-                    mainContent.classList.remove("main-content-expanded");
-                    isCollapsed = false;
+                    setSidebarState("hidden");
                 } else {
-                    // Collapse sidebar
-                    sidebar.classList.remove("sidebar-collapsed");
-                    sidebarToggle.classList.remove("collapsed");
-                    mainContent.classList.remove("main-content-expanded");
-                    isCollapsed = false;
+                    setSidebarState("collapsed");
                 }
             }
 
-            // Double-click to hide sidebar completely
-            sidebarToggle.addEventListener("dblclick", () => {
-                sidebar.classList.add("sidebar-hidden");
-                sidebarToggle.classList.remove("active");
-                sidebarToggle.classList.remove("collapsed");
-                mainContent.classList.remove("main-content-expanded");
-                isCollapsed = false;
-
-                // Delay hiding to allow animation to complete
-                setTimeout(() => {
-                    if (sidebar.classList.contains("sidebar-hidden")) {
-                        sidebar.style.display = "none";
-                    }
-                }, 400);
-            });
-
-            // Single click to toggle between expanded and collapsed
-            sidebarToggle.addEventListener("click", toggleSidebar);
-
-            // Initialize sidebar state
-            toggleSidebar(); // Show sidebar on load
+            lastClickTime = currentTime;
         });
-    </script>
+
+        // Initialize sidebar state
+        setSidebarState("expanded");
+
+        // Handle window resize
+        let resizeTimer;
+        window.addEventListener("resize", () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(updateNavbarPosition, 250);
+        });
+    });
+</script>
 </body>
 </html>

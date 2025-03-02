@@ -127,6 +127,11 @@ border: none;
     overflow: hidden; /* Hides both vertical and horizontal scrollbars */
 }
 
+.target-card{
+
+    margin-left: 28px;
+    margin-right: 12px;
+    }
 
     .individuallootelement {
         display: flex;
@@ -601,16 +606,6 @@ border: none;
             position: absolute;
             bottom: -15px;
             left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .nav-links h1::after {
-            content: '';
-            position: absolute;
-            left: 10%;
             transform: translateX(-50%);
             width: 200px;
             height: 2px;
@@ -1479,13 +1474,13 @@ $(document).ready(function() {
 <!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
             {% for item in choices_with_nonce %}
                 {% with choice=item.choice %}
-                    <div id="{{ choice.choice_text }}" class="cards" style="background: rgba(255, 255, 255, 0.3);">
+                    <div id="{{ choice.choice_text }}" class="cards" style="margin-left: 16px; margin-left: 16px; background: rgba(255, 255, 255, 0.3);">
                         {% with color=game|get_color:choice %}
                             <div class="lootelement"
                                  data-price="{{ choice.value }}"
                                  data-currency-file="{{ item.currency.file_url }}"
                                  data-currency-symbol="{{ item.currency.symbol }}"
-                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; display: flex; margin-right: 18px;">
+                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; display: flex;">
                                 <p style=" color: black;">
                                     {% if choice.file.url %}
                                     <img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}">
