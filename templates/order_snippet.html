@@ -1,5 +1,5 @@
 
-<div class="col-md-12 mb-4">
+<div class="col-md-12 mb-4" style="display: flex; flex-direction: column;">
     <br><br>
     <h4 class="d-felex justify-content-between align-items-center mb-3">
     <span class="text-muted" style="color: white;">Your Cart</span>
@@ -58,7 +58,7 @@
         {% csrf_token %}
         <div class="input-group">
             {{ couponform.code }}
-            <div class="input-group-append" style="margin-top: 2.5%;">
+            <div class="input-group-append">
             <button class="btn btn-secondary btn-md waves-effect m-0" style="" type="submit">Redeem</button>
             </div>
         </div>
