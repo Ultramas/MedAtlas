@@ -573,7 +573,7 @@
         }
 
         .sidebar-collapsed .view-collection span {
-            display: none;
+            /* display: none; */
         }
 
         /* Animations */
@@ -606,7 +606,6 @@
 
         /* Main Content */
         .main-content {
-            margin-left: var(--sidebar-width);
             padding: 20px;
             transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -615,8 +614,9 @@
             margin-left: var(--sidebar-collapsed-width);
         }
 
+
         /* Responsive */
-        @media (max-width: 768px) {
+        /* @media (max-width: 768px) {
             .sidebar-container {
                 width: 100%;
                 max-width: 300px;
@@ -637,7 +637,7 @@
             .main-content-expanded {
                 margin-left: 0;
             }
-        }
+        } */
 
 
 

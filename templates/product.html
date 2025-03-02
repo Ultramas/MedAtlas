@@ -644,8 +644,8 @@
                                 <div class="price-container">
                                     {% if item.price %}
                                         {% if item.discount_price %}
-                                            <del class="old-price">${{ item.price }}</del>
-                                            <p class="current-price">${{ item.discount_price }}</p>
+                                            <del class="old-price">${{ item.discount_price }}</del>
+                                            <p class="current-price">${{ item.price }}</p>
                                         {% else %}
                                             <p class="current-price">${{ item.price }}</p>
                                         {% endif %}
