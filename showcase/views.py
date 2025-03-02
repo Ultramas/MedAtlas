@@ -15045,56 +15045,26 @@ class CurrencyPaymentView(EBaseView):
 
         return render(request, self.template_name, context)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, *args, **kwargs):
+
         order = get_object_or_404(CurrencyOrder, user=request.user, ordered=False)
         form = CurrencyPaymentForm(request.POST)
         user_profile = get_object_or_404(UserProfile, user=request.user)
 
-        if form.is_valid():
-            payment_method = request.POST.get('payment_method')
-            token = request.POST.get("stripeToken")
-            save = form.cleaned_data.get('save')
-            use_default = form.cleaned_data.get('use_default')
-
-            if save and user_profile.stripe_customer_id:
-                customer = stripe.Customer.retrieve(user_profile.stripe_customer_id)
-                customer.sources.create(source=token)
-            elif save:
-                customer = stripe.Customer.create(email=request.user.email)
-                customer.sources.create(source=token)
-                user_profile.stripe_customer_id = customer['id']
-                user_profile.one_click_purchasing = True
-                user_profile.save()
-
-            amount = int(order.get_total_price() * 100)
-
+        if token:
             try:
-                charge_params = {
-                    "amount": amount,
-                    "currency": "usd",
-                }
-                if use_default and user_profile.stripe_customer_id:
-                    charge_params["customer"] = user_profile.stripe_customer_id
-                elif token:
-                    charge_params["source"] = token
-                else:
-                    raise ValueError("No payment method provided.")
-
-                charge = stripe.Charge.create(**charge_params)
-
-                self._process_successful_payment(order, charge, user_profile)
-                if payment_method == 'paypal':
-                    return HttpResponseRedirect(self.process_paypal_payment(order))
-                return redirect("showcase:currencymarket")
-
+                charge = stripe.Charge.create(
+                    amount=int(order.get_total_price() * 100),
+                    currency="usd",
+                    source=token,
+                    description=f"Order {order.id}",
+                )
+                return JsonResponse({"success": "Thanks for purchasing!"})
             except stripe.error.StripeError as e:
-                messages.warning(request, f"Stripe error: {str(e)}")
-            except ValueError as e:
-                messages.error(request, str(e))
-            except Exception:
-                messages.error(request, "An unexpected error occurred. Please try again.")
+                return JsonResponse({"error": str(e)}, status=400)
+        messages.warning(self.request, "Invalid data received")
+        return redirect("/payment/stripe")
 
-            return redirect("showcase:currencymarket")
 
 
 class CurrencyPayPalExecuteView(View):

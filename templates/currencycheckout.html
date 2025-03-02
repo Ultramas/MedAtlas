@@ -802,9 +802,8 @@ nav.main-menu ul li a {
               {% csrf_token %}
               {{ form.non_field_errors }}
 
-              <h3>Shipping Address</h3>
 
-              <div class='hideable_shipping_form'>
+              <div class='hideable_shipping_form' style="display: none;">
 
                 <div class="md-form mb-5">
                   <!--find proper syntaxing for userprofile.shipping_address1-->
@@ -855,9 +854,8 @@ nav.main-menu ul li a {
 
               <hr>
 
-              <h3>Billing Address</h3>
 
-              <div class='hideable_billing_form'>
+              <div class='hideable_billing_form' style="display: none;">
                 <div class="md-form mb-5">
                   <input type='text' placeholder='Address (example: 1234 Main St)' id='billing_address' name='billing_address' class='form-control' />
                   <!--<label for="billing_address" class="">Address</label>-->
