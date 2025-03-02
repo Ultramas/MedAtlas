@@ -10,8 +10,6 @@ body{
     display: flex;
     justify-content: center; /* Centers the flex items horizontally */
     align-items: center; /* Centers the flex items vertically */
-    height: 100vh; /* Ensures full height for vertical centering */
-    margin-top: 10%; /* Reset margin-top if not needed */
 
 }
 
@@ -89,19 +87,27 @@ body{
 
 /* Final Message */
 
-.popup{
+.popupWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+/* .popup{
     display: none;
     position: fixed;
     height: fit-content;
     width: fit-content;
     right: 60vh;
     top: 35vh;
+    width: 50em;
     transform: translate(-50%, -50%);
     backdrop-filter: blur(20px);
     padding: 20px;
     border:3px solid #323c52;
-    z-index: 15;
-}
+    z-index: 120;
+} */
 
 .text{
     text-align: center;
@@ -121,12 +127,20 @@ body{
     margin-top: 10px;
 }
 
+.selectionsWrapper{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2em 0;
+    height: 100%;
+}
+
 .selections {
-    position: absolute;
-    top: 30vh;
-    left: 50%;
-    transform: translateX(-50%); /* Centers the element horizontally */
-    height: 45vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20em;
+    height: 20em;
     background-color: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
     color: black;
@@ -201,16 +215,17 @@ body{
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 80vw;
+    width: 50em;
     max-width: 1200px;
-    height: auto;
+    height: 43em;
     background-color: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(10px);
     padding: 30px;
     border: 3px solid #323c52;
     border-radius: 15px;
-    z-index: 15;
+    z-index: 120;
     overflow: hidden;
+    
 }
 
 
@@ -402,7 +417,7 @@ body{
     box-shadow: 0 5px 15px rgba(255, 102, 0, 0.4);
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-top: 20px;
+    margin: -2.5em 0 0 0;
 }
 
 .close:hover {
