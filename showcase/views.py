@@ -12292,6 +12292,7 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
         context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
         context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -14085,6 +14086,7 @@ class InventoryTradeView(CreateView):
 
         # Add disabled items to the context
         context['disabled_items'] = set(items_in_pending_offers)
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         context['other_trade_items'] = [
             {
