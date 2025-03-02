@@ -15734,98 +15734,24 @@ class PaymentView(EBaseView):
 
     def post(self, *args, **kwargs):
         order = Order.objects.get(user=self.request.user, ordered=False)
-        token = self.request.POST.get('token')
-        payment_method = self.request.POST.get('payment_method')
+        data = json.loads(self.request.body.decode('utf-8'))
+        token = data.get('token')
+        payment_method = data.get('payment_method')
 
         if token:
             try:
-                # Use the token to create a charge or attach a payment method
-                stripe.PaymentMethod.attach(
-                    token,
-                    customer=userprofile.stripe_customer_id,
-                )
-                # Process payment
                 charge = stripe.Charge.create(
-                    amount=int(order.get_total_price() * 100),  # Amount in cents
+                    amount=int(order.get_total_price() * 100),
                     currency="usd",
                     source=token,
                     description=f"Order {order.id}",
                 )
-                # Handle success
-                return JsonResponse({"success": "Payment processed successfully!"})
+                return JsonResponse({"success": "Thanks for purchasing!"})
             except stripe.error.StripeError as e:
                 return JsonResponse({"error": str(e)}, status=400)
-
-            if save:
-                if userprofile.stripe_customer_id:
-                    # Customer already exists
-                    customer = stripe.Customer.retrieve(userprofile.stripe_customer_id)
-                    customer.sources.create(source=token)
-                else:
-                    # Create a new customer
-                    customer = stripe.Customer.create(email=self.request.user.email)
-                    customer.sources.create(source=token)
-                    userprofile.stripe_customer_id = customer['id']
-                    userprofile.one_click_purchasing = True
-                    userprofile.save()
-
-            # Calculate the order amount in cents
-            amount_in_cents = int(order.get_total_price() * 100)
-
-            try:
-                # Create a PaymentIntent
-                payment_intent = stripe.PaymentIntent.create(
-                    amount=amount_in_cents,  # Total amount in cents
-                    currency="usd",
-                    customer=userprofile.stripe_customer_id if (use_default or save) else None,
-                    payment_method_types=['ach_credit_transfer'],
-                    payment_method_data={
-                        'type': 'card',
-                        'card': {
-                            'token': token.id,
-                        }
-                    } if not (use_default or save) else None,
-                )
-                print('The payment went through')
-
-                # Handle successful payment
-                payment = Payment()
-                payment.stripe_charge_id = payment_intent['id']
-                payment.user = self.request.user
-                payment.amount = order.get_total_price()
-                payment.save()
-
-                # Update the order status
-                order_items = order.items.all()
-                order_items.update(ordered=True)
-                for item in order_items:
-                    item.save()
-
-                order.ordered = True
-                order.payment = payment
-                order.ref_code = create_ref_code()
-                order.save()
-
-                messages.success(self.request, "Your order was successful!")
-
-                if payment_method == 'paypal':
-                    return HttpResponseRedirect(self.process_paypal_payment(order))
-                return redirect("showcase:ehome")
-
-            except stripe.error.StripeError as e:
-                # Handle Stripe errors
-                body = e.json_body if hasattr(e, 'json_body') else {}
-                err = body.get('error', {})
-                messages.warning(self.request, f"{err.get('message', 'Payment failed')}")
-                return redirect("showcase:ehome")
-
-            except Exception as e:
-                # Handle generic exceptions
-                messages.warning(self.request, "A serious error occurred. We have been notified.")
-                return redirect("/ehome")
-
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
+
 
 
 class PayPalExecuteView(View):
