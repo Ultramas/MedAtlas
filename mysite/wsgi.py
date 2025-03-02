@@ -10,7 +10,14 @@ https://docs.djangoproject.com/en/3.0/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
+import sys
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
+path = '/home/Ultramas/PokeTrove-Official-Website'
 
+if path not in sys.path:
+    sys.path.append(path)
+os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
+#os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
+
+from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
