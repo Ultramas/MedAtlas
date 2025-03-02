@@ -12,7 +12,7 @@ import os
 from django.core.wsgi import get_wsgi_application
 import sys
 
-path = 'home/PokeTrove/PokeTrove-Official-Website'
+path = '/PokeTrove-Official-Website'
 
 if path not in sys.path:
     sys.path.append(path)
