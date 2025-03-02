@@ -561,6 +561,7 @@
             .inventory-grid {
                 grid-template-columns: 1fr;
             }
+
         }
 
         .inventory-item {
@@ -715,12 +716,9 @@ nav.main-menu ul li a {
 {% include 'navtrove.html' %}
 
   <main class="main-content" style="align-items: center; justify-content: center;">
-
-
-    <div class="container wow fadeIn" style="display: flex; flex-direction: column;">
+        <div class="container wow fadeIn" style="display: flex; flex-direction: column;">
         <h2 class="my-5 h2 text-center" style="color: white; margin-bottom: -20%;">Checkout</h2>
-
-            <div class="row">
+            <div class="row" style="display: flex; flex-direction: row; justify-content: center; align-items: center;">
         <div class="col-md-8 mb-4">
           <div class="card">
               {% if address %}
@@ -729,6 +727,7 @@ nav.main-menu ul li a {
 
         }
         .shipping-label {
+            flex-grow: 1;
             background-color: white;
             border: 2px solid #000;
             padding: 20px;
@@ -774,9 +773,21 @@ nav.main-menu ul li a {
         .list-group-item{
             color: black;
         }
+
+        .input-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .outerContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
              <form id="checkout-form" method="POST" class="card-body" action="{% url 'showcase:payment' payment_option='card' %}">
-
+        <div class="outerContainer">
               {% csrf_token %}
           <div class="shipping-label">
         <div class="label-header">
@@ -808,6 +819,7 @@ nav.main-menu ul li a {
             <div class="barcode-placeholder" style="color:black;">||||| |||| || |||||||</div>
         </div>
     </div>
+</div>
               {% else %}
             <form method="POST" class="card-body"  action="{% url 'showcase:payment' payment_option='card' %}">
               {% csrf_token %}
@@ -1048,7 +1060,7 @@ nav.main-menu ul li a {
 
         </div>
 
-        <div class="col-md-4 mb-4">
+        <div class="col-md-4 mb-4" style="margin: 0; padding: 0; max-width: 40min; min-width: 20em;">
           {% include "order_snippet.html" %}
         </div>
 
