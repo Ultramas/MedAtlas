@@ -839,8 +839,6 @@ sellBtn.addEventListener('click', () => {
     }, 0);
 });
 
-
-
     }
 });
 
