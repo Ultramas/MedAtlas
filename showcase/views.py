@@ -14802,6 +14802,7 @@ class CurrencyProductView(DetailView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         # context['object'] = Item.objects.filter(is_active=1).order_by('slug')  #maybe change to be able to be ordered by different parameters
         # like slug, price, popularity, type (gold, platinum, emerald, diamond), etc
         # somehow limited to 3 products on first page, yet products still exist and can be accessed by "view on site"
@@ -14838,7 +14839,6 @@ class CurrencyMarketView(EBaseView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
-        context['Logos'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
@@ -14848,6 +14848,7 @@ class CurrencyMarketView(EBaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Currency'] = CurrencyMarket.objects.filter(is_active=1).order_by(
             'price')  # deals/non-deals can be seperated in the templates
         if self.request.user.is_authenticated:

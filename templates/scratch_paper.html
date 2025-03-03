@@ -46,10 +46,6 @@
         letter-spacing: 1px;
         margin: 0;
     }
-
-    h6 {
-        color: black;
-    }
 </style>
 
     <style>
@@ -57,7 +53,6 @@
 
         :root {
             --primary: #bf97ff;
-            --primary-dark: #9a6bff;
             --primary-dark: #9a6bff;
             --background: #0a0a13;
             --text: #ffffff;
@@ -150,10 +145,31 @@
             color: var(--accent);
         }
 
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
         .nav-links a:hover::after {
             width: 100%;
         }
 
+    .logo-icon h1::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+    }
         .container {
             display: flex;
             gap: 3rem;
@@ -368,6 +384,17 @@
             background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
+
+        .nav-links h1::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
         .pokemon-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -529,7 +556,6 @@
             .inventory-grid {
                 grid-template-columns: 1fr;
             }
-
         }
 
         .inventory-item {
@@ -683,358 +709,79 @@ nav.main-menu ul li a {
 
 {% include 'navtrove.html' %}
 
-  <main class="main-content" style="align-items: center; justify-content: center;">
-        <div class="container wow fadeIn" style="display: flex; flex-direction: column;">
-        <h2 class="my-5 h2 text-center" style="color: white; margin-bottom: -20%;">Checkout</h2>
-            <div class="row" style="display: flex; flex-direction: row; justify-content: center; align-items: center;">
-        <div class="col-md-8 mb-4">
-          <div class="card">
-              {% if address %}
-              <style>
-        body {
+  <main class="main-content" style=" align-items: center; justify-content: center;">
 
-        }
-        .shipping-label {
-            flex-grow: 1;
-            background-color: white;
-            border: 2px solid #000;
-            padding: 20px;
-            width: 350px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .label-header {
-            text-align: center;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-            color: black;
-        }
-        .label-header h2 {
-            margin: 0;
-            font-size: 1.2em;
-            text-transform: uppercase;
-        }
-        .address-section {
-            margin-bottom: 15px;
-            color: black;
-        }
-        .address-section h3 {
-            margin: 0 0 5px 0;
-            font-size: 1em;
-            font-weight: bold;
-        }
-        .address-content {
-            font-size: 0.9em;
-            line-height: 1.4;
-        }
-        .barcode {
-            text-align: center;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 2px solid #000;
-        }
-        .barcode-placeholder {
-            font-family: 'Courier New', monospace;
-            font-size: 1.2em;
-            letter-spacing: 2px;
-        }
-        .list-group-item{
-            color: black;
-        }
+      <h1>{{object.title}} </h1>
+      <section id="inventoryGrid" class="inventory-grid comfortable-view">
 
-        .input-group {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+                    <div class="inventory-item" style="width: 200%;">
 
-        .outerContainer {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-    </style>
-             <form id="checkout-form" method="POST" class="card-body" action="{% url 'showcase:payment' payment_option='card' %}">
-        <div class="outerContainer">
-              {% csrf_token %}
-          <div class="shipping-label">
-        <div class="label-header">
-            <h2>Shipping Label</h2>
-        </div>
-        <div class="address-section">
-            <h3>Ship To:</h3>
-            <div class="address-content" style="color: black;">
-                Address - {{address.street_address}}<br>
-                {% if apartment_address %}
-                Apartment - {{address.apartment_address}}<br>
-                {% endif %}
-                Country - {{address.country}}<br>
-                ZIP - {{address.zip}}
-            </div>
-        </div>
-        <div class="address-section" style="color: black;">
-            <h3>Bill To:</h3>
-            <div class="address-content">
-                Address - {{address.street_address}}<br>
-                {% if apartment_address %}
-                Apartment - {{address.apartment_address}}<br>
-                {% endif %}
-                Country - {{address.country}}<br>
-                ZIP - {{address.zip}}
-            </div>
-        </div>
-        <div class="barcode">
-            <div class="barcode-placeholder" style="color:black;">||||| |||| || |||||||</div>
-        </div>
-    </div>
-</div>
-              {% else %}
-            <form method="POST" class="card-body"  action="{% url 'showcase:payment' payment_option='card' %}">
-              {% csrf_token %}
-              {{ form.non_field_errors }}
+                        <div class="legendary-icon">🐉</div>
+                        <div class="pokemon-image">
+                            <img src="{{ object.file.url }}" alt="{{Inventory.choice_text}} Image">
+                        </div>
+                        <div class="pokemon-info">
+                            <h3 class="pokemon-name">{{ Inventory.choice.choice_text }}</h3>
 
-              <h3>Shipping Address</h3>
 
-              <div class='hideable_shipping_form'>
+                                 {% if object.price %}
+            {% if object.discount_price %}
+              <span class="mr-1" style="">
+              <del><p class="pokemon-type">${{ object.price }}</p></del>
+              </span>
+              <p class="pokemon-type">${{ object.discount_price }}</p>
+            {% else %}
+             <p class="pokemon-type">${{ object.price }}</p>
+            {% endif %}
 
-                <div class="md-form mb-5">
-                  <!--find proper syntaxing for userprofile.shipping_address1-->
-                  <input type='text' placeholder='Address (example: 1234 Main St)' id='shipping_address' name='shipping_address' class='form-control' />
-                  <!--<label for="shipping_address" class="">Address</label>-->
-                </div>
+            {% else %}
+            {% if object.discount_currency_price %}
+              <span class="mr-1" style="">
+              <del><p class="pokemon-type">💎 {{ object.currency_price }}</p></del>
+              </span>
+              <p class="pokemon-type">💎 {{ object.discount_currency_price }}</p>
+            {% else %}
+                <p class="pokemon-type">💎 {{ object.currency_price }}</p>
+            {% endif %}
+            {% endif %}
+<h3 class = "product-title" style="color: var(--primary);">{{object.title}}</h3>
+                            <p class="product-condition" style="">Card Condition: {{ object.condition }}</p>
+                            {% if object.category and object.category.lower == 'p' %}
+                            <p class="product-condition" style="">Card Category: Pokemon</p>
+                            {% elif object.category.lower == 'm' %}
+                            <p class="product-condition" style="">Card Category: Magic The Gathering</p>
+                            {% elif object.category.lower == 'b' %}
+                            <p class="product-condition" style="">Card Category: Bakugo</p>
+                            {% elif object.category.lower == 'y' %}
+                            <p class="product-condition" style="">Card Category: Yu-Gi-Oh!</p>
+                            {% else %}
+                            <p class="product-condition" style="">Card Category: Other</p>
+                            {% endif %}
 
-                <div class="md-form mb-5">
-                  <input type='text' placeholder='Address 2 (optional)' id='shipping_address2' name='shipping_address2' class='form-control' />
-                  <!--<label for="shipping_address2" class="">Address 2 (optional)</label>-->
-                </div>
+                            {% if object.category and object.category.lower == 'g' %}
+                            <p class="product-tier" style="color: gold;">Tier: Gold</p>
+                            {% elif object.category and object.category.lower == 'p' %}
+                            <p class="product-tier" style="color: #E5E4E2;">Tier: Platinum</p>
+                            {% elif object.category and object.category.lower == 'e' %}
+                            <p class="product-tier" style="color: #50C878;">Tier: Emerald</p>
+                            {% else %}
+                            <p class="product-tier" style="color: #B9F2FF;">Tier: Diamond</p>
+                            {% endif %}
 
-                <div class="row">
-                  <div class="col-lg-4 col-md-12 mb-4">
-                    <label for="country">Country</label>
-                    <!--{{ form.shipping_country }} causes the image-->
-                    {{ form.shipping_country }}
-                    <div class="invalid-feedback">
-                      Please select a valid country.
+                            <p class="product-description" style="color: rgba(255, 255, 255, 0.8);">{{ object.description }}</p>
+                            <div class="action-buttons">
+
+
+            <a href="{{ object.currency_get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p" >Buy Rubicoins Package
+                <i class="fas fa-shopping-cart ml-1"></i>
+            </a>
+
+
+                            </div>
+                        </div>
+
                     </div>
-                  </div>
-                  <div class="col-lg-4 col-md-6 mb-4">
-                    <label for="shipping_zip">Zip</label>
-                    <input type='text' placeholder='Zip code' id='shipping_zip' name='shipping_zip' class='form-control' />
-                    <div class="invalid-feedback">
-                      Zip code required.
-                    </div>
-                  </div>
-                </div>
-
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" name="same_billing_address" id="same_billing_address">
-                  <label class="custom-control-label" for="same_billing_address">My billing address is the same as my shipping address</label>
-                </div>
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" name="set_default_shipping" id="set_default_shipping">
-                  <label class="custom-control-label" for="set_default_shipping">Save as default shipping address</label>
-                </div>
-
-              </div>
-
-              {% if default_shipping_address %}
-              <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" name="use_default_shipping" id="use_default_shipping">
-                <label class="custom-control-label" for="use_default_shipping">Use default shipping address: {{ default_shipping_address.street_address|truncatechars:10 }}</label>
-              </div>
-              {% endif %}
-
-              <hr>
-
-              <h3>Billing Address</h3>
-
-              <div class='hideable_billing_form'>
-                <div class="md-form mb-5">
-                  <input type='text' placeholder='Address (example: 1234 Main St)' id='billing_address' name='billing_address' class='form-control' />
-                  <!--<label for="billing_address" class="">Address</label>-->
-                </div>
-
-                <div class="md-form mb-5">
-                  <input type='text' placeholder='Address 2 (optional)' id='billing_address2' name='billing_address2' class='form-control' />
-                  <!--<label for="billing_address2" class="">Address 2 (optional)</label>-->
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-4 col-md-12 mb-4">
-                    <label for="country">Country</label>
-                    {{ form.billing_country }}
-                    <div class="invalid-feedback">
-                      Please select a valid country.
-                    </div>
-                  </div>
-
-                  <div class="col-lg-4 col-md-6 mb-4">
-                    <label for="billing_zip">Zip</label>
-                    <input type='text' placeholder='Zip code' id='billing_zip' name='billing_zip' class='form-control' />
-                    <div class="invalid-feedback">
-                      Zip code required.
-                    </div>
-                  </div>
-
-                </div>
-
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" name="set_default_billing" id="set_default_billing">
-                  <label class="custom-control-label" for="set_default_billing">Save as default billing address</label>
-                </div>
-
-              </div>
-
-              {% if default_billing_address %}
-              <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" name="use_default_billing" id="use_default_billing">
-                <label class="custom-control-label" for="use_default_billing">Use default billing address: {{ default_billing_address.street_address|truncatechars:10 }}</label>
-              </div>
-              {% endif %}
-{% endif %}
-              <hr>
-             <!-- <h3>Payment Option</h3>-->
-
-
-    <!-- Set up a container element for the button -->
-    <!--<div id="paypal-button-container"></div>
--->
-    <!-- Include the PayPal JavaScript SDK -->
-<!--    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>-->
-
-
-<!--    &lt;!&ndash; Set up a container element for the button &ndash;&gt;-->
-<!--    <div id="paypal-button-container"></div>-->
-
-<!--    &lt;!&ndash; Include the PayPal JavaScript SDK &ndash;&gt;-->
-<!--    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>-->
-
-   <!-- <script>
-        // Render the PayPal button into #paypal-button-container
-        paypal.Buttons({
-
-            style: {
-                color:  'blue',
-                shape:  'pill',
-                label:  'pay',
-                height: 40
-            },
-
-            // Call your server to set up the transaction
-            createOrder: function(data, actions) {
-                return fetch('/demo/checkout/api/paypal/order/create/', {
-                    method: 'post'
-                }).then(function(res) {
-                    return res.json();
-                }).then(function(orderData) {
-                    return orderData.id;
-                });
-            },
-
-            // Call your server to finalize the transaction
-            onApprove: function(data, actions) {
-                return fetch('/demo/checkout/api/paypal/order/' + data.orderID + '/capture/', {
-                    method: 'post'
-                }).then(function(res) {
-                    return res.json();
-                }).then(function(orderData) {
-                    // Three cases to handle:
-                    //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
-                    //   (2) Other non-recoverable errors -> Show a failure message
-                    //   (3) Successful transaction -> Show confirmation or thank you
-
-                    // This example reads a v2/checkout/orders capture response, propagated from the server
-                    // You could use a different API or structure for your 'orderData'
-                    var errorDetail = Array.isArray(orderData.details) && orderData.details[0];
-
-                    if (errorDetail && errorDetail.issue === 'INSTRUMENT_DECLINED') {
-                        return actions.restart(); // Recoverable state, per:
-                        // https://developer.paypal.com/docs/checkout/integration-features/funding-failure/
-                    }
-
-                    if (errorDetail) {
-                        var msg = 'Sorry, your transaction could not be processed.';
-                        if (errorDetail.description) msg += '\n\n' + errorDetail.description;
-                        if (orderData.debug_id) msg += ' (' + orderData.debug_id + ')';
-                        return alert(msg); // Show a failure message (try to avoid alerts in production environments)
-                    }
-
-                    // Successful capture! For demo purposes:
-                    console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
-                    var transaction = orderData.purchase_units[0].payments.captures[0];
-                    alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
-
-                    // Replace the above to show a success message within this page, e.g.
-                    // const element = document.getElementById('paypal-button-container');
-                    // element.innerHTML = '';
-                    // element.innerHTML = '<h3>Thank you for your payment!</h3>';
-                    // Or go to another URL:  actions.redirect('thank_you.html');
-                });
-            }
-
-        }).render('#paypal-button-container');
-    </script>
-              -->
-
-
-    {% if not form.payment_option.is_hidden %}
-    <h3 style="">Payment Options</h3>
-    <div class="d-block my-3">
-    {% for value, name in form.fields.payment_option.choices %}
-      <div class="custom-control custom-radio">
-        <input id="{{ name }}" name="payment_option" value="{{ value }}" type="radio" class="custom-control-input" required>
-        <label class="custom-control-label" for="{{ name }}">{{ name }}</label>
-      </div>
-    {% endfor %}
-    </div>
-    {% endif %}
-
-
-    <hr class="mb-4">
-    <button type="submit" class="btn btn-primary btn-lg btn-block" >Continue To Payment</button>
-
-  <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const checkoutForm = document.getElementById('checkout-form');
-    if (checkoutForm) {
-      checkoutForm.onsubmit = function(event) {
-        const selectedOption = document.querySelector('input[name="payment_option"]:checked');
-        if (selectedOption) {
-          const paymentOption = selectedOption.value;
-          // Set the action based on selected payment option
-          if (paymentOption === 'stripe') {
-            this.action = "{% url 'showcase:payment' payment_option='stripe' %}";
-          } else if (paymentOption === 'paypal') {
-            this.action = "{% url 'showcase:payment' payment_option='paypal' %}";
-          } else if (paymentOption === 'card') {
-            this.action = "{% url 'showcase:payment' payment_option='card' %}";
-          }
-        } else {
-          // Optionally prevent submission if no option is selected
-          event.preventDefault();
-          alert('Please select a payment option.');
-        }
-      };
-    } else {
-      console.error('Checkout form not found.');
-    }
-  });
-  </script>
-              <!--<button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>-->
-
-            </form>
-
-          </div>
-
-        </div>
-
-        <div class="col-md-4 mb-4" style="margin: 0; padding: 0; max-width: 40min; min-width: 20em;">
-          {% include "order_snippet.html" %}
-        </div>
-
-      </div>
-
-    </div>
+            </section>
         </main>
     </div>
 
@@ -1050,28 +797,133 @@ nav.main-menu ul li a {
 </footer>
 
 <script>
-var hideable_shipping_form = $('.hideable_shipping_form');
-var hideable_billing_form = $('.hideable_billing_form');
+document.addEventListener("DOMContentLoaded", function () {
+    const forms = document.querySelectorAll(".ajax-form");
 
-var use_default_shipping = document.querySelector("input[name=use_default_shipping]");
-var use_default_billing = document.querySelector("input[name=use_default_billing]");
+    forms.forEach(form => {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
 
-use_default_shipping.addEventListener('change', function() {
-  if (this.checked) {
-    hideable_shipping_form.hide();
-  } else {
-    hideable_shipping_form.show();
-  }
-})
+            const formData = new FormData(this);
+            const url = this.getAttribute("action");
+            const csrfToken = formData.get("csrfmiddlewaretoken");
 
-use_default_billing.addEventListener('change', function() {
-  if (this.checked) {
-    hideable_billing_form.hide();
-  } else {
-    hideable_billing_form.show();
-  }
-})
+            fetch(url, {
+                method: "POST",
+				headers: {
+					"X-Requested-With": "XMLHttpRequest",
+					"X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+				},
 
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Update stock count
+                    const stockCountElement = document.querySelector("#stock-count");
+                    if (stockCountElement) {
+                        stockCountElement.textContent = data.stock_count;
+                    }
+
+                    // Update currency amount
+                    const currencyAmountElement = document.querySelector("#currency-amount");
+                    if (currencyAmountElement) {
+                        currencyAmountElement.textContent = data.currency_amount;
+                    }
+
+                    // Example: Remove the item from the UI
+                    this.closest(".inventory-item").remove();
+                } else {
+                    console.error("Action failed.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    });
+});
+
+
+
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const withdrawButtons = document.querySelectorAll(".withdraw-button");
+
+    withdrawButtons.forEach((button) => {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            const form = button.closest("form");
+            const formData = new FormData(form);
+            const actionUrl = form.getAttribute("action") || window.location.href;
+
+            console.log("Submitting form to:", actionUrl); // Debug URL
+            console.log("Form Data:", [...formData.entries()]); // Debug form data
+
+            fetch(actionUrl, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP status ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        const inventoryItem = form.closest(".inventory-item");
+                        if (inventoryItem) inventoryItem.remove();
+
+                        const stockCountElement = document.getElementById("stock-count");
+                        if (stockCountElement) {
+                            stockCountElement.textContent = data.stock_count;
+                        }
+                    } else {
+                        console.error("Server error:", data.error);
+                        alert(data.error || "An error occurred.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error);
+                    alert("An unexpected error occurred. Please try again.");
+                });
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    const toggleBtn = document.getElementById("toggleViewBtn");
+    const inventoryGrid = document.getElementById("inventoryGrid");
+
+    toggleBtn.addEventListener("click", function() {
+        inventoryGrid.classList.toggle("compact-view");
+        inventoryGrid.classList.toggle("comfortable-view");
+
+        // Save the current view preference to localStorage
+        const isCompact = inventoryGrid.classList.contains("compact-view");
+        localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
+    });
+
+    // Load the saved view preference on page load
+    const savedViewPreference = localStorage.getItem("inventoryViewPreference");
+    if (savedViewPreference === "compact") {
+        inventoryGrid.classList.remove("comfortable-view");
+        inventoryGrid.classList.add("compact-view");
+    }
+});
 </script>
 	<!-- jquery -->
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
