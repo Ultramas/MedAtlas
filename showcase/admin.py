@@ -644,8 +644,6 @@ class GameAdmin(admin.ModelAdmin):
                 # Set additional fields if needed.
                 instance.category = form.instance.category
                 instance.save()  # Ensure instance has a primary key.
-                # Now, add the saved Choice to the Game’s many-to-many field.
-                form.instance.choices.add(instance)
         formset.save_m2m()
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
