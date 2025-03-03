@@ -49,7 +49,7 @@ STRIPE_KEY = 'SECRET'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['54.183.195.21', 'localhost', '127.0.0.1', '*']
+ALLOWED_HOSTS = ['54.183.195.21', 'localhost', '127.0.0.1', 'webapp-2487358.pythonanywhere.com', '*']
 
 
 # Application definition
@@ -275,6 +275,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://poketrove-official-website.onrender.com',
     'https://poketrove.org',
     'https://poketrove.net',
+    'https://www.poketrove.store',
+    'https://poketrove.store',
 ]
 
 

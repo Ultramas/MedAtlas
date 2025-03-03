@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prize Picker</title>
+    <title>PokeTrove Chests</title>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,10 +72,6 @@
             box-sizing: border-box;
         }
 
-        .containerre {
-            margin-bottom: 5em;
-        }
-
         .sliderlootlist {
             display: flex;
             flex-wrap: wrap;
@@ -133,13 +129,18 @@ border: none;
 
 .target-card{
 
+    margin-left: 0px;
+    margin-right: 5px;
     }
 
     .individuallootelement {
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        align-items: center;
+        align-items: flex-start; /* Align items to the start */
+        padding: 15px;
+    }
+       .individuallootelement p {
+        margin: 5px 0;
     }
 
     .cards {
@@ -150,14 +151,9 @@ border: none;
         box-sizing: border-box;
         display: flex;
         flex-direction: column; /* Align elements vertically */
-        align-items: center; /* Centers horizontally */
-        justify-content: center; /* Centers vertically */
-        text-align: center;
-        height: 20em;
-        width: 10em;
-        background-repeat: no-repeat; 
-        background-position: center; 
-        background-size: cover; 
+    align-items: center; /* Centers horizontally */
+    justify-content: center; /* Centers vertically */
+    text-align: center;
     }
 
     .slider img {
@@ -270,7 +266,11 @@ border: none;
                 grid-template-columns: 1fr;
             }
         }
+        .selections {
+            position: absolute;
+            top: 30vh;
 
+}
         .button{
         padding: 5px;
         }
@@ -343,7 +343,6 @@ border: none;
                 radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
             min-height: 100vh;
-            width: 100%;
         }
 
         .main-menu {
@@ -871,31 +870,6 @@ p.blog-meta span {
     color: rgba(255, 255, 255, 1);
     font-size: 0.85em;
 }
-
-.lootelement {
-    background-repeat: no-repeat; 
-    background-position: center; 
-    background-size: contain; 
-    height: 10em; 
-    width: 100%; 
-    display: flex;
-     flex-direction: column; 
-     align-items: center; 
-     height: 100%; 
-     align-self: 
-     flex-start; 
-     border-top: none; 
-     width: 10em;
-}
-
-.sliderPrice {
-    color: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    
-}
     </style>
 </head>
 <body>
@@ -914,7 +888,7 @@ p.blog-meta span {
   <script>
 
   </script>
-<div class="total" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%">
+<div class="total" style="display: flex; flex-direction: column;">
 	<!-- header -->
 {% include 'navtrove.html' %}
 	<!-- end header -->
@@ -926,13 +900,13 @@ p.blog-meta span {
     height: 80%;
     opacity: 0.20;
     background: linear-gradient(to bottom, rgba(0,0,255,0) 70%, rgb(10, 10, 19) 100%), url('{{ game.image.url }}');
-    background-size: cover;selections
+    background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
 " alt="{{ game.name }}">
 </div>
-    <div class="selectionsWrapper">
-<div class="selections">
+    <div>
+<div class="selections" style="border: 2px solid black; margin-bottom: 120%; position: absolute">
     <div class="flame-effect"></div>
     <div class="content">
         <label style="background: rgba(255, 255, 255, 0.3); padding: 2px; border-radius: 10px;"> Spin Boost Power</label>
@@ -1459,7 +1433,6 @@ $(document).ready(function() {
 
     </div>
 
-<div class="popupWrapper">
     <div id="popup" class="popup">
         <div class="fire-container">
             <div class="fire">
@@ -1490,28 +1463,29 @@ $(document).ready(function() {
 
         </div>
     </div>
-</div>
 
-    </style>
-    <div class="wrapper">
-        <div class="containerre">
+  <div class="wrapper">
+        <div class="containerre" style="margin-top: 3%;
+  position: absolute;
+  top: 90%;
+  left: 50%;
+  transform: translate(-50%, -50%); ">
             <div class="slider" id="slider">
 <!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
             {% for item in choices_with_nonce %}
                 {% with choice=item.choice %}
-                {% with color=game|get_color:choice %}
-                    <div id="{{ choice.choice_text }}" class="cards" style="background: url({% static 'css/images/'|add:color|add:'.png' %});">
-                        
+                    <div id="{{ choice.choice_text }}" class="cards" style="margin-left: 16px; margin-left: 16px; background: rgba(255, 255, 255, 0.3);">
+                        {% with color=game|get_color:choice %}
                             <div class="lootelement"
                                  data-price="{{ choice.value }}"
                                  data-currency-file="{{ item.currency.file_url }}"
                                  data-currency-symbol="{{ item.currency.symbol }}"
-                                 >
+                                 style="background: url({% static 'css/images/'|add:color|add:'.png' %}); padding: 6%; display: flex;">
+                                <p style=" color: black;">
                                     {% if choice.file.url %}
-                                    <div class="sliderImg" style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
-                                    <!-- <img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"> -->
+                                    <img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}">
                                     {% endif %}
-                                <div class="sliderPrice">{{ choice.value }} 💎</div>
+                                {{ choice.value }} 💎</p>
                             </div>
                         {% endwith %}
                         <!--<p>Noncevalue: {{ item.nonce }}</p>
