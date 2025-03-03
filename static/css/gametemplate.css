@@ -12,78 +12,71 @@ body{
     align-items: center; /* Centers the flex items vertically */
 
 }
-
-
 .containerre {
-   border: 3px solid;
-   border-color: #323c52;
-   border-radius: 15px;
-   width: 120vh; /* or any specific width */
-   height: 26vh;
-   backdrop-filter: blur(20px);
-   overflow: hidden;
-   margin: 0 auto; /* Centers the container horizontally */
+  border: 3px solid #323c52;
+  border-radius: 15px;
+  width: 1200px;  /* Fixed width */
+  height: 200px;  /* Fixed height */
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  margin: 0 auto; /* Center horizontally */
+  position: relative;  /* For absolute positioning of inner elements */
 }
 
-.spinner-arrow{
-    margin-bottom: auto;
-    margin-left: 60vh;
-    margin-top: -3vh;
-    height: 8vh;
-    margin-right: auto;
-    width: 20px;
-    position:absolute;
-    user-select: none;
+/* Fixed spinner-arrow positioning */
+.spinner-arrow {
+  /* Instead of using multiple margin declarations, center using top/left calculations */
+  /*top: calc(50% - 40px); 50% of container height minus half the spinner's height (80px/2) */
+  left: calc(50% - 10px);
+  position: absolute;
+  height: 80px;
+  width: 20px;
+  margin-top: -10px;
+  user-select: none;
 }
 
-.slider img{
-    width: 15vh;
-    height: 20vh;
-    border: 2px solid;
-    border-color: transparent; /*to change later*/
-    border-radius: 7px;
+/* Slider images are locked at fixed dimensions */
+.slider img {
+  width: 150px;
+  height: 200px;
+  border: 2px solid transparent; /* Use this as a placeholder for future changes */
+  border-radius: 7px;
 }
 
-
-
-.slider{
-    display: inline-flex;
-    position: absolute;
-    flex-wrap: nowrap;
+/* Slider container with fixed layout */
+.slider {
+  display: inline-flex;
+  position: absolute;
+  flex-wrap: nowrap;
 }
 
-/* Updated keyframes with intermediate points to create a speed-up and slow-down effect */
+/* Keyframes for spin animations (using fixed transforms) */
 @keyframes slideshow {
-    0% {
-        transform: translateX(0);
-    }
-    50% {
-        transform: translateX(-50%); /* Speed up */
-    }
-    100% {
-        transform: translateX(-100%); /* Slow down */
-    }
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-50%); /* Accelerate in the middle */
+  }
+  100% {
+    transform: translateX(-100%); /* Decelerate to a stop */
+  }
 }
 
+/* Spin animations */
 .slider[data-animated='true'] {
-    animation: slideshow 9s ease-in-out forwards; /* Updated duration and easing */
-    animation-iteration-count: 1; /* Run animation once per spin */
+  animation: slideshow 18s cubic-bezier(0.02, 0.1, 0.02, 1) forwards;
+  animation-iteration-count: 1;
 }
-/* Quick Spin Animation */
+
 .slider[data-animated='quick'] {
-    animation: slideshow 9s cubic-bezier(0.02, 0.1, 0.02, 1) forwards;
+  animation: slideshow 9s cubic-bezier(0.02, 0.1, 0.02, 1) forwards;
 }
 
-/* Normal Spin Animation */
-.slider[data-animated='true'] {
-    animation: slideshow 18s cubic-bezier(0.02, 0.1, 0.02, 1) forwards;
-}
-
-
+/* Ensure cards are not selectable and maintain their fixed layout */
 .cards {
-    user-select: none;
+  user-select: none;
 }
-
 
 /* Final Message */
 
@@ -117,7 +110,7 @@ body{
 
 .start{
     position: relative;
-    width: 23vh;
+    width: 150px;
     background-color: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
     color: black;
