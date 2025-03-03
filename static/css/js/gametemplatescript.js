@@ -131,9 +131,6 @@ async function randomizeContents() {
 </div>
 `;
 
-
-
-
             selectedItems.push({
                 id: attributes.id,
                 nonce: attributes.nonce,
@@ -151,7 +148,7 @@ async function randomizeContents() {
             const middleIndex = Math.floor(cardContainer.children.length / 2);
             const targetIndex = Math.min(
                 cardContainer.children.length,
-                middleIndex + 0
+                middleIndex + 4
             );
 
             if (cardContainer.children[targetIndex]) {

@@ -27,7 +27,7 @@ body{
 .spinner-arrow {
   /* Instead of using multiple margin declarations, center using top/left calculations */
   /*top: calc(50% - 40px); 50% of container height minus half the spinner's height (80px/2) */
-  left: calc(50% - 10px);
+  left: calc(50% - 50px);
   position: absolute;
   height: 80px;
   width: 20px;

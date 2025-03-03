@@ -29,16 +29,6 @@
 
 }
 
-.spinner-arrow{
-    margin-bottom: auto;
-    margin-left: 60vh;
-    margin-top: -3vh;
-    height: 8vh;
-    margin-right: auto;
-    width: 20px;
-    position:absolute;
-    user-select: none;
-}
 
 .sliderg img{
     width: 15vh;
