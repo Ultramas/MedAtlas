@@ -119,19 +119,19 @@ async function randomizeContents() {
             targetCardElement.setAttribute('data-upper_nonce', attributes.upperNonce);
 
             targetCardElement.innerHTML = `
-                <div class="lge" style="background: rgba(255, 255, 255, 0.3); margin-right: 10px;" data-file="${attributes.file}">
-                        <div class="lootelement" 
-         data-price="${attributes.value || ''}" 
-         data-currency-file="${attributes.currencyFile || ''}" 
-         data-currency-symbol="${attributes.currencySymbol || ''}" 
-         style="background: url('/static/css/images/${attributes.color}.png'); padding: 6%; margin-left: -6px; padding-right: 54px; width: 100%;">
-        ${attributes.file ? `<p style="text-align: center; color: black;">
-<img src="${attributes.file}" alt="${attributes.text}" width="100" height="100" style="justify-content: center; ">
-        ${attributes.value} 💎</p>` : ''}
-    </div>
-                </div>
-                <h5></h5>
-            `;
+    <div class="cards" style="background: url(/static/css/images/${attributes.color}.png);">
+            <div class="lootelement"
+     data-price="${attributes.value || ''}"
+     data-currency-file="${attributes.currencyFile || ''}"
+     data-currency-symbol="${attributes.currencySymbol || ''}"
+     style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border: 0.1em solid grey; border-top: none; width: 10em;">
+    ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
+    <div class="sliderPrice">${attributes.value} 💎</div>
+</div>
+</div>
+`;
+
+
 
 
             selectedItems.push({
@@ -156,6 +156,7 @@ async function randomizeContents() {
 
             if (cardContainer.children[targetIndex]) {
                 cardContainer.insertBefore(targetCardElement, cardContainer.children[targetIndex]);
+                cardContainer.children[targetIndex + 1].style.marginLeft = "3em";
             } else {
                 cardContainer.appendChild(targetCardElement);
             }
@@ -189,7 +190,7 @@ async function randomizeContents() {
             if (inventoryData.status === 'success') {
                 if (inventoryData.button_id === "start") {
                     console.log("Inventory object created successfully with user.");
-                     let inventory_pk = inventoryData.inventory_object_id;
+                    let inventory_pk = inventoryData.inventory_object_id;
                         console.log("inventory_pk:", inventory_pk);
                         inventory_pk = inventory_pk;
                         targetCardElement.setAttribute('data-inventory_pk', window.inventory_pk);
@@ -198,9 +199,9 @@ async function randomizeContents() {
                         const sellForm = document.getElementById(`sell-form-${window.inventory_pk}`);
                         console.log('sellform: ' + sellForm);
                         if (sellForm) {
-                          console.log("Sell form found:", sellForm);
+                        console.log("Sell form found:", sellForm);
 
-                          sellForm.addEventListener('submit', function(event) {
+                        sellForm.addEventListener('submit', function(event) {
                             event.preventDefault();
                             const pk = this.querySelector('[name="pk"]').value;
                             console.log("Sell form submitted. pk =", pk);
@@ -212,9 +213,9 @@ async function randomizeContents() {
                             totalSpins = parseInt($(this).data("value"));
                             sessionStorage.setItem("totalSpins", totalSpins);
                             sellInventory(pk);
-                          });
+                        });
                         } else {
-                          console.error("Sell form not found for inventory_pk:", window.inventory_pk);
+                        console.error("Sell form not found for inventory_pk:", window.inventory_pk);
                         }
 
                 } else if (inventoryData.button_id === "start2") {
@@ -597,9 +598,9 @@ function findSelectedCard() {
 
         if (
             !(selector.right < cardRect.left ||
-              selector.left > cardRect.right ||
-              selector.bottom < cardRect.top ||
-              selector.top > cardRect.bottom)
+            selector.left > cardRect.right ||
+            selector.bottom < cardRect.top ||
+            selector.top > cardRect.bottom)
         ) {
             currentSelection = {
                 id: card.id,
@@ -653,81 +654,81 @@ function findSelectedCard() {
         });
     }
 
- async function showPopup(buttonId) {
+async function showPopup(buttonId) {
 
 if (buttonId === "start") {
-  console.log("Show Regular Start");
-  window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-  console.log("Sell Imported CSRFToken:", window.csrfToken);
+console.log("Show Regular Start");
+window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+console.log("Sell Imported CSRFToken:", window.csrfToken);
 
-  // Attach the event handler (using delegated binding in case the form is inserted dynamically)
-  $(document).ready(function() {
+// Attach the event handler (using delegated binding in case the form is inserted dynamically)
+$(document).ready(function() {
     $(document).on("submit", "#sell-form-" + window.inventory_pk, function(e) {
-      e.preventDefault();
-      console.log('submitting here'); // Debug output
+    e.preventDefault();
+    console.log('submitting here'); // Debug output
 
-      var form = $(this);
+    var form = $(this);
 
-      // Send the form data via AJAX
-      $.ajax({
+    // Send the form data via AJAX
+    $.ajax({
         type: "POST",
         url: form.attr("action"),
         data: form.serialize(),
         success: function(response) {
-          console.log('Sell request succeeded:', response);
-          // Instead of refreshing the page, update the relevant part of your page.
-          // For example, update a container with the new HTML provided by the server:
-          if(response.html) {
+        console.log('Sell request succeeded:', response);
+        // Instead of refreshing the page, update the relevant part of your page.
+        // For example, update a container with the new HTML provided by the server:
+        if(response.html) {
             $("#updated-content-container").html(response.html);
-          }
-          // Alternatively, perform other DOM updates here if needed.
+        }
+        // Alternatively, perform other DOM updates here if needed.
         },
         error: function(error) {
 
-          console.error("Sell request failed:", error);
+        console.error("Sell request failed:", error);
         }
-      });
     });
-  });
+    });
+});
 
-   textContainer.innerHTML = `
+textContainer.innerHTML = `
     <h2>Congratulations!</h2>
     <p>You got:</p>
     <div class="cards-container"></div>
     <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
-      <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
-      <input type="hidden" name="action" value="sell">
-      <input type="hidden" name="pk" value="${window.inventory_pk}">
-      <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}" 
+    <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
+    <input type="hidden" name="action" value="sell">
+    <input type="hidden" name="pk" value="${window.inventory_pk}">
+    <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
         style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
-          Sell
-      </button>
+        Sell
+    </button>
     </form>
 
-  <button class="close" style="">Collect</button>
+<button class="close" style="">Collect</button>
 `;
 
-  } else if (buttonId === "start2") {
-      console.log("Show Demo Start");
+} else if (buttonId === "start2") {
+    console.log("Show Demo Start");
 
-      textContainer.innerHTML = `
+    textContainer.innerHTML = `
             <h2></h2>
             <p>You would have hit:</p>
             <div class="cards-container"></div>
 
             <button class="close">I see</button>
         `;
-  }
+}
 
 
-     const cardsContainer = textContainer.querySelector('.cards-container');
-     selectedItems.forEach((item, index) => {
-         const cardElement = document.createElement('div');
-         cardElement.innerHTML = `
+    const cardsContainer = textContainer.querySelector('.cards-container');
+    selectedItems.forEach((item, index) => {
+        const cardElement = document.createElement('div');
+        cardElement.innerHTML = `
             <div class="card-fire" data-color="${item.color}">
-              <div class="card-flames">
+            <div class="card-flames">
                 <div class="card-flame"></div>
-              </div>
+            </div>
             </div>
             <!--<p>ID: ${item.id}</p>
             <p>Nonceword: ${item.nonce}</p>-->
