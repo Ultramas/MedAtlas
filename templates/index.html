@@ -9,7 +9,7 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
+	<meta name="description" content="PokeTrove Official - Where  The Ultimate Unboxing Experience ">
     <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -96,6 +96,7 @@
                 radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
             min-height: 100vh;
+    		background: fixed;
         }
         .pokemon-grid {
             display: grid;
@@ -693,6 +694,467 @@ function toggleChatWidget() {
     justify-content: center;
   }
 	*/
+
+
+
+    :root {
+        --primary: #00f0ff;
+        --primary-dark: #00a0a8;
+        --secondary: #ff00e5;
+        --accent: #4ecca3;
+        --dark: #0a0a20;
+        --darker: #050510;
+        --light: #e1e1ff;
+        --success: #00ff66;
+        --warning: #ffcc00;
+        --danger: #ff3366;
+    }
+
+    /* Common Chest Container Styles */
+    .chest-container, .chest2-container, .chest3-container {
+        padding: 3rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto 4rem;
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        border: none; /* Remove the border as we'll use a pseudo-element for the fading border */
+    }
+
+    /* Fading Border Effect - Common */
+    .chest-container::before, .chest2-container::before, .chest3-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 20px;
+        pointer-events: none;
+        z-index: 2; /* Above the background but below the content */
+    }
+
+    /* Chest Header Styles */
+    .chest-header {
+        text-align: center;
+        color: var(--light);
+        font-size: 2.5rem;
+        margin-bottom: 3rem;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        position: relative;
+        text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        z-index: 3; /* Ensure it's above the fading border */
+    }
+
+    .chest-header::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .highlight-text {
+        color: var(--primary);
+        position: relative;
+        z-index: 1;
+    }
+
+    .chest-collection {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        position: relative;
+        z-index: 3; /* Ensure it's above the fading border */
+    }
+
+    /* Cosmic Holographic Animation - Common for all containers */
+    .cosmic-holo {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 1;
+        opacity: 0.4;
+        mix-blend-mode: screen;
+    }
+
+    .celestial-entity {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.1);
+        opacity: 0.2;
+        animation: float 20s linear infinite;
+    }
+
+    .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.4);
+        animation: twinkle 4s ease-in-out infinite;
+    }
+
+    .nebula {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(ellipse at center,
+            rgba(100, 200, 255, 0.2) 0%,
+            rgba(150, 100, 255, 0.1) 40%,
+            rgba(255, 100, 200, 0.05) 60%,
+            transparent 80%);
+        filter: blur(8px);
+        opacity: 0.15;
+        mix-blend-mode: screen;
+        animation: pulse 15s ease-in-out infinite alternate;
+    }
+
+    @keyframes float {
+        0% {
+            transform: translateY(0) translateX(0) rotate(0deg);
+        }
+        33% {
+            transform: translateY(-30px) translateX(20px) rotate(120deg);
+        }
+        66% {
+            transform: translateY(20px) translateX(-20px) rotate(240deg);
+        }
+        100% {
+            transform: translateY(0) translateX(0) rotate(360deg);
+        }
+    }
+
+    @keyframes twinkle {
+        0%, 100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+        }
+        50% {
+            opacity: 0.8;
+            transform: scale(1.2);
+        }
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 0.1;
+        }
+        50% {
+            transform: scale(1.2);
+            opacity: 0.2;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 0.1;
+        }
+    }
+
+    /* Chest 1 Container - Calming, Soothing Animation */
+    .chest-container {
+        background: linear-gradient(145deg, rgba(0, 240, 255, 0.1), rgba(0, 100, 255, 0.05));
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* More Subtle Fading Border for Chest 1 */
+    .chest-container::before {
+        border: 1px solid rgba(0, 240, 255, 0.3); /* Reduced opacity */
+        box-shadow:
+            inset 0 0 30px 15px rgba(10, 10, 32, 0.8), /* Increased blur and spread */
+            0 0 10px rgba(0, 240, 255, 0.1); /* Reduced glow */
+        mask:
+            linear-gradient(#fff 0 0) content-box,
+            linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+        padding: 8%; /* Increased fade area */
+    }
+
+    .chest-container .background-effect {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(circle at 20% 30%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(0, 100, 255, 0.1) 0%, transparent 50%);
+        z-index: 0;
+    }
+
+    .chest-container .wave-effect {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        right: -50%;
+        bottom: -50%;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%2300f0ff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E"),
+            linear-gradient(rgba(0, 240, 255, 0.05), rgba(0, 100, 255, 0.02));
+        opacity: 0.5;
+        z-index: 0;
+        animation: calmWaves 20s linear infinite;
+    }
+
+    @keyframes calmWaves {
+        0% {
+            transform: rotate(0deg) scale(1);
+        }
+        50% {
+            transform: rotate(180deg) scale(1.1);
+        }
+        100% {
+            transform: rotate(360deg) scale(1);
+        }
+    }
+
+    .chest-container .highlight-text {
+        color: var(--primary);
+    }
+
+    /* Chest 2 Container - Shiny, Clean, Pristine Animation */
+    .chest2-container {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(200, 200, 255, 0.05));
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* More Subtle Fading Border for Chest 2 */
+    .chest2-container::before {
+        border: 1px solid rgba(255, 255, 255, 0.2); /* Reduced opacity */
+        box-shadow:
+            inset 0 0 30px 15px rgba(10, 10, 32, 0.8), /* Increased blur and spread */
+            0 0 10px rgba(255, 255, 255, 0.1); /* Reduced glow */
+        mask:
+            linear-gradient(#fff 0 0) content-box,
+            linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+        padding: 8%; /* Increased fade area */
+    }
+
+    .chest2-container .background-effect {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 70% 60%, rgba(200, 200, 255, 0.1) 0%, transparent 40%);
+        z-index: 0;
+    }
+
+    .chest2-container .shine-effect {
+        content: '';
+        position: absolute;
+        top: -150%;
+        left: -150%;
+        width: 400%;
+        height: 400%;
+        background: linear-gradient(
+            45deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0) 40%,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0) 60%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        z-index: 1;
+        animation: shinyEffect 8s linear infinite;
+    }
+
+    @keyframes shinyEffect {
+        0% {
+            transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        }
+        100% {
+            transform: translateX(100%) translateY(100%) rotate(45deg);
+        }
+    }
+
+    .chest2-container .highlight-text {
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.4);
+    }
+
+    /* Chest 3 Container - Fiery, Powerful, Exciting Animation */
+    .chest3-container {
+        background: linear-gradient(145deg, rgba(255, 51, 102, 0.1), rgba(255, 153, 0, 0.05));
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* More Subtle Fading Border for Chest 3 */
+    .chest3-container::before {
+        border: 1px solid rgba(255, 51, 102, 0.2); /* Reduced opacity */
+        box-shadow:
+            inset 0 0 30px 15px rgba(10, 10, 32, 0.8), /* Increased blur and spread */
+            0 0 10px rgba(255, 51, 102, 0.1); /* Reduced glow */
+        mask:
+            linear-gradient(#fff 0 0) content-box,
+            linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+        padding: 8%; /* Increased fade area */
+    }
+
+    .chest3-container .background-effect {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(circle at 30% 40%, rgba(255, 51, 102, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 70% 60%, rgba(255, 153, 0, 0.1) 0%, transparent 50%);
+        z-index: 0;
+    }
+
+    .chest3-container .fire-effect {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        left: 0;
+        right: 0;
+        height: 150%;
+        background:
+            radial-gradient(ellipse at 50% 100%, rgba(255, 51, 102, 0.3) 0%, transparent 70%),
+            radial-gradient(ellipse at 30% 100%, rgba(255, 153, 0, 0.3) 0%, transparent 70%),
+            radial-gradient(ellipse at 70% 100%, rgba(255, 204, 0, 0.3) 0%, transparent 70%);
+        filter: blur(20px);
+        z-index: 0;
+        animation: fireEffect 5s ease-in-out infinite alternate;
+    }
+
+    @keyframes fireEffect {
+        0% {
+            transform: translateY(5%) scale(1);
+            opacity: 0.7;
+        }
+        100% {
+            transform: translateY(0%) scale(1.1);
+            opacity: 1;
+        }
+    }
+
+    .chest3-container .highlight-text {
+        color: #ff3366;
+        text-shadow: 0 0 10px rgba(255, 51, 102, 0.8), 0 0 20px rgba(255, 51, 102, 0.4);
+    }
+
+    /* Particles */
+    .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .chest-container .particles .particle {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        background: rgba(0, 240, 255, 0.5);
+        border-radius: 50%;
+        animation: floatUp 15s linear infinite;
+    }
+
+    .chest2-container .particles .particle {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        animation: sparkle 8s linear infinite;
+    }
+
+    .chest3-container .particles .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 153, 0, 0.8);
+        border-radius: 50%;
+        animation: riseUp 6s linear infinite;
+    }
+
+    @keyframes floatUp {
+        0% {
+            transform: translateY(100%) translateX(0);
+            opacity: 0;
+        }
+        10% {
+            opacity: 1;
+        }
+        90% {
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-100%) translateX(20px);
+            opacity: 0;
+        }
+    }
+
+    @keyframes sparkle {
+        0%, 100% {
+            opacity: 0;
+            transform: scale(0);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes riseUp {
+        0% {
+            transform: translateY(100%) translateX(0) scale(1);
+            opacity: 0;
+        }
+        10% {
+            opacity: 1;
+        }
+        50% {
+            transform: translateY(50%) translateX(10px) scale(1.5);
+        }
+        90% {
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(0%) translateX(0) scale(0.5);
+            opacity: 0;
+        }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .chest-container, .chest2-container, .chest3-container {
+            padding: 2rem 1rem;
+        }
+
+        .chest-header {
+            font-size: 2rem;
+        }
+
+        .chest-collection {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+    }
 </style>
 
 <script>
@@ -997,52 +1459,295 @@ window.onscroll = function() {
 				</div>
 			</div>
 -->
-            <div class="chest-container" id="#game">
-  <h2 class="chest-header"><span class="highlight-text" id="game">Featured</span> Chests</h2>
+           <div class="chest-container" id="#game">
+    <div class="background-effect"></div>
+    <div class="wave-effect"></div>
+    <div class="cosmic-holo">
+        <!-- Cosmic elements will be added with JavaScript -->
+    </div>
+    <div class="particles">
+        <!-- Generate 15 particles with JavaScript -->
+    </div>
+    <h2 class="chest-header"><span class="highlight-text" id="game">Featured</span> Chests</h2>
 
-  <div class="chest-collection">
-    {% for Game in FeaturedGame %}
-      <div class="prismatic-chest">
+    <div class="chest-collection">
+        {% for Game in FeaturedGame %}
+        <div class="prismatic-chest">
+            <a href="{{ Game.get_profile_url2 }}">
+                <!-- Holographic Chest -->
+                <div class="chest-base">
+                    <div class="chest-interior"></div>
+                    <div class="chest-front-panel"></div>
+                    <div class="chest-left-panel"></div>
+                    <div class="chest-right-panel"></div>
+                    <div class="light-beam"></div>
+                </div>
 
-          <a href="{{ Game.get_profile_url2 }}">
-        <!-- Holographic Chest -->
-        <div class="chest-base">
-          <div class="chest-interior"></div>
-          <div class="chest-front-panel"></div>
-          <div class="chest-left-panel"></div>
-          <div class="chest-right-panel"></div>
-          <div class="light-beam"></div>
+                <!-- Floating Card -->
+                <div class="floating-card">
+                    <div class="card-inner">
+                        <div class="card-image" style="background-image: url('{{ Game.image.url }}');"></div>
+                        <div class="card-holographic-overlay"></div>
+                        <div class="card-shine"></div>
+                    </div>
+                </div>
+
+                <!-- Content and Info -->
+                <div class="chest-info">
+                    <h3 class="chest-title" style="color: white;">{{ Game.name }}</h3>
+                    <div class="price-tag">
+                        <div class="diamond-icon">💎</div>
+                        {% if Game.discount_cost %}
+                        <div class="price-amount">{{ Game.discount_cost }}</div>
+                        <div class="original-price">{{ Game.cost }}</div>
+                        {% else %}
+                        <div class="price-amount">{{ Game.cost }}</div>
+                        {% endif %}
+                    </div>
+                    <button class="view-button"> Check It Out!</button>
+                </div>
+            </a>
         </div>
-
-        <!-- Floating Card -->
-        <div class="floating-card">
-          <div class="card-inner">
-            <div class="card-image" style="background-image: url('{{ Game.image.url }}');"></div>
-            <div class="card-holographic-overlay"></div>
-            <div class="card-shine"></div>
-          </div>
-        </div>
-
-        <!-- Content and Info -->
-        <div class="chest-info">
-          <h3 class="chest-title" style="color: white;">{{ Game.name }}</h3>
-          <div class="price-tag">
-            <div class="diamond-icon">💎</div>
-            {% if Game.discount_cost %}
-              <div class="price-amount">{{ Game.discount_cost }}</div>
-              <div class="original-price">{{ Game.cost }}</div>
-            {% else %}
-              <div class="price-amount">{{ Game.cost }}</div>
-            {% endif %}
-          </div>
-           <button class="view-button"> Check It Out!</button>
-
-        </div>
-	  </a>
-      </div>
-    {% endfor %}
-  </div>
+        {% endfor %}
+    </div>
 </div>
+
+<!-- New Chests - Shiny, Clean, Pristine Animation -->
+<div class="chest2-container" id="#game">
+    <div class="background-effect"></div>
+    <div class="shine-effect"></div>
+    <div class="cosmic-holo">
+        <!-- Cosmic elements will be added with JavaScript -->
+    </div>
+    <div class="particles">
+        <!-- Generate 20 particles with JavaScript -->
+    </div>
+    <br>
+    <h2 class="chest-header"><span class="highlight-text" id="game">New</span> Chests</h2>
+
+    <div class="chest-collection">
+        {% for Game in NewGame %}
+        <div class="prismatic-chest">
+            <a href="{{ Game.get_profile_url2 }}">
+                <!-- Holographic Chest -->
+                <div class="chest-base">
+                    <div class="chest-interior"></div>
+                    <div class="chest2-front-panel"></div>
+                    <div class="chest2-left-panel"></div>
+                    <div class="chest2-right-panel"></div>
+                    <div class="light-beam"></div>
+                </div>
+
+                <!-- Floating Card -->
+                <div class="floating-card">
+                    <div class="card-inner">
+                        <div class="card-image" style="background-image: url('{{ Game.image.url }}');"></div>
+                        <div class="card-holographic-overlay"></div>
+                        <div class="card-shine"></div>
+                    </div>
+                </div>
+
+                <!-- Content and Info -->
+                <div class="chest-info">
+                    <h3 class="chest-title" style="color: white;">{{ Game.name }}</h3>
+                    <div class="price-tag">
+                        <div class="diamond-icon">💎</div>
+                        {% if Game.discount_cost %}
+                        <div class="price-amount">{{ Game.discount_cost }}</div>
+                        <div class="original-price">{{ Game.cost }}</div>
+                        {% else %}
+                        <div class="price-amount">{{ Game.cost }}</div>
+                        {% endif %}
+                    </div>
+                    <button class="view-button"> Check It Out!</button>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="chest3-container" id="#game">
+    <div class="background-effect"></div>
+    <div class="fire-effect"></div>
+    <div class="cosmic-holo">
+    </div>
+    <div class="particles">
+    </div>
+    <h2 class="chest-header"><span class="highlight-text" id="game">Popular</span> Chests</h2>
+
+    <div class="chest-collection">
+        {% for Game in PopularGame %}
+        <div class="prismatic-chest">
+            <a href="{{ Game.get_profile_url2 }}">
+                <div class="chest-base">
+                    <div class="chest-interior"></div>
+                    <div class="chest3-front-panel"></div>
+                    <div class="chest3-left-panel"></div>
+                    <div class="chest3-right-panel"></div>
+                    <div class="light-beam"></div>
+                </div>
+
+                <div class="floating-card">
+                    <div class="card-inner">
+                        <div class="card-image" style="background-image: url('{{ Game.image.url }}');"></div>
+                        <div class="card-holographic-overlay"></div>
+                        <div class="card-shine"></div>
+                    </div>
+                </div>
+
+                <div class="chest-info">
+                    <h3 class="chest-title" style="color: white;">{{ Game.name }}</h3>
+                    <div class="price-tag">
+                        <div class="diamond-icon">💎</div>
+                        {% if Game.discount_cost %}
+                        <div class="price-amount">{{ Game.discount_cost }}</div>
+                        <div class="original-price">{{ Game.cost }}</div>
+                        {% else %}
+                        <div class="price-amount">{{ Game.cost }}</div>
+                        {% endif %}
+                    </div>
+                    <button class="view-button"> Check It Out!</button>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Generate particles for each container
+    document.addEventListener('DOMContentLoaded', function() {
+        // Calm particles for Featured Chests
+        const calmParticles = document.querySelector('.chest-container .particles');
+        for (let i = 0; i < 15; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.top = `${Math.random() * 100}%`;
+            particle.style.opacity = Math.random() * 0.5 + 0.3;
+            particle.style.width = `${Math.random() * 4 + 2}px`;
+            particle.style.height = particle.style.width;
+            particle.style.animationDelay = `${Math.random() * 15}s`;
+            calmParticles.appendChild(particle);
+        }
+
+        const shinyParticles = document.querySelector('.chest2-container .particles');
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.top = `${Math.random() * 100}%`;
+            particle.style.opacity = Math.random() * 0.7 + 0.3;
+            particle.style.width = `${Math.random() * 3 + 1}px`;
+            particle.style.height = particle.style.width;
+            particle.style.animationDelay = `${Math.random() * 8}s`;
+            shinyParticles.appendChild(particle);
+        }
+
+        const fieryParticles = document.querySelector('.chest3-container .particles');
+        for (let i = 0; i < 15; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.bottom = '0';
+            particle.style.opacity = Math.random() * 0.7 + 0.3;
+            particle.style.width = `${Math.random() * 5 + 2}px`;
+            particle.style.height = particle.style.width;
+            particle.style.animationDelay = `${Math.random() * 6}s`;
+
+            // Randomize colors between orange, red, and yellow
+            const colors = ['rgba(255, 153, 0, 0.8)', 'rgba(255, 51, 102, 0.8)', 'rgba(255, 204, 0, 0.8)'];
+            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+            fieryParticles.appendChild(particle);
+        }
+
+        // Generate cosmic holographic elements for all containers
+        const cosmicHolos = document.querySelectorAll('.cosmic-holo');
+
+        cosmicHolos.forEach(cosmicHolo => {
+            // Add celestial entities (planets, moons)
+            for (let i = 0; i < 5; i++) {
+                const celestial = document.createElement('div');
+                celestial.classList.add('celestial-entity');
+
+                // Random size between 30px and 100px
+                const size = Math.random() * 70 + 30;
+                celestial.style.width = `${size}px`;
+                celestial.style.height = `${size}px`;
+
+                // Random position
+                celestial.style.left = `${Math.random() * 100}%`;
+                celestial.style.top = `${Math.random() * 100}%`;
+
+                // Random animation delay
+                celestial.style.animationDelay = `${Math.random() * 20}s`;
+
+                // Adjust opacity based on size (larger = more visible)
+                celestial.style.opacity = (0.1 + (size - 30) / 140).toFixed(2);
+
+                cosmicHolo.appendChild(celestial);
+            }
+
+            // Add stars
+            for (let i = 0; i < 30; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+
+                // Random position
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+
+                // Random animation delay
+                star.style.animationDelay = `${Math.random() * 4}s`;
+
+                cosmicHolo.appendChild(star);
+            }
+
+            // Add nebulae
+            for (let i = 0; i < 3; i++) {
+                const nebula = document.createElement('div');
+                nebula.classList.add('nebula');
+
+                // Random size between 100px and 300px
+                const size = Math.random() * 200 + 100;
+                nebula.style.width = `${size}px`;
+                nebula.style.height = `${size}px`;
+
+                // Random position
+                nebula.style.left = `${Math.random() * 100}%`;
+                nebula.style.top = `${Math.random() * 100}%`;
+
+                // Random animation delay
+                nebula.style.animationDelay = `${Math.random() * 15}s`;
+
+                // Custom colors for each container
+                if (cosmicHolo.parentElement.classList.contains('chest-container')) {
+                    nebula.style.background = `radial-gradient(ellipse at center,
+                        rgba(0, 240, 255, 0.15) 0%,
+                        rgba(0, 100, 255, 0.1) 40%,
+                        rgba(100, 100, 255, 0.05) 60%,
+                        transparent 80%)`;
+                } else if (cosmicHolo.parentElement.classList.contains('chest2-container')) {
+                    nebula.style.background = `radial-gradient(ellipse at center,
+                        rgba(255, 255, 255, 0.15) 0%,
+                        rgba(200, 200, 255, 0.1) 40%,
+                        rgba(150, 150, 255, 0.05) 60%,
+                        transparent 80%)`;
+                } else {
+                    nebula.style.background = `radial-gradient(ellipse at center,
+                        rgba(255, 100, 100, 0.15) 0%,
+                        rgba(255, 150, 50, 0.1) 40%,
+                        rgba(255, 200, 50, 0.05) 60%,
+                        transparent 80%)`;
+                }
+
+                cosmicHolo.appendChild(nebula);
+            }
+        });
+    });
+</script>
 
 <style>
   /* Base styles */
@@ -1200,6 +1905,125 @@ window.onscroll = function() {
     transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1); /* Improved easing */
   }
 
+
+  .chest2-front-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background: linear-gradient(to bottom,
+      rgba(0, 255, 255, 0.2),
+      rgba(175, 191, 208, 0.5));
+
+    border-radius: 0 0 10px 10px;
+    transform-origin: bottom;
+    transform: rotateX(40deg);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1); /* Improved easing */
+  }
+
+  .chest2-left-panel, .chest2-right-panel {
+    position: absolute;
+    bottom: 0;
+    width: 30px;
+    height: 100%;
+    background: linear-gradient(to right,
+      rgba(0, 255, 255, 0.2),
+      rgba(175, 191, 208, 0.5));
+    transform-origin: bottom;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1); /* Improved easing */
+  }
+
+  .chest2-left-panel {
+    left: -30px;
+    transform: rotateY(-60deg);
+    border-radius: 10px 0 0 10px;
+  }
+
+  .chest2-right-panel {
+    right: -30px;
+    transform: rotateY(60deg);
+    border-radius: 0 10px 10px 0;
+  }
+
+
+  .chest3-front-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background: linear-gradient(to bottom,
+      rgba(0, 255, 255, 0.2),
+      rgba(175, 191, 208, 0.5));
+
+    border-radius: 0 0 10px 10px;
+    transform-origin: bottom;
+    transform: rotateX(40deg);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1); /* Improved easing */
+  }
+
+  .chest3-left-panel, .chest3-right-panel {
+    position: absolute;
+    bottom: 0;
+    width: 30px;
+    height: 100%;
+	background: linear-gradient(to right, rgb(0, 255, 255, 20%), rgb(166, 54, 31, 50%));
+    transform-origin: bottom;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1); /* Improved easing */
+  }
+
+  .chest3-interior {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+	background: linear-gradient(to right, rgb(212, 193, 17, 54%), rgb(255, 18, 0));
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow:
+      0 0 20px rgba(0, 255, 255, 0.3),
+      0 0 40px rgba(0, 128, 255, 0.2),
+      inset 0 0 20px rgba(0, 255, 255, 0.2);
+    overflow: hidden;
+    transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1); /* Improved easing */
+  }
+
+  .chest3-interior:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      linear-gradient(45deg,
+        transparent 0%,
+        rgba(0, 255, 255, 0.1) 45%,
+        rgba(0, 255, 255, 0.4) 50%,
+        rgba(0, 255, 255, 0.1) 55%,
+        transparent 100%);
+    animation: prismatic-sweep 6s linear infinite; /* Slower for smoother effect */
+    opacity: 0.7;
+  }
+
+  .chest3-left-panel {
+    left: -30px;
+    transform: rotateY(-60deg);
+    border-radius: 10px 0 0 10px;
+  }
+
+  .chest3-right-panel {
+    right: -30px;
+    transform: rotateY(60deg);
+    border-radius: 0 10px 10px 0;
+  }
+
   /* Floating Card */
   .floating-card {
     position: absolute;
@@ -1259,7 +2083,6 @@ window.onscroll = function() {
     animation: holographic 8s linear infinite; /* Slower for smoother effect */
   }
 
-  /* New shine effect for realistic card */
   .card-shine {
     position: absolute;
     top: -100%;
@@ -2301,6 +3124,7 @@ Chat
   /*box-shadow: 0 5px 30px rgba(0, 0, 0, .2);*/
   /* background: rgba(0, 0, 0, .5);*/
   background: transparent;
+  background-color: #0a0a16;
   border-radius: 20px;
   -webkit-border-radius: 20px;
   -moz-border-radius: 20px;
@@ -2339,437 +3163,257 @@ Chat Title
     text-align: center;
 }
 
-/* Style for the avenue2-messenger section */
-.avenue2-messenger {
-    position: fixed;
-    left: 20px;
-    bottom: 20px;
-    width: 320px;
-    max-height: 460px;
-    min-height: 220px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 20px;
-    box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
-    z-index: 10;
-    overflow: hidden; /* Ensure no overflow */
-    display: flex;
-    flex-direction: column;
-}
 
-/* Ensure .chat2e takes up the full space within .avenue2-messenger */
-.chat2e {
-    position: relative;
-    width: 100%;
-    flex: 1;
-    padding: 10px;
-    box-sizing: border-box;
-    color: #232323;
-    overflow-y: auto; /* Ensure it scrolls if needed */
-}
+    /* Chat Widget Container Styles */
+    .avenue-messenger, .avenue2-messenger {
+        position: fixed;
+        bottom: 50px;
+        z-index: 300;
+        width: 320px;
+        height: 500px;
+        border-radius: 15px;
+        box-shadow: 0 0 25px rgba(0, 240, 255, 0.3);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background: linear-gradient(145deg, rgba(10, 10, 32, 0.95), rgba(5, 5, 16, 0.98));
+        border: 1px solid rgba(0, 240, 255, 0.2);
+    }
 
-/* Title and message box alignment */
-.chat2e-title, .message2-box {
-    margin-bottom: 10px;
-}
+    .avenue-messenger {
+        right: 10px;
+    }
 
-/* Message box styling */
-.message2-box {
-    position: relative;
-    width: 100%;
-}
+    .avenue2-messenger {
+        left: 10px;
+    }
 
-/* Input styling inside the message box */
-.message2-box input[type="text"] {
-    width: calc(100% - 60px);
-    padding: 10px;
-    border-radius: 5px;
-    height: 20px;
-    border: 1px solid #ccc;
-}
+    /* Chat Title Styles */
+    .chat2-title {
+        background: linear-gradient(90deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 229, 0.1));
+        color: var(--light);
+        padding: 15px;
+        border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+        text-align: center;
+        position: relative;
+    }
 
-/* Submit button alignment */
-.message-submit {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 36px;
-    color: #051922;
-    font-weight: 700;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    padding: 0 15px;
-}
+    .chat2-title h5 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary);
+        text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        letter-spacing: 1px;
+    }
 
-/* Ensure the chat messages section scrolls properly */
+    .chat2-title h6 {
+        margin: 5px 0 0;
+        font-size: 0.9rem;
+        color: var(--light);
+        opacity: 0.8;
+    }
 
-#display-general {
-	height: 400px;
-	overflow-y: scroll;
-	border: 1px solid #ccc;
-	padding: 10px;
-}
+    /* Message Display Area */
+    .message, .message2 {
+        height: 350px;
+        background: rgba(10, 10, 32, 0.7);
+        backdrop-filter: blur(10px);
+        padding: 10px;
+        overflow: hidden;
+    }
 
-/* Message box styling */
-.message2-box {
-    position: absolute;
-    bottom: 10px;
-    width: calc(100% - 20px);
-    left: 10px;
-}
+    .chat-messages {
+        padding: 10px;
+        overflow-y: scroll;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary) var(--darker);
+    }
 
-/* Input styling inside the message box */
-.message2-box input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
+    .chat-messages::-webkit-scrollbar {
+        width: 6px;
+    }
 
-/* Submit button alignment */
-.message-submit {
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    width: 50px;
-    background-color: #bf97ff;
-    color: #051922;
-    font-weight: 700;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-}
+    .chat-messages::-webkit-scrollbar-track {
+        background: var(--darker);
+        border-radius: 3px;
+    }
 
-/* Ensure the chat messages section scrolls properly */
-.chat-messages {
-    height: calc(100% - 160px);
-    overflow-y: scroll;
-    padding-right: 10px;
-}
-.chat-title h1,
-.chat-title h2 {
-  font-weight: normal;
-  font-size: 14px;
-  margin: 0;
-  padding: 0;
-}
-.chat-title h2 {
-  /* color: rgba(255, 255, 255, .8);*/
-  font-size: 11px;
-  letter-spacing: 1px;
-}
-.chat-title .avatar {
-  position: absolute;
-  z-index: 1;
-  top: 8px;
-  left: 9px;
-  border-radius: 30px;
-  width: 60px;
-  height: 60px;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  border: 1px solid #fff;
-}
-.chat-title .avatar img {
-  width: 100%;
-  height: auto;
-}
+    .chat-messages::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 3px;
+    }
 
-/*--------------------
-Messages
---------------------*/
-.messages {
-  flex: 1 1 auto;
-  /*  color: rgba(255, 255, 255, .5);
-  color: #fff;*/
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-}
-.messages .messages-content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 101%;
-  width: 100%;
-}
-.messages .message {
-  clear: both;
-  float: left;
-  padding: 6px 10px 7px;
-  border-radius: 20px 20px 20px 0;
-  background: #eee;
-  /*rgba(0, 0, 0, 0.1);*/
-  margin: 8px 0;
-  font-size: 14px;
-  line-height: 1.4;
-  margin-left: 35px;
-  position: relative;
-  border: 1px solid #ccc;
-  /*text-shadow: 0 1px 1px rgba(0, 0, 0, .2);*/
-}
-.messages .message .timestamp {
-  position: absolute;
-  bottom: -15px;
-  font-size: 10px;
-  color: #555;
-  right: 30px;
-  /* color: rgba(255, 255, 255, .7);*/
-}
-.messages .message .checkmark-sent-delivered {
-  position: absolute;
-  bottom: -15px;
-  right: 10px;
-  font-size: 12px;
-  color: #999;
-}
-.messages .message .checkmark-read {
-  color: blue;
-  position: absolute;
-  bottom: -15px;
-  right: 16px;
-  font-size: 12px;
-}
-.messages .message::before {
-  /*  content: '';
-    position: absolute;
-    bottom: -6px;
-    border-top: 6px solid rgba(0, 0, 0, 0.1);
-    left: 0;
-    border-right: 7px solid transparent;*/
-}
-.messages .message .avatar {
-  position: absolute;
-  z-index: 1;
-  bottom: -15px;
-  left: -35px;
-  border-radius: 30px;
-  width: 30px;
-  height: 30px;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-}
-.messages .message .avatar img {
-  width: 100%;
-  height: auto;
-}
-.messages .message.message-personal {
-  float: right;
-  text-align: right;
-  /*      background: linear-gradient(120deg, #ddd, #eee);*/
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 20px 20px 0 20px;
-}
-.messages .message.message-personal::before {
-  /*
-      content:"";
-  border-color:#4A90E2 transparent;
-    width:0;
-    border-style:solid;*/
-  /*
-   left: auto;
-   right: 0;
-   border-right: none;
-  border-left: 8px solid transparent;
-   border-top: 9px solid #fff;
+    /* Message Styles */
+    .message .message, .message2 .message2 {
+        margin-bottom: 15px;
+        background: rgba(0, 240, 255, 0.05);
+        border-radius: 10px;
+        padding: 10px;
+        border-left: 3px solid var(--primary);
+        position: relative;
+        overflow: visible;
+        height: auto;
+    }
 
-   bottom: -8px;*/
-}
-.messages .message:last-child {
-  margin-bottom: 30px;
-}
-.messages .message.new {
-  transform: scale(0);
-  transform-origin: 0 0;
-  -webkit-animation: bounce 500ms linear both;
-          animation: bounce 500ms linear both;
-}
-.messages .message.loading::before {
-  position: relative;
-  /*  top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);*/
-  content: "";
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  /*  background: rgba(255, 255, 255, .5);*/
-  background: #888;
-  z-index: 2;
-  margin-top: 4px;
-  -webkit-animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
-          animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
-  border: none;
-  -webkit-animation-delay: 0.15s;
-          animation-delay: 0.15s;
-}
-.messages .message.loading span {
-  display: block;
-  font-size: 0;
-  width: 20px;
-  height: 10px;
-  position: relative;
-}
-.messages .message.loading span::before {
-  position: relative;
-  /*  top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);*/
-  content: "";
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  /*  background: rgba(255, 255, 255, .5);*/
-  background: #888;
-  z-index: 2;
-  margin-top: 4px;
-  -webkit-animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
-          animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
-  margin-left: -7px;
-}
-.messages .message.loading span::after {
-  position: relative;
-  /*  top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);*/
-  content: "";
-  display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  /*  background: rgba(255, 255, 255, .5);*/
-  background: #888;
-  z-index: 2;
-  margin-top: 4px;
-  -webkit-animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
-          animation: ball 0.45s cubic-bezier(0, 0, 0.15, 1) alternate infinite;
-  margin-left: 7px;
-  -webkit-animation-delay: 0.3s;
-          animation-delay: 0.3s;
-}
+    .message a, .message2 a {
+        text-decoration: none;
+        color: var(--light);
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
 
-/*--------------------
-Message Box
---------------------*/
-.message-box {
-  flex: 0 1 42px;
-  width: 90%;
-  background: #fff;
-  margin: 2px auto;
-  /*-webkit-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
-  -moz-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
-  box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);*/
-  /*background: rgba(0, 0, 0, 0.3);
-    border-top:1px solid #e3e3e3;*/
-  padding: 10px;
-  position: relative;
-  border-radius: 20px;
-  height: 14px;
-  border: 1px solid #ccc;
-}
-.message-box .message-input {
-  background: none;
-  border: none;
-  outline: none !important;
-  resize: none;
-  /* color: rgba(255, 255, 255, .8);*/
-  font-size: 15px;
-  height: 24px;
-  margin: 0;
-  padding-right: 20px;
-  width: 265px;
-  color: #444;
-}
-.message-box textarea:focus:-webkit-placeholder {
-  color: transparent;
-}
-.message-box .message-submit {
-  position: absolute;
-  z-index: 1;
-  top: 0px;
-  right: 0px;
-  border: none;
-  /* background: #c29d5f;*/
-  font-size: 12px;
-  text-transform: uppercase;
-  line-height: 1;
-  padding: 6px 10px;
-  border-radius: 5px;
-  outline: none !important;
-  transition: background 0.2s ease;
-  cursor: pointer;
-}
-.message-box .message-submit:hover {
-  background: #fff;
-  color: #333;
-}
+    .message img, .message2 img {
+        border: 2px solid var(--primary);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
 
-/*--------------------
-Message 2 Box
---------------------*/
-.message2-box {
-  flex: 0 1 42px;
-  width: 90%;
-  background: #fff;
-  margin: 2px auto;
-  /*-webkit-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
-  -moz-box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);
-  box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.4);*/
-  /*background: rgba(0, 0, 0, 0.3);
-    border-top:1px solid #e3e3e3;*/
-  padding: 10px;
-  position: relative;
-  border-radius: 20px;
-  border: 1px solid #ccc;
-}
-.message2-box .message2-input {
-  background: none;
-  border: none;
-  outline: none !important;
-  resize: none;
-  /* color: rgba(255, 255, 255, .8);*/
-  font-size: 15px;
-  height: 24px;
-  margin: 0;
-  padding-right: 20px;
-  width: 265px;
-  color: #444;
-}
-.message2-box textarea:focus:-webkit-placeholder {
-  color: transparent;
-}
-.message2-box .message2-submit {
-  position: absolute;
-  z-index: 1;
-  top: 9px;
-  right: 10px;
-  color: #4A90E2;
-  border: none;
-  /* background: #c29d5f;*/
-  background: #fff;
-  font-size: 12px;
-  text-transform: uppercase;
-  line-height: 1;
-  padding: 6px 10px;
-  border-radius: 5px;
-  outline: none !important;
-  transition: background 0.2s ease;
-  cursor: pointer;
-}
-.message2-box .message2-submit:hover {
-  background: #fff;
-  color: #333;
-}
+    .sender {
+        font-weight: bold;
+        margin-left: 10px;
+        color: white;
+        text-shadow: 0 0 5px rgba(0, 240, 255, 0.3);
+    }
+
+    .message-content, .message2-content {
+        color: var(--light);
+        word-break: break-word;
+        padding: 5px 10px;
+    }
+
+    .time {
+        font-size: 0.7rem;
+        color: rgba(225, 225, 255, 0.6);
+        margin-top: 5px;
+        text-align: right;
+    }
+
+    /* Message Input Box */
+    .message-box, .message2-box {
+        background: rgba(5, 5, 16, 0.9);
+        padding: 10px;
+        border-top: 1px solid rgba(0, 240, 255, 0.2);
+        position: relative;
+    }
+
+    .w {
+        display: flex;
+        align-items: center;
+    }
+
+    form {
+        display: flex;
+        width: 100%;
+        align-items: center;
+    }
+
+    input[type="text"] {
+        flex: 1;
+        background: rgba(10, 10, 32, 0.5);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        color: var(--light);
+        padding: 10px 15px;
+        border-radius: 20px;
+        margin-right: 10px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    input[type="file"] {
+        display: none;
+    }
+
+    .file-label {
+        cursor: pointer;
+        color: var(--primary);
+        margin-right: 10px;
+        font-size: 1.2rem;
+    }
+
+    .message-submit {
+        background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+        color: var(--darker);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .message-submit:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+    }
+
+    /* Toggle Buttons */
+    .chat-toggle-button, .chat2e-toggle-button {
+        position: fixed;
+        bottom: 10px;
+        z-index: 400;
+    }
+
+    .chat-toggle-button {
+        right: 6px;
+    }
+
+    .chat2e-toggle-button {
+        left: 6px;
+    }
+
+    .chat-button {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        right: 3px;
+        background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+        color: var(--darker);
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+        transition: all 0.3s ease;
+    }
+
+    .chat-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.7);
+    }
+
+    /* Cosmic Holographic Animation */
+    .avenue-messenger::before, .avenue2-messenger::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(circle at 20% 30%, rgba(0, 240, 255, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(255, 0, 229, 0.05) 0%, transparent 50%);
+        z-index: -1;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .avenue-messenger, .avenue2-messenger {
+            width: 280px;
+            height: 450px;
+        }
+    }
 
 /*--------------------
 Custom Srollbar
@@ -2945,7 +3589,7 @@ Bounce
   position: fixed;
   right: 20px;
   bottom: 20px;
-  margin: auto;
+  margin-left: 30px;
   z-index: 10;
   box-shadow: 2px 10px 40px rgba(22, 20, 19, 0.4);
   /*  transform: translateX(300px);*/
@@ -3260,87 +3904,80 @@ Bounce
           }
         }      
 </style>
-<!--
+
 <section class="avenue-messenger" id="chatwidget">
     <div class="chat2">
         <div class="chat2-title">
             {% if user.is_authenticated %}
-                <h5>{{ request.user.username }}'s Personal Support Line</h5>
-                <br>
+                <h5>{{ request.user.username }}'s Personal Support</h5>
                 <h6>Run By Agent Holley</h6>
             </div>
             <div class="message" style="overflow: auto;">
-                <div id="display-support" class="chat-messages" style="height: 400px; overflow-y: scroll;"></div>
+                <div id="display-support" class="chat-messages" style="height: 350px; overflow-y: scroll;"></div>
             </div>
             <div class="message-box">
-                <div class="w" style="margin-top: -10px; display: flex; overflow: hidden; 30px;">
-<form id="support-post-form" method="post">
-    {% csrf_token %}
-    <input type="hidden" id="support-username" name="username" value="{{ request.user.username }}">
-    <input type="hidden" name="room_name" id="support-room_name" value="{{ room }}">
-    <input type="text" name="message" id="support-message" width="100px" placeholder="Type your message..." style="border: none; margin-bottom: 0px;height: 20px;">
-    <input type="hidden" name="page_name" id="support-page_named" value="index.html">
-    <input type="submit" class="message-submit" style="margin-left: 220px; height: 20px; overflow: hidden; position: absolute; text-align: center;
-        line-height: 0px; font-size: 14px; font-weight: 700;
-        text-transform: uppercase; font-size: 15px; border: none !important; cursor: pointer;
-        padding: 16px 25px; border-radius: 3px; margin-top: 16px;" value="➤">
-</form>
-
-                </div>
-            </div>
-            {% else %}
-            <h5>Guest User</h5>
-            <br>
-            <h6>Please sign in to participate in the chat.</h6>
-        {% endif %}
-    </div>
-</section>
-	<div class="chat-toggle-button" style="position: fixed; right: 6px; border-radius: 230px; bottom: 10px; z-index: 400;">
-		<button class="chat-button chat-toggle-button" type="button" onclick="showChatWidget()" aria-label="Open chat">
-        &#8942;
-    </button>
-	</div>
-
-<div class="chat2e-toggle-button" style="position: fixed; left: 6px; border-radius: 230px; bottom: 10px; z-index: 400;">
-  <button class="chat-button chat2e-toggle-button" type="button" onclick="toggleChatWidget()" aria-label="Toggle chat">
-        &#10005;
-    </button>
-</div>-->
-
-</div>
-
-<!-- General Chat -->
-<!--
-<section class="avenue2-messenger" id="chatwidget2" style="margin-left:10px; margin-right: 92%;">
-<div class="chat2">
-        <div class="chat2-title">
-            {% if user.is_authenticated %}
-                <h5>{{ request.user.username }} Community</h5>
-                <br>
-                <h6>PokeTrove General Chat</h6>
-            </div>
-            <div class="message2" style="overflow: auto;">
-                <div id="display-general" class="chat-messages" style="height: 400px; overflow-y: scroll; margin-left: 5px;"></div>
-            </div>
-            <div class="message2-box">
-                <div class="w" style="margin-top: -10px; display: flex; overflow: hidden;height: 20px;">
-                   <form id="general-post-form" method="post" enctype="multipart/form-data">
-						{% csrf_token %}
-						<input type="hidden" id="general-username" name="username" value="{{ request.user.username }}">
-						<input type="text" name="message" id="general-message" width="100px" placeholder="Type your message..." style="border: none;">
-						<input type="file" name="file" id="general-file" value="📎">
-						<input type="submit" class="message-submit" style="margin-top: 15px; display: flex; overflow: hidden;padding: 0px 0px;" value="➤">
-				   </form>
+                <div class="w">
+                    <form id="support-post-form" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" id="support-username" name="username" value="{{ request.user.username }}">
+                        <input type="hidden" name="room_name" id="support-room_name" value="{{ room }}">
+                        <input type="text" name="message" id="support-message" placeholder="Type your message...">
+                        <button type="submit" class="message-submit">➤</button>
+                    </form>
                 </div>
             </div>
             {% else %}
                 <h5>Guest User</h5>
-                <br>
                 <h6>Please sign in to participate in the chat.</h6>
             {% endif %}
         </div>
 </section>
--->
+
+<div class="chat-toggle-button">
+    <button class="chat-button" type="button" onclick="showChatWidget()" aria-label="Open support chat">
+        &#8942;
+    </button>
+</div>
+
+<!-- Chat Close Button -->
+<div class="chat2e-toggle-button">
+    <button class="chat-button" type="button" onclick="toggleChatWidget()" aria-label="Toggle chat">
+        &#10005;
+    </button>
+</div>
+
+
+</div>
+
+<!-- General Chat -->
+<section class="avenue2-messenger" id="chatwidget2">
+    <div class="chat2">
+        <div class="chat2-title">
+            {% if user.is_authenticated %}
+                <h5>{{ request.user.username }} Community</h5>
+                <h6>PokeTrove General Chat</h6>
+            </div>
+            <div class="message2" style="overflow: auto;">
+                <div id="display-general" class="chat-messages" style="height: 350px; overflow-y: scroll;"></div>
+            </div>
+            <div class="message2-box">
+                <div class="w">
+                    <form id="general-post-form" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" id="general-username" name="username" value="{{ request.user.username }}">
+                        <input type="text" name="message" id="general-message" placeholder="Type your message...">
+                        <label for="general-file" class="file-label">📎</label>
+                        <input type="file" name="file" id="general-file">
+                        <button type="submit" class="message-submit">➤</button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+                <h5>Guest User</h5>
+                <h6>Please sign in to participate in the chat.</h6>
+            {% endif %}
+        </div>
+</section>
 
 <script>
 function showChatWidget2() {
@@ -3381,7 +4018,6 @@ function showChatWidget2() {
 </script>
 
 
-<!--
 <script>
 $(document).ready(function() {
     // Function to load and display support messages
@@ -3392,21 +4028,19 @@ $(document).ready(function() {
             type: 'GET',
             url: "/supportgetMessages/" + room + "/",
             success: function(response) {
-                console.log(response);
                 $("#display-support").empty();
 
                 for (var key in response.messages) {
                     var message = response.messages[key];
                     var messageHtml = `
                         <div class="message">
-                            <a href="${message.user_profile_url}" style="display: flex;">
-                                <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-                                <div class="sender" style="">${message.user}</div>
-
+                            <a href="${message.user_profile_url}">
+                                <img src="${message.avatar_url}" alt="${message.user}" style="width: 40px; height: 40px; border-radius: 20px;">
+                                <div class="sender" style="color: #fffff0;">${message.user}</div>
                             </a>
-                            <div class="message-content" style="padding: 5px;">
-                                <div>${message.value}</div>
-                                <div class="time">${message.date}</div>
+                            <div class="message-content">
+                                <div style="color: var(--light);">${message.value}</div>
+                                <div class="time" style="color: var(--light); font-size: 7px;">${message.date}</div>
                             </div>
                         </div>`;
 
@@ -3414,62 +4048,92 @@ $(document).ready(function() {
                 }
             },
             error: function(response) {
-                alert('An error occurred');
+                console.error('Error loading support messages:', response);
             }
         });
     }
 
-function loadAndDisplayGeneralMessages() {
-    $.ajax({
-        type: 'GET',
-        url: "{% url 'showcase:getGeneralMessages' %}",
-        success: function(response) {
-            console.log(response);
-            $("#display-general").empty();
+    // Function to load and display general messages
+    function loadAndDisplayGeneralMessages() {
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'showcase:getGeneralMessages' %}",
+            success: function(response) {
+                $("#display-general").empty();
 
-            // Limit messages to the latest 3
-            var messages = response.messages;
-            if (messages.length > 3) {
-                messages = messages.slice(messages.length - 3);
+                for (var i = 0; i < response.messages.length; i++) {
+                    var message = response.messages[i];
+                    var messageHtml = `
+                        <div class="message2">
+                            <a href="${message.user_profile_url}">
+                                <img src="${message.avatar_url}" alt="${message.user}" style="width: 40px; height: 40px; border-radius: 20px;">
+                                <div class="sender" style="color: #fffff0;">${message.user}</div>
+                            </a>
+                            <div class="message2-content">
+                                <div style="color: var(--light);">${message.value}</div>
+                                <div class="time" style="color: var(--light); font-size: 7px;">${message.date}</div>
+                            </div>
+                        </div>`;
+                    $("#display-general").append(messageHtml);
+                }
+            },
+            error: function(response) {
+                console.error('Error loading general messages:', response);
             }
+        });
+    }
 
-            for (var i = 0; i < messages.length; i++) {
-                var message = messages[i];
-                var messageHtml = `
-                    <div class="message2">
-                        <a href="${message.user_profile_url}" style="display: flex;">
-                            <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-                            <div class="sender">${message.user}</div>
-                        </a>
-                        <div class="message2-content">
-                            <div>${message.value}</div>
-                            <div class="time">${message.date}</div>
-                        </div>
-                    </div>`;
-                $("#display-general").append(messageHtml);
-            }
-        },
-        error: function(response) {
-            alert('An error occurred');
+    // Function to scroll to the bottom of a chat display
+    function scrollToBottom(elementId) {
+        var element = document.getElementById(elementId);
+        if (element) {
+            element.scrollTop = element.scrollHeight;
         }
-    });
-}
+    }
 
-function loadAndDisplayGeneralMessagesAndScroll() {
-    loadAndDisplayGeneralMessages();
-    // Scroll after messages have rendered
-    setTimeout(function(){
-       $("#display-general").scrollTop($("#display-general")[0].scrollHeight);
-    }, 100);
-}
-    // Load and display messages every half-second
-    setInterval(loadAndDisplaySupportMessages, 500);
-	setInterval(loadAndDisplayGeneralMessages, 500);
+    // Function to load support messages and scroll to bottom
+    function loadAndDisplaySupportMessagesAndScroll() {
+        loadAndDisplaySupportMessages();
+        // Use a longer timeout to ensure messages are fully loaded and rendered
+        setTimeout(function() {
+            scrollToBottom('display-support');
+        }, 300);
+    }
 
-    // Handle support message form submission via AJAX
+    // Function to load general messages and scroll to bottom
+    function loadAndDisplayGeneralMessagesAndScroll() {
+        loadAndDisplayGeneralMessages();
+        // Use a longer timeout to ensure messages are fully loaded and rendered
+        setTimeout(function() {
+            scrollToBottom('display-general');
+        }, 300);
+    }
+
+    // Initial load of messages with scrolling
+    loadAndDisplaySupportMessagesAndScroll();
+    loadAndDisplayGeneralMessagesAndScroll();
+
+    // Set up periodic refresh of messages (every 2 seconds)
+    setInterval(function() {
+        loadAndDisplaySupportMessages();
+        loadAndDisplayGeneralMessages();
+
+        // Check if we should auto-scroll (only if already at bottom)
+        var supportDisplay = document.getElementById('display-support');
+        var generalDisplay = document.getElementById('display-general');
+
+        if (supportDisplay && (supportDisplay.scrollHeight - supportDisplay.scrollTop - supportDisplay.clientHeight < 50)) {
+            scrollToBottom('display-support');
+        }
+
+        if (generalDisplay && (generalDisplay.scrollHeight - generalDisplay.scrollTop - generalDisplay.clientHeight < 50)) {
+            scrollToBottom('display-general');
+        }
+    }, 2000);
+
+    // Handle support message form submission
     $(document).on('submit', '#support-post-form', function(e) {
         e.preventDefault();
-        console.log('Support message submitted');
 
         var username = $('#support-username').val();
         var room_name = $('#support-room_name').val();
@@ -3479,8 +4143,6 @@ function loadAndDisplayGeneralMessagesAndScroll() {
             alert('Message cannot be empty');
             return;
         }
-
-        console.log(`Sending message: ${message}, username: ${username}, room_name: ${room_name}`);
 
         $.ajax({
             type: 'POST',
@@ -3492,84 +4154,94 @@ function loadAndDisplayGeneralMessagesAndScroll() {
                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
             },
             success: function(data) {
-                if (data.status === 'success') {
-                    $('#support-message').val('');
-                    loadAndDisplaySupportMessagesAndScroll();
-                } else {
-                    $('#support-message').val('');
-                    loadAndDisplaySupportMessagesAndScroll();
-                }
+                $('#support-message').val('');
+                // Force reload and scroll after sending
+                loadAndDisplaySupportMessagesAndScroll();
             },
             error: function(xhr, status, error) {
-                console.error(xhr.responseText);
+                console.error('Error sending support message:', xhr.responseText);
             }
         });
     });
 
-    // Handle general message form submission via AJAX
+    // Handle general message form submission
     $(document).on('submit', '#general-post-form', function(e) {
         e.preventDefault();
-        console.log('General message submitted');
 
         var username = $('#general-username').val();
         var message = $('#general-message').val();
+        var fileInput = $('#general-file')[0];
+        var file = fileInput.files.length > 0 ? fileInput.files[0] : null;
 
-        if (!message.trim()) {
-            alert('Message cannot be empty');
+        if (!message.trim() && !file) {
+            alert('Message or file is required');
             return;
         }
 
-        console.log(`Sending message: ${message}, username: ${username}`);
+        var formData = new FormData();
+        formData.append('username', username);
+        formData.append('message', message);
+        formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+
+        if (file) {
+            formData.append('file', file);
+        }
 
         $.ajax({
             type: 'POST',
             url: "{% url 'showcase:generalsend' %}",
-            data: {
-                username: username,
-                message: message,
-                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-            },
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function(data) {
-                if (data.status === 'success') {
-                    $('#general-message').val('');
-                    loadAndDisplayGeneralMessagesAndScroll();
-                } else {
-                    /*alert(data.message);*/
-                }
+                $('#general-message').val('');
+                $('#general-file').val('');
+                // Force reload and scroll after sending
+                loadAndDisplayGeneralMessagesAndScroll();
             },
             error: function(xhr, status, error) {
-                console.error(xhr.responseText);
+                console.error('Error sending general message:', xhr.responseText);
             }
         });
     });
+
+    // Add event listeners for manual scrolling
+    $('#display-support, #display-general').on('scroll', function() {
+        // You can add scroll position tracking here if needed
+    });
 });
 
-// Function to load and display support messages and then scroll to bottom
-function loadAndDisplaySupportMessagesAndScroll() {
-    loadAndDisplaySupportMessages();
+// Toggle chat widget visibility functions
+function showChatWidget() {
+    document.getElementById('chatwidget').style.display = 'block';
+}
+
+function toggleChatWidget() {
+    var supportChat = document.getElementById('chatwidget');
+    var generalChat = document.getElementById('chatwidget2');
+
+    var chatWidget = document.getElementById("chatwidget2");
+    if (chatWidget.style.display === "none") {
+        chatWidget.style.display = "block";
+    } else {
+        chatWidget.style.display = "none";
+    }
+
+    // Ensure scrolling works when toggling
     setTimeout(function() {
-        console.log("Before scrollToBottom: ", $('#display-support').scrollTop(), $('#display-support')[0].scrollHeight);
         scrollToBottom('display-support');
-        console.log("After scrollToBottom: ", $('#display-support').scrollTop(), $('#display-support')[0].scrollHeight);
-    }, 600); // Add a slight delay to ensure DOM is updated
-}
-
-// Function to load and display general messages and then scroll to bottom
-function loadAndDisplayGeneralMessagesAndScroll() {
-    loadAndDisplayGeneralMessages();
-    setTimeout(function() {
         scrollToBottom('display-general');
-    }, 600); // Add a slight delay to ensure DOM is updated
+    }, 300);
 }
 
-// Function to scroll to the bottom of the chat display
+// Function to scroll to the bottom of a chat display
 function scrollToBottom(elementId) {
-    var chatDisplay = document.getElementById(elementId);
-    console.log("Scrolling to bottom of element: ", elementId);
-    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    var element = document.getElementById(elementId);
+    if (element) {
+        element.scrollTop = element.scrollHeight;
+    }
 }
 </script>
-
     <script src="js/index.js"></script>
 	<script src="{% static 'css/js/script.js' %}"></script>
 <script src="{% static 'css/js/darkmode.js' %}"></script>
