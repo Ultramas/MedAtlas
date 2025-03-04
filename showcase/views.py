@@ -8636,6 +8636,8 @@ class BackgroundView(FormMixin, BaseView):
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by("image_position")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['FeaturedGame'] = Game.objects.filter(is_active=1, filter='F')
+        context['NewGame'] = Game.objects.filter(is_active=1, filter='N')
+        context['PopularGame'] = Game.objects.filter(is_active=1, filter='P')
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['Email'] = EmailField.objects.filter(is_active=1)
