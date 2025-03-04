@@ -10001,64 +10001,6 @@ class MegaCreatePostView(CreateView):
     success_url = reverse_lazy("megacoins")
 
 
-class EventBackgroundView(BaseView):
-    model = EventBackgroundImage
-    template_name = "events.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['EventBackgroundImage'] = EventBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['Events'] = Event.objects.all()
-
-        newprofile = Event.objects.filter(is_active=1)
-        # Retrieve the author's profile avatar
-
-        context['Profiles'] = newprofile
-
-        for newprofile in context['Profiles']:
-            user = newprofile.user
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
-
-        if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-        else:
-            userprofile = None
-
-        if userprofile:
-            context['NewsProfiles'] = userprofile
-        else:
-            context['NewsProfiles'] = None
-
-        if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
-        else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-        return context
-
-
-class EventCreatePostView(CreateView):
-    model = EventBackgroundImage
-    form_class = EventBackgroundImagery
-    template_name = "eventbackgroundimagechange.html"
-    success_url = reverse_lazy("event")
-
-
 class NewsBackgroundView(ListView):
     model = NewsBackgroundImage
     form_class = EmailForm
@@ -15038,7 +14980,7 @@ class CurrencyPaymentView(EBaseView):
             return redirect("accounts/login")
 
         try:
-            order = CurrencyOrder.objects.get(user=self.request.user, ordered=False)
+            order = CurrencyOrder.objects.filter(user=self.request.user, ordered=False)
         except CurrencyOrder.DoesNotExist:
             messages.warning(self.request, "Please add a billing address.")
             return redirect("showcase:currencycheckout")

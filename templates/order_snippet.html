@@ -1,71 +1,307 @@
+<style>
+    :root {
+        --primary: #00f0ff;
+        --primary-dark: #00a0a8;
+        --secondary: #ff00e5;
+        --accent: #4ecca3;
+        --dark: #0a0a20;
+        --darker: #050510;
+        --light: #e1e1ff;
+        --success: #00ff66;
+    }
 
-<div class="col-md-12 mb-4" style="display: flex; flex-direction: column;">
-    <br><br>
-    <h4 class="d-felex justify-content-between align-items-center mb-3">
-    <span class="text-muted" style="color: white;">Your Cart</span>
-    <span class="badge badge-secondary badge-pill">{{ order.items.count }}</span>
+    .cart-container {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .cart-title {
+        color: var(--primary);
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
+    .cart-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100px;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary), transparent);
+    }
+
+    .cart-badge {
+        background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+        color: var(--darker);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+
+    .cart-list {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        margin-bottom: 1.5rem;
+        list-style: none;
+        padding: 0;
+    }
+
+    .cart-list::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .cart-item {
+        padding: 1.2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .cart-item:hover {
+        background: rgba(0, 240, 255, 0.05);
+    }
+
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+
+    .cart-item-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--light);
+    }
+
+    .cart-item-desc {
+        font-size: 0.9rem;
+        color: rgba(225, 225, 255, 0.7);
+        margin-top: 0.3rem;
+    }
+
+    .cart-item-price {
+        font-size: 1.1rem;
+        color: var(--primary);
+        font-weight: 600;
+        text-shadow: 0 0 5px rgba(0, 240, 255, 0.3);
+    }
+
+    .cart-item-currency {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .cart-item-currency .currency-icon {
+        color: #ffd700;
+        font-size: 1.2rem;
+        filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));
+    }
+
+    .cart-total {
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(0, 240, 255, 0.1);
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary);
+        text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .cart-total strong {
+        font-size: 1.3rem;
+    }
+
+    .line::after {
+        content: '';
+        bottom: -10px;
+        left: 0;
+        width: 100px;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary), transparent);
+    }
+
+    .promo-item {
+        padding: 1.2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(0, 255, 102, 0.1);
+        border-bottom: 1px solid rgba(0, 255, 102, 0.3);
+    }
+
+    .promo-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--success);
+        text-shadow: 0 0 5px rgba(0, 255, 102, 0.3);
+    }
+
+    .promo-code {
+        font-size: 0.9rem;
+        color: var(--success);
+        margin-top: 0.3rem;
+    }
+
+    .promo-discount {
+        font-size: 1.1rem;
+        color: var(--success);
+        font-weight: 600;
+        text-shadow: 0 0 5px rgba(0, 255, 102, 0.3);
+    }
+
+    .coupon-form {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        display: flex;
+        align-items: center;
+    }
+
+    .coupon-input {
+        flex-grow: 1;
+        padding: 0.8rem 1rem;
+        background: rgba(10, 10, 32, 0.6);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 8px 0 0 8px;
+        font-size: 1rem;
+        color: var(--light);
+        transition: all 0.3s ease;
+    }
+
+    .coupon-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+
+    .coupon-button {
+        background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+        color: var(--darker);
+        border: none;
+        border-radius: 0 8px 8px 0;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .coupon-button:hover {
+        background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+    }
+
+    @media (max-width: 768px) {
+        .cart-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .cart-item-price {
+            margin-top: 0.5rem;
+        }
+    }
+</style>
+
+<div class="col-md-12 mb-4 cart-container">
+    <h4 class="cart-title">
+        <span>Your Cart</span>
+        <span class="cart-badge">{{ order.items.count }}</span>
     </h4>
-    <ul class="list-group mb-3 z-depth-1">
-    {% for order_item in order.items.all %}
-    <li class="list-group-item d-flex justify-content-between lh-condensed">
-        <div>
-            <h6 class="my-0">{{ order_item.quantity }}x {{ order_item.item.title}}</h6>
-            <small class="text-muted">{{ order_item.item.description}}</small>
-        </div>
-        {% if order_item.item.price is not None %}
-            <span class="text-muted">${{ order_item.get_final_price }}</span>
-        {% elif order_item.item.currency_price is not None %}
-            <span class="text-muted">💎 {{ order_item.get_final_currency_price }} </span>
-        {% else %}
-            <span class="text-muted">Price not available</span>
-        {% endif %}
-    </li>
-    {% endfor %}
-    {% if order.coupon %}
-    <li class="list-group-item d-flex justify-content-between bg-light">
-        <div class="text-success">
-        <h3 class="my-0">Promo Code</h3>
-        <small>{{ order.coupon.code }}</small>
-        </div>
-      
-      <!--{{ order.coupon.percentDollars }}-->
-      
-      {% if order.coupon.percentDollars == False %}
-        <span class="text-success">-${{ order.coupon.amount }}</span>
-      
-      {% else %}
-      <span class="text-success">-{{ order.coupon.amount }}%</span>
-    {% endif %}
-      
-{% endif %}      
-    </li>
-      
-    <li class="list-group-item d-flex justify-content-between">
-        {% if order.get_total_price %}
-            <span>Total (USD)</span>
-            <strong>${{ order.get_total_price }}</strong>
-        {% endif %}
-        {% if order.get_total_currency_price %}
-            <span>Total (Rubies)</span>
-            <strong>💎{{ order.get_total_currency_price }}</strong>
-        {% endif %}
-    </li>
-    </ul>
-  
-    {% if DISPLAY_COUPON_FORM %}
-
-     <form class="card p-2" action="{% url 'showcase:add-coupon' %}" method="POST">        
-        {% csrf_token %}
-        <div class="input-group">
-            {{ couponform.code }}
-            <div class="input-group-append">
-            <button class="btn btn-secondary btn-md waves-effect m-0" style="" type="submit">Redeem</button>
+    
+    <ul class="cart-list">
+        {% for order_item in order.items.all %}
+        <li class="cart-item">
+            <div>
+                <h6 class="cart-item-title">{{ order_item.quantity }}x {{ order_item.item.title}}</h6>
+                <small class="cart-item-desc">{{ order_item.item.description}}</small>
             </div>
+            {% if order_item.item.price is not None %}
+                <span class="cart-item-price">${{ order_item.get_final_price }}</span>
+            {% elif order_item.item.currency_price is not None %}
+                <span class="cart-item-price cart-item-currency">
+                    <span class="currency-icon">💎</span> {{ order_item.get_final_currency_price }}
+                </span>
+            {% else %}
+                <span class="cart-item-price">Price not available</span>
+            {% endif %}
+        </li>
+        {% endfor %}
+        
+        {% if order.coupon %}
+        <li class="promo-item">
+            <div>
+                <h6 class="promo-title">Promo Code</h6>
+                <small class="promo-code">{{ order.coupon.code }}</small>
+            </div>
+            
+            {% if order.coupon.percentDollars == False %}
+                <span class="promo-discount">-${{ order.coupon.amount }}</span>
+            {% else %}
+                <span class="promo-discount">-{{ order.coupon.amount }}%</span>
+            {% endif %}
+        </li>
+        {% endif %}
+        
+        <li class="cart-total" style="display: flex; flex-direction: column;">
+            {% if order.get_total_price %}
+            <div class="line">
+                <div class="lined" style="display: flex; flex-direction: row;">
+                <span style="margin-right: 5px;">Total (USD) </span>
+                <strong>${{ order.get_total_price }}</strong>
+                </div>
+                </div>
+            {% endif %}
+            {% if order.get_total_currency_price %}
+
+            <div class="line2" style="display: flex; flex-direction: row;">
+                <span style="margin-right: 5px;">Total (Rubies)</span>
+                <strong>
+                    <span class="currency-icon">💎</span>{{ order.get_total_currency_price }}
+                </strong>
+            </div>
+            {% endif %}
+        </li>
+    </ul>
+    
+    {% if DISPLAY_COUPON_FORM %}
+    <form class="coupon-form" action="{% url 'showcase:add-coupon' %}" method="POST">        
+        {% csrf_token %}
+        <div class="input-group" style="display: flex; width: 100%;">
+            {{ couponform.code }}
+            <button class="coupon-button" type="submit">Redeem</button>
         </div>
     </form>
-
     {% endif %}
-
 </div>
-
-          

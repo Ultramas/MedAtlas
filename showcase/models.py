@@ -2461,8 +2461,6 @@ class Event(models.Model):
         return self.name + " hosted by " + str(self.user)
 
     def save(self, *args, **kwargs):
-        if not self.page.endswith('.html'):
-            self.page += '.html'
         if not self.pk:
             # Get the associated ProfileDetails for the donor
             profile = ProfileDetails.objects.filter(user=self.user).first()

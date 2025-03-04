@@ -9,6 +9,17 @@
     <!-- PayPal SDK -->
     <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}"></script>
     <style>
+        :root {
+            --primary: #00f0ff;
+            --primary-dark: #00a0a8;
+            --secondary: #ff00e5;
+            --accent: #4ecca3;
+            --dark: #0a0a20;
+            --darker: #050510;
+            --light: #e1e1ff;
+            --success: #00ff66;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -17,7 +28,11 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f9f9f9;
+
+            background-color: var(--darker);
+            background-image:
+                radial-gradient(circle at 20% 35%, rgba(0, 240, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 75% 65%, rgba(255, 0, 229, 0.15) 0%, transparent 40%);
         }
         .payment-container {
             background: #fff;

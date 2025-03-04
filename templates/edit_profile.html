@@ -4,43 +4,285 @@
 {% block head_title %}Edit Profile{% endblock %}
 
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-6">
-      <h2 class="my-5">Edit profile</h2>
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="form-group">
-          {{ form.username.label_tag }}
-          <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}" id="id_username"
-            name="username" value='{{ form.username.value|default:user.username }}'>
-          {% if form.username.errors %}
-          <div class="invalid-feedback">{{ form.username.errors }}</div>
-          {% endif %}
-        </div>
+<style>
+    :root {
+        --primary: #00f0ff;
+        --primary-dark: #00a0a8;
+        --secondary: #ff00e5;
+        --accent: #4ecca3;
+        --dark: #0a0a20;
+        --darker: #050510;
+        --light: #e1e1ff;
+        --success: #00ff66;
+    }
 
-        <div class="form-group">
-          {{ form.about_me.label_tag }}
-          <textarea type="text" class="form-control {% if form.about_me.errors %}is-invalid{% endif %}" id="id_about_me"
-            name="about_me" value='{{ form.about_me.value }}' rows="5"></textarea>
-          {% if form.about_me.errors %}
-          <div class="invalid-feedback">{{ form.about_me.errors }}</div>
-          {% endif %}
-        </div>
+    .profile-edit-container {
+        padding: 3rem 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
 
-        <div class="form-group">
-          {{ form.image.label_tag }}<br>
-          <input type="file" class="{% if form.image.errors %}is-invalid{% endif %}" id="id_image" name="image"
-            accept="image/*">
-          {% if form.image.errors %}
-          <div class="invalid-feedback">{{ form.image.errors }}</div>
-          {% endif %}
-        </div>
+    .profile-edit-card {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        border-radius: 16px;
+        padding: 2.5rem;
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+    }
 
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
-      <br>
+    .profile-edit-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .profile-title {
+        color: var(--primary);
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        position: relative;
+        text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+    }
+
+    .profile-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100px;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary), transparent);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        color: var(--primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        background: rgba(10, 10, 32, 0.6);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        color: var(--light);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .is-invalid {
+        border-color: var(--secondary) !important;
+    }
+
+    .invalid-feedback {
+        color: var(--secondary);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        animation: pulse 2s infinite;
+    }
+
+    .file-input-container {
+        position: relative;
+        margin-top: 0.5rem;
+    }
+
+    .file-input-label {
+        display: inline-block;
+        padding: 10px 20px;
+        background: linear-gradient(45deg, rgba(0, 240, 255, 0.2), rgba(255, 0, 229, 0.2));
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--light);
+    }
+
+    .file-input-label:hover {
+        background: linear-gradient(45deg, rgba(0, 240, 255, 0.3), rgba(255, 0, 229, 0.3));
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .file-input {
+        position: absolute;
+        left: -9999px;
+    }
+
+    .file-name {
+        margin-left: 10px;
+        font-size: 0.9rem;
+        color: var(--light);
+        opacity: 0.8;
+    }
+
+    .btn-cyber {
+        background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+        color: var(--darker);
+        border: none;
+        border-radius: 8px;
+        padding: 12px 30px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+        margin-top: 1rem;
+    }
+
+    .btn-cyber::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent 70%);
+        transition: transform 0.5s ease;
+    }
+
+    .btn-cyber:hover::before {
+        transform: translate(25%, 25%);
+    }
+
+    .btn-cyber:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+    }
+
+    .btn-cyber:active {
+        transform: translateY(-1px);
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.7; }
+        50% { opacity: 1; }
+        100% { opacity: 0.7; }
+    }
+
+    @media (max-width: 768px) {
+        .profile-edit-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .profile-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="profile-edit-container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="profile-edit-card">
+                <h2 class="profile-title">Edit Profile</h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{ form.username.label_tag }}
+                        <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}" id="id_username"
+                            name="username" value='{{ form.username.value|default:user.username }}'>
+                        {% if form.username.errors %}
+                        <div class="invalid-feedback">{{ form.username.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.about_me.label_tag }}
+                        <textarea class="form-control {% if form.about_me.errors %}is-invalid{% endif %}" id="id_about_me"
+                            name="about_me" rows="5">{{ form.about_me.value|default:'' }}</textarea>
+                        {% if form.about_me.errors %}
+                        <div class="invalid-feedback">{{ form.about_me.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.image.label_tag }}
+                        <div class="file-input-container">
+                            <label for="id_image" class="file-input-label">
+                                <i class="fas fa-upload"></i> Choose Image
+                            </label>
+                            <input type="file" class="file-input {% if form.image.errors %}is-invalid{% endif %}" id="id_image" name="image"
+                                accept="image/*">
+                            <span class="file-name" id="file-name-display">No file chosen</span>
+                        </div>
+                        {% if form.image.errors %}
+                        <div class="invalid-feedback">{{ form.image.errors }}</div>
+                        {% endif %}
+                        {% if user.profile.image %}
+                        <div class="current-image mt-2">
+                            <p class="text-light">Current image:</p>
+                            <img src="{{ user.profile.image.url }}" alt="Current profile image" style="max-width: 100px; border-radius: 8px; border: 1px solid rgba(0, 240, 255, 0.3);">
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn-cyber">Save Changes</button>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Display file name when selected
+        const fileInput = document.getElementById('id_image');
+        const fileNameDisplay = document.getElementById('file-name-display');
+
+        if (fileInput && fileNameDisplay) {
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    fileNameDisplay.textContent = this.files[0].name;
+                } else {
+                    fileNameDisplay.textContent = 'No file chosen';
+                }
+            });
+        }
+
+        // Add animation to form fields
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.querySelector('label')?.style.textShadow = '0 0 10px rgba(255, 0, 229, 0.5)';
+            });
+
+            input.addEventListener('blur', function() {
+                this.parentElement.querySelector('label')?.style.textShadow = 'none';
+            });
+        });
+
+        // Fix textarea value
+        const aboutMeTextarea = document.getElementById('id_about_me');
+        if (aboutMeTextarea) {
+            const aboutMeValue = '{{ form.about_me.value|default:"" }}';
+            aboutMeTextarea.value = aboutMeValue;
+        }
+    });
+</script>
 {% endblock content %}

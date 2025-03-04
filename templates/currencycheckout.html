@@ -6,357 +6,93 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PokeTrove - Marketplace</title>
-        <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-    <style>
-    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
-    .copyright-section {
-        background: linear-gradient(
-            to right,
-            rgba(191, 151, 255, 0.1),
-            rgba(255, 255, 255, 0.05),
-            rgba(191, 151, 255, 0.1)
-        );
-        backdrop-filter: blur(10px);
-        padding: 1rem 0;
-        text-align: center;
-        position: relative;
-        z-index: 100;
-    }
-
-    .copyright-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--primary), transparent);
-    }
-
-    .copyright-section p {
-        color: var(--text);
-        font-family: 'Cinzel', serif;
-        font-size: 0.9rem;
-        letter-spacing: 1px;
-        margin: 0;
-    }
-</style>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
-
         :root {
-            --primary: #bf97ff;
-            --primary-dark: #9a6bff;
-            --background: #0a0a13;
-            --text: #ffffff;
-            --accent: #4db2ea;
-            --accent2: #ffd700;
+            --primary: #00f0ff;
+            --primary-dark: #00a0a8;
+            --secondary: #ff00e5;
+            --accent: #4ecca3;
+            --dark: #0a0a20;
+            --darker: #050510;
+            --light: #e1e1ff;
+            --success: #00ff66;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Rajdhani', sans-serif;
         }
 
         body {
-            background-color: var(--background);
-            color: var(--text);
-            font-family: 'Cormorant Garamond', serif;
-            background-image:
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
+            background-color: var(--darker);
+            color: var(--light);
             min-height: 100vh;
+            background-image:
+                radial-gradient(circle at 20% 35%, rgba(0, 240, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 75% 65%, rgba(255, 0, 229, 0.15) 0%, transparent 40%);
         }
 
-        .main-menu {
-            display: flex;
-            align-items: center;
-            padding: 1rem 2rem;
+        .copyright-section {
             background: linear-gradient(
                 to right,
-                rgba(191, 151, 255, 0.1),
+                rgba(0, 240, 255, 0.1),
                 rgba(255, 255, 255, 0.05),
-                rgba(191, 151, 255, 0.1)
+                rgba(0, 240, 255, 0.1)
             );
             backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
+            padding: 1rem 0;
+            text-align: center;
+            position: relative;
             z-index: 100;
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
-            position: relative;
-        }
-
-        .logo::after {
+        .copyright-section::before {
             content: '';
             position: absolute;
-            bottom: -5px;
+            top: 0;
             left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
         }
 
-        .logo-icon {
-            color: var(--accent);
-            font-size: 2rem;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        .copyright-section p {
+            color: var(--light);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            margin: 0;
         }
 
-        .nav-links {
-            margin-left: auto;
-            display: flex;
-            gap: 3rem;
-        }
-
-        .nav-links a {
-
-    color: var(--primary);
-            text-decoration: none;
-            position: relative;
-            padding: 0.5rem 0;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            /*font-size: 1rem;*/
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-    .logo-icon h1::after {
-        content: '';
-        position: absolute;
-        bottom: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 200px;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-    }
-        .container {
-            display: flex;
-            gap: 3rem;
-            padding: 3rem;
-            max-width: 1800px;
+        /* Checkout Page Styling */
+        .checkout-container {
+            padding: 3rem 1rem;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        .sidebar {
-            width: 320px;
-            flex-shrink: 0;
-        }
-
-        .user-profile {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .user-profile::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-
-        .user-info {
+        .checkout-title {
             text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .username {
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
             color: var(--primary);
-            margin-bottom: 0.75rem;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
-        }
-
-        .user-stats {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            font-size: 1rem;
-        }
-
-        .user-stat {
-            background: rgba(191, 151, 255, 0.1);
-            padding: 0.75rem 1.25rem;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid var(--primary);
-        }
-
-        .user-stat-icon {
-            font-size: 1.5rem;
-        }
-
-        .filters {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .filters h2, .collection-title {
-            color: var(--primary);
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-            font-family: 'Cinzel', serif;
-            text-align: center;
-            position: relative;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
-        }
-
-        .filters h2::after, .collection-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .search-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 100%;
-            color: var(--text);
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-        }
-
-        .type-select {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 100%;
-            color: var(--text);
-            margin-bottom: 2rem;
-            cursor: pointer;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-        }
-
-        .view-collection {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-            border: 2px solid var(--primary);
-            color: var(--text);
-            padding: 1rem;
-            border-radius: 8px;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 1.1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .view-collection::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
-            transition: transform 0.5s ease;
-        }
-
-        .view-collection:hover::before {
-            transform: translate(25%, 25%);
-        }
-
-        .view-collection:hover {
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-            border-color: var(--accent);
-            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
-            transform: translateY(-2px);
-            color: var(--accent);
-        }
-
-        .main-content h1 {
-            color: var(--primary);
-            font-size: 3rem;
+            font-size: 2.5rem;
             margin-bottom: 3rem;
-            font-family: 'Cinzel', serif;
-            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
             position: relative;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
         }
 
-        .main-content h1::after {
+        .checkout-title::after {
             content: '';
             position: absolute;
             bottom: -15px;
@@ -364,712 +100,575 @@
             transform: translateX(-50%);
             width: 200px;
             height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
         }
 
-
-        .pokemon-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
-        }
-
-        .pokemon-card {
+        .checkout-card {
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
             border-radius: 16px;
-            overflow: hidden;
+            padding: 2rem;
+            border: 1px solid rgba(0, 240, 255, 0.3);
             position: relative;
-            border: 2px solid var(--primary);
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
         }
 
-        .pokemon-card:hover {
-            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
-            border-color: var(--accent);
-        }
-
-        .pokemon-card::before {
+        .checkout-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
-            z-index: 1;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
         }
 
-        .pokemon-image {
-            width: 100%;
-            aspect-ratio: 1;
-            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .section-title {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
             position: relative;
-            overflow: hidden;
+            padding-left: 1rem;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
         }
 
-        .pokemon-image::after {
+        .section-title::before {
             content: '';
             position: absolute;
-            width: 150%;
-            height: 150%;
-            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
-            animation: rotate 20s linear infinite;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 100%;
+            background: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
         }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .pokemon-info {
-            padding: 1.5rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        .pokemon-name {
-            font-size: 1.75rem;
-            margin-bottom: 0.75rem;
-            font-family: 'Cinzel', serif;
-            color: var(--primary);
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
-        }
-
-        .pokemon-type {
-            color: white;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        /* Form Styling */
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(10, 10, 32, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            color: var(--light);
             margin-bottom: 1rem;
         }
 
-        .add-button {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-            border: 2px solid var(--primary);
-            color: var(--text);
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 1.5rem;
-            transition: all 0.3s ease;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 1.1rem;
-            position: relative;
-            overflow: hidden;
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+            transform: translateY(-2px);
         }
 
-        .add-button::before {
+        label {
+            display: block;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        /* Custom Checkbox */
+        .custom-control {
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .custom-control-input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .custom-control-label {
+            position: relative;
+            cursor: pointer;
+            padding-top: 0.2rem;
+        }
+
+        .custom-control-label::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 0.2rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            background: rgba(10, 10, 32, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .custom-control-input:checked ~ .custom-control-label::before {
+            background: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        .custom-control-label::after {
+            content: '';
+            position: absolute;
+            left: -2.1rem;
+            top: 0.6rem;
+            width: 0.7rem;
+            height: 0.7rem;
+            border-radius: 2px;
+            background: var(--darker);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .custom-control-input:checked ~ .custom-control-label::after {
+            opacity: 1;
+        }
+
+        /* Custom Radio */
+        .custom-radio .custom-control-label::before {
+            border-radius: 50%;
+        }
+
+        .custom-radio .custom-control-label::after {
+            border-radius: 50%;
+        }
+
+        /* Button Styling */
+        .btn-cyber {
+            background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+            color: var(--darker);
+            border: none;
+            border-radius: 8px;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        .btn-cyber::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent 70%);
             transition: transform 0.5s ease;
         }
 
-        .add-button:hover::before {
+        .btn-cyber:hover::before {
             transform: translate(25%, 25%);
         }
 
-        .add-button:hover {
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-            border-color: var(--accent);
-            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
-            transform: translateY(-2px);
-            color: var(--accent);
+        .btn-cyber:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
         }
 
-        .legendary-icon {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            color: var(--accent);
-            background: rgba(255, 215, 0, 0.1);
-            padding: 0.75rem;
-            border-radius: 50%;
-            z-index: 2;
-            backdrop-filter: blur(5px);
-            border: 2px solid var(--accent2);
-            font-size: 1.5rem;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
-            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-        }
-
-                .inventory-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @media (max-width: 1200px) {
-            .inventory-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .inventory-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .inventory-item {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        /* Shipping Label */
+        .shipping-label {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
             border-radius: 16px;
-            overflow: hidden;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+            color: var(--darker);
             position: relative;
-            border: 2px solid var(--primary);
+            overflow: hidden;
+        }
+
+        .shipping-label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .label-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(10, 10, 32, 0.1);
+        }
+
+        .address-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .address-section h3 {
+            color: var(--darker);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .barcode {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid rgba(10, 10, 32, 0.1);
+        }
+
+        .barcode-placeholder {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: var(--darker);
+        }
+
+        /* Payment Options */
+        .payment-options {
+            display: grid;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .payment-option {
+            position: relative;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
             transition: all 0.3s ease;
-            transform-style: preserve-3d;
         }
 
-        .inventory-item:hover {
-            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
-            border-color: var(--accent);
+        .payment-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
         }
 
+        .payment-option input {
+            display: none;
+        }
 
+        .payment-option label {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+        }
 
-.view-toggle {
-    text-align: right;
-    margin-bottom: 1rem;
-}
+        .payment-option input:checked + label {
+            color: var(--primary);
+        }
 
-.toggle-btn {
-    background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-    border: 2px solid var(--primary);
-    color: var(--text);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-}
+        .payment-option input:checked + label::before {
+            content: '✓';
+            position: absolute;
+            right: 1rem;
+            color: var(--primary);
+        }
 
-.toggle-btn:hover {
-    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-    border-color: var(--accent);
-    box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
-}
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .checkout-card {
+                padding: 1.5rem;
+            }
 
-.inventory-grid.compact-view {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-}
+            .checkout-title {
+                font-size: 2rem;
+            }
+        }
 
-.inventory-grid.compact-view .inventory-item {
-    font-size: 0.9em;
-}
+        /* Animation */
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.5); }
+        }
 
-.inventory-grid.compact-view .pokemon-image {
-    aspect-ratio: 16/9;
-}
-
-.inventory-grid.compact-view .product-description {
-    display: none;
-}
-
-.inventory-grid.compact-view .action-buttons {
-    flex-direction: column;
-}
-
-.inventory-grid.compact-view .action-buttons form {
-    width: 100%;
-    margin-bottom: 0.5rem;
-}
-
-.legendary-icon {
-    font-size: 2em;
-    margin-bottom: 0.5rem;
-}
-
-.empty-inventory {
-    text-align: center;
-}
-
-.empty-inventory img {
-    max-width: 50%;
-    margin: 2rem auto;
-}
-
-nav.main-menu ul li a {
-    color: #fff;
-    font-weight: 700;
-    display: block;
-    padding: 15px;
-}
-
-.product-condition{
-    color: var(--accent);
-}
+        .glow-effect {
+            animation: glow 2s infinite;
+        }
     </style>
 </head>
 <body>
+    {% include 'navtrove.html' %}
 
-<script>
-    // Load audio files
-    const sellAudio = new Audio("/static/css/sounds/sell_coin.mp3");
-    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
-    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
+    <div class="checkout-container">
+        <h2 class="checkout-title">Currency Checkout</h2>
 
-    // Add event listeners to sell forms
-    document.querySelectorAll('.sell-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            sellAudio.play(); // Play the sell sound
-            console.log('')
-            handleAjaxFormSubmission(form); // Handle the AJAX request
-        });
-    });
-
-    // Add event listeners to withdraw forms
-    document.querySelectorAll('.withdraw-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            withdrawAudio.play(); // Play the withdraw sound
-            handleAjaxFormSubmission(form); // Handle the AJAX request
-        });
-    });
-
-	document.querySelectorAll('.trade-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            tradeAudio.play(); // Play the withdraw sound
-        });
-    });
-
-    // Generic AJAX form submission handler
-    function handleAjaxFormSubmission(form) {
-        const formData = new FormData(form);
-        const actionUrl = form.getAttribute('action');
-
-        fetch(actionUrl, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('stock-count').textContent = data.number_of_cards;
-            } else {
-                console.error(data.error);
-            }
-        });
-    }
-</script>
-
-{% include 'navtrove.html' %}
-
-  <main class="main-content" style="align-items: center; justify-content: center;">
+        <div class="row">
+            <div class="col-md-8 mb-4">
+                <div class="checkout-card">
+                    {% if address %}
+                        <div class="shipping-label">
+                            <div class="label-header">
+                                <h2>Shipping Label</h2>
+                            </div>
+                            <div class="address-section">
+                                <h3>Ship To:</h3>
+                                <div class="address-content">
+                                    Address - {{address.street_address}}<br>
+                                    {% if apartment_address %}
+                                        Apartment - {{address.apartment_address}}<br>
+                                    {% endif %}
+                                    Country - {{address.country}}<br>
+                                    ZIP - {{address.zip}}
+                                </div>
+                            </div>
+                            <div class="address-section">
+                                <h3>Bill To:</h3>
+                                <div class="address-content">
+                                    Address - {{address.street_address}}<br>
+                                    {% if apartment_address %}
+                                        Apartment - {{address.apartment_address}}<br>
+                                    {% endif %}
+                                    Country - {{address.country}}<br>
+                                    ZIP - {{address.zip}}
+                                </div>
+                            </div>
+                            <div class="barcode">
+                                <div class="barcode-placeholder">||||| |||| || |||||||</div>
+                            </div>
+                        </div>
+                        <form method="POST" class="card-body" action="{% url 'showcase:checkout' %}">
+                            {% csrf_token %}
+                    {% else %}
+                        <form method="POST" class="card-body" action="{% url 'showcase:checkout' %}" id="checkout-form">
+                            {% csrf_token %}
+                            {{ form.non_field_errors }}
 
 
-    <div class="container wow fadeIn" style="display: flex; flex-direction: column;">
-        <h2 class="my-5 h2 text-center" style="color: white; margin-bottom: -20%;">Checkout</h2>
+                            <div class='hideable_shipping_form' style="display: none;">
+                                <div class="form-group">
+                                    <input type='text' placeholder='Address (example: 1234 Main St)' id='shipping_address' name='shipping_address' class='form-control' />
+                                </div>
 
-            <div class="row">
-        <div class="col-md-8 mb-4">
-          <div class="card">
-              {% if address %}
-              <style>
-        body {
+                                <div class="form-group">
+                                    <input type='text' placeholder='Address 2 (optional)' id='shipping_address2' name='shipping_address2' class='form-control' />
+                                </div>
 
-        }
-        .shipping-label {
-            background-color: white;
-            border: 2px solid #000;
-            padding: 20px;
-            width: 350px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .label-header {
-            text-align: center;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-        .label-header h2 {
-            margin: 0;
-            font-size: 1.2em;
-            text-transform: uppercase;
-        }
-        .address-section {
-            margin-bottom: 15px;
-        }
-        .address-section h3 {
-            margin: 0 0 5px 0;
-            font-size: 1em;
-            font-weight: bold;
-        }
-        .address-content {
-            font-size: 0.9em;
-            line-height: 1.4;
-        }
-        .barcode {
-            text-align: center;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 2px solid #000;
-        }
-        .barcode-placeholder {
-            font-family: 'Courier New', monospace;
-            font-size: 1.2em;
-            letter-spacing: 2px;
-        }
-    </style>
-                          <form method="POST" class="card-body"  action="{% url 'showcase:checkout' %}">
-              {% csrf_token %}
-          <div class="shipping-label">
-        <div class="label-header">
-            <h2>Shipping Label</h2>
-        </div>
-        <div class="address-section">
-            <h3>Ship To:</h3>
-            <div class="address-content" style="color: black;">
-                Address - {{address.street_address}}<br>
-                {% if apartment_address %}
-                Apartment - {{address.apartment_address}}<br>
-                {% endif %}
-                Country - {{address.country}}<br>
-                ZIP - {{address.zip}}
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12 mb-4">
+                                        <label for="country">Country</label>
+                                        {{ form.shipping_country }}
+                                    </div>
+                                    <div class="col-lg-6 col-md-12 mb-4">
+                                        <label for="shipping_zip">Zip</label>
+                                        <input type='text' placeholder='Zip code' id='shipping_zip' name='shipping_zip' class='form-control' />
+                                    </div>
+                                </div>
+
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" name="same_billing_address" id="same_billing_address">
+                                    <label class="custom-control-label" for="same_billing_address">My billing address is the same as my shipping address</label>
+                                </div>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" name="set_default_shipping" id="set_default_shipping">
+                                    <label class="custom-control-label" for="set_default_shipping">Save as default shipping address</label>
+                                </div>
+                            </div>
+
+                            {% if default_shipping_address %}
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" name="use_default_shipping" id="use_default_shipping">
+                                    <label class="custom-control-label" for="use_default_shipping">Use default shipping address: {{ default_shipping_address.street_address|truncatechars:10 }}</label>
+                                </div>
+                            {% endif %}
+
+                            <hr>
+
+
+                            <div class='hideable_billing_form' style="display: none;">
+                                <div class="form-group">
+                                    <input type='text' placeholder='Address (example: 1234 Main St)' id='billing_address' name='billing_address' class='form-control' />
+                                </div>
+
+                                <div class="form-group">
+                                    <input type='text' placeholder='Address 2 (optional)' id='billing_address2' name='billing_address2' class='form-control' />
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12 mb-4">
+                                        <label for="country">Country</label>
+                                        {{ form.billing_country }}
+                                    </div>
+                                    <div class="col-lg-6 col-md-12 mb-4">
+                                        <label for="billing_zip">Zip</label>
+                                        <input type='text' placeholder='Zip code' id='billing_zip' name='billing_zip' class='form-control' />
+                                    </div>
+                                </div>
+
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" name="set_default_billing" id="set_default_billing">
+                                    <label class="custom-control-label" for="set_default_billing">Save as default billing address</label>
+                                </div>
+                            </div>
+
+                            {% if default_billing_address %}
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" name="use_default_billing" id="use_default_billing">
+                                    <label class="custom-control-label" for="use_default_billing">Use default billing address: {{ default_billing_address.street_address|truncatechars:10 }}</label>
+                                </div>
+                            {% endif %}
+                    {% endif %}
+
+                            <hr>
+
+                            {% if not form.payment_option.is_hidden %}
+                                <h3 class="section-title">Payment Options</h3>
+                                <div class="payment-options">
+                                    {% for value, name in form.fields.payment_option.choices %}
+                                        <div class="payment-option">
+                                            <input id="{{ name }}" name="payment_option" value="{{ value }}" type="radio" required>
+                                            <label for="{{ name }}">
+                                                <i class="fas fa-credit-card"></i>
+                                                {{ name }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <button type="submit" class="btn-cyber">Continue To Payment</button>
+                        </form>
+                </div>
             </div>
-        </div>
-        <div class="address-section" style="color: black;">
-            <h3>Bill To:</h3>
-            <div class="address-content">
-                Address - {{address.street_address}}<br>
-                {% if apartment_address %}
-                Apartment - {{address.apartment_address}}<br>
-                {% endif %}
-                Country - {{address.country}}<br>
-                ZIP - {{address.zip}}
+
+            <div class="col-md-4 mb-4">
+                {% include "currency_order_snippet.html" %}
             </div>
-        </div>
-        <div class="barcode">
-            <div class="barcode-placeholder" style="color:black;">||||| |||| || |||||||</div>
         </div>
     </div>
-              {% else %}
-            <form method="POST" class="card-body"  action="{% url 'showcase:checkout' %}">
-              {% csrf_token %}
-              {{ form.non_field_errors }}
 
+    <footer class="copyright-section">
+        <div class="container">
+            <p>
+                {% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
+                    {{BaseCopyrightTextField.copyright}}
+                {% endfor %}
+            </p>
+        </div>
+    </footer>
 
-              <div class='hideable_shipping_form' style="display: none;">
+    <script>
+        // Load audio files
+        const sellAudio = new Audio("/static/css/sounds/sell_coin.mp3");
+        const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
+        const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
 
-                <div class="md-form mb-5">
-                  <!--find proper syntaxing for userprofile.shipping_address1-->
-                  <input type='text' placeholder='Address (example: 1234 Main St)' id='shipping_address' name='shipping_address' class='form-control' />
-                  <!--<label for="shipping_address" class="">Address</label>-->
-                </div>
+        // Add event listeners to sell forms
+        document.querySelectorAll('.sell-form').forEach(form => {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent default form submission
+                sellAudio.play(); // Play the sell sound
+                handleAjaxFormSubmission(form); // Handle the AJAX request
+            });
+        });
 
-                <div class="md-form mb-5">
-                  <input type='text' placeholder='Address 2 (optional)' id='shipping_address2' name='shipping_address2' class='form-control' />
-                  <!--<label for="shipping_address2" class="">Address 2 (optional)</label>-->
-                </div>
+        // Add event listeners to withdraw forms
+        document.querySelectorAll('.withdraw-form').forEach(form => {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent default form submission
+                withdrawAudio.play(); // Play the withdraw sound
+                handleAjaxFormSubmission(form); // Handle the AJAX request
+            });
+        });
 
-                <div class="row">
-                  <div class="col-lg-4 col-md-12 mb-4">
-                    <label for="country">Country</label>
-                    <!--{{ form.shipping_country }} causes the image-->
-                    {{ form.shipping_country }}
-                    <div class="invalid-feedback">
-                      Please select a valid country.
-                    </div>
-                  </div>
-                  <div class="col-lg-4 col-md-6 mb-4">
-                    <label for="shipping_zip">Zip</label>
-                    <input type='text' placeholder='Zip code' id='shipping_zip' name='shipping_zip' class='form-control' />
-                    <div class="invalid-feedback">
-                      Zip code required.
-                    </div>
-                  </div>
-                </div>
+        document.querySelectorAll('.trade-form').forEach(form => {
+            form.addEventListener('submit', function(event) {
+                tradeAudio.play(); // Play the withdraw sound
+            });
+        });
 
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" name="same_billing_address" id="same_billing_address">
-                  <label class="custom-control-label" for="same_billing_address">My billing address is the same as my shipping address</label>
-                </div>
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" name="set_default_shipping" id="set_default_shipping">
-                  <label class="custom-control-label" for="set_default_shipping">Save as default shipping address</label>
-                </div>
+        // Generic AJAX form submission handler
+        function handleAjaxFormSubmission(form) {
+            const formData = new FormData(form);
+            const actionUrl = form.getAttribute('action');
 
-              </div>
+            fetch(actionUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('stock-count').textContent = data.number_of_cards;
+                } else {
+                    console.error(data.error);
+                }
+            });
+        }
 
-              {% if default_shipping_address %}
-              <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" name="use_default_shipping" id="use_default_shipping">
-                <label class="custom-control-label" for="use_default_shipping">Use default shipping address: {{ default_shipping_address.street_address|truncatechars:10 }}</label>
-              </div>
-              {% endif %}
-
-              <hr>
-
-
-              <div class='hideable_billing_form' style="display: none;">
-                <div class="md-form mb-5">
-                  <input type='text' placeholder='Address (example: 1234 Main St)' id='billing_address' name='billing_address' class='form-control' />
-                  <!--<label for="billing_address" class="">Address</label>-->
-                </div>
-
-                <div class="md-form mb-5">
-                  <input type='text' placeholder='Address 2 (optional)' id='billing_address2' name='billing_address2' class='form-control' />
-                  <!--<label for="billing_address2" class="">Address 2 (optional)</label>-->
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-4 col-md-12 mb-4">
-                    <label for="country">Country</label>
-                    {{ form.billing_country }}
-                    <div class="invalid-feedback">
-                      Please select a valid country.
-                    </div>
-                  </div>
-
-                  <div class="col-lg-4 col-md-6 mb-4">
-                    <label for="billing_zip">Zip</label>
-                    <input type='text' placeholder='Zip code' id='billing_zip' name='billing_zip' class='form-control' />
-                    <div class="invalid-feedback">
-                      Zip code required.
-                    </div>
-                  </div>
-
-                </div>
-
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" name="set_default_billing" id="set_default_billing">
-                  <label class="custom-control-label" for="set_default_billing">Save as default billing address</label>
-                </div>
-
-              </div>
-
-              {% if default_billing_address %}
-              <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" name="use_default_billing" id="use_default_billing">
-                <label class="custom-control-label" for="use_default_billing">Use default billing address: {{ default_billing_address.street_address|truncatechars:10 }}</label>
-              </div>
-              {% endif %}
-{% endif %}
-              <hr>
-             <!-- <h3>Payment Option</h3>-->
-
-
-    <!-- Set up a container element for the button -->
-    <!--<div id="paypal-button-container"></div>
--->
-    <!-- Include the PayPal JavaScript SDK -->
-<!--    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>-->
-
-
-<!--    &lt;!&ndash; Set up a container element for the button &ndash;&gt;-->
-<!--    <div id="paypal-button-container"></div>-->
-
-<!--    &lt;!&ndash; Include the PayPal JavaScript SDK &ndash;&gt;-->
-<!--    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>-->
-
-   <!-- <script>
-        // Render the PayPal button into #paypal-button-container
-        paypal.Buttons({
-
-            style: {
-                color:  'blue',
-                shape:  'pill',
-                label:  'pay',
-                height: 40
-            },
-
-            // Call your server to set up the transaction
-            createOrder: function(data, actions) {
-                return fetch('/demo/checkout/api/paypal/order/create/', {
-                    method: 'post'
-                }).then(function(res) {
-                    return res.json();
-                }).then(function(orderData) {
-                    return orderData.id;
-                });
-            },
-
-            // Call your server to finalize the transaction
-            onApprove: function(data, actions) {
-                return fetch('/demo/checkout/api/paypal/order/' + data.orderID + '/capture/', {
-                    method: 'post'
-                }).then(function(res) {
-                    return res.json();
-                }).then(function(orderData) {
-                    // Three cases to handle:
-                    //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
-                    //   (2) Other non-recoverable errors -> Show a failure message
-                    //   (3) Successful transaction -> Show confirmation or thank you
-
-                    // This example reads a v2/checkout/orders capture response, propagated from the server
-                    // You could use a different API or structure for your 'orderData'
-                    var errorDetail = Array.isArray(orderData.details) && orderData.details[0];
-
-                    if (errorDetail && errorDetail.issue === 'INSTRUMENT_DECLINED') {
-                        return actions.restart(); // Recoverable state, per:
-                        // https://developer.paypal.com/docs/checkout/integration-features/funding-failure/
+        // Form submission handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkoutForm = document.getElementById('checkout-form');
+            if (checkoutForm) {
+                checkoutForm.onsubmit = function() {
+                    const selectedOption = document.querySelector('input[name="payment_option"]:checked');
+                    if (selectedOption) {
+                        const paymentOption = selectedOption.value;
+                        // Set the action based on selected payment option
+                        if (paymentOption === 'stripe') {
+                            this.action = "{% url 'showcase:payment' payment_option='stripe' %}";
+                        } else if (paymentOption === 'paypal') {
+                            this.action = "{% url 'showcase:payment' payment_option='paypal' %}";
+                        } else if (paymentOption === 'card') {
+                            this.action = "{% url 'showcase:payment' payment_option='card' %}";
+                        }
                     }
+                };
+            }
 
-                    if (errorDetail) {
-                        var msg = 'Sorry, your transaction could not be processed.';
-                        if (errorDetail.description) msg += '\n\n' + errorDetail.description;
-                        if (orderData.debug_id) msg += ' (' + orderData.debug_id + ')';
-                        return alert(msg); // Show a failure message (try to avoid alerts in production environments)
+            // Address form toggling
+            var hideable_shipping_form = $('.hideable_shipping_form');
+            var hideable_billing_form = $('.hideable_billing_form');
+
+            var use_default_shipping = document.querySelector("input[name=use_default_shipping]");
+            var use_default_billing = document.querySelector("input[name=use_default_billing]");
+
+            if (use_default_shipping) {
+                use_default_shipping.addEventListener('change', function() {
+                    if (this.checked) {
+                        hideable_shipping_form.hide();
+                    } else {
+                        hideable_shipping_form.show();
                     }
-
-                    // Successful capture! For demo purposes:
-                    console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
-                    var transaction = orderData.purchase_units[0].payments.captures[0];
-                    alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
-
-                    // Replace the above to show a success message within this page, e.g.
-                    // const element = document.getElementById('paypal-button-container');
-                    // element.innerHTML = '';
-                    // element.innerHTML = '<h3>Thank you for your payment!</h3>';
-                    // Or go to another URL:  actions.redirect('thank_you.html');
                 });
             }
 
-        }).render('#paypal-button-container');
+            if (use_default_billing) {
+                use_default_billing.addEventListener('change', function() {
+                    if (this.checked) {
+                        hideable_billing_form.hide();
+                    } else {
+                        hideable_billing_form.show();
+                    }
+                });
+            }
+        });
     </script>
-              -->
 
-
-    {% if not form.payment_option.is_hidden %}
-    <h3 style="">Payment Options</h3>
-    <div class="d-block my-3">
-        {% for value, name in form.fields.payment_option.choices %}
-        <div class="custom-control custom-radio">
-            <input id="{{ name }}" name="payment_option" value="{{ value }}" type="radio" class="custom-control-input" required>
-            <label class="custom-control-label" for="{{ name }}">{{ name }}</label>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-
-    <hr class="mb-4">
-    <button type="submit" class="btn btn-primary btn-lg btn-block" >Continue To Payment</button>
-
-  <script>
-      document.getElementById('checkout-form').onsubmit = function() {
-        const selectedOption = document.querySelector('input[name="payment_option"]:checked');
-        if (selectedOption) {
-            const paymentOption = selectedOption.value;
-            // Set the action based on selected payment option
-            if (paymentOption === 'stripe') {
-                this.action = "{% url 'showcase:payment' payment_option='stripe' %}";
-            } else if (paymentOption === 'paypal') {
-                this.action = "{% url 'showcase:payment' payment_option='paypal' %}";
-            } else if (paymentOption === 'card') {
-                this.action = "{% url 'showcase:payment' payment_option='card' %}";
-            }
-        }
-    };
-
-    function submitPaymentForm() {
-      const selectedOption = document.querySelector('input[name="payment_option"]:checked');
-      if (selectedOption) {
-        const paymentOption = selectedOption.value;
-        const form = document.getElementById('payment-form');
-        if (form) {
-          form.action = `/payment/${paymentOption}/`;
-          form.submit();
-        } else {
-          console.error('Form with id "payment-form" not found.');
-        }
-      } else {
-        alert('Please select a payment option.');
-      }
-    }
-  </script>
-              <!--<button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>-->
-
-            </form>
-
-          </div>
-
-        </div>
-
-        <div class="col-md-4 mb-4">
-          {% include "currency_order_snippet.html" %}
-        </div>
-
-      </div>
-
-    </div>
-        </main>
-    </div>
-
-<footer class="copyright-section">
-    <div class="container">
-        <p>{% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
-
-        {{BaseCopyrightTextField.copyright}}
-
-            {% endfor %}
-        </p>
-    </div>
-</footer>
-
-<script>
-var hideable_shipping_form = $('.hideable_shipping_form');
-var hideable_billing_form = $('.hideable_billing_form');
-
-var use_default_shipping = document.querySelector("input[name=use_default_shipping]");
-var use_default_billing = document.querySelector("input[name=use_default_billing]");
-
-use_default_shipping.addEventListener('change', function() {
-  if (this.checked) {
-    hideable_shipping_form.hide();
-  } else {
-    hideable_shipping_form.show();
-  }
-})
-
-use_default_billing.addEventListener('change', function() {
-  if (this.checked) {
-    hideable_billing_form.hide();
-  } else {
-    hideable_billing_form.show();
-  }
-})
-
-</script>
-	<!-- jquery -->
-     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-     <script src="{% static 'css/js/main.js' %}"></script>
-     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
-     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
-     <script src="{% static 'css/js/waypoints.js' %}"></script>
-	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
-     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
-     <script src="{% static 'css/js/sticker.js' %}"></script>
-
+    <!-- jQuery and other scripts -->
+    <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+    <script src="{% static 'css/js/main.js' %}"></script>
+    <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+    <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+    <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+    <script src="{% static 'css/js/waypoints.js' %}"></script>
+    <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+    <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+    <script src="{% static 'css/js/sticker.js' %}"></script>
 </body>
 </html>
-
