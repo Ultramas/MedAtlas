@@ -2,894 +2,754 @@
 
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Chat</title>
-		<!-- Bootstrap -->
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" >
-		<!-- Font awesome -->
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" >
-		<!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/chathome.css' %}">
-<style>
+<head>
+    <title>Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/lightbox.css' %}">
 
-button[type="submit"] {
-    background-color: rgba(0, 0, 0, 0.4);
-    color: white;
-    height: 35px;
-    margin-top: 20px;
-    margin-right: 0px;
-    margin-top: 0px;
-    border: none;
-    box-shadow: none;
-    padding: 0 10px;  /* Adjust padding as needed */
-    border-radius: 0px 8px 8px 0px; /* Top-left, Top-right, Bottom-right, Bottom-left */
-    cursor: pointer;
-}
+    {% for room in rooms_with_logo_same_name %}
+        <title>{{ room.name }}</title>
+    {% endfor %}
 
-button[type="submit"]:hover {
-    transition-duration: 0.5s;
-    display: inline-block;
-    padding: 5 5px;
-    font-size: 24px;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    outline: none;
-    color: #fff;
-    background-color: rgba(0, 0, 0, 0.4);
-    border: none;
-    border-radius: 15px;
-    }
-</style>
-
-
-{% for room in rooms_with_logo_same_name %}
-    <title>{{ room.name }}</title>
-{% endfor %}
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-
-.chat-container {
-  background-color: rgba(0, 0, 0, 0);
-  border-radius: 5px;
-  padding: 20px;
-  max-width: 800px;
-  padding: 0 20px;
-  margin: 0 auto; /* This centers the element horizontally */
-  background-color: #f1f1f1;
-}
-
-.chat-container .message {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
-
-.chat-container .avatar img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-.chat-container .message .message-content {
-  flex-grow: 1;
-  background-color: #f7f7f7;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-.chat-container .message .message-content .sender {
-  font-weight: bold;
-}
-
-.chat-container .message .message-content .time {
-  font-size: 12px;
-  color: #999;
-}
-
-.chat-input {
-  background-color: #f7f7f7;
-  padding: 20px;
-  border-radius: 5px;
-}
-
-.chat-input input[type="text"] {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 5px;
-  box-sizing: border-box;
-}
-
-.chat-input input[type="submit"] {
-  width: 100%;
-  background-color: #4CAF50;
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.username-room{
-background-color: rgba(102, 102, 102, 0.06);
-margin-bottom: 22px;
-  border-radius: 5px;
-padding-top: 36px;
-padding-bottom: 52px;
-    }
-
-.combined-input {
-    position: relative;
-    display: inline-block;
-    width: 100%;
-}
-
-#file-label {
-    position: absolute;
-    right: 1px;
-    top: 50%;
-    background: rgba(255, 215, 0, 1);
-    padding: 6.5px;
-    border-radius: 4px;
-    transform: translateY(-62%);
-    cursor: pointer;
-}
-
-</style>
-    <link rel='stylesheet' type='text/css' media='screen' href="{% static 'css/lightbox.css' %}">
     {% if current_theme %}
-    {% if current_theme.file %}
-        <style>
-            body {
-        background-image: url("{{ current_theme.file.url }}");
-        background-size: cover;
-        background-attachment: fixed;
-            }
-        </style>
-    {% else %}
-        <p>Error: Current theme does not have an image.</p>
+        {% if current_theme.file %}
+            <style>
+                body {
+                    background-image: url("{{ current_theme.file.url }}");
+                    background-size: cover;
+                    background-attachment: fixed;
+                }
+            </style>
+        {% else %}
+            <p>Error: Current theme does not have an image.</p>
+        {% endif %}
     {% endif %}
-{% else %}
-{% endif %}
-<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --primary: #00f0ff;
+            --primary-dark: #00a0a8;
+            --secondary: #ff00e5;
+            --dark: #0a0a20;
+            --darker: #050510;
+            --light: #e1e1ff;
+            --gray: #2a2a40;
+            --success: #00ff66;
+            --warning: #ffcc00;
+            --danger: #ff3366;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        body {
+            background-color: var(--darker);
+            color: var(--light);
+            min-height: 100vh;
+            background-image:
+                radial-gradient(circle at 20% 35%, rgba(0, 240, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 75% 65%, rgba(255, 0, 229, 0.15) 0%, transparent 40%);
+        }
+
+        /* Chat Container */
+        .chat-container {
+            background-color: rgba(10, 10, 32, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 100%;
+            height: 60vh;
+            overflow-y: auto;
+            margin: 0 auto;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+            backdrop-filter: blur(10px);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--dark);
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: rgba(10, 10, 32, 0.5);
+            border-radius: 10px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        /* Message Styling */
+        .message {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .message:hover {
+            transform: translateY(-2px);
+        }
+
+        .message img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            margin-right: 15px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+            object-fit: cover;
+        }
+
+        .message-content {
+            flex-grow: 1;
+            background: rgba(42, 42, 64, 0.7);
+            padding: 12px 15px;
+            border-radius: 12px;
+            position: relative;
+            border-left: 3px solid var(--primary);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .message-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+        }
+
+        .sender {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            text-shadow: 0 0 5px rgba(0, 240, 255, 0.3);
+        }
+
+        .time {
+            font-size: 0.8rem;
+            color: rgba(225, 225, 255, 0.6);
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        /* Chat Input */
+        .chat-input {
+            background: rgba(42, 42, 64, 0.7);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            position: relative;
+        }
+
+        .combined-input {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-input input[type="text"] {
+            width: 100%;
+            padding: 12px 50px 12px 15px;
+            background: rgba(10, 10, 32, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 8px;
+            color: var(--light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        #file-label {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+            color: var(--darker);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+            z-index: 10;
+        }
+
+        #file-label:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+        }
+
+        .chat-input input[type="submit"] {
+            background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+            color: var(--darker);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .chat-input input[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        /* Card Styling */
+        .card {
+            background: rgba(10, 10, 32, 0.7);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(90deg, rgba(0, 240, 255, 0.2), rgba(255, 0, 229, 0.1));
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 15px;
+        }
+
+        .card-body {
+            padding: 0;
+        }
+
+        .msg_card_body {
+            height: 70vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--dark);
+        }
+
+        .msg_card_body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .msg_card_body::-webkit-scrollbar-track {
+            background: rgba(10, 10, 32, 0.5);
+        }
+
+        .msg_card_body::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        /* Contacts Styling */
+        .contacts_card {
+            height: 100%;
+        }
+
+        .contacts_body {
+            padding: 0;
+            overflow-y: auto;
+            height: calc(100vh - 200px);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--dark);
+        }
+
+        .contacts_body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .contacts_body::-webkit-scrollbar-track {
+            background: rgba(10, 10, 32, 0.5);
+        }
+
+        .contacts_body::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .contacts {
+            list-style: none;
+            padding: 0;
+        }
+
+        .contacts li {
+            padding: 15px;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .contacts li:hover {
+            background: rgba(0, 240, 255, 0.1);
+        }
+
+        .contacts li.active {
+            background: linear-gradient(90deg, rgba(0, 240, 255, 0.2), transparent);
+            border-left: 3px solid var(--primary);
+        }
+
+        .user_img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+            object-fit: cover;
+        }
+
+        .user_info {
+            margin-left: 15px;
+        }
+
+        .user_info span {
+            font-size: 1.1rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .user_info p {
+            font-size: 0.9rem;
+            color: rgba(225, 225, 255, 0.7);
+            margin: 0;
+        }
+
+        .online_icon {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--success);
+            border-radius: 50%;
+            bottom: 0;
+            right: 0;
+            border: 2px solid var(--dark);
+        }
+
+        /* Search Input */
+        .search {
+            background: rgba(10, 10, 32, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--light);
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .search:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .input-group-prepend button {
+            background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+            border: none;
+            border-radius: 8px;
+            color: var(--darker);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .input-group-prepend button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+        }
+
+        /* Room Title */
+        .room-title {
+            text-align: center;
+            margin-top: 100px;
+            margin-bottom: 30px;
+            color: var(--primary);
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .room-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        /* Message Images */
+        #myImg {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        #myImg:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        /* Animation */
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.5); }
+        }
+
+        .glow-effect {
+            animation: glow 2s infinite;
+        }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
 </head>
 
 <body>
+    {% include 'navtrove.html' %}
+    <h1 class="room-title">{{username}} - {{room}}</h1>
 
-
-<section class="gt_section-77035 gt_animation-zoom-out-left gt_animated" data-name="Header" style="height: auto;"> <div class="gt_header"> <div class="gt_flex gt_logo"> <div class="icon_when_scroll"> <div class="icon_when_scroll_content">  </div> </div> <div class="logo_header">
-
-
-    <div class = "navbarx">
-
-   <ul>
-  {% for column in Header %}
-    <div class="dropdown">
-      <a href="#{{ column.section }}" class="glass">{{ column.text }}</a>
-      <div class="dropdown-content">
-        {% for row in DropDown %}
-          {% if row.row == column.row %}
-            {% if row.url == 'http://127.0.0.1:8000/profile' %}
-              {% if row.opennew %}
-                <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a>
-              {% else %}
-                <a href="{{ profile_url }}">{{ row.text }}</a>
-              {% endif %}
-            {% else %}
-              {% if row.opennew %}
-                <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
-              {% else %}
-                <a href="{{ row.url }}">{{ row.text }}</a>
-              {% endif %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-      </div>
-    </div>
-  {% endfor %}
-</ul>
-
-    </div>
-
-
-      </div>
-
-  </div>
-<nav class="show">
-     <div  onclick="navToggle(this)" class="bell"></div>
-     <div onclick="navToggle(this)" class="hamburger">
-       <div class="bun"></div>
-       <div class="bun"></div>
-       <div class="bun"></div>
-     </div>
-
-{% if FeaturedNavigation %}
-    {% for BaseView in FeaturedNavigation %}
-    {% if BaseView.position == 1 %}
-    <h2 class="navtext">{{BaseView.default_header}}</h2>
-    {% endif %}
-    {% if BaseView.text %}
-
-            {% if BaseView.url == 'http://127.0.0.1:8000/profile' %}
-              {% if BaseView.opennew %}
-                <div class="navItem10" style="justify-content: center;">
-                  <a href="{{profile_url}}" target="_blank">{{BaseView.text}}</a>
-                </div>
-              {% else %}
-                <div class="navItem10" style="justify-content: center;">
-                  <a href="{{profile_url}}">{{BaseView.text}}</a>
-                </div>
-              {% endif %}
-            {% else %}
-              {% if BaseView.opennew %}
-                <div class="navItem10" style="justify-content: center;">
-                  <a href="{{BaseView.url}}" target="_blank">{{BaseView.text}}</a>
-                </div>
-              {% else %}
-                <div class="navItem10" style="justify-content: center;">
-                  <a href="{{BaseView.url}}">{{BaseView.text}}</a>
-                </div>
-              {% endif %}
-            {% endif %}
-
-    {% endif %}
-    {% if BaseView.image %}
-<div class="metaclass1e" style="padding-top: 10%; font-size: 10px; text-align: left;
-    justify-content: left;
-    object-position: right;">
-    <a href="{{BaseView.url}}">
-         <img src="{{BaseView.image.url}}" width="150px" height="150px" style="border-radius: 50px;" alt="{{BaseView.url}}">
-      </a>
-</div>
-
-    {% endif %}
-
-    {% endfor %}
-    {% else %}
-<h2 class="navtext">PokeTrove</h2>
-    <div class="navItem"><a href="/">Home</a></div>
-     <div class="navItem2"><a href="/about/">About Us</a></div>
-     <div class="navItem3"><a href="/home/" target="_blank">Community</a></div>
-     <!--<div class="navItem10"><a href = "/perks/">Member Perks</a></li></div>-->
-     <div class="navItem4"><a href="/admin/" target="_blank">Administration</a></div>
-     <div class="navItem8"><a href="/ehome/">Store</a></div>
-     <div class="navItem11"><a href="/accounts/logout/">Logout</a></div>
-<br>
-<br>
-
-<div class="metaclass1">
-    <a href="https://discord.gg/g43uGbURUz">
-         <img alt="Qries" src="../static/css/images/MC.png" width="280" height="150">
-      </a>
-
-</div>
-</nav>
-    </div>
-    {% endif %}
-</section>
-
-
-
-
-  {% block javascript %}
-    <script src="{% static 'css/js/script.js' %}"></script>
-    <script src="{% static 'css/js/darkmode.js' %}"></script>
-    <script src="{% static 'css/js/navbar.js' %}"></script>
-    <script src="{% static 'css/js/scroll.js' %}"></script>
-    <script src="{% static 'css/js/cover.js' %}"></script>
-  {% endblock javascript %}
-
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-
-
-<script>
-$(document).ready(function(){
-  // Preload avatars
-  var avatarUrls = [];
-  $(".message img").each(function() {
-    avatarUrls.push($(this).attr("src"));
-  });
-
-  preloadImages(avatarUrls);
-
-  setInterval(function(){
-    var room = "{{ room }}"; // Replace with the actual value of the room
-
-    $.ajax({
-      type: 'GET',
-      url : "/getMessages/" + room + "/",
-      success: function(response){
-        console.log(response);
-        $("#display").empty();
-        for (var key in response.messages) {
-          var message = response.messages[key];
-          var user_profile_url = message.user_profile_url;
-          var avatar_url = message.avatar_url; // Store avatar_url in a separate variable
-          var user = message.user; // Store user in a separate variable
-          var value = message.value; // Store value in a separate variable
-          var imageUrl = message.file; // Store file_url in a separate variable
-          var date = message.date; // Store date in a separate variable
-          var message_number = message.message_number;
-
-          console.log(user_profile_url);
-          var messageHtml = `
-            <div class="message" id="#${message_number}">
-              <a href="${user_profile_url}">
-                <img style="width: 40px; height: 40px; border-radius: 50px;" src="${avatar_url}" alt="${user}">
-              </a>
-              <div class="message-content">
-                <div class="sender">${user}</div>
-                <div>${value}</div>`;
-
-                if (imageUrl) {  // Check if imageUrl exists
-                    messageHtml += `<a href="${imageUrl}" data-lightbox="image-1"><img id="myImg" style="max-width: 600px; max-height: 600px;" src="${imageUrl}" alt="Uploaded file"></a>`;
-                }
-
-
-          messageHtml += `
-                <div class="time">${date}</div>
-              </div>
-            </div>`;
-
-          console.log(user_profile_url);
-          $("#display").append(messageHtml);
-        }
-      },
-      error: function(response){
-        alert('An error occurred');
-      }
-    });
-  }, 0500);
-});
-
-// Preload images
-function preloadImages(urls) {
-  for (var i = 0; i < urls.length; i++) {
-    var img = new Image();
-    img.src = urls[i];
-  }
-}
-
-
-</script>
-
-
-<script type="text/javascript">
-$(document).on('submit', '#post-form', function(e) {
-  e.preventDefault();
-
-  // Create a new FormData object to send both text and file data
-  var formData = new FormData();
-  formData.append('username', $('#username').val());
-  formData.append('room_id', $('#room_id').val());
-  formData.append('room_name', $('#room_name').val());
-  formData.append('message', $('#message').val());
-  formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
-
-  // Append the file input to the FormData object if a file is selected
-  var fileInput = $('#file')[0];
-  if (fileInput.files.length > 0) {
-    formData.append('file', fileInput.files[0]);
-  }
-
-  $.ajax({
-    type: 'POST',
-    url: '/home/send',
-    data: formData,
-    contentType: false,  // Prevent jQuery from setting a content type
-    processData: false,  // Prevent jQuery from processing the data
-    success: function(data) {
-       // Handle the success response here
-    }
-  });
-
-  // Clear the message input and file input
-  document.getElementById('message').value = '';
-  document.getElementById('file').value = ''; // Reset the file input
-
-  // Add further handling if needed
-});
-</script>
-
-<script>
-function scrollToBottom() {
-  const chatContainer = document.querySelector('.chat-container'); // Replace with your actual selector
-  if (chatContainer) {
-    setTimeout(() => {
-      chatContainer.scrollTop = chatContainer.scrollHeight - chatContainer.clientHeight;
-    }, 10); // Add a slight delay (adjust as needed)
-  }
-}
-
-// Call scrollToBottom on page load and after receiving new messages
-scrollToBottom();
-</script>
-
-    <script src="{% static 'css/js/script.js' %}"></script>
-    <script src="{% static 'css/js/darkmode.js' %}"></script>
-    <script src="{% static 'css/js/navbar.js' %}"></script>
-    <script src="{% static 'css/js/scroll.js' %}"></script>
-    <script src="{% static 'css/js/lightbox.js' %}"></script>
-
-<script>
-    function copyToClipboard() {
-        const roomUrl = window.location.href;  // Get the current room URL
-        const input = document.createElement('textarea');
-        input.value = roomUrl;
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand('copy');
-        document.body.removeChild(input);
-
-        // Show "Link Copied" message
-        const copyMessage = document.getElementById('copy-message');
-        copyMessage.style.display = 'inline';
-        setTimeout(() => {
-            copyMessage.style.display = 'none';
-        }, 2000);  // Hide the message after 2 seconds
-    }
-
-$(document).ready(function(){
-    // Change the background color of the file label when a file is selected
-    $('#file').change(function() {
-        if ($(this).val()) {
-            $('#file-label').css('background-color', 'yellowgreen');
-        } else {
-            $('#file-label').css('background-color', 'gold');
-        }
-    });
-
-    // Change the background color of the file label back to gold when the form is submitted
-    $('#post-form').submit(function() {
-        $('#file-label').css('background-color', 'gold');
-    });
-});
-</script>
-
-{% for Room in Background %}
-{% if Room.page == 'room.html' %}
-  <body class="backgroundimages" style="background: url('{{Room.cover.url}}'); background-size: cover; min-height: 140vh;">
-  {% else %}
-  <body class="backgroundimages" style="background: #7F7FD5; background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
-  background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);">
-      {% endif %}
-{% endfor %}
-
-
-  <div class="username-room">{% for room in rooms_with_logo_same_name %}
-        {% if room.logo %}
-            <img src="{{ room.logo.url }}" alt="{{ room.name }} logo" style="width: 22vh; height: 14.5vh; padding: 0px; margin-top: -40px;">
-        {% else %}
-            <p></p>
-        {% endif %}
-{% endfor %}
-
-
-  <h1 style="text-align: center; margin-top: 150px; margin-bottom: -170px; color: rgba(255, 255, 255, 0.5); ">{{username}} - {{room}}</h1>
-
-</div>
-
-
-		<div class="container-fluid h-100">
-			<div class="row justify-content-center h-100">
-				<div class="col-md-4 col-xl-3 chat"><div class="card mb-sm-3 mb-md-0 contacts_card">
-					<div class="card-header">
-						<form action="{% url 'showcase:home' %}" method="get">
+    <div class="container-fluid h-100">
+        <div class="row justify-content-center h-100">
+            <!-- Contacts Sidebar -->
+            <div class="col-md-4 col-xl-3 chat">
+                <div class="card mb-sm-3 mb-md-0 contacts_card">
+                    <div class="card-header">
+                        <form action="{% url 'showcase:home' %}" method="get">
                             <div class="input-group">
-                                <input type="text" placeholder="Search..." name="search" class="form-control search" style="height: 35px;">
+                                <input type="text" placeholder="Search..." name="search" class="form-control search">
                                 <div class="input-group-prepend">
-                                    <button type="submit" style="margin-left: 0px; margin-top: 5px;">
+                                    <button type="submit">
                                         <i class="fas fa-search"></i>
                                     </button>
                                 </div>
                             </div>
                         </form>
-					</div>
-					<div class="card-body contacts_body">
-						<ul class="contacts">
+                    </div>
+                    <div class="card-body contacts_body">
+                        <ul class="contacts">
+                            {% if search_results %}
+                                {% for friend in search_results %}
+                                    <li {% if friend.currently_active %}class="active"{% endif %}>
+                                        <div class="d-flex bd-highlight">
+                                            <div class="img_cont">
+                                                {% if friend.profile_picture_url %}
+                                                    <a href="{{ friend.user_profile_url }}">
+                                                        <img src="{{ friend.profile_picture_url }}" class="user_img">
+                                                        <span class="online_icon"></span>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                            <div class="user_info">
+                                                <span>{{ friend.username }}</span>
+                                                <p>{% if friend.online %}Online{% else %}Offline{% endif %}</p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                {% for friend in item_list %}
+                                    <li {% if friend.currently_active %}class="active"{% endif %}>
+                                        <div class="d-flex bd-highlight">
+                                            <div class="img_cont">
+                                                {% if friend.profile_picture_url %}
+                                                    <a href="{{ friend.user_profile_url }}">
+                                                        <img src="{{ friend.profile_picture_url }}" class="user_img">
+                                                        <span class="online_icon"></span>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                            <div class="user_info">
+                                                <span>{{ friend.username }}</span>
+                                                <p>{% if friend.online %}Online{% else %}Offline{% endif %}</p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                {% empty %}
+                                    {% for friend in friends_data %}
+                                        <li {% if friend.currently_active %}class="active"{% endif %}>
+                                            <div class="d-flex bd-highlight">
+                                                <div class="img_cont">
+                                                    {% if friend.profile_picture_url %}
+                                                        <a href="{{ friend.user_profile_url }}">
+                                                            <img src="{{ friend.profile_picture_url }}" class="user_img">
+                                                            <span class="online_icon"></span>
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="user_info">
+                                                    <span>{{ friend.username }}</span>
+                                                    <p>{% if friend.online %}Online{% else %}Offline{% endif %}</p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    {% empty %}
+                                        <h2>No friends found.</h2>
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
-  {% if search_results %}
-     {% for friend in search_results %}
+            <!-- Chat Area -->
+            <div class="col-md-8 col-xl-6 chat">
+                <div class="card">
+                    <div class="card-header msg_head">
+                        <div class="d-flex bd-highlight">
+                            <div class="img_cont">
+                                {% for friend in friends_data %}
+                                    {% if friend.currently_active %}
+                                        {% if friend.profile_picture_url %}
+                                            <a href="{{ friend.user_profile_url }}">
+                                                <img src="{{ friend.profile_picture_url }}" class="user_img">
+                                                <span class="online_icon"></span>
+                                            </a>
+                                        </div>
+                                        <div class="user_info">
+                                            <span>{{ friend.username }}</span>
+                                            <p>{% if friend.online %}Online{% else %}Offline{% endif %}</p>
+                                        </div>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
 
-      									{% if friend.currently_active %}
-              <li class="active" style="padding-top: 12px;">
-                  {% else %}
-                  <li>
-                  {% endif %}
+                            <div class="video_cam">
+                                <span><i class="fas fa-video"></i></span>
+                                <span><i class="fas fa-phone"></i></span>
+                            </div>
+                        </div>
+                        <span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+                        <div class="action_menu">
+                            <ul>
+                                <li><i class="fas fa-user-circle"></i> View profile</li>
+                                <li><i class="fas fa-users"></i> Add to close friends</li>
+                                <li><i class="fas fa-plus"></i> Add to group</li>
+                                <li><i class="fas fa-ban"></i> Block</li>
+                            </ul>
+                        </div>
+                    </div>
 
-          <div class="d-flex bd-highlight">
-              <div class="img_cont">
-                  {% if friend.profile_picture_url %}
+                    <div class="card-body msg_card_body">
+                        <div class="chat-container" id="chat-container">
+                            <div id="display"></div>
+                        </div>
+                    </div>
 
-                      <a href="{{ friend.user_profile_url }}">
-                          <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
-                      <span class="online_icon"></span>
-                      </a>
-                  {% endif %}
-              </div>
-              <div class="user_info">
-                  <span>{{ friend.username }}</span>
-                  {% if friend.online == True %}
-                      <p>Online</p>
-                  {% else %}
-                      <p>Offline</p>
-                  {% endif %}
-              </div>
-          </div>
-      </li>
+                    <div class="card-footer">
+                        <div class="chat-input">
+                            <form id="post-form" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="username" id="username" value="{{username}}" />
+                                <input type="hidden" name="room_id" id="room_id" value="{{room}}" />
+                                <input type="hidden" name="room_name" id="room_name" value="{{room}}" />
 
-    {% endfor %}
-{% else %}
-  {% for friend in item_list %}
+                                <div class="combined-input">
+                                    <input type="text" name="message" id="message" placeholder="Type your message or choose a file..." />
+                                    <input type="file" name="file" id="file" style="display: none;">
+                                    <label for="file" id="file-label"><i class="fas fa-paperclip"></i></label>
+                                </div>
 
-									{% if friend.currently_active %}
-              <li class="active" style="padding-top: 12px;">
-                  {% else %}
-                  <li>
-                  {% endif %}
-
-          <div class="d-flex bd-highlight">
-              <div class="img_cont">
-                  {% if friend.profile_picture_url %}
-                      <a href="{{ friend.user_profile_url }}">
-                          <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
-                      <span class="online_icon"></span>
-                      </a>
-                  {% endif %}
-              </div>
-              <div class="user_info">
-                  <span>{{ friend.username }}</span>
-                  {% if friend.online == True %}
-                      <p>Online</p>
-                  {% else %}
-                      <p>Offline</p>
-                  {% endif %}
-              </div>
-          </div>
-      </li>
-              {% empty %}
-                  {% for friend in friends_data %}
-                  {% if friend.currently_active %}
-              <li class="active" style="padding-top: 12px;">
-                  {% else %}
-                  <li>
-                  {% endif %}
-          <div class="d-flex bd-highlight">
-              <div class="img_cont">
-                  {% if friend.profile_picture_url %}
-                      <a href="{{ friend.user_profile_url }}">
-                          <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
-                      <span class="online_icon"></span>
-                      </a>
-                  {% endif %}
-              </div>
-              <div class="user_info">
-                  <span>{{ friend.username }}</span>
-                  {% if friend.online == True %}
-                      <p>Online</p>
-                  {% else %}
-                      <p>Offline</p>
-                  {% endif %}
-              </div>
-          </div>
-      </li>
-  {% empty %}
-      <h2>No friends found.</h2>
-  {% endfor %}
-  {% endfor %}
-{% endif %}
-
-
-						</ul>
-					</div>
-					<div class="card-footer"></div>
-				</div></div>
-				<div class="col-md-8 col-xl-6 chat">
-					<div class="card">
-						<div class="card-header msg_head">
-							<div class="d-flex bd-highlight">
-								<div class="img_cont">
-
-						{% for friend in friends_data %}
-                            {% if friend.currently_active %}
-    					        {% if friend.profile_picture_url %}
-                        <a href="{{ friend.user_profile_url }}">
-           				 	<img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
-									<span class="online_icon"></span>
-						</a>
-								</div>
-								<div class="user_info">
-									<span>{{ friend.username }}</span>
-									{% if friend.online == True %}
-									<p>Online</p>
-									{% else %}
-									<p>Offline</p>
-									{% endif %}
-									{% endif %}
-									{% endif %}
-									{% endfor %}
-								</div>
-
-								<div class="user_info">
-						            {% for Friend in Friends %}
-									<span>{{Friend.friend}}</span>
-									<p>1767 Messages</p>
-									{% endfor %}
-								</div>
-								<div class="video_cam">
-									<span><i class="fas fa-video"></i></span>
-									<span><i class="fas fa-phone"></i></span>
-								</div>
-							</div>
-							<span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
-							<div class="action_menu">
-								<ul>
-									<li><i class="fas fa-user-circle"></i> View profile</li>
-									<li><i class="fas fa-users"></i> Add to close friends</li>
-									<li><i class="fas fa-plus"></i> Add to group</li>
-									<li><i class="fas fa-ban"></i> Block</li>
-								</ul>
-							</div>
-						</div>
-						<div class="card-body msg_card_body">
-
-    <div class="column three mobile-twelve section_header_logo vertical-align-middle"
-        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
-
-
+                                <input type="submit" value="Send">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Scripts -->
+    <script>
+        $(document).ready(function(){
+            // Preload avatars
+            var avatarUrls = [];
+            $(".message img").each(function() {
+                avatarUrls.push($(this).attr("src"));
+            });
 
-{% for Room in Background %}
-{% if Room.page == 'room.html' %}
-  <div class="backgroundimages" style="background: url('{{Room.cover.url}}'); background-size: cover; min-height: 140vh;">
-      {% endif %}
-{% endfor %}
+            preloadImages(avatarUrls);
 
+            setInterval(function(){
+                var room = "{{ room }}";
 
+                $.ajax({
+                    type: 'GET',
+                    url : "/getMessages/" + room + "/",
+                    success: function(response){
+                        $("#display").empty();
+                        for (var key in response.messages) {
+                            var message = response.messages[key];
+                            var user_profile_url = message.user_profile_url;
+                            var avatar_url = message.avatar_url;
+                            var user = message.user;
+                            var value = message.value;
+                            var imageUrl = message.file;
+                            var date = message.date;
+                            var message_number = message.message_number;
 
-<script>
-    function copyToClipboard() {
-        const roomUrl = window.location.href;  // Get the current room URL
-        const input = document.createElement('textarea');
-        input.value = roomUrl;
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand('copy');
-        document.body.removeChild(input);
+                            var messageHtml = `
+                                <div class="message" id="#${message_number}">
+                                    <a href="${user_profile_url}">
+                                        <img src="${avatar_url}" alt="${user}">
+                                    </a>
+                                    <div class="message-content">
+                                        <div class="sender">${user}</div>
+                                        <div>${value}</div>`;
 
-        // Show "Link Copied" message
-        const copyMessage = document.getElementById('copy-message');
-        copyMessage.style.display = 'inline';
-        setTimeout(() => {
-            copyMessage.style.display = 'none';
-        }, 2000);  // Hide the message after 2 seconds
-    }
+                            if (imageUrl) {
+                                messageHtml += `<a href="${imageUrl}" data-lightbox="image-1"><img id="myImg" src="${imageUrl}" alt="Uploaded file"></a>`;
+                            }
 
-$(document).ready(function(){
-    // Change the background color of the file label when a file is selected
-    $('#file').change(function() {
-        if ($(this).val()) {
-            $('#file-label').css('background-color', 'yellowgreen');
-        } else {
-            $('#file-label').css('background-color', 'gold');
-        }
-    });
+                            messageHtml += `
+                                        <div class="time">${date}</div>
+                                    </div>
+                                </div>`;
 
-    // Change the background color of the file label back to gold when the form is submitted
-    $('#post-form').submit(function() {
-        $('#file-label').css('background-color', 'gold');
-    });
-});
-</script>
-
-
-<div class="chat-container" id="chat-container" style="background-color: rgba(0, 0, 0, 0);">
-<br>
-
-  <div id="display"></div>
-  </div>
-
-</div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  // Function to scroll to the bottom of the display
-  function scrollToBottom() {
-    var display = document.getElementById("card-body msg_card_body");
-    if (display) {
-      display.scrollTop = display.scrollHeight;
-      console.log("Scrolled to bottom.");
-    } else {
-      console.error("Element with id 'display' not found.");
-    }
-  }
-
-  // Call the function every 1 second
-  setInterval(scrollToBottom, 1000);
-});
-</script>
-
-        <script>
-  function checkUserPresence() {
-    // Send an AJAX request to notify the server the user is on the page
-    fetch("{% url 'showcase:mark_notifications_as_read' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": "{{ csrf_token }}",
-      },
-      body: JSON.stringify({ room_id: {{ room.id }} }),
-    }).then(response => {
-      if (response.ok) {
-        console.log("User presence confirmed, notifications marked as read.");
-      }
-    }).catch(error => {
-      console.error("Error updating notifications:", error);
-    });
-  }
-
-  // Check user presence every 5 seconds
-  setInterval(checkUserPresence, 0200);
-</script>
-
-
-<br>
-<br>
-<br>
-
-
-<script type="text/javascript">
-$(document).ready(function() {
-    console.log("Document is ready");
-
-    // Function to load and display messages
-    function loadAndDisplayGeneralMessages() {
-        console.log("Loading and displaying messages");
-        $.ajax({
-            type: 'GET',
-            url: '/getMessages/General/',
-            success: function(response) {
-                console.log("Messages fetched successfully:", response);
-                $("#display-general").empty();
-                response.messages.forEach(function(message) {
-                    var messageHtml = `
-                        <div class="message">
-                            <a href="${message.user_profile_url}">
-                                <img src="${message.avatar_url}" alt="${message.user}" style="width: 50px; height: 50px; border-radius: 25px; padding: 5px;">
-                            </a>
-                            <div class="message-content" style="padding: 5px;">
-                                <div class="sender">${message.user}</div>
-                                <div>${message.value}</div>
-                                <div class="time">${message.date}</div>
-                            </div>
-                        </div>`;
-                    $("#display-general").append(messageHtml);
+                            $("#display").append(messageHtml);
+                        }
+                        scrollToBottom();
+                    },
+                    error: function(response){
+                        console.error("Error fetching messages:", response);
+                    }
                 });
-            },
-            error: function(response) {
-                console.error("Error fetching messages:", response);
-                alert('An error occurred while fetching messages.');
+            }, 500);
+
+            // File input styling
+            $('#file').change(function() {
+                if ($(this).val()) {
+                    $('#file-label').css('background', 'linear-gradient(45deg, #00a0a8, #00ff66)');
+                } else {
+                    $('#file-label').css('background', 'linear-gradient(45deg, #00a0a8, #00f0ff)');
+                }
+            });
+
+            // Form submission
+            $(document).on('submit', '#post-form', function(e) {
+                e.preventDefault();
+
+                var formData = new FormData();
+                formData.append('username', $('#username').val());
+                formData.append('room_id', $('#room_id').val());
+                formData.append('room_name', $('#room_name').val());
+                formData.append('message', $('#message').val());
+                formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+
+                var fileInput = $('#file')[0];
+                if (fileInput.files.length > 0) {
+                    formData.append('file', fileInput.files[0]);
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/home/send',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(data) {
+                        // Success handling
+                    }
+                });
+
+                document.getElementById('message').value = '';
+                document.getElementById('file').value = '';
+                $('#file-label').css('background', 'linear-gradient(45deg, #00a0a8, #00f0ff)');
+            });
+
+            // User presence check
+            function checkUserPresence() {
+                fetch("{% url 'showcase:mark_notifications_as_read' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}",
+                    },
+                    body: JSON.stringify({ room_id: {{ room.id }} }),
+                }).then(response => {
+                    if (response.ok) {
+                        console.log("User presence confirmed, notifications marked as read.");
+                    }
+                }).catch(error => {
+                    console.error("Error updating notifications:", error);
+                });
             }
+
+            setInterval(checkUserPresence, 200);
         });
-    }
 
-    // Function to send message via AJAX
-    $(document).on('submit', '#general-post-form', function(e) {
-        e.preventDefault(); // Prevent default form submission
-        console.log("Form submitted");
-
-        let messageContent = $('#message').val().trim();
-        let username = $('#username').val();
-        let roomId = $('#room_name').val();
-        let pageName = $('#page_name').val();
-        let csrfToken = $('input[name=csrfmiddlewaretoken]').val();
-
-        console.log("Message Content:", messageContent);
-        console.log("Username:", username);
-        console.log("Room ID:", roomId);
-        console.log("Page Name:", pageName);
-
-        if (!messageContent) {
-            alert('Message cannot be empty');
-            return;
+        // Preload images
+        function preloadImages(urls) {
+            for (var i = 0; i < urls.length; i++) {
+                var img = new Image();
+                img.src = urls[i];
+            }
         }
 
-        $.ajax({
-            type: 'POST',
-            url: '{% url "showcase:send" %}', // Use Django's URL template tag
-            data: {
-                username: username,
-                room_id: roomId,
-                message: messageContent,
-                csrfmiddlewaretoken: csrfToken,
-                page_name: pageName
-            },
-            success: function(data) {
-                console.log('Message sent successfully:', data); // Log success response
-                $('#message').val('');  // Clear the input field after submitting
-                loadAndDisplayGeneralMessages(); // Reload messages after posting
-            },
-            error: function(xhr, status, error) {
-                console.error('Error sending message:', error); // Log error
+        // Scroll to bottom
+        function scrollToBottom() {
+            const chatContainer = document.querySelector('.chat-container');
+            if (chatContainer) {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
             }
-        });
-    });
+        }
 
-    // Load and display messages initially and then every 500 milliseconds
-    loadAndDisplayGeneralMessages();
-    setInterval(loadAndDisplayGeneralMessages, 500);
-    console.log("Message loading set to every 500ms");
-});
+        // Copy room link
+        function copyToClipboard() {
+            const roomUrl = window.location.href;
+            const input = document.createElement('textarea');
+            input.value = roomUrl;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
 
-// Preload images function
-function preloadImages(urls) {
-    console.log("Preloading images");
-    for (var i = 0; i < urls.length; i++) {
-        var img = new Image();
-        img.src = urls[i];
-        console.log("Image preloaded:", urls[i]);
-    }
-}
-</script>
+            const copyMessage = document.getElementById('copy-message');
+            if (copyMessage) {
+                copyMessage.style.display = 'inline';
+                setTimeout(() => {
+                    copyMessage.style.display = 'none';
+                }, 2000);
+            }
+        }
+    </script>
 
-
-
+    <!-- Additional Scripts -->
     <script src="{% static 'css/js/script.js' %}"></script>
     <script src="{% static 'css/js/darkmode.js' %}"></script>
     <script src="{% static 'css/js/navbar.js' %}"></script>
     <script src="{% static 'css/js/scroll.js' %}"></script>
     <script src="{% static 'css/js/lightbox.js' %}"></script>
-
-
-  </div>
-
-
-<script>
-  // Scroll to the bottom of the chat container
-  function scrollToBottom() {
-    var chatContainer = document.querySelector('.chat-container');
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-  }
-
-  // Scroll to the bottom after page refresh
-  window.onload = function () {
-    scrollToBottom();
-  };
-</script>
-                      <div class="chat-input" style="height: 15%;;">
-  <form id="post-form" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="hidden" name="username" id="username" value="{{username}}" />
-    <input type="hidden" name="room_id" id="room_id" value="{{room}}" />
-      <div class="combined-input">
-    <input type="text" name="message" id="message" placeholder="Type your message or choose a file..." />
-    <input type="file" name="file" id="file" style="display: none;">  <!-- Add this line -->
-        <label for="file" id="file-label">📎</label>
-</div>
-
-    <input type="submit" value="Send">
-  </form>
-                      </div>
-
-						</div>
-
-						<div class="card-footer">
-
-
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	<!-- JQuery -->
-     <script type="text/javascript" src="{% static 'css/js/chat.js' %}"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	</body>
+    <script src="{% static 'css/js/chat.js' %}"></script>
+</body>
 </html>
-

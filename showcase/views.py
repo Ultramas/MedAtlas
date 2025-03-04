@@ -8685,6 +8685,22 @@ class BackgroundView(FormMixin, BaseView):
                 product.hyperlink = item.get_profile_url()
                 product.description = item.description
 
+        currencyobject = CurrencyMarket.objects.filter(is_active=1)
+
+        context['CurrencyItem'] = currencyobject
+
+        for currencyobject in context['CurrencyItem']:
+            image = currencyobject.file
+            item = CurrencyMarket.objects.filter(slug=currencyobject.slug).first()
+            if currencyobject:
+                currencyobject.title = item.name
+                currencyobject.price = item.price
+                currencyobject.discount_price = item.discount_price
+                currencyobject.image_url = item.file.url
+                currencyobject.label = item.label
+                currencyobject.hyperlink = item.get_profile_url()
+                currencyobject.description = item.flavor_text
+
         events = Event.objects.filter(is_active=1)
         context['NewEvents'] = events
 
