@@ -17,6 +17,8 @@
             --rare-color: #0070dd;
             --epic-color: #a335ee;
             --legendary-color: #ff8000;
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --card-glow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
 
         body {
@@ -29,6 +31,7 @@
             font-family: 'Rajdhani', sans-serif;
             color: #f0f0f0;
             min-height: 100vh;
+            background-attachment: fixed;
         }
 
         .containerev {
@@ -36,13 +39,11 @@
             margin: 40px auto;
             padding: 30px;
             position: relative;
-            background: linear-gradient(135deg, rgba(30, 28, 51, 0.9), rgba(10, 10, 19, 0.95));
-            border: 2px solid #222;
-            border-radius: 12px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            align-items: center;
-            margin: auto;
-            justify-content: center;
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.9), rgba(10, 10, 19, 0.95));
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
         }
 
         .containerev::before {
@@ -52,11 +53,12 @@
             left: -2px;
             right: -2px;
             bottom: -2px;
-            border-radius: 12px;
+            border-radius: 16px;
             background: linear-gradient(45deg, #333, var(--dark-gold), #333, var(--dark-gold));
             background-size: 400%;
             z-index: -1;
             animation: borderAnimation 10s linear infinite;
+            opacity: 0.7;
         }
 
         @keyframes borderAnimation {
@@ -70,10 +72,23 @@
             font-size: 42px;
             text-align: center;
             color: var(--light-gold);
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color);
             letter-spacing: 2px;
             text-transform: uppercase;
+            position: relative;
+            display: inline-block;
+            transform: translateX(-50%);
+        }
+
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--light-gold), transparent);
         }
 
         .loot-grid {
@@ -81,59 +96,74 @@
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 30px;
             padding: 20px;
-            border-radius: 10px;
-            background: rgba(5, 25, 34, 0.4);
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            background: rgba(5, 5, 15, 0.4);
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
         }
 
         .loot-item {
             position: relative;
-            border-radius: 8px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 0;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: var(--card-shadow);
             display: flex;
             flex-direction: column;
-            align-items: center;
             overflow: hidden;
             height: 100%;
-            backdrop-filter: blur(5px);
+            transform-style: preserve-3d;
+            perspective: 1000px;
         }
 
-        .loot-item::before {
+        /* This will be set dynamically by JS based on item.get_color_display */
+        .loot-item-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .loot-item-bg::before {
             content: "";
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-            pointer-events: none;
-            z-index: 1;
-            border-radius: 8px;
+            background: inherit;
+            filter: blur(10px);
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .loot-item-bg::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.8));
+            z-index: -1;
         }
 
         .loot-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.6);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--card-shadow), var(--card-glow);
         }
 
-        .loot-item:hover::after {
-            opacity: 1;
-        }
-
-        .loot-item::after {
-            content: "";
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            border-radius: 10px;
-            background: linear-gradient(45deg, var(--dark-gold), transparent, var(--dark-gold));
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        .loot-item-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(5px);
         }
 
         .loot-item h2 {
@@ -141,23 +171,28 @@
             margin-top: 0;
             margin-bottom: 15px;
             color: var(--light-gold);
-            font-size: 24px;
+            font-size: 22px;
             text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
             text-align: center;
             position: relative;
             z-index: 2;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .loot-item-image {
+            position: relative;
+            margin-bottom: 15px;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .loot-item img {
-            max-width: 100%;
             height: auto;
+            display: block;
+            transition: transform 0.5s ease;
             border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease;
-            position: relative;
-            z-index: 2;
         }
 
         .loot-item:hover img {
@@ -165,18 +200,20 @@
         }
 
         .loot-details, .nerd-stats {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 6px;
-            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            padding: 12px 15px;
             margin-bottom: 15px;
             width: 100%;
             box-sizing: border-box;
             position: relative;
             z-index: 2;
+            backdrop-filter: blur(5px);
         }
 
         .loot-details {
             border-left: 3px solid var(--light-gold);
+            flex-grow: 1;
         }
 
         .nerd-stats {
@@ -185,38 +222,50 @@
         }
 
         .loot-details p, .nerd-stats p {
-            margin: 5px 0;
+            margin: 8px 0;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
 
         .rarity {
             font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .tier {
             font-weight: bold;
             text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .tier-common {
             color: var(--common-color);
+            text-shadow: 0 0 5px rgba(192, 192, 192, 0.5);
         }
 
         .tier-uncommon {
             color: var(--uncommon-color);
+            text-shadow: 0 0 5px rgba(30, 255, 0, 0.5);
         }
 
         .tier-rare {
             color: var(--rare-color);
+            text-shadow: 0 0 5px rgba(0, 112, 221, 0.5);
         }
 
         .tier-epic {
             color: var(--epic-color);
+            text-shadow: 0 0 5px rgba(163, 53, 238, 0.5);
         }
 
         .tier-legendary {
             color: var(--legendary-color);
+            text-shadow: 0 0 5px rgba(255, 128, 0, 0.5);
         }
 
         footer {
@@ -230,74 +279,81 @@
 
         .lootelement {
             position: relative;
-            padding: 10px;
             border-radius: 8px;
-            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .lootelement img {
-            max-width: 100%;
+            width: 100%;
             height: auto;
+            display: block;
+            object-fit: contain;
         }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add particle effect to the loot items
-            const lootItems = document.querySelectorAll('.loot-item');
 
-            lootItems.forEach(item => {
-                // Set background color based on item.get_color_display
-                const colorText = item.getAttribute('data-color');
-                if (colorText) {
-                    item.style.background = `linear-gradient(135deg, ${colorText}, rgba(20, 20, 30, 0.9))`;
-                }
+        /* Particle effects */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
 
-                // Set tier class for color-coding
-                const tierSpan = item.querySelector('.tier');
-                if (tierSpan) {
-                    const tierText = tierSpan.textContent.toLowerCase();
-                    tierSpan.classList.add(`tier-${tierText}`);
-                }
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            animation: float 3s infinite ease-in-out;
+        }
 
-                // Add rarity color based on percentage
-                const raritySpan = item.querySelector('.rarity');
-                if (raritySpan) {
-                    const rarityValue = parseFloat(raritySpan.textContent);
-                    if (rarityValue < 1) {
-                        raritySpan.style.color = var(--legendary-color);
-                    } else if (rarityValue < 5) {
-                        raritySpan.style.color = var(--epic-color);
-                    } else if (rarityValue < 15) {
-                        raritySpan.style.color = var(--rare-color);
-                    } else if (rarityValue < 30) {
-                        raritySpan.style.color = var(--uncommon-color);
-                    } else {
-                        raritySpan.style.color = var(--common-color);
-                    }
-                }
+        @keyframes float {
+            0% {
+                transform: translateY(100%) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100%) translateX(20px);
+                opacity: 0;
+            }
+        }
 
-                // Add hover sound effect
-                item.addEventListener('mouseenter', function() {
-                    const hoverSound = new Audio("{% static 'sounds/hover.mp3' %}");
-                    hoverSound.volume = 0.2;
-                    hoverSound.play().catch(e => console.log("Audio play failed: ", e));
-                });
-            });
-
-            // Add glowing effect animation
-            function addGlowEffect() {
-                const h1 = document.querySelector('h1');
-                h1.style.textShadow = '0 0 15px var(--glow-color), 0 0 30px var(--glow-color)';
-
-                setTimeout(() => {
-                    h1.style.textShadow = '0 0 10px var(--glow-color), 0 0 20px var(--glow-color)';
-                }, 1000);
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .containerev {
+                padding: 20px 15px;
+                margin: 20px 10px;
             }
 
-            // Run glow effect every 2 seconds
-            setInterval(addGlowEffect, 2000);
-        });
-    </script>
+            h1 {
+                font-size: 32px;
+            }
+
+            .loot-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .loot-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -307,21 +363,60 @@
     <div class="loot-grid">
         {% for item in choices %}
         <div class="loot-item" data-color="{{ item.get_color_display }}">
-            <h2>{{ item.choice_text }}</h2>
-            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}px" height="{{ item.image_length }}px">
-            <div class="loot-details">
-                <p><strong>Value:</strong> <span>{{ item.value }} {{ item.currency }}</span></p>
-                <p><strong>Rarity:</strong> <span class="rarity">{{ item.formatted_rarity }}%</span></p>
-                <p><strong>Category:</strong> <span>{{ item.category }}</span></p>
-                {% if item.get_display_tier %}
-                <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
-                {% endif %}
-                <p><strong>Color:</strong> <span>{{ item.get_color_display }}</span></p>
-            </div>
-            <div class="nerd-stats">
-                <p><strong>Inventory:</strong> <span>{{ item.number_of_choice }}</span></p>
-                <p><strong>Total Number:</strong> <span>{{ item.total_number_of_choice }}</span></p>
-                <p><strong>Nonce:</strong> <span>{{ item.nonce }} ({{ item.lower_nonce }} - {{ item.upper_nonce }})</span></p>
+            <div class="loot-item-bg"></div>
+            <div class="particles"></div>
+            <div class="loot-item-content">
+                <h2>{{ item.choice_text }}</h2>
+                <div class="loot-item-image">
+                    <img src="{{ item.file.url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}" height="{{ item.image_length }}">
+                </div>
+                <div class="loot-details">
+                    <p><strong>Value:</strong> <span style="color: #E5E4E2;">{{ item.value }} {{ item.currency }}</span></p>
+                    <p><strong>Rarity:</strong> <span class="rarity">{{ item.formatted_rarity }}%</span></p>
+                    <p><strong>Category:</strong> <span class="rarity">{{ item.category }}</span></p>
+                    {% if item.get_display_tier %}
+                    <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
+                    {% endif %}
+
+                    {% if item.value >= cost_threshold_100000000 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/redgold.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value >= cost_threshold_100000 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value >= cost_threshold_10000 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/black.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value >= cost_threshold_500 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/red.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value >= cost_threshold_200 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/orange.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value >= cost_threshold_100 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value >= cost_threshold_80 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/green.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value < cost_threshold_80 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/gray.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% else %}
+                        <p>This item does not meet the cost requirement.</p>
+                    {% endif %}
+                </div>
+                <div class="nerd-stats">
+                    <p><strong>Nonce:</strong> <span>{{ item.nonce }} ({{ item.lower_nonce }} - {{ item.upper_nonce }})</span></p>
+                </div>
             </div>
         </div>
         {% empty %}
@@ -337,46 +432,60 @@
     <div class="loot-grid">
         {% for item in choices %}
         <div class="loot-item" data-color="{{ item.get_color_display }}">
-            <h2>{{ item.choice_text }}</h2>
-            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}px" height="{{ item.image_length }}px">
-            <div class="loot-details">
-                <p><strong>Value:</strong> <span>{{ item.value }} {{ item.currency }}</span></p>
-                <p><strong>Rarity:</strong> <span class="rarity">{{ item.formatted_rarity }}%</span></p>
-                <p><strong>Category:</strong> <span>{{ item.category }}</span></p>
-                {% if item.get_display_tier %}
-                <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
-                {% endif %}
+            <div class="loot-item-bg"></div>
+            <div class="particles"></div>
+            <div class="loot-item-content">
+                <h2>{{ item.choice_text }}</h2>
+                <div class="loot-item-image">
+                    <img src="{{ item.file.url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}" height="{{ item.image_length }}">
+                </div>
+                <div class="loot-details">
+                    <p><strong>Value:</strong> <span>{{ item.value }} {{ item.currency }}</span></p>
+                    <p><strong>Rarity:</strong> <span class="rarity">{{ item.formatted_rarity }}%</span></p>
+                    <p><strong>Category:</strong> <span>{{ item.category }}</span></p>
+                    {% if item.get_display_tier %}
+                    <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
+                    {% endif %}
 
-                {% if cost_threshold_10000 >= item.value %}
-                    <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); padding: -10%;">
-                        <p><img src="{{ item.file.url }}" alt="{{ item.choice_text }}"></p>
-                    </div>
-                {% elif cost_threshold_500 >= item.value > cost_threshold_10000 %}
-                    <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); padding: 6%;">
-                        <p><img src="{{ item.file.url }}" alt="{{ item.choice_text }}"></p>
-                    </div>
-                {% elif cost_threshold_200 >= item.value > cost_threshold_500 %}
-                    <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); padding: 6%;">
-                        <p><img src="{{ item.file.url }}" alt="{{ item.choice_text }}"></p>
-                    </div>
-                {% elif cost_threshold_100 >= item.value > cost_threshold_200 %}
-                    <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); padding: 6%;">
-                        <p><img src="{{ item.file.url }}" alt="{{ item.choice_text }}"></p>
-                    </div>
-                {% elif cost_threshold_80 >= item.value > cost_threshold_100 %}
-                    <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); padding: 6%;">
-                        <p><img src="{{ item.file.url }}" alt="{{ item.choice_text }}"></p>
-                    </div>
-                {% elif cost_threshold_80 >= item.value > cost_threshold_100 %}
-                    <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); padding: 6%;">
-                        <p><img src="{{ item.file.url }}" alt="{{ item.choice_text }}"></p>
-                    </div>
-                {% else %}
-                    <p>This item does not meet the cost requirement.</p>
-                {% endif %}
-            </div>
-            <div class="nerd-stats">
-                <p><strong>Nonce:</strong> <span>{{ item.nonce }} ({{ item.lower_nonce }} - {{ item.upper_nonce }})</span></p>
+                    {% if item.value >= cost_threshold_100000000 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/redgold.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value >= cost_threshold_100000 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value >= cost_threshold_10000 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/black.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value >= cost_threshold_500 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/red.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value >= cost_threshold_200 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/orange.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value >= cost_threshold_100 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value >= cost_threshold_80 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/green.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% elif item.value < cost_threshold_80 %}
+                        <div class="lootelement" style="background: url({% static 'css/images/gray.png' %});">
+                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                        </div>
+                    {% else %}
+                        <p>This item does not meet the cost requirement.</p>
+                    {% endif %}
+                </div>
+                <div class="nerd-stats">
+                    <p><strong>Nonce:</strong> <span>{{ item.nonce }} ({{ item.lower_nonce }} - {{ item.upper_nonce }})</span></p>
+                </div>
             </div>
         </div>
         {% empty %}
@@ -385,6 +494,114 @@
     </div>
 </div>
 {% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Apply color backgrounds to each loot item
+        const lootItems = document.querySelectorAll('.loot-item');
+
+        lootItems.forEach(item => {
+            const colorValue = item.getAttribute('data-color');
+            const bgElement = item.querySelector('.loot-item-bg');
+
+            if (colorValue && bgElement) {
+                // Set the background color to fill the entire card
+                bgElement.style.background = `linear-gradient(135deg, ${colorValue}, rgba(10, 10, 20, 0.9))`;
+            }
+
+            // Set tier class for color-coding
+            const tierSpan = item.querySelector('.tier');
+            if (tierSpan) {
+                const tierText = tierSpan.textContent.toLowerCase().trim();
+                tierSpan.classList.add(`tier-${tierText}`);
+            }
+
+            // Add rarity color based on percentage
+            const raritySpan = item.querySelector('.rarity');
+            if (raritySpan) {
+                const rarityText = raritySpan.textContent;
+                const rarityValue = parseFloat(rarityText);
+
+                if (rarityValue < 1) {
+                    raritySpan.style.color = 'var(--legendary-color)';
+                    raritySpan.style.textShadow = '0 0 5px rgba(255, 128, 0, 0.7)';
+                } else if (rarityValue < 5) {
+                    raritySpan.style.color = 'var(--epic-color)';
+                    raritySpan.style.textShadow = '0 0 5px rgba(163, 53, 238, 0.7)';
+                } else if (rarityValue < 15) {
+                    raritySpan.style.color = 'var(--rare-color)';
+                    raritySpan.style.textShadow = '0 0 5px rgba(0, 112, 221, 0.7)';
+                } else if (rarityValue < 30) {
+                    raritySpan.style.color = 'var(--uncommon-color)';
+                    raritySpan.style.textShadow = '0 0 5px rgba(30, 255, 0, 0.7)';
+                } else {
+                    raritySpan.style.color = 'var(--common-color)';
+                    raritySpan.style.textShadow = '0 0 5px rgba(192, 192, 192, 0.7)';
+                }
+            }
+
+            // Add particles to each item
+            const particlesContainer = item.querySelector('.particles');
+            if (particlesContainer) {
+                // Create particles based on item tier/rarity
+                const particleCount = 10;
+                let particleColor = 'rgba(255, 255, 255, 0.5)';
+
+                if (tierSpan) {
+                    const tierText = tierSpan.textContent.toLowerCase().trim();
+
+                    if (tierText === 'legendary') {
+                        particleColor = 'rgba(255, 128, 0, 0.7)';
+                    } else if (tierText === 'epic') {
+                        particleColor = 'rgba(163, 53, 238, 0.7)';
+                    } else if (tierText === 'rare') {
+                        particleColor = 'rgba(0, 112, 221, 0.7)';
+                    } else if (tierText === 'uncommon') {
+                        particleColor = 'rgba(30, 255, 0, 0.7)';
+                    }
+                }
+
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    particle.style.left = `${Math.random() * 100}%`;
+                    particle.style.bottom = '0';
+                    particle.style.backgroundColor = particleColor;
+                    particle.style.boxShadow = `0 0 5px ${particleColor}`;
+                    particle.style.animationDelay = `${Math.random() * 3}s`;
+
+                    particlesContainer.appendChild(particle);
+                }
+            }
+
+            // Add hover sound effect
+            item.addEventListener('mouseenter', function() {
+                try {
+                    const hoverSound = new Audio("{% static 'sounds/hover.mp3' %}");
+                    hoverSound.volume = 0.2;
+                    hoverSound.play().catch(e => console.log("Audio play failed: ", e));
+                } catch (error) {
+                    console.log("Audio play error: ", error);
+                }
+            });
+        });
+
+        // Add glowing effect animation to title
+        function pulseGlowEffect() {
+            const h1 = document.querySelector('h1');
+            if (h1) {
+                h1.style.textShadow = '0 0 15px var(--glow-color), 0 0 30px var(--glow-color)';
+
+                setTimeout(() => {
+                    h1.style.textShadow = '0 0 10px var(--glow-color), 0 0 20px var(--glow-color)';
+                }, 1000);
+            }
+        }
+
+        // Run glow effect every 2 seconds
+        setInterval(pulseGlowEffect, 2000);
+    });
+</script>
 
 </body>
 </html>

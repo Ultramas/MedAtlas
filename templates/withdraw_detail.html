@@ -5,305 +5,509 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Withdraw Details</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <style>
         :root {
-    --primary-color: #3498db;
-    --secondary-color: #2c3e50;
-    --background-color: #f4f7f9;
-    --card-background: #ffffff;
-    --text-color: #333333;
-    --label-color: #7f8c8d;
-}
+            --primary: #00f0ff;
+            --primary-dark: #00a0a8;
+            --secondary: #ff00e5;
+            --accent: #4ecca3;
+            --dark: #0a0a20;
+            --darker: #050510;
+            --light: #e1e1ff;
+            --success: #00ff66;
+            --warning: #ffcc00;
+            --danger: #ff3366;
+            --common-color: #c0c0c0;
+            --uncommon-color: #1eff00;
+            --rare-color: #0070dd;
+            --epic-color: #a335ee;
+            --legendary-color: #ff8000;
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --card-glow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    line-height: 1.6;
-}
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--darker);
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(50, 50, 80, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(50, 50, 120, 0.2) 0%, transparent 50%);
+            color: var(--light);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-}
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
 
-.withdraw-detail {
-    background-color: var(--card-background);
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 2rem;
-    margin-top: 2rem;
-}
+        .withdraw-detail {
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.9), rgba(10, 10, 19, 0.95));
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
 
-h1 {
-    color: var(--secondary-color);
-    margin-bottom: 1.5rem;
-    font-size: 2rem;
-}
+        .withdraw-detail::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 16px;
+            background: linear-gradient(45deg, var(--primary-dark), var(--secondary), var(--primary-dark));
+            background-size: 400%;
+            z-index: -1;
+            animation: borderAnimation 10s linear infinite;
+            opacity: 0.7;
+        }
 
-h2 {
-    color: var(--secondary-color);
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-}
+        @keyframes borderAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-.detail-card {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-}
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+            position: relative;
+        }
 
-.detail-item {
-    display: flex;
-    flex-direction: column;
-}
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
 
-.label {
-    font-weight: 600;
-    color: var(--label-color);
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-}
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--secondary);
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+            text-shadow: 0 0 8px rgba(255, 0, 229, 0.5);
+            position: relative;
+            display: inline-block;
+        }
 
-.value {
-    font-size: 1.1rem;
-}
+        h2::after {
+            content: "";
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, var(--secondary), transparent);
+        }
 
-.status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
+        .detail-card {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            background: rgba(10, 10, 32, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 240, 255, 0.1);
+        }
 
-.cards-list {
-    list-style-type: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-}
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            background: rgba(5, 5, 16, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 2px solid var(--primary);
+            transition: all 0.3s ease;
+        }
 
-.card-item {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    transition: transform 0.2s ease-in-out;
-}
+        .detail-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 240, 255, 0.2);
+        }
 
-.card-item:hover {
-    transform: translateY(-2px);
-}
+        .label {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-.fees-section {
-    margin-top: 2rem;
-    text-align: right;
-}
+        .value {
+            font-size: 1.2rem;
+            color: var(--light);
+        }
 
-.fees-amount {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-}
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
 
-@media (max-width: 600px) {
-    .container {
-        padding: 1rem;
-    }
+        /* Status colors */
+        [data-status="pending"] {
+            color: var(--warning);
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+        }
 
-    .withdraw-detail {
-        padding: 1.5rem;
-    }
+        [data-status="approved"] {
+            color: var(--success);
+            text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
+        }
 
-    .detail-card {
-        grid-template-columns: 1fr;
-    }
-}
+        [data-status="rejected"] {
+            color: var(--danger);
+            text-shadow: 0 0 5px rgba(255, 51, 102, 0.5);
+        }
+
+        [data-status="processing"] {
+            color: var(--primary);
+            text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);
+        }
+
+        [data-status="completed"] {
+            color: var(--legendary-color);
+            text-shadow: 0 0 5px rgba(255, 128, 0, 0.5);
+        }
+
+        .cards-section {
+            margin-top: 30px;
+        }
+
+        .cards-list {
+            list-style-type: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .card-item {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 100, 255, 0.1));
+            color: var(--light);
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-item::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0) 40%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0) 60%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(45deg);
+            z-index: 1;
+            transition: all 0.5s ease;
+        }
+
+        .card-item:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .card-item:hover::before {
+            animation: shine 1.5s ease-in-out;
+        }
+
+        @keyframes shine {
+            0% {
+                left: -100%;
+                top: -100%;
+            }
+            100% {
+                left: 100%;
+                top: 100%;
+            }
+        }
+
+        .fees-section {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 32, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(0, 240, 255, 0.1);
+        }
+
+        .fees-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Cosmic Holographic Animation */
+        .cosmic-holo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .celestial-entity {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.1);
+            opacity: 0.2;
+            animation: float 20s linear infinite;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.4);
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-30px) translateX(20px) rotate(120deg);
+            }
+            66% {
+                transform: translateY(20px) translateX(-20px) rotate(240deg);
+            }
+            100% {
+                transform: translateY(0) translateX(0) rotate(360deg);
+            }
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.2);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 20px auto;
+            }
+
+            .withdraw-detail {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .detail-card {
+                grid-template-columns: 1fr;
+            }
+
+            .cards-list {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+
+            .fees-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .fees-amount {
+                margin-top: 10px;
+                font-size: 1.8rem;
+            }
+        }
     </style>
 </head>
 <body>
+{% include 'navtrove.html' %}
     <div class="container">
         <div class="withdraw-detail">
+            <div class="cosmic-holo">
+                <!-- Cosmic elements will be added with JavaScript -->
+            </div>
+
             <h1>Withdraw Details</h1>
+
             <div class="detail-card">
                 <div class="detail-item">
-                    <span class="label">User:</span>
+                    <span class="label">User</span>
                     <span class="value">{{ withdraw.user.username }}</span>
                 </div>
                 <div class="detail-item">
-                    <span class="label">Number of Cards:</span>
+                    <span class="label">Number of Cards</span>
                     <span class="value">{{ withdraw.number_of_cards }}</span>
                 </div>
                 <div class="detail-item">
-                    <span class="label">Condition:</span>
+                    <span class="label">Condition</span>
                     <span class="value">{{ withdraw.get_condition_display }}</span>
                 </div>
                 <div class="detail-item">
-                    <span class="label">Status:</span>
+                    <span class="label">Status</span>
                     <span class="value status-badge" data-status="{{ withdraw.status }}">{{ withdraw.get_status_display }}</span>
                 </div>
                 <div class="detail-item">
-                    <span class="label">Shipping State:</span>
+                    <span class="label">Shipping State</span>
                     <span class="value">{{ withdraw.get_shipping_state_display }}</span>
                 </div>
                 <div class="detail-item">
-                    <span class="label">Date and Time:</span>
+                    <span class="label">Date and Time</span>
                     <span class="value">{{ withdraw.date_and_time }}</span>
                 </div>
             </div>
+
             <div class="cards-section">
                 <h2>Cards</h2>
                 <ul class="cards-list">
                     {% for card in withdraw.cards.all %}
-                        <li class="card-item">{{ card.choice_text }}</li>
+                        <li class="card-item">{{ card.choice_text }} - {{ withdraw.cards.condition }}</li>
+                    {% empty %}
+                        <li class="card-item" style="grid-column: 1 / -1; text-align: center;">No cards in this withdrawal</li>
                     {% endfor %}
                 </ul>
             </div>
+
             <div class="fees-section">
                 <h2>Fees</h2>
-                <span class="fees-amount">${{ withdraw.fees }}</span>
+                <span class="fees-amount">{{ withdraw.fees }}</span>
             </div>
         </div>
     </div>
-    <script src="{% static 'js/script.js' %}"></script>
-<script>
-    :root {
-    --primary-color: #3498db;
-    --secondary-color: #2c3e50;
-    --background-color: #f4f7f9;
-    --card-background: #ffffff;
-    --text-color: #333333;
-    --label-color: #7f8c8d;
-}
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add cosmic holographic elements
+            const cosmicHolo = document.querySelector('.cosmic-holo');
 
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    line-height: 1.6;
-}
+            // Add celestial entities
+            for (let i = 0; i < 5; i++) {
+                const celestial = document.createElement('div');
+                celestial.classList.add('celestial-entity');
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-}
+                // Random size between 30px and 100px
+                const size = Math.random() * 70 + 30;
+                celestial.style.width = `${size}px`;
+                celestial.style.height = `${size}px`;
 
-.withdraw-detail {
-    background-color: var(--card-background);
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 2rem;
-    margin-top: 2rem;
-}
+                // Random position
+                celestial.style.left = `${Math.random() * 100}%`;
+                celestial.style.top = `${Math.random() * 100}%`;
 
-h1 {
-    color: var(--secondary-color);
-    margin-bottom: 1.5rem;
-    font-size: 2rem;
-}
+                // Random animation delay
+                celestial.style.animationDelay = `${Math.random() * 20}s`;
 
-h2 {
-    color: var(--secondary-color);
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-}
+                cosmicHolo.appendChild(celestial);
+            }
 
-.detail-card {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-}
+            // Add stars
+            for (let i = 0; i < 30; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
 
-.detail-item {
-    display: flex;
-    flex-direction: column;
-}
+                // Random position
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
 
-.label {
-    font-weight: 600;
-    color: var(--label-color);
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-}
+                // Random animation delay
+                star.style.animationDelay = `${Math.random() * 4}s`;
 
-.value {
-    font-size: 1.1rem;
-}
+                cosmicHolo.appendChild(star);
+            }
 
-.status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
+            // Add hover sound effect to cards
+            const cardItems = document.querySelectorAll('.card-item');
+            cardItems.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    try {
+                        const hoverSound = new Audio("{% static 'sounds/hover.mp3' %}");
+                        hoverSound.volume = 0.2;
+                        hoverSound.play().catch(e => console.log("Audio play failed: ", e));
+                    } catch (error) {
+                        console.log("Audio play error: ", error);
+                    }
+                });
+            });
 
-.cards-list {
-    list-style-type: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-}
+            // Add pulsing glow effect to title
+            function pulseGlowEffect() {
+                const h1 = document.querySelector('h1');
+                if (h1) {
+                    h1.style.textShadow = '0 0 15px rgba(0, 240, 255, 0.7), 0 0 30px rgba(0, 240, 255, 0.4)';
 
-.card-item {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    transition: transform 0.2s ease-in-out;
-}
+                    setTimeout(() => {
+                        h1.style.textShadow = '0 0 10px rgba(0, 240, 255, 0.5), 0 0 20px rgba(0, 240, 255, 0.3)';
+                    }, 1000);
+                }
+            }
 
-.card-item:hover {
-    transform: translateY(-2px);
-}
-
-.fees-section {
-    margin-top: 2rem;
-    text-align: right;
-}
-
-.fees-amount {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-}
-
-@media (max-width: 600px) {
-    .container {
-        padding: 1rem;
-    }
-
-    .withdraw-detail {
-        padding: 1.5rem;
-    }
-
-    .detail-card {
-        grid-template-columns: 1fr;
-    }
-}
-
-
-</script>
+            // Run glow effect every 2 seconds
+            setInterval(pulseGlowEffect, 2000);
+        });
+    </script>
 </body>
 </html>

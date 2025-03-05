@@ -174,7 +174,7 @@ class ProfileForm(forms.ModelForm):
 class ShippingForm(forms.ModelForm):
     class Meta:
         model = UserProfile2
-        fields = ('first_name', 'last_name', 'address', 'city', 'state', 'phone_number', 'profile_picture')
+        fields = ('first_name', 'last_name', 'address', 'city', 'state', 'country', 'zip_code', 'phone_number', 'profile_picture')
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)

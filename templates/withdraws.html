@@ -145,18 +145,7 @@
             transition: color 0.3s ease;
         }
 
-        .nav-links a:hover {
-        }
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            transition: width 0.3s ease;
-        }
 
         .nav-links a:hover::after {
             width: 100%;
@@ -207,23 +196,6 @@
             height: 200%;
             background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
             animation: rotate 20s linear infinite;
-        }
-
-        .profile-picture {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid var(--accent2);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-
-        .profile-picture img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
 
         .user-info {
@@ -380,16 +352,6 @@
             position: absolute;
             bottom: -15px;
             left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .nav-links h1::after {
-            content: '';
-            position: absolute;
-            left: 10%;
             transform: translateX(-50%);
             width: 200px;
             height: 2px;

@@ -6887,13 +6887,72 @@ class ShippingBackgroundView(FormMixin, LoginRequiredMixin, ListView):
             form.instance.user = request.user
             post.save()
             messages.success(request, 'Shipping fields updated successfully.')
-            return redirect('showcase:tradingcentral')
+            return redirect('showcase:shippingprofile')
         else:
             messages.error(request, "Form submission invalid")
             print(form.errors)
             print(form.non_field_errors())
             print(form.cleaned_data)
             return render(request, "shippingform.html", {'form': form})
+
+
+
+class ShippingProfileView(ListView):
+    model = UserProfile2
+    template_name = "shippingprofile.html"
+
+
+    def get_queryset(self):
+        return ShowcaseBackgroundImage.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+
+        current_user = self.request.user
+        newprofile = UserProfile2.objects.filter(is_active=1, user=current_user)
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+            # Create a new object with the necessary attributes
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
 
 
 class PrintShippingLabelView(LoginRequiredMixin, ListView):
@@ -13474,12 +13533,11 @@ class WithdrawView(LoginRequiredMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
-        # Filter withdrawals for the current user
-        completed_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, shipping_state='D')
-        incomplete_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1).exclude(shipping_state='D')
+        completed_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state = 'C', shipping_state='C')
+        incomplete_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state = 'C').exclude(shipping_state='C')
 
-        # Add both querysets to the context
         context['CompletedWithdraws'] = completed_withdraws
         context['IncompleteWithdraws'] = incomplete_withdraws
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -13528,9 +13586,16 @@ class WithdrawView(LoginRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
-        # Default queryset for user withdrawals
         return Withdraw.objects.filter(user=self.request.user, is_active=1)
 
+    def post(self, request, *args, **kwargs):
+        withdraw_id = request.POST.get("withdraw_id")
+        if withdraw_id:
+            withdraw = get_object_or_404(Withdraw, id=withdraw_id, user=request.user)
+            if withdraw.shipping_state != 'C':
+                withdraw.mark_complete()
+                messages.success(request, "Withdrawal marked complete successfully!")
+        return redirect('showcase:withdraws')
 
 class WithdrawDetailView(LoginRequiredMixin, DetailView):
     model = Withdraw
@@ -13539,6 +13604,18 @@ class WithdrawDetailView(LoginRequiredMixin, DetailView):
     def get_object(self):
         slag = self.kwargs.get('slag')
         return get_object_or_404(Withdraw, slag=slag)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        return context
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -13578,6 +13655,77 @@ class WithdrawDetailView(LoginRequiredMixin, DetailView):
 
         return context
 
+
+class ProcessingWithdrawView(LoginRequiredMixin, ListView):
+    model = Withdraw
+    template_name = "processing_withdraws.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        completed_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state = 'I', shipping_state='Y')
+        incomplete_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state = 'I').exclude(shipping_state='Y')
+
+        context['CompletedWithdraws'] = completed_withdraws
+        context['IncompleteWithdraws'] = incomplete_withdraws
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        for withdraw in context['CompletedWithdraws']:
+            user = withdraw.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                withdraw.newprofile_profile_picture_url = profile.avatar.url
+                withdraw.newprofile_profile_url = withdraw.get_profile_url()
+
+        for withdraw in context['IncompleteWithdraws']:
+            user = withdraw.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                withdraw.newprofile_profile_picture_url = profile.avatar.url
+                withdraw.newprofile_profile_url = withdraw.get_profile_url()
+
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
+    def get_queryset(self):
+        return Withdraw.objects.filter(user=self.request.user, is_active=1)
+
+    def post(self, request, *args, **kwargs):
+        withdraw_id = request.POST.get("withdraw_id")
+        if withdraw_id:
+            withdraw = get_object_or_404(Withdraw, id=withdraw_id, user=request.user)
+            if withdraw.shipping_state != 'C':
+                withdraw.mark_complete()
+                messages.success(request, "Withdrawal marked complete successfully!")
+        return redirect('showcase:withdraws')
 
 from django.contrib.auth.decorators import login_required
 from .models import InviteCode

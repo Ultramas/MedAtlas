@@ -155,6 +155,16 @@ TIMESTATUS = (
     ('N', 'Not Applicable - Intended'),
 )
 
+WITHDRAWSTATE = (
+    ('I', 'Incomplete'),
+    ('C', 'Complete'),
+)
+
+CAPACITYSTATE = (
+    ('Y', 'Yes'),
+    ('N', 'No'),
+)
+
 POWER = (
     ('1', 'x1'),
     ('2', 'x2'),
@@ -2948,34 +2958,24 @@ class Game(models.Model):
         return f"{hours}h {minutes}m {seconds}s"
 
     def get_color(self, choice):
-        cost_threshold_80 = self.cost * 0.8
-        cost_threshold_100 = self.cost
-        cost_threshold_200 = self.cost * 2
-        cost_threshold_500 = self.cost * 5
-        cost_threshold_10000 = self.cost * 100
-        cost_threshold_100000 = self.cost * 1000
-        cost_threshold_100000000 = self.cost * 1000000
+        thresholds = {
+            "gray": self.cost * 0.8,
+            "green": self.cost,
+            "yellow": self.cost * 2,
+            "orange": self.cost * 5,
+            "red": self.cost * 100,
+            "black": self.cost * 1000,
+            "redblack": self.cost * 1000000,
+        }
 
         if choice.value is None:
-            # Handle the case where value is None, perhaps by setting a default value
             choice.value = random.randint(0, 1000000)
 
-        if choice.value >= cost_threshold_100000000:
-            return 'redgold'
-        elif choice.value >= cost_threshold_100000:
-            return 'redblack'
-        elif choice.value >= cost_threshold_10000:
-            return 'black'
-        elif choice.value >= cost_threshold_500:
-            return 'red'
-        elif choice.value >= cost_threshold_200:
-            return 'orange'
-        elif choice.value >= cost_threshold_100:
-            return 'yellow'
-        elif choice.value >= cost_threshold_80:
-            return 'green'
-        else:
-            return 'gray'
+        for color, threshold in thresholds.items():
+            if choice.value <= threshold:
+                return color
+
+        return 'redgold'
 
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.user).first()
@@ -7153,12 +7153,14 @@ class Withdraw(models.Model):
     cards = models.ManyToManyField(InventoryObject)
     number_of_cards = models.IntegerField(blank=True, null=True, verbose_name='Quantity')
     shipping_state = models.CharField(choices=SHIPPINGSTATUS, max_length=1, default='P')
-    fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    fees = models.IntegerField(null=True, blank=True, default=599)
     #slug = models.CharField(max_length=16, blank=True, null=True)
     slag = models.SlugField(unique=True, max_length=16, blank=True, null=True, verbose_name='Slug')
     date_and_time = models.DateTimeField(null=True, verbose_name="time and date", auto_now_add=True)
     condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2, blank=True, null=True)
     status = models.CharField(choices=TIMESTATUS, max_length=1, default='P')
+    withdraw_state = models.CharField(choices=WITHDRAWSTATE, max_length=1, default='I')
+    capacity_state = models.CharField(choices=CAPACITYSTATE, max_length=1, default='N')
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -7186,21 +7188,23 @@ class Withdraw(models.Model):
             if not Withdraw.objects.filter(slag=random_slug).exists():
                 return random_slug
 
+    def mark_complete(self):
+        self.withdraw_state = 'C'
+        self.save(update_fields=['withdraw_state'])
+
     def save(self, *args, **kwargs):
         self.clean()
+        if self.number_of_cards == 25:
+            self.capacity_state = 'Y'
+        else:
+            self.capacity_state = 'N'
         if not self.slag:
             self.slag = self.generate_unique_slug()
         is_new = self.pk is None
 
         if is_new:
-            # Create the withdrawal first to ensure ID is generated
             super().save(*args, **kwargs)
 
-
-            # Update number of cards
-
-
-            # Handle WithdrawClass logic
             time_threshold = timezone.now() - timedelta(hours=48)
             withdraw_class = WithdrawClass.objects.annotate(
                 withdraw_count=Count('withdraw')
@@ -7231,7 +7235,6 @@ class Withdraw(models.Model):
 
     @receiver(pre_delete, sender=InventoryObject)
     def update_withdraw_on_inventory_object_delete(sender, instance, **kwargs):
-        # When an InventoryObject is deleted, update the associated Withdraw objects
         withdraws = Withdraw.objects.filter(cards=instance)
         for withdraw in withdraws:
             withdraw.number_of_cards -= 1
