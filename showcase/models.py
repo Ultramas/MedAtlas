@@ -1,3 +1,4 @@
+import os
 import string
 import uuid
 from datetime import timedelta, time, datetime
@@ -858,7 +859,7 @@ class ProfileDetails(models.Model):
 
         # Set a default avatar if not provided
         if not self.avatar:
-            self.avatar = os.path.join(settings.BASE_DIR, 'static', 'css', 'images', 'a.jpg')
+            self.avatar = os.path.join('a.jpg')
             print('saved the profile avatar to default image')
 
         # Check if rubies_spent has changed

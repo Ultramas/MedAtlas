@@ -564,7 +564,10 @@ setTimeout(() => {
     } else {
         animationStopped = true;
         console.log(`The spins have ended.`);
+        setTimeout(() => {
         showPopup(buttonId);
+    }, 250);
+
 
         if (!persistSpin) {
             totalSpins = 1;

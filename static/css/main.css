@@ -1377,7 +1377,7 @@ a.mobile-show.search-bar-icon:hover {
 }
 
 .hero-area {
-  height: 92%;
+  /*height:  100%;*/
   z-index: 1;
 }
 
@@ -1392,7 +1392,6 @@ html, body {
   width: 100%;
   height: 100%;
   content: "";
-  background-color: #07212e;
   z-index: -1;
   opacity: 0.6;
 }

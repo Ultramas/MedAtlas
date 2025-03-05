@@ -98,6 +98,7 @@
             min-height: 100vh;
     		background: fixed;
         }
+
         .pokemon-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -713,8 +714,8 @@ function toggleChatWidget() {
     /* Common Chest Container Styles */
     .chest-container, .chest2-container, .chest3-container {
         padding: 3rem 2rem;
-        max-width: 1200px;
-        margin: 0 auto 4rem;
+        /*max-width: 1200px;*/
+        /*margin: 0 auto 4rem;*/
         position: relative;
         border-radius: 20px;
         overflow: hidden;
@@ -1155,6 +1156,43 @@ function toggleChatWidget() {
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         }
     }
+
+.video-background {
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+.video-background::after {
+    content: "";
+    position: absolute;
+    top: 80%;
+    left: 0;
+    width: 100%;
+    height: 20%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 240, 255, 0.3) 100%);
+}
+
+.hero-area.hero-bg {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    margin-top: 0;
+    overflow: hidden;
+}
+
+.video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    z-index: -1; 
+}
+
+
 </style>
 
 <script>
@@ -1300,7 +1338,7 @@ window.onscroll = function() {
 
 {% include 'navtrove.html' %}
 
-<div class="hero-area hero-bg" style="margin-top: 0%; background: rgba(0, 255, 255, 0); height: 92%">
+<div class="hero-area hero-bg">
         {% for BackgroundImage in Background %}
             {% if BackgroundImage.page == "index.html" %}
                 {% if BackgroundImage.position == 1 %}
@@ -1759,7 +1797,7 @@ window.onscroll = function() {
 
   .chest-container {
     padding: 2rem;
-    max-width: 1200px;
+    /*max-width: 1200px;*/
     margin: 0 auto;
   }
 
@@ -4258,7 +4296,6 @@ function showChatWidget() {
   popup.style.display = popup.style.display === "none" ? "block" : "none";
 }
 </script>
--->
 		<i class="icon"></i>
 
 	<!-- end copyright -->
