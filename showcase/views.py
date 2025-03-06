@@ -15275,11 +15275,13 @@ class CurrencyPaypalFormView(FormView):
 def currency_add_to_cart(request, slug):
     item = get_object_or_404(CurrencyMarket, slug=slug)
 
+    # Check for an existing order item for this user and item
     order_item_qs = CurrencyOrder.objects.filter(
         user=request.user,
         items=item,
         ordered=False
     )
+
     if order_item_qs.exists():
         order_item = order_item_qs.first()
         # Increase the quantity
@@ -15287,12 +15289,12 @@ def currency_add_to_cart(request, slug):
         order_item.save()
         messages.info(request, f"Updated quantity of \"{item.name}\" in your cart.")
     else:
-        # Create a new order item with quantity 1
+        # Create a new order item for a different CurrencyMarket item
         order_item = CurrencyOrder.objects.create(
             user=request.user,
             items=item,
             ordered=False,
-            quantity=1,
+            quantity=1,  # New item with quantity 1
             slug=item.slug  # Optional: ensure slug is set if needed elsewhere
         )
         messages.info(request, f"Added \"{item.name}\" to your cart.")
