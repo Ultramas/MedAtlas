@@ -124,6 +124,7 @@
     <li class="list-group-item d-flex justify-content-between lh-condensed" style="color: black;">
         <div>
         <h6 class="my-0">{{ order_item.quantity }}x {{ order_item.items.name}}</h6>
+        <small class="text-muted" style="font-size: 16px;">{{ order_item.items.amount}} Rubies</small><br>
         <small class="text-muted">{{ order_item.items.flavor_text}}</small>
         </div>
         <span class="text-muted">${{ order_item.get_final_price }}</span>

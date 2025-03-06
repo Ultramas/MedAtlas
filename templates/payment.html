@@ -127,7 +127,7 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    alert('Payment successful!');
+                    alert('Thanks for your purchase!');
                     window.location.href = '/';
                 } else {
                     alert(data.error || 'Payment failed. Please try again.');

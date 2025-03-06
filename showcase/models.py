@@ -26,7 +26,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator, MinLeng
 from pydantic import ValidationError
 from django.contrib.auth.models import Group
 from django.db import connection
-
+from decimal import ROUND_UP
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
@@ -689,7 +689,7 @@ class CurrencyMarket(models.Model):
     amount = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_price = models.FloatField(blank=True, null=True)
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True, blank=True, null=True)
     unit_ratio = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     deal = models.BooleanField(default=False)
     label = models.CharField(choices=LABEL_CHOICES, max_length=1000, blank=True,
@@ -725,6 +725,10 @@ class CurrencyMarket(models.Model):
         return reverse('showcase:product', args=[str(self.slug)])
 
     def save(self, *args, **kwargs):
+        if not self.slug:
+            print("Name:", self.name)
+            self.slug = slugify(self.name)
+            print("Slug after slugify:", self.slug)
         if self.amount != 0:  # Avoid division by zero
             self.unit_ratio = self.price / self.amount
         super().save(*args, **kwargs)
@@ -909,7 +913,7 @@ class CurrencyOrder(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
     slug = models.SlugField()
-    items = models.OneToOneField(CurrencyMarket, on_delete=models.CASCADE)
+    items = models.ForeignKey(CurrencyMarket, on_delete=models.CASCADE)
     itemhistory = models.ForeignKey(CurrencyMarket, on_delete=models.CASCADE, verbose_name="Order history", null=True,
                                     related_name='currency_item_history')
     start_date = models.DateTimeField(auto_now_add=True)
@@ -1037,25 +1041,33 @@ class CurrencyFullOrder(models.Model):
 
     def get_final_price(self):
         if self.items.discount_price:
-            return self.get_discount_item_price()
-        return self.get_total_item_price()
+            return Decimal(self.get_discount_item_price())  # Ensure Decimal type
+        return Decimal(self.get_total_item_price())  # Ensure Decimal type
 
     def get_discount_item_price(self):
-        return self.item.discount_price
+        return self.round_decimal(Decimal(self.item.discount_price))
 
     def get_amount_saved(self):
-        return self.get_total_item_price() - self.get_discount_item_price()
+        return self.round_decimal(self.get_total_item_price() - self.get_discount_item_price())
+
 
     def get_total_price(self):
-        total = 0
+        total = Decimal('0.00')  # Initialize as Decimal
         for order_item in self.items.all():
-            total += order_item.get_final_price()
+            total += Decimal(order_item.get_final_price())  # Ensure conversion to Decimal
+
         if self.coupon:
             if self.coupon.percentDollars:
-                total *= 1 - (0.01 * self.coupon.amount)
+                discount_factor = Decimal('1.00') - (Decimal(self.coupon.amount) / Decimal('100.00'))
+                total *= discount_factor
             else:
-                total -= self.coupon.amount
-        return total
+                total -= Decimal(self.coupon.amount)
+
+        return self.round_decimal(total)  # Ensure rounding before returning
+
+    def round_decimal(self, value):
+        """Ensures the decimal always has two places and rounds up."""
+        return value.quantize(Decimal('0.01'), rounding=ROUND_UP)
 
     def get_profile_url(self):
         return reverse('showcase:profile', args=[str(self.slug)])

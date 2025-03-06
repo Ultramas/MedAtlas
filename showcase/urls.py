@@ -519,6 +519,7 @@ urlpatterns = [
     path('checkout/', views.CheckoutView.as_view(), name='checkout'),
     path('payment/<payment_option>/', views.PaymentView.as_view(), name='payment'),
     path('create-checkout-session/<slug:slug>/', views.create_checkout_session, name='create-checkout-session'),
+    path('create-currency-checkout-session/<slug:slug>/', views.create_currency_checkout_session, name='create-currency-checkout-session'),
     path('success/', views.SuccessView.as_view(), name='success'),
     path('cancel/', views.CancelView.as_view(), name='cancel'),
     path('add-to-cart/<slug>/', add_to_cart, name='add-to-cart'),

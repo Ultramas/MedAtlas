@@ -14894,7 +14894,6 @@ def subtract_currency(request):
         except ValueError:
             return JsonResponse({'status': 'error', 'message': 'Not enough currency'})
 
-
 class CurrencyProductView(DetailView):
     model = CurrencyMarket
     paginate_by = 10
@@ -14904,16 +14903,17 @@ class CurrencyProductView(DetailView):
         context = super().get_context_data(**kwargs)
         context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name
+        ).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-        # context['object'] = Item.objects.filter(is_active=1).order_by('slug')  #maybe change to be able to be ordered by different parameters
-        # like slug, price, popularity, type (gold, platinum, emerald, diamond), etc
-        # somehow limited to 3 products on first page, yet products still exist and can be accessed by "view on site"
+        context['Logo'] = LogoBase.objects.filter(
+            Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1
+        )
+
+        # User profile context (existing code)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -14924,7 +14924,7 @@ class CurrencyProductView(DetailView):
         else:
             context['NewsProfiles'] = None
 
-        if context['NewsProfiles'] == None:
+        if context['NewsProfiles'] is None:
             # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
@@ -14937,7 +14937,20 @@ class CurrencyProductView(DetailView):
                     userprofile.newprofile_profile_picture_url = profile.avatar.url
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
+        # New: Determine if this CurrencyMarket item is in the user's cart
+        in_cart = False
+        if self.request.user.is_authenticated:
+            try:
+                # Get the active cart for the user
+                order = CurrencyFullOrder.objects.get(user=self.request.user, ordered=False)
+                # Check if any CurrencyOrder in the cart refers to the current CurrencyMarket object
+                in_cart = order.items.filter(items=self.object).exists()
+            except CurrencyFullOrder.DoesNotExist:
+                in_cart = False
+        context['in_cart'] = in_cart
+
         return context
+
 
 
 class CurrencyMarketView(EBaseView):
@@ -15045,7 +15058,6 @@ class CurrencyCheckoutView(EBaseView):
         endowment_form = EndowmentForm(self.request.POST, request=self.request)
         if endowment_form.is_valid():
             endowment = endowment_form.save(commit=False)
-            # Optionally adjust endowment.user or endowment.order here if needed.
             endowment.save()
 
         try:
@@ -15061,11 +15073,10 @@ class CurrencyCheckoutView(EBaseView):
                     messages.warning(self.request, "Invalid payment option selected")
                     return redirect('showcase:currencycheckout')
 
-            # Process EndowmentForm if valid
             if endowment_form.is_valid():
                 endowment = endowment_form.save(commit=False)
-                endowment.user = self.request.user  # Assign current user
-                endowment.order = order  # Assign the current order
+                endowment.user = self.request.user
+                endowment.order = order
                 endowment.save()
                 messages.success(self.request, "Endowment has been successfully recorded!")
 
@@ -15156,27 +15167,50 @@ class CurrencyPaymentView(EBaseView):
 
         return render(request, self.template_name, context)
 
-    def post(self, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+        # Parse the JSON payload from the request body
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            messages.warning(request, "Invalid JSON received")
+            return redirect("/currencypayment/stripe")
 
-        order = get_object_or_404(CurrencyOrder, user=request.user, ordered=False)
-        form = CurrencyPaymentForm(request.POST)
-        user_profile = get_object_or_404(UserProfile, user=request.user)
+        # Retrieve the token from the JSON data
+        token = data.get("token")
+        if not token:
+            messages.warning(request, "Invalid data received")
+            return redirect("/currencypayment/stripe")
 
-        if token:
-            try:
-                charge = stripe.Charge.create(
-                    amount=int(order.get_total_price() * 100),
-                    currency="usd",
-                    source=token,
-                    description=f"Order {order.id}",
-                )
-                return JsonResponse({"success": "Thanks for purchasing!"})
-            except stripe.error.StripeError as e:
-                return JsonResponse({"error": str(e)}, status=400)
-        messages.warning(self.request, "Invalid data received")
-        return redirect("/payment/stripe")
+        order_user = request.user
+        orders = CurrencyOrder.objects.filter(user=order_user, ordered=False)
+        if not orders.exists():
+            messages.warning(request, "No active orders found.")
+            return redirect("/currencycheckout/")
 
+        ruby_profile = get_object_or_404(ProfileDetails, user=order_user)
 
+        total_amount = sum(order.get_total_price() for order in orders)
+        total_currency_amount = sum(order.items.amount for order in orders)
+
+        try:
+            charge = stripe.Charge.create(
+                amount=int(total_amount * 100),  # e.g., $10.00 => 1000 cents
+                currency="usd",
+                source=token,
+                description=f"Order(s) for user {order_user.id}",
+            )
+        except stripe.error.StripeError as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+        ruby_profile.currency_amount += total_currency_amount
+        ruby_profile.save()
+
+        for order in orders:
+            order.ordered = True
+            order.ordered_date = timezone.now()
+            order.save()
+
+        return JsonResponse({"success": "Thanks for purchasing!"})
 
 class CurrencyPayPalExecuteView(View):
     def get(self, request, *args, **kwargs):
@@ -15201,7 +15235,6 @@ class CurrencyPayPalExecuteView(View):
                 order_items.update(ordered=True)
                 print('your payment has been updated')
 
-                # Associate the payment with the order
                 order.ordered = True
                 order.payment = payment
                 order.ref_code = create_ref_code()
@@ -15211,7 +15244,6 @@ class CurrencyPayPalExecuteView(View):
                 messages.success(self.request, 'Your order was successful!')
                 return redirect('showcase:currencymarket')
 
-            # Payment failed
             messages.error(self.request, 'Failed to process PayPal payment')
             return redirect('/currencypayment')
 
@@ -15238,77 +15270,77 @@ class CurrencyPaypalFormView(FormView):
             'no_shipping': '1',
         }
 
+
 @allow_guest_user
 def currency_add_to_cart(request, slug):
     item = get_object_or_404(CurrencyMarket, slug=slug)
-    order_item, created = CurrencyOrder.objects.get_or_create(
-        items=item,
-        user=request.user,
-        ordered=False,
-    )
 
+    order_item_qs = CurrencyOrder.objects.filter(
+        user=request.user,
+        items=item,
+        ordered=False
+    )
+    if order_item_qs.exists():
+        order_item = order_item_qs.first()
+        # Increase the quantity
+        order_item.quantity += 1
+        order_item.save()
+        messages.info(request, f"Updated quantity of \"{item.name}\" in your cart.")
+    else:
+        # Create a new order item with quantity 1
+        order_item = CurrencyOrder.objects.create(
+            user=request.user,
+            items=item,
+            ordered=False,
+            quantity=1,
+            slug=item.slug  # Optional: ensure slug is set if needed elsewhere
+        )
+        messages.info(request, f"Added \"{item.name}\" to your cart.")
+
+    # Get or create the active full order (cart) for the user
     order_qs = CurrencyFullOrder.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
-        order = order_qs[0]
-
-        # CORRECTION: Check for existing item using the appropriate field
-        if any(order_item.slug == item.slug for order_item in order.items.all()):
-            order_item.quantity += 1  # Assuming quantity is directly on CurrencyOrder
-            order_item.save()
-            messages.info(
-                request,
-                f"\"{order_item.item.title}\" was added to your cart."
-            )
-            return redirect("showcase:currencycheckout")
-        else:
-            order.items.add(order_item)
-            messages.info(request, "The currency was added to your cart.")
-            return redirect("showcase:currencycheckout")
+        order = order_qs.first()
     else:
-        order_qs = CurrencyFullOrder.objects.create(
+        order = CurrencyFullOrder.objects.create(
             user=request.user,
             ordered=False,
             ordered_date=timezone.now()
         )
-        print("Order created")
 
-        # CORRECTION: Same check as above
-        if any(order_item.slug == item.slug for order_item in order_qs.items.all()):
-            order_item.quantity += 1
-            order_item.save()
-            messages.info(
-                request,
-                f"\"{order_item.item.title}\" was added to your cart."
-            )
-            return redirect("showcase:currencycheckout")
-        else:
-            order_qs.items.add(order_item)
-            messages.info(request, "You now have the currency in your cart.")
-            return redirect("showcase:currencycheckout")
+    # Add the order item to the cart if it's not already present
+    if not order.items.filter(id=order_item.id).exists():
+        order.items.add(order_item)
+
+    return redirect("showcase:currencycheckout")
 
 
 @login_required
 def currency_remove_from_cart(request, slug):
-    item = get_object_or_404(CurrencyOrder, slug=slug)
+    # Get the order item for the currency market item with the provided slug
+    order_item = get_object_or_404(
+        CurrencyOrder,
+        items__slug=slug,
+        user=request.user,
+        ordered=False
+    )
+
+    # Get the active cart for the user
     order_qs = CurrencyFullOrder.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
-        order = order_qs[0]
-        if order.items.filter(item__slug=item.slug).exists():
-            order_item = CurrencyOrder.objects.filter(item=item,
-                                                  user=request.user,
-                                                  ordered=False)[0]
+        order = order_qs.first()
+        if order.items.filter(id=order_item.id).exists():
+            order.items.remove(order_item)
+            # Optionally delete the order item (if you don’t need to keep it once removed)
             order_item.delete()
-            messages.info(
-                request, "Item \"" + order_item.item.title +
-                         "\" was removed from your cart")
-            return redirect("showcase:currencymarket")
+            messages.info(request, f"Removed \"{order_item.items.name}\" from your cart.")
         else:
-            messages.info(request, "This item is no longer in your cart")
-            return redirect("showcase:product", slug=slug)
+            messages.info(request, "This item is no longer in your cart.")
+        return redirect("showcase:currencycheckout")
     else:
-        # add message doesnt have order
-        messages.info(request, "You do not seem to have an order currently")
-        return redirect("showcase:product", slug=slug)
+        messages.info(request, "You do not have an active cart.")
+        return redirect("showcase:currencymarket")
+
 
 def currency_get_coupon(request, code):
     try:
@@ -15319,7 +15351,7 @@ def currency_get_coupon(request, code):
             request,
             "Sorry, this coupon seems to have either expired or does not exist. Do you want to try another one?"
         )
-        return redirect("showcase:checkout")
+        return redirect("showcase:currencycheckout")
 
 
 class CurrencyAddCouponView(View):
@@ -15856,7 +15888,6 @@ class PayPalExecuteView(View):
             paypal_payment = PayPalPayment.find(payment_id)
 
             if paypal_payment.execute({'payer_id': payer_id}):
-                # Payment successful
                 payment = Payment()
                 payment.paypal_payment_id = payment_id
                 payment.user = self.request.user
@@ -16254,6 +16285,50 @@ def create_checkout_session(request, slug):
     price = item.discount_price if item.discount_price else item.price
     if price is None:
         return JsonResponse({'error': 'Price not set for this item'}, status=400)
+
+    currency = item.currency.code.lower() if item.currency else 'usd'
+    print('the currency is ' + currency)
+    # Validate Stripe-supported currency
+    if currency not in ['usd', 'eur']:
+        return JsonResponse({'error': 'Currency not supported'}, status=400)
+
+    amount = int(price * 100)  # Convert to cents
+
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': currency,
+                    'product_data': {'name': item.title},
+                    'unit_amount': amount,
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=request.build_absolute_uri(reverse('showcase:success')) + '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=request.build_absolute_uri(reverse('showcase:cancel')),
+        )
+        print('one-click checkout session created')
+        return JsonResponse({'session_id': checkout_session.id})
+    except stripe.error.StripeError as e:
+        print('there were errors with the submition of the one-click checkout ')
+        print('the errors are ' + str(e))
+        return JsonResponse({'errors here': str(e)}, status=400)
+
+
+@csrf_exempt
+@require_POST
+def create_currency_checkout_session(request, slug):
+    item = get_object_or_404(CurrencyMarket, slug=slug)
+
+    if item.is_currency_based:
+        return JsonResponse({'error': 'This item requires in-game currency and cannot be purchased here.'}, status=400)
+
+    # Handle regular priced items
+    price = item.discount_price if item.discount_price else item.price
+    if price is None:
+        return JsonResponse({'error': 'Price not set for this currency item'}, status=400)
 
     currency = item.currency.code.lower() if item.currency else 'usd'
     print('the currency is ' + currency)

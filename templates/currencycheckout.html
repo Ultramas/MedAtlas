@@ -438,10 +438,10 @@
                                 <div class="barcode-placeholder">||||| |||| || |||||||</div>
                             </div>
                         </div>
-                        <form method="POST" class="card-body" action="{% url 'showcase:checkout' %}">
+                        <form method="POST" class="card-body" action="{% url 'showcase:currencycheckout' %}">
                             {% csrf_token %}
                     {% else %}
-                        <form method="POST" class="card-body" action="{% url 'showcase:checkout' %}" id="checkout-form">
+                        <form method="POST" class="card-body" action="{% url 'showcase:currencycheckout' %}" id="checkout-form">
                             {% csrf_token %}
                             {{ form.non_field_errors }}
 
@@ -588,7 +588,6 @@
             });
         });
 
-        // Generic AJAX form submission handler
         function handleAjaxFormSubmission(form) {
             const formData = new FormData(form);
             const actionUrl = form.getAttribute('action');
@@ -610,7 +609,6 @@
             });
         }
 
-        // Form submission handling
         document.addEventListener('DOMContentLoaded', function() {
             const checkoutForm = document.getElementById('checkout-form');
             if (checkoutForm) {
@@ -618,13 +616,12 @@
                     const selectedOption = document.querySelector('input[name="payment_option"]:checked');
                     if (selectedOption) {
                         const paymentOption = selectedOption.value;
-                        // Set the action based on selected payment option
                         if (paymentOption === 'stripe') {
-                            this.action = "{% url 'showcase:payment' payment_option='stripe' %}";
+                            this.action = "{% url 'showcase:currencypayment' payment_option='stripe' %}";
                         } else if (paymentOption === 'paypal') {
-                            this.action = "{% url 'showcase:payment' payment_option='paypal' %}";
+                            this.action = "{% url 'showcase:currencypayment' payment_option='paypal' %}";
                         } else if (paymentOption === 'card') {
-                            this.action = "{% url 'showcase:payment' payment_option='card' %}";
+                            this.action = "{% url 'showcase:currencypayment' payment_option='card' %}";
                         }
                     }
                 };
