@@ -92,17 +92,18 @@
             /*width: 50px;*/
             height: 50px;
             z-index: 10; /* Ensure it's on top */
-        }
-
-.cards-container {
+        }.cards-container {
     display: flex;
-    flex-wrap: nowrap; /* Prevent wrapping to a new line */
-    overflow-x: auto; /* Allows horizontal scrolling */
-    overflow-y: hidden; /* Hides vertical scrolling */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
     padding: 10px;
-    gap: 10px; /* Optional: adds space between cards */
-    max-height: 100%; /* Ensure the height is properly constrained */
-    position: relative; /* Ensure positioning is correct */
+    justify-content: center;
+    gap: 10px;
+    max-height: 100%;
+    position: relative;
+    width: max-content; /* Dynamically adjust width based on content */
+    min-width: 100%; /* Ensures it doesn't shrink below viewport */
 }
 
 .cards-container .popup-card:first-child {

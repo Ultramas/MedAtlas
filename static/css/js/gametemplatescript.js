@@ -126,10 +126,11 @@ async function randomizeContents() {
      data-currency-symbol="${attributes.currencySymbol || ''}"
      style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border: 0.1em solid grey; border-top: none; width: 10em;">
     ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-    <div class="sliderPrice">${attributes.value} 💎</div>
+    <div class="sliderPrice">${attributes.value} targetcard💎</div>
 </div>
 </div>
 `;
+
 
             selectedItems.push({
                 id: attributes.id,
@@ -153,7 +154,6 @@ async function randomizeContents() {
 
             if (cardContainer.children[targetIndex]) {
                 cardContainer.insertBefore(targetCardElement, cardContainer.children[targetIndex]);
-                cardContainer.children[targetIndex + 1].style.marginLeft = "3em";
             } else {
                 cardContainer.appendChild(targetCardElement);
             }
@@ -187,7 +187,7 @@ async function randomizeContents() {
             if (inventoryData.status === 'success') {
                 if (inventoryData.button_id === "start") {
                     console.log("Inventory object created successfully with user.");
-                    let inventory_pk = inventoryData.inventory_object_id;
+                     let inventory_pk = inventoryData.inventory_object_id;
                         console.log("inventory_pk:", inventory_pk);
                         inventory_pk = inventory_pk;
                         targetCardElement.setAttribute('data-inventory_pk', window.inventory_pk);
@@ -196,9 +196,9 @@ async function randomizeContents() {
                         const sellForm = document.getElementById(`sell-form-${window.inventory_pk}`);
                         console.log('sellform: ' + sellForm);
                         if (sellForm) {
-                        console.log("Sell form found:", sellForm);
+                          console.log("Sell form found:", sellForm);
 
-                        sellForm.addEventListener('submit', function(event) {
+                          sellForm.addEventListener('submit', function(event) {
                             event.preventDefault();
                             const pk = this.querySelector('[name="pk"]').value;
                             console.log("Sell form submitted. pk =", pk);
@@ -210,9 +210,9 @@ async function randomizeContents() {
                             totalSpins = parseInt($(this).data("value"));
                             sessionStorage.setItem("totalSpins", totalSpins);
                             sellInventory(pk);
-                        });
+                          });
                         } else {
-                        console.error("Sell form not found for inventory_pk:", window.inventory_pk);
+                          console.error("Sell form not found for inventory_pk:", window.inventory_pk);
                         }
 
                 } else if (inventoryData.button_id === "start2") {
@@ -406,6 +406,37 @@ let choiceColor = targetCard ? targetCard.getAttribute('data-color') : 'gray';
 // Log and handle choiceColor
 console.log('Given the choice color:', choiceColor);
 
+function randomizedContents() {
+    const slider = document.querySelector('.slider');
+    const children = Array.from(slider.children);
+
+    const targetIndex = children.findIndex(child => child.classList.contains('target-card'));
+    let targetCard = null;
+    if (targetIndex !== -1) {
+        targetCard = children[targetIndex];
+    }
+
+    const nonTargetCards = children.filter(child => !child.classList.contains('target-card'));
+
+    for (let i = nonTargetCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [nonTargetCards[i], nonTargetCards[j]] = [nonTargetCards[j], nonTargetCards[i]];
+    }
+
+    slider.innerHTML = '';
+
+    const totalCards = nonTargetCards.length + (targetCard ? 1 : 0);
+    for (let i = 0, j = 0; i < totalCards; i++) {
+        if (i === targetIndex && targetCard) {
+            slider.appendChild(targetCard);
+        } else {
+            slider.appendChild(nonTargetCards[j]);
+            j++;
+        }
+    }
+
+    console.log("Slider contents randomized without affecting target card position.");
+}
 
 
 
@@ -419,6 +450,7 @@ function spin(buttonId) {
     $(".spin-option").prop('disabled', true);
 
     randomizeContents();
+    randomizedContents();
     addAnimation();
 
     if (buttonId === "start") {
@@ -437,12 +469,10 @@ function spin(buttonId) {
         const adjustedDuration = (animationDuration + audiobuffer) / 1000; // Convert ms to seconds
         const originalDuration = audio.duration;
 
-        // Adjust playback rate if the original duration is available
         if (originalDuration) {
             audio.playbackRate = originalDuration / adjustedDuration;
         }
 
-        // Play the audio
         audio.play().catch((error) => console.error('Error playing audio:', error));
     });
 
@@ -456,7 +486,7 @@ setTimeout(() => {
     document.querySelectorAll('.slider').forEach((scroller) => {
         scroller.style.animationPlayState = 'paused';
 
-        // Dynamically get the choice color
+
     const targetCard = document.querySelector('.target-card'); // Find the target element
 
     const startButton = document.getElementById('start'); // Or use querySelector('.start')
@@ -486,7 +516,6 @@ setTimeout(() => {
                     color: choiceColor,
                     game_id: gameId, // Ensure this is set correctly
                 };
-                // Create the Top Hit
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
                 console.log('processed the top hit')
@@ -522,7 +551,6 @@ setTimeout(() => {
                     color: choiceColor,
                     game_id: gameId,
                 };
-                // Create the Top Hit
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
                 console.log('processed the top hit')
@@ -534,7 +562,6 @@ setTimeout(() => {
                     color: choiceColor,
                     game_id: gameId,
                 };
-                // Create the Top Hit
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
                 console.log('processed the top hit')
@@ -555,12 +582,46 @@ setTimeout(() => {
 
     });
 
+function randomizedContents() {
+    const slider = document.querySelector('.slider');
+    const children = Array.from(slider.children);
+
+    const targetIndex = children.findIndex(child => child.classList.contains('target-card'));
+    let targetCard = null;
+    if (targetIndex !== -1) {
+        targetCard = children[targetIndex];
+    }
+
+    const nonTargetCards = children.filter(child => !child.classList.contains('target-card'));
+
+    for (let i = nonTargetCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [nonTargetCards[i], nonTargetCards[j]] = [nonTargetCards[j], nonTargetCards[i]];
+    }
+
+    slider.innerHTML = '';
+
+    const totalCards = nonTargetCards.length + (targetCard ? 1 : 0);
+    for (let i = 0, j = 0; i < totalCards; i++) {
+        if (i === targetIndex && targetCard) {
+            slider.appendChild(targetCard);
+        } else {
+            slider.appendChild(nonTargetCards[j]);
+            j++;
+        }
+    }
+
+    console.log("Slider contents randomized without affecting target card position.");
+}
 
     currentSpin++;
     console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`);
 
     if (currentSpin < totalSpins) {
         setTimeout(() => spin(buttonId), buffer);
+         setTimeout(() => {
+        randomizedContents();
+    }, 500);
     } else {
         animationStopped = true;
         console.log(`The spins have ended.`);
@@ -568,17 +629,29 @@ setTimeout(() => {
         showPopup(buttonId);
     }, 250);
 
+                if (!persistSpin) {
+                    totalSpins = 1;
+                    console.log("persistSpin disabled; reset spins to 1");
+                    sessionStorage.setItem("totalSpins", totalSpins);
 
-        if (!persistSpin) {
-            totalSpins = 1;
+                    $(".spin-option").removeClass("selected active");
+                    $(".spin-option[data-value='1']").addClass("selected active");
 
-            console.log(`persist spin not enabled; reset spins to 1`); // Debug: Log the button's ID
-            sessionStorage.setItem("totalSpins", totalSpins);
-            $(".spin-option").removeClass("selected");
-            $('.spin-option').removeClass('active');
-            $(".spin-option[data-value='1']").addClass("selected");
-            $('.spin-option[data-value="1"]').addClass('active');
-        }
+                } else {
+                    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
+
+                    $(".spin-option").removeClass("selected active");
+                    $(".spin-option[data-value='1']").addClass("selected active");
+
+                    setTimeout(() => {
+                        $(".spin-option").removeClass("selected active");
+                        $(".spin-option[data-value='" + currentSelectionValue + "']")
+                            .addClass("selected active");
+
+                        totalSpins = currentSelectionValue;
+                        console.log("Reverted spin to:", totalSpins);
+                    }, 0);
+                }
 
         $(".spin-option").prop('disabled', false);
     }
@@ -598,9 +671,9 @@ function findSelectedCard() {
 
         if (
             !(selector.right < cardRect.left ||
-            selector.left > cardRect.right ||
-            selector.bottom < cardRect.top ||
-            selector.top > cardRect.bottom)
+              selector.left > cardRect.right ||
+              selector.bottom < cardRect.top ||
+              selector.top > cardRect.bottom)
         ) {
             currentSelection = {
                 id: card.id,
@@ -654,81 +727,81 @@ function findSelectedCard() {
         });
     }
 
-async function showPopup(buttonId) {
+ async function showPopup(buttonId) {
 
 if (buttonId === "start") {
-console.log("Show Regular Start");
-window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-console.log("Sell Imported CSRFToken:", window.csrfToken);
+  console.log("Show Regular Start");
+  window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  console.log("Sell Imported CSRFToken:", window.csrfToken);
 
-// Attach the event handler (using delegated binding in case the form is inserted dynamically)
-$(document).ready(function() {
+  // Attach the event handler (using delegated binding in case the form is inserted dynamically)
+  $(document).ready(function() {
     $(document).on("submit", "#sell-form-" + window.inventory_pk, function(e) {
-    e.preventDefault();
-    console.log('submitting here'); // Debug output
+      e.preventDefault();
+      console.log('submitting here'); // Debug output
 
-    var form = $(this);
+      var form = $(this);
 
-    // Send the form data via AJAX
-    $.ajax({
+      // Send the form data via AJAX
+      $.ajax({
         type: "POST",
         url: form.attr("action"),
         data: form.serialize(),
         success: function(response) {
-        console.log('Sell request succeeded:', response);
-        // Instead of refreshing the page, update the relevant part of your page.
-        // For example, update a container with the new HTML provided by the server:
-        if(response.html) {
+          console.log('Sell request succeeded:', response);
+          // Instead of refreshing the page, update the relevant part of your page.
+          // For example, update a container with the new HTML provided by the server:
+          if(response.html) {
             $("#updated-content-container").html(response.html);
-        }
-        // Alternatively, perform other DOM updates here if needed.
+          }
+          // Alternatively, perform other DOM updates here if needed.
         },
         error: function(error) {
 
-        console.error("Sell request failed:", error);
+          console.error("Sell request failed:", error);
         }
+      });
     });
-    });
-});
+  });
 
-textContainer.innerHTML = `
+   textContainer.innerHTML = `
     <h2>Congratulations!</h2>
     <p>You got:</p>
     <div class="cards-container"></div>
     <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
-    <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
-    <input type="hidden" name="action" value="sell">
-    <input type="hidden" name="pk" value="${window.inventory_pk}">
-    <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
+      <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
+      <input type="hidden" name="action" value="sell">
+      <input type="hidden" name="pk" value="${window.inventory_pk}">
+      <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
         style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
-        Sell
-    </button>
+          Sell
+      </button>
     </form>
 
-<button class="close" style="">Collect</button>
+  <button class="close" style="">Collect</button>
 `;
 
-} else if (buttonId === "start2") {
-    console.log("Show Demo Start");
+  } else if (buttonId === "start2") {
+      console.log("Show Demo Start");
 
-    textContainer.innerHTML = `
+      textContainer.innerHTML = `
             <h2></h2>
             <p>You would have hit:</p>
             <div class="cards-container"></div>
 
             <button class="close">I see</button>
         `;
-}
+  }
 
 
-    const cardsContainer = textContainer.querySelector('.cards-container');
-    selectedItems.forEach((item, index) => {
-        const cardElement = document.createElement('div');
-        cardElement.innerHTML = `
+     const cardsContainer = textContainer.querySelector('.cards-container');
+     selectedItems.forEach((item, index) => {
+         const cardElement = document.createElement('div');
+         cardElement.innerHTML = `
             <div class="card-fire" data-color="${item.color}">
-            <div class="card-flames">
+              <div class="card-flames">
                 <div class="card-flame"></div>
-            </div>
+              </div>
             </div>
             <!--<p>ID: ${item.id}</p>
             <p>Nonceword: ${item.nonce}</p>-->
@@ -780,16 +853,29 @@ textContainer.innerHTML = `
             $(".spin-option").prop('disabled', false);
             $(".start").prop('disabled', false);
 
-            if (!persistSpin) {
-                totalSpins = 1;
+ if (!persistSpin) {
+                    totalSpins = 1;
+                    console.log("persistSpin disabled; reset spins to 1");
+                    sessionStorage.setItem("totalSpins", totalSpins);
 
-                console.log(`persist spin not enabled; reset spins to 1`); // Debug: Log the button's ID
-                sessionStorage.setItem("totalSpins", totalSpins);
-                $(".spin-option").removeClass("selected");
-                $('.spin-option').removeClass('active');
-                $(".spin-option[data-value='1']").addClass("selected");
-                $('.spin-option[data-value="1"]').addClass('active');
-            }
+                    $(".spin-option").removeClass("selected active");
+                    $(".spin-option[data-value='1']").addClass("selected active");
+
+                } else {
+                    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
+
+                    $(".spin-option").removeClass("selected active");
+                    $(".spin-option[data-value='1']").addClass("selected active");
+
+                    setTimeout(() => {
+                        $(".spin-option").removeClass("selected active");
+                        $(".spin-option[data-value='" + currentSelectionValue + "']")
+                            .addClass("selected active");
+
+                        totalSpins = currentSelectionValue;
+                        console.log("Reverted spin to:", totalSpins);
+                    }, 0);
+                }
         });
 
 const sellBtn = textContainer.querySelector('.sell-button');
@@ -811,15 +897,28 @@ sellBtn.addEventListener('click', () => {
     $(".start").prop('disabled', false);
 
     if (!persistSpin) {
-        totalSpins = 1;
+                    totalSpins = 1;
+                    console.log("persistSpin disabled; reset spins to 1");
+                    sessionStorage.setItem("totalSpins", totalSpins);
 
-        console.log(`persist spin not enabled; reset spins to 1`); // Debug: Log the button's ID
-        sessionStorage.setItem("totalSpins", totalSpins);
-        $(".spin-option").removeClass("selected");
-        $('.spin-option').removeClass('active');
-        $(".spin-option[data-value='1']").addClass("selected");
-        $('.spin-option[data-value="1"]').addClass('active');
-    }
+                    $(".spin-option").removeClass("selected active");
+                    $(".spin-option[data-value='1']").addClass("selected active");
+
+                } else {
+                    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
+
+                    $(".spin-option").removeClass("selected active");
+                    $(".spin-option[data-value='1']").addClass("selected active");
+
+                    setTimeout(() => {
+                        $(".spin-option").removeClass("selected active");
+                        $(".spin-option[data-value='" + currentSelectionValue + "']")
+                            .addClass("selected active");
+
+                        totalSpins = currentSelectionValue;
+                        console.log("Reverted spin to:", totalSpins);
+                    }, 0);
+                }
 
     // Fetch and update only the .sell.update div without affecting the rest of the page
     setTimeout(() => {
@@ -839,7 +938,8 @@ sellBtn.addEventListener('click', () => {
     }, 0);
 });
 
+
+
     }
 });
-
 

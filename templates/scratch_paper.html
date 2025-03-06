@@ -1,690 +1,682 @@
-{% load static %}
+document.addEventListener('DOMContentLoaded', () => {
+    const slider = document.getElementById('slider');
+    const popup = document.getElementById('popup');
+    const buttons = popup.querySelectorAll('.close, .sell-button');
+    const fire = popup.querySelector('.fire');
+    const textContainer = popup.querySelector('.text');
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeTrove - Marketplace</title>
-        <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-    <style>
-    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
-    .copyright-section {
-        background: linear-gradient(
-            to right,
-            rgba(191, 151, 255, 0.1),
-            rgba(255, 255, 255, 0.05),
-            rgba(191, 151, 255, 0.1)
-        );
-        backdrop-filter: blur(10px);
-        padding: 1rem 0;
-        text-align: center;
-        position: relative;
-        z-index: 100;
+    let animationStopped = false;
+    let selectedItems = [];
+    let totalSpins = 1;
+    let currentSpin = 0;
+
+    const persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
+    const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
+
+    if (persistSpin) {
+        $('#persist-spin-checkbox').prop('checked', true);
     }
 
-    .copyright-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--primary), transparent);
-    }
+    $('#persist-spin-checkbox').change(function () {
+        localStorage.setItem('persistSpinChecked', $(this).prop('checked').toString());
+    });
 
-    .copyright-section p {
-        color: var(--text);
-        font-family: 'Cinzel', serif;
-        font-size: 0.9rem;
-        letter-spacing: 1px;
-        margin: 0;
-    }
-</style>
+    $('#quickspin-checkbox').change(function () {
+        localStorage.setItem('quickSpinChecked', $(this).prop('checked').toString());
+    });
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
+    // Update total spins when a spin option is clicked
+    $(".spin-option").click(function () {
+        $(".spin-option").removeClass("selected");
 
-        :root {
-            --primary: #bf97ff;
-            --primary-dark: #9a6bff;
-            --background: #0a0a13;
-            --text: #ffffff;
-            --accent: #4db2ea;
-            --accent2: #ffd700;
-        }
+        // Play sound bubble_selection.mp3
+        let audio = new Audio("/static/css/sounds/bubble_selection.mp3");
+        audio.play();
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        $(this).addClass("selected");
+        totalSpins = parseInt($(this).data("value"));
+        sessionStorage.setItem("totalSpins", totalSpins);
+    });
 
-        body {
-            background-color: var(--background);
-            color: var(--text);
-            font-family: 'Cormorant Garamond', serif;
-            background-image:
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
-            min-height: 100vh;
-        }
 
-        .main-menu {
-            display: flex;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(
-                to right,
-                rgba(191, 151, 255, 0.1),
-                rgba(255, 255, 255, 0.05),
-                rgba(191, 151, 255, 0.1)
+    // Start animation on button click
+    $(".start").click(function (event) {
+        const buttonId = event.target.id; // Extract the ID of the clicked button
+        console.log(`Button clicked: ${buttonId}`); // Debug: Log the button's ID
+        sessionStorage.setItem("startAnimation", "true");
+        sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
+
+        // Reset current spin count and initialize the animation
+
+
+        let currentSpin = 0;
+        console.log('current spin set to 0')
+        initializeAnimation(buttonId);
+    });
+
+    function initializeAnimation(buttonId) {
+        $(".start").prop('disabled', true);
+        const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
+        selectedItems = [];
+        console.log(`Initializing animation for button: ${buttonId}`); // Debug log for button ID
+
+
+
+async function randomizeContents() {
+    const startButton = document.getElementById("start");
+    const gameId = startButton.getAttribute("data-game-id");
+    const nonce = startButton.getAttribute("data-nonce");
+    const slug = startButton.getAttribute("data-slug");
+
+    console.log("Game ID:", gameId);
+    console.log("Nonce:", nonce);
+    console.log("Slug:", slug);
+
+    try {
+        const payload = { game_id: gameId };
+        console.log("Payload sent to server:", payload);
+
+        // Call the create_outcome endpoint
+        const response = await fetch(`/create_outcome/${slug}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+        console.log("Response from server:", data);
+
+        if (data.status === 'success') {
+            startButton.setAttribute('data-nonce', data.nonce);
+            console.log(`Nonce updated: ${data.nonce}`);
+
+            // Clear existing cards
+            clearCards();
+
+            const attributes = {
+                id: data.choice_id || 'N/A',
+                nonce: data.nonce || 'N/A',
+                text: data.choice_text || 'Unknown',
+                color: data.choice_color || '#FFFFFF',
+                file: data.choice_file || null,
+                value: data.choice_value || 0,
+                lowerNonce: data.lower_nonce || 'N/A',
+                upperNonce: data.upper_nonce || 'N/A',
+            };
+
+            const targetCardElement = document.createElement('div');
+            targetCardElement.classList.add('card', 'target-card');
+            targetCardElement.setAttribute('id', `card-${attributes.id}`);
+            targetCardElement.setAttribute('data-nonce', attributes.nonce);
+            targetCardElement.setAttribute('data-color', attributes.color);
+            targetCardElement.setAttribute('data-choice_value', attributes.value);
+            targetCardElement.setAttribute('data-lower_nonce', attributes.lowerNonce);
+            targetCardElement.setAttribute('data-upper_nonce', attributes.upperNonce);
+
+            targetCardElement.innerHTML = `
+    <div class="cards" style="background: url(/static/css/images/${attributes.color}.png);">
+            <div class="lootelement"
+     data-price="${attributes.value || ''}"
+     data-currency-file="${attributes.currencyFile || ''}"
+     data-currency-symbol="${attributes.currencySymbol || ''}"
+     style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border: 0.1em solid grey; border-top: none; width: 10em;">
+    ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
+    <div class="sliderPrice">${attributes.value} targetcard💎</div>
+</div>
+</div>
+`;
+
+            selectedItems.push({
+                id: attributes.id,
+                nonce: attributes.nonce,
+                text: attributes.text,
+                color: attributes.color,
+                src: attributes.file,
+                value: attributes.value,
+                lowerNonce: attributes.lowerNonce,
+                upperNonce: attributes.upperNonce
+            });
+
+            const cardContainer = document.querySelector('.slider'); // Adjust selector if necessary
+
+            // Calculate the position to insert: 4 cards to the right of the middle
+            const middleIndex = Math.floor(cardContainer.children.length / 2);
+            const targetIndex = Math.min(
+                cardContainer.children.length,
+                middleIndex + 0
             );
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+
+            if (cardContainer.children[targetIndex]) {
+                cardContainer.insertBefore(targetCardElement, cardContainer.children[targetIndex]);
+                cardContainer.children[targetIndex + 1].style.marginLeft = "0";
+            } else {
+                cardContainer.appendChild(targetCardElement);
+            }
+
+            console.log("Target card inserted 4 cards to the right of the middle.");
+
+            const inventoryPayload = {
+                choice_id: data.choice_id,
+                choice_value: data.choice_value,
+                category: data.category,
+                price: 100,
+                condition: 'New',
+                quantity: 1,
+                buttonId: buttonId,
+            };
+            console.log("Calling /create_inventory_object/ with payload:", inventoryPayload);
+
+            const inventoryResponse = await fetch('/create_inventory_object/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is correctly passed
+                },
+                body: JSON.stringify(inventoryPayload),
+            });
+
+            const inventoryData = await inventoryResponse.json();
+            console.log("Response from /create_inventory_object/:", inventoryData);
+
+            if (inventoryData.status === 'success') {
+                if (inventoryData.button_id === "start") {
+                    console.log("Inventory object created successfully with user.");
+                    let inventory_pk = inventoryData.inventory_object_id;
+                        console.log("inventory_pk:", inventory_pk);
+                        inventory_pk = inventory_pk;
+                        targetCardElement.setAttribute('data-inventory_pk', window.inventory_pk);
+
+                        window.sellUrl = `/inventory/${inventory_pk}/sell/`;
+                        const sellForm = document.getElementById(`sell-form-${window.inventory_pk}`);
+                        console.log('sellform: ' + sellForm);
+                        if (sellForm) {
+                        console.log("Sell form found:", sellForm);
+
+                        sellForm.addEventListener('submit', function(event) {
+                            event.preventDefault();
+                            const pk = this.querySelector('[name="pk"]').value;
+                            console.log("Sell form submitted. pk =", pk);
+
+                            $(".spin-option").removeClass("selected");
+
+
+                            $(this).addClass("selected");
+                            totalSpins = parseInt($(this).data("value"));
+                            sessionStorage.setItem("totalSpins", totalSpins);
+                            sellInventory(pk);
+                        });
+                        } else {
+                        console.error("Sell form not found for inventory_pk:", window.inventory_pk);
+                        }
+
+                } else if (inventoryData.button_id === "start2") {
+                    console.log("Temporary inventory object created without user. ID:", inventoryData.inventory_object_id);
+                }
+            } else {
+                console.error("Failed to create inventory object:", inventoryData.message);
+            }
+
+            return data; // Return the data for further use
+        } else {
+            console.error(`Error: ${data.message}`);
+            return null;
         }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
-            position: relative;
-        }
-
-        .logo::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .logo-icon {
-            color: var(--accent);
-            font-size: 2rem;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
-        }
-
-        .nav-links {
-            margin-left: auto;
-            display: flex;
-            gap: 3rem;
-        }
-
-        .nav-links a {
-
-    color: var(--primary);
-            text-decoration: none;
-            position: relative;
-            padding: 0.5rem 0;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            /*font-size: 1rem;*/
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-    .logo-icon h1::after {
-        content: '';
-        position: absolute;
-        bottom: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 200px;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+    } catch (error) {
+        console.error(`Request failed: ${error}`);
+        return null;
     }
-        .container {
-            display: flex;
-            gap: 3rem;
-            padding: 3rem;
-            max-width: 1800px;
-            margin: 0 auto;
+}
+
+
+function clearCards() {
+    const cardContainer = document.querySelector('.slider');
+    const targetCards = cardContainer.querySelectorAll('.target-card');
+
+    targetCards.forEach(card => cardContainer.removeChild(card));
+
+    console.log("All target cards removed.");
+}
+
+// Function to center the card in the slider
+function centerCard(cardElement) {
+    const slider = document.getElementById('slider');
+    const cardOffset = cardElement.offsetLeft;
+    const sliderWidth = slider.offsetWidth;
+    const cardWidth = cardElement.offsetWidth;
+
+    // Adjust margin-left to center the card
+    slider.scrollTo({
+        left: cardOffset - sliderWidth / 2 + cardWidth / 2,
+        behavior: 'smooth',
+    });
+}
+
+
+
+        function addAnimation() {
+            document.querySelectorAll('.slider').forEach(scroller => {
+                scroller.style.animation = 'none';
+                scroller.offsetHeight;  // Trigger reflow
+                let animationDuration = isQuickSpin ? '9s' : '18s';
+                scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
+                scroller.style.animationPlayState = 'running';
+            });
         }
 
-        .sidebar {
-            width: 320px;
-            flex-shrink: 0;
+function alignCardWithSpinner() {
+    const spinnerTick = document.getElementById('selector'); // The spinner tick element
+    const slider = document.getElementById('slider');
+    const targetCard = document.querySelector('.target-card'); // The new card to align
+
+    if (!targetCard || !spinnerTick) {
+        console.error('Target card or spinner tick not found!');
+        return;
+    }
+
+    // Get the center position of the spinner tick
+    const spinnerTickRect = spinnerTick.getBoundingClientRect();
+    const spinnerTickCenter = spinnerTickRect.left + spinnerTickRect.width / 2;
+
+    // Get the center position of the target card
+    const targetCardRect = targetCard.getBoundingClientRect();
+    const targetCardCenter = targetCardRect.left + targetCardRect.width / 2;
+
+    // Calculate how far to scroll
+    const offset = spinnerTickCenter - targetCardCenter;
+
+    // If your slider is scroll-based, adjust scrollLeft:
+    slider.scrollLeft -= offset;
+
+    // If instead your wheel is transform-based, you might do:
+    // slider.style.transform = `translateX(${currentTranslateX + offset}px)`;
+    // (But for typical overflow/scroll setups, scrollLeft is enough.)
+
+    console.log(`Aligned card with spinner. Offset: ${offset}px`);
+}
+
+
+
+
+$(".start").click(function (event) {
+    const buttonId = event.target.id; // Extract the ID of the clicked button
+    console.log(`Button clicked: ${buttonId}`); // Debug: Log the button's ID
+
+});
+
+
+const casinoThump = new Audio('/static/css/sounds/thump.mp3');
+const casinoGreen = new Audio('/static/css/sounds/money.mp3');
+const casinoYellow = new Audio('/static/css/sounds/retro_video_game_col.mp3');
+const casinoOrange = new Audio('/static/css/sounds/click-nice.mp3');
+const casinoRed = new Audio('/static/css/sounds/redwin.mp3');
+const casinoBlack = new Audio('/static/css/sounds/blackwin.mp3');
+const casinoRedBlack = new Audio('/static/css/sounds/rap.mp3');
+const casinoRedGold = new Audio('/static/css/sounds/ultimatewin.mp3');
+
+function playThump() {
+    casinoThump.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoGreenSound() {
+    casinoGreen.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoYellowSound() {
+    casinoYellow.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoOrangeSound() {
+    casinoOrange.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoRedSound() {
+    casinoRed.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoBlackSound() {
+    casinoBlack.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoRedBlackSound() {
+    casinoRedBlack.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function playCasinoRedGoldSound() {
+    casinoRedGold.play().catch((error) => {
+        console.error('Error playing casino-win audio:', error);
+    });
+}
+
+function createTopHit(data) {
+    fetch('/top-hits/create/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+    .then((response) => response.json())
+    .then((result) => {
+        if (result.error) {
+            console.error('Error creating Top Hit:', result.error);
+        } else {
+            console.log('Top Hit created successfully:', result);
+        }
+    })
+    .catch((error) => {
+        console.error('Network error:', error);
+    });
+}
+
+
+// Function to get CSRF token
+function getCSRFToken() {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith('csrftoken=')) {
+            return cookie.substring('csrftoken='.length, cookie.length);
+        }
+    }
+    return null;
+}
+
+// Select the target card
+const targetCard = document.querySelector('.target-card');
+let choiceColor = targetCard ? targetCard.getAttribute('data-color') : 'gray';
+
+// Log and handle choiceColor
+console.log('Given the choice color:', choiceColor);
+
+
+
+
+function spin(buttonId) {
+    // Reset currentSpin to 0 when a button is pressed
+    if (currentSpin === totalSpins || animationStopped) {
+        currentSpin = 0; // Reset spin count
+        animationStopped = false; // Ensure animations are not marked as stopped
+    }
+
+    $(".spin-option").prop('disabled', true);
+
+    randomizeContents();
+    addAnimation();
+
+    if (buttonId === "start") {
+        console.log("Regular Spin triggered");
+    } else if (buttonId === "start2") {
+        console.log("Demo Spin triggered");
+    }
+
+    const animationDuration = isQuickSpin ? 4500 : 9000;
+    const buffer = 150;
+    const audiobuffer = 300;
+    const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
+
+    audio.addEventListener('loadedmetadata', () => {
+        // Calculate the adjusted duration
+        const adjustedDuration = (animationDuration + audiobuffer) / 1000; // Convert ms to seconds
+        const originalDuration = audio.duration;
+
+        // Adjust playback rate if the original duration is available
+        if (originalDuration) {
+            audio.playbackRate = originalDuration / adjustedDuration;
         }
 
-        .user-profile {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            position: relative;
-            overflow: hidden;
+        // Play the audio
+        audio.play().catch((error) => console.error('Error playing audio:', error));
+    });
+
+    // Handle audio load errors
+    audio.addEventListener('error', (e) => {
+        console.error('Audio failed to load:', e);
+    });
+
+    // Call this function when the spin ends
+setTimeout(() => {
+    document.querySelectorAll('.slider').forEach((scroller) => {
+        scroller.style.animationPlayState = 'paused';
+
+    alignCardWithSpinner();
+    const targetCard = document.querySelector('.target-card'); // Find the target element
+
+    const startButton = document.getElementById('start'); // Or use querySelector('.start')
+
+
+    if (targetCard) {
+        let choiceColor = targetCard.getAttribute('data-color') || 'gray';
+        let choiceId = targetCard.getAttribute('id');
+        let gameId = startButton.getAttribute("data-game-id");
+
+
+        // Log and handle choiceColor
+        console.log('The choice color is:', choiceColor);
+        console.log('The choice id is:', choiceId);
+        console.log('The game id is:', gameId);
+        if (choiceColor === 'gray') {
+            playThump();
+
+        } else if (choiceColor === 'green') {
+            playCasinoGreenSound();
+            $(".start").prop('disabled', true);
+        } else if (choiceColor === 'yellow') {
+                console.log('yellow hit')
+            playCasinoGreenSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    color: choiceColor,
+                    game_id: gameId, // Ensure this is set correctly
+                };
+                // Create the Top Hit
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
+        } else if (choiceColor === 'orange') {
+                console.log('orange hit')
+            playCasinoGreenSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                // Create the Top Hit
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
+        } else if (choiceColor === 'red') {
+                console.log('red hit')
+            playCasinoGreenSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                // Create the Top Hit
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
+        } else if (choiceColor === 'black') {
+                console.log('black hit')
+            playCasinoGreenSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                // Create the Top Hit
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
+        } else if (choiceColor === 'redblack') {
+                console.log('redblack hit')
+            playCasinoGreenSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                // Create the Top Hit
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
+        } else if (choiceColor === 'redgold') {
+                console.log('redgold hit')
+            playCasinoGreenSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                // Create the Top Hit
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
+        }
         }
 
-        .user-profile::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
+    });
 
-        .profile-picture {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid var(--accent2);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
+// Define the function to randomize slider contents using Fisher–Yates shuffle
+function randomizedContents() {
+    const slider = document.querySelector('.slider');
+    // Get an array of the slider's child elements (cards)
+    const cards = Array.from(slider.children);
+    // Perform Fisher–Yates shuffle on the cards array
+    for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        // Swap the positions of cards[i] and cards[j] in the DOM
+        slider.insertBefore(cards[j], cards[i]);
+    }
+    console.log("Slider contents randomized.");
+}
 
-        .profile-picture img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+function adjustContainerWidth() {
+    const container = document.querySelector('.cards-container');
+    const cards = container.children.length;
+    const cardWidth = 150;
+    const gap = 55;
 
-        .user-info {
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
+    // Calculate required width dynamically
+    const requiredWidth = cards * (cardWidth + gap);
+    container.style.width = `${requiredWidth}px`;
+}
 
-        .username {
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            color: var(--primary);
-            margin-bottom: 0.75rem;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
-        }
+    currentSpin++;
+    console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`);
 
-        .user-stats {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            font-size: 1rem;
-        }
+    if (currentSpin < totalSpins) {
+        setTimeout(() => spin(buttonId), buffer);
+         setTimeout(() => {
+        randomizedContents();
+    }, 500);
+    } else {
+        animationStopped = true;
+        console.log(`The spins have ended.`);
 
-        .user-stat {
-            background: rgba(191, 151, 255, 0.1);
-            padding: 0.75rem 1.25rem;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid var(--primary);
-        }
-
-        .user-stat-icon {
-            font-size: 1.5rem;
-        }
-
-        .filters {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .filters h2, .collection-title {
-            color: var(--primary);
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-            font-family: 'Cinzel', serif;
-            text-align: center;
-            position: relative;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
-        }
-
-        .filters h2::after, .collection-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .search-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 100%;
-            color: var(--text);
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-        }
-
-        .type-select {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 100%;
-            color: var(--text);
-            margin-bottom: 2rem;
-            cursor: pointer;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-        }
-
-        .view-collection {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-            border: 2px solid var(--primary);
-            color: var(--text);
-            padding: 1rem;
-            border-radius: 8px;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 1.1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .view-collection::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
-            transition: transform 0.5s ease;
-        }
-
-        .view-collection:hover::before {
-            transform: translate(25%, 25%);
-        }
-
-        .view-collection:hover {
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-            border-color: var(--accent);
-            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
-            transform: translateY(-2px);
-            color: var(--accent);
-        }
-
-        .main-content h1 {
-            color: var(--primary);
-            font-size: 3rem;
-            margin-bottom: 3rem;
-            font-family: 'Cinzel', serif;
-            text-align: center;
-            position: relative;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
-        }
-
-        .main-content h1::after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
+        setTimeout(() => {
+        showPopup(buttonId);
+        adjustContainerWidth();
+    }, 250);
 
 
-        .nav-links h1::after {
-            content: '';
-            position: absolute;
-            left: 10%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
 
-        .pokemon-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
-        }
 
-        .pokemon-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            overflow: hidden;
-            position: relative;
-            border: 2px solid var(--primary);
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
-        }
+               if (!persistSpin) {
+                    totalSpins = 1;
+                    console.log("persistSpin disabled; reset spins to 1");
+                    sessionStorage.setItem("totalSpins", totalSpins);
 
-        .pokemon-card:hover {
-            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
-            border-color: var(--accent);
-        }
+                    $(".spin-option").removeClass("selected active");
+                    $(".spin-option[data-value='1']").addClass("selected active");
 
-        .pokemon-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
-            z-index: 1;
-        }
+                } else {
+                    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
 
-        .pokemon-image {
-            width: 100%;
-            aspect-ratio: 1;
-            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
+                    $(".spin-option").removeClass("selected active");
+                    $(".spin-option[data-value='1']").addClass("selected active");
 
-        .pokemon-image::after {
-            content: '';
-            position: absolute;
-            width: 150%;
-            height: 150%;
-            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
-            animation: rotate 20s linear infinite;
-        }
+                    setTimeout(() => {
+                        $(".spin-option").removeClass("selected active");
+                        $(".spin-option[data-value='" + currentSelectionValue + "']")
+                            .addClass("selected active");
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+                        totalSpins = currentSelectionValue;
+                        console.log("Reverted spin to:", totalSpins);
+                    }, 0);
+                }
 
-        .pokemon-info {
-            padding: 1.5rem;
-            position: relative;
-            z-index: 2;
-        }
 
-        .pokemon-name {
-            font-size: 1.75rem;
-            margin-bottom: 0.75rem;
-            font-family: 'Cinzel', serif;
-            color: var(--primary);
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
-        }
+        $(".spin-option").prop('disabled', false);
+    }
+}, animationDuration);
 
-        .pokemon-type {
-            color: white;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 1rem;
-        }
+}
+spin(buttonId);
 
-        .add-button {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-            border: 2px solid var(--primary);
-            color: var(--text);
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 1.5rem;
-            transition: all 0.3s ease;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 1.1rem;
-            position: relative;
-            overflow: hidden;
-        }
+}
 
-        .add-button::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
-            transition: transform 0.5s ease;
-        }
+function findSelectedCard() {
+    const selector = document.getElementById('selector').getBoundingClientRect();
+    let currentSelection = null;
 
-        .add-button:hover::before {
-            transform: translate(25%, 25%);
-        }
+    document.querySelectorAll('.cards').forEach(card => {
+        const cardRect = card.getBoundingClientRect();
 
-        .add-button:hover {
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-            border-color: var(--accent);
-            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
-            transform: translateY(-2px);
-            color: var(--accent);
-        }
+        if (
+            !(selector.right < cardRect.left ||
+            selector.left > cardRect.right ||
+            selector.bottom < cardRect.top ||
+            selector.top > cardRect.bottom)
+        ) {
+            currentSelection = {
+                id: card.id,
+                src: card.querySelector('img')?.src || '',
+                price: card.dataset.price,
+                color: card.dataset.color,
+                value: card.dataset.value,
+                text: card.dataset.text, // Include additional data like text
+            };
 
-        .legendary-icon {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            color: var(--accent);
-            background: rgba(255, 215, 0, 0.1);
-            padding: 0.75rem;
-            border-radius: 50%;
-            z-index: 2;
-            backdrop-filter: blur(5px);
-            border: 2px solid var(--accent2);
-            font-size: 1.5rem;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
-            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-        }
-
-                .inventory-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @media (max-width: 1200px) {
-            .inventory-grid {
-                grid-template-columns: repeat(2, 1fr);
+            if (card.classList.contains('target-card')) {
+                card.classList.add('highlight'); // Apply a class for visual indication
+                console.log('Target card landed:', currentSelection);
             }
         }
+    });
 
-        @media (max-width: 768px) {
-            .inventory-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .inventory-item {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            overflow: hidden;
-            position: relative;
-            border: 2px solid var(--primary);
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
-        }
-
-        .inventory-item:hover {
-            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
-            border-color: var(--accent);
-        }
-
-
-
-.view-toggle {
-    text-align: right;
-    margin-bottom: 1rem;
+    if (currentSelection) {
+        selectedItems.push(currentSelection);
+    }
 }
 
-.toggle-btn {
-    background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-    border: 2px solid var(--primary);
-    color: var(--text);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-}
-
-.toggle-btn:hover {
-    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-    border-color: var(--accent);
-    box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
-}
-
-.inventory-grid.compact-view {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-}
-
-.inventory-grid.compact-view .inventory-item {
-    font-size: 0.9em;
-}
-
-.inventory-grid.compact-view .pokemon-image {
-    aspect-ratio: 16/9;
-}
-
-.inventory-grid.compact-view .product-description {
-    display: none;
-}
-
-.inventory-grid.compact-view .action-buttons {
-    flex-direction: column;
-}
-
-.inventory-grid.compact-view .action-buttons form {
-    width: 100%;
-    margin-bottom: 0.5rem;
-}
-
-.legendary-icon {
-    font-size: 2em;
-    margin-bottom: 0.5rem;
-}
-
-.empty-inventory {
-    text-align: center;
-}
-
-.empty-inventory img {
-    max-width: 50%;
-    margin: 2rem auto;
-}
-
-nav.main-menu ul li a {
-    color: #fff;
-    font-weight: 700;
-    display: block;
-    padding: 15px;
-}
-
-.product-condition{
-    color: var(--accent);
-}
-    </style>
-</head>
-<body>
-
-<script>
-    // Load audio files
-    const sellAudio = new Audio("/static/css/sounds/sell_coin.mp3");
-    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
-    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
-
-    // Add event listeners to sell forms
+    const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
     document.querySelectorAll('.sell-form').forEach(form => {
         form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            sellAudio.play(); // Play the sell sound
+            event.preventDefault();
+            sellAudio.play();
             console.log('')
-            handleAjaxFormSubmission(form); // Handle the AJAX request
+            handleAjaxFormSubmission(form);
         });
     });
 
-    // Add event listeners to withdraw forms
-    document.querySelectorAll('.withdraw-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            withdrawAudio.play(); // Play the withdraw sound
-            handleAjaxFormSubmission(form); // Handle the AJAX request
-        });
-    });
-
-	document.querySelectorAll('.trade-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            tradeAudio.play(); // Play the withdraw sound
-        });
-    });
-
-    // Generic AJAX form submission handler
     function handleAjaxFormSubmission(form) {
         const formData = new FormData(form);
         const actionUrl = form.getAttribute('action');
@@ -705,238 +697,201 @@ nav.main-menu ul li a {
             }
         });
     }
-</script>
 
-{% include 'navtrove.html' %}
+async function showPopup(buttonId) {
 
-  <main class="main-content" style=" align-items: center; justify-content: center;">
+if (buttonId === "start") {
+console.log("Show Regular Start");
+window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+console.log("Sell Imported CSRFToken:", window.csrfToken);
 
-      <h1>{{object.title}} </h1>
-      <section id="inventoryGrid" class="inventory-grid comfortable-view">
+// Attach the event handler (using delegated binding in case the form is inserted dynamically)
+$(document).ready(function() {
+    $(document).on("submit", "#sell-form-" + window.inventory_pk, function(e) {
+    e.preventDefault();
+    console.log('submitting here'); // Debug output
 
-                    <div class="inventory-item" style="width: 200%;">
+    var form = $(this);
 
-                        <div class="legendary-icon">🐉</div>
-                        <div class="pokemon-image">
-                            <img src="{{ object.file.url }}" alt="{{Inventory.choice_text}} Image">
-                        </div>
-                        <div class="pokemon-info">
-                            <h3 class="pokemon-name">{{ Inventory.choice.choice_text }}</h3>
+    // Send the form data via AJAX
+    $.ajax({
+        type: "POST",
+        url: form.attr("action"),
+        data: form.serialize(),
+        success: function(response) {
+        console.log('Sell request succeeded:', response);
+        // Instead of refreshing the page, update the relevant part of your page.
+        // For example, update a container with the new HTML provided by the server:
+        if(response.html) {
+            $("#updated-content-container").html(response.html);
+        }
+        // Alternatively, perform other DOM updates here if needed.
+        },
+        error: function(error) {
 
+        console.error("Sell request failed:", error);
+        }
+    });
+    });
+});
 
-                                 {% if object.price %}
-            {% if object.discount_price %}
-              <span class="mr-1" style="">
-              <del><p class="pokemon-type">${{ object.price }}</p></del>
-              </span>
-              <p class="pokemon-type">${{ object.discount_price }}</p>
-            {% else %}
-             <p class="pokemon-type">${{ object.price }}</p>
-            {% endif %}
+textContainer.innerHTML = `
+    <h2>Congratulations!</h2>
+    <p>You got:</p>
+    <div class="cards-container"></div>
+    <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
+    <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
+    <input type="hidden" name="action" value="sell">
+    <input type="hidden" name="pk" value="${window.inventory_pk}">
+    <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
+        style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
+        Sell
+    </button>
+    </form>
 
-            {% else %}
-            {% if object.discount_currency_price %}
-              <span class="mr-1" style="">
-              <del><p class="pokemon-type">💎 {{ object.currency_price }}</p></del>
-              </span>
-              <p class="pokemon-type">💎 {{ object.discount_currency_price }}</p>
-            {% else %}
-                <p class="pokemon-type">💎 {{ object.currency_price }}</p>
-            {% endif %}
-            {% endif %}
-<h3 class = "product-title" style="color: var(--primary);">{{object.title}}</h3>
-                            <p class="product-condition" style="">Card Condition: {{ object.condition }}</p>
-                            {% if object.category and object.category.lower == 'p' %}
-                            <p class="product-condition" style="">Card Category: Pokemon</p>
-                            {% elif object.category.lower == 'm' %}
-                            <p class="product-condition" style="">Card Category: Magic The Gathering</p>
-                            {% elif object.category.lower == 'b' %}
-                            <p class="product-condition" style="">Card Category: Bakugo</p>
-                            {% elif object.category.lower == 'y' %}
-                            <p class="product-condition" style="">Card Category: Yu-Gi-Oh!</p>
-                            {% else %}
-                            <p class="product-condition" style="">Card Category: Other</p>
-                            {% endif %}
+<button class="close" style="">Collect</button>
+`;
 
-                            {% if object.category and object.category.lower == 'g' %}
-                            <p class="product-tier" style="color: gold;">Tier: Gold</p>
-                            {% elif object.category and object.category.lower == 'p' %}
-                            <p class="product-tier" style="color: #E5E4E2;">Tier: Platinum</p>
-                            {% elif object.category and object.category.lower == 'e' %}
-                            <p class="product-tier" style="color: #50C878;">Tier: Emerald</p>
-                            {% else %}
-                            <p class="product-tier" style="color: #B9F2FF;">Tier: Diamond</p>
-                            {% endif %}
+} else if (buttonId === "start2") {
+    console.log("Show Demo Start");
 
-                            <p class="product-description" style="color: rgba(255, 255, 255, 0.8);">{{ object.description }}</p>
-                            <div class="action-buttons">
+    textContainer.innerHTML = `
+            <h2></h2>
+            <p>You would have hit:</p>
+            <div class="cards-container"></div>
 
-
-            <a href="{{ object.currency_get_add_to_cart_url }}" class="btn btn-primary btn-md my-0 p" >Buy Rubicoins Package
-                <i class="fas fa-shopping-cart ml-1"></i>
-            </a>
+            <button class="close">I see</button>
+        `;
+}
 
 
-                            </div>
-                        </div>
+    const cardsContainer = textContainer.querySelector('.cards-container');
+    selectedItems.forEach((item, index) => {
+        const cardElement = document.createElement('div');
+        cardElement.innerHTML = `
+            <div class="card-fire" data-color="${item.color}">
+            <div class="card-flames">
+                <div class="card-flame"></div>
+            </div>
+            </div>
+            <!--<p>ID: ${item.id}</p>
+            <p>Nonceword: ${item.nonce}</p>-->
+            <img src="${item.src || ''}" alt="${item.id}" width=150 height=225>
+            <p>${item.value} 💎</p>
+            <!--<p>Lower Nonce: ${item.lowerNonce}</p>
+            <p>Upper Nonce: ${item.upperNonce}</p>-->
+        `;
 
-                    </div>
-            </section>
-        </main>
-    </div>
 
-<footer class="copyright-section">
-    <div class="container">
-        <p>{% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
+            cardsContainer.appendChild(cardElement);
 
-        {{BaseCopyrightTextField.copyright}}
+            if (index === 0) {
+                const fire = document.querySelector('.fire');
+                fire.setAttribute('data-color', item.color);
+            }
+        });
 
-            {% endfor %}
-        </p>
-    </div>
-</footer>
+        popup.style.display = 'block';
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const forms = document.querySelectorAll(".ajax-form");
+        // Trigger the fire animation
+        setTimeout(() => {
+            const fire = document.querySelector('.fire');
+            fire.classList.add('active');
+        }, 100);
 
-    forms.forEach(form => {
-        form.addEventListener("submit", function (event) {
-            event.preventDefault();
+        const closeBtn = textContainer.querySelector('.close');
+        closeBtn.addEventListener('click', () => {
 
-            const formData = new FormData(this);
-            const url = this.getAttribute("action");
-            const csrfToken = formData.get("csrfmiddlewaretoken");
 
-            fetch(url, {
-                method: "POST",
-				headers: {
-					"X-Requested-With": "XMLHttpRequest",
-					"X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-				},
 
-                body: formData,
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Update stock count
-                    const stockCountElement = document.querySelector("#stock-count");
-                    if (stockCountElement) {
-                        stockCountElement.textContent = data.stock_count;
-                    }
 
-                    // Update currency amount
-                    const currencyAmountElement = document.querySelector("#currency-amount");
-                    if (currencyAmountElement) {
-                        currencyAmountElement.textContent = data.currency_amount;
-                    }
+        $(this).addClass("selected");
+        totalSpins = parseInt($(this).data("value"));
+        sessionStorage.setItem("totalSpins", totalSpins);
+        const audio = new Audio('/static/css/sounds/collect.mp3');
+        audio.play();
 
-                    // Example: Remove the item from the UI
-                    this.closest(".inventory-item").remove();
-                } else {
-                    console.error("Action failed.");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
+            const fire = document.querySelector('.fire');
+            fire.style.opacity = '0';
+            document.querySelectorAll('.card-fire').forEach(fire => {
+                fire.style.opacity = '0';
             });
+
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 200);
+
+            $(".spin-option").prop('disabled', false);
+            $(".start").prop('disabled', false);
+
+if (!persistSpin) {
+    totalSpins = 1;
+    console.log(`persist spin not enabled; reset spins to 1`);
+    sessionStorage.setItem("totalSpins", totalSpins);
+    $(".spin-option").removeClass("selected active");
+    $(".spin-option[data-value='1']").addClass("selected active");
+} else {
+    const currentSelectionValue = $(".spin-option.selected").data("value") || 1;
+
+    $(".spin-option").removeClass("selected active");
+    $(".spin-option[data-value='1']").addClass("selected active");
+
+    setTimeout(() => {
+        $(".spin-option").removeClass("selected active");
+        $(".spin-option[data-value='" + currentSelectionValue + "']").addClass("selected active");
+        totalSpins = currentSelectionValue;
+    }, 0);
+}
         });
+
+const sellBtn = textContainer.querySelector('.sell-button');
+sellBtn.addEventListener('click', () => {
+    const audio = new Audio('/static/css/sounds/collect.mp3');
+    audio.play();
+
+    const fire = document.querySelector('.fire');
+    fire.style.opacity = '0';
+    document.querySelectorAll('.card-fire').forEach(fire => {
+        fire.style.opacity = '0';
     });
+
+    setTimeout(() => {
+        popup.style.display = 'none';
+    }, 0);
+
+    $(".spin-option").prop('disabled', false);
+    $(".start").prop('disabled', false);
+
+    if (!persistSpin) {
+        totalSpins = 1;
+
+        console.log(`persist spin not enabled; reset spins to 1`); // Debug: Log the button's ID
+        sessionStorage.setItem("totalSpins", totalSpins);
+        $(".spin-option").removeClass("selected");
+        $('.spin-option').removeClass('active');
+        $(".spin-option[data-value='1']").addClass("selected");
+        $('.spin-option[data-value="1"]').addClass('active');
+    }
+
+    // Fetch and update only the .sell.update div without affecting the rest of the page
+    setTimeout(() => {
+        $.ajax({
+            url: window.location.href,
+            type: 'GET',
+            success: function(response) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = response;
+                const newContent = $(tempDiv).find('.sellupdate').html();
+                $('.sellupdate').html(newContent);
+            },
+            error: function(xhr, status, error) {
+                console.error("Ajax reload failed: " + xhr.status + " " + xhr.statusText);
+            }
+        });
+    }, 0);
 });
 
-
-
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const withdrawButtons = document.querySelectorAll(".withdraw-button");
-
-    withdrawButtons.forEach((button) => {
-        button.addEventListener("click", function (event) {
-            event.preventDefault();
-
-            const form = button.closest("form");
-            const formData = new FormData(form);
-            const actionUrl = form.getAttribute("action") || window.location.href;
-
-            console.log("Submitting form to:", actionUrl); // Debug URL
-            console.log("Form Data:", [...formData.entries()]); // Debug form data
-
-            fetch(actionUrl, {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP status ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    if (data.success) {
-                        const inventoryItem = form.closest(".inventory-item");
-                        if (inventoryItem) inventoryItem.remove();
-
-                        const stockCountElement = document.getElementById("stock-count");
-                        if (stockCountElement) {
-                            stockCountElement.textContent = data.stock_count;
-                        }
-                    } else {
-                        console.error("Server error:", data.error);
-                        alert(data.error || "An error occurred.");
-                    }
-                })
-                .catch((error) => {
-                    console.error("Fetch error:", error);
-                    alert("An unexpected error occurred. Please try again.");
-                });
-        });
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    const toggleBtn = document.getElementById("toggleViewBtn");
-    const inventoryGrid = document.getElementById("inventoryGrid");
-
-    toggleBtn.addEventListener("click", function() {
-        inventoryGrid.classList.toggle("compact-view");
-        inventoryGrid.classList.toggle("comfortable-view");
-
-        // Save the current view preference to localStorage
-        const isCompact = inventoryGrid.classList.contains("compact-view");
-        localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
-    });
-
-    // Load the saved view preference on page load
-    const savedViewPreference = localStorage.getItem("inventoryViewPreference");
-    if (savedViewPreference === "compact") {
-        inventoryGrid.classList.remove("comfortable-view");
-        inventoryGrid.classList.add("compact-view");
     }
 });
-</script>
-	<!-- jquery -->
-     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-     <script src="{% static 'css/js/main.js' %}"></script>
-     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
-     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
-     <script src="{% static 'css/js/waypoints.js' %}"></script>
-	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
-     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
-     <script src="{% static 'css/js/sticker.js' %}"></script>
 
-</body>
-</html>
 

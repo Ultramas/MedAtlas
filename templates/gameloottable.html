@@ -359,7 +359,7 @@
 
 {% if user.is_staff %}
 <div class="containerev">
-    <h1>Loot Drop Table</h1>
+    <h1 style="text-align: center; left: 50%;">Loot Drop Table</h1>
     <div class="loot-grid">
         {% for item in choices %}
         <div class="loot-item" data-color="{{ item.get_color_display }}">
@@ -428,7 +428,7 @@
 {% else %}
 
 <div class="containerev">
-    <h1>Loot Drop Table</h1>
+    <h1 style="text-align: center; left: 50%;">Loot Drop Table</h1>
     <div class="loot-grid">
         {% for item in choices %}
         <div class="loot-item" data-color="{{ item.get_color_display }}">
