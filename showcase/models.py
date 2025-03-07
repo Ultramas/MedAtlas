@@ -1204,6 +1204,21 @@ class Ascension(models.Model):
         verbose_name_plural = "Ascensions"
 
 
+class Clickable(models.Model):
+    name = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='images/', verbose_name="Clickable Image")
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    value = models.IntegerField(default=0)
+    rarity = models.IntegerField(default=0) #set rarity to the odds of appearing per second
+    chance_per_thousand = models.IntegerField(default=1000) #chance to appear, formula is 1/chance_per_thousand per second
+    sound = models.FileField()
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+
 class SecretRoom(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     code = models.CharField(validators=[MinLengthValidator(24)], max_length=50)
@@ -1227,7 +1242,7 @@ class Endowment(models.Model):
     target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="target_user")
     order = models.ForeignKey(CurrencyOrder, on_delete=models.CASCADE)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     experience = models.ForeignKey(Experience, on_delete=models.CASCADE)
     experience_increase = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     is_active = models.IntegerField(default=1,
@@ -1257,7 +1272,7 @@ class EndowmentCurrency(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sender")
     endowment = models.ForeignKey(Endowment, on_delete=models.CASCADE, related_name="endowment")
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     @receiver(post_save, sender=Endowment)
     def create_endowment_currency(sender, instance, created, **kwargs):

@@ -687,7 +687,7 @@ p.blog-meta span {
   <main class="main-content" style="">
             <h1>My Profile - (<span id="stock-count">{{ user.username }}</span>)</h1>
 
-            <section id="inventoryGrid" class="inventory-grid comfortable-view">
+            <section id="inventoryGrid" class="inventory-grid comfortable-view" style="justify-content: center;">
 
                 {% if profile %}
                     {% if profile.avatar %}
@@ -698,7 +698,7 @@ p.blog-meta span {
                         </div>
                         <div class="pokemon-info">
 							<h3 class="pokemon-name">{{profile.user}}</h3>
-                            {% if newprofile.about_me %}
+                            {% if profile.about_me %}
                             <h5 class="excerpt" style=" color: rgba(255, 255, 255, 0.8);">About Me: {{ profile.about_me }}</h5>
                             {% else %}
                             <h5 class="excerpt" style=" color: rgba(255, 255, 255, 0.8);">About me coming soon!</h5>

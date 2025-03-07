@@ -24,7 +24,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
-    UserNotification, TopHits, Card
+    UserNotification, TopHits, Card, Clickable
 from .models import Idea
 from .models import VoteQuery
 from .models import StaffApplication
@@ -6550,7 +6550,6 @@ class NavView(ListView):
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)  # Fetch active logos
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
 
-        # Check and print the title field of each logo in the queryset
         print("navtrove here")
         for logo in context['Logo']:
             print("the logo is " + logo.title)
@@ -11359,7 +11358,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
                 withdraw.cards.add(inventory_object)  # Add the InventoryObject
 
             withdraw.number_of_cards = withdraw.cards.count()
-            withdraw.save()  # Update the number of cards
+            withdraw.save()
 
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # AJAX check
             stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
@@ -11433,6 +11432,36 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
             # Redirect to the trade inventory page
             return redirect('showcase:tradeinventory')
+
+
+
+@csrf_exempt
+def update_currency(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            clickable_name = data.get("clickable_name")
+
+            # Fetch the clickable object
+            clickable = Clickable.objects.get(name=clickable_name, is_active=1)
+
+            # Update the user's currency
+            user_profile = request.user.userprofile
+            user_profile.currency_amount += clickable.value
+            user_profile.save()
+
+            return JsonResponse({"success": True, "new_amount": user_profile.currency_amount})
+        except Clickable.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Invalid clickable."}, status=400)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request."}, status=400)
+
+
+def clickable_view(request):
+    clickables = Clickable.objects.filter(is_active=1).values("name", "image", "value", "chance_per_thousand")
+    return render(request, "navtrove.html", {"clickables": clickables})
 
 
 @method_decorator(login_required, name='dispatch')
@@ -16499,6 +16528,7 @@ class ProfileEditView(FormView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:

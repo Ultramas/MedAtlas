@@ -12,7 +12,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
-    TopHits, Address, Robot, Bet, LevelIcon
+    TopHits, Address, Robot, Bet, LevelIcon, Clickable
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -1744,6 +1744,17 @@ class WithdrawClassAdmin(admin.ModelAdmin):
 
 admin.site.register(WithdrawClass, WithdrawClassAdmin)
 
+
+class ClickableAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (' Clickable Information - Categorial Description', {
+            'fields': ('name', 'image', 'currency', 'condition', 'image_length', 'image_width', 'is_active',),
+            'classes': ('collapse',),
+        }),
+    )
+
+
+admin.site.register(Clickable, ClickableAdmin)
 
 class ExchangePrizeAdmin(admin.ModelAdmin):
     fieldsets = (
