@@ -17,14 +17,15 @@
                 </p>
                 <p class="product-description">{{ Inventory.description }}</p>
                             <div class="action-buttons">
-                <form id="sell-form-{{ Inventory.pk }}" action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post" class="ajax-form sell-form">
+                <form id="sell-form-{{ Inventory.pk }}" action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post" class="ajax-form sell-form" style="margin-bottom: 5px;">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="sell">
                     <input type="hidden" name="pk" value="{{ Inventory.pk }}">
                     <button type="submit" class="card-button add-button sell-button">Sell</button>
                 </form>
+
                                 <!-- Additional forms for withdraw and trade -->
-                                <form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' Inventory.pk %}" method="post" class="ajax-form withdraw-form">
+                                <form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' Inventory.pk %}" method="post" class="ajax-form withdraw-form" style="margin-bottom: 5px;">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="withdraw">
                     <input type="hidden" name="pk" value="{{ Inventory.pk }}">

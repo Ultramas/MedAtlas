@@ -12,7 +12,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
-    TopHits, Address, Robot, Bet, LevelIcon, Clickable
+    TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -221,7 +221,7 @@ class PollQuestionAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Question Information - Categorial Descriptions', {
             'fields': ('question_text', 'choice', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
     #inlines = [ChoiceInLine]
@@ -297,11 +297,11 @@ class StaffApplicationAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Staff Application Information - Staff Background Check', {
             'fields': ('name', 'overall_time_check', 'previous_role_time_check', 'strikes_check', 'read_requirements'),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Staff Application Information - Staff Candidate Input', {
             'fields': ('role', 'resume', 'why', 'how_better', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -313,7 +313,7 @@ class CardCategoryAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Card Category Application Information - Categorial Description', {
             'fields': ('category', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -325,7 +325,7 @@ class PartnerApplicationAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Partner Application Information - Categorial Description', {
             'fields': ('user', 'name', 'category', 'multi_category', 'description', 'resume', 'requirement_check', 'policy_check', 'voucher',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -338,7 +338,7 @@ class PunishmentAppealAdmin(admin.ModelAdmin):
         ('Punishment Appeal Information - Categorial Description', {
             'fields': (
                 'name', 'Rule_broken', 'Why_I_should_have_my_punishment_revoked', 'Additional_comments', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -350,11 +350,11 @@ class ReportIssueAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Report Issue Information - Categorial Description', {
             'fields': ('user', 'name', 'category', 'issue', 'Additional_comments', 'anonymous', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Report Issue Information - Image Description', {
             'fields': ('image', 'image_length', 'image_width',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -374,11 +374,11 @@ class StaffProfileAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Staff Profile Information - Categorial Description', {
             'fields': ('user', 'name', 'role_position', 'description', 'staff_feats', 'date_and_time', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Staff Profile Information - Image Description', {
             'fields': ('image', 'image_length', 'image_width',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     inlines = [SocialMediaInline]
@@ -391,7 +391,7 @@ class CurrencyOrderAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Order Item Information - Categorial Description', {
             'fields': ('user', 'ordered', 'quantity', 'items',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Order Item Information - Attributes', {
             'fields': ('slug', 'is_active'),
@@ -407,11 +407,11 @@ class CurrencyFullOrderAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Order Item Information - Order Outline', {
             'fields': ('user', 'items', 'itemhistory', 'coupon',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Order Item Information - Personal Information', {
             'fields': ('payment',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Order Item Information - Attributes', {
             'fields': ('ref_code', 'ordered_date', 'is_active'),
@@ -441,15 +441,15 @@ class TradeItemAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Trade Item Information - Categorial Description', {
             'fields': ('user', 'title', 'category', 'specialty', 'status', 'description', ),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Trade Item Information - Technical Description', {
             'fields': ('fees', 'value', 'condition', 'label', 'slug', 'relateditems', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Trade Item Information - Image Description', {
             'fields': ('image', 'image_length', 'image_width','length_for_resize', 'width_for_resize',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -461,7 +461,7 @@ class InventoryTradeOfferAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Inventory Trade Offer Information - Categorial Description', {
             'fields': ('initiator', 'receiver', 'offered_items', 'requested_items',  'final_cost', 'status', 'is_active', ),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -473,7 +473,7 @@ class TradeAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Trade Offer Information - Categorial Description', {
             'fields': ('trade_offers', 'users', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('timestamp',)
@@ -487,11 +487,11 @@ class TradeOfferAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Trade Offer Information - Categorial Description', {
             'fields': ('title', 'trade_items', 'estimated_trading_value', 'user', 'user2', 'trade_status', 'message', 'quantity'),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Trade Offer Information - Technical Description', {
             'fields': ('slug', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('slug', 'timestamp',)
@@ -504,11 +504,11 @@ class RespondingTradeOfferAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Trade Offer Information - Categorial Description', {
             'fields': ('offered_trade_items', 'wanted_trade_items', 'estimated_trading_value', 'user', 'user2', 'trade_status', 'message', 'quantity'),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Trade Offer Information - Technical Description', {
             'fields': ('is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('slug', 'timestamp',)
@@ -522,7 +522,7 @@ class NotificationAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Notification Information - Categorial Description', {
             'fields': ('user', 'message', 'content_type', 'object_id',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('created_at',)
@@ -534,7 +534,7 @@ class UserNotificationAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Notification Information - Categorial Description', {
             'fields': ('user', 'notification', 'is_read',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('created_at',)
@@ -603,7 +603,7 @@ class UserProfileAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Partner Application Information - Categorial Description', {
             'fields': ('user', 'stripe_customer_id', 'one_click_purchasing', 'currency', 'level', 'currency_amount', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -616,7 +616,7 @@ class GameHubAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Game Hub Information - Categorial Description', {
             'fields': ('name', 'type', 'image', 'filter', 'description', 'slug', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -624,41 +624,90 @@ class GameHubAdmin(admin.ModelAdmin):
 admin.site.register(GameHub, GameHubAdmin)
 
 
-from django.contrib import admin
 from django.utils.html import format_html
-
 
 class GameChoiceInline(admin.StackedInline):
     model = Choice
     extra = 1
+    fields = (
+        'user', 'choice_text', 'file', 'image_length', 'image_width',
+        'color', 'value', 'category', 'midcategory', 'subcategory', 'tier', 'rarity', 'condition', 'number_of_choice', 'is_active',
+    )
+    readonly_fields = ('mfg_date',)
+
+
+class GameChoiceMiddleInline(admin.TabularInline):
+    model = GameChoice
+    extra = 1
+    fields = ('game', 'choice', 'value', 'rarity', 'lower_nonce', 'upper_nonce', 'get_image',)
+    readonly_fields = ('value', 'rarity', 'get_image',)
+
+    def get_image(self, obj):
+        if obj.choice and getattr(obj.choice, 'image', None):
+            return format_html('<img src="{}" style="max-height:50px;"/>', obj.choice.image.url)
+        return "No Image"
+    get_image.short_description = "Image"
 
 
 class GameAdmin(admin.ModelAdmin):
-    inlines = [GameChoiceInline]
+    inlines = [GameChoiceInline, GameChoiceMiddleInline]
+
+    def save_related(self, request, form, formsets, change):
+        """Ensure GameChoice instances are saved properly when Game is saved."""
+        super().save_related(request, form, formsets, change)
+
+        game = form.instance
+        game_choices = GameChoice.objects.filter(game=game)
+
+        for game_choice in game_choices:
+            if game_choice.choice:
+                if game_choice.choice.total_number_of_choice and game_choice.choice.number_of_choice:
+                    if game_choice.choice.total_number_of_choice != 0:
+                        game_choice.choice.rarity = (Decimal(game_choice.choice.number_of_choice) /
+                                                            Decimal(game_choice.choice.total_number_of_choice)
+                                                    ) * Decimal(100)
+                    else:
+                        game_choice.choice.rarity = Decimal(0)
+
+                # Assign default currency if missing
+                if not game_choice.choice.currency:
+                    first_currency = Currency.objects.first()
+                    if first_currency:
+                        game_choice.choice.currency = first_currency
+
+                # Ensure nonce values are set
+                if game_choice.choice.lower_nonce is None:
+                    game_choice.choice.lower_nonce = random.randint(0, 1000000)
+                if game_choice.choice.upper_nonce is None:
+                    game_choice.choice.upper_nonce = random.randint(0, 1000000)
+
+                # Compute rarity based on nonce range
+                if game_choice.choice.upper_nonce is not None and game_choice.choice.lower_nonce is not None:
+                    rarity_value = (game_choice.choice.upper_nonce - game_choice.choice.lower_nonce) / 10000
+                    game_choice.choice.rarity = round(rarity_value, 6)
+
+                # Assign fallback values
+                if not game_choice.choice.choice_text and game_choice.choice.name:
+                    game_choice.choice.choice_text = game_choice.choice.name
+                if not game_choice.choice.value and game_choice.choice.price:
+                    game_choice.choice.value = game_choice.choice.price * 100
+                if not game_choice.choice.subcategory and game_choice.choice.subtypes:
+                    game_choice.choice.subcategory = game_choice.choice.subtypes
+
+                # Save the updated choice instance
+                game_choice.choice.save()
+
+            # Save the GameChoice instance itself
+            game_choice.save()
 
     def save_formset(self, request, form, formset, change):
-        # Save inline instances without committing immediately.
-        inline_instances = formset.save(commit=False)
-        for instance in inline_instances:
+        """Ensures GameChoice instances are saved properly."""
+        instances = formset.save(commit=False)
+        for instance in instances:
             if isinstance(instance, Choice):
-                # Set additional fields if needed.
                 instance.category = form.instance.category
-                instance.save()  # Ensure instance has a primary key.
+            instance.save()
         formset.save_m2m()
-
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        # Only display already linked choices in the admin widget.
-        if db_field.name == "choices":
-            object_id = request.resolver_match.kwargs.get('object_id')
-            if object_id:
-                try:
-                    game = Game.objects.get(pk=object_id)
-                    kwargs["queryset"] = game.choices.all()
-                except Game.DoesNotExist:
-                    kwargs["queryset"] = Choice.objects.none()
-            else:
-                kwargs["queryset"] = Choice.objects.none()
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     fieldsets = (
         ('Game Information - Categorial Description', {
@@ -667,7 +716,7 @@ class GameAdmin(admin.ModelAdmin):
                 'image', 'power_meter', 'slug', 'filter',
                 'player_made', 'player_inventory', 'daily', 'is_active'
             ),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Unlocking (Daily Games Only)', {
             'fields': ('unlocking_level', 'cooldown', 'locked',),
@@ -698,7 +747,7 @@ class TopHitsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Top Hits Information - Categorial Description', {
             'fields': ('user', 'game', 'choice', 'color', 'file', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('mfg_date',)
@@ -711,7 +760,7 @@ class BlackJackAdmin(admin.ModelAdmin):
     fieldsets = (
         ('BlackJack Game Information - Categorial Description', {
             'fields': ('name', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -723,7 +772,7 @@ class BlackJackWagerAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Wager Game Information - Categorial Description', {
             'fields': ('user_profile', 'amount', 'outcome',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('timestamp',)
@@ -741,11 +790,11 @@ class AchievementsAdmin(admin.ModelAdmin):
         }),
         ('Achievement Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width', 'display_image'),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Achievement Information - Technical Description', {
             'fields': ('is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('slug', 'display_image')
@@ -770,11 +819,11 @@ class EarnedAchievementsAdmin(admin.ModelAdmin):
         }),
         ('Earned Achievement Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Earned Achievement Information - Technical Description', {
             'fields': ('is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('slug',)
@@ -811,11 +860,11 @@ class TitledAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Page Title Information - Categorial Descriptions', {
             'fields': ('overtitle', 'page',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Page Title Information - Categorial Descriptions', {
             'fields': ('url', 'position', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -863,7 +912,7 @@ class ProductA(admin.ModelAdmin):
     fieldsets = (
         ('Item Information - Categorial Descriptions', {
             'fields': ('name', 'description', 'rating', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
     readonly_fields = ('mfg_date',)
@@ -883,7 +932,7 @@ class CityAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Item Information - Categorial Descriptions', {
             'fields': ('name', 'state',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
     list_display = (
@@ -921,11 +970,11 @@ class OrderAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Order Item Information - Order Outline', {
             'fields': ('user', 'items', 'itemhistory', 'coupon', 'orderprice', 'currencyorderprice',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Order Item Information - Personal Information', {
             'fields': ('shipping_address', 'billing_address', 'payment',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Order Item Information - Attributes', {
             'fields': ('ref_code', 'feedback_url', 'ordered_date', 'is_active'),
@@ -945,7 +994,7 @@ class PaymentAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Order Item Information - Categorial Description', {
             'fields': ('user', 'amount', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('stripe_charge_id', 'timestamp',)
@@ -958,7 +1007,7 @@ class DegeneratePlaylistLibraryAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Degenerate Playist Library Information - Categorial Description', {
             'fields': ('user', 'title', 'category', 'artist', 'audio_file', 'audio_img', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('created_at',)
@@ -971,7 +1020,7 @@ class DegeneratePlaylistAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Degenerate Playist Information - Categorial Description', {
             'fields': ('user', 'song', 'artist', 'audio_file', 'audio_img', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('created_at',)
@@ -1049,7 +1098,7 @@ class FeedbackAdmin(admin.ModelAdmin):
         }),
         ('Feedback Information - Read-only Fields', {
             'fields': ('slug', 'username'),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -1061,12 +1110,12 @@ class HyperlinkBaseAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Hyperlink Information - Text Display', {
             'fields': ('display_text',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Hyperlink Information - Image Display', {
             'fields': (
                 'display_image', 'alternate', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Hyperlink Information - Attributes', {
             'fields': ('hyperlink', 'section', 'page', 'hyperlink_type', 'is_active'),
@@ -1083,11 +1132,11 @@ class OrderItemAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Order Item Information - Categorial Description', {
             'fields': ('user', 'ordered', 'quantity', 'item', 'orderprice', 'currencyorderprice',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Order Item Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Order Item Information - Attributes', {
             'fields': ('slug', 'is_active'),
@@ -1103,11 +1152,11 @@ class OrderItemFieldAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Order Item Field Information - Categorial Description', {
             'fields': ('user', 'ordered', 'quantity', 'item',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Order Item Field Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
         ('Order Item Field Information - Attributes', {
             'fields': ('slug', 'is_active'),
@@ -1175,7 +1224,7 @@ class ItemFilterAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Item Information - Categorial Descriptions', {
             'fields': ('product_filter', 'clicks', 'image', 'category', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1188,23 +1237,23 @@ class ItemAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Item Information - Categorial Descriptions', {
             'fields': ('user', 'title', 'is_currency_based', 'category', 'label', 'slug', 'description', 'specialty',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Item Information - Prices', {
             'fields': ('price', 'discount_price',),
-            'classes': ('collapse',),  # Open by default
+            'classes': ('open',),
         }),
         ('Item Information - Currency Prices', {
             'fields': ('currency', 'currency_price', 'discount_currency_price',),
-            'classes': ('collapse',),  # Open by default
+            'classes': ('open',),
         }),
         ('Item Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Item Information - Related Items', {
             'fields': ('relateditems',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1222,7 +1271,7 @@ class QuickItemAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Quick Item Information - Categorial Descriptions', {
             'fields': ('user', 'item', 'price', 'discount_price', 'image', 'image_length', 'image_width', 'quantity', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1234,7 +1283,7 @@ class UploadACardAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Item Information - Categorial Descriptions', {
             'fields': ('user', 'name', 'image', 'public', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1246,7 +1295,7 @@ class InviteCodeAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Item Information - Categorial Descriptions', {
             'fields': ('code','user', 'created_at', 'permalink', 'expire_time', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1258,11 +1307,11 @@ class LogoBaseAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Logo Information - Categorial Descriptions', {
             'fields': ('title', 'hyperlink', 'section', 'page', 'alternate',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Logo Information - Logo Image Display', {
             'fields': ('logocover', 'logo_length', 'logo_width', 'length_for_resize', 'width_for_resize', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1280,7 +1329,7 @@ class BlogHeaderAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Blog Header Information - Categorial Descriptions', {
             'fields': ('category', 'image', 'position', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1298,7 +1347,7 @@ class BlogFilterAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Blog Information - Categorial Descriptions', {
             'fields': ('blog_filter', 'clicks', 'image', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1310,16 +1359,16 @@ class BlogAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Blog Information - Categorial Descriptions', {
             'fields': ('title', 'slug', 'type', 'author', 'content', 'filters', 'position', 'category', 'minute_read', 'status', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Blog Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
 
         ('Blog Information - Likes/Dislikes', {
             'fields': ('likes', 'dislikes',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
     readonly_fields = ('updated_on', 'created_on',)
@@ -1338,11 +1387,11 @@ class TextBaseAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Text Base Information - Categorial Descriptions', {
             'fields': ('text', 'page', 'url', 'created_at', 'text_color',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Text Base  Information - Attributes', {
             'fields': ('header_or_textfield', 'section', 'text_size', 'hyperlink', 'is_active'),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
     list_display = (
@@ -1384,15 +1433,15 @@ class EventAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Event Information - Categorial Descriptions', {
             'fields': ('user', 'name', 'category', 'numeric_quantifier', 'qualitative_qualifier', 'description', 'section', 'page',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Event Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Event  Information - Attributes', {
             'fields': ('date', 'time', 'date_and_time', 'slug', 'anonymous', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
     # Other configurations for your admin
@@ -1406,16 +1455,16 @@ class FaviconBaseAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Event Information - Categorial Descriptions', {
             'fields': ('favicontitle', 'faviconlink',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
 
         ('Event  Information - Image Display', {
             'fields': ('faviconcover', 'favicon_length', 'favicon_width', 'length_for_resize', 'width_for_resize',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Event  Information - Attributes', {
             'fields': ('faviconpage', 'faviconurl', 'faviconsizes', 'faviconrelationship', 'favicontype', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1433,7 +1482,7 @@ class FrequentlyAskedQuestionsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Administration Role Information', {
             'fields': ('question', 'position', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1445,18 +1494,18 @@ class AdvertisementBaseAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Advertisement Base Information - Categorial Descriptions', {
             'fields': ('advertisementtitle', 'page', 'type',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Advertisement Base Information - Advertisement', {
             'fields': (
                 'advertisement', 'advertisement_length', 'advertisement_width', 'length_for_resize', 'width_for_resize',
                 'advertisement_file', 'xposition', 'yposition',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Advertisement Base  Information - Attributes', {
             'fields': (
                 'advertisement_position', 'relevance', 'correlating_product', 'advertisement_hyperlink', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1474,15 +1523,15 @@ class NewsFeedAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Advertisement Base Information - Categorical Descriptions', {
             'fields': ('user', 'name', 'title', 'category', 'description', 'anonymous',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Advertisement Base Information - Advertisement', {
             'fields': ('image', 'image_length', 'image_width',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Advertisement Base  Information - Attributes', {
             'fields': ('slug', 'position', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
     readonly_fields = ('date_and_time',)
@@ -1502,7 +1551,7 @@ class MemeTextFieldAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Meme Text Information - Categorial Descriptions', {
             'fields': ('meme', 'text', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1515,11 +1564,11 @@ class MemeAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Meme Information - Categorial Descriptions', {
             'fields': ('user', 'title', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Event Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
     readonly_fields = ('uploaded_at',)
@@ -1532,15 +1581,15 @@ class ShufflerAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Shuffler Information - Categorial Descriptions', {
             'fields': ('question', 'choice_text', 'choices', 'category', 'heat', 'shuffletype',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Shuffler Information - Attributes', {
             'fields': ('cost', 'currency', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Shuffler Information - Image Display', {
             'fields': ('file', 'image_length', 'image_width',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1554,7 +1603,7 @@ class ShuffleTypeAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Shuffle Type Information - Categorial Descriptions', {
             'fields': ('name', 'type', 'circumstance', 'game_mode', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1567,15 +1616,15 @@ class CurrencyAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Currency Information - Categorial Descriptions', {
             'fields': ('name', 'flavor_text',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Currency Information - Attributes', {
             'fields': ('code', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Currency Information - Image Display', {
             'fields': ('file', 'image_length', 'image_width',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1589,15 +1638,15 @@ class CurrencyMarketAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Currency Information - Categorial Descriptions', {
             'fields': ('name', 'currency', 'amount', 'price', 'discount_price', 'unit_ratio', 'flavor_text',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Shuffler Information - Attributes', {
             'fields': ('slug', 'deal', 'label', 'mfg_date', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Shuffler Information - Image Display', {
             'fields': ('file', 'image_length', 'image_width',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1611,11 +1660,11 @@ class SellerApplicationAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Seller Application Information - Categorial Descriptions', {
             'fields': ('user', 'age', 'email', 'email_verified', 'accepted'),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Seller Application Information - Image Display', {
             'fields': ('identification',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1627,7 +1676,7 @@ class AdministrationRoleAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Administration Role Information', {
             'fields': ('role', 'role_description', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -1639,15 +1688,19 @@ class ChoiceAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Choice Information - Categorial Descriptions', {
             'fields': ('user', 'choice_text', 'category', 'tier',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Choice Information - Attributes', {
             'fields': ('votes', 'mfg_date', 'rarity', 'condition', 'number_of_choice', 'total_number_of_choice', 'value', 'number', 'prizes', 'generated_nonce','is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
+        }),
+        ('Choice Information - Card API Information', {
+            'fields': ('card_id', 'name', 'supertype', 'subtypes', 'hp', 'types', 'evolves_to', 'rules', 'attacks', 'weaknesses', 'retreat_cost', 'set_name', 'set_series', 'set_release_date', 'image_small', 'image_large','price',),
+            'classes': ('collapse-open',),
         }),
         ('Choice Information - Image Display', {
             'fields': ('file', 'image_length', 'image_width',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
     #inlines = [Prizes]
@@ -1670,7 +1723,7 @@ class InventoryAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Inventory Application Information - Categorial Description', {
             'fields': ('user', 'name', 'number_of_cards', 'image', 'image_length', 'image_width', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -1682,7 +1735,7 @@ class InventoryObjectAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Inventory Application Information - Categorial Description', {
             'fields': ('user', 'inventory', 'choice', 'choice_text', 'currency', 'price', 'trade_locked', 'condition', 'image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -1694,7 +1747,7 @@ class WithdrawAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Withdraws - Categorial Description', {
             'fields': ('user', 'cards', 'number_of_cards', 'shipping_state', 'fees', 'slag', 'condition', 'status', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('date_and_time',)
@@ -1736,7 +1789,7 @@ class WithdrawClassAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Withdraw Classes - Categorial Description', {
             'fields': ('user', 'withdraw', 'number_of_cards', 'fees', 'currency', 'status', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('date_and_time',)
@@ -1749,7 +1802,7 @@ class ClickableAdmin(admin.ModelAdmin):
     fieldsets = (
         (' Clickable Information - Categorial Description', {
             'fields': ('name', 'image', 'currency', 'condition', 'image_length', 'image_width', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -1760,7 +1813,7 @@ class ExchangePrizeAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Exchange Prize Information - Categorial Description', {
             'fields': ('prize', 'name', 'value', 'currency', 'condition', 'image_length', 'image_width', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
 
@@ -1772,7 +1825,7 @@ class CommerceExchangeAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Commerce Exchange Information - Categorial Description', {
             'fields': ('user', 'usercard', 'total_usercard_value', 'prizes', 'total_prize_value', 'value_descrepancy', 'currency', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('mfg_date',)
@@ -1785,15 +1838,15 @@ class AdministrationTaskAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Administration Task Information - Categorial Descriptions', {
             'fields': ('task', 'hyperlink',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Administration Task Information - Attributes', {
             'fields': ('opennew', 'section', 'page_name',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Administration Task Information - Image Display', {
             'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize', 'alternate',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
     )
 
@@ -2204,41 +2257,41 @@ class FormBaseAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Form Base Information - Categorial Descriptions', {
             'fields': ('user', 'form_name', 'form_type', 'text', 'image', 'is_active',),
-            'classes': ('collapse-open',),  # Open by default
+            'classes': ('collapse-open',),
         }),
         ('Form Base Information - Multiple Choice', {
             'fields': ('correct_answer_multiple_choice',),
-            'classes': ('collapse',),  # Open by default
+            'classes': ('open',),
         }),
 
         ('Form Base Information - Short Answer', {
             'fields': ('correct_answer_short_answer',),
-            'classes': ('collapse',),  # Open by default
+            'classes': ('open',),
             # answers may vary
         }),
         ('Form Base Information - Free Response', {
             'fields': ('correct_answer_free_response',),
-            'classes': ('collapse',),  # Open by default
+            'classes': ('open',),
             # answers may vary
         }),
 
         ('Form Base Information - True or False', {
             'fields': ('correct_answer_true_false',),
-            'classes': ('collapse',),  # Open by default
+            'classes': ('open',),
         }),
         ('Form Base Information - Image Display', {
             'fields': ('correct_answer_image_field',),
-            'classes': ('collapse',),  # Open by default
+            'classes': ('open',),
             # answers may vary
         }),
         ('Form Base Information - Decimal Field', {
             'fields': ('correct_answer_decimal_field',),
-            'classes': ('collapse',),  # Open by default
+            'classes': ('open',),
             # answers may vary
         }),
         ('Form Base Information - Infinite Decimal Field', {
             'fields': ('correct_answer_infinite_decimal_field',),
-            'classes': ('collapse',),  # Open by default
+            'classes': ('open',),
             # answers may vary
         }),
     )
@@ -2335,7 +2388,7 @@ class AscensionAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Ascension Information - Categorial Description', {
             'fields': ('user', 'ascension', 'flavor_text', 'final_level', 'reward', 'is_active',),
-            'classes': ('collapse',),
+            'classes': ('open',),
         }),
     )
     readonly_fields = ('ascension_number',)

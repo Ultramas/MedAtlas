@@ -1,7 +1,7 @@
 
 import requests
 from django.core.management.base import BaseCommand
-from showcase.models import Card
+from showcase.models import Choice
 
 class Command(BaseCommand):
     help = 'Fetch Pokémon cards from the Pokémon TCG API'
@@ -9,13 +9,13 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         api_url = 'https://api.pokemontcg.io/v2/cards'
         headers = {
-            'X-Api-Key': 'POKEMON_API_KEY'  # Replace with your actual API key
+            'X-Api-Key': 'POKEMON_API_KEY'
         }
         response = requests.get(api_url, headers=headers)
         if response.status_code == 200:
             cards_data = response.json().get('data', [])
             for card_data in cards_data:
-                card, created = Card.objects.update_or_create(
+                card, created = Choice.objects.update_or_create(
                     card_id=card_data['id'],
                     defaults={
                         'name': card_data.get('name'),

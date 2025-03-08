@@ -11345,6 +11345,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         inventory_object.save()
 
         user = request.user
+        new_withdraw = False
         with transaction.atomic():
             withdraw = Withdraw.objects.filter(
                 user=user, is_active=1, shipping_state='S', number_of_cards__lt=25
@@ -11354,8 +11355,10 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
                 withdraw.cards.add(inventory_object)
             else:
                 withdraw = Withdraw.objects.create(user=user, is_active=1, shipping_state='S')
-                withdraw.save()  # Save the object to generate an ID
-                withdraw.cards.add(inventory_object)  # Add the InventoryObject
+                withdraw.save()
+                withdraw.cards.add(inventory_object)
+
+                new_withdraw = True
 
             withdraw.number_of_cards = withdraw.cards.count()
             withdraw.save()
@@ -11364,7 +11367,8 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
             return JsonResponse({
                 'success': True,
-                'stock_count': stock_count})
+                'stock_count': stock_count,
+                'new_withdraw': new_withdraw})
         return redirect('showcase:inventory')
 
     def sell_inventory_object(self, request, pk):
@@ -11397,10 +11401,8 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         })
 
     def move_to_trade(self, request, pk):
-        # Fetch the InventoryObject instance by primary key
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
-        # Check if the user owns the inventory object
         if inventory_object.user != request.user:
             messages.error(request, 'You cannot trade items you do not own!')
             return redirect('showcase:inventory')
@@ -11424,15 +11426,55 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
                 image_width=inventory_object.image_width,
                 length_for_resize=inventory_object.length_for_resize,
                 width_for_resize=inventory_object.width_for_resize,
-                description=f"Automatically moved to trade by {user.username}"  # Example description
+                description=f"Automatically moved to trade by {user.username}"
             )
 
-            # Delete the inventory object after creating the trade item
             inventory_object.delete()
 
             # Redirect to the trade inventory page
             return redirect('showcase:tradeinventory')
 
+
+@csrf_exempt
+def withdraw_cost(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            withdraw_id = data.get("withdraw_id")
+            if not withdraw_id:
+                return JsonResponse({"success": False, "error": "Withdraw ID not provided."})
+
+            # Note: use the correct model name "Withdraw" instead of "Withdrawal"
+            withdraw = get_object_or_404(Withdraw, pk=withdraw_id)
+
+            # Get the fee from the withdraw instance (using the "fees" field)
+            cost = withdraw.fees
+
+            # Get the user's profile
+            profile = ProfileDetails.objects.filter(user=request.user).first()
+            if not profile:
+                return JsonResponse({"success": False, "error": "User profile not found."})
+
+            if profile.currency_amount < cost:
+                return JsonResponse({"success": False, "error": "Insufficient currency."})
+
+            # Deduct the cost
+            profile.currency_amount -= cost
+            profile.save()
+
+            return JsonResponse({
+                "success": True,
+                "message": f"Withdraw charged {cost} {profile.currency.name}",
+                "updated_currency_amount": profile.currency_amount,
+                "currency_name": profile.currency.name
+            })
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON."})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    return JsonResponse({"success": False, "error": "Invalid request method."})
 
 
 @csrf_exempt
@@ -11442,10 +11484,8 @@ def update_currency(request):
             data = json.loads(request.body)
             clickable_name = data.get("clickable_name")
 
-            # Fetch the clickable object
             clickable = Clickable.objects.get(name=clickable_name, is_active=1)
 
-            # Update the user's currency
             user_profile = request.user.userprofile
             user_profile.currency_amount += clickable.value
             user_profile.save()
@@ -11826,13 +11866,11 @@ class GameChestBackgroundView(BaseView):
             context['user_cash'] = None
             context['total_cost'] = None
 
-        # Retrieve 'button_type' from the request
         button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
 
-        # Determine cost based on button type
-        if button_type == "start2":  # If Demo Spin is pressed
+        if button_type == "start2":
             cost = 0
-        else:  # If normal Spin is pressed
+        else:
             cost = game.discount_cost if game.discount_cost else game.cost
 
         context.update({
@@ -11914,7 +11952,6 @@ class GameChestBackgroundView(BaseView):
         context['spin_preference_form'] = spinform
 
         if user.is_authenticated:
-            # Determine the random amount based on quick_spin preference
             if spinpreference.quick_spin:
                 random_amount = random.randint(500, 1000)
             else:
@@ -11926,11 +11963,9 @@ class GameChestBackgroundView(BaseView):
         context['range_random_amount'] = range(random_amount)
         print(str('the random amount is ') + str(random_amount))
 
-        # Generate a list of random nonces
         random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
         context['random_nonces'] = random_nonces
 
-        # Create a list to store choices matched with the generated nonces
         choices_with_nonce = []
         for nonce in random_nonces:
             for choice in choices:
@@ -11950,7 +11985,6 @@ class GameChestBackgroundView(BaseView):
 
         context['choices_with_nonce'] = choices_with_nonce
 
-        # Get the game_id from the URL kwargs
         game_id = self.kwargs.get('slug')
 
         # Retrieve the Game object
@@ -16634,12 +16668,11 @@ class SignupView(FormMixin, ListView):
                 user = form.save()
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 subject = "Welcome to PokeTrove!"
-                message = 'Hello {{user.username}}, thank you for becoming a member of the PokeTrove Community!'
+                message = f"Hello {user.username}, thank you for becoming a member of the PokeTrove Community!"
                 email_from = settings.EMAIL_HOST_USER
                 recipent_list = [user.email, ]
                 send_mail(subject, message, email_from, recipent_list)
 
-                # redirect user to home page
                 return redirect('showcase:showcase')
                 messages.info(request, "You have signed up successfully! Welcome!")
         else:

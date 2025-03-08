@@ -587,9 +587,34 @@ nav.main-menu ul li a {
     z-index: 100;
 }
 
+          .withdraw-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+  .popup-content {
+    text-align: center;
+  }
     </style>
 </head>
 <body>
+<div id="withdraw-popup" class="withdraw-popup">
+  <div class="popup-content">
+    <h2>Confirm Withdrawal</h2>
+    <p>The shipping fee is <strong>599 rubies</strong>. Do you wish to proceed?</p>
+    <div class="popup-buttons">
+      <button id="confirm-withdraw">Yes, proceed</button>
+      <button id="cancel-withdraw">No, cancel</button>
+    </div>
+  </div>
+</div>
 
 
 <script>
@@ -633,13 +658,54 @@ nav.main-menu ul li a {
             },
         })
             .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('stock-count').textContent = data.number_of_cards;
-                } else {
-                    console.error(data.error);
-                }
-            });
+            .then((data) => {
+            if (data.new_withdraw) {
+              console.log('shipping fee charged 599');
+              alert("Shipping fee is 599 rubies.");
+
+              const popup = document.getElementById("withdraw-popup");
+              popup.style.display = "block";
+
+              const withdrawId = data.withdraw_id;
+
+              document.getElementById("confirm-withdraw").onclick = function() {
+                fetch('/withdraw_cost/', { // Adjust the URL to your actual endpoint
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'), // Or a function to fetch the token
+                  },
+                  body: JSON.stringify({ withdraw_id: withdrawId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    const inventoryItem = form.closest(".gridCardItem");
+                    if (inventoryItem) inventoryItem.remove();
+
+                    const stockCountElement = document.getElementById("stock-count");
+                    if (stockCountElement) {
+                        stockCountElement.textContent = data.stock_count;
+                    }
+                  } else {
+                    alert(data.error);
+                  }
+                  popup.style.display = "none";
+                })
+                .catch(error => {
+                  console.error("Error:", error);
+                  popup.style.display = "none";
+                });
+              };
+
+              // Set up the cancel button to just hide the popup
+              document.getElementById("cancel-withdraw").onclick = function() {
+                popup.style.display = "none";
+              };
+            }
+
+        });
+
     }
 </script>
 
@@ -818,13 +884,29 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
                 .then((data) => {
                     if (data.success) {
-                        const inventoryItem = form.closest(".gridCardItem");
-                        if (inventoryItem) inventoryItem.remove();
+                        console.log('withdraw here')
+                        if (data.new_withdraw) {
+                            console.log('shipping fee charged 599')
+                            alert("Shipping fee is 599 rubies.");
+                            document.getElementById("withdraw-popup").style.display = "block";
+                            const inventoryItem = form.closest(".gridCardItem");
+                                    if (inventoryItem) inventoryItem.remove();
 
-                        const stockCountElement = document.getElementById("stock-count");
-                        if (stockCountElement) {
-                            stockCountElement.textContent = data.stock_count;
+                                    const stockCountElement = document.getElementById("stock-count");
+                                    if (stockCountElement) {
+                                        stockCountElement.textContent = data.stock_count;
+                                    }
                         }
+                        else {
+                            const inventoryItem = form.closest(".gridCardItem");
+                            if (inventoryItem) inventoryItem.remove();
+
+                            const stockCountElement = document.getElementById("stock-count");
+                            if (stockCountElement) {
+                                stockCountElement.textContent = data.stock_count;
+                            }
+                    }
+
                     } else {
                         console.error("Server error:", data.error);
                         alert(data.error || "An error occurred.");

@@ -2817,10 +2817,15 @@ class Game(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     cost = models.IntegerField(default=0, blank=True, null=True)
     discount_cost = models.IntegerField(blank=True, null=True)
-    #choices = models.ManyToManyField('Choice', blank=True, related_name="gamechoices")
-    type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
+    type = models.ForeignKey(GameHub, on_delete=models.CASCADE, blank=True, null=True)
     category = models.CharField(max_length=2,
                                 choices=CARD_CATEGORIES, blank=True, null=True)
+    choices = models.ManyToManyField(
+        'Choice',
+        through='GameChoice',
+        blank=True,
+        related_name="api_set_cards"
+    )
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     power_meter = models.CharField(choices=POWER, max_length=4, default=1)
     items = models.ManyToManyField(PrizePool, related_name='official_items', blank=True)
@@ -2850,9 +2855,14 @@ class Game(models.Model):
             raise ValidationError("An unlocking level must be set for daily games.")
 
     def save(self, *args, **kwargs):
-        self.full_clean()  # Trigger validation
+        self.full_clean()
+        if not self.type:
+            first_gamehub = GameHub.objects.first()
+            if first_gamehub:
+                self.type = first_gamehub
+        if self.cost:
+            self.cost = self.cost * 1.05
 
-        # Generate slug if missing.
         if not self.slug:
             base_slug = slugify(self.name)
             slug = base_slug
@@ -2862,11 +2872,9 @@ class Game(models.Model):
                 slug = f"{base_slug}-{num}"
             self.slug = slug
 
-        # Set default discount cost for daily games.
         if self.daily and not self.discount_cost:
             self.discount_cost = 0
 
-        # Save the instance (so it gets a primary key).
         super().save(*args, **kwargs)
 
         total_cost = 0
@@ -2894,7 +2902,6 @@ class Game(models.Model):
         if self.daily:
             self.locked = not (current_time_pst >= self.cooldown)
 
-        # Save the updates.
         super().save(*args, **kwargs)
 
 
@@ -3021,6 +3028,49 @@ class Game(models.Model):
         verbose_name_plural = "Games"
 
 
+class GameChoice(models.Model):
+    game = models.ForeignKey('Game', on_delete=models.CASCADE)
+    choice = models.ForeignKey('Choice', on_delete=models.CASCADE)
+    value = models.IntegerField(blank=True, null=True)
+    rarity = models.DecimalField(max_digits=9, decimal_places=6, help_text="Rarity of choice in percent (optional).",
+                                 blank=True, null=True,
+                                 verbose_name="Rarity (%)")
+    lower_nonce = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(1000000)],
+        help_text="Lower bound nonce of Choice"
+    )
+    upper_nonce = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(1000000)],
+        help_text="Upper bound nonce of Choice"
+    )
+
+    class Meta:
+        unique_together = (('game', 'choice'),)
+
+    def save(self, *args, **kwargs):
+        if self.choice.total_number_of_choice and self.choice.number_of_choice:
+            if self.choice.total_number_of_choice != 0:
+                self.choice.rarity = (Decimal(self.number_of_choice) / Decimal(self.total_number_of_choice)) * Decimal(100)
+            else:
+                self.choice.rarity = Decimal(0)
+
+        if not self.choice.currency:
+            first_currency = Currency.objects.first()
+            if first_currency:
+                self.choice.currency = first_currency
+
+
+        # Calculate rarity if both upper_nonce and lower_nonce are present
+        if self.upper_nonce is not None and self.lower_nonce is not None:
+            rarity_value = (self.upper_nonce - self.lower_nonce) / 10000
+            self.rarity = round(rarity_value, 6)
+
+        if not self.value and self.choice.price:
+            self.value = self.choice.price * 100
+            print('save committed of value')
+        print('save committed of gamechoice')
+        super().save(*args, **kwargs)
+
 class Choice(models.Model):
     """Used for voting on different new ideas"""
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
@@ -3037,6 +3087,8 @@ class Choice(models.Model):
     value = models.IntegerField(default=0)
     category = models.CharField(max_length=2,
                                 choices=CARD_CATEGORIES, blank=True, null=True)
+    midcategory = models.CharField(max_length=200, help_text='Middle category of choice.',
+                                   blank=True, null=True)
     subcategory = models.CharField(max_length=200, help_text='Subcategory of choice (Pokemon, trainers, etc.).',
                                    blank=True, null=True)
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
@@ -3071,11 +3123,30 @@ class Choice(models.Model):
     )
     nodes = models.IntegerField(help_text="Number of the choice included", blank=True, null=True,
                                 verbose_name="Quantity Displayed")
-    value = models.IntegerField(help_text="Value of item in Rubicoins.", blank=True,
-                                null=True, verbose_name="Value (Rubicoins)")
+    value = models.IntegerField(help_text="Value of item in Rubies.", blank=True,
+                                null=True, verbose_name="Value (Rubies)")
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True, )
     number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)", blank=True, null=True,
                                  default=1)
+    #card attributes (direct from Pokemon API)
+    card_id = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, null=True, blank=True)
+    supertype = models.CharField(max_length=50, null=True, blank=True)
+    subtypes = models.CharField(max_length=100, null=True, blank=True)
+    hp = models.CharField(max_length=10, null=True, blank=True)
+    types = models.CharField(max_length=100, null=True, blank=True)
+    evolves_to = models.CharField(max_length=100, null=True, blank=True)
+    rules = models.TextField(null=True, blank=True)
+    attacks = models.TextField(null=True, blank=True)
+    weaknesses = models.TextField(null=True, blank=True)
+    retreat_cost = models.CharField(max_length=50, null=True, blank=True)
+    set_name = models.CharField(max_length=100, null=True, blank=True)
+    set_series = models.CharField(max_length=100, null=True, blank=True)
+    set_release_date = models.DateField(null=True, blank=True)
+    image_small = models.URLField(null=True, blank=True)
+    image_large = models.URLField(null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -3114,6 +3185,16 @@ class Choice(models.Model):
         if self.upper_nonce is not None and self.lower_nonce is not None:
             rarity_value = (self.upper_nonce - self.lower_nonce) / 10000
             self.rarity = round(rarity_value, 6)  # Set rarity with up to 6 decimal places
+
+
+        if not self.choice_text and self.name:
+            self.choice_text = self.name
+        if self.value:
+            self.value = self.value * 1.05 #0.05% increase on market
+        if not self.value and self.price:
+            self.value = self.price * 105 #0.05% increase on market
+        if not self.subcategory and self.subtypes:
+            self.subcategory = self.subtypes
 
         super().save(*args, **kwargs)
 
@@ -6072,8 +6153,8 @@ class GameHistory(models.Model):
         verbose_name="image width"
     )
     plays = models.IntegerField(help_text="Number of plays", blank=True, null=True)
-    value = models.IntegerField(help_text="Value of item in Rubicoins.", blank=True,
-                                null=True, verbose_name="Value (Rubicoins)")
+    value = models.IntegerField(help_text="Value of item in Rubies.", blank=True,
+                                null=True, verbose_name="Value (Rubies)")
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True, )
     number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)", blank=True, null=True,
                                  default=1)
