@@ -2,7 +2,7 @@ import os
 import string
 import uuid
 from datetime import timedelta, time, datetime
-
+import requests
 from django.utils import timezone
 from uuid import uuid4
 
@@ -29,7 +29,7 @@ from django.db import connection
 from decimal import ROUND_UP
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
-
+from django.core.files.base import ContentFile
 # from image.utils import render
 
 CATEGORY_CHOICES = (
@@ -2820,12 +2820,9 @@ class Game(models.Model):
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE, blank=True, null=True)
     category = models.CharField(max_length=2,
                                 choices=CARD_CATEGORIES, blank=True, null=True)
-    choices = models.ManyToManyField(
-        'Choice',
-        through='GameChoice',
-        blank=True,
-        related_name="api_set_cards"
-    )
+    existing_choices = models.ManyToManyField('Choice', related_name='games', blank=True)
+
+
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     power_meter = models.CharField(choices=POWER, max_length=4, default=1)
     items = models.ManyToManyField(PrizePool, related_name='official_items', blank=True)
@@ -2842,7 +2839,8 @@ class Game(models.Model):
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+                                    choices=((1, 'Active'), (0, 'Inactive')),
+                                    verbose_name="Set active?")
 
     def __str__(self):
         return str(self.name)
@@ -2927,10 +2925,8 @@ class Game(models.Model):
         if not self.daily:
             raise ValueError("This game is not configured as daily.")
 
-        # Get the current cycle start and time
         cycle_start, current_time_pst = self._get_pst_time()
 
-        # Check if the user has already spun during the current cycle
         existing_spin = DailySpin.objects.filter(user=user, cooldown=cycle_start).first()
 
         if existing_spin:
@@ -3076,12 +3072,16 @@ class Choice(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     choice_text = models.CharField(max_length=200, verbose_name='Name', blank=True, null=True)
     file = models.FileField(null=True, verbose_name='File', blank=True)
-    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                               help_text='Original length of the advertisement (use for original ratio).',
-                                               verbose_name="image length")
-    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
-                                              help_text='Original width of the advertisement (use for original ratio).',
-                                              verbose_name="image width")
+    image_length = models.PositiveIntegerField(
+        blank=True, null=True, default=100,
+        help_text='Original length of the advertisement (use for original ratio).',
+        verbose_name="image length"
+    )
+    image_width = models.PositiveIntegerField(
+        blank=True, null=True, default=100,
+        help_text='Original width of the advertisement (use for original ratio).',
+        verbose_name="image width"
+    )
     color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
     votes = models.IntegerField(default=0)
     value = models.IntegerField(default=0)
@@ -3093,42 +3093,47 @@ class Choice(models.Model):
                                    blank=True, null=True)
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     tier = models.CharField(choices=LEVEL, max_length=1, blank=True, null=True)
-    rarity = models.DecimalField(max_digits=9, decimal_places=6, help_text="Rarity of choice in percent (optional).",
-                                 blank=True, null=True,
-                                 verbose_name="Rarity (%)")  # use the rarity field to determine the amount of times the item pops up
+    rarity = models.DecimalField(
+        max_digits=9, decimal_places=6,
+        help_text="Rarity of choice in percent (optional).",
+        blank=True, null=True,
+        verbose_name="Rarity (%)"
+    )
     prizes = models.ForeignKey(PrizePool, on_delete=models.CASCADE, blank=True, null=True)
     shufflers = models.ForeignKey(Shuffler, on_delete=models.CASCADE, blank=True, null=True)
     condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2, blank=True, null=True)
     number_of_choice = models.IntegerField(default=1)
-    total_number_of_choice = models.IntegerField(blank=True,
-                                                 null=True)  # make it pull from the total_number_of_choice field in the related PrizePool
+    total_number_of_choice = models.IntegerField(blank=True, null=True)
     lower_nonce = models.IntegerField(
         validators=[MaxValueValidator(1000000), MinValueValidator(0)],
         help_text="Lower bound nonce of Choice",
-        blank=True,
-        null=True
+        blank=True, null=True
     )
     upper_nonce = models.IntegerField(
         validators=[MaxValueValidator(1000000), MinValueValidator(0)],
         help_text="Upper bound nonce of Choice",
-        blank=True,
-        null=True
+        blank=True, null=True
     )
     generated_nonce = models.IntegerField(
         validators=[MaxValueValidator(1000000), MinValueValidator(0)],
         help_text="Do NOT fill out manually.",
-        blank=True,
-        null=True,
+        blank=True, null=True,
         verbose_name='Generated Nonce'
     )
-    nodes = models.IntegerField(help_text="Number of the choice included", blank=True, null=True,
-                                verbose_name="Quantity Displayed")
-    value = models.IntegerField(help_text="Value of item in Rubies.", blank=True,
-                                null=True, verbose_name="Value (Rubies)")
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True, )
-    number = models.IntegerField(help_text="Position ordered by value (from highest to lowest)", blank=True, null=True,
-                                 default=1)
-    #card attributes (direct from Pokemon API)
+    nodes = models.IntegerField(
+        help_text="Number of the choice included", blank=True, null=True,
+        verbose_name="Quantity Displayed"
+    )
+    value = models.IntegerField(
+        help_text="Value of item in Rubies.", blank=True, null=True,
+        verbose_name="Value (Rubies)"
+    )
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
+    number = models.IntegerField(
+        help_text="Position ordered by value (from highest to lowest)",
+        blank=True, null=True, default=1
+    )
+    # Card attributes (direct from Pokemon API)
     card_id = models.CharField(max_length=100)
     name = models.CharField(max_length=100, null=True, blank=True)
     supertype = models.CharField(max_length=50, null=True, blank=True)
@@ -3146,16 +3151,17 @@ class Choice(models.Model):
     image_small = models.URLField(null=True, blank=True)
     image_large = models.URLField(null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+    is_active = models.IntegerField(
+        default=1, blank=True, null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+    # This ForeignKey makes the relationship one-to-many (each Choice belongs to one Game).
     game = models.ForeignKey(
         Game,
         on_delete=models.CASCADE,
-        related_name='choice_fk_set',  # Changed from 'choices' to 'choice_fk_set'
+        related_name='choice_fk_set',
         null=True,
         blank=True
     )
@@ -3195,7 +3201,23 @@ class Choice(models.Model):
             self.value = self.price * 105 #0.05% increase on market
         if not self.subcategory and self.subtypes:
             self.subcategory = self.subtypes
+        if self.image_large and not self.file:
+            try:
+                response = requests.get(self.image_large, stream=True)
+                if response.status_code == 200:
+                    file_name = self.image_large.split("/")[-1]
+                    self.file.save(file_name, ContentFile(response.content), save=False)
+            except requests.RequestException:
+                pass
 
+        elif self.image_small and not self.file:
+            try:
+                response = requests.get(self.image_small, stream=True)
+                if response.status_code == 200:
+                    file_name = self.image_small.split("/")[-1]
+                    self.file.save(file_name, ContentFile(response.content), save=False)
+            except requests.RequestException:
+                pass
         super().save(*args, **kwargs)
 
     def __str__(self):

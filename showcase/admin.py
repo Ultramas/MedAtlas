@@ -636,72 +636,50 @@ class GameChoiceInline(admin.StackedInline):
     readonly_fields = ('mfg_date',)
 
 
-class GameChoiceMiddleInline(admin.TabularInline):
-    model = GameChoice
-    extra = 1
-    fields = ('game', 'choice', 'value', 'rarity', 'lower_nonce', 'upper_nonce', 'get_image',)
-    readonly_fields = ('value', 'rarity', 'get_image',)
-
-    def get_image(self, obj):
-        if obj.choice and getattr(obj.choice, 'image', None):
-            return format_html('<img src="{}" style="max-height:50px;"/>', obj.choice.image.url)
-        return "No Image"
-    get_image.short_description = "Image"
-
-
 class GameAdmin(admin.ModelAdmin):
-    inlines = [GameChoiceInline, GameChoiceMiddleInline]
+    inlines = [GameChoiceInline]
+    filter_horizontal = ('existing_choices',)  # Enables a selection box for existing choices
 
     def save_related(self, request, form, formsets, change):
-        """Ensure GameChoice instances are saved properly when Game is saved."""
+        """Ensure Choice instances are saved properly when Game is saved."""
         super().save_related(request, form, formsets, change)
-
         game = form.instance
-        game_choices = GameChoice.objects.filter(game=game)
 
-        for game_choice in game_choices:
-            if game_choice.choice:
-                if game_choice.choice.total_number_of_choice and game_choice.choice.number_of_choice:
-                    if game_choice.choice.total_number_of_choice != 0:
-                        game_choice.choice.rarity = (Decimal(game_choice.choice.number_of_choice) /
-                                                            Decimal(game_choice.choice.total_number_of_choice)
-                                                    ) * Decimal(100)
-                    else:
-                        game_choice.choice.rarity = Decimal(0)
+        game_choices = list(game.choice_fk_set.all()) + list(game.existing_choices.all())
 
-                # Assign default currency if missing
-                if not game_choice.choice.currency:
-                    first_currency = Currency.objects.first()
-                    if first_currency:
-                        game_choice.choice.currency = first_currency
+        for choice in game_choices:
+            if choice.total_number_of_choice and choice.number_of_choice:
+                if choice.total_number_of_choice != 0:
+                    choice.rarity = (Decimal(choice.number_of_choice) /
+                                     Decimal(choice.total_number_of_choice)) * Decimal(100)
+                else:
+                    choice.rarity = Decimal(0)
 
-                # Ensure nonce values are set
-                if game_choice.choice.lower_nonce is None:
-                    game_choice.choice.lower_nonce = random.randint(0, 1000000)
-                if game_choice.choice.upper_nonce is None:
-                    game_choice.choice.upper_nonce = random.randint(0, 1000000)
+            if not choice.currency:
+                first_currency = Currency.objects.first()
+                if first_currency:
+                    choice.currency = first_currency
 
-                # Compute rarity based on nonce range
-                if game_choice.choice.upper_nonce is not None and game_choice.choice.lower_nonce is not None:
-                    rarity_value = (game_choice.choice.upper_nonce - game_choice.choice.lower_nonce) / 10000
-                    game_choice.choice.rarity = round(rarity_value, 6)
+            if choice.lower_nonce is None:
+                choice.lower_nonce = random.randint(0, 1000000)
+            if choice.upper_nonce is None:
+                choice.upper_nonce = random.randint(0, 1000000)
 
-                # Assign fallback values
-                if not game_choice.choice.choice_text and game_choice.choice.name:
-                    game_choice.choice.choice_text = game_choice.choice.name
-                if not game_choice.choice.value and game_choice.choice.price:
-                    game_choice.choice.value = game_choice.choice.price * 100
-                if not game_choice.choice.subcategory and game_choice.choice.subtypes:
-                    game_choice.choice.subcategory = game_choice.choice.subtypes
+            if choice.upper_nonce is not None and choice.lower_nonce is not None:
+                rarity_value = (choice.upper_nonce - choice.lower_nonce) / 10000
+                choice.rarity = round(rarity_value, 6)
 
-                # Save the updated choice instance
-                game_choice.choice.save()
+            if not choice.choice_text and choice.name:
+                choice.choice_text = choice.name
+            if not choice.value and choice.price:
+                choice.value = choice.price * 100
+            if not choice.subcategory and choice.subtypes:
+                choice.subcategory = choice.subtypes
 
-            # Save the GameChoice instance itself
-            game_choice.save()
+            choice.save()
 
     def save_formset(self, request, form, formset, change):
-        """Ensures GameChoice instances are saved properly."""
+        """Ensures Choice instances are saved properly."""
         instances = formset.save(commit=False)
         for instance in instances:
             if isinstance(instance, Choice):
@@ -726,6 +704,10 @@ class GameAdmin(admin.ModelAdmin):
             'fields': ('items',),
             'classes': ('collapse',),
         }),
+        ('Choices', {
+            'fields': ('existing_choices',),  # Allow selecting existing choices
+            'classes': ('open',),
+        }),
     )
 
     def get_readonly_fields(self, request, obj=None):
@@ -741,6 +723,7 @@ class GameAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Game, GameAdmin)
+
 
 
 class TopHitsAdmin(admin.ModelAdmin):

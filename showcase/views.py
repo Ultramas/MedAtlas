@@ -11777,7 +11777,6 @@ def card_list(request):
     return render(request, 'card_list.html', {'cards': cards, 'view': view})
 
 
-
 class GameChestBackgroundView(BaseView):
     template_name = "game.html"
     print("Debug: Received POST data:")
@@ -11830,7 +11829,6 @@ class GameChestBackgroundView(BaseView):
         slug = self.kwargs.get('slug')
         context['slug'] = slug
 
-        # Fetch data related to the user and game
         game = get_object_or_404(Game, slug=slug)
         context['game'] = game
 
@@ -11944,7 +11942,6 @@ class GameChestBackgroundView(BaseView):
                     userprofile.newprofile_profile_picture_url = profile.avatar.url
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
-        # Initialize the form with spinpreference instance, or None if not authenticated
         if spinpreference:
             spinform = SpinPreferenceForm(instance=spinpreference)
         else:
@@ -11975,27 +11972,26 @@ class GameChestBackgroundView(BaseView):
                         'nonce': nonce,
                         'lower_nonce': choice.lower_nonce,
                         'upper_nonce': choice.upper_nonce,
-                        'file_url': choice.file.url if choice.file else None,  # Get the URL of the file field
+                        'file_url': choice.file.url if choice.file else None,
                         'currency': {
                             'symbol': choice.currency.name if choice.currency else '💎',
                             'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
                         }
                     })
-                    break  # Exit after finding the first match for this nonce
+                    break
 
         context['choices_with_nonce'] = choices_with_nonce
 
         game_id = self.kwargs.get('slug')
 
-        # Retrieve the Game object
         game = get_object_or_404(Game, slug=slug)
 
-        # Retrieve related Choice objects
-        choices = Choice.objects.filter(game=game)
-
-        # Add them to the context
+        inline_choices = game.choice_fk_set.all()
+        existing_choices = game.existing_choices.all()
+        all_choices = list(inline_choices) + list(existing_choices)
         context['game'] = game
-        context['choices'] = choices
+        context['choices'] = all_choices
+        print('the choices are ' + str(all_choices))
 
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         print(context['Background'])
