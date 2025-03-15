@@ -221,7 +221,7 @@ async function randomizeContents() {
                 console.error("Failed to create inventory object:", inventoryData.message);
             }
 
-            return data; // Return the data for further use
+            return data;
         } else {
             console.error(`Error: ${data.message}`);
             return null;
@@ -310,11 +310,11 @@ $(".start").click(function (event) {
 const casinoThump = new Audio('/static/css/sounds/thump.mp3');
 const casinoGreen = new Audio('/static/css/sounds/money.mp3');
 const casinoYellow = new Audio('/static/css/sounds/retro_video_game_col.mp3');
-const casinoOrange = new Audio('/static/css/sounds/money.mp3');
-const casinoRed = new Audio('/static/css/sounds/money.mp3');
-const casinoBlack = new Audio('/static/css/sounds/money.mp3');
+const casinoOrange = new Audio('/static/css/sounds/click-nice.mp3');
+const casinoRed = new Audio('/static/css/sounds/redwin.mp3');
+const casinoBlack = new Audio('/static/css/sounds/blackwin.mp3');
 const casinoRedBlack = new Audio('/static/css/sounds/rap.mp3');
-const casinoRedGold = new Audio('/static/css/sounds/money.mp3');
+const casinoRedGold = new Audio('/static/css/sounds/ultimatewin.mp3');
 
 function playThump() {
     casinoThump.play().catch((error) => {
@@ -341,25 +341,25 @@ function playCasinoOrangeSound() {
 }
 
 function playCasinoRedSound() {
-    casinoThump.play().catch((error) => {
+    casinoRed.play().catch((error) => {
         console.error('Error playing casino-win audio:', error);
     });
 }
 
 function playCasinoBlackSound() {
-    casinoGreen.play().catch((error) => {
+    casinoBlack.play().catch((error) => {
         console.error('Error playing casino-win audio:', error);
     });
 }
 
 function playCasinoRedBlackSound() {
-    casinoYellow.play().catch((error) => {
+    casinoRedBlack.play().catch((error) => {
         console.error('Error playing casino-win audio:', error);
     });
 }
 
 function playCasinoRedGoldSound() {
-    casinoOrange.play().catch((error) => {
+    casinoRedGold.play().catch((error) => {
         console.error('Error playing casino-win audio:', error);
     });
 }
@@ -497,7 +497,6 @@ setTimeout(() => {
         let gameId = startButton.getAttribute("data-game-id");
 
 
-        // Log and handle choiceColor
         console.log('The choice color is:', choiceColor);
         console.log('The choice id is:', choiceId);
         console.log('The game id is:', gameId);
@@ -520,7 +519,7 @@ setTimeout(() => {
                 console.log('processed the top hit')
         } else if (choiceColor === 'orange') {
                 console.log('orange hit')
-            playCasinoGreenSound();
+            playCasinoYellowSound();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
                     color: choiceColor,
@@ -532,7 +531,7 @@ setTimeout(() => {
                 console.log('processed the top hit')
         } else if (choiceColor === 'red') {
                 console.log('red hit')
-            playCasinoGreenSound();
+            playCasinoRedSound();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
                     color: choiceColor,
@@ -544,7 +543,7 @@ setTimeout(() => {
                 console.log('processed the top hit')
         } else if (choiceColor === 'black') {
                 console.log('black hit')
-            playCasinoGreenSound();
+            playCasinoBlackSound();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
                     color: choiceColor,
@@ -555,7 +554,7 @@ setTimeout(() => {
                 console.log('processed the top hit')
         } else if (choiceColor === 'redblack') {
                 console.log('redblack hit')
-            playCasinoGreenSound();
+            playCasinoRedBlackSound();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
                     color: choiceColor,
@@ -566,7 +565,7 @@ setTimeout(() => {
                 console.log('processed the top hit')
         } else if (choiceColor === 'redgold') {
                 console.log('redgold hit')
-            playCasinoGreenSound();
+            playCasinoRedGoldSound();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
                     color: choiceColor,

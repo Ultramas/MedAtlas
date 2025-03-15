@@ -35,6 +35,49 @@
 
 </style>
     <style>
+        .emailformsubmitbutton {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    margin-top: 10px;
+}
+
+.email-form {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between input and button */
+}
+
+.email-form input {
+    height: 45px;
+    width: 250px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.email-submit-btn {
+    height: 50px;
+    width: 50px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease-in-out;
+}
+
+.email-submit-btn:hover {
+    transform: scale(1.1);
+}
+
+.email-icon {
+    width: 30px;
+    height: 16px;
+}
+
     /* Add this to the existing <style> tag or create a new one if it doesn't exist */
     .copyright-section {
         background: linear-gradient(
@@ -2511,7 +2554,8 @@ window.onscroll = function() {
                 {% endif %}
             {% endif %}
         {% endfor %}-->
-		<div class="marketplaceOuterContainer">
+		<div class="marketplaceOuterContainer" style="margin-top: 20px;">
+            <br><br>
 			<div class="row">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="section-title">
@@ -2586,15 +2630,15 @@ window.onscroll = function() {
                 {% endif %}
             {% endif %}
         {% endfor %}-->
-		<div class="marketplaceOuterContainer">
-			<br>
+		<div class="marketplaceOuterContainer" style="margin-top: 20px;">
+			<br><br>
 			<div class="row">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="section-title">
 						<br>
 						<br>
 						<br>
-						<h3 style="color: #e5e4e2;"><span class="orange-text" style="color: #bf97ff;">PokeTrove</span> Marketplace</h3>
+						<h3 style="color: #e5e4e2;" class="marketplacement"><span class="orange-text" style="color: #bf97ff;">PokeTrove</span> <span>Marketplace</span></h3>
 						{% for BackgroundImage in TextFielde %}
 						{% if BackgroundImage.page == "index.html" %}
 						{% if BackgroundImage.section == 13 %}
@@ -3071,12 +3115,17 @@ window.onscroll = function() {
 					<div class="footer-box subscribe">
 						<h2 class="widget-title">Subscribe</h2>
 						<p>Subscribe to our mailing list to get the latest updates!</p>
-						<form method="post" action="">
-    						{% csrf_token %}
-							{{ form.email }}
-							<a href="{% url 'showcase:emaildone' %}">
-								<button type="submit" style="height: 50px;"><img src="{% static 'css/images/sendemailairplane.png' %}" style="width: 30px; height: 16px; "></button>
-							</a>
+						<form method="post" action="" class="emailform">
+                           <div class="emailformsubmitbutton">
+                                <form method="post" action="{% url 'showcase:emaildone' %}" class="email-form">
+                                    {% csrf_token %}
+                                    {{ form.email }}
+                                    <button type="submit" class="email-submit-btn">
+                                        <img src="{% static 'css/images/sendemailairplane.png' %}" alt="Send" class="email-icon">
+                                    </button>
+                                </form>
+                            </div>
+
 													<br>
 							I agree to the Terms & Conditions: {{ form.confirmation }}
 						</form>
@@ -3444,11 +3493,19 @@ Chat Title
         z-index: -1;
     }
 
-    /* Responsive Adjustments */
     @media (max-width: 768px) {
         .avenue-messenger, .avenue2-messenger {
             width: 280px;
             height: 450px;
+        }
+    }
+
+    @media (max-width: 468px) {
+        .orange-text {
+            font-size: 25px;
+        }
+        .marketplacement {
+            font-size: 25px;
         }
     }
 
@@ -3963,7 +4020,7 @@ Bounce
         }      
 </style>
 
-<section class="avenue-messenger" id="chatwidget">
+<section class="avenue-messenger" id="chatwidget" style="display: none;">
     <div class="chat2">
         <div class="chat2-title">
             {% if user.is_authenticated %}
@@ -4009,7 +4066,7 @@ Bounce
 </div>
 
 <!-- General Chat -->
-<section class="avenue2-messenger" id="chatwidget2">
+<section class="avenue2-messenger" id="chatwidget2" style="display: none;">
     <div class="chat2">
         <div class="chat2-title">
             {% if user.is_authenticated %}
@@ -4038,13 +4095,18 @@ Bounce
         </div>
 </section>
 
+
 <script>
-function showChatWidget2() {
+    function showChatWidget2() {
     var popup = document.getElementById("chatwidget2");
     if (popup.style.display === "none" || popup.style.display === "") {
         popup.style.display = "block";
+        popup.style.opacity = "1"; // Ensures full visibility
     } else {
-        popup.style.display = "none";
+        popup.style.opacity = "0"; // Smooth transition before hiding
+        setTimeout(() => {
+            popup.style.display = "none";
+        }, 300); // Delay to allow opacity transition
     }
 }
 
@@ -4270,7 +4332,6 @@ $(document).ready(function() {
     });
 });
 
-// Toggle chat widget visibility functions
 function showChatWidget() {
     document.getElementById('chatwidget').style.display = 'block';
 }
@@ -4313,8 +4374,16 @@ function showMenu() {
 }
 
 function showChatWidget() {
-  var popup = document.getElementById("chatwidget");
-  popup.style.display = popup.style.display === "none" ? "block" : "none";
+    var popup = document.getElementById("chatwidget");
+    if (popup.style.display === "none" || popup.style.display === "") {
+        popup.style.display = "block";
+        popup.style.opacity = "1"; // Ensures full visibility
+    } else {
+        popup.style.opacity = "0"; // Smooth transition before hiding
+        setTimeout(() => {
+            popup.style.display = "none";
+        }, 300); // Delay to allow opacity transition
+    }
 }
 </script>
 		<i class="icon"></i>

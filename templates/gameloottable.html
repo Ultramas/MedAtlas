@@ -368,11 +368,11 @@
             <div class="loot-item-content">
                 <h2>{{ item.choice_text }}</h2>
                 <div class="loot-item-image">
-                    <img src="{{ item.file.url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}" height="{{ item.image_length }}">
+                    <img src="{{ item.file_url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}" height="{{ item.image_length }}">
                 </div>
                 <div class="loot-details">
-                    <p><strong>Value:</strong> <span style="color: #E5E4E2;">{{ item.value }} {{ item.currency }}</span></p>
-                    <p><strong>Rarity:</strong> <span class="rarity">{{ item.formatted_rarity }}%</span></p>
+                    <p><strong>Value:</strong> <span style="color: #E5E4E2;">{{ item.value }} Rubies</span></p>
+                    <p><strong>Rarity:</strong> <span class="rarity">{{ item.rarity }}%</span></p>
                     <p><strong>Category:</strong> <span class="rarity">{{ item.category }}</span></p>
                     {% if item.get_display_tier %}
                     <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
@@ -380,35 +380,35 @@
 
                     {% if item.value >= cost_threshold_100000000 %}
                         <div class="lootelement" style="background: url({% static 'css/images/redgold.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value >= cost_threshold_100000 %}
                         <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value >= cost_threshold_10000 %}
                         <div class="lootelement" style="background: url({% static 'css/images/black.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value >= cost_threshold_500 %}
                         <div class="lootelement" style="background: url({% static 'css/images/red.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value >= cost_threshold_200 %}
                         <div class="lootelement" style="background: url({% static 'css/images/orange.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value >= cost_threshold_100 %}
                         <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value >= cost_threshold_80 %}
                         <div class="lootelement" style="background: url({% static 'css/images/green.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value < cost_threshold_80 %}
                         <div class="lootelement" style="background: url({% static 'css/images/gray.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% else %}
                         <p>This item does not meet the cost requirement.</p>
@@ -437,11 +437,11 @@
             <div class="loot-item-content">
                 <h2>{{ item.choice_text }}</h2>
                 <div class="loot-item-image">
-                    <img src="{{ item.file.url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}" height="{{ item.image_length }}">
+                    <img src="{{ item.file_url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}" height="{{ item.image_length }}">
                 </div>
                 <div class="loot-details">
-                    <p><strong>Value:</strong> <span>{{ item.value }} {{ item.currency }}</span></p>
-                    <p><strong>Rarity:</strong> <span class="rarity">{{ item.formatted_rarity }}%</span></p>
+                    <p><strong>Value:</strong> <span>{{ item.value }} Rubies</span></p>
+                    <p><strong>Rarity:</strong> <span class="rarity">{{ item.rarity }}%</span></p>
                     <p><strong>Category:</strong> <span>{{ item.category }}</span></p>
                     {% if item.get_display_tier %}
                     <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
@@ -449,35 +449,35 @@
 
                     {% if item.value >= cost_threshold_100000000 %}
                         <div class="lootelement" style="background: url({% static 'css/images/redgold.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value >= cost_threshold_100000 %}
                         <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value >= cost_threshold_10000 %}
                         <div class="lootelement" style="background: url({% static 'css/images/black.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value >= cost_threshold_500 %}
                         <div class="lootelement" style="background: url({% static 'css/images/red.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value >= cost_threshold_200 %}
                         <div class="lootelement" style="background: url({% static 'css/images/orange.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value >= cost_threshold_100 %}
                         <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value >= cost_threshold_80 %}
                         <div class="lootelement" style="background: url({% static 'css/images/green.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% elif item.value < cost_threshold_80 %}
                         <div class="lootelement" style="background: url({% static 'css/images/gray.png' %});">
-                            <img src="{{ item.file.url }}" alt="{{ item.choice_text }}">
+                            <img src="{{ item.file_url }}" alt="{{ item.choice_text }}">
                         </div>
                     {% else %}
                         <p>This item does not meet the cost requirement.</p>

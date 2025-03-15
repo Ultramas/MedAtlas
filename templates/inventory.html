@@ -631,82 +631,76 @@ nav.main-menu ul li a {
         });
     });
 
-    document.querySelectorAll('.withdraw-form').forEach(form => {
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
-            withdrawAudio.play();
-            handleAjaxFormSubmission(form);
-        });
-    });
+document.querySelectorAll(".withdraw-form").forEach(form => {
+  form.addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent immediate submission
 
-    document.querySelectorAll('.trade-form').forEach(form => {
-        form.addEventListener('submit', function (event) {
-            tradeAudio.play();
-        });
-    });
+    // Capture the form that triggered the submission
+    const currentForm = form;
+    const withdrawPopup = document.getElementById("withdraw-popup");
+    withdrawPopup.style.display = "block"; // Show confirmation popup
 
+    const confirmButton = document.getElementById("confirm-withdraw");
+    const cancelButton = document.getElementById("cancel-withdraw");
 
-    function handleAjaxFormSubmission(form) {
-        const formData = new FormData(form);
-        const actionUrl = form.getAttribute('action');
+    // Remove any previous onclick handlers to avoid duplicate submissions
+    confirmButton.onclick = null;
+    cancelButton.onclick = null;
 
-        fetch(actionUrl, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-            },
+    confirmButton.onclick = () => {
+      // Create new FormData from the current form
+      const confirmFormData = new FormData(currentForm);
+      // Append confirmation flag so the server knows to create a new withdraw
+      confirmFormData.append("confirm_withdraw", "true");
+
+      const actionUrl = currentForm.getAttribute("action");
+
+      fetch(actionUrl, {
+        method: "POST",
+        body: confirmFormData,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": confirmFormData.get("csrfmiddlewaretoken"),
+        },
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP status ${response.status}`);
+          }
+          return response.json();
         })
-            .then(response => response.json())
-            .then((data) => {
-            if (data.new_withdraw) {
-              console.log('shipping fee charged 599');
-              alert("Shipping fee is 599 rubies.");
+        .then(data => {
+          if (data.success) {
+            alert("Withdraw successful!");
 
-              const popup = document.getElementById("withdraw-popup");
-              popup.style.display = "block";
+            // Remove item from UI if necessary
+            const inventoryItem = currentForm.closest(".gridCardItem");
+            if (inventoryItem) inventoryItem.remove();
 
-              const withdrawId = data.withdraw_id;
-
-              document.getElementById("confirm-withdraw").onclick = function() {
-                fetch('/withdraw_cost/', { // Adjust the URL to your actual endpoint
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'), // Or a function to fetch the token
-                  },
-                  body: JSON.stringify({ withdraw_id: withdrawId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                  if (data.success) {
-                    const inventoryItem = form.closest(".gridCardItem");
-                    if (inventoryItem) inventoryItem.remove();
-
-                    const stockCountElement = document.getElementById("stock-count");
-                    if (stockCountElement) {
-                        stockCountElement.textContent = data.stock_count;
-                    }
-                  } else {
-                    alert(data.error);
-                  }
-                  popup.style.display = "none";
-                })
-                .catch(error => {
-                  console.error("Error:", error);
-                  popup.style.display = "none";
-                });
-              };
-
-              // Set up the cancel button to just hide the popup
-              document.getElementById("cancel-withdraw").onclick = function() {
-                popup.style.display = "none";
-              };
+            // Update stock count
+            const stockCountElement = document.getElementById("stock-count");
+            if (stockCountElement) {
+              stockCountElement.textContent = data.stock_count;
             }
-
+          } else {
+            alert("Withdraw failed! " + (data.error || ""));
+          }
+          withdrawPopup.style.display = "none"; // Hide popup after processing
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          withdrawPopup.style.display = "none";
         });
+    };
 
-    }
+    cancelButton.onclick = () => {
+      withdrawPopup.style.display = "none"; // Close popup on cancel
+    };
+  });
+});
+
+
+
 </script>
 
 {% include 'navtrove.html' %}
@@ -857,65 +851,96 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
     const withdrawButtons = document.querySelectorAll(".withdraw-button");
 
+    // Helper function to submit form via fetch
+    function submitWithdrawForm(form, confirmWithdraw = false) {
+        const formData = new FormData(form);
+        if (confirmWithdraw) {
+            formData.append("confirm_withdraw", "true");
+        }
+        const actionUrl = form.getAttribute("action") || window.location.href;
+
+        console.log("Submitting form to:", actionUrl);
+        console.log("Form Data:", [...formData.entries()]);
+
+        fetch(actionUrl, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP status ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if (data.success) {
+                    // Withdrawal succeeded, update the UI accordingly.
+                    if (data.new_withdraw) {
+                        console.log('Shipping fee charged 599');
+                    }
+                    // Remove the withdrawn inventory item
+                    const inventoryItem = form.closest(".gridCardItem");
+                    if (inventoryItem) inventoryItem.remove();
+
+                    const stockCountElement = document.getElementById("stock-count");
+                    if (stockCountElement) {
+                        stockCountElement.textContent = data.stock_count;
+                    }
+                } else if (data.confirmation_required) {
+                    // Display confirmation popup if confirmation is needed.
+                    showConfirmationPopup(form);
+                } else {
+                    console.error("Server error:", data.error);
+                    alert(data.error || "An error occurred.");
+                }
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error);
+                alert("An unexpected error occurred. Please try again.");
+            });
+    }
+
+    // Show the confirmation popup and set up the confirm/cancel handlers.
+    function showConfirmationPopup(form) {
+        const popup = document.getElementById("withdraw-popup");
+        popup.style.display = "block";
+
+        const confirmButton = document.getElementById("confirm-withdraw");
+        const cancelButton = document.getElementById("cancel-withdraw");
+
+        // Define handlers so they can be removed after use.
+        function proceedWithWithdraw() {
+            popup.style.display = "none";
+            // Re-submit the form with confirmation flag.
+            submitWithdrawForm(form, true);
+            cleanup();
+        }
+
+        function cancelWithdraw() {
+            popup.style.display = "none";
+            cleanup();
+        }
+
+        function cleanup() {
+            confirmButton.removeEventListener("click", proceedWithWithdraw);
+            cancelButton.removeEventListener("click", cancelWithdraw);
+        }
+
+        confirmButton.addEventListener("click", proceedWithWithdraw);
+        cancelButton.addEventListener("click", cancelWithdraw);
+    }
+
+    // Attach event listeners to all withdraw buttons.
     withdrawButtons.forEach((button) => {
         button.addEventListener("click", function (event) {
             event.preventDefault();
-
             const form = button.closest("form");
-            const formData = new FormData(form);
-            const actionUrl = form.getAttribute("action") || window.location.href;
-
-            console.log("Submitting form to:", actionUrl); // Debug URL
-            console.log("Form Data:", [...formData.entries()]); // Debug form data
-
-            fetch(actionUrl, {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP status ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    if (data.success) {
-                        console.log('withdraw here')
-                        if (data.new_withdraw) {
-                            console.log('shipping fee charged 599')
-                            alert("Shipping fee is 599 rubies.");
-                            document.getElementById("withdraw-popup").style.display = "block";
-                            const inventoryItem = form.closest(".gridCardItem");
-                                    if (inventoryItem) inventoryItem.remove();
-
-                                    const stockCountElement = document.getElementById("stock-count");
-                                    if (stockCountElement) {
-                                        stockCountElement.textContent = data.stock_count;
-                                    }
-                        }
-                        else {
-                            const inventoryItem = form.closest(".gridCardItem");
-                            if (inventoryItem) inventoryItem.remove();
-
-                            const stockCountElement = document.getElementById("stock-count");
-                            if (stockCountElement) {
-                                stockCountElement.textContent = data.stock_count;
-                            }
-                    }
-
-                    } else {
-                        console.error("Server error:", data.error);
-                        alert(data.error || "An error occurred.");
-                    }
-                })
-                .catch((error) => {
-                    console.error("Fetch error:", error);
-                    alert("An unexpected error occurred. Please try again.");
-                });
+            // Initial submission without confirmation flag.
+            submitWithdrawForm(form, false);
         });
     });
 });

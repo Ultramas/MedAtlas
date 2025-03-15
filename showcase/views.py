@@ -14,7 +14,7 @@ from django.shortcuts import render, redirect
 from django.utils.html import strip_tags
 from django.views.generic import ListView
 import stripe  # Official Stripe library
-from social_core.backends.stripe import StripeOAuth2  # If needed for OAuth
+from social_core.backends.stripe import StripeOAuth2
 
 
 from . import models
@@ -24,7 +24,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
-    UserNotification, TopHits, Card, Clickable
+    UserNotification, TopHits, Card, Clickable, GameChoice
 from .models import Idea
 from .models import VoteQuery
 from .models import StaffApplication
@@ -246,7 +246,7 @@ class SignupView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -316,7 +316,7 @@ class TotalView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -350,7 +350,7 @@ class LogoView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -394,7 +394,7 @@ class AdvertisementView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -465,7 +465,7 @@ class ImageView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -525,7 +525,7 @@ class BaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -569,7 +569,7 @@ class EBaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -615,7 +615,7 @@ class BlogBaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -700,7 +700,7 @@ class AdminRolesView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -738,7 +738,7 @@ class AdminTasksView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -776,7 +776,7 @@ class AdminPagesView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -815,7 +815,7 @@ class AdministrationView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -858,7 +858,7 @@ class DonateBaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -901,7 +901,7 @@ class MemberBaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -973,7 +973,7 @@ class PostList(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+            
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -1032,7 +1032,7 @@ class votingview(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+            
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -1123,7 +1123,7 @@ class MemberHomeBackgroundView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -1163,7 +1163,7 @@ class BusinessMessageBackgroundView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -1202,7 +1202,7 @@ class PatreonBackgroundView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -1299,7 +1299,7 @@ class FaviconBaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -1340,7 +1340,7 @@ class BackgroundBaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -1441,7 +1441,7 @@ class ImageCarouselView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -1604,7 +1604,7 @@ class BackgroundStyleView(TemplateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -1679,7 +1679,7 @@ class ShowcaseBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -1790,7 +1790,7 @@ class ChatBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -1848,7 +1848,7 @@ class ChatBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -1920,7 +1920,7 @@ class SupportChatBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -2141,7 +2141,7 @@ class PokeChestBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -2235,7 +2235,6 @@ def game_view(request, slug):
             'choices': choices_data
         })
 
-    # Initial nonce generation for the template
     nonce = random.randint(1, 1000000)
     return render(request, 'game.html', {'game': game, 'nonce': nonce})
 
@@ -2244,9 +2243,8 @@ def game_view(request, slug):
 def create_outcome(request, slug):
     if request.method == 'POST':
         try:
-            # Parse JSON body
             body = json.loads(request.body)
-            game_id = body.get('game_id')  # Get 'game_id' from the parsed JSON
+            game_id = body.get('game_id')
             user = request.user
 
             print(f"Received JSON body: {body}")
@@ -2255,15 +2253,30 @@ def create_outcome(request, slug):
             if not game_id:
                 return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
 
-            # Retrieve the game and proceed
             game = Game.objects.get(id=game_id, slug=slug)
             nonce = random.randint(1, 1000000)
-            choices = Choice.objects.filter(game=game, lower_nonce__lte=nonce, upper_nonce__gte=nonce)
 
-            if not choices.exists():
-                return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
+            # First, try to find a matching GameChoice instance using nonce filtering.
+            game_choice_instance = GameChoice.objects.filter(
+                game=game,
+                lower_nonce__lte=nonce,
+                upper_nonce__gte=nonce
+            ).first()
 
-            choice = choices.order_by('?').first()
+            if game_choice_instance:
+                # If a GameChoice instance is found, use its related choice.
+                choice = game_choice_instance.choice
+            else:
+                # Otherwise, fall back to filtering Choice objects directly.
+                choices = Choice.objects.filter(
+                    game=game,
+                    lower_nonce__lte=nonce,
+                    upper_nonce__gte=nonce
+                )
+                if not choices.exists():
+                    return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
+                choice = choices.order_by('?').first()
+
             color = game.get_color(choice)
             choice.color = color
             choice.save()
@@ -2278,11 +2291,27 @@ def create_outcome(request, slug):
                 'ratio': random.randint(1, 10),
                 'type': game.type
             }
-
             if user.is_authenticated:
                 outcome_data['user'] = user
 
             outcome = Outcome.objects.create(**outcome_data)
+
+            if game_choice_instance:
+                game_choice_data = {
+                    'lower_nonce': game_choice_instance.lower_nonce,
+                    'upper_nonce': game_choice_instance.upper_nonce,
+                    'value': game_choice_instance.value,
+                    'rarity': game_choice_instance.rarity,
+                }
+                print('game choice instance returned')
+            else:
+                game_choice_data = {
+                    'lower_nonce': choice.lower_nonce,
+                    'upper_nonce': choice.upper_nonce,
+                    'value': choice.value,
+                    'rarity': choice.rarity,
+                }
+
             return JsonResponse({
                 'status': 'success',
                 'outcome': outcome.id,
@@ -2294,6 +2323,7 @@ def create_outcome(request, slug):
                 'choice_text': choice.choice_text,
                 'choice_color': choice.color,
                 'choice_file': choice.file.url if choice.file else None,
+                'game_choice': game_choice_data,
             })
 
         except Game.DoesNotExist:
@@ -2303,11 +2333,9 @@ def create_outcome(request, slug):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
-
 def game_view(request, game_id):
     game = get_object_or_404(Game, id=game_id)
 
-    # Use the discount cost if available, otherwise use the regular cost
     if game.daily:
         cost = 0
     else:
@@ -2535,7 +2563,7 @@ class DailyRoomView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -2659,7 +2687,7 @@ class DailyChestView(BaseView):
             context['Profiles'] = None
 
         if context['Profiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -2671,15 +2699,13 @@ class DailyChestView(BaseView):
                     userprofile.newprofile_profile_picture_url = profile.avatar.url
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
-        # Initialize the form with spinpreference instance, or None if not authenticated
         if spinpreference:
             spinform = SpinPreferenceForm(instance=spinpreference)
         else:
-            spinform = SpinPreferenceForm()  # Initialize an empty form if spinpreference is None
+            spinform = SpinPreferenceForm()
         context['spin_preference_form'] = spinform
 
         if user.is_authenticated:
-            # Determine the random amount based on quick_spin preference
             if spinpreference.quick_spin:
                 random_amount = random.randint(500, 1000)
             else:
@@ -2691,11 +2717,9 @@ class DailyChestView(BaseView):
         context['range_random_amount'] = range(random_amount)
         print(str('the random amount is ') + str(random_amount))
 
-        # Generate a list of random nonces
         random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
         context['random_nonces'] = random_nonces
 
-        # Create a list to store choices matched with the generated nonces
         choices_with_nonce = []
         for nonce in random_nonces:
             for choice in choices:
@@ -2705,7 +2729,7 @@ class DailyChestView(BaseView):
                         'nonce': nonce,
                         'lower_nonce': choice.lower_nonce,
                         'upper_nonce': choice.upper_nonce,
-                        'file_url': choice.file.url if choice.file else None,  # Get the URL of the file field
+                        'file_url': choice.file.url if choice.file else '',
                         'currency': {
                             'symbol': choice.currency.name if choice.currency else '💎',
                             'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
@@ -2749,7 +2773,7 @@ class DailyChestView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -2802,9 +2826,8 @@ class DailyChestView(BaseView):
             wager = form.save(commit=False)
             wager.user_profile = request.user.user_profile
             wager.save()
-            return redirect('showcase:blackjack')  # replace with your actual view name
+            return redirect('showcase:blackjack')
         else:
-            # If the form is not valid, re-render the page with the form errors
             return self.get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -2815,67 +2838,6 @@ class DailyChestView(BaseView):
             spinpreference.save()
             return JsonResponse({'success': True})
         return JsonResponse({'success': False}, status=400)
-
-    @csrf_exempt
-    def create_outcome(request, slug):
-        if request.method == 'POST':
-            try:
-                game_id = request.POST.get('game_id')
-                user = request.user
-
-                if not game_id:
-                    return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
-
-                game = Game.objects.get(id=game_id, slug=slug)
-                nonce = random.randint(1, 1000000)
-                choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce)
-
-                if not choices.exists():
-                    return JsonResponse(
-                        {'status': 'error', 'message': 'No valid choice found for the given nonce.'})
-
-                choice = choices.order_by('?').first()
-
-                color = game.get_color(choice)
-                choice.color = color
-                choice.save()  # Save the updated color to the database
-
-                # Print the selected choice fields to the console
-                print(f"Selected Choice ID: {choice.id}")
-                print(f"Selected Choice Text: {choice.choice_text}")
-                print(f"Selected Choice Color: {choice.color}")
-                print(f"Selected Choice File: {choice.file.url if choice.file else 'No file associated'}")
-
-                outcome_data = {
-                    'game': game,
-                    'choice': choice,
-                    'nonce': nonce,
-                    'value': random.randint(1, 1000000),
-                    'ratio': random.randint(1, 10),
-                    'type': game.type
-                }
-
-                if user.is_authenticated:
-                    outcome_data['user'] = user
-
-                outcome = Outcome.objects.create(**outcome_data)
-
-                return JsonResponse({
-                    'status': 'success',
-                    'outcome': outcome.id,
-                    'nonce': outcome.nonce,
-                    'choice_id': choice.id,
-                    'choice_text': choice.choice_text,
-                    'choice_color': choice.color,
-                    'choice_file': choice.file.url if choice.file else None
-                })
-
-            except Game.DoesNotExist:
-                return JsonResponse({'status': 'error', 'message': 'Game not found.'})
-            except Exception as e:
-                return JsonResponse({'status': 'error', 'message': str(e)})
-
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
 
 @csrf_exempt
@@ -2984,7 +2946,7 @@ class OpenBattleListView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -3383,7 +3345,7 @@ class AscendView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -3441,7 +3403,7 @@ class EarningAchievement(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -3516,7 +3478,7 @@ class PlayerEarnedAchievement(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -3585,7 +3547,7 @@ class WhyBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -3647,7 +3609,7 @@ class GameHubView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -3719,7 +3681,7 @@ class GameRoomView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -3751,27 +3713,45 @@ class OutcomeHistoryView(BaseView):
         current_user = self.request.user
         user_outcomes = Outcome.objects.filter(is_active=1, user=current_user)
 
-        # Serialize outcomes into JSON-compatible structure
-        context['UserOutcomes'] = user_outcomes
-        context['UserOutcomesJSON'] = json.dumps(
-            [
-                {
-                    'id': outcome.id,
-                    'user': str(outcome.user),
-                    'quick_spin': outcome.quick_spin,
-                    'slug': outcome.slug,
-                    'value': outcome.value,
-                    'file': outcome.file.url if outcome.file else None,
-                    'color': outcome.color,
-                    'game': str(outcome.game),
-                    'choice': str(outcome.choice),
-                    'nonce': outcome.nonce,
-                    'date_and_time': outcome.date_and_time.isoformat(),
+        outcomes_data = []
+        for outcome in user_outcomes:
+            game_choice_instance = GameChoice.objects.filter(
+                game=outcome.game,
+                choice=outcome.choice
+            ).first()
+
+            if game_choice_instance:
+                game_choice_data = {
+                    'lower_nonce': game_choice_instance.lower_nonce,
+                    'upper_nonce': game_choice_instance.upper_nonce,
+                    'value': game_choice_instance.value,
+                    'rarity': game_choice_instance.rarity,
                 }
-                for outcome in user_outcomes
-            ],
-            cls=DjangoJSONEncoder
-        )
+            else:
+                game_choice_data = {
+                    'lower_nonce': outcome.choice.lower_nonce,
+                    'upper_nonce': outcome.choice.upper_nonce,
+                    'value': outcome.choice.value,
+                    'rarity': outcome.choice.rarity,
+                }
+
+            outcomes_data.append({
+                'id': outcome.id,
+                'user': str(outcome.user),
+                'quick_spin': outcome.quick_spin,
+                'slug': outcome.slug,
+                'value': outcome.value,
+                'file': outcome.file.url if outcome.file else None,
+                'color': outcome.color,
+                'game': str(outcome.game),
+                'choice': str(outcome.choice),
+                'nonce': outcome.nonce,
+                'date_and_time': outcome.date_and_time.isoformat(),
+                'game_choice': game_choice_data,
+            })
+
+        context['UserOutcomes'] = user_outcomes
+        context['UserOutcomesJSON'] = json.dumps(outcomes_data, cls=DjangoJSONEncoder)
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -3783,8 +3763,7 @@ class OutcomeHistoryView(BaseView):
         else:
             context['NewsProfiles'] = None
 
-        if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+        if context['NewsProfiles'] is None:
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -3849,7 +3828,7 @@ class ClubRoomView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -3927,7 +3906,7 @@ class AchievementsView(TemplateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -3975,7 +3954,7 @@ class BlogBackgroundView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4023,7 +4002,7 @@ class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4090,7 +4069,7 @@ class ShufflerBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4136,7 +4115,7 @@ class BilletBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4182,7 +4161,7 @@ class RuleBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4226,7 +4205,7 @@ class PolicyBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4263,7 +4242,7 @@ class ServersView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4308,7 +4287,7 @@ class FaqBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4352,7 +4331,7 @@ class StaffBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4401,7 +4380,7 @@ class StaffApplyBackgroundView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4458,7 +4437,7 @@ class InformationBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4502,7 +4481,7 @@ class TagBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4547,7 +4526,7 @@ class UserBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4591,7 +4570,7 @@ class StaffRanksBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4635,7 +4614,7 @@ class MegaBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4693,7 +4672,7 @@ class EventBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4750,7 +4729,7 @@ class NewsBackgroundView(BaseView):
             context['Profiles'] = None
 
         if context['Profiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4773,7 +4752,7 @@ class NewsBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4834,7 +4813,7 @@ class SingleNewsView(DetailView):
             context['Profiles'] = None
 
         if context['Profiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4857,7 +4836,7 @@ class SingleNewsView(DetailView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4901,7 +4880,7 @@ class DonorView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4949,7 +4928,7 @@ class ContributorBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4985,7 +4964,7 @@ class ContentBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -5026,7 +5005,7 @@ class PartnerApplicationView(FormMixin, LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -5095,7 +5074,7 @@ class PartnerBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -5132,7 +5111,7 @@ class ConvertBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -5169,7 +5148,7 @@ class ReasonsBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -5206,7 +5185,7 @@ class PerksBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -5247,7 +5226,7 @@ class MonstrosityView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -5297,7 +5276,7 @@ class AddMonstrosityView(FormMixin, LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -5523,7 +5502,7 @@ class RoomView(TemplateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -5584,7 +5563,7 @@ class RoomView(TemplateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -5790,7 +5769,7 @@ class NewRoomSettingsView(LoginRequiredMixin, TemplateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6173,7 +6152,7 @@ class SignupView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6243,7 +6222,7 @@ class TotalView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6277,7 +6256,7 @@ class LogoView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6321,7 +6300,7 @@ class AdvertisementView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6392,7 +6371,7 @@ class ImageView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6436,7 +6415,7 @@ class BaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6480,7 +6459,7 @@ class EBaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6524,7 +6503,7 @@ class BlogBaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6537,6 +6516,7 @@ class BlogBaseView(ListView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
+
 
 class NavView(ListView):
     template_name = "navtrove.html"
@@ -6556,6 +6536,14 @@ class NavView(ListView):
 
         user = self.request.user
         if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1.0 / user_clickable.clickable.chance_per_second
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
             profile = ProfileDetails.objects.filter(user=user).first()
             if profile:
@@ -6572,7 +6560,7 @@ class NavView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] is None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6584,10 +6572,14 @@ class NavView(ListView):
                     userprofile.newprofile_profile_picture_url = profile.avatar.url
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
+                    clickables = Clickable.objects.filter(is_active=1)
+
+                    user_clickables = UserClickable.objects.filter(user=user, clickable__in=clickables)
+
+                    context['Clickables'] = user_clickables
+
+
         return context
-
-
-from .models import Preference
 
 
 def detail_post_view(request, id=None):
@@ -6659,7 +6651,7 @@ class AdminRolesView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6698,7 +6690,7 @@ class AdminTasksView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6739,7 +6731,7 @@ class AdminPagesView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6779,7 +6771,7 @@ class AdministrationView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6822,7 +6814,7 @@ class DonateBaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6864,7 +6856,7 @@ class ShippingBackgroundView(FormMixin, LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6938,7 +6930,7 @@ class ShippingProfileView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -6981,7 +6973,7 @@ class PrintShippingLabelView(LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -7024,7 +7016,7 @@ class MembershipView(LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -7067,7 +7059,7 @@ class MemberBaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -7180,7 +7172,7 @@ class PostList(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -7300,7 +7292,6 @@ class votingview(ListView):
         context['NewsProfiles'] = userprofile if userprofile else None
 
         if context['NewsProfiles'] is None:
-            # Create a dummy profile with default attributes
             dummy_profile = type('DummyProfile', (), {})()
             dummy_profile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             dummy_profile.newprofile_profile_url = None
@@ -7357,7 +7348,7 @@ class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -7447,7 +7438,7 @@ class TradeItemCreateView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -7488,7 +7479,7 @@ class TradeBackgroundView(FormMixin, LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -7553,7 +7544,7 @@ class TradeOfferCreateView(CreateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -7639,7 +7630,7 @@ class ResponseTradeOfferCreateView(CreateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -7887,7 +7878,7 @@ class eventview(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+            
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -7962,7 +7953,7 @@ class SupportRoomView(TemplateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -8050,7 +8041,7 @@ class SupportLineView(TemplateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -8186,7 +8177,7 @@ class MemberHomeBackgroundView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -8225,7 +8216,7 @@ class BusinessMessageBackgroundView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -8264,7 +8255,7 @@ class PatreonBackgroundView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -8360,7 +8351,7 @@ class FaviconBaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -8401,7 +8392,7 @@ class BackgroundBaseView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -8502,7 +8493,7 @@ class ImageCarouselView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -8535,15 +8526,13 @@ import logging
 
 
 def getGeneralMessages(request):
-    messages = GeneralMessage.objects.all()
+    messages = GeneralMessage.objects.all().order_by('-date')[:30]
     messages_data = []
 
-    # Get the first default avatar for fallback purposes
     default_avatar = DefaultAvatar.objects.first()
     default_avatar_data = serialize_default_avatar(default_avatar)
 
     for message in messages:
-        # Get profile details if they exist
         profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
 
         avatar_url = (
@@ -8552,10 +8541,9 @@ def getGeneralMessages(request):
         )
         user_profile_url = (
             profile_details.get_absolute_url() if profile_details else
-            'index.html'  # Fallback URL
+            'index.html'
         )
 
-        # Build the message data
         message_data = {
             'user_profile_url': user_profile_url,
             'avatar_url': avatar_url,
@@ -8705,15 +8693,12 @@ class BackgroundView(FormMixin, BaseView):
         context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
         users = User.objects.all()
 
-        # Loop through each user and attach extra attributes if available
         for user in users:
             profile = ProfileDetails.objects.filter(user=user).first()
             if profile:
-                # Attach new attributes to the user instance
                 user.newprofile_profile_picture_url = profile.avatar.url
                 user.newprofile_profile_url = profile.get_profile_url()
             else:
-                # Optionally, attach default values if no profile is found
                 user.newprofile_profile_picture_url = None
                 user.newprofile_profile_url = "#"
         context['Users'] = users
@@ -8798,7 +8783,7 @@ class BackgroundView(FormMixin, BaseView):
             context['Profiles'] = None
 
         if context['Profiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -8874,7 +8859,7 @@ class BackgroundView(FormMixin, BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9086,7 +9071,7 @@ class EBackgroundView(BaseView, FormView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9184,7 +9169,7 @@ class StoreView(BaseView, FormView, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9281,7 +9266,7 @@ class ShowcaseBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9329,7 +9314,7 @@ class SupportLineBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9372,7 +9357,7 @@ class WhyBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9422,7 +9407,7 @@ class MemeHostView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9477,7 +9462,7 @@ class MemeView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9539,7 +9524,7 @@ class BlogBackgroundView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9587,7 +9572,7 @@ class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9647,7 +9632,7 @@ class BilletBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9733,7 +9718,7 @@ class AboutBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9778,7 +9763,7 @@ class FaqBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9821,7 +9806,7 @@ class StaffBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9864,7 +9849,7 @@ class InformationBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9907,7 +9892,7 @@ class TagBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9951,7 +9936,7 @@ class UserBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -9995,7 +9980,7 @@ class StaffRanksBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10039,7 +10024,7 @@ class MegaBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10132,7 +10117,7 @@ class NewsBackgroundView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10180,7 +10165,7 @@ class UploadACardView(FormMixin, LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10233,7 +10218,7 @@ class DonorView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10281,7 +10266,7 @@ class ContributorBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10317,7 +10302,7 @@ class ContentBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10370,7 +10355,7 @@ class PartnerBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10447,7 +10432,7 @@ class ShareBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10484,7 +10469,7 @@ class ConvertBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10521,7 +10506,7 @@ class ReasonsBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10558,7 +10543,7 @@ class PerksBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10743,7 +10728,7 @@ class PostView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10841,7 +10826,7 @@ class SupportBackgroundView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10918,7 +10903,7 @@ class PostingView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -10997,7 +10982,7 @@ class PollQuestionsView(View):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -11067,7 +11052,7 @@ class PollDetailView(TemplateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -11115,7 +11100,7 @@ class PollResultsView(View):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -11189,7 +11174,7 @@ class InventoryView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -11243,7 +11228,6 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             context['SentProfile'] = None
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
-        # Retrieve the author's profile avatar
 
         context['NewsProfiles'] = newprofile
 
@@ -11292,7 +11276,6 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -11333,43 +11316,69 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         return response
 
     def withdraw_inventory_object(self, request, pk):
+        if request.method != "POST" or request.headers.get("X-Requested-With") != "XMLHttpRequest":
+            return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
-
         if inventory_object.user != request.user:
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # AJAX check
-                return JsonResponse({'success': False}, status=403)
-            return redirect('showcase:inventory')
-
-        inventory_object.user = None
-        inventory_object.inventory = None
-        inventory_object.save()
+            return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
 
         user = request.user
+        # Retrieve user profile early
+        user_profile = get_object_or_404(ProfileDetails, user=user)
         new_withdraw = False
+        confirm_withdraw = request.POST.get("confirm_withdraw", "false").lower() == "true"
+        withdraw = Withdraw.objects.filter(
+            user=user, is_active=1, shipping_state='S', number_of_cards__lt=25
+        ).first()
+        withdraw_fee = 599  
+
         with transaction.atomic():
             withdraw = Withdraw.objects.filter(
                 user=user, is_active=1, shipping_state='S', number_of_cards__lt=25
             ).first()
 
             if withdraw:
+                # Remove inventory ownership and add to the existing withdraw
+                inventory_object.user = None
+                inventory_object.inventory = None
+                inventory_object.save()
                 withdraw.cards.add(inventory_object)
             else:
-                withdraw = Withdraw.objects.create(user=user, is_active=1, shipping_state='S')
-                withdraw.save()
-                withdraw.cards.add(inventory_object)
-
-                new_withdraw = True
+                print('withdraw created here ')
+                if not confirm_withdraw:
+                    return JsonResponse({
+                        'success': False,
+                        'confirmation_required': True,
+                        'message': 'Please confirm withdrawal to proceed.'
+                    })
+                if user_profile.currency_amount >= withdraw_fee:
+                    user_profile.currency_amount -= withdraw_fee
+                    user_profile.save()
+                    print('User profile deducted withdraw fee')
+                    inventory_object.user = None
+                    inventory_object.inventory = None
+                    inventory_object.save()
+                    withdraw = Withdraw.objects.create(user=user, is_active=1, shipping_state='S')
+                    withdraw.cards.add(inventory_object)
+                    new_withdraw = True
+                else:
+                    print('Not enough rubies')
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Not enough rubies.'
+                    }, status=400)
 
             withdraw.number_of_cards = withdraw.cards.count()
             withdraw.save()
 
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # AJAX check
-            stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
-            return JsonResponse({
-                'success': True,
-                'stock_count': stock_count,
-                'new_withdraw': new_withdraw})
-        return redirect('showcase:inventory')
+        stock_count = InventoryObject.objects.filter(is_active=1, user=user).count()
+        return JsonResponse({
+            'success': True,
+            'stock_count': stock_count,
+            'new_withdraw': new_withdraw,
+            'currency_amount': user_profile.currency_amount  # include updated currency amount
+        })
 
     def sell_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
@@ -11389,7 +11398,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             )
             inventory_object.save()
 
-            user_profile = get_object_or_404(ProfileDetails, user=request.user) #was UserProfile, also has a currency_amount attribute
+            user_profile = get_object_or_404(ProfileDetails, user=request.user)
             user_profile.currency_amount += inventory_object.price
             user_profile.save()
 
@@ -11433,6 +11442,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
             # Redirect to the trade inventory page
             return redirect('showcase:tradeinventory')
+
 
 
 @csrf_exempt
@@ -11813,7 +11823,7 @@ class GameChestBackgroundView(BaseView):
             )
             inventory_object.save()
 
-            user_profile = get_object_or_404(ProfileDetails, user=request.user) #was UserProfile, also has a currency_amount attribute
+            user_profile = get_object_or_404(ProfileDetails, user=request.user)
             user_profile.currency_amount += inventory_object.price
             user_profile.save()
 
@@ -11853,7 +11863,7 @@ class GameChestBackgroundView(BaseView):
             profile = ProfileDetails.objects.filter(user=user).first()
             if profile:
                 effective_cost = game.get_effective_cost()
-                spin_multiplier = 1  # Default value; adjust as needed
+                spin_multiplier = 1
                 total_cost = effective_cost * spin_multiplier
                 context['user_cash'] = profile.currency_amount
                 context['total_cost'] = total_cost
@@ -11893,7 +11903,6 @@ class GameChestBackgroundView(BaseView):
         if game.user:
             user_profile, created = UserProfile.objects.get_or_create(user=game.user)
 
-
         context['SentProfile'] = user_profile
         if game.user:
             user_cash = user_profile.currency_amount
@@ -11904,7 +11913,7 @@ class GameChestBackgroundView(BaseView):
 
         context['Money'] = Currency.objects.filter(is_active=1).first()
 
-        spinpreference = None  # Initialize spinpreference to ensure it exists
+        spinpreference = None
 
         if user.is_authenticated:
             try:
@@ -11930,7 +11939,7 @@ class GameChestBackgroundView(BaseView):
             context['Profiles'] = None
 
         if context['Profiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -11945,7 +11954,7 @@ class GameChestBackgroundView(BaseView):
         if spinpreference:
             spinform = SpinPreferenceForm(instance=spinpreference)
         else:
-            spinform = SpinPreferenceForm()  # Initialize an empty form if spinpreference is None
+            spinform = SpinPreferenceForm()
         context['spin_preference_form'] = spinform
 
         if user.is_authenticated:
@@ -11960,38 +11969,90 @@ class GameChestBackgroundView(BaseView):
         context['range_random_amount'] = range(random_amount)
         print(str('the random amount is ') + str(random_amount))
 
+        random_amount = random.randint(150, 300)
         random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
         context['random_nonces'] = random_nonces
-
-        choices_with_nonce = []
-        for nonce in random_nonces:
-            for choice in choices:
-                if choice.lower_nonce <= nonce <= choice.upper_nonce:
-                    choices_with_nonce.append({
-                        'choice': choice,
-                        'nonce': nonce,
-                        'lower_nonce': choice.lower_nonce,
-                        'upper_nonce': choice.upper_nonce,
-                        'file_url': choice.file.url if choice.file else None,
-                        'currency': {
-                            'symbol': choice.currency.name if choice.currency else '💎',
-                            'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
-                        }
-                    })
-                    break
-
-        context['choices_with_nonce'] = choices_with_nonce
 
         game_id = self.kwargs.get('slug')
 
         game = get_object_or_404(Game, slug=slug)
 
-        inline_choices = game.choice_fk_set.all()
-        existing_choices = game.existing_choices.all()
-        all_choices = list(inline_choices) + list(existing_choices)
         context['game'] = game
+
+        inline_choices = game.choice_fk_set.all()
+        m2m_choices = game.choices.all()
+        combined_choices = {choice.pk: choice for choice in list(inline_choices) + list(m2m_choices)}
+
+        through_qs = GameChoice.objects.filter(game=game).select_related('choice')
+        through_data = {}
+        for gc in through_qs:
+            choice = gc.choice
+            through_data[choice.pk] = {
+                'choice': choice,
+                'lower_nonce': gc.lower_nonce if gc.lower_nonce is not None else choice.lower_nonce,
+                'upper_nonce': gc.upper_nonce if gc.upper_nonce is not None else choice.upper_nonce,
+                'value': gc.value if gc.value is not None else choice.value,
+                'rarity': gc.rarity if gc.rarity is not None else choice.rarity,
+                'file_url': choice.file.url if choice.file else '',
+                'category': choice.category if choice.category else '',
+                'currency': {
+                    'symbol': choice.currency.name if choice.currency else '💎',
+                    'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                }
+            }
+
+        all_choices = []
+        for pk, choice in combined_choices.items():
+            nonce_info = through_data.get(pk, {
+                'choice': choice,
+                'lower_nonce': choice.lower_nonce,
+                'upper_nonce': choice.upper_nonce,
+                'value': choice.value,
+                'rarity': choice.rarity,
+                'file_url': choice.file.url if choice.file else '',
+                'category': choice.category if choice.category else '',
+                'currency': {
+                    'symbol': choice.currency.name if choice.currency else '💎',
+                    'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                }
+            })
+
+            all_choices.append({
+                'choice': choice,
+                'choice_text': choice.choice_text,
+                'lower_nonce': nonce_info['lower_nonce'],
+                'upper_nonce': nonce_info['upper_nonce'],
+                'value': nonce_info['value'],
+                'rarity': nonce_info['rarity'],
+                'file_url': nonce_info['file_url'],
+                'category': nonce_info['category'],
+                'currency': nonce_info['currency'],
+                'image_width': getattr(choice, 'image_width', None),
+                'image_length': getattr(choice, 'image_length', None),
+                'get_color_display': getattr(choice, 'get_color_display', lambda: ''),
+                'get_tier_display': getattr(choice, 'get_tier_display', lambda: ''),
+            })
+
         context['choices'] = all_choices
-        print('the choices are ' + str(all_choices))
+
+        choices_with_nonce = []
+        for nonce in random_nonces:
+            for choice_data in all_choices:
+                lower = choice_data['lower_nonce']
+                upper = choice_data['upper_nonce']
+                if lower is not None and upper is not None and lower <= nonce <= upper:
+                    choices_with_nonce.append({
+                        'choice': choice_data['choice'],
+                        'nonce': nonce,
+                        'lower_nonce': lower,
+                        'upper_nonce': upper,
+                        'rarity': choice_data['rarity'],  # Use the rarity from choice_data
+                        'file_url': choice_data['file_url'],
+                        'currency': choice_data['currency']
+                    })
+                    break
+
+        context['choices_with_nonce'] = choices_with_nonce
 
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         print(context['Background'])
@@ -12012,7 +12073,6 @@ class GameChestBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -12036,7 +12096,6 @@ class GameChestBackgroundView(BaseView):
 
 
     def sell_game_inventory_object(self, request):
-        # Get the most recently created InventoryObject for the current user
         inventory_object = InventoryObject.objects.filter(
             user=request.user,
             inventory__isnull=False,  # Ensure it's still in inventory
@@ -12046,12 +12105,10 @@ class GameChestBackgroundView(BaseView):
             messages.error(request, 'No items available to sell!')
             return redirect('showcase:inventory')
 
-        # Update InventoryObject
         inventory_object.user = None
         inventory_object.inventory = None
 
         with transaction.atomic():
-            # Create the Transaction instance
             Transaction.objects.create(
                 inventory_object=inventory_object,
                 user=request.user,
@@ -12059,10 +12116,8 @@ class GameChestBackgroundView(BaseView):
                 amount=inventory_object.price
             )
 
-            # Save the updated InventoryObject
             inventory_object.save()
 
-            # Update UserProfile's currency_amount
             user_profile = get_object_or_404(UserProfile, user=request.user)
             user_profile.currency_amount += inventory_object.price
             user_profile.save()
@@ -12080,7 +12135,6 @@ class GameChestBackgroundView(BaseView):
         game = get_object_or_404(Game, id=game_id, slug=slug)
         choices = Choice.objects.filter(game=game)
 
-        # Ensure each choice has a nonce
         for choice in choices:
             if choice.lower_nonce is None or choice.upper_nonce is None:
                 choice.lower_nonce = random.randint(0, 1000000)
@@ -12089,7 +12143,6 @@ class GameChestBackgroundView(BaseView):
 
         return render(request, 'game.html', {'game': game, 'choices': choices})
 
-    # Example usage in a view or any other part of your application
     def take_spinner_slot(user, game, choice):
         SpinnerChoiceRenders.take_up_slot(user=user, game=game, choice=choice, value=100, ratio=2, type=game.type,
                                           image=choice.image.url, color=choice.color)
@@ -12109,9 +12162,8 @@ class GameChestBackgroundView(BaseView):
             wager = form.save(commit=False)
             wager.user_profile = request.user.user_profile
             wager.save()
-            return redirect('showcase:blackjack')  # replace with your actual view name
+            return redirect('showcase:blackjack')
         else:
-            # If the form is not valid, re-render the page with the form errors
             return self.get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -12323,7 +12375,7 @@ class SecretRoomView(LoginRequiredMixin, FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -12381,7 +12433,7 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -12506,7 +12558,7 @@ class LotteryBackgroundView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -12560,7 +12612,7 @@ class DailyLotteryView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -12621,7 +12673,7 @@ class Lottereal(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -12936,7 +12988,7 @@ class TradeHistory(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -12986,7 +13038,7 @@ class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -13041,7 +13093,7 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -13214,7 +13266,7 @@ class BlogSearchResultsView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -13297,7 +13349,7 @@ class GameSearchResultsView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -13417,7 +13469,7 @@ class SearchResultsView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -13526,7 +13578,7 @@ class CreateWithdrawView(LoginRequiredMixin, CreateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -13630,7 +13682,7 @@ class WithdrawView(LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -13700,7 +13752,7 @@ class WithdrawDetailView(LoginRequiredMixin, DetailView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -13885,7 +13937,7 @@ class ProfileView(LoginRequiredMixin, UpdateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -13982,7 +14034,7 @@ class MyLevelView(LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -14033,7 +14085,7 @@ class PunishAppsBackgroundView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -14099,7 +14151,7 @@ class BanAppealBackgroundView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -14182,7 +14234,7 @@ class CommerceExchangeView(CreateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -14286,7 +14338,7 @@ class InventoryTradeView(CreateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -14559,7 +14611,7 @@ class ExchangePrizesView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -14609,7 +14661,7 @@ class IssueBackgroundView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -14712,7 +14764,7 @@ class ContactSuccessView(TemplateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -14777,7 +14829,7 @@ class BusinessMailingView(FormView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -14826,7 +14878,7 @@ class BusinessSuccessMailingView(TemplateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -14875,7 +14927,7 @@ class PostDetailView(View):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -14984,7 +15036,7 @@ class CurrencyProductView(DetailView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] is None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -15042,7 +15094,7 @@ class CurrencyMarketView(EBaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -15081,7 +15133,7 @@ class CurrencyCheckoutView(EBaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -15169,7 +15221,7 @@ class CurrencyPaymentView(EBaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -15505,7 +15557,7 @@ class ProductView(DetailView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -15562,7 +15614,7 @@ class OrderSummaryView(EBaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -15631,7 +15683,7 @@ class CheckoutView(EBaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -15865,7 +15917,7 @@ class PaymentView(EBaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -16026,7 +16078,7 @@ class OrderDoneView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -16570,7 +16622,7 @@ class ProfileEditView(FormView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -16633,7 +16685,7 @@ class SignupView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -16702,7 +16754,7 @@ class ChangePasswordView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -16886,7 +16938,7 @@ class DonateView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -16955,7 +17007,7 @@ class PatreonedView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -17001,7 +17053,7 @@ class DonateHistoryView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -17056,7 +17108,7 @@ class DonationsView(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -17140,7 +17192,7 @@ class ContactViewe(CreateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -17187,7 +17239,7 @@ class ContactSuccessView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -17245,7 +17297,7 @@ class SellerApplicationView(FormMixin, LoginRequiredMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -17457,7 +17509,7 @@ class BusinessEmailSuccessView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -17779,7 +17831,7 @@ class FeedbackView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -17848,7 +17900,7 @@ class FeedbackView(UpdateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+            
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -17985,7 +18037,7 @@ class ReviewView(BaseView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -18353,7 +18405,7 @@ class CreateReviewView(LoginRequiredMixin, FormView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -18452,7 +18504,7 @@ class FeedView(FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -18666,7 +18718,7 @@ class OrderHistory(ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None

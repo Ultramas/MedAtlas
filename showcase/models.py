@@ -158,6 +158,7 @@ TIMESTATUS = (
 WITHDRAWSTATE = (
     ('I', 'Incomplete'),
     ('C', 'Complete'),
+    ('CA', 'Cancelled'),
 )
 
 CAPACITYSTATE = (
@@ -1207,16 +1208,59 @@ class Ascension(models.Model):
 class Clickable(models.Model):
     name = models.CharField(max_length=200)
     image = models.ImageField(upload_to='images/', verbose_name="Clickable Image")
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    value = models.IntegerField(default=0)
-    rarity = models.IntegerField(default=0) #set rarity to the odds of appearing per second
-    chance_per_thousand = models.IntegerField(default=1000) #chance to appear, formula is 1/chance_per_thousand per second
+    base_value = models.IntegerField(default=0)
+    rarity = models.IntegerField(default=0)  # Set rarity to the odds of appearing per second
+    chance_per_second = models.IntegerField(default=1000)  # Chance to appear, formula is 1/chance_per_thousand per second
     sound = models.FileField()
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    def __str__(self):
+        return self.name
+
+
+
+class UserClickable(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    clickable = models.ForeignKey(Clickable, on_delete=models.CASCADE)
+    exponential_level_multiplier = models.FloatField(default=1.0)
+    actual_value = models.FloatField(default=0)
+    currency = models.ForeignKey('Currency', on_delete=models.CASCADE, blank=True, null=True)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    def save(self, *args, **kwargs):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        self.currency = Currency.objects.filter(is_active=1).first()
+
+        if profile and profile.level >= 1:
+            level_value = profile.level.level
+            self.exponential_level_multiplier = 1.02 ** level_value
+            self.actual_value = self.clickable.base_value * self.exponential_level_multiplier
+        else:
+            self.exponential_level_multiplier = 1.0
+            self.actual_value = self.clickable.base_value
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.clickable.name}"
+
+    class Meta:
+        verbose_name = "User Clickable"
+        verbose_name_plural = "User Clickables"
 
 
 class SecretRoom(models.Model):
@@ -1255,7 +1299,7 @@ class Endowment(models.Model):
         return str(self.user) + " bestowed a gift upon " + str(self.target)
 
     def save(self, *args, **kwargs):
-        if self.order:  # Check if a related CurrencyOrder exists
+        if self.order:
             self.amount = self.order.amount * 5
 
         self.currency = Currency.objects.filter(is_active=1).first()
@@ -2820,9 +2864,12 @@ class Game(models.Model):
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE, blank=True, null=True)
     category = models.CharField(max_length=2,
                                 choices=CARD_CATEGORIES, blank=True, null=True)
-    existing_choices = models.ManyToManyField('Choice', related_name='games', blank=True)
-
-
+    choices = models.ManyToManyField(
+        'Choice',
+        through='GameChoice',
+        blank=True,
+        related_name="api_set_cards"
+    )
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     power_meter = models.CharField(choices=POWER, max_length=4, default=1)
     items = models.ManyToManyField(PrizePool, related_name='official_items', blank=True)
@@ -2839,8 +2886,7 @@ class Game(models.Model):
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')),
-                                    verbose_name="Set active?")
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
         return str(self.name)
@@ -2925,8 +2971,10 @@ class Game(models.Model):
         if not self.daily:
             raise ValueError("This game is not configured as daily.")
 
+        # Get the current cycle start and time
         cycle_start, current_time_pst = self._get_pst_time()
 
+        # Check if the user has already spun during the current cycle
         existing_spin = DailySpin.objects.filter(user=user, cooldown=cycle_start).first()
 
         if existing_spin:
@@ -3061,8 +3109,8 @@ class GameChoice(models.Model):
             rarity_value = (self.upper_nonce - self.lower_nonce) / 10000
             self.rarity = round(rarity_value, 6)
 
-        if not self.value and self.choice.price:
-            self.value = self.choice.price * 100
+        if not self.value and self.choice.value:
+            self.value = self.choice.value
             print('save committed of value')
         print('save committed of gamechoice')
         super().save(*args, **kwargs)
@@ -3084,7 +3132,6 @@ class Choice(models.Model):
     )
     color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
     votes = models.IntegerField(default=0)
-    value = models.IntegerField(default=0)
     category = models.CharField(max_length=2,
                                 choices=CARD_CATEGORIES, blank=True, null=True)
     midcategory = models.CharField(max_length=200, help_text='Middle category of choice.',
@@ -3187,7 +3234,6 @@ class Choice(models.Model):
         if self.upper_nonce is None:
             self.upper_nonce = random.randint(0, 1000000)
 
-        # Calculate rarity if both upper_nonce and lower_nonce are present
         if self.upper_nonce is not None and self.lower_nonce is not None:
             rarity_value = (self.upper_nonce - self.lower_nonce) / 10000
             self.rarity = round(rarity_value, 6)  # Set rarity with up to 6 decimal places
@@ -3195,10 +3241,6 @@ class Choice(models.Model):
 
         if not self.choice_text and self.name:
             self.choice_text = self.name
-        if self.value:
-            self.value = self.value * 1.05 #0.05% increase on market
-        if not self.value and self.price:
-            self.value = self.price * 105 #0.05% increase on market
         if not self.subcategory and self.subtypes:
             self.subcategory = self.subtypes
         if self.image_large and not self.file:
@@ -3225,6 +3267,13 @@ class Choice(models.Model):
             return f"{self.choice_text} with prize {self.prizes}"
         else:
             return str(self.choice_text)
+
+    def asave(self):
+        if self.value:
+            self.value = self.value * Decimal('1.05')  # 5% increase on market
+        elif self.price:
+            self.value = self.price * Decimal('1.05')  # 5% increase on market
+        self.save()
 
     def formatted_rarity(self):
         if self.rarity is not None:
@@ -7289,7 +7338,7 @@ class Withdraw(models.Model):
     date_and_time = models.DateTimeField(null=True, verbose_name="time and date", auto_now_add=True)
     condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2, blank=True, null=True)
     status = models.CharField(choices=TIMESTATUS, max_length=1, default='P')
-    withdraw_state = models.CharField(choices=WITHDRAWSTATE, max_length=1, default='I')
+    withdraw_state = models.CharField(choices=WITHDRAWSTATE, max_length=2, default='I')
     capacity_state = models.CharField(choices=CAPACITYSTATE, max_length=1, default='N')
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -7384,7 +7433,6 @@ class Withdraw(models.Model):
 @receiver(m2m_changed, sender=Withdraw.cards.through)
 def update_number_of_cards(sender, instance, action, **kwargs):
     if action in ['post_add', 'post_remove', 'post_clear']:
-        # Update the number_of_cards whenever the ManyToMany field changes
         instance.number_of_cards = instance.cards.count()
         print('number of cards is ' + str(instance.number_of_cards))
         instance.save(update_fields=['number_of_cards'])
