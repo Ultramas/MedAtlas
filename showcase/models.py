@@ -3181,7 +3181,7 @@ class Choice(models.Model):
         blank=True, null=True, default=1
     )
     # Card attributes (direct from Pokemon API)
-    card_id = models.CharField(max_length=100)
+    card_id = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100, null=True, blank=True)
     supertype = models.CharField(max_length=50, null=True, blank=True)
     subtypes = models.CharField(max_length=100, null=True, blank=True)
@@ -3296,7 +3296,7 @@ class Choice(models.Model):
         verbose_name_plural = "Choices"
 
 class Card(models.Model):
-    card_id = models.CharField(max_length=100, unique=True)
+    card_id = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100)
     supertype = models.CharField(max_length=50)
     subtypes = models.CharField(max_length=100)
