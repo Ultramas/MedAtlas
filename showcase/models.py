@@ -2918,7 +2918,6 @@ class Game(models.Model):
 
         if self.daily and not self.discount_cost:
             self.discount_cost = 0
-
         super().save(*args, **kwargs)
 
         total_cost = 0
@@ -3103,17 +3102,27 @@ class GameChoice(models.Model):
             if first_currency:
                 self.choice.currency = first_currency
 
+        previous_game_choice = GameChoice.objects.filter(game=self.game).order_by('-upper_nonce').first()
 
-        # Calculate rarity if both upper_nonce and lower_nonce are present
+        if previous_game_choice and previous_game_choice.upper_nonce:
+            self.lower_nonce = previous_game_choice.upper_nonce
+        else:
+            self.lower_nonce = random.randint(0, 1000000)
+
+        if self.upper_nonce and self.upper_nonce != 1000000:
+            self.upper_nonce -= 1
+        if self.upper_nonce is None:
+            self.upper_nonce = random.randint(0, 1000000)
+
         if self.upper_nonce is not None and self.lower_nonce is not None:
             rarity_value = (self.upper_nonce - self.lower_nonce) / 10000
             self.rarity = round(rarity_value, 6)
 
         if not self.value and self.choice.value:
             self.value = self.choice.value
-            print('save committed of value')
         print('save committed of gamechoice')
         super().save(*args, **kwargs)
+
 
 class Choice(models.Model):
     """Used for voting on different new ideas"""
@@ -3180,6 +3189,10 @@ class Choice(models.Model):
         help_text="Position ordered by value (from highest to lowest)",
         blank=True, null=True, default=1
     )
+    total_number = models.IntegerField(
+        help_text="Position ordered by value (from highest to lowest)",
+        blank=True, null=True, default=1
+    )
     # Card attributes (direct from Pokemon API)
     card_id = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100, null=True, blank=True)
@@ -3204,7 +3217,6 @@ class Choice(models.Model):
         choices=((1, 'Active'), (0, 'Inactive')),
         verbose_name="Set active?"
     )
-    # This ForeignKey makes the relationship one-to-many (each Choice belongs to one Game).
     game = models.ForeignKey(
         Game,
         on_delete=models.CASCADE,
@@ -3213,13 +3225,13 @@ class Choice(models.Model):
         blank=True
     )
 
-
     def save(self, *args, **kwargs):
-        if not self.pk:  # Check if this is a new object
-            self.number = Choice.objects.filter(shufflers=self.shufflers).count() + 1
+        if not self.pk:
+            self.number = Choice.objects.filter(shufflers=self.shufflers, game=self.game).count() + 1
+            self.total_number = Choice.objects.filter(shufflers=self.shufflers).count() + 1
 
         if self.total_number_of_choice and self.number_of_choice:
-            if self.total_number_of_choice != 0:
+            if self.total_number_of_choice != 1:
                 self.rarity = (Decimal(self.number_of_choice) / Decimal(self.total_number_of_choice)) * Decimal(100)
             else:
                 self.rarity = Decimal(0)
@@ -3229,15 +3241,30 @@ class Choice(models.Model):
             if first_currency:
                 self.currency = first_currency
 
-        if self.lower_nonce is None:
-            self.lower_nonce = random.randint(0, 1000000)
+        previous_choice = Choice.objects.filter(game=self.game).order_by('-upper_nonce').first()
+        previous_game_choice = GameChoice.objects.filter(game=self.game).order_by('-upper_nonce').first()
+
+        if previous_choice and previous_choice.upper_nonce and self.number != 1:
+            self.lower_nonce = previous_choice.upper_nonce + 1
+            print('a choice exists previously here')
+            print(self.number)
+        elif previous_game_choice and previous_game_choice.upper_nonce and self.number != 1:
+            self.lower_nonce = previous_game_choice.upper_nonce + 1
+        else:
+            pass
+
+        if self.upper_nonce is not None:
+            if self.upper_nonce % 10 == 0:
+                print("The last digit of upper_nonce is 0")
+                if self.upper_nonce > 0:
+                    self.upper_nonce -= 1
+
         if self.upper_nonce is None:
             self.upper_nonce = random.randint(0, 1000000)
 
         if self.upper_nonce is not None and self.lower_nonce is not None:
             rarity_value = (self.upper_nonce - self.lower_nonce) / 10000
-            self.rarity = round(rarity_value, 6)  # Set rarity with up to 6 decimal places
-
+            self.rarity = round(rarity_value, 6)
 
         if not self.choice_text and self.name:
             self.choice_text = self.name
@@ -3260,6 +3287,12 @@ class Choice(models.Model):
                     self.file.save(file_name, ContentFile(response.content), save=False)
             except requests.RequestException:
                 pass
+
+        if self.pk:
+            previous = Choice.objects.filter(pk=self.pk).only('value').first()
+            if previous and previous.value != self.value:
+                self.value = self.value + self.value * 0.05
+                print('value updated')
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -7739,7 +7772,6 @@ class ImageBase(models.Model):
     image_ratio = models.FloatField(blank=True, null=True, default=1.0,
                                     help_text='Length to Width Ratio of the Image (Length/Width).',
                                     verbose_name="image ratio")
-
     file = models.FileField(blank=True, null=True, upload_to='images/', verbose_name="Non-image File")
     image_measurement = models.CharField(blank=True, null=True, choices=IMAGE_MEASUREMENT_CHOICES, max_length=3)
     width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resize Width")

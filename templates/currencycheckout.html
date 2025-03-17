@@ -1,671 +1,89 @@
+{% extends 'ebase.html' %}
 {% load static %}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeTrove - Marketplace</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --primary: #00f0ff;
-            --primary-dark: #00a0a8;
-            --secondary: #ff00e5;
-            --accent: #4ecca3;
-            --dark: #0a0a20;
-            --darker: #050510;
-            --light: #e1e1ff;
-            --success: #00ff66;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Rajdhani', sans-serif;
-        }
-
-        body {
-            background-color: var(--darker);
-            color: var(--light);
-            min-height: 100vh;
-            background-image:
-                radial-gradient(circle at 20% 35%, rgba(0, 240, 255, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 75% 65%, rgba(255, 0, 229, 0.15) 0%, transparent 40%);
-        }
-
-        .copyright-section {
-            background: linear-gradient(
-                to right,
-                rgba(0, 240, 255, 0.1),
-                rgba(255, 255, 255, 0.05),
-                rgba(0, 240, 255, 0.1)
-            );
-            backdrop-filter: blur(10px);
-            padding: 1rem 0;
-            text-align: center;
-            position: relative;
-            z-index: 100;
-        }
-
-        .copyright-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-        }
-
-        .copyright-section p {
-            color: var(--light);
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            margin: 0;
-        }
-
-        /* Checkout Page Styling */
-        .checkout-container {
-            padding: 3rem 1rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .checkout-title {
-            text-align: center;
-            color: var(--primary);
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            position: relative;
-            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-        }
-
-        .checkout-title::after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-        }
-
-        .checkout-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            margin-bottom: 2rem;
-        }
-
-        .checkout-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-        }
-
-        .section-title {
-            color: var(--primary);
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            position: relative;
-            padding-left: 1rem;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
-        }
-
-        .section-title::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 100%;
-            background: var(--primary);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-        }
-
-        /* Form Styling */
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            background: rgba(10, 10, 32, 0.6);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            color: var(--light);
-            margin-bottom: 1rem;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        label {
-            display: block;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        /* Custom Checkbox */
-        .custom-control {
-            position: relative;
-            padding-left: 2.5rem;
-            margin-bottom: 1rem;
-            cursor: pointer;
-        }
-
-        .custom-control-input {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-            height: 0;
-            width: 0;
-        }
-
-        .custom-control-label {
-            position: relative;
-            cursor: pointer;
-            padding-top: 0.2rem;
-        }
-
-        .custom-control-label::before {
-            content: '';
-            position: absolute;
-            left: -2.5rem;
-            top: 0.2rem;
-            width: 1.5rem;
-            height: 1.5rem;
-            border: 2px solid var(--primary);
-            border-radius: 4px;
-            background: rgba(10, 10, 32, 0.6);
-            transition: all 0.3s ease;
-        }
-
-        .custom-control-input:checked ~ .custom-control-label::before {
-            background: var(--primary);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-        }
-
-        .custom-control-label::after {
-            content: '';
-            position: absolute;
-            left: -2.1rem;
-            top: 0.6rem;
-            width: 0.7rem;
-            height: 0.7rem;
-            border-radius: 2px;
-            background: var(--darker);
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .custom-control-input:checked ~ .custom-control-label::after {
-            opacity: 1;
-        }
-
-        /* Custom Radio */
-        .custom-radio .custom-control-label::before {
-            border-radius: 50%;
-        }
-
-        .custom-radio .custom-control-label::after {
-            border-radius: 50%;
-        }
-
-        /* Button Styling */
-        .btn-cyber {
-            background: linear-gradient(45deg, var(--primary-dark), var(--primary));
-            color: var(--darker);
-            border: none;
-            border-radius: 8px;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            margin-top: 1.5rem;
-        }
-
-        .btn-cyber::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent 70%);
-            transition: transform 0.5s ease;
-        }
-
-        .btn-cyber:hover::before {
-            transform: translate(25%, 25%);
-        }
-
-        .btn-cyber:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-        }
-
-        /* Shipping Label */
-        .shipping-label {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
-            color: var(--darker);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .shipping-label::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-        }
-
-        .label-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid rgba(10, 10, 32, 0.1);
-        }
-
-        .address-section {
-            margin-bottom: 1.5rem;
-        }
-
-        .address-section h3 {
-            color: var(--darker);
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .barcode {
-            text-align: center;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 2px solid rgba(10, 10, 32, 0.1);
-        }
-
-        .barcode-placeholder {
-            font-family: 'Courier New', monospace;
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            color: var(--darker);
-        }
-
-        /* Payment Options */
-        .payment-options {
-            display: grid;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-
-        .payment-option {
-            position: relative;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .payment-option:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: var(--primary);
-        }
-
-        .payment-option input {
-            display: none;
-        }
-
-        .payment-option label {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            cursor: pointer;
-        }
-
-        .payment-option input:checked + label {
-            color: var(--primary);
-        }
-
-        .payment-option input:checked + label::before {
-            content: '✓';
-            position: absolute;
-            right: 1rem;
-            color: var(--primary);
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .checkout-card {
-                padding: 1.5rem;
-            }
-
-            .checkout-title {
-                font-size: 2rem;
-            }
-        }
-
-        /* Animation */
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.8); }
-            100% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.5); }
-        }
-
-        .glow-effect {
-            animation: glow 2s infinite;
-        }
-    </style>
-</head>
-<body>
-    {% include 'navtrove.html' %}
-
-    <div class="checkout-container">
-        <h2 class="checkout-title">Currency Checkout</h2>
-
-        <div class="row">
-            <div class="col-md-8 mb-4">
-                <div class="checkout-card">
-                    {% if address %}
-                        <div class="shipping-label">
-                            <div class="label-header">
-                                <h2>Shipping Label</h2>
-                            </div>
-                            <div class="address-section">
-                                <h3>Ship To:</h3>
-                                <div class="address-content">
-                                    Address - {{address.street_address}}<br>
-                                    {% if apartment_address %}
-                                        Apartment - {{address.apartment_address}}<br>
-                                    {% endif %}
-                                    Country - {{address.country}}<br>
-                                    ZIP - {{address.zip}}
-                                </div>
-                            </div>
-                            <div class="address-section">
-                                <h3>Bill To:</h3>
-                                <div class="address-content">
-                                    Address - {{address.street_address}}<br>
-                                    {% if apartment_address %}
-                                        Apartment - {{address.apartment_address}}<br>
-                                    {% endif %}
-                                    Country - {{address.country}}<br>
-                                    ZIP - {{address.zip}}
-                                </div>
-                            </div>
-                            <div class="barcode">
-                                <div class="barcode-placeholder">||||| |||| || |||||||</div>
-                            </div>
-                        </div>
-                        <form method="POST" class="card-body" action="{% url 'showcase:currencycheckout' %}">
-                            {% csrf_token %}
-                    {% else %}
-                        <form method="POST" class="card-body" action="{% url 'showcase:currencycheckout' %}" id="checkout-form">
-                            {% csrf_token %}
-                            {{ form.non_field_errors }}
-
-
-                            <div class='hideable_shipping_form' style="display: none;">
-                                <div class="form-group">
-                                    <input type='text' placeholder='Address (example: 1234 Main St)' id='shipping_address' name='shipping_address' class='form-control' />
-                                </div>
-
-                                <div class="form-group">
-                                    <input type='text' placeholder='Address 2 (optional)' id='shipping_address2' name='shipping_address2' class='form-control' />
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-lg-6 col-md-12 mb-4">
-                                        <label for="country">Country</label>
-                                        {{ form.shipping_country }}
-                                    </div>
-                                    <div class="col-lg-6 col-md-12 mb-4">
-                                        <label for="shipping_zip">Zip</label>
-                                        <input type='text' placeholder='Zip code' id='shipping_zip' name='shipping_zip' class='form-control' />
-                                    </div>
-                                </div>
-
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" name="same_billing_address" id="same_billing_address">
-                                    <label class="custom-control-label" for="same_billing_address">My billing address is the same as my shipping address</label>
-                                </div>
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" name="set_default_shipping" id="set_default_shipping">
-                                    <label class="custom-control-label" for="set_default_shipping">Save as default shipping address</label>
-                                </div>
-                            </div>
-
-                            {% if default_shipping_address %}
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" name="use_default_shipping" id="use_default_shipping">
-                                    <label class="custom-control-label" for="use_default_shipping">Use default shipping address: {{ default_shipping_address.street_address|truncatechars:10 }}</label>
-                                </div>
-                            {% endif %}
-
-                            <hr>
-
-
-                            <div class='hideable_billing_form' style="display: none;">
-                                <div class="form-group">
-                                    <input type='text' placeholder='Address (example: 1234 Main St)' id='billing_address' name='billing_address' class='form-control' />
-                                </div>
-
-                                <div class="form-group">
-                                    <input type='text' placeholder='Address 2 (optional)' id='billing_address2' name='billing_address2' class='form-control' />
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-lg-6 col-md-12 mb-4">
-                                        <label for="country">Country</label>
-                                        {{ form.billing_country }}
-                                    </div>
-                                    <div class="col-lg-6 col-md-12 mb-4">
-                                        <label for="billing_zip">Zip</label>
-                                        <input type='text' placeholder='Zip code' id='billing_zip' name='billing_zip' class='form-control' />
-                                    </div>
-                                </div>
-
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" name="set_default_billing" id="set_default_billing">
-                                    <label class="custom-control-label" for="set_default_billing">Save as default billing address</label>
-                                </div>
-                            </div>
-
-                            {% if default_billing_address %}
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" name="use_default_billing" id="use_default_billing">
-                                    <label class="custom-control-label" for="use_default_billing">Use default billing address: {{ default_billing_address.street_address|truncatechars:10 }}</label>
-                                </div>
-                            {% endif %}
-                    {% endif %}
-
-                            <hr>
-
-                            {% if not form.payment_option.is_hidden %}
-                                <h3 class="section-title">Payment Options</h3>
-                                <div class="payment-options">
-                                    {% for value, name in form.fields.payment_option.choices %}
-                                        <div class="payment-option">
-                                            <input id="{{ name }}" name="payment_option" value="{{ value }}" type="radio" required>
-                                            <label for="{{ name }}">
-                                                <i class="fas fa-credit-card"></i>
-                                                {{ name }}
-                                            </label>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-
-                            <button type="submit" class="btn-cyber">Continue To Payment</button>
-                        </form>
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+{% block logos %}
+    {% for EBaseView in Logos %}
+    {% if EBaseView.page == 'currencycheckout.html' %}
+        <a class="logo" href="{{ EBaseView.hyperlink }}">
+            <img class="imageicon" src="media/{{ EBaseView.logocover }}" alt="{{ EBaseView.alternate }}"
+                 width="145vh" height="100vh" style="z-index: 100;">
+        </a>
+    {% endif %}
+    {% endfor %}
+{% endblock %}
+
+  <main >
+    <div class="container wow fadeIn">
+      <h2 class="my-5 h2 text-center" style="color: white;">RubiAce Checkout</h2>
+      <div class="row">
+        <div class="col-md-8 mb-4">
+          <div class="card">
+            <form method="POST" class="card-body">
+              {% csrf_token %}
+              <h2>Select Payment Type</h2>
+              <hr>
+
+              <div class="d-block my-3">
+                {% for value, name in form.fields.payment_option.choices %}
+                <div class="custom-control custom-radio">
+                  <input id="{{ name }}" name="payment_option" value="{{ value }}" type="radio" class="custom-control-input" required>
+                  <label class="custom-control-label" for="{{ name }}">{{ name }}</label>
                 </div>
-            </div>
-
-            <div class="col-md-4 mb-4">
-                {% include "currency_order_snippet.html" %}
-            </div>
-        </div>
-    </div>
-
-    <footer class="copyright-section">
-        <div class="container">
-            <p>
-                {% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
-                    {{BaseCopyrightTextField.copyright}}
                 {% endfor %}
-            </p>
+                <!--keep operating until alternate payment methods are avaliable-->
+
+
+
+              </div>
+
+              <hr class="mb-4">
+              <button class="btn btn-primary btn-lg btn-block" type="submit">Continue To Checkout</button>
+              <!--<button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>-->
+
+            </form>
+
+          </div>
+
         </div>
-    </footer>
 
-    <script>
-        // Load audio files
-        const sellAudio = new Audio("/static/css/sounds/sell_coin.mp3");
-        const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
-        const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
+        <div class="col-md-4 mb-4">
+          {% include "currency_order_snippet.html" %}
+        </div>
 
-        // Add event listeners to sell forms
-        document.querySelectorAll('.sell-form').forEach(form => {
-            form.addEventListener('submit', function(event) {
-                event.preventDefault(); // Prevent default form submission
-                sellAudio.play(); // Play the sell sound
-                handleAjaxFormSubmission(form); // Handle the AJAX request
-            });
-        });
+      </div>
+<br><br><br><br><br><br><br>
+    </div>
+  </main>
 
-        // Add event listeners to withdraw forms
-        document.querySelectorAll('.withdraw-form').forEach(form => {
-            form.addEventListener('submit', function(event) {
-                event.preventDefault(); // Prevent default form submission
-                withdrawAudio.play(); // Play the withdraw sound
-                handleAjaxFormSubmission(form); // Handle the AJAX request
-            });
-        });
+{% endblock content %}
 
-        document.querySelectorAll('.trade-form').forEach(form => {
-            form.addEventListener('submit', function(event) {
-                tradeAudio.play(); // Play the withdraw sound
-            });
-        });
+{% block extra_scripts %}
+<script>
+var hideable_shipping_form = $('.hideable_shipping_form');
+var hideable_billing_form = $('.hideable_billing_form');
 
-        function handleAjaxFormSubmission(form) {
-            const formData = new FormData(form);
-            const actionUrl = form.getAttribute('action');
+var use_default_shipping = document.querySelector("input[name=use_default_shipping]");
+var use_default_billing = document.querySelector("input[name=use_default_billing]");
 
-            fetch(actionUrl, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('stock-count').textContent = data.number_of_cards;
-                } else {
-                    console.error(data.error);
-                }
-            });
-        }
+use_default_shipping.addEventListener('change', function() {
+  if (this.checked) {
+    hideable_shipping_form.hide();
+  } else {
+    hideable_shipping_form.show();
+  }
+})
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkoutForm = document.getElementById('checkout-form');
-            if (checkoutForm) {
-                checkoutForm.onsubmit = function() {
-                    const selectedOption = document.querySelector('input[name="payment_option"]:checked');
-                    if (selectedOption) {
-                        const paymentOption = selectedOption.value;
-                        if (paymentOption === 'stripe') {
-                            this.action = "{% url 'showcase:currencypayment' payment_option='stripe' %}";
-                        } else if (paymentOption === 'paypal') {
-                            this.action = "{% url 'showcase:currencypayment' payment_option='paypal' %}";
-                        } else if (paymentOption === 'card') {
-                            this.action = "{% url 'showcase:currencypayment' payment_option='card' %}";
-                        }
-                    }
-                };
-            }
+use_default_billing.addEventListener('change', function() {
+  if (this.checked) {
+    hideable_billing_form.hide();
+  } else {
+    hideable_billing_form.show();
+  }
+})
 
-            // Address form toggling
-            var hideable_shipping_form = $('.hideable_shipping_form');
-            var hideable_billing_form = $('.hideable_billing_form');
+</script>
+{% endblock extra_scripts %}
 
-            var use_default_shipping = document.querySelector("input[name=use_default_shipping]");
-            var use_default_billing = document.querySelector("input[name=use_default_billing]");
-
-            if (use_default_shipping) {
-                use_default_shipping.addEventListener('change', function() {
-                    if (this.checked) {
-                        hideable_shipping_form.hide();
-                    } else {
-                        hideable_shipping_form.show();
-                    }
-                });
-            }
-
-            if (use_default_billing) {
-                use_default_billing.addEventListener('change', function() {
-                    if (this.checked) {
-                        hideable_billing_form.hide();
-                    } else {
-                        hideable_billing_form.show();
-                    }
-                });
-            }
-        });
-    </script>
-
-    <!-- jQuery and other scripts -->
-    <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-    <script src="{% static 'css/js/main.js' %}"></script>
-    <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
-    <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
-    <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
-    <script src="{% static 'css/js/waypoints.js' %}"></script>
-    <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
-    <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
-    <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
-    <script src="{% static 'css/js/sticker.js' %}"></script>
-</body>
-</html>

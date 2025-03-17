@@ -631,7 +631,7 @@ class GameChoiceInline(admin.StackedInline):
     extra = 1
     fields = (
         'user', 'choice_text', 'file', 'image_length', 'image_width',
-        'color', 'value', 'category', 'midcategory', 'subcategory', 'tier', 'rarity', 'condition', 'number_of_choice', 'lower_nonce', 'upper_nonce', 'is_active',
+        'color', 'value', 'number', 'total_number', 'category', 'midcategory', 'subcategory', 'tier', 'rarity', 'condition', 'number_of_choice', 'lower_nonce', 'upper_nonce', 'is_active',
     )
     readonly_fields = ('mfg_date',)
 
