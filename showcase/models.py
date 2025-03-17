@@ -955,9 +955,11 @@ class CurrencyOrder(models.Model):
         super(CurrencyOrder, self).save(*args, **kwargs)
 
     def get_total_item_price(self):
-        if self.items.discount_price:
-            return self.quantity * self.get_discount_item_price()
-        return self.quantity * self.items.price
+        if self.item and self.item.price is not None:
+            if self.items.discount_price:
+                return self.quantity * self.get_discount_item_price()
+            return self.quantity * self.items.price
+        return 0
 
     def get_discount_item_price(self):
         return self.quantity * self.items.discount_price
@@ -3241,10 +3243,12 @@ class Choice(models.Model):
             if first_currency:
                 self.currency = first_currency
 
-        previous_choice = Choice.objects.filter(game=self.game).order_by('-upper_nonce').first()
+        previous_number = self.number - 1
+        print('the previous number is ' + str(previous_number))
+        previous_choice = Choice.objects.filter(game=self.game, number=previous_number).order_by('-upper_nonce').first()
         previous_game_choice = GameChoice.objects.filter(game=self.game).order_by('-upper_nonce').first()
 
-        if previous_choice and previous_choice.upper_nonce and self.number != 1:
+        if previous_choice and previous_choice.upper_nonce and previous_choice.number != 0 and self.number != 1:
             self.lower_nonce = previous_choice.upper_nonce + 1
             print('a choice exists previously here')
             print(self.number)
@@ -6926,8 +6930,8 @@ class OrderItem(models.Model):
                                               verbose_name="image width")
     quantity = models.IntegerField(default=1)
     order_date = models.DateTimeField(auto_now_add=True, verbose_name="Order date")
-    orderprice = models.FloatField(blank=True, null=True, verbose_name="Order price")
-    currencyorderprice = models.IntegerField(blank=True, null=True, verbose_name="Curency order price")
+    orderprice = models.FloatField(verbose_name="Order price", default=0)
+    currencyorderprice = models.IntegerField(verbose_name="Curency order price", default=0)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -6938,16 +6942,21 @@ class OrderItem(models.Model):
         return f"{self.quantity} of {self.item.title}"
 
     def get_total_item_price(self):
-        if self.item.discount_price:
-            return self.quantity * self.get_discount_item_price()
-        self.orderprice = self.quantity * self.item.price
-        return self.quantity * self.item.price
+        if self.item and self.item.price is not None:
+            if self.item.discount_price:
+                return self.quantity * self.get_discount_item_price()
+            self.orderprice = self.quantity * self.item.price
+            return self.quantity * self.item.price
+        return 0
 
     def get_total_item_currency_price(self):
-        if self.item.discount_currency_price:
-            return self.quantity * self.get_discount_item_currency_price()
-        self.currencyorderprice = self.quantity * self.item.currency_price
-        return self.quantity * self.item.currency_price
+        if self.item and self.item.currency_price is not None:
+            if self.item.discount_currency_price:
+                return self.quantity * self.get_discount_item_currency_price()
+            self.currencyorderprice = self.quantity * self.item.currency_price
+            return self.quantity * self.item.currency_price
+        return 0
+
 
     def get_item_price(self):
         return self.quantity * self.item.price
@@ -6977,7 +6986,6 @@ class OrderItem(models.Model):
             return self.get_discount_item_currency_price()
         return self.get_total_item_currency_price()
 
-    # used to get the url of the item
     def get_profile_url(self):
         order = OrderItem.objects.filter(user=self.user).first()
         if order:
@@ -6991,9 +6999,13 @@ class OrderItem(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = self.item.slug
+            self.slug = self.item.slug if self.item else None
         if not self.image:
-            self.image = self.item.image
+            self.image = self.item.image if self.item else None
+        if not self.orderprice and self.item and self.item.price is not None:
+            self.orderprice = self.item.price
+        if not self.currencyorderprice and self.item and self.item.currency_price is not None:
+            self.currencyorderprice = self.item.currency_price
         super().save(*args, **kwargs)
         OrderItemField.objects.create(
             user=self.user,
@@ -7006,6 +7018,13 @@ class OrderItem(models.Model):
             quantity=self.quantity,
             is_active=self.is_active,
         )
+        if not self.orderprice and self.item and self.item.price:
+            self.orderprice = self.item.price
+
+        elif not self.currencyorderprice and self.item and self.item.currency_price:
+            self.currencyorderprice = self.item.currency_price
+
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Order Items'
@@ -7199,8 +7218,8 @@ class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
     items = models.ManyToManyField(OrderItem)
-    orderprice = models.FloatField(blank=True, null=True, verbose_name="Order price")
-    currencyorderprice = models.IntegerField(blank=True, null=True, verbose_name="Currency order price")
+    orderprice = models.FloatField(verbose_name="Order price", default=0)
+    currencyorderprice = models.IntegerField(verbose_name="Curency order price", default=0)
     itemhistory = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name="Order history", blank=True, null=True)
     feedback_url = models.URLField(blank=True)
     start_date = models.DateTimeField(auto_now_add=True)
@@ -7235,30 +7254,28 @@ class Order(models.Model):
    '''
 
     def __str__(self):
-        if str(self.being_delivered) == 'False':
-            return self.user.username + " " + str(self.items) + " - Not Shipped"
-        else:
-            return self.user.username + " " + str(self.items) + " - Shipped"
+        items_list = ", ".join([str(item) for item in self.items.all()])
+        status = "Shipped" if self.being_delivered else "Not Shipped"
+        return f"{self.user.username} | Items: [{items_list}] - {status}"
+
         if self.profile:
             self.shipping_address = self.profile.shipping_address
             self.billing_address = self.profile.billing_address
 
-    def get_total_price(self):
+    def update_total_prices(self):
+        """ Updates orderprice and currencyorderprice based on order items. """
+        self.orderprice = sum(item.get_final_price() for item in self.items.all() if item.get_final_price())
+        self.currencyorderprice = sum(item.get_final_currency_price() for item in self.items.all() if item.get_final_currency_price())
 
-        total = 0
-        for order_item in self.items.all():
-            if order_item.item.price:
-                total += order_item.get_final_price()
-                self.orderprice = total
-        return total
+    def save(self, *args, **kwargs):
+        self.update_total_prices()
+        super().save(*args, **kwargs)
+
+    def get_total_price(self):
+        return str(self.orderprice) or 0
 
     def get_total_currency_price(self):
-        currency_total = 0
-        for order_item in self.items.all():
-            if order_item.item.currency_price:
-                currency_total += order_item.get_final_currency_price()
-                self.currencyorderprice = currency_total
-        return currency_total
+        return str(self.currencyorderprice) or 0
 
     def deduct_currency_amount(self):
         profile = ProfileDetails.objects.get(user=self.user)
@@ -8105,4 +8122,4 @@ class DefaultAvatar(models.Model):
 
     class Meta:
         verbose_name = "Default Avatar"
-        verbose_name_plural = "Default Avatars"
+        verbose_name_plural = "Default Avatar"

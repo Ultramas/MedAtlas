@@ -996,8 +996,15 @@ class OrderAdmin(admin.ModelAdmin):
             'fields': ('ordered', 'being_delivered', 'received', 'refund_requested', 'refund_granted'),
         }),
     )
+
     readonly_fields = ('start_date', 'id',)
-    list_display = ('user', 'coupon', 'orderprice', 'currencyorderprice')
+
+    def display_items(self, obj):
+        return ", ".join([str(item) for item in obj.items.all()])
+
+    display_items.short_description = "Items"
+
+    list_display = ('user', 'display_items', 'coupon', 'orderprice', 'currencyorderprice')
 
 
 admin.site.register(Order, OrderAdmin)
