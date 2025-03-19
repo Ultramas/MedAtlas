@@ -2949,7 +2949,6 @@ class Game(models.Model):
 
         super().save(*args, **kwargs)
 
-
     def _get_pst_time(self):
         """Get the current time in PST and determine today's 5 PM PST."""
         pst = pytz.timezone('US/Pacific')

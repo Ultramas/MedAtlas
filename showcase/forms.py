@@ -8,12 +8,14 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 
+from django.contrib.admin.widgets import AutocompleteSelect
 from mysite import settings
+from . import admin
 from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewType, LotteryTickets, Meme, TradeOffer, \
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
     SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame, Monstrosity, \
-    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet
+    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet, GameChoice
 from .models import UpdateProfile
 from .models import VoteQuery
 from .models import StaffApplication
@@ -86,6 +88,7 @@ class SignUpForm(UserCreationForm):
         if User.objects.filter(email=email).exists():
             raise ValidationError("This email is already in use. Please use a different email address.")
         return email
+
 
 CONTACT_PREFERENCE = [
     ('email', 'Email'),
@@ -376,6 +379,51 @@ ChoiceFormSet = modelformset_factory(
     form=ChoiceForm,
     extra=0,
 )
+
+
+from django.utils.safestring import mark_safe
+
+class TypeaheadSelectWidget(forms.Select):
+    class Media:
+        css = {
+            'all': ('https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css',)
+        }
+        js = (
+            'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js',
+        )
+
+    def render(self, name, value, attrs=None, renderer=None):
+        # Render the default select widget.
+        output = super().render(name, value, attrs, renderer)
+        # Use the element's id to initialize Select2.
+        element_id = attrs.get('id', 'id_%s' % name)
+        js = f'''
+        <script type="text/javascript">
+            (function($) {{
+                $(document).ready(function(){{
+                    $('#{element_id}').select2({{
+                        width: 'resolve',
+                        placeholder: 'Select a choice',
+                        allowClear: true
+                    }});
+                }});
+            }})(django.jQuery);
+        </script>
+        '''
+        return mark_safe(output + js)
+
+
+class GameChoiceForm(forms.ModelForm):
+    choice = forms.ModelChoiceField(
+        queryset=Choice.objects.all(),
+        widget=TypeaheadSelectWidget,
+        required=True
+    )
+
+    class Meta:
+        model = GameChoice
+        fields = '__all__'
 
 
 class AscensionCreateForm(forms.ModelForm):

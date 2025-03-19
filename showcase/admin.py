@@ -1,4 +1,7 @@
+import random
+
 from django.contrib import admin
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ValidationError
 import re
@@ -625,6 +628,51 @@ admin.site.register(GameHub, GameHubAdmin)
 
 
 from django.utils.html import format_html
+from decimal import Decimal
+from django.contrib.admin.widgets import AutocompleteSelect
+from django.core.validators import MinValueValidator, MaxValueValidator
+
+
+class ChoiceAdmin(admin.ModelAdmin):
+    search_fields = ('choice_text', 'name',)
+
+    fieldsets = (
+        ('Choice Information - Categorial Descriptions', {
+            'fields': ('user', 'choice_text', 'category', 'tier',),
+            'classes': ('collapse-open',),
+        }),
+        ('Choice Information - Attributes', {
+            'fields': (
+            'votes', 'mfg_date', 'rarity', 'condition', 'number_of_choice', 'total_number_of_choice', 'value',
+            'number', 'prizes', 'lower_nonce', 'upper_nonce', 'generated_nonce', 'is_active',),
+            'classes': ('collapse-open',),
+        }),
+        ('Choice Information - Card API Information', {
+            'fields': ('card_id', 'name', 'supertype', 'subtypes', 'hp', 'types', 'evolves_to', 'rules', 'attacks',
+                       'weaknesses', 'retreat_cost', 'set_name', 'set_series', 'set_release_date', 'image_small',
+                       'image_large', 'price',),
+            'classes': ('collapse-open',),
+        }),
+        ('Choice Information - Image Display', {
+            'fields': ('file', 'image_length', 'image_width',),
+            'classes': ('collapse-open',),
+        }),
+    )
+    # inlines = [Prizes]
+
+    readonly_fields = ('mfg_date',)
+
+    list_display = (
+        'user',
+        'choice_text',
+        'category',
+        'condition',
+        'value',
+        'is_active',
+    )
+
+admin.site.register(Choice, ChoiceAdmin)
+
 
 class GameChoiceInline(admin.StackedInline):
     model = Choice
@@ -638,6 +686,7 @@ class GameChoiceInline(admin.StackedInline):
 
 class GameChoiceMiddleInline(admin.TabularInline):
     model = GameChoice
+    autocomplete_fields = ['choice']
     extra = 1
     fields = ('game', 'choice', 'value', 'rarity', 'lower_nonce', 'upper_nonce', 'get_image',)
     readonly_fields = ('value', 'rarity', 'get_image',)
@@ -748,9 +797,6 @@ class GameAdmin(admin.ModelAdmin):
         if obj and not obj.daily:
             readonly_fields += ('unlocking_level', 'cooldown', 'locked')
         return readonly_fields
-
-    class Media:
-        js = ('admin/js/game_admin.js',)
 
 
 admin.site.register(Game, GameAdmin)
@@ -1702,41 +1748,6 @@ class AdministrationRoleAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AdminRoles, AdministrationRoleAdmin)
-
-
-class ChoiceAdmin(admin.ModelAdmin):
-    fieldsets = (
-        ('Choice Information - Categorial Descriptions', {
-            'fields': ('user', 'choice_text', 'category', 'tier',),
-            'classes': ('collapse-open',),
-        }),
-        ('Choice Information - Attributes', {
-            'fields': ('votes', 'mfg_date', 'rarity', 'condition', 'number_of_choice', 'total_number_of_choice', 'value', 'number', 'prizes', 'lower_nonce', 'upper_nonce', 'generated_nonce','is_active',),
-            'classes': ('collapse-open',),
-        }),
-        ('Choice Information - Card API Information', {
-            'fields': ('card_id', 'name', 'supertype', 'subtypes', 'hp', 'types', 'evolves_to', 'rules', 'attacks', 'weaknesses', 'retreat_cost', 'set_name', 'set_series', 'set_release_date', 'image_small', 'image_large','price',),
-            'classes': ('collapse-open',),
-        }),
-        ('Choice Information - Image Display', {
-            'fields': ('file', 'image_length', 'image_width',),
-            'classes': ('collapse-open',),
-        }),
-    )
-    #inlines = [Prizes]
-
-    readonly_fields = ('mfg_date',)
-
-    list_display = (
-        'user',
-        'choice_text',
-        'category',
-        'condition',
-        'value',
-        'is_active',
-    )
-
-admin.site.register(Choice, ChoiceAdmin)
 
 
 class InventoryAdmin(admin.ModelAdmin):

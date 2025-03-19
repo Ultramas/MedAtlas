@@ -3017,7 +3017,7 @@ class SingleBattleListView(DetailView):
         context['default_game'] = ordered_games[0] if ordered_games else None
         related_games = Game.objects.filter(game_battles__battle=battle).distinct()
         context['related_games'] = related_games
-
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         user = self.request.user
         context['is_participant'] = user in battle.participants.all()
         total_capacity = battle.get_total_capacity()
@@ -3105,7 +3105,7 @@ class SingleBattleListView(DetailView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         # Update participant status and creator check
-        if hasattr(self, 'object') and self.object is not None:
+        if hasattr(self, 'object') and self.object is not None and self.request.user.is_authenticated:
             battle = self.object
             context['is_participant'] = battle.participants.filter(user=user).exists()
             context['is_creator'] = (battle.creator == user)
@@ -3115,11 +3115,9 @@ class SingleBattleListView(DetailView):
             context['is_creator'] = False
             context['is_full'] = False
 
-        # Add the BetForm with the battle already set (hidden field)
         if 'bet_form' not in context:
             context['bet_form'] = BetForm(initial={'battle': battle.pk})
 
-        # Also add the join battle form instance if needed
         if 'join_form' not in context:
             context['join_form'] = BattleJoinForm(user=user, battle=battle)
 

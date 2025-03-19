@@ -80,6 +80,22 @@
 
         .containerre {
             margin-bottom: 5em;
+            display: flex;
+            justify-content: center;
+            overflow: hidden; /* Ensures hidden overflow on both sides */
+            position: relative;
+            width: 100%;
+        }
+
+        .slider {
+            display: flex;
+            flex-wrap: nowrap;
+            transition: transform 0.3s ease-in-out;
+            justify-content: center; /* Ensures even distribution */
+        }
+
+        .cards {
+            flex: 0 0 auto;
         }
 
         .sliderlootlist {
@@ -88,11 +104,14 @@
             justify-content: left;
         }
 
+
         .spinner-arrow {
             /*width: 50px;*/
             height: 50px;
-            z-index: 10; /* Ensure it's on top */
-        }.cards-container {
+            z-index: 10;
+        }
+
+        cards-container {
     display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -1897,6 +1916,20 @@ document.addEventListener("DOMContentLoaded", function() {
         inventoryGrid.classList.add("compact-view");
     }
 });
+
+    window.addEventListener('resize', function () {
+    const slider = document.getElementById('slider');
+    const containerWidth = document.querySelector('.containerre').offsetWidth;
+    const sliderWidth = slider.scrollWidth;
+
+    if (sliderWidth > containerWidth) {
+        const excessWidth = (sliderWidth - containerWidth) / 2;
+        slider.style.transform = `translateX(-${excessWidth}px)`;
+    } else {
+        slider.style.transform = 'translateX(0)';
+    }
+});
+
 </script>
 
     <footer class="copyright-section">
