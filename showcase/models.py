@@ -2907,7 +2907,7 @@ class Game(models.Model):
             if first_gamehub:
                 self.type = first_gamehub
         if self.cost:
-            self.cost = self.cost * Decimal('1.05')
+            self.cost = self.cost * 1.05
 
         if not self.slug:
             base_slug = slugify(self.name)
@@ -2929,6 +2929,7 @@ class Game(models.Model):
                     choice_cost = (choice.value * float(choice.rarity)) / 100
                     total_cost += choice_cost
             self.cost = int(total_cost * 1.12)
+            print('the cost was edited')
 
         # 5:00 PM PST logic for cooldown and locked status.
         pst = pytz.timezone('US/Pacific')

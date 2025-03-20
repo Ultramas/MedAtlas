@@ -78,7 +78,6 @@ async function randomizeContents() {
         const payload = { game_id: gameId };
         console.log("Payload sent to server:", payload);
 
-        // Call the create_outcome endpoint
         const response = await fetch(`/create_outcome/${slug}/`, {
             method: 'POST',
             headers: {
@@ -95,7 +94,6 @@ async function randomizeContents() {
             startButton.setAttribute('data-nonce', data.nonce);
             console.log(`Nonce updated: ${data.nonce}`);
 
-            // Clear existing cards
             clearCards();
 
             const attributes = {
@@ -126,7 +124,7 @@ async function randomizeContents() {
      data-currency-symbol="${attributes.currencySymbol || ''}"
      style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border: 0.1em solid grey; border-top: none; width: 10em;">
     ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-    <div class="sliderPrice">${attributes.value} 💎</div>
+    <div class="sliderPrice">${attributes.value} 💎 targetcard</div>
 </div>
 </div>
 `;
@@ -142,24 +140,38 @@ async function randomizeContents() {
                 upperNonce: attributes.upperNonce
             });
 
-            const cardContainer = document.querySelector('.slider'); // Adjust selector if necessary
+            const cardContainer = document.querySelector('.slider');
 
-            // Calculate the position to insert: 4 cards to the right of the middle
-            const middleIndex = Math.floor(cardContainer.children.length / 2);
-            const targetIndex = Math.min(
-                cardContainer.children.length,
-                middleIndex + 4
-            );
+            function updateCardPosition() {
+                // Get the updated window width
+                const windowWidth = window.innerWidth;
 
-            if (cardContainer.children[targetIndex]) {
-                cardContainer.insertBefore(targetCardElement, cardContainer.children[targetIndex]);
-            } else {
-                cardContainer.appendChild(targetCardElement);
+                // Calculate the offset dynamically (0.1 per 25 pixels, capped at 4)
+                const additionalOffset = Math.min(5, Math.floor((windowWidth / 25) * 0.1));
+
+                // Calculate the position to insert: dynamically adjust based on screen width
+                const cardContainer = document.querySelector('.slider'); // Adjust selector if necessary
+                const middleIndex = Math.floor(cardContainer.children.length / 2);
+                const targetIndex = Math.min(cardContainer.children.length, middleIndex + additionalOffset);
+
+                // Insert the target card at the calculated position
+                if (cardContainer.children[targetIndex]) {
+                    cardContainer.insertBefore(targetCardElement, cardContainer.children[targetIndex]);
+                } else {
+                    cardContainer.appendChild(targetCardElement);
+                }
+
+                console.log(`Window Width: ${windowWidth}, Offset: ${additionalOffset}, Target Index: ${targetIndex}`);
             }
+
+            // Listen for window resize events and update the position accordingly
+            window.addEventListener('resize', updateCardPosition);
+
+            // Call the function initially to set the correct position
+            updateCardPosition();
 
             console.log("Target card inserted 4 cards to the right of the middle.");
 
-            // Call create_inventory_object after the card is created
             const inventoryPayload = {
                 choice_id: data.choice_id, // Use choice_id from outcome response
                 choice_value: data.choice_value, // Use choice_value

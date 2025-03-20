@@ -1499,8 +1499,7 @@ $(document).ready(function() {
 
     </div>
     <div class="wrapper">
-        <div class="containerre"  style="
-            display: flex;">
+        <div class="containerre"  style="">
             <div class="slider" id="slider">
 <!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
 {% for item in choices_with_nonce %}
@@ -1511,8 +1510,7 @@ $(document).ready(function() {
                         <div class="lootelement"
                              data-price="{{ choice.value }}"
                              data-currency-file="{{ item.currency.file_url }}"
-                             data-currency-symbol="{{ item.currency.symbol }}"
-                             >
+                             data-currency-symbol="{{ item.currency.symbol }}">
                                 {% if choice.file.url %}
                                 <div class="sliderImg" style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
                                 {% endif %}
