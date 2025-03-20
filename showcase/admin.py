@@ -688,7 +688,8 @@ class GameChoiceMiddleInline(admin.TabularInline):
     model = GameChoice
     autocomplete_fields = ['choice']
     extra = 1
-    fields = ('game', 'choice', 'value', 'rarity', 'lower_nonce', 'upper_nonce', 'get_image',)
+    fields = ('game', 'choice',
+              'value', 'rarity', 'number', 'lower_nonce', 'upper_nonce', 'get_image',)
     readonly_fields = ('value', 'rarity', 'get_image',)
 
     def save_model(self, request, obj, form, change):

@@ -838,6 +838,7 @@ nav.main-menu ul li a {
         </div>
         <div class="user-info">
             <h2 class="username">Guest</h2>
+            <a href="{% url 'login' %}" style="text-decoration: none;">
             <div class="user-stats">
                 <div class="user-stat">
                     <i class="fas fa-gem user-stat-icon" style="color: #ED2221;"></i>
@@ -850,6 +851,7 @@ nav.main-menu ul li a {
                     <span>Login To Level!</span>
                 </div>
             </div>
+                </a>
         </div>
     </div>
 {% endfor %}

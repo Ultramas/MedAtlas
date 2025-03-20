@@ -72,30 +72,18 @@
             padding: 20px;
 
         }
+
         .cardslootlist {
-            flex: 1 1 200px; /* Adjust the width as needed */
+            flex: 1 1 200px;
             margin: 10px;
             box-sizing: border-box;
         }
 
         .containerre {
-            margin-bottom: 5em;
-            display: flex;
             justify-content: center;
-            overflow: hidden; /* Ensures hidden overflow on both sides */
+            overflow: hidden;
             position: relative;
-            width: 100%;
-        }
-
-        .slider {
-            display: flex;
-            flex-wrap: nowrap;
-            transition: transform 0.3s ease-in-out;
-            justify-content: center; /* Ensures even distribution */
-        }
-
-        .cards {
-            flex: 0 0 auto;
+            margin-bottom: 5em;
         }
 
         .sliderlootlist {
@@ -104,62 +92,57 @@
             justify-content: left;
         }
 
-
         .spinner-arrow {
             /*width: 50px;*/
             height: 50px;
             z-index: 10;
         }
 
-        cards-container {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 10px;
-    justify-content: center;
-    gap: 10px;
-    max-height: 100%;
-    position: relative;
-    width: max-content;
-    min-width: 100%;
-}
+        .cards-container {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 10px;
+            justify-content: center;
+            gap: 10px;
+            max-height: 100%;
+            position: relative;
+            width: max-content;
+            min-width: 100%;
+        }
 
-.cards-container .popup-card:first-child {
-    margin-left: 250px; /* Adjust as needed to make the first card fully visible */
-}
+        .cards-container .popup-card:first-child {
+            margin-left: 250px; /* Adjust as needed to make the first card fully visible */
+        }
 
-.cards-container::-webkit-scrollbar {
-    height: 8px; /* Custom scrollbar height */
-}
+        .cards-container::-webkit-scrollbar {
+            height: 8px; /* Custom scrollbar height */
+        }
 
-.cards-container::-webkit-scrollbar-thumb {
-    background-color: #888; /* Custom scrollbar color */
-    border-radius: 4px;
-}
+        .cards-container::-webkit-scrollbar-thumb {
+            background-color: #888; /* Custom scrollbar color */
+            border-radius: 4px;
+        }
 
-.cards-container::-webkit-scrollbar-thumb:hover {
-    background-color: #555; /* Darker color on hover */
-}
+        .cards-container::-webkit-scrollbar-thumb:hover {
+            background-color: #555; /* Darker color on hover */
+        }
 
-.card{
-background: none;
-background-color: nonce;
-border: none;
-}
+        .card{
+        background: none;
+        background-color: nonce;
+        border: none;
+        }
 
-.popup-card {
-    min-width: 200px;
-    max-width: 250px;
-    flex-shrink: 0;
-    margin-left: 10px;
-    text-align: center;
-    overflow: hidden; /* Hides both vertical and horizontal scrollbars */
-}
-
-.target-card{
-
-    }
+        .popup-card {
+            min-width: 200px;
+            max-width: 250px;
+            flex-shrink: 0;
+            margin-left: 10px;
+            text-align: center;
+            overflow: hidden;
+        }
 
     .individuallootelement {
         display: flex;
@@ -1494,9 +1477,6 @@ $(document).ready(function() {
                 <div class="glow"></div>
             </div>
         </div>
-<script>
-    const sellUrl = "{% url 'showcase:sell_game_inventory_object' %}";
-</script>
 
         <div class="text">
             <h2>Congratulations!</h2>
@@ -1519,7 +1499,8 @@ $(document).ready(function() {
 
     </div>
     <div class="wrapper">
-        <div class="containerre">
+        <div class="containerre"  style="
+            display: flex;">
             <div class="slider" id="slider">
 <!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
 {% for item in choices_with_nonce %}
@@ -1576,7 +1557,7 @@ $(document).ready(function() {
 
             </div>
 
-            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
+            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow" style="">
         </div>
     </div>
 
@@ -1916,20 +1897,6 @@ document.addEventListener("DOMContentLoaded", function() {
         inventoryGrid.classList.add("compact-view");
     }
 });
-
-    window.addEventListener('resize', function () {
-    const slider = document.getElementById('slider');
-    const containerWidth = document.querySelector('.containerre').offsetWidth;
-    const sliderWidth = slider.scrollWidth;
-
-    if (sliderWidth > containerWidth) {
-        const excessWidth = (sliderWidth - containerWidth) / 2;
-        slider.style.transform = `translateX(-${excessWidth}px)`;
-    } else {
-        slider.style.transform = 'translateX(0)';
-    }
-});
-
 </script>
 
     <footer class="copyright-section">

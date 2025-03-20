@@ -2894,7 +2894,7 @@ class Game(models.Model):
         return str(self.name)
 
     def clean(self):
-        """Ensure player_made and daily cannot both be True."""
+        """Ensure player_made & daily cannot both be True."""
         if self.player_made and self.daily:
             raise ValidationError("A game cannot be both player-made and daily.")
         if self.daily and not self.unlocking_level:
@@ -2907,7 +2907,7 @@ class Game(models.Model):
             if first_gamehub:
                 self.type = first_gamehub
         if self.cost:
-            self.cost = self.cost * 1.05
+            self.cost = self.cost * Decimal('1.05')
 
         if not self.slug:
             base_slug = slugify(self.name)
@@ -3075,13 +3075,21 @@ class Game(models.Model):
 class GameChoice(models.Model):
     game = models.ForeignKey('Game', on_delete=models.CASCADE)
     choice = models.ForeignKey('Choice', on_delete=models.CASCADE)
+    number = models.IntegerField(
+        help_text="Position ordered by value (from highest to lowest)",
+        blank=True, null=True, default=1
+    )
+    total_number = models.IntegerField(
+        help_text="Position ordered by value (from highest to lowest)",
+        blank=True, null=True, default=1
+    )
     value = models.IntegerField(blank=True, null=True)
     rarity = models.DecimalField(max_digits=9, decimal_places=6, help_text="Rarity of choice in percent (optional).",
                                  blank=True, null=True,
                                  verbose_name="Rarity (%)")
     lower_nonce = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(1000000)],
-        help_text="Lower bound nonce of Choice"
+        help_text="Lower bound nonce of Choice", blank=True, null=True
     )
     upper_nonce = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(1000000)],
@@ -3092,26 +3100,37 @@ class GameChoice(models.Model):
         unique_together = (('game', 'choice'),)
 
     def save(self, *args, **kwargs):
-        if self.choice.total_number_of_choice and self.choice.number_of_choice:
-            if self.choice.total_number_of_choice != 0:
-                self.choice.rarity = (Decimal(self.number_of_choice) / Decimal(self.total_number_of_choice)) * Decimal(100)
+
+        if not self.pk and self.game:
+            existing_choices = Choice.objects.filter(game=self.game).count()
+            existing_gamechoices = GameChoice.objects.filter(game=self.game).count()
+
+            self.number = existing_choices + existing_gamechoices + 1
+
+        if self.number:
+            last_choice = Choice.objects.filter(game=self.game, number=self.number-1).first()
+            last_gamechoice = GameChoice.objects.filter(game=self.game, number=self.number-1).first()
+            if last_choice:
+                self.lower_nonce = last_choice.upper_nonce + 1
+            elif last_gamechoice:
+                self.lower_nonce = last_gamechoice.upper_nonce + 1
             else:
-                self.choice.rarity = Decimal(0)
+                pass
+
+        if self.upper_nonce and self.lower_nonce:
+            self.rarity = (self.upper_nonce - self.lower_nonce) / 10000
 
         if not self.choice.currency:
             first_currency = Currency.objects.first()
             if first_currency:
                 self.choice.currency = first_currency
 
-        previous_game_choice = GameChoice.objects.filter(game=self.game).order_by('-upper_nonce').first()
+        if self.upper_nonce is not None:
+            if self.upper_nonce % 10 == 0:
+                print("The last digit of upper_nonce is 0")
+                if self.upper_nonce > 0 and self.upper_nonce != 1000000:
+                    self.upper_nonce -= 1
 
-        if previous_game_choice and previous_game_choice.upper_nonce:
-            self.lower_nonce = previous_game_choice.upper_nonce
-        else:
-            self.lower_nonce = random.randint(0, 1000000)
-
-        if self.upper_nonce and self.upper_nonce != 1000000:
-            self.upper_nonce -= 1
         if self.upper_nonce is None:
             self.upper_nonce = random.randint(0, 1000000)
 
@@ -3227,10 +3246,6 @@ class Choice(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            self.number = Choice.objects.filter(shufflers=self.shufflers, game=self.game).count() + 1
-            self.total_number = Choice.objects.filter(shufflers=self.shufflers).count() + 1
-
         if self.total_number_of_choice and self.number_of_choice:
             if self.total_number_of_choice != 1:
                 self.rarity = (Decimal(self.number_of_choice) / Decimal(self.total_number_of_choice)) * Decimal(100)
@@ -3242,24 +3257,16 @@ class Choice(models.Model):
             if first_currency:
                 self.currency = first_currency
 
-        previous_number = self.number - 1
-        print('the previous number is ' + str(previous_number))
-        previous_choice = Choice.objects.filter(game=self.game, number=previous_number).order_by('-upper_nonce').first()
-        previous_game_choice = GameChoice.objects.filter(game=self.game).order_by('-upper_nonce').first()
+        if not self.pk and self.game:
+            existing_choices = Choice.objects.filter(game=self.game).count()
+            existing_gamechoices = GameChoice.objects.filter(game=self.game).count()
 
-        if previous_choice and previous_choice.upper_nonce and previous_choice.number != 0 and self.number != 1:
-            self.lower_nonce = previous_choice.upper_nonce + 1
-            print('a choice exists previously here')
-            print(self.number)
-        elif previous_game_choice and previous_game_choice.upper_nonce and self.number != 1:
-            self.lower_nonce = previous_game_choice.upper_nonce + 1
-        else:
-            pass
+            self.number = existing_choices + existing_gamechoices + 1
 
         if self.upper_nonce is not None:
             if self.upper_nonce % 10 == 0:
                 print("The last digit of upper_nonce is 0")
-                if self.upper_nonce > 0:
+                if self.upper_nonce > 0 and self.upper_nonce != 1000000:
                     self.upper_nonce -= 1
 
         if self.upper_nonce is None:
@@ -3294,7 +3301,7 @@ class Choice(models.Model):
         if self.pk:
             previous = Choice.objects.filter(pk=self.pk).only('value').first()
             if previous and previous.value != self.value:
-                self.value = self.value + self.value * 0.05
+                self.value = self.value + self.value * Decimal('0.05')
                 print('value updated')
         super().save(*args, **kwargs)
 
@@ -3330,6 +3337,7 @@ class Choice(models.Model):
     class Meta:
         verbose_name = "Choice"
         verbose_name_plural = "Choices"
+
 
 class Card(models.Model):
     card_id = models.CharField(max_length=100, blank=True, null=True)
