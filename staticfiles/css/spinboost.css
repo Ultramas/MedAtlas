@@ -1,0 +1,70 @@
+
+
+.content {
+    position: relative;
+    z-index: 2;
+}
+
+.flame-effect {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-image:
+        radial-gradient(ellipse at center bottom, var(--flame-color) 0%, transparent 80%),
+        linear-gradient(to top, var(--flame-color) 0%, transparent 100%);
+    opacity: 0.7;
+    animation: flame 3s infinite, flicker 0.5s infinite alternate, sway 6s infinite ease-in-out;
+}
+
+.flame-effect::before,
+.flame-effect::after {
+content: '';
+position: absolute;
+left: 50%;
+bottom: 0;
+width: 150px;
+height: 150px;
+transform: translateX(-50%);
+background-image: radial-gradient(circle at center, var(--flame-color) 0%, transparent 70%);
+animation: spark 3s infinite;
+}
+
+.flame-effect::after {
+    width: 30px;
+    height: 30px;
+    animation-delay: 0.5s;
+}
+
+@keyframes flame {
+0%, 100% { transform: scaleY(1) translateY(0); }
+50% { transform: scaleY(1.2) translateY(-20px); }
+}
+
+@keyframes flicker {
+0% { opacity: 0.7; }
+100% { opacity: 0.9; }
+}
+
+@keyframes spark {
+0% { transform: translateX(-50%) translateY(0) scale(0); opacity: 1; }
+100% { transform: translateX(-50%) translateY(-150px) scale(1.5); opacity: 0; }
+}
+
+@keyframes sway {
+0%, 100% { transform: translateX(0); }
+50% { transform: translateX(10px); }
+}
+
+.spin-option {
+    padding: 5px 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.spin-option.selected {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #007bff;
+}
