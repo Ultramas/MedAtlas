@@ -243,7 +243,7 @@ urlpatterns = [
     path('rules/', views.RuleBackgroundView.as_view(), name='rules'),
     path('social-auth/', include('social_django.urls', namespace='social')),
     path('social-auth/sociallogin', TemplateView.as_view(template_name='sociallogin.html'), name='sociallogin'),
-    path('password_reset/', TemplateView.as_view(template_name='password_reset.html'), name='password_reset'),
+    path('password_reset/', TemplateView.as_view(template_name='password/password_reset.html'), name='password/password_reset'),
     path('password_reset_done/', TemplateView.as_view(template_name='password_reset_done.html'),
          name='password_reset_done'),
     path('password_reset_confirm/', TemplateView.as_view(template_name='password_reset_confirm.html.html'),
@@ -575,19 +575,19 @@ urlpatterns = [
     path("convert/", views.ConvertBackgroundView.as_view(), name='convert'),
     path("reasons-to-convert/", views.ReasonsBackgroundView.as_view(), name='reasons_to_convert'),
     # Forget Password
-    path('password-reset/',
+    path('password/password-reset/',
          auth_views.PasswordResetView.as_view(template_name='commons/password-reset/password_reset.html',
                                               subject_template_name='commons/password-reset/password_reset_subject.txt',
                                               email_template_name='commons/password-reset/password_reset_email.html',
                                               success_url='/login/'),
          name='password_reset'),
-    path('password-reset/done/',
+    path('password/password-reset/done/',
          auth_views.PasswordResetDoneView.as_view(template_name='commons/password-reset/password_reset_done.html'),
          name='password_reset_done'),
-    path('password-reset-confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+    path('password/password-reset-confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
         template_name='commons/password-reset/password_reset_confirm.html'),
          name='password_reset_confirm'),
-    path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(
+    path('password/password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(
         template_name='commons/password-reset/password_reset_complete.html'),
          name='password_reset_complete')
 ]
