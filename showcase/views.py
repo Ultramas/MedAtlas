@@ -3,6 +3,7 @@ from venv import logger
 
 import pytz
 from celery import shared_task
+from django.contrib.auth.views import PasswordResetView
 from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError
 
@@ -3925,6 +3926,20 @@ class AchievementsView(TemplateView):
         context = self.get_context_data(**kwargs)
         context['CheckedAchievements'] = self.CheckAchievements(request.user)
         return self.render_to_response(context)
+
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'registration/password_reset_form.html'
+    email_template_name = 'registration/password_reset_email.html'
+    subject_template_name = 'registration/password_reset_subject.txt'
+    success_url = reverse_lazy('password_reset_done')
+
+    def form_valid(self, form):
+        # Optionally, add custom logging here
+        response = super().form_valid(form)
+        print("Password reset email sent (if user exists).")
+        return response
+
 
 
 class BlogBackgroundView(ListView):

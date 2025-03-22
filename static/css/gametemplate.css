@@ -35,11 +35,10 @@ body{
   user-select: none;
 }
 
-/* Slider images are locked at fixed dimensions */
 .slider img {
   width: 150px;
   height: 200px;
-  border: 2px solid transparent; /* Use this as a placeholder for future changes */
+  border: 2px solid transparent;
   border-radius: 7px;
 }
 
