@@ -124,7 +124,7 @@ async function randomizeContents() {
      data-currency-symbol="${attributes.currencySymbol || ''}"
      style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border: 0.1em solid grey; border-top: none; width: 10em;">
     ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-    <div class="sliderPrice">${attributes.value} 💎 targetcard</div>
+    <div class="sliderPrice">${attributes.value} 💎 </div>
 </div>
 </div>
 `;
@@ -143,11 +143,10 @@ async function randomizeContents() {
             const cardContainer = document.querySelector('.slider');
 
             function updateCardPosition() {
-                // Get the updated window width
                 const windowWidth = window.innerWidth;
 
                 // Calculate the offset dynamically (0.1 per 25 pixels, capped at 4)
-                const additionalOffset = Math.min(5, Math.floor((windowWidth / 25) * 0.1));
+                const additionalOffset = Math.min(4, Math.floor((windowWidth / 25) * 0.1));
 
                 // Calculate the position to insert: dynamically adjust based on screen width
                 const cardContainer = document.querySelector('.slider'); // Adjust selector if necessary
