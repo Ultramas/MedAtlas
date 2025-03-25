@@ -3838,12 +3838,17 @@ class Robot(models.Model):
 
 
 class BattleParticipant(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     is_bot = models.BooleanField(default=False)
+    robot = models.ForeignKey(Robot, blank=True, null=True, on_delete=models.CASCADE)
     battle = models.ForeignKey('Battle', on_delete=models.CASCADE, blank=True, null=True, related_name='battle_joined')
 
     def __str__(self):
-        return str(self.user) + " " + str(self.battle)
+        if self.user:
+            return str(self.user) + " " + str(self.battle)
+        else:
+            return "Robot: " +  str(self.robot.name) + " " + str(self.battle)
+
 
     class Meta:
         verbose_name = "Battle Participant"
@@ -3941,41 +3946,27 @@ class Battle(models.Model):
         verbose_name="Set active?",
     )
 
-
     def get_game_quantities(self):
-        """Returns a dictionary of games and their quantities in this battle."""
         return {bg.game: bg.quantity for bg in self.battle_games.all()}
+
+    def get_total_participants(self):
+        return self.battle_joined.count()
+
 
     def __str__(self):
         return f"{self.battle_name} submitted by {self.creator}"
 
     logger = logging.getLogger(__name__)
+
     def get_total_capacity(self):
-        """
-        Compute total capacity based on the human-readable slots string.
-        For example:
-          - "1v1"  → [1, 1] → capacity 2
-          - "1v1v1"  → capacity 3
-          - "1ve5" → if intended as 1 vs 5, then capacity 6
-          - "2v2"  → [2, 2] → capacity 4
-          - "2v2v2"  → capacity 6
-        """
-        display = self.get_slots_display()
-        if 've' in display:
-            parts = display.split('ve')
-            if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
-                return int(parts[0]) + int(parts[1])
-                self.team_battle=True
-        # Otherwise split on 'v' (which covers cases like "1v1" or "1v1v1")
-        parts = display.split('v')
-        try:
-            return sum(int(part) for part in parts if part.isdigit())
-        except ValueError:
-            return 0
+        if 've' in self.slots:
+            parts = self.slots.split('ve')
+            return int(parts[0]) + int(parts[1])
+        parts = self.slots.split('v')
+        return sum(int(part) for part in parts if part.isdigit())
 
     def is_full(self):
-        slot_number = int(self.slots.split('v')[-1])
-        return self.participants.count() >= slot_number
+        return self.get_total_participants() >= self.get_total_capacity()
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -3988,13 +3979,11 @@ class Battle(models.Model):
                 participant.battle = self
                 participant.save()
 
-        # Assign a default currency if not set
         if not self.currency:
             first_currency = Currency.objects.first()
             if first_currency:
                 self.currency = first_currency
 
-        # Calculate the total price based on the games' costs
         total_price = 0
         for game in self.chests.all():
             if game.discount_cost is not None:
@@ -4004,7 +3993,6 @@ class Battle(models.Model):
 
         self.price = total_price
         print('price set to total_price')
-        # Save again to ensure currency and price updates
         super().save(*args, **kwargs)
 
     @property

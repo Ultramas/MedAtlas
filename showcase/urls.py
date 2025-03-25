@@ -384,6 +384,8 @@ urlpatterns = [
     path('battle/', views.OpenBattleListView.as_view(), name='battle'),
     path('battle_detail/<int:battle_id>/', views.SingleBattleListView.as_view(), name='battle_detail'),
     path('battle/<int:battle_id>/join/', views.join_battle, name='join_battle'),
+    path('battle/<int:battle_id>/add_robot/', views.add_robot, name='add_robot'),
+    path('actualbattle/<int:battle_id>/', views.ActualBattleView.as_view(), name='actualbattle'),
     path('battlecreator/', views.BattleCreationView.as_view(), name='battlecreator'),
     path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
     path('inventory/', views.PlayerInventoryView.as_view(), name='inventory'),
@@ -463,7 +465,6 @@ urlpatterns = [
                  template_name='registration/password_reset_form.html'
              ),
              name='password_reset_form'),
-
     path('contact/', views.ContactViewe.as_view(), name='contact'),
     # path('success/', successView, name='success'),
     path('success/', views.ContactSuccessView.as_view(), name='success'),

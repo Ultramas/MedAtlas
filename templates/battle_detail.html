@@ -808,7 +808,7 @@ nav.main-menu ul li a {
         </div>
 
         <div class="participant-slots">
-            <h2>Participants ({{ battle.participants.count }} / {{ battle.get_slots_display }})</h2>
+            <h2>Participants ({{ battle.get_total_participants }} / {{ battle.get_slots_display }})</h2>
             <div class="slots-grid">
                 {% for participant in battle.participants.all %}
                     <div class="slot occupied">
@@ -1069,28 +1069,35 @@ nav.main-menu ul li a {
             <h2>Battle Slots</h2>
             <table class="battle-grid" border="1" cellspacing="0" cellpadding="5">
               <tr>
-                {% for slot in grid %}
-                  <td style="width: 100px; height: 50px; text-align: center;">
-                    {% if slot %}
-                      {% if slot.user %}
-                        {{ slot.user.username }}
-                      {% else %}
-                        {{ slot.name }}
-                      <form method="POST">
-                {% csrf_token %}
-                {{ join_form.as_p }}
-                          {% if user.is_authenticated %}
-                <button type="submit" name="join_battle_submit">Join Battle!</button>
-                          {% else %}
-                <button name="join_battle_submit">Login To Join!</button>
-                          {% endif %}
-            </form>
+                    {% for slot in grid %}
+  <td style="width: 100px; height: 50px; text-align: center;">
+    {% if slot %}
+      {% if slot.user %}
+        {{ slot.user.username }}
+      {% elif slot.robot %}
+        🤖 {{ slot.robot.name }}
+      {% endif %}
+    {% else %}
+      {% if user == battle.creator %}
+        <form method="POST" action="{% url 'add_robot' battle.id %}">
+          {% csrf_token %}
+          <button type="submit" name="add_robot_submit">Add Robot</button>
+        </form>
+      {% else %}
+        <form method="POST">
+          {% csrf_token %}
+          {{ join_form.as_p }}
+          {% if user.is_authenticated %}
+            <button type="submit" name="join_battle_submit">Join Battle!</button>
+          {% else %}
+            <button name="join_battle_submit">Login To Join!</button>
           {% endif %}
-        {% else %}
-          <!-- Empty slot; you can leave it blank or put a placeholder -->
-        {% endif %}
-      </td>
-    {% endfor %}
+        </form>
+      {% endif %}
+    {% endif %}
+  </td>
+{% endfor %}
+
   </tr>
 </table>
 
