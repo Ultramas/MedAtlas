@@ -22,7 +22,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     PrizePool, CurrencyMarket, CurrencyOrder, SellerApplication, Meme, CurrencyFullOrder, Currency, Wager, GameHub, \
     InventoryObject, Inventory, Trade, FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, \
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
-    SpinnerChoiceRenders, DefaultAvatar, Achievements, EarnedAchievements, QuickItem, SpinPreference, Battle, \
+    SpinnerChoiceRenders, DefaultAvatar, Achievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
     UserNotification, TopHits, Card, Clickable, GameChoice, Robot
 from .models import Idea
@@ -3874,68 +3874,6 @@ def earningachievement(self, achievement_id):
         return JsonResponse({"status": "success", "message": "Achievement earned successfully!"})
     else:
         return JsonResponse({"status": "failure", "message": "Achievement has already been earned."})
-
-
-class PlayerEarnedAchievement(BaseView):
-    model = EarnedAchievements
-    template_name = "earnedachievements.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-        else:
-            userprofile = None
-
-        if userprofile:
-            context['NewsProfiles'] = userprofile
-        else:
-            context['NewsProfiles'] = None
-
-        if context['NewsProfiles'] == None:
-
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
-        else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-        return context
-
-    def earningachievement(self, achievement_id):
-        achievement = get_object_or_404(Achievements, id=achievement_id)
-        user_profile = get_object_or_404(ProfileDetails, user=self.request.user)
-
-        # Check if the achievement is not already earned
-        if not achievement.earned:
-            # Update the achievement status and associate it with the user
-            achievement.earned = True
-            achievement.user = self.request.user
-            achievement.save()
-
-            # Add the achievement's value to the user's currency amount
-            user_profile.add_currency(achievement.value)
-
-            # Set the currency to the first applicable currency if not already set
-            if not user_profile.currency:
-                first_currency = Currency.objects.first()
-                if first_currency:
-                    user_profile.currency = first_currency
-
-            user_profile.save()
-
-            return JsonResponse({"status": "success", "message": "Achievement earned successfully!"})
-        else:
-            return JsonResponse({"status": "failure", "message": "Achievement has already been earned."})
 
 
 class ChatCreatePostView(CreateView):

@@ -12,7 +12,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     MemeTextField, CurrencyFullOrder, CurrencyOrder, GameHub, BlackJack, Wager, Inventory, InventoryObject, Trade, \
     FriendRequest, Friend, RespondingTradeOffer, TradeShippingLabel, Game, Outcome, CardCategory, Experience, Endowment, \
     UploadACard, InviteCode, OfficialShipping, Withdraw, Transaction, Battle, BattleParticipant, QuickItem, \
-    GeneralMessage, DefaultAvatar, Achievements, EarnedAchievements, AdministrationChangeLog, TradeContract, BlogTips, \
+    GeneralMessage, DefaultAvatar, Achievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
     TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable
@@ -870,26 +870,6 @@ class AchievementsAdmin(admin.ModelAdmin):
     display_image.short_description = "Image Preview"
 
 admin.site.register(Achievements, AchievementsAdmin)
-
-
-class EarnedAchievementsAdmin(admin.ModelAdmin):
-    fieldsets = (
-        ('Earned Achievement  Information - Categorial Descriptions', {
-            'fields': ('achievement', 'title', 'user', 'value','type',)
-        }),
-        ('Earned Achievement Information - Image Display', {
-            'fields': ('image', 'image_length', 'image_width',),
-            'classes': ('open',),
-        }),
-        ('Earned Achievement Information - Technical Description', {
-            'fields': ('is_active',),
-            'classes': ('open',),
-        }),
-    )
-    readonly_fields = ('slug',)
-
-
-admin.site.register(EarnedAchievements, EarnedAchievementsAdmin)
 
 # admin.site.register(BackgroundImage)
 # admin.site.register(BackgroundImage2a)

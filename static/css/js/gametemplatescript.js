@@ -145,7 +145,7 @@ async function randomizeContents() {
             function updateCardPosition() {
                 const windowWidth = window.innerWidth;
 
-                const additionalOffset = Math.min(4, Math.floor((windowWidth / 25) * 0.1));
+                const additionalOffset = Math.min(4, Math.floor((windowWidth / 20) * 0.1));
 
                 // Calculate the position to insert: dynamically adjust based on screen width
                 const cardContainer = document.querySelector('.slider'); // Adjust selector if necessary
