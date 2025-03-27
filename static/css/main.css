@@ -323,7 +323,7 @@ p:last-child {
     margin-bottom: 100px;
   }
 }
-
+/*
 .pt-80 {
   padding-top: 80px;
 }
@@ -334,6 +334,7 @@ p:last-child {
   }
 }
 
+
 .pb-80 {
   padding-bottom: 80px;
 }
@@ -343,7 +344,7 @@ p:last-child {
     padding-bottom: 50px;
   }
 }
-
+*/
 .pt-100 {
   padding-top: 100px;
 }

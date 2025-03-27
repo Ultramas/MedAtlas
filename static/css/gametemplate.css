@@ -49,20 +49,18 @@ body{
   flex-wrap: nowrap;
 }
 
-/* Keyframes for spin animations (using fixed transforms) */
 @keyframes slideshow {
   0% {
     transform: translateX(0);
   }
   50% {
-    transform: translateX(-50%); /* Accelerate in the middle */
+    transform: translateX(-25%);
   }
   100% {
-    transform: translateX(-100%); /* Decelerate to a stop */
+    transform: translateX(-50%);
   }
 }
 
-/* Spin animations */
 .slider[data-animated='true'] {
   animation: slideshow 18s cubic-bezier(0.02, 0.1, 0.02, 1) forwards;
   animation-iteration-count: 1;
@@ -72,7 +70,6 @@ body{
   animation: slideshow 9s cubic-bezier(0.02, 0.1, 0.02, 1) forwards;
 }
 
-/* Ensure cards are not selectable and maintain their fixed layout */
 .cards {
   user-select: none;
 }

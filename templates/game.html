@@ -1439,7 +1439,7 @@ $(document).ready(function() {
             document.querySelectorAll('.slider').forEach(scroller => {
                 scroller.style.animation = 'none';
                 scroller.offsetHeight;
-                const animationDuration = isQuickSpin ? '9s' : '18s'; // Adjust duration based on Quick Spin
+                const animationDuration = isQuickSpin ? '9s' : '18s';
                 scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
                 scroller.style.animationPlayState = 'running';
             });
@@ -1517,7 +1517,7 @@ $(document).ready(function() {
 
     </div>
     <div class="wrapper">
-        <div class="containerre"  style="">
+        <div class="containerre"  style="display: flex;">
             <div class="slider" id="slider">
 <!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
 {% for item in choices_with_nonce %}

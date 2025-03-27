@@ -122,9 +122,9 @@ async function randomizeContents() {
      data-price="${attributes.value || ''}"
      data-currency-file="${attributes.currencyFile || ''}"
      data-currency-symbol="${attributes.currencySymbol || ''}"
-     style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border: 0.1em solid grey; border-top: none; width: 10em;">
+     style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border-top: none; width: 10em;">
     ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-    <div class="sliderPrice">${attributes.value} 💎 </div>
+    <div class="sliderPrice">${attributes.value} 💎targetcard </div>
 </div>
 </div>
 `;
@@ -142,38 +142,43 @@ async function randomizeContents() {
 
             const cardContainer = document.querySelector('.slider');
 
+
             function updateCardPosition() {
                 const windowWidth = window.innerWidth;
 
-                const additionalOffset = Math.min(4, Math.floor((windowWidth / 20) * 0.1));
 
-                // Calculate the position to insert: dynamically adjust based on screen width
-                const cardContainer = document.querySelector('.slider'); // Adjust selector if necessary
-                const middleIndex = Math.floor(cardContainer.children.length / 2);
-                const targetIndex = Math.min(cardContainer.children.length, middleIndex + additionalOffset);
+                function getRandomDecimal(min, max) {
+                    const randomDecimal = Math.random() * (max - min) + min;
+                    return Math.round(randomDecimal * 10000) / 10000;
+                }
 
-                // Insert the target card at the calculated position
+                const randomDivisor = getRandomDecimal(1.3298, 1.3302);
+
+                const cardContainer = document.querySelector('.slider');
+                const middleIndex = Math.floor(cardContainer.children.length / 1.33);
+
+                console.log(randomDivisor);
+                const targetIndex = Math.min(cardContainer.children.length, middleIndex);
+
                 if (cardContainer.children[targetIndex]) {
                     cardContainer.insertBefore(targetCardElement, cardContainer.children[targetIndex]);
                 } else {
                     cardContainer.appendChild(targetCardElement);
                 }
 
-                console.log(`Window Width: ${windowWidth}, Offset: ${additionalOffset}, Target Index: ${targetIndex}`);
+                console.log(`Window Width: ${windowWidth}, Divisor: ${randomDivisor}, Target Index: ${targetIndex}`);
             }
 
-            // Listen for window resize events and update the position accordingly
             window.addEventListener('resize', updateCardPosition);
 
-            // Call the function initially to set the correct position
             updateCardPosition();
 
             console.log("Target card inserted 4 cards to the right of the middle.");
 
             const inventoryPayload = {
-                choice_id: data.choice_id, // Use choice_id from outcome response
-                choice_value: data.choice_value, // Use choice_value
-                category: data.category, // Additional data as needed
+                choice_id: data.choice_id,
+                choice_value: data.choice_value,
+                category: data.category,
                 price: 100,
                 condition: 'New',
                 quantity: 1,
@@ -185,7 +190,7 @@ async function randomizeContents() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is correctly passed
+                    'X-CSRFToken': '{{ csrf_token }}',
                 },
                 body: JSON.stringify(inventoryPayload),
             });
@@ -252,19 +257,6 @@ function clearCards() {
     console.log("All target cards removed.");
 }
 
-// Function to center the card in the slider
-function centerCard(cardElement) {
-    const slider = document.getElementById('slider');
-    const cardOffset = cardElement.offsetLeft;
-    const sliderWidth = slider.offsetWidth;
-    const cardWidth = cardElement.offsetWidth;
-
-    // Adjust margin-left to center the card
-    slider.scrollTo({
-        left: cardOffset - sliderWidth / 2 + cardWidth / 2,
-        behavior: 'smooth',
-    });
-}
 
 
 
@@ -450,10 +442,9 @@ function randomizedContents() {
 
 
 function spin(buttonId) {
-    // Reset currentSpin to 0 when a button is pressed
     if (currentSpin === totalSpins || animationStopped) {
-        currentSpin = 0; // Reset spin count
-        animationStopped = false; // Ensure animations are not marked as stopped
+        currentSpin = 0;
+        animationStopped = false;
     }
 
     $(".spin-option").prop('disabled', true);
@@ -485,20 +476,18 @@ function spin(buttonId) {
         audio.play().catch((error) => console.error('Error playing audio:', error));
     });
 
-    // Handle audio load errors
     audio.addEventListener('error', (e) => {
         console.error('Audio failed to load:', e);
     });
 
-    // Call this function when the spin ends
 setTimeout(() => {
     document.querySelectorAll('.slider').forEach((scroller) => {
         scroller.style.animationPlayState = 'paused';
 
 
-    const targetCard = document.querySelector('.target-card'); // Find the target element
+    const targetCard = document.querySelector('.target-card');
 
-    const startButton = document.getElementById('start'); // Or use querySelector('.start')
+    const startButton = document.getElementById('start');
 
 
     if (targetCard) {
@@ -520,9 +509,9 @@ setTimeout(() => {
                 console.log('yellow hit')
             playCasinoGreenSound();
                 const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
-                    game_id: gameId, // Ensure this is set correctly
+                    game_id: gameId,
                 };
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
@@ -531,11 +520,10 @@ setTimeout(() => {
                 console.log('orange hit')
             playCasinoYellowSound();
                 const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
                     game_id: gameId,
                 };
-                // Create the Top Hit
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
                 console.log('processed the top hit')
@@ -543,7 +531,7 @@ setTimeout(() => {
                 console.log('red hit')
             playCasinoRedSound();
                 const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
                     game_id: gameId,
                 };
@@ -555,7 +543,7 @@ setTimeout(() => {
                 console.log('black hit')
             playCasinoBlackSound();
                 const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
                     game_id: gameId,
                 };
@@ -566,7 +554,7 @@ setTimeout(() => {
                 console.log('redblack hit')
             playCasinoRedBlackSound();
                 const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
                     game_id: gameId,
                 };
@@ -577,7 +565,7 @@ setTimeout(() => {
                 console.log('redgold hit')
             playCasinoRedGoldSound();
                 const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
                     game_id: gameId,
                 };
@@ -670,39 +658,6 @@ spin(buttonId);
 
 }
 
-function findSelectedCard() {
-    const selector = document.getElementById('selector').getBoundingClientRect();
-    let currentSelection = null;
-
-    document.querySelectorAll('.cards').forEach(card => {
-        const cardRect = card.getBoundingClientRect();
-
-        if (
-            !(selector.right < cardRect.left ||
-              selector.left > cardRect.right ||
-              selector.bottom < cardRect.top ||
-              selector.top > cardRect.bottom)
-        ) {
-            currentSelection = {
-                id: card.id,
-                src: card.querySelector('img')?.src || '',
-                price: card.dataset.price,
-                color: card.dataset.color,
-                value: card.dataset.value,
-                text: card.dataset.text, // Include additional data like text
-            };
-
-            if (card.classList.contains('target-card')) {
-                card.classList.add('highlight'); // Apply a class for visual indication
-                console.log('Target card landed:', currentSelection);
-            }
-        }
-    });
-
-    if (currentSelection) {
-        selectedItems.push(currentSelection);
-    }
-}
 
     const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
     document.querySelectorAll('.sell-form').forEach(form => {
@@ -806,14 +761,16 @@ if (buttonId === "start") {
      selectedItems.forEach((item, index) => {
          const cardElement = document.createElement('div');
          cardElement.innerHTML = `
-            <div class="card-fire" data-color="${item.color}">
+            <div class="card-fire" data-color="${item.color}" style="background-color: ${item.color}">
               <div class="card-flames">
                 <div class="card-flame"></div>
               </div>
             </div>
             <!--<p>ID: ${item.id}</p>
             <p>Nonceword: ${item.nonce}</p>-->
+            <div class="background" style="background-color: ${item.color}; padding: 10px; border-radius: 3px;">
             <img src="${item.src || ''}" alt="${item.id}" width=150 height=225>
+            </div>
             <p>${item.value} 💎</p>
             <!--<p>Lower Nonce: ${item.lowerNonce}</p>
             <p>Upper Nonce: ${item.upperNonce}</p>-->

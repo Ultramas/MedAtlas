@@ -148,7 +148,6 @@ urlpatterns = [
     # path(r'blogpost-like/<slug:slug>/preference/<like_or_dislike>/', postpreference, name='preference'),
     # path('preference/<int:like_or_dislike>/', postpreference, name='preference'),
 
-    # add these
     path('showcase/', views.ShowcaseBackgroundView.as_view(), name='showcase'),
     path('memberhome/', views.MemberHomeBackgroundView.as_view(), name='memberhome'),
     path('post_edit/', views.PostingView.as_view(), name='post_edit'),

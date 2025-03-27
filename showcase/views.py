@@ -6540,11 +6540,9 @@ class SignupView(FormMixin, ListView):
                 print('is_valid')
                 user = form.save()
                 user.refresh_from_db()
-                # load the profile instance created by the signal
                 user.save()
                 raw_password = form.cleaned_data.get('password')
 
-                # login user after signing up
                 user = form.save()
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 subject = "Welcome to IntelleX!"
@@ -17088,11 +17086,9 @@ class SignupView(FormMixin, ListView):
                 print('is_valid')
                 user = form.save()
                 user.refresh_from_db()
-                # load the profile instance created by the signal
                 user.save()
                 raw_password = form.cleaned_data.get('password')
 
-                # login user after signing up
                 user = form.save()
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 subject = "Welcome to PokeTrove!"
