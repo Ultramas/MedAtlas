@@ -8,32 +8,31 @@ body{
 
 .wrapper {
     display: flex;
-    justify-content: center; /* Centers the flex items horizontally */
-    align-items: center; /* Centers the flex items vertically */
+    justify-content: center;
+    align-items: center;
 
 }
 .containerre {
   border: 3px solid #323c52;
   border-radius: 15px;
-  width: 1200px;  /* Fixed width */
-  height: 200px;  /* Fixed height */
+  width: 1200px;
+  height: 200px;
   backdrop-filter: blur(20px);
   overflow: hidden;
-  margin: 0 auto; /* Center horizontally */
-  position: relative;  /* For absolute positioning of inner elements */
+  margin: 0 auto;
+  position: relative;
 }
 
-/* Fixed spinner-arrow positioning */
 .spinner-arrow {
-  /* Instead of using multiple margin declarations, center using top/left calculations */
-  /*top: calc(50% - 40px); 50% of container height minus half the spinner's height (80px/2) */
-  left: calc(50% - 10px);
   position: absolute;
   height: 80px;
   width: 20px;
-  margin-top: -10px;
   user-select: none;
+  left: 50%;
+  margin-top: -10px;
+  transform: translateX(-50%);
 }
+
 
 .slider img {
   width: 150px;
@@ -42,7 +41,6 @@ body{
   border-radius: 7px;
 }
 
-/* Slider container with fixed layout */
 .slider {
   display: inline-flex;
   position: absolute;
@@ -62,12 +60,12 @@ body{
 }
 
 .slider[data-animated='true'] {
-  animation: slideshow 18s cubic-bezier(0.02, 0.1, 0.02, 1) forwards;
+  animation: slideshow 20s cubic-bezier(0.02, 0.1, 0.02, 1) forwards;
   animation-iteration-count: 1;
 }
 
 .slider[data-animated='quick'] {
-  animation: slideshow 9s cubic-bezier(0.02, 0.1, 0.02, 1) forwards;
+  animation: slideshow 10s cubic-bezier(0.02, 0.1, 0.02, 1) forwards;
 }
 
 .cards {

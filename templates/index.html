@@ -1465,21 +1465,27 @@ window.onscroll = function() {
 	</div>
 	<!-- end hero area -->
 
-	<div class="list-section pt-80 pb-80" style="background: rgba(0, 255, 255, 0);">
-		<div class="container" >
+	<div class="list-section pt-80 pb-80 sticky-top" style="background: rgba(0, 255, 255, 0);">
+    <div class="container">
 
-			<div class="row">
-						{% for TopHits in tophit %}<a href="{% url 'showcase:game' TopHits.game.slug %}">
-<div class="list-box d-flex align-items-center" style="position: relative;">
-    <div class="content"
-        style="padding: 5px; margin: 5px; height: 150px; border-radius: 3px; background: radial-gradient(circle at center, blue, {{TopHits.color}}, white 100%);">
-        <div class="image-container">
-            <img src="{{ TopHits.file.url }}" alt="Image" style="width: 100px; height: 140px;">
-            <h3>{{ TopHits.user.username }}</h3>
+        <div class="row">
+            {% for TopHits in tophit %}
+            <a href="{% url 'showcase:game' TopHits.game.slug %}">
+                <div class="list-box d-flex align-items-center" style="position: relative;">
+                    <div class="content"
+                        style="padding: 5px; margin: 5px; height: 150px; border-radius: 3px; background: radial-gradient(circle at center, blue, {{TopHits.color}}, white 100%);">
+                        <div class="image-container">
+                            <img src="{{ TopHits.file.url }}" alt="Image" style="width: 100px; height: 140px;">
+                            <h3>{{ TopHits.user.username }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
         </div>
-    </div>
 
-</div></a>
+    </div>
+</div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -1493,9 +1499,6 @@ window.onscroll = function() {
         });
     });
 </script>
-{% endfor %}
-
-				</div>
 				<div class="col-lg-4 col-md-6">
 
 					<div class="list-box d-flex justify-content-start align-items-center">

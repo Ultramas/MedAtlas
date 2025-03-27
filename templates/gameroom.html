@@ -14,7 +14,6 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
 
     <style>
-    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
     .copyright-section {
         background: linear-gradient(
             to right,
@@ -386,15 +385,6 @@
             background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
-        .nav-links h1::after {
-            content: '';
-            position: absolute;
-            left: 10%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
 
         .pokemon-grid {
             display: grid;
@@ -666,7 +656,7 @@ p.blog-meta span {
 {% include 'navtrove.html' %}
 
   <main class="main-content">
-            <h1>PokeTrove Chests - (<span id="stock-count">{{ Game|length }}</span>)</h1>
+            <h1>PokeTrove Chests - (<span id="stock-count">{{ Profiles|length }}</span>)</h1>
 
             <section id="inventoryGrid" class="inventory-grid comfortable-view">
 

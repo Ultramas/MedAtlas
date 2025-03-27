@@ -2536,9 +2536,9 @@ class DailyRoomView(BaseView):
             try:
                 context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
             except ObjectDoesNotExist:
-                context['SentProfile'] = None  # or some default value
+                context['SentProfile'] = None
         else:
-            context['SentProfile'] = None  # or some default value
+            context['SentProfile'] = None
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['Game'] = GameHub.objects.filter(is_active=1).first()
         context['GameRoom'] = Game.objects.filter(is_active=1, daily=True).first()
@@ -3946,9 +3946,9 @@ class GameHubView(BaseView):
             try:
                 context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
             except ObjectDoesNotExist:
-                context['SentProfile'] = None  # or some default value
+                context['SentProfile'] = None
         else:
-            context['SentProfile'] = None  # or some default value
+            context['SentProfile'] = None
         """if the user has no profile, allow it anyway"""
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['Game'] = GameHub.objects.filter(is_active=1)
@@ -4007,9 +4007,9 @@ class GameRoomView(BaseView):
             try:
                 context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
             except ObjectDoesNotExist:
-                context['SentProfile'] = None  # or some default value
+                context['SentProfile'] = None
         else:
-            context['SentProfile'] = None  # or some default value
+            context['SentProfile'] = None
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['Game'] = GameHub.objects.filter(is_active=1).first()
         context['GameRoom'] = Game.objects.filter(is_active=1, daily=False).first()

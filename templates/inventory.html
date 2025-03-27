@@ -572,7 +572,6 @@ nav.main-menu ul li a {
     cursor: pointer;
 }
 
-/* Optional: Visual feedback when an item is selected */
 .item-select-checkbox:checked + .gridCardItem {
     background-color: rgba(0, 128, 0, 0.1); /* Example: light green background */
 }
@@ -602,6 +601,102 @@ nav.main-menu ul li a {
   .popup-content {
     text-align: center;
   }
+
+    .popup-content::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #d4af37, #f9f095, #d4af37);
+      border-radius: 2px;
+    }
+            h2 {
+      color: #1a1a1a;
+      font-size: 24px;
+      font-weight: 600;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    p {
+      color: #555;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    p strong {
+      color: #d4af37;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      outline: none;
+      letter-spacing: 0.5px;
+    }
+
+    #confirm-withdraw {
+      background: linear-gradient(135deg, #d4af37, #e5c760);
+      color: #000;
+      border: none;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+    }
+
+    #confirm-withdraw:hover {
+      background: linear-gradient(135deg, #c9a431, #d4af37);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+    }
+
+    #cancel-withdraw {
+      background-color: transparent;
+      color: #555;
+      border: 1px solid #d1d1d1;
+    }
+
+    #cancel-withdraw:hover {
+      background-color: #f5f5f5;
+      color: #333;
+      border-color: #bbb;
+    }
+
+    /* Demo button */
+    #show-popup {
+      background: linear-gradient(135deg, #d4af37, #e5c760);
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+      margin: 20px;
+    }
+
+    #show-popup:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+    }
     </style>
 </head>
 <body>
@@ -733,7 +828,6 @@ $(document).ready(function() {
   const $sellAllForm = $('#sell-all-form');
   const $sellAllSelectedIds = $('#sell-all-selected-ids');
 
-  // Function to update the hidden input and toggle form visibility
   function updateSellAllButton() {
       let selectedIds = [];
       $checkboxes.each(function() {
@@ -749,7 +843,6 @@ $(document).ready(function() {
       }
   }
 
-  // Bind change event for checkboxes
   $checkboxes.on('change', updateSellAllButton);
 
   $sellAllForm.on('submit', function(event) {
@@ -782,6 +875,105 @@ $(document).ready(function() {
 
   });
 });
+
+    $(document).ready(function() {
+    const $checkboxes = $('.item-select-checkbox');
+    const $sellAllForm = $('#sell-all-form');
+    const $sellAllSelectedIds = $('#sell-all-selected-ids');
+
+    function updateSellAllButton() {
+        let selectedIds = [];
+        $checkboxes.each(function() {
+            if ($(this).prop('checked')) {
+                selectedIds.push($(this).data('id'));
+            }
+        });
+
+        if (selectedIds.length > 0) {
+            $sellAllForm.show();
+            $sellAllSelectedIds.val(selectedIds.join(','));
+        } else {
+            $sellAllForm.hide();
+        }
+    }
+
+    $checkboxes.on('change', updateSellAllButton);
+
+    function handleInventoryAction(event, $form) {
+        event.preventDefault();
+        console.log('Processing action:', $form.find('input[name="action"]').val());
+
+        $.ajax({
+            url: $form.attr('action'),
+            type: 'POST',
+            data: $form.serialize(),
+            dataType: 'json',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            success: function(response) {
+                $('#stock-count').html(response.stock_count);
+                $('#inventory-items-container').html(response.inventory_html);
+                $('#sellupdate').html(response.currency_amount);
+
+                // Uncheck the checkbox associated with the affected item
+                const pk = $form.find('input[name="pk"]').val();
+                $('#checkbox-' + pk).prop('checked', false);
+                updateSellAllButton();
+
+                console.log('Action successful:', response);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+    // Handle Sell Button Click
+    $(document).on('submit', '.sell-form', function(event) {
+        handleInventoryAction(event, $(this));
+    });
+
+    // Handle Withdraw Button Click
+    $(document).on('submit', '.withdraw-form', function(event) {
+        handleInventoryAction(event, $(this));
+    });
+
+    // Handle Set Tradable Button Click
+    $(document).on('submit', '.trade-form', function(event) {
+        handleInventoryAction(event, $(this));
+    });
+
+    // Handle Sell All Form Submission
+    $sellAllForm.on('submit', function(event) {
+        event.preventDefault();
+        console.log('Selling all selected items.');
+
+        const sellselectedAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
+        sellselectedAudio.play();
+
+        $.ajax({
+            url: "{% url 'showcase:sell_all_inventory_objects' %}",
+            type: 'POST',
+            data: $sellAllForm.serialize(),
+            dataType: 'json',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            success: function(response) {
+                $('#stock-count').html(response.stock_count);
+                $('#inventory-items-container').html(response.inventory_html);
+                $('#sellupdate').html(response.currency_amount);
+
+                // Uncheck all selected checkboxes after selling
+                $checkboxes.prop('checked', false);
+                updateSellAllButton();
+
+                console.log('Successfully sold selected inventory objects');
+            },
+            error: function(xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    });
+});
+
 </script>
 
         </section>

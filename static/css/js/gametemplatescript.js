@@ -122,9 +122,9 @@ async function randomizeContents() {
      data-price="${attributes.value || ''}"
      data-currency-file="${attributes.currencyFile || ''}"
      data-currency-symbol="${attributes.currencySymbol || ''}"
-     style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border-top: none; width: 10em;">
+     style="display: flex; flex-direction: column; background: white; align-items: center; height: 100%; align-self: flex-start; border-top: none; width: 10em;">
     ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-    <div class="sliderPrice">${attributes.value} 💎targetcard </div>
+    <div class="sliderPrice">${attributes.value} 💎 </div>
 </div>
 </div>
 `;
@@ -152,10 +152,10 @@ async function randomizeContents() {
                     return Math.round(randomDecimal * 10000) / 10000;
                 }
 
-                const randomDivisor = getRandomDecimal(1.3298, 1.3302);
+                const randomDivisor = getRandomDecimal(1.3265, 1.3375);
 
                 const cardContainer = document.querySelector('.slider');
-                const middleIndex = Math.floor(cardContainer.children.length / 1.33);
+                const middleIndex = Math.floor(cardContainer.children.length / 1.327);
 
                 console.log(randomDivisor);
                 const targetIndex = Math.min(cardContainer.children.length, middleIndex);
@@ -257,13 +257,10 @@ function clearCards() {
     console.log("All target cards removed.");
 }
 
-
-
-
         function addAnimation() {
             document.querySelectorAll('.slider').forEach(scroller => {
                 scroller.style.animation = 'none';
-                scroller.offsetHeight;  // Trigger reflow
+                scroller.offsetHeight;
                 let animationDuration = isQuickSpin ? '9s' : '18s';
                 scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
                 scroller.style.animationPlayState = 'running';
@@ -271,40 +268,36 @@ function clearCards() {
         }
 
 function alignCardWithSpinner() {
-    const spinnerTick = document.getElementById('selector'); // The spinner tick element
+    const spinnerTick = document.getElementById('selector');
     const slider = document.getElementById('slider');
-    const targetCard = document.querySelector('.target-card'); // The new card to align
+    const targetCard = document.querySelector('.target-card');
 
     if (!targetCard || !spinnerTick) {
         console.error('Target card or spinner tick not found!');
         return;
     }
 
-    // Get the center position of the spinner tick
     const spinnerTickRect = spinnerTick.getBoundingClientRect();
     const spinnerTickCenter = spinnerTickRect.left + spinnerTickRect.width / 2;
 
-    // Get the center position of the target card
     const targetCardRect = targetCard.getBoundingClientRect();
     const targetCardCenter = targetCardRect.left + targetCardRect.width / 2;
 
-    // Calculate the offset needed to align the card with the spinner tick
     const offset = spinnerTickCenter - targetCardCenter;
 
-    // Update the slider's translateX value
     const currentTransform = getComputedStyle(slider).transform;
-    const matrix = new DOMMatrix(currentTransform); // Use DOMMatrix for robust transformation parsing
+    const matrix = new DOMMatrix(currentTransform);
     const currentTranslateX = matrix.m41 || 0;
 
-    //slider.style.transform = `translateX(${currentTranslateX + offset}px)`;
+    slider.style.transform = `translateX(${currentTranslateX + offset}px)`;
     //console.log(`Slider adjusted by offset: ${offset}px`);
 }
 
 
 
 $(".start").click(function (event) {
-    const buttonId = event.target.id; // Extract the ID of the clicked button
-    console.log(`Button clicked: ${buttonId}`); // Debug: Log the button's ID
+    const buttonId = event.target.id;
+    console.log(`Button clicked: ${buttonId}`);
 
 });
 
@@ -388,7 +381,6 @@ function createTopHit(data) {
 }
 
 
-// Function to get CSRF token
 function getCSRFToken() {
     const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {

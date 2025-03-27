@@ -1591,11 +1591,11 @@ fetch(`/create_outcome/${slug}/`, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken,  // Ensure csrf token is being sent
+        'X-CSRFToken': csrftoken,
     },
     body: JSON.stringify({
-        game_id: gameId,  // Pass the game_id as needed
-        other_data: otherData,  // Add any additional data as needed
+        game_id: gameId,
+        other_data: otherData,
     })
 })
 }
@@ -1605,14 +1605,14 @@ fetch(`/create_outcome/${slug}/`, {
             const choiceFile = data.choice_file;
 
             if (choiceFile) {
-                const slider = document.querySelector('.slider'); // Adjust selector as needed
+                const slider = document.querySelector('.slider');
                 const newCard = document.createElement('div');
                 newCard.className = 'cards';
                 newCard.innerHTML = `
                     <div class="lootelement"
                          data-price="100"
                          data-nonce="${data.nonce}"
-                         style="background: url('${choiceFile}'); padding: 6%; margin-left: 22px;">
+                         style="background: url('${choiceFile}'); padding: 6%; margin-left: 0px;">
                        <img src="${choiceFile}" alt="Generated Card">
                     </div>
                     <h2 style="margin-left: 22px;">100 💎</h2>
