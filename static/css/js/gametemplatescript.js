@@ -711,6 +711,7 @@ $(document).ready(function() {
                 background: card.style.background,
             });
 
+                const targetCards = cardContainer.querySelectorAll('.target-card');
                 targetCards.forEach(card => {
                     card.querySelectorAll('*').forEach(child => {
                         child.style.display = 'none';
@@ -734,24 +735,73 @@ $(document).ready(function() {
         });
     });
 
-    $(document).on("click", ".sell-button, .close", function() {
-        var cardContainer = document.querySelector('.slider');
-        var sellCards = cardContainer.querySelectorAll('.sellattribute');
+$(document).on("click", ".sell-button, .close", function() {
+    var cardContainer = document.querySelector('.slider');
+    var sellCards = cardContainer.querySelectorAll('.sellattribute');
 
-        sellCards.forEach(card => {
-            console.log("Removing item:", {
-                price: card.getAttribute("data-price"),
-                currencyFile: card.getAttribute("data-currency-file"),
-                currencySymbol: card.getAttribute("data-currency-symbol"),
-                background: card.style.background,
-            });
+    if (sellCards.length === 0) {
+        console.log("No items to sell.");
+        return;
+    }
 
-            card.classList.remove('sellattribute'); // Remove the class
-            card.remove(); // Remove the element
-        });
-
-        console.log("All sell items removed.");
+    // Collect data from every sellattribute card
+    let itemsToSell = [];
+    sellCards.forEach(card => {
+        let inventory_pk = card.getAttribute("data-inventory_pk");
+        if (!inventory_pk) {
+            console.error("Card missing inventory_pk:", card);
+            return; // Skip cards missing required attribute
+        }
+        let itemData = {
+            inventory_pk: inventory_pk,
+            price: card.getAttribute("data-price"),
+            currencySymbol: card.getAttribute("data-currency-symbol")
+        };
+        itemsToSell.push(itemData);
     });
+
+    console.log("Selling items:", itemsToSell);
+
+    if (itemsToSell.length === 0) {
+        console.error("No valid items to sell.");
+        return;
+    }
+
+    // Build the URL using the first valid item's inventory_pk
+    let sellUrl = `/sell/${itemsToSell[0].inventory_pk}/`;
+    console.log("Sell URL:", sellUrl);
+
+    // Make the AJAX request with the collected items as JSON
+    $.ajax({
+        type: "POST",
+        url: sellUrl,
+        data: JSON.stringify({ items: itemsToSell }),
+        contentType: "application/json",
+        headers: { "X-CSRFToken": window.csrfToken }, // Ensure window.csrfToken is set
+        success: function(response) {
+            console.log("Sell request succeeded:", response);
+
+            if (response.success) {
+                sellCards.forEach(card => {
+                    console.log("Removing sold item:", {
+                        inventory_pk: card.getAttribute("data-inventory_pk"),
+                        price: card.getAttribute("data-price"),
+                        currencySymbol: card.getAttribute("data-currency-symbol")
+                    });
+                    card.remove();
+                });
+                console.log(`Sold ${itemsToSell.length} items.`);
+            }
+            if (response.html) {
+                $("#updated-content-container").html(response.html);
+            }
+        },
+        error: function(error) {
+            console.error("Sell request failed:", error);
+        }
+    });
+});
+
 });
 
 
