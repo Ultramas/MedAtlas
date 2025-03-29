@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeTrove - News</title>
+    <title>PokeTrove - Chat</title>
         <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
@@ -14,7 +14,6 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
 
     <style>
-    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
     .copyright-section {
         background: linear-gradient(
             to right,
@@ -23,7 +22,6 @@
             rgba(191, 151, 255, 0.1)
         );
         bottom: 0px;
-        position: absolute;
         width: 100%;
         backdrop-filter: blur(10px);
         padding: 1rem 0;
@@ -379,9 +377,6 @@
             position: absolute;
             left: 10%;
             transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
         .pokemon-grid {
@@ -772,7 +767,7 @@ button[type="submit"] {
                         </form>
                         <div class="add-friend">
                             <a href="{% url 'showcase:send_friend_request' %}">
-                                add friend
+                                Add A Friend
                             </a>
                         </div>
 					</div>
@@ -863,7 +858,7 @@ button[type="submit"] {
           </div>
                 </li></a>
   {% empty %}
-      <h2>No friends found.</h2>
+      <h5>No friends found.</h5>
   {% endfor %}
   {% endfor %}
 {% endif %}

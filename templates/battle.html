@@ -45,9 +45,7 @@
         letter-spacing: 1px;
         margin: 0;
     }
-</style>
 
-    <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
 
         :root {
@@ -69,11 +67,9 @@
             background-color: var(--background);
             color: var(--text);
             font-family: 'Cormorant Garamond', serif;
-            background-image:
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
             min-height: 100vh;
+            background: #050510;
+            background-image: radial-gradient(circle at 20% 35%, rgba(0, 240, 255, 0.15) 0%, transparent 40%), radial-gradient(circle at 75% 65%, rgba(255, 0, 229, 0.15) 0%, transparent 40%);
         }
 
         .main-menu {
@@ -369,15 +365,6 @@
             background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
-        .nav-links h1::after {
-            content: '';
-            position: absolute;
-            left: 10%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
 
 
         .main-content h1 {
@@ -406,9 +393,6 @@
             position: absolute;
             left: 10%;
             transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
         .pokemon-grid {
@@ -593,94 +577,83 @@
 
 
 
-.view-toggle {
-    text-align: right;
-    margin-bottom: 1rem;
-}
+        .view-toggle {
+            text-align: right;
+            margin-bottom: 1rem;
+        }
 
-.toggle-btn {
-    background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-    border: 2px solid var(--primary);
-    color: var(--text);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-}
+        .toggle-btn {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
 
-.toggle-btn:hover {
-    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-    border-color: var(--accent);
-    box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
-}
+        .toggle-btn:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
+        }
 
-.inventory-grid.compact-view {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-}
+        .inventory-grid.compact-view {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
 
-.inventory-grid.compact-view .inventory-item {
-    font-size: 0.9em;
-}
+        .inventory-grid.compact-view .inventory-item {
+            font-size: 0.9em;
+        }
 
-.inventory-grid.compact-view .pokemon-image {
-    aspect-ratio: 16/9;
-}
+        .inventory-grid.compact-view .pokemon-image {
+            aspect-ratio: 16/9;
+        }
 
-.inventory-grid.compact-view .product-description {
-    display: none;
-}
+        .inventory-grid.compact-view .product-description {
+            display: none;
+        }
 
-.inventory-grid.compact-view .action-buttons {
-    flex-direction: column;
-}
+        .inventory-grid.compact-view .action-buttons {
+            flex-direction: column;
+        }
 
-.inventory-grid.compact-view .action-buttons form {
-    width: 100%;
-    margin-bottom: 0.5rem;
-}
+        .inventory-grid.compact-view .action-buttons form {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
 
-.legendary-icon {
-    font-size: 2em;
-    margin-bottom: 0.5rem;
-}
+        .legendary-icon {
+            font-size: 2em;
+            margin-bottom: 0.5rem;
+        }
 
-.empty-inventory {
-    text-align: center;
-}
+        .empty-inventory {
+            text-align: center;
+        }
 
-.empty-inventory img {
-    max-width: 50%;
-    margin: 2rem auto;
-}
+        .empty-inventory img {
+            max-width: 50%;
+            margin: 2rem auto;
+        }
 
-nav.main-menu ul li a {
-    color: #fff;
-    font-weight: 700;
-    display: block;
-    padding: 15px;
-}
+        nav.main-menu ul li a {
+            color: #fff;
+            font-weight: 700;
+            display: block;
+            padding: 15px;
+        }
 
-p.blog-meta span {
-    margin-right: 15px;
-    opacity: 0.6;
-    color: rgba(255, 255, 255, 1);
-    font-size: 0.85em;
-}
-    </style>
-</head>
-<body>
+        p.blog-meta span {
+            margin-right: 15px;
+            opacity: 0.6;
+            color: rgba(255, 255, 255, 1);
+            font-size: 0.85em;
+        }
 
-<script>
-
-</script>
-
-
-{% include 'navtrove.html' %}
-
-<style>
         body {
             font-family: 'Orbitron', sans-serif;
             background-color: #0f0f1a;
@@ -688,7 +661,8 @@ p.blog-meta span {
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+            background: #050510;
+            background-image: radial-gradient(circle at 20% 35%, rgba(0, 240, 255, 0.15) 0%, transparent 40%), radial-gradient(circle at 75% 65%, rgba(255, 0, 229, 0.15) 0%, transparent 40%);
             background-size: 400% 400%;
             animation: gradientAnimation 15s ease infinite;
         }
@@ -812,7 +786,13 @@ p.blog-meta span {
     </style>
 
 </head>
+
 <body>
+
+
+{% include 'navtrove.html' %}
+
+
 
     <div class="container">
         <h1 class="title">Open Battles</h1>

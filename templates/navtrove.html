@@ -21,6 +21,11 @@
             --border-gradient: linear-gradient(135deg, rgb(191, 151, 255, 0.2), rgb(78, 204, 163, 0.2));
             --sidebar-width: 320px;
             --sidebar-collapsed-width: 80px;
+            --bg-light: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+            --bg-dark: #050510;
+            --radial-light: none;
+            --radial-dark: radial-gradient(circle at 20% 35%, rgba(0, 240, 255, 0.15) 0%, transparent 40%), radial-gradient(circle at 75% 65%, rgba(255, 0, 229, 0.15) 0%, transparent 40%);
+
         }
 
         * {
@@ -31,10 +36,196 @@
         }
 
         body {
-            background-color: var(--background);
-            color: var(--foreground);
-            overflow-x: hidden;
-            min-height: 100vh;
+            background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+            /*background-image: var(--radial-light);*/
+            transition: background 0.5s ease-in-out;
+        }
+
+        .dark-mode {
+            background: var(--bg-dark) !important;
+            background-image: var(--radial-dark) !important;
+        }
+
+        .buttonets {
+            top: 20px;
+            left: 20px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 13rem;
+            overflow: hidden;
+            height: 3rem;
+            background-size: 300% 300%;
+            cursor: pointer;
+            backdrop-filter: blur(1rem);
+            border-radius: 5rem;
+            transition: 0.5s;
+            animation: gradient_301 5s ease infinite;
+            border: double 4px transparent;
+        }
+
+        #containerteed-stars {
+          position: absolute;
+          z-index: -1;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          transition: 0.5s;
+          backdrop-filter: blur(1rem);
+          border-radius: 5rem;
+        }
+
+        strong {
+          z-index: 2;
+          font-family: "Avalors Personal Use";
+          font-size: 12px;
+          letter-spacing: 5px;
+          color: #ffffff;
+          text-shadow: 0 0 4px white;
+        }
+
+        #glow {
+          position: absolute;
+          display: flex;
+          width: 12rem;
+        }
+
+        .circle {
+          width: 100%;
+          height: 30px;
+          filter: blur(2rem);
+          animation: pulse_3011 4s infinite;
+          z-index: -1;
+        }
+
+        .circle:nth-of-type(1) {
+          background: rgba(254, 83, 186, 0.636);
+        }
+
+        .circle:nth-of-type(2) {
+          background: rgba(142, 81, 234, 0.704);
+        }
+
+        .buttonets:hover #containerteed-stars {
+          z-index: 1;
+          background-color: #212121;
+        }
+
+        .buttonets:hover {
+          transform: scale(1.1);
+        }
+
+        .buttonets:active {
+          border: double 4px #fe53bb;
+          background-origin: border-box;
+          background-clip: content-box, border-box;
+          animation: none;
+        }
+
+        .buttonets:active .circle {
+          background: #fe53bb;
+        }
+
+        #stars {
+          position: relative;
+          background: transparent;
+          width: 200rem;
+          height: 200rem;
+        }
+
+        #stars::after {
+          content: "";
+          position: absolute;
+          top: -10rem;
+          left: -100rem;
+          width: 100%;
+          height: 100%;
+          animation: animStarRotate 90s linear infinite;
+        }
+
+        #stars::after {
+          background-image: radial-gradient(#ffffff 1px, transparent 1%);
+          background-size: 50px 50px;
+        }
+
+        #stars::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -50%;
+          width: 170%;
+          height: 500%;
+          animation: animStar 60s linear infinite;
+        }
+
+        #stars::before {
+          background-image: radial-gradient(#ffffff 1px, transparent 1%);
+          background-size: 50px 50px;
+          opacity: 0.5;
+        }
+
+        @keyframes animStar {
+          from {
+            transform: translateY(0);
+          }
+
+          to {
+            transform: translateY(-135rem);
+          }
+        }
+
+        @keyframes animStarRotate {
+          from {
+            transform: rotate(360deg);
+          }
+
+          to {
+            transform: rotate(0);
+          }
+        }
+
+        @keyframes gradient_301 {
+          0% {
+            background-position: 0% 50%;
+          }
+
+          50% {
+            background-position: 100% 50%;
+          }
+
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+
+        @keyframes pulse_3011 {
+          0% {
+            transform: scale(0.75);
+            box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+          }
+
+          70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+          }
+
+          100% {
+            transform: scale(0.75);
+            box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+          }
+        }
+
+        .copyright-section {
+            background: linear-gradient(to right, rgba(191, 151, 255, 0.1), rgba(255, 255, 255, 0.05), rgba(191, 151, 255, 0.1));
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            padding: 1rem 0;
+            text-align: center;
+            z-index: 100;
         }
 
         /* Main Navigation */
@@ -65,6 +256,12 @@
             position: relative;
         }
 
+        a {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+
         .navLogo {
             background-size: 100% auto;
             background-position: center;
@@ -73,7 +270,6 @@
             width: 3.5em;
         }
 
-        /* Sidebar Styles */
         .sidebar-container {
             position: fixed;
             top: 0;
@@ -86,6 +282,7 @@
             box-shadow: 5px 0 20px rgba(0, 0, 0, 0.5);
             overflow: hidden;
             border-right: 1px solid rgba(191, 151, 255, 0.2);
+            color: white;
         }
 
         .sidebar-hidden {
@@ -508,7 +705,6 @@
             background: linear-gradient(90deg, var(--primary), var(--accent));
             border-radius: 4px;
             position: relative;
-            width: 65%; /* Example value */
             transition: width 1s ease;
         }
 
@@ -523,7 +719,6 @@
             border-radius: 0 4px 4px 0;
         }
 
-        /* Collapsed Sidebar Styles */
         .sidebar-collapsed .nav-text,
         .sidebar-collapsed .username,
         .sidebar-collapsed .user-stats,
@@ -727,6 +922,16 @@ nav.main-menu ul li a {
   top: 0;
   border-radius: 10px;
 }
+
+         #visual-mode-text {
+    color: #0a0a13;
+    transition: color 0.3s ease;
+  }
+
+  /* Change color when hovered */
+  .buttonets:hover #visual-mode-text {
+    color: white;
+  }
     </style>
 </head>
 <body>
@@ -814,20 +1019,36 @@ nav.main-menu ul li a {
             </a>
         </div>
         <div class="user-info">
-            <h2 class="username">{{ userprofile.username }}</h2>
+            <h4 class="username">{{ user.username }}</h4>
             <div class="user-stats">
-                <div class="user-stat">
-                    <i class="fas fa-gem user-stat-icon" style="color: #ED2221;"></i>
-                    <div class="sellupdate" id="sellupdate">
-                        <span id="currency-amount">{{ userprofile.currency_amount }}</span>
+                <a href="{% url 'showcase:currencymarket' %}">
+                    <div class="user-stat">
+                        <i class="fas fa-gem user-stat-icon" style="color: #ED2221;"></i>
+                        <div class="sellupdate" id="sellupdate">
+                            <span id="currency-amount">{{ userprofile.currency_amount }}</span>
+                        </div>
                     </div>
-                </div>
-                <div class="user-stat">
-                    <i class="fas fa-trophy user-stat-icon" style="color: var(--accent);"></i>
-                    <span>{{ userprofile.level }}</span>
-                </div>
+                </a>
+                <a href="{% url 'showcase:mylevel' %}">
+                    <div class="user-stat">
+                        <i class="fas fa-trophy user-stat-icon" style="color: var(--accent);"></i>
+                        <span>{{ userprofile.level }}</span>
+                    </div>
+                </a>
             </div>
         </div>
+            <br>
+            <button class="buttonets" onclick="toggleMode()" style="margin-left: auto; margin-right: auto;">
+              <strong><h6 id="visual-mode-text">Visual Mode</h6></strong>
+              <div id="containerteed-stars">
+                <div id="stars"></div>
+              </div>
+
+              <div id="glow">
+                <div class="circle"></div>
+                <div class="circle"></div>
+              </div>
+            </button>
     </div>
 {% empty %}
     <div class="user-profile">
@@ -856,6 +1077,18 @@ nav.main-menu ul li a {
     </div>
 {% endfor %}
 
+
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.body.classList.add("dark-mode");
+      });
+
+      function toggleMode() {
+        document.body.classList.toggle("dark-mode");
+      }
+    </script>
+
             <!-- Navigation Section -->
             <div class="sidebar-nav">
                 <!-- Main Navigation -->
@@ -869,9 +1102,21 @@ nav.main-menu ul li a {
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="{% url 'showcase:currencymarket' %}" class="nav-link">
+                                <i class="fas fa-diamond"></i>
+                                <span class="nav-text">Rubies</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{% url 'showcase:ehome' %}" class="nav-link">
                                 <i class="fas fa-store"></i>
                                 <span class="nav-text">Marketplace</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:ehome' %}" class="nav-link">
+                                <i class="fas fa-box"></i>
+                                <span class="nav-text">Chests</span>
                             </a>
                         </li>
                         <!--
@@ -899,6 +1144,12 @@ nav.main-menu ul li a {
                             <a href="{% url 'showcase:inventory' %}" class="nav-link">
                                 <i class="fas fa-fire"></i>
                                 <span class="nav-text">Inventory</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:commerce' %}" class="nav-link">
+                                <i class="fa-solid fa-money-bill-trend-up"></i>
+                                <span class="nav-text">Exchange</span>
                             </a>
                         </li>
                         <!--<li class="nav-item">
@@ -967,20 +1218,31 @@ nav.main-menu ul li a {
                 <h3 class="section-title"><i class="fas fa-chart-line"></i> Progress</h3>
                 <div class="progress-title">
                     <span>Level Progress</span>
-                    <span>65%</span>
+
+               {% for userprofile in NewsProfiles %}
+
+                    <span>
+  {{ userprofile.rubies_spent }}/{{ userprofile.level.experience }}
+  ({% widthratio userprofile.rubies_spent userprofile.level.experience 100 %}%)
+</span>
+
+                    {% endfor %}
                 </div>
                 <div class="progress-bar">
-                    <div class="progress-fill"></div>
+                    <div class="progress-bar" style="width: 100%; height: 20px; background: #ddd; border-radius: 4px; overflow: hidden;">
+                        <div class="progress-fill" style="width: {% widthratio userprofile.rubies_spent userprofile.level.experience 100 %}%;">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Collection Section -->
+
             <div class="collection">
                 <h2 class="collection-title">My Collection</h2>
                 <button class="view-collection">
                     <a href="{% url 'showcase:inventory' %}" class="collection-item">
 
-                    🐉 View Collection (0)
+                    🐉 View Collection (<span id="stock-count">{{ StockObject|length }}</span>)
 
                     </a>
                 </button>
@@ -1155,6 +1417,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }, 1000);
 });
 </script>
+
+
 
 
 

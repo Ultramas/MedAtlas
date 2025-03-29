@@ -109,6 +109,7 @@ async function randomizeContents() {
 
             const targetCardElement = document.createElement('div');
             targetCardElement.classList.add('card', 'target-card');
+            targetCardElement.classList.add('sellattribute');
             targetCardElement.setAttribute('id', `card-${attributes.id}`);
             targetCardElement.setAttribute('data-nonce', attributes.nonce);
             targetCardElement.setAttribute('data-color', attributes.color);
@@ -252,9 +253,14 @@ function clearCards() {
     const cardContainer = document.querySelector('.slider');
     const targetCards = cardContainer.querySelectorAll('.target-card');
 
-    targetCards.forEach(card => cardContainer.removeChild(card));
+    targetCards.forEach(card => {
 
-    console.log("All target cards removed.");
+        card.querySelectorAll('*').forEach(child => {
+            child.style.display = 'none';
+        });
+    });
+
+    console.log("All target cards modified (class removed, child elements hidden, but kept 'sellattribute').");
 }
 
         function addAnimation() {
@@ -392,11 +398,9 @@ function getCSRFToken() {
     return null;
 }
 
-// Select the target card
 const targetCard = document.querySelector('.target-card');
 let choiceColor = targetCard ? targetCard.getAttribute('data-color') : 'gray';
 
-// Log and handle choiceColor
 console.log('Given the choice color:', choiceColor);
 
 function randomizedContents() {
@@ -689,35 +693,68 @@ if (buttonId === "start") {
   window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
   console.log("Sell Imported CSRFToken:", window.csrfToken);
 
-  // Attach the event handler (using delegated binding in case the form is inserted dynamically)
-  $(document).ready(function() {
+$(document).ready(function() {
     $(document).on("submit", "#sell-form-" + window.inventory_pk, function(e) {
-      e.preventDefault();
-      console.log('submitting here'); // Debug output
+        e.preventDefault();
+        console.log('Submitting sell request');
 
-      var form = $(this);
+        var form = $(this);
+        var cardContainer = document.querySelector('.slider');
+        var sellCards = cardContainer.querySelectorAll('.sellattribute');
 
-      // Send the form data via AJAX
-      $.ajax({
-        type: "POST",
-        url: form.attr("action"),
-        data: form.serialize(),
-        success: function(response) {
-          console.log('Sell request succeeded:', response);
-          // Instead of refreshing the page, update the relevant part of your page.
-          // For example, update a container with the new HTML provided by the server:
-          if(response.html) {
-            $("#updated-content-container").html(response.html);
-          }
-          // Alternatively, perform other DOM updates here if needed.
-        },
-        error: function(error) {
+        console.log("Sell cards before modification:");
+        sellCards.forEach(card => {
+            console.log({
+                price: card.getAttribute("data-price"),
+                currencyFile: card.getAttribute("data-currency-file"),
+                currencySymbol: card.getAttribute("data-currency-symbol"),
+                background: card.style.background,
+            });
 
-          console.error("Sell request failed:", error);
-        }
-      });
+                targetCards.forEach(card => {
+                    card.querySelectorAll('*').forEach(child => {
+                        child.style.display = 'none';
+                    });
+                });
+        });
+
+        $.ajax({
+            type: "POST",
+            url: form.attr("action"),
+            data: form.serialize(),
+            success: function(response) {
+                console.log('Sell request succeeded:', response);
+                if (response.html) {
+                    $("#updated-content-container").html(response.html);
+                }
+            },
+            error: function(error) {
+                console.error("Sell request failed:", error);
+            }
+        });
     });
-  });
+
+    $(document).on("click", ".sell-button, .close", function() {
+        var cardContainer = document.querySelector('.slider');
+        var sellCards = cardContainer.querySelectorAll('.sellattribute');
+
+        sellCards.forEach(card => {
+            console.log("Removing item:", {
+                price: card.getAttribute("data-price"),
+                currencyFile: card.getAttribute("data-currency-file"),
+                currencySymbol: card.getAttribute("data-currency-symbol"),
+                background: card.style.background,
+            });
+
+            card.classList.remove('sellattribute'); // Remove the class
+            card.remove(); // Remove the element
+        });
+
+        console.log("All sell items removed.");
+    });
+});
+
+
 
    textContainer.innerHTML = `
     <h2>Congratulations!</h2>
@@ -877,7 +914,6 @@ sellBtn.addEventListener('click', () => {
                     }, 0);
                 }
 
-    // Fetch and update only the .sell.update div without affecting the rest of the page
     setTimeout(() => {
         $.ajax({
             url: window.location.href,

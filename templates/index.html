@@ -131,13 +131,6 @@
         }
 
         body {
-            background-color: var(--background);
-            color: var(--text);
-            font-family: 'Cormorant Garamond', serif;
-            background-image:
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
             min-height: 100vh;
     		background: fixed;
         }
@@ -1719,9 +1712,7 @@ window.onscroll = function() {
 </div>
 
 <script>
-    // Generate particles for each container
     document.addEventListener('DOMContentLoaded', function() {
-        // Calm particles for Featured Chests
         const calmParticles = document.querySelector('.chest-container .particles');
         for (let i = 0; i < 15; i++) {
             const particle = document.createElement('div');
@@ -2684,56 +2675,41 @@ window.onscroll = function() {
       </style>
 
 			<div class="outerGridContainer">
-				      {% for product in Products %}
-				<div class="gridCardItem">
-						<div class="gridCardImg" style="background-image: url('{{ product.image.url }}');">
-						</div>
-            <div class="gridCardContent">
-              <h1 class="gridCardTitle">{{product.title}}</h1>
-              {% if product.price %}
-        {% if product.discount_price %}
+  {% for product in Products %}
+    <a href="{{ product.get_profile_url }}" class="gridCardLink">
+      <div class="gridCardItem">
+        <div class="gridCardImg" style="background-image: url('{{ product.image.url }}');"></div>
+        <div class="gridCardContent">
+          <h1 class="gridCardTitle">{{ product.title }}</h1>
+          {% if product.price %}
+            {% if product.discount_price %}
               <div class="gridCardPriceWrapper">
-        {% if product.discount_price %}
-                     <div class="gridCardDiscountPrice">
-                     ${{ product.price }}
-                     </div>
-                     <div class="gridCardPrice"  style="color: rgb(6, 227, 6);">${{ product.discount_price }}</div>
-                 {% else %}
-                 <div class="gridCardPrice">${{ product.price }}</div>
-                 {% endif %} </p>
+                <div class="gridCardDiscountPrice">${{ product.price }}</div>
+                <div class="gridCardPrice" style="color: rgb(6, 227, 6);">${{ product.discount_price }}</div>
               </div>
-          <a href="{{ product.get_profile_url }}" class="cartBtn">
-          <h2 class="cartBtnFire">Check It Out!</h2></a>
-
+            {% else %}
+              <div class="gridCardPrice">${{ product.price }}</div>
+            {% endif %}
           {% else %}
-          <div class="gridCardPrice"> ${{ product.price }} </div>
-          <a href="{{ product.get_profile_url }}" class="cartBtn">
-          <h2 class="cartBtnFire" style=background-image: url("{% static 'css/images/fireimage.png' %}"); /* Default image */>Check It Out</h2> !</a>
+            {% if product.discount_currency_price %}
+              <div class="gridCardPrice" style="color: rgb(6, 227, 6);">
+                <div class="gridCardDiscountPrice">💎{{ product.currency_price }}</div>
+                💎{{ product.discount_currency_price }}
+              </div>
+            {% else %}
+              <div class="gridCardPrice">💎{{ product.currency_price }}</div>
+            {% endif %}
+          {% endif %}
 
-         {% endif %}
-         {% else %}
-          {% if product.discount_currency_price %}
-              <div class="gridCardPrice"   style="color: rgb(6, 227, 6);">
-                          {% if product.discount_currency_price %}
-                     <div class="gridCardDiscountPrice">💎{{ product.currency_price }}</div>
-                     💎{{ product.discount_currency_price }}
-                 {% else %}
-                     💎{{ product.currency_price }}
-                 {% endif %} </div>
-          <a href="{{ product.get_profile_url }}" class="cartBtn">
-                               <h2 class="cartBtnFire">Check It Out!</h2></a>
+          <div class="cartBtn">
+              <h2 class="cartBtnFire">Check It Out!</h2>
+          </div>
+        </div>
+      </div>
+    </a>
+  {% endfor %}
+</div>
 
-          {% else %}
-          <div class="gridCardPrice"> 💎{{ product.currency_price }} </div>
-          <a href="{{ product.get_profile_url }}" class="cartBtn">
-            <h2 class="cartBtnFire">Check It Out!</h2>
-          </a>
-         {% endif %}
-         {% endif %}
-            </div>
-				</div>
-				{% endfor %}
-		</div>
 	</div>
 
 	</div>
@@ -3532,7 +3508,7 @@ Chat Title
     }
 
 /*--------------------
-Custom Srollbar
+Custom Scrollbar
 --------------------*/
 .mCSB_scrollTools {
   margin: 1px -3px 1px 0;
@@ -3990,8 +3966,26 @@ Bounce
   overflow-y: scroll;
 }
 
-		</style>
-<style>
+		.gridCardLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.gridCardLink .gridCardItem {
+  pointer-events: none; /* Disables click behavior on child elements */
+}
+
+.gridCardLink .gridCardContent,
+.gridCardLink .gridCardImg,
+.gridCardLink .gridCardTitle,
+.gridCardLink .gridCardPriceWrapper,
+.gridCardLink .gridCardPrice,
+.gridCardLink .gridCardDiscountPrice {
+  pointer-events: auto; /* Ensures inner elements remain interactive */
+}
+
+
 	.chat-button {
             position: fixed;
             bottom: 10px;

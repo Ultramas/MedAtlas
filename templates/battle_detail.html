@@ -1079,7 +1079,7 @@ nav.main-menu ul li a {
       {% endif %}
     {% else %}
       {% if user == battle.creator %}
-        <form method="POST" action="{% url 'add_robot' battle.id %}">
+        <form method="POST" action="{% url 'showcase:add_robot' battle.id %}">
           {% csrf_token %}
           <button type="submit" name="add_robot_submit">Add Robot</button>
         </form>
