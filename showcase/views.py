@@ -233,8 +233,10 @@ class SignupView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
@@ -305,8 +307,10 @@ class TotalView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
@@ -495,8 +499,10 @@ class BaseView(ListView):
         context = super().get_context_data(**kwargs)
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
@@ -560,8 +566,10 @@ class EBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logos'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
@@ -607,8 +615,10 @@ class BlogBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
@@ -704,8 +714,10 @@ class AdminRolesView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Roles'] = AdminRoles.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
@@ -745,8 +757,10 @@ class AdminTasksView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
@@ -786,8 +800,10 @@ class AdminPagesView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
@@ -827,8 +843,10 @@ class AdministrationView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
@@ -868,8 +886,10 @@ class DonateBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         user = self.request.user
         if user.is_authenticated:
@@ -914,8 +934,10 @@ class MemberBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         user = self.request.user
         if user.is_authenticated:
@@ -977,8 +999,10 @@ class PostList(BaseView):
         context['TextFielde'] = TextBase.objects.filter(is_active=1)
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
@@ -1045,8 +1069,10 @@ class votingview(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['VoteQuery'] = VoteQuery.objects.all()
 
         newprofile = VoteQuery.objects.filter(is_active=1)
@@ -2818,8 +2844,10 @@ class DailyChestView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['next_5pm'] = get_next_5pm_pst()
         context['is_daily'] = game.daily
@@ -2995,8 +3023,10 @@ class OpenBattleListView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['game_values'] = self.request.session.pop('game_values', '')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
@@ -3104,8 +3134,10 @@ class SingleBattleListView(DetailView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['wager_form'] = WagerForm()
 
         cost = sum(game.discount_cost or game.cost for game in related_games)
@@ -3288,8 +3320,10 @@ class ActualBattleView(DetailView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['wager_form'] = WagerForm()
 
         battle_games = battle.battle_games.all().order_by('order')
@@ -3599,9 +3633,7 @@ class ActualBattleView(DetailView):
             context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
             context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
             context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-            
-            context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+
             context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
             if self.request.user.is_authenticated:
                 userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -3658,8 +3690,10 @@ class BattleCreationView(CreateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         games = Game.objects.filter(daily=False)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         if self.request.user.is_authenticated:
@@ -4324,8 +4358,10 @@ class AchievementsView(TemplateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -4811,8 +4847,10 @@ class StaffApplyBackgroundView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
@@ -5236,8 +5274,10 @@ class SingleNewsView(DetailView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['News'] = NewsFeed.objects.all()
         context['Money'] = Currency.objects.filter(is_active=1)
@@ -5447,8 +5487,10 @@ class PartnerApplicationView(FormMixin, LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -5505,8 +5547,10 @@ class PartnerBackgroundView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Partner'] = PartnerApplication.objects.all()
 
         newprofile = Partner.objects.filter(is_active=1)
@@ -5674,8 +5718,10 @@ class MonstrosityView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -5726,8 +5772,10 @@ class AddMonstrosityView(FormMixin, LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -5856,8 +5904,10 @@ class RoomView(TemplateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -6216,8 +6266,10 @@ class NewRoomSettingsView(LoginRequiredMixin, TemplateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['form'] = form
         context['room'] = room
         # add other context variables as needed
@@ -6604,8 +6656,10 @@ class SignupView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
@@ -6674,8 +6728,10 @@ class TotalView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
@@ -6865,8 +6921,10 @@ class BaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
@@ -6913,8 +6971,10 @@ class EBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logos'] = LogoBase.objects.filter(page=self.template_name, is_active=1)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
@@ -6959,8 +7019,10 @@ class BlogBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
@@ -7006,8 +7068,10 @@ class NavView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'),
                                                   is_active=1)
@@ -7121,8 +7185,10 @@ class AdminRolesView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Roles'] = AdminRoles.objects.filter(is_active=1)
 
@@ -7164,8 +7230,10 @@ class AdminTasksView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
@@ -7206,8 +7274,10 @@ class AdminPagesView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         AdminPage = AdminPages.objects.filter(is_active=1)
@@ -7249,8 +7319,10 @@ class AdministrationView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
@@ -7290,8 +7362,10 @@ class DonateBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         user = self.request.user
@@ -7344,8 +7418,10 @@ class ShippingBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -7408,8 +7484,10 @@ class ShippingProfileView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
 
         context['Profiles'] = newprofile
 
@@ -7461,8 +7539,10 @@ class PrintShippingLabelView(LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Label'] = TradeShippingLabel.objects.filter(is_active=1, user=self.request.user)
 
         if self.request.user.is_authenticated:
@@ -7506,8 +7586,10 @@ class MembershipView(LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Label'] = TradeShippingLabel.objects.filter(is_active=1, user=self.request.user)
         context['tier'] = Membership.objects.filter(is_active=1)
 
@@ -7546,8 +7628,10 @@ class MemberBaseView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         user = self.request.user
@@ -7629,8 +7713,10 @@ class PostList(BaseView):
         context['TextFielde'] = TextBase.objects.filter(is_active=1)
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by("image_position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1).order_by('image_position')
@@ -7785,8 +7871,10 @@ class votingview(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['VoteQuery'] = VoteQuery.objects.all()
 
         profiles = VoteQuery.objects.filter(is_active=1)
@@ -7838,8 +7926,10 @@ class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Item'] = Item.objects.filter(is_active=1)
 
         newprofile = Item.objects.filter(is_active=1)
@@ -7927,8 +8017,10 @@ class TradeItemCreateView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['TradeItems'] = TradeItem.objects.filter(is_active=1)
         context['TradeOffers'] = TradeOffer.objects.filter(is_active=1)
         context['Friends'] = Friend.objects.filter(user=self.request.user, is_active=1)
@@ -7987,8 +8079,10 @@ class TradeBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['TradeItem'] = TradeItem.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         if self.request.user.is_authenticated:
@@ -8055,8 +8149,10 @@ class TradeOfferCreateView(CreateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['TradeOffer'] = TradeOffer.objects.filter(is_active=1)
 
         if self.request.user.is_authenticated:
@@ -8144,8 +8240,10 @@ class ResponseTradeOfferCreateView(CreateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['TradeOffer'] = TradeOffer.objects.filter(is_active=1)
 
         if self.request.user.is_authenticated:
@@ -8198,8 +8296,10 @@ class FriendRequestsView(View):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
 
         profiles = []
         for newprofile in FriendRequest.objects.filter(Q(sender=request.user) | Q(receiver=request.user)):
@@ -8297,8 +8397,10 @@ class SendFriendRequestView(View):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
 
         return render(request, 'send_friend_request.html', context)
 
@@ -8386,8 +8488,10 @@ class eventview(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
 
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
 
         context['username'] = username
         context['room'] = room
@@ -8452,8 +8556,10 @@ class SupportRoomView(TemplateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['room'] = signed_in_user
         context['profile_details'] = profile_details
 
@@ -8552,8 +8658,10 @@ class SupportLineView(TemplateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -9253,8 +9361,10 @@ class BackgroundView(FormMixin, BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['tophit'] = TopHits.objects.filter(is_active=True).order_by('-mfg_date')[:4]
         print(FaviconBase.objects.all())
         print(213324)
@@ -9708,8 +9818,10 @@ class StoreView(BaseView, FormView, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -9988,8 +10100,10 @@ class MemeView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Profile'] = UpdateProfile.objects.all()
         context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
 
@@ -10644,8 +10758,10 @@ class NewsBackgroundView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1)
         context['Email'] = EmailField.objects.filter(is_active=1)
@@ -10711,8 +10827,10 @@ class UploadACardView(FormMixin, LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -10890,8 +11008,10 @@ class PartnerBackgroundView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Partner'] = PartnerApplication.objects.all()
 
         newprofile = PartnerApplication.objects.filter(is_active=1)
@@ -11282,8 +11402,10 @@ class PostView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Idea'] = Idea.objects.all()
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -11383,8 +11505,10 @@ class SupportBackgroundView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Support'] = Support.objects.all()
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -11449,8 +11573,10 @@ class PostingView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Profile'] = UpdateProfile.objects.all()
         context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
 
@@ -11736,8 +11862,10 @@ class InventoryView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['PrizePool'] = PrizePool.objects.all()
         context['Shuffle'] = Shuffler.objects.filter(is_active=1).order_by("category")
         if self.request.user.is_authenticated:
@@ -11799,8 +11927,10 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         try:
@@ -12645,8 +12775,10 @@ class GameChestBackgroundView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -12944,8 +13076,10 @@ class SecretRoomView(LoginRequiredMixin, FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
         context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
         context['Money'] = Currency.objects.filter(is_active=1)
@@ -13005,8 +13139,10 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
         context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user)
         context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
@@ -13179,8 +13315,10 @@ class DailyLotteryView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Profile'] = UpdateProfile.objects.all()
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
@@ -13256,8 +13394,10 @@ class Lottereal(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['VoteQuery'] = VoteQuery.objects.all()
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -13306,8 +13446,10 @@ class PosteView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['VoteQuery'] = VoteQuery.objects.all()
 
         if self.request.user.is_authenticated:
@@ -13365,8 +13507,10 @@ class TradeOffersView(View):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         current_user = self.request.user
 
         newprofile = TradeOffer.objects.filter(user=request.user, is_active=1)
@@ -13418,8 +13562,10 @@ class DirectedTradeOfferView(View):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['request'] = request  # Pass the request object to the context
         current_user = request.user
 
@@ -13523,8 +13669,10 @@ class TradeHistory(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -13634,8 +13782,10 @@ class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         # context['name'] = Showcase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
@@ -13689,8 +13839,10 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -13854,8 +14006,10 @@ class BlogSearchResultsView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         # settings to alter the username & password
 
@@ -13946,8 +14100,10 @@ class GameSearchResultsView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         newprofile = Game.objects.filter(is_active=1)
@@ -14054,8 +14210,10 @@ class SearchResultsView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         # settings to alter the username & password
 
@@ -14282,8 +14440,10 @@ class WithdrawView(LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
 
         # Add profile details to completed withdrawals
         for withdraw in context['CompletedWithdraws']:
@@ -14358,8 +14518,10 @@ class WithdrawDetailView(LoginRequiredMixin, DetailView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
 
         return context
 
@@ -14425,8 +14587,10 @@ class ProcessingWithdrawView(LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
 
         for withdraw in context['CompletedWithdraws']:
             user = withdraw.user
@@ -14560,8 +14724,10 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
@@ -14641,8 +14807,10 @@ class MyLevelView(LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
@@ -14720,8 +14888,10 @@ class PunishAppsBackgroundView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['PunishApps'] = PunishmentAppeal.objects.all()
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -15306,8 +15476,10 @@ class IssueBackgroundView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Support'] = Support.objects.all()
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -15474,8 +15646,10 @@ class BusinessMailingView(FormView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -15525,8 +15699,10 @@ class BusinessSuccessMailingView(TemplateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -15580,8 +15756,10 @@ class PostDetailView(View):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
@@ -15689,8 +15867,10 @@ class CurrencyProductView(DetailView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(
             Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1
         )
@@ -15750,8 +15930,10 @@ class CurrencyMarketView(EBaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Currency'] = CurrencyMarket.objects.filter(is_active=1).order_by(
@@ -16217,8 +16399,10 @@ class ProductView(DetailView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         if self.request.user.is_authenticated:
@@ -16273,8 +16457,10 @@ class OrderSummaryView(EBaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
 
         # Checking user profile existence
         user_profile_exists = UserProfile2.objects.filter(user=self.request.user, is_active=1).exists()
@@ -16340,8 +16526,10 @@ class CheckoutView(EBaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -16739,8 +16927,10 @@ class OrderDoneView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -17298,8 +17488,10 @@ class ProfileEditView(FormView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
@@ -17363,8 +17555,10 @@ class SignupView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
@@ -17435,8 +17629,10 @@ class ChangePasswordView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
@@ -17606,8 +17802,10 @@ class DonateView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['donation'] = Donate.objects.filter(is_active=1)
@@ -17697,8 +17895,10 @@ class PatreonedView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
@@ -17746,8 +17946,10 @@ class DonateHistoryView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
@@ -17792,8 +17994,10 @@ class DonationsView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
@@ -17892,8 +18096,10 @@ class ContactViewe(CreateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         print(context["Contact"])
@@ -17942,8 +18148,10 @@ class ContactSuccessView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         print(context["Contact"])
@@ -18007,8 +18215,10 @@ class SellerApplicationView(FormMixin, LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -18523,8 +18733,10 @@ class FeedbackView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
         context['Items'] = Item.objects.filter(is_active=1)
         context['Image'] = ImageBase.objects.filter(is_active=1, page=self.template_name)
@@ -18591,8 +18803,10 @@ class FeedbackView(UpdateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
  
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
         context['Items'] = Item.objects.filter(is_active=1)
 
@@ -18659,8 +18873,10 @@ class FeedbackView(LoginRequiredMixin, FormView):
             context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
             context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
             
-            context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+            if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
             context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
             context['Feed'] = Feedback.objects.filter(is_active=1).order_by("slug")
             context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -19127,8 +19343,10 @@ class CreateReviewView(LoginRequiredMixin, FormView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Profile'] = UpdateProfile.objects.all()
         context['Logo'] = LogoBase.objects.all()
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
@@ -19381,8 +19599,10 @@ class OrderHistory(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
-        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
-            "created_at")
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
