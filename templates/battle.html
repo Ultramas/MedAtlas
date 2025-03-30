@@ -827,7 +827,17 @@
                             <strong>Slots:</strong> {{ battle.slots }}
                         </div>
                         <div class="battle-info">
+
+                            {% if battle.type %}
+                            {% if battle.type == 'team_fight' %}
+                            <strong>Type:</strong> Team Fight
+                            {% elif battle.type == 'teams' %}
+                            <strong>Type:</strong> Teams
+                            {% else %}
                             <strong>Type:</strong> {{ battle.type }}
+                            {% endif %}
+                            {% endif %}
+
                         </div>
                         <div class="battle-info">
                             <strong>Games:</strong>

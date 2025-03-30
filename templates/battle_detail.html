@@ -719,6 +719,7 @@ nav.main-menu ul li a {
         .game-title {
             font-size: 1.25rem;
             font-weight: 600;
+            color: white;
         }
 
         .game-category {
@@ -847,12 +848,12 @@ nav.main-menu ul li a {
         </div>
 
         <div class="game-list">
-            <h2>Battle Selection</h2>
+            <h2 style="color: white;">Battle Selection</h2>
             <div class="games-grid">
                 {% for game in battle.chests.all %}
                     <div class="game-card">
                         <div class="game-header">
-                            {% if game.image %}
+                            {% if game.image.url %}
                                 <img src="{{ game.image.url }}" alt="{{ game.name }}" class="game-image">
                             {% else %}
                                 <div class="game-image" style="background-color: #374151; display: flex; align-items: center; justify-content: center;">
