@@ -16123,6 +16123,8 @@ class CurrencyCheckoutView(EBaseView):
                     return redirect('showcase:currencypayment', payment_option='stripe')
                 elif payment_option == 'P':
                     return redirect('showcase:currencypayment', payment_option='paypal')
+                elif payment_option == 'C':
+                    return redirect('showcase:currencypayment', payment_option='card')
                 else:
                     messages.warning(self.request, "Invalid payment option selected")
                     return redirect('showcase:currencycheckout')
