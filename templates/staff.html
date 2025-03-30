@@ -109,7 +109,7 @@
     {% endfor %}
   {% else %}
 <head>
-  <meta http-equiv="refresh" content="0; {% url 'login' %}">
+  <meta http-equiv="refresh" content="0; {% url 'login' %}?next={{ request.path }}">
   </head>
   {% endif %}
 {% endblock content %}

@@ -3,7 +3,7 @@ from venv import logger
 
 import pytz
 from celery import shared_task
-from django.contrib.auth.views import PasswordResetView
+from django.contrib.auth.views import PasswordResetView, LoginView
 from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError
 
@@ -16,6 +16,9 @@ from django.utils.html import strip_tags
 from django.views.generic import ListView
 import stripe  # Official Stripe library
 from social_core.backends.stripe import StripeOAuth2
+from django.utils.text import slugify
+from urllib.parse import quote, urlparse
+from django.contrib.auth.forms import UserChangeForm, AuthenticationForm
 
 from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
@@ -165,7 +168,7 @@ from django.db.models import Q, Sum
 from django.views import generic
 from django.views.generic import TemplateView, ListView
 
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, is_valid_path
 from django.views.generic import UpdateView
 from .forms import ProfileForm
 from django.contrib.auth.models import User
@@ -2467,10 +2470,79 @@ def get_user_cash(request):
     user_cash = profile.currency_amount if profile else 0
     return JsonResponse({'user_cash': user_cash})
 
+import json
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.db import transaction
+from django.views.decorators.csrf import csrf_exempt
+from .models import InventoryObject, Transaction, ProfileDetails
 
+@csrf_exempt
+def bulk_sell_view(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON payload"}, status=400)
+
+    items = data.get("items", [])
+    if not items:
+        return JsonResponse({"success": False, "error": "No items provided"}, status=400)
+
+    sold_count = 0
+    total_added = 0
+
+    with transaction.atomic():
+        # Get the user's profile only once
+        user_profile = get_object_or_404(ProfileDetails, user=request.user)
+
+        for item in items:
+            inv_pk = item.get("inventory_pk")
+            if not inv_pk:
+                continue  # Skip items missing an inventory_pk
+
+            inventory_object = get_object_or_404(InventoryObject, pk=inv_pk)
+
+            # Verify ownership
+            if inventory_object.user != request.user:
+                return JsonResponse({"success": False, "error": f"Permission denied for item {inv_pk}"}, status=403)
+
+            # "Sell" the item by disassociating it
+            inventory_object.user = None
+            inventory_object.inventory = None
+
+            # Log the sale via a Transaction record
+            Transaction.objects.create(
+                inventory_object=inventory_object,
+                user=request.user,
+                currency=inventory_object.currency,
+                amount=inventory_object.price
+            )
+            inventory_object.save()
+
+            total_added += inventory_object.price
+            sold_count += 1
+
+        # Update the user's profile in one go after processing all items
+        user_profile.currency_amount += total_added
+        user_profile.save()
+
+    # Update the stock count for the user after selling
+    stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+    print('Bulk inventory sell committed')
+
+    return JsonResponse({
+        "success": True,
+        "sold_count": sold_count,
+        "stock_count": stock_count,
+        "currency_amount": user_profile.currency_amount
+    })
 
 @csrf_exempt
 def sell_game_inventory_object(request, pk):
+    print('sell direct started in the outside')
     if request.method != "POST":
         return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
 
@@ -2493,12 +2565,11 @@ def sell_game_inventory_object(request, pk):
                 item_pk = item.get("inventory_pk")
                 item_inventory = get_object_or_404(InventoryObject, pk=item_pk)
 
-                # Mark inventory as sold
+
                 item_inventory.user = None
                 item_inventory.inventory = None
                 item_inventory.save()
 
-                # Create a transaction entry
                 Transaction.objects.create(
                     inventory_object=item_inventory,
                     user=request.user,
@@ -2506,10 +2577,10 @@ def sell_game_inventory_object(request, pk):
                     amount=float(item.get("price", 0))
                 )
 
-            # Update user profile currency
             user_profile = get_object_or_404(ProfileDetails, user=request.user)
             user_profile.currency_amount += total_sale_value
             user_profile.save()
+            print('sold an item directly using outside sell_game_inventory_object method')
 
         stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
 
@@ -12115,6 +12186,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             user_profile.save()
 
         stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+        print('inventory sell committed')
         return JsonResponse({
             'success': True,
             'stock_count': stock_count,
@@ -12518,34 +12590,59 @@ class GameChestBackgroundView(BaseView):
             response = self.sell_inventory_object(request, pk)
         return JsonResponse({'error': 'Invalid action'}, status=400)
 
-    def sell_game_inventory_object(self, request, pk):
+    @csrf_exempt
+    def sell_game_inventory_object(request, pk):
+        if request.method != "POST":
+            return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
         if inventory_object.user != request.user:
-            return JsonResponse({'success': False}, status=403)
+            return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
 
-        inventory_object.user = None
-        inventory_object.inventory = None
+        try:
+            data = json.loads(request.body)  # Use request.body to read JSON data
+            items = data.get("items", [])
 
-        with transaction.atomic():
-            Transaction.objects.create(
-                inventory_object=inventory_object,
-                user=request.user,
-                currency=inventory_object.currency,
-                amount=inventory_object.price
-            )
-            inventory_object.save()
+            if not items:
+                return JsonResponse({'success': False, 'message': 'No items provided'}, status=400)
 
-            user_profile = get_object_or_404(ProfileDetails, user=request.user)
-            user_profile.currency_amount += inventory_object.price
-            user_profile.save()
+            total_sale_value = sum(float(item["price"]) for item in items if "price" in item)
 
-        stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
-        return JsonResponse({
-            'success': True,
-            'stock_count': stock_count,
-            'currency_amount': user_profile.currency_amount
-        })
+            with transaction.atomic():
+                for item in items:
+                    item_pk = item.get("inventory_pk")
+                    item_inventory = get_object_or_404(InventoryObject, pk=item_pk)
+
+                    # Mark inventory as sold
+                    item_inventory.user = None
+                    item_inventory.inventory = None
+                    item_inventory.save()
+
+                    # Create a transaction entry
+                    Transaction.objects.create(
+                        inventory_object=item_inventory,
+                        user=request.user,
+                        currency=item.get("currencySymbol", ""),
+                        amount=float(item.get("price", 0))
+                    )
+
+                # Update user profile currency
+                user_profile = get_object_or_404(ProfileDetails, user=request.user)
+                user_profile.currency_amount += total_sale_value
+                user_profile.save()
+
+            stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+
+            return JsonResponse({
+                'success': True,
+                'stock_count': stock_count,
+                'currency_amount': user_profile.currency_amount,
+                'message': f"Sold {len(items)} items for {total_sale_value} currency."
+            })
+
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'message': 'Invalid JSON data'}, status=400)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -12810,38 +12907,8 @@ class GameChestBackgroundView(BaseView):
         pk = self.request.POST.get('pk')
 
         if action == 'sell':
+            print('direct sell called in the GameChestBackgroundView')
             return self.sell_game_inventory_object(request)
-
-    def sell_game_inventory_object(self, request):
-        inventory_object = InventoryObject.objects.filter(
-            user=request.user,
-            inventory__isnull=False,  # Ensure it's still in inventory
-        ).order_by('-created_at').first()  # Get the latest instance
-
-        if not inventory_object:
-            messages.error(request, 'No items available to sell!')
-            return redirect('showcase:inventory')
-
-        inventory_object.user = None
-        inventory_object.inventory = None
-
-        with transaction.atomic():
-            Transaction.objects.create(
-                inventory_object=inventory_object,
-                user=request.user,
-                currency=inventory_object.currency,
-                amount=inventory_object.price
-            )
-
-            inventory_object.save()
-
-            user_profile = get_object_or_404(UserProfile, user=request.user)
-            user_profile.currency_amount += inventory_object.price
-            user_profile.save()
-
-        messages.success(request,
-                         f"Successfully sold {inventory_object.choice} for {inventory_object.price} {inventory_object.currency}!")
-        return redirect('showcase:inventory')
 
     def game_detail(request, slug):
         game = get_object_or_404(Game, slug=slug)
@@ -13378,6 +13445,26 @@ class DailyLotteryView(FormMixin, ListView):
             print(form.cleaned_data)
             messages.error(request, 'You need to log in to claim your daily ticket!')
             return render(request, 'registration/login.html', {'form': form})
+
+
+def login_view(request):
+    next_url = request.GET.get('next', '/')
+
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            next_url = request.POST.get('next', next_url)
+            parsed_url = urlparse(next_url)
+            if not parsed_url.netloc and is_valid_path(next_url):
+                print('next path accessed')
+                return HttpResponseRedirect(next_url)
+            return HttpResponseRedirect('/')
+    else:
+        form = AuthenticationForm()
+
+    return render(request, 'accounts/login.html', {'form': form, 'next': next_url})
 
 
 class Lottereal(BaseView):
@@ -17232,7 +17319,6 @@ class RequestRefundView(View):
                 return redirect("showcase:request-refund")
 
 
-from django.contrib.auth.forms import UserChangeForm
 
 
 class UserRegisterView(generic.CreateView):
@@ -19575,8 +19661,6 @@ def edit_feedback(request, feedback_id):
     return render(request, 'create_review.html', {'form': form})
 
 
-from django.utils.text import slugify
-from urllib.parse import quote
 
 
 @login_required

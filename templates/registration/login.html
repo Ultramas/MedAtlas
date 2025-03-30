@@ -406,6 +406,7 @@
             <div class="passwordreset">
                 <a href="{% url 'showcase:reset_password' %}">Forgot Password?</a>
             </div>
+            <input name="next" type="hidden" value="{{ next }}"/>
             <button type="submit" class="submit-button">Login</button>
         </form>
 

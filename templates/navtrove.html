@@ -1053,13 +1053,13 @@ nav.main-menu ul li a {
 {% empty %}
     <div class="user-profile">
         <div class="profile-picture" style="--profile-bg-image: url('/static/css/images/a.jpg');">
-            <a href="{% url 'login' %}" style="display: contents;">
+            <a href="{% url 'login' %}?next={{ request.path }}" style="display: contents;">
                 <img src="/static/css/images/a.jpg" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;">
             </a>
         </div>
         <div class="user-info">
             <h2 class="username">Guest</h2>
-            <a href="{% url 'login' %}" style="text-decoration: none;">
+            <a href="{% url 'login' %}?next={{ request.path }}" style="text-decoration: none;">
             <div class="user-stats">
                 <div class="user-stat">
                     <i class="fas fa-gem user-stat-icon" style="color: #ED2221;"></i>

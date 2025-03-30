@@ -204,7 +204,7 @@ async function randomizeContents() {
                     console.log("Inventory object created successfully with user.");
                      let inventory_pk = inventoryData.inventory_object_id;
                         console.log("inventory_pk:", inventory_pk);
-                        inventory_pk = inventory_pk;
+                        window.inventory_pk = inventory_pk;
                         targetCardElement.setAttribute('data-inventory_pk', window.inventory_pk);
 
                         window.sellUrl = `/inventory/${inventory_pk}/sell/`;
@@ -736,28 +736,26 @@ $(document).ready(function() {
     });
 
 $(document).on("click", ".sell-button, .close", function() {
-    var cardContainer = document.querySelector('.slider');
-    var sellCards = cardContainer.querySelectorAll('.sellattribute');
+    const cardContainer = document.querySelector('.slider');
+    const sellCards = cardContainer.querySelectorAll('.sellattribute');
 
     if (sellCards.length === 0) {
         console.log("No items to sell.");
         return;
     }
 
-    // Collect data from every sellattribute card
     let itemsToSell = [];
     sellCards.forEach(card => {
-        let inventory_pk = card.getAttribute("data-inventory_pk");
+        const inventory_pk = card.getAttribute("data-inventory_pk");
         if (!inventory_pk) {
             console.error("Card missing inventory_pk:", card);
-            return; // Skip cards missing required attribute
+            return;
         }
-        let itemData = {
+        itemsToSell.push({
             inventory_pk: inventory_pk,
             price: card.getAttribute("data-price"),
             currencySymbol: card.getAttribute("data-currency-symbol")
-        };
-        itemsToSell.push(itemData);
+        });
     });
 
     console.log("Selling items:", itemsToSell);
@@ -767,17 +765,16 @@ $(document).on("click", ".sell-button, .close", function() {
         return;
     }
 
-    // Build the URL using the first valid item's inventory_pk
-    let sellUrl = `/sell/${itemsToSell[0].inventory_pk}/`;
+    // Use a generic endpoint for bulk selling rather than one based on a single item's pk.
+    let sellUrl = `/sell/`;
     console.log("Sell URL:", sellUrl);
 
-    // Make the AJAX request with the collected items as JSON
     $.ajax({
         type: "POST",
         url: sellUrl,
         data: JSON.stringify({ items: itemsToSell }),
         contentType: "application/json",
-        headers: { "X-CSRFToken": window.csrfToken }, // Ensure window.csrfToken is set
+        headers: { "X-CSRFToken": window.csrfToken },
         success: function(response) {
             console.log("Sell request succeeded:", response);
 

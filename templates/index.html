@@ -1438,7 +1438,7 @@ window.onscroll = function() {
 							{% endif %}
 							{% endfor %}
                                 {% else %}
-                            <a href="{% url 'login' %}" class="boxed-btn">Login To Play!</a>
+                            <a href="{% url 'login' %}?next={{ request.path }}" class="boxed-btn">Login To Play!</a>
                                 {% endif %}
 
 							{% for BackgroundImage in TextFielde %}
