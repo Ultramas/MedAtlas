@@ -1,9 +1,12 @@
-
 {% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeTrove Achievements</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
@@ -11,19 +14,20 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeTrove Achievements</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
-
         :root {
-            --primary-color: #4a90e2;
-            --secondary-color: #f39c12;
-            --background-color: #f4f4f4;
-            --text-color: #333;
+            --primary: #00f0ff;
+            --primary-dark: #00a0a8;
+            --secondary: #ff00e5;
+            --accent: #4ecca3;
+            --dark: #0a0a20;
+            --darker: #050510;
+            --light: #e1e1ff;
+            --success: #00ff66;
+            --warning: #ffcc00;
+            --danger: #ff3366;
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --card-glow: 0 0 15px rgba(0, 240, 255, 0.3);
         }
 
         * {
@@ -33,71 +37,195 @@
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--darker);
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255, 0, 229, 0.15) 0%, transparent 50%);
+            color: var(--light);
             line-height: 1.6;
+            min-height: 100vh;
+            background-attachment: fixed;
         }
 
-
         .hero {
-            background-image: url('https://source.unsplash.com/random/1600x900/?pokemon');
-            background-size: cover;
-            background-position: center;
+            position: relative;
             height: 50vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            color: #fff;
+            color: var(--light);
             padding: 2rem;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.7), rgba(10, 10, 19, 0.8));
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('{% static "css/images/hero-bg.jpg" %}'), linear-gradient(rgba(5, 5, 16, 0.7), rgba(5, 5, 16, 0.9));
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            z-index: -1;
+            filter: blur(3px);
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary-dark), transparent, var(--secondary), transparent, var(--primary-dark));
+            background-size: 400%;
+            z-index: -2;
+            animation: borderAnimation 15s linear infinite;
+            opacity: 0.7;
+            border-radius: 0 0 30px 30px;
         }
 
         .hero h1 {
-            font-size: 3rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
             margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.7);
+            color: var(--primary);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .hero h1::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
         }
 
         .hero p {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             max-width: 600px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            margin-top: 20px;
         }
 
         main {
             padding: 2rem 5%;
-            margin-top: 60px;
+            margin-top: 20px;
         }
 
         .achievements {
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.9), rgba(10, 10, 19, 0.95));
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
         }
 
-        .achievements h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: var(--primary-color);
+        .achievements::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 16px;
+            background: linear-gradient(45deg, var(--primary-dark), var(--secondary), var(--primary-dark));
+            background-size: 400%;
+            z-index: -1;
+            animation: borderAnimation 10s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes borderAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .achievements h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .achievements h1::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        .progress-container {
+            margin-bottom: 40px;
+            position: relative;
+            padding: 10px;
+            background: rgba(10, 10, 30, 0.5);
+            border-radius: 20px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 240, 255, 0.2);
         }
 
         .progress-bar {
-            background-color: #e0e0e0;
-            height: 20px;
-            border-radius: 10px;
-            margin-bottom: 2rem;
+            background: rgba(5, 5, 16, 0.7);
+            height: 30px;
+            border-radius: 15px;
             position: relative;
             overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
         .progress {
-            background-color: var(--primary-color);
+            background: linear-gradient(90deg, var(--primary-dark), var(--primary));
             height: 100%;
-            border-radius: 10px;
-            width: 60%; /* Adjust this value to represent the actual progress */
+            border-radius: 15px;
+            position: relative;
+            transition: width 1s ease-in-out;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+        }
+
+        .progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.2) 50%,
+                transparent 100%);
+            animation: shimmer 2s infinite;
+            transform: skewX(-20deg);
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) skewX(-20deg); }
+            100% { transform: translateX(100%) skewX(-20deg); }
         }
 
         .achievement-count {
@@ -105,263 +233,383 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #fff;
-            font-weight: 600;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            color: var(--light);
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+            z-index: 2;
         }
 
         .achievement-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+            position: relative;
         }
 
         .achievement {
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 1rem;
+            background: linear-gradient(145deg, rgba(20, 20, 40, 0.7), rgba(10, 10, 19, 0.8));
+            border-radius: 12px;
+            padding: 20px;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: visible; /* Changed from hidden to visible */
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .achievement::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 12px;
+            background: linear-gradient(45deg, var(--primary-dark), transparent, var(--secondary), transparent, var(--primary-dark));
+            background-size: 400%;
+            z-index: -1;
+            animation: borderAnimation 15s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .achievement:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 240, 255, 0.3);
+            z-index: 10; /* Ensure hovered card is above others */
+        }
+
+        .achievement:hover::before {
+            opacity: 1;
         }
 
         .achievement img {
             width: 100px;
             height: 100px;
             object-fit: cover;
-            border-radius: 50%;
-            margin-bottom: 1rem;
+            border-radius: 10px;
+            margin: 0 auto 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .achievement:hover img {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 240, 255, 0.5);
         }
 
         .achievement h3 {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
         }
 
         .achievement p {
-            font-size: 0.9rem;
-            color: #666;
+            font-size: 1rem;
+            color: var(--light);
+            opacity: 0.8;
+            margin-bottom: 15px;
         }
 
         .achievement.locked {
-            opacity: 0.5;
+            opacity: 0.7;
         }
 
         .achievement.locked img {
             filter: grayscale(100%);
+            border-color: #555;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .achievement.locked h3 {
+            color: #888;
+            text-shadow: none;
+        }
+
+        /* Base hover content styles */
+        .hover-content {
+            display: none;
+            position: absolute;
+            background: linear-gradient(145deg, rgba(20, 20, 40, 0.95), rgba(10, 10, 19, 0.98));
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            padding: 15px;
+            width: 220px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 240, 255, 0.2);
+            z-index: 100; /* Increased z-index */
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        /* Right-positioned hover content (for left cards) */
+        .hover-content-right {
+            left: 110%;
+            top: 0;
+        }
+
+        /* Left-positioned hover content (for middle and right cards) */
+        .hover-content-left {
+            right: 110%;
+            left: auto;
+            top: 0;
+        }
+
+        /* Arrow for right-positioned hover content */
+        .hover-content-right::before {
+            content: "";
+            position: absolute;
+            top: 20px;
+            left: -10px;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(145deg, rgba(20, 20, 40, 0.95), rgba(10, 10, 19, 0.98));
+            border-left: 1px solid var(--primary);
+            border-bottom: 1px solid var(--primary);
+            transform: rotate(45deg);
+        }
+
+        /* Arrow for left-positioned hover content */
+        .hover-content-left::before {
+            content: "";
+            position: absolute;
+            top: 20px;
+            right: -10px;
+            left: auto;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(145deg, rgba(20, 20, 40, 0.95), rgba(10, 10, 19, 0.98));
+            border-right: 1px solid var(--primary);
+            border-top: 1px solid var(--primary);
+            transform: rotate(45deg);
+        }
+
+        .achievement:hover .hover-content {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .hover-content p {
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: var(--light);
+        }
+
+        .hover-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-achieved {
+            color: var(--success) !important;
+            font-weight: 600;
+            text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
+        }
+
+        .status-locked {
+            color: var(--danger) !important;
+            font-weight: 600;
+            text-shadow: 0 0 5px rgba(255, 51, 102, 0.5);
+        }
+
+        .cosmic-holo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            opacity: 0.4; /* Increased opacity for better visibility */
+            pointer-events: none;
+        }
+
+        .celestial-entity {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.1);
+            opacity: 0.4; /* Increased opacity */
+            animation: float 20s linear infinite;
+        }
+
+        .star {
+            position: absolute;
+            width: 3px; /* Increased size */
+            height: 3px; /* Increased size */
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.5); /* Increased glow */
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-30px) translateX(20px) rotate(120deg);
+            }
+            66% {
+                transform: translateY(20px) translateX(-20px) rotate(240deg);
+            }
+            100% {
+                transform: translateY(0) translateX(0) rotate(360deg);
+            }
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.3; /* Increased minimum opacity */
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1; /* Full opacity at peak */
+                transform: scale(1.2);
+            }
         }
 
         footer {
-            background-color: #333;
-            color: #fff;
+            background: linear-gradient(to right, rgba(10, 10, 30, 0.8), rgba(20, 20, 40, 0.8), rgba(10, 10, 30, 0.8));
+            color: var(--light);
             text-align: center;
-            padding: 1rem;
-            margin-top: 2rem;
+            padding: 1.5rem;
+            margin-top: 3rem;
+            position: relative;
+            border-top: 1px solid rgba(0, 240, 255, 0.2);
         }
 
-.achievement {
-        position: relative;
-    }
-
-    .hover-content {
-        display: none;
-        position: absolute;
-        opacity: 1;
-        left: 100%;
-        top: 0;
-        background-color: white;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        padding: 10px;
-        width: 200px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        z-index: 30;
-    }
-
-    .achievement:hover .hover-content {
-        display: block;
-    }
-
-    /* Adjust the achievement grid to allow space for popups */
-    .achievement-grid {
-        gap: 2rem 4rem;
-    }
-
-    /* Media query for smaller screens */
-    @media (max-width: 768px) {
-        .hover-content {
-            left: 50%;
-            top: 100%;
-            transform: translateX(-50%);
+        footer p {
+            font-size: 1rem;
+            opacity: 0.8;
         }
-    }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .achievements {
+                padding: 1.5rem;
+            }
+
+            .achievement-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 20px;
+            }
+
+            /* Mobile hover content positioning */
+            .hover-content-right,
+            .hover-content-left {
+                left: 50%;
+                right: auto;
+                top: 100%;
+                transform: translateX(-50%);
+                width: 90%;
+                max-width: 250px;
+            }
+
+            /* Mobile hover content arrow */
+            .hover-content-right::before,
+            .hover-content-left::before {
+                left: 50%;
+                right: auto;
+                top: -10px;
+                border: none;
+                border-left: 1px solid var(--primary);
+                border-bottom: 1px solid var(--primary);
+                transform: translateX(-50%) rotate(135deg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .achievement-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
+    {% include 'navtrove.html' %}
 
-
-	<!-- header -->
-	<div class="top-header-area" id="sticker">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-12 col-sm-12 text-center">
-					<div class="main-menu-wrap">
-						<!-- logo -->
-        {% for GameHub in Logo %}
-        {% if GameHub.page == 'gamehub.html' %}
-
-        <a class="logo" href="{{GameHub.hyperlink}}">
-          <img class="imageicon" src="{{GameHub.logocover.url}}"
-                alt="{{GameHub.alternate}}" style="length: {{GameHub.length_for_resize}}px; width: {{GameHub.width_for_resize}}px;"></a>
-        {% endif %}
-        {% endfor %}
-						<!-- logo -->
-
-
-						<!-- menu start -->
-						<nav class="main-menu">
-							<ul>
-							  {% for column in Header %}
-
-      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
-									<ul class="sub-menu">
-										{% for row in DropDown %}
-          {% if row.row == column.row %}
-            {% if row.url == 'http://127.0.0.1:8000/profile' %}
-              {% if row.opennew %}
-										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
-              {% else %}
-										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
-              {% endif %}
-            {% else %}
-              {% if row.opennew %}
-										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
-              {% else %}
-										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
-              {% endif %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-									</ul>
-        {% endfor %}
-								</li>
-								<li>
-									<div class="header-icons">
-										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
-											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
-										</a>
-										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
-									</div>
-								</li>
-							</ul>
-						</nav>
-						<a class="mobile-show search-bar-icon" href="#"><i class="fas fa-search"></i></a>
-						<div class="mobile-menu"></div>
-						<!-- menu end -->
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end header -->
-
-	<!-- search area -->
-	<div class="search-area">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-12">
-					<span class="close-btn"><i class="fas fa-window-close"></i></span>
-					<div class="search-bar">
-						<div class="search-bar-tablecell">
-							<h3>Search For:</h3>
-							<input type="text" placeholder="Keywords">
-							<button type="submit">Search <i class="fas fa-search"></i></button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end search area -->
+    <section class="hero">
+        <div class="cosmic-holo hero-cosmic">
+            <!-- Cosmic elements will be added with JavaScript -->
+        </div>
+        <h1>PokeTrove Achievements</h1>
+        <p>Unlock your potential, collect them all!</p>
+    </section>
 
     <main>
-        <section class="hero">
-            <h1>PokeTrove Achievements</h1>
-            <p>Unlock your potential, collect them all!</p>
-        </section>
-
         <section class="achievements" id="achievements">
-        <h1 style="text-align: center; font-size: 35px;">{{user.username}}'s Achievements ({{ earned_count }}/{{ total_count }})</h1>
-
-            <div class="progress-bar">
-                <div class="progress"></div>
-                <span class="achievement-count">{{ earned_count }}/{{ total_count }}</span>
+            <div class="cosmic-holo">
+                <!-- Cosmic elements will be added with JavaScript -->
             </div>
 
-    {% for achievement in total_achievements %}
-        {% if achievement in earned_achievements %}
+            <h1>{{user.username}}'s Achievements ({{ earned_count }}/{{ total_count }})</h1>
+
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress" style="width: {{ earned_percentage }}%"></div>
+                    <span class="achievement-count">{{ earned_count }}/{{ total_count }}</span>
+                </div>
+            </div>
+
             <div class="achievement-grid">
-                <div class="achievement">
-                    <img src="{{ achievement.image.url }}" alt="{{ achievement.title }}" style="width: 100px; height: 100px; border-radius: 10px;">
-                    <h3>{{ achievement.title }}</h3>
-                    <p>{{ achievement.description }}</p>
-                    <div class="hover-content">
-                     {% if achievement.currency.name == "Rubies" %}
-                    <p>Value: {{ achievement.value }} 💎</p>
-                     {% else %}
-                    <p>Value: {{ achievement.value }} {{ achievement.currency }} </p>
-                     {% endif %}
-                    <p>Type: {{ achievement.type }}</p>
-                    <p>Status: Achieved</p>
-                </div>
-                </div>
-                 {% else %}
-            <!-- Unearned Achievement (Blacked Out) -->
-            <div class="image-container hover-container unearned">
-                <div class="achievement locked">
-                <img src="{{ achievement.image.url }}" alt="{{ achievement.title }}" style="width: 100px; height: 100px; border-radius: 10px; opacity: 0.5;">
-                <h3>{{ achievement.title }}</h3>
-                    <p>{{ achievement.description }}</p>
-                    <div class="hover-content">
-                     {% if achievement.currency.name == "Rubies" %}
-                    <p>Value: {{ achievement.value }} 💎</p>
-                     {% else %}
-                    <p>Value: {{ achievement.value }} {{ achievement.currency }} </p>
-                     {% endif %}
-                    <p>Type: {{ achievement.type }}</p>
-                    <p>Status: Not Achieved</p>
-                </div>
-            </div>
-            </div>
-        {% endif %}
-    {% empty %}
-        <li>No achievements available.</li>
-    {% endfor %}
-                <div class="achievement">
-                    <img src="https://source.unsplash.com/random/201x201/?pokemon" alt="Collector">
-                    <h3>Collector</h3>
-                    <p>Catch 50 unique Pokemon</p>
-                </div>
-                <div class="achievement locked">
-                    <img src="https://source.unsplash.com/random/202x202/?pokemon" alt="Master Trainer">
-                    <h3>Master Trainer</h3>
-                    <p>Win 100 battles</p>
-                </div>
-                <div class="achievement">
-                    <img src="https://source.unsplash.com/random/203x203/?pokemon" alt="Explorer">
-                    <h3>Explorer</h3>
-                    <p>Visit 10 different locations</p>
-                </div>
-                <div class="achievement locked">
-                    <img src="https://source.unsplash.com/random/204x204/?pokemon" alt="Legend">
-                    <h3>Legend</h3>
-                    <p>Catch a legendary Pokemon</p>
-                </div>
+                {% for achievement in total_achievements %}
+                    {% if achievement in earned_achievements %}
+                        <div class="achievement">
+                            <img src="{{ achievement.image.url }}" alt="{{ achievement.title }}">
+                            <h3>{{ achievement.title }}</h3>
+                            <p>{{ achievement.description }}</p>
+                            <div class="hover-content">
+                                {% if achievement.currency.name == "Rubies" %}
+                                <p><strong>Value:</strong> {{ achievement.value }} 💎</p>
+                                {% else %}
+                                <p><strong>Value:</strong> {{ achievement.value }} {{ achievement.currency }}</p>
+                                {% endif %}
+                                <p><strong>Type:</strong> {{ achievement.type }}</p>
+                                <p><strong>Status:</strong> <span class="status-achieved">Achieved</span></p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="achievement locked">
+                            <img src="{{ achievement.image.url }}" alt="{{ achievement.title }}">
+                            <h3>{{ achievement.title }}</h3>
+                            <p>{{ achievement.description }}</p>
+                            <div class="hover-content">
+                                {% if achievement.currency.name == "Rubies" %}
+                                <p><strong>Value:</strong> {{ achievement.value }} 💎</p>
+                                {% else %}
+                                <p><strong>Value:</strong> {{ achievement.value }} {{ achievement.currency }}</p>
+                                {% endif %}
+                                <p><strong>Type:</strong> {{ achievement.type }}</p>
+                                <p><strong>Status:</strong> <span class="status-locked">Not Achieved</span></p>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="empty-achievements">
+                        <p>No achievements available.</p>
+                    </div>
+                {% endfor %}
             </div>
         </section>
     </main>
@@ -369,5 +617,163 @@
     <footer>
         <p>&copy; 2023 PokeTrove. All rights reserved.</p>
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Calculate progress percentage
+            const earnedCount = {{ earned_count|default:0 }};
+            const totalCount = {{ total_count|default:1 }};
+            const progressPercentage = totalCount > 0 ? (earnedCount / totalCount) * 100 : 0;
+
+            // Set progress bar width
+            document.querySelector('.progress').style.width = progressPercentage + '%';
+
+            // Add cosmic holographic elements to main container
+            const cosmicHolo = document.querySelector('.cosmic-holo');
+
+            // Add celestial entities
+            for (let i = 0; i < 12; i++) {
+                const celestial = document.createElement('div');
+                celestial.classList.add('celestial-entity');
+
+                // Random size between 30px and 150px
+                const size = Math.random() * 120 + 30;
+                celestial.style.width = `${size}px`;
+                celestial.style.height = `${size}px`;
+
+                // Random position
+                celestial.style.left = `${Math.random() * 100}%`;
+                celestial.style.top = `${Math.random() * 100}%`;
+
+                // Random animation delay
+                celestial.style.animationDelay = `${Math.random() * 20}s`;
+
+                cosmicHolo.appendChild(celestial);
+            }
+
+            // Add stars
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+
+                // Random position
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+
+                // Random animation delay
+                star.style.animationDelay = `${Math.random() * 4}s`;
+
+                cosmicHolo.appendChild(star);
+            }
+
+            // Add cosmic elements to hero section
+            const heroCosmic = document.querySelector('.hero-cosmic');
+
+            // Add celestial entities to hero
+            for (let i = 0; i < 8; i++) {
+                const celestial = document.createElement('div');
+                celestial.classList.add('celestial-entity');
+
+                // Random size between 30px and 150px
+                const size = Math.random() * 120 + 30;
+                celestial.style.width = `${size}px`;
+                celestial.style.height = `${size}px`;
+
+                // Random position
+                celestial.style.left = `${Math.random() * 100}%`;
+                celestial.style.top = `${Math.random() * 100}%`;
+
+                // Random animation delay
+                celestial.style.animationDelay = `${Math.random() * 20}s`;
+
+                heroCosmic.appendChild(celestial);
+            }
+
+            // Add stars to hero
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+
+                // Random position
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+
+                // Random animation delay
+                star.style.animationDelay = `${Math.random() * 4}s`;
+
+                heroCosmic.appendChild(star);
+            }
+
+            // Add pulsing glow effect to title
+            function pulseGlowEffect() {
+                const h1Elements = document.querySelectorAll('h1');
+                h1Elements.forEach(h1 => {
+                    h1.style.textShadow = '0 0 20px rgba(0, 240, 255, 0.8), 0 0 40px rgba(0, 240, 255, 0.5)';
+
+                    setTimeout(() => {
+                        h1.style.textShadow = '0 0 10px rgba(0, 240, 255, 0.5), 0 0 20px rgba(0, 240, 255, 0.3)';
+                    }, 1000);
+                });
+            }
+
+            // Run glow effect every 2 seconds
+            setInterval(pulseGlowEffect, 2000);
+
+            // Add hover sound effect to achievement cards
+            const achievementCards = document.querySelectorAll('.achievement');
+            achievementCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    try {
+                        const hoverSound = new Audio("{% static 'sounds/hover.mp3' %}");
+                        hoverSound.volume = 0.2;
+                        hoverSound.play().catch(e => console.log("Audio play failed: ", e));
+                    } catch (error) {
+                        console.log("Audio play error: ", error);
+                    }
+                });
+            });
+
+            // Position hover content based on card position
+            function positionHoverContent() {
+                const grid = document.querySelector('.achievement-grid');
+                const cards = grid.querySelectorAll('.achievement');
+                const gridRect = grid.getBoundingClientRect();
+                const gridWidth = gridRect.width;
+                const isMobile = window.innerWidth <= 768;
+
+                // Get the number of columns in the grid
+                const cardWidth = cards[0]?.getBoundingClientRect().width || 250;
+                const gap = 30; // Gap between cards
+                const columnsCount = Math.floor(gridWidth / (cardWidth + gap));
+
+                cards.forEach((card, index) => {
+                    const hoverContent = card.querySelector('.hover-content');
+
+                    // Remove existing positioning classes
+                    hoverContent.classList.remove('hover-content-left', 'hover-content-right');
+
+                    if (isMobile) {
+                        // For mobile, position all hover content below the card
+                        hoverContent.classList.add('hover-content-right');
+                    } else {
+                        // For desktop, determine column position
+                        const columnIndex = index % columnsCount;
+
+                        // If it's in the first column (left side), position hover content to the right
+                        if (columnIndex === 0) {
+                            hoverContent.classList.add('hover-content-right');
+                        } else {
+                            // For all other columns (middle and right), position hover content to the left
+                            hoverContent.classList.add('hover-content-left');
+                        }
+                    }
+                });
+            }
+
+            window.addEventListener('resize', positionHoverContent);
+
+            setTimeout(positionHoverContent, 500);
+        });
+    </script>
 </body>
 </html>

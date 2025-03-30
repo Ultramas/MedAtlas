@@ -6,8 +6,9 @@
             <p><strong>Choice:</strong> {{ hit.choice }}</p>
             <p><strong>Color:</strong> {{ hit.color }}</p>
             <p><strong>Date:</strong> {{ hit.mfg_date }}</p>
+            <p><strong>Button Pressed:</strong> {{ hit.button_pressed }}</p>
             {% if hit.file %}
-                <a href="{{ hit.file.url }}"> <img src="{{ hit.file.url }}"></a>
+                <a href="{{ hit.file.url }}"><img src="{{ hit.file.url }}" alt="Top Hit File"></a>
             {% endif %}
         </div>
         <hr>

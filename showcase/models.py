@@ -950,12 +950,12 @@ class CurrencyOrder(models.Model):
 
     def __str__(self):
         return self.user.username
-        if not self.id:  # Newly created object, so set slug
+        if not self.id:
             self.slug = slugify(self.market.slug)
         super(CurrencyOrder, self).save(*args, **kwargs)
 
     def get_total_item_price(self):
-        if self.item and self.item.price is not None:
+        if self.items and self.items.price is not None:
             if self.items.discount_price:
                 return self.quantity * self.get_discount_item_price()
             return self.quantity * self.items.price
@@ -3370,6 +3370,7 @@ class TopHits(models.Model):
     color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
     file = models.FileField(null=True, verbose_name='File')
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    button_pressed = models.CharField(max_length=10)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,

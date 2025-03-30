@@ -2454,7 +2454,6 @@ def display_choices(request, game_id, slug):
     game = get_object_or_404(Game, id=game_id, slug=slug)
     choices = Choice.objects.filter(game=game)
 
-    # Ensure each choice has a nonce
     for choice in choices:
         if choice.lower_nonce is None or choice.upper_nonce is None:
             choice.lower_nonce = random.randint(0, 1000000)
@@ -2472,6 +2471,7 @@ def get_user_cash(request):
 
 import json
 from django.http import JsonResponse
+from json.decoder import JSONDecodeError
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
@@ -2594,49 +2594,52 @@ def sell_game_inventory_object(request, pk):
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'message': 'Invalid JSON data'}, status=400)
 
+
 @csrf_exempt
 def create_top_hit(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        required_fields = ['choice_id', 'game_id']
+        try:
+            data = json.loads(request.body)
+        except JSONDecodeError:
+            logger.error("Invalid JSON payload")
+            return JsonResponse({'error': 'Invalid JSON payload'}, status=400)
 
-        # Check for missing fields
+        required_fields = ['choice_id', 'game_id', 'button_id']
         missing_fields = [field for field in required_fields if field not in data]
         if missing_fields:
+            logger.warning(f"Missing fields: {', '.join(missing_fields)}")
             return JsonResponse({'error': f'Missing fields: {", ".join(missing_fields)}'}, status=400)
 
         try:
-            # Fetch the related choice object
             choice = Choice.objects.get(id=data['choice_id'])
-
-            # Fetch the related game object
-            try:
-                game = Game.objects.get(id=data['game_id'])
-            except Game.DoesNotExist:
-                return JsonResponse({'error': 'Invalid game_id. Game does not exist.'}, status=400)
-
-            # Create the TopHits instance
-            try:
-                top_hit = TopHits.objects.create(
-                    user=request.user if request.user.is_authenticated else None,
-                    game=game,
-                    choice=choice,
-                    color=choice.color,
-                    file=choice.file if hasattr(choice, 'file') else None,
-                )
-                print(
-                    f"Creating TopHits with data: user={request.user}, game={game}, choice={choice}, color={choice.color}, file={choice.file}"
-                )
-            except Exception as e:
-                print(f"Error while creating TopHits: {str(e)}")
-                raise
-
-            return JsonResponse({'message': 'Top Hit created successfully', 'id': top_hit.id})
         except Choice.DoesNotExist:
+            logger.error(f"Choice with id {data['choice_id']} does not exist.")
             return JsonResponse({'error': 'Invalid choice_id. Choice does not exist.'}, status=400)
+
+        try:
+            game = Game.objects.get(id=data['game_id'])
+        except Game.DoesNotExist:
+            logger.error(f"Game with id {data['game_id']} does not exist.")
+            return JsonResponse({'error': 'Invalid game_id. Game does not exist.'}, status=400)
+
+        button_id = data['button_id']
+
+        try:
+            top_hit = TopHits.objects.create(
+                user=request.user if request.user.is_authenticated else None,
+                game=game,
+                choice=choice,
+                color=choice.color,
+                file=choice.file,
+                button_pressed=button_id,
+            )
+            logger.info(f"Top Hit created successfully with id {top_hit.id}")
+            return JsonResponse({'message': 'Top Hit created successfully', 'id': top_hit.id})
         except Exception as e:
+            logger.exception("Error creating Top Hit")
             return JsonResponse({'error': str(e)}, status=400)
 
+    logger.warning("Invalid request method")
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
@@ -2645,20 +2648,16 @@ from django.template.loader import render_to_string
 
 class TopHitsListView(ListView):
     model = TopHits
-    template_name = 'top_hits_list.html'  # Full page template
+    template_name = 'top_hits_list.html'
     context_object_name = 'top_hits'
 
     def get_queryset(self):
-        # Return only active TopHits
         return TopHits.objects.filter(is_active=True).order_by('-mfg_date')
 
     def render_to_response(self, context, **response_kwargs):
-        # Check if the request is an AJAX request
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            # Render only the HTML for the #top-hits-container
             html = render_to_string('partials/top_hits_partial.html', context, request=self.request)
             return JsonResponse({'html': html})
-        # Render the full template for regular requests
         return super().render_to_response(context, **response_kwargs)
 
 
@@ -3989,6 +3988,7 @@ class EarningAchievement(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -4428,6 +4428,7 @@ class AchievementsView(TemplateView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(

@@ -376,7 +376,6 @@ urlpatterns = [
     path('create-card-instance/', views.create_card_instance, name='create-card-instance'), #game with a single game
     path('top-hits/create/', views.create_top_hit, name='create_top_hit'),
     path('tophits/', views.TopHitsListView.as_view(), name='top_hits_list'),
-    path('tophits/', views.TopHitsListView.as_view(), name='top_hits_list'),
     path('gametemplate/', TemplateView.as_view(template_name='gametemplate.html'), name='gametemplate'),
     path('create_outcome/<slug:slug>/', views.create_outcome, name='create_outcome'),
     path('outcomehistory/', views.OutcomeHistoryView.as_view(), name='outcomehistory'),

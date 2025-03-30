@@ -12,17 +12,15 @@
 <body>
     <h1>Top Hits</h1>
     <div id="top-hits-container">
-        <!-- Initial content is loaded here for non-AJAX requests -->
         {% include 'partials/top_hits_partial.html' %}
     </div>
 
     <script>
         function fetchTopHits() {
             $.ajax({
-                url: "{% url 'showcase:top_hits_list' %}", // URL of the TopHitsListView
+                url: "{% url 'showcase:top_hits_list' %}",
                 type: "GET",
                 success: function (data) {
-                    // Update the #top-hits-container with the new content
                     $('#top-hits-container').html(data.html);
                 },
                 error: function () {
@@ -34,7 +32,6 @@
         // Fetch top hits every 10 seconds
         setInterval(fetchTopHits, 2000);
 
-        // Initial fetch on page load
         fetchTopHits();
     </script>
 </body>

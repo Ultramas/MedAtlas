@@ -1089,9 +1089,7 @@ nav.main-menu ul li a {
       }
     </script>
 
-            <!-- Navigation Section -->
             <div class="sidebar-nav">
-                <!-- Main Navigation -->
                 <div class="nav-section">
                     <h3 class="section-title"><i class="fas fa-compass"></i> Navigation</h3>
                     <ul>
@@ -1114,9 +1112,15 @@ nav.main-menu ul li a {
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{% url 'showcase:ehome' %}" class="nav-link">
+                            <a href="{% url 'showcase:gamehub' slug='123'  %}" class="nav-link">
                                 <i class="fas fa-box"></i>
                                 <span class="nav-text">Chests</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:ehome' %}" class="nav-link">
+                                <i class="fas fa-trophy"></i>
+                                <span class="nav-text">Achievements</span>
                             </a>
                         </li>
                         <!--
