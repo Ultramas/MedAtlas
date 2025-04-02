@@ -458,9 +458,6 @@ a.boxed-btn, a.bordered-btn, a.cart-btn {
   line-height: 1.8;
 }
 
-.section-title {
-  margin-bottom: 80px;
-}
 
 .breadcrumb-bg {
   background-image: url(../img/breadcrumb-bg.jpg);
@@ -1432,7 +1429,7 @@ html, body {
 }
 
 .hero-btns {
-  margin-top: 35px;
+  margin-top: 25px;
 }
 
 .hero-btns a.bordered-btn {

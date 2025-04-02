@@ -1,23 +1,19 @@
 {% load static %}
+
 {% load random_nonce %}
 <!--manually count-->
-
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=1200, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeTrove Wheel</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/game.css' %}">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-    {% csrf_token %}
-	<link rel="shortcut icon" type="image/png" href="static/img/favicon.png">
-	<!-- google font -->
-	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <title>PokeTrove - Game</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
@@ -25,6 +21,12 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/gametemplate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/spinboost.css' %}">
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+     <script defer src="{% static 'css/js/indexgametry.js' %}"></script>
+     <script defer src="{% static 'css/js/spinboostscript.js' %}"></script>
 
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
      <script src="{% static 'css/js/main.js' %}"></script>
@@ -36,8 +38,26 @@
      <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
      <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
      <script src="{% static 'css/js/sticker.js' %}"></script>
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-    <style>
+
+    <script src="{% static 'css/js/build.js' %}"></script>
+    <script src="{% static 'css/js/start.js' %}"></script>
+    <script src="{% static 'css/js/test.js' %}"></script>
+
+
+
+     <style>
+        body{
+            background-color: #0a0a13;
+        }
+
+        .total{
+            align-items: center;
+            margin: auto;
+            justify-content: center;
+        }
+
         .wrapperlootlist {
             display: flex;
             flex-wrap: wrap;
@@ -48,14 +68,22 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            width: 100%:
+            width: 100%;
             padding: 20px;
 
         }
+
         .cardslootlist {
-            flex: 1 1 200px; /* Adjust the width as needed */
+            flex: 1 1 200px;
             margin: 10px;
             box-sizing: border-box;
+        }
+
+        .containerre {
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 5em;
         }
 
         .sliderlootlist {
@@ -65,46 +93,88 @@
         }
 
         .spinner-arrow {
-            width: 50px;
+            /*width: 50px;*/
             height: 50px;
-            z-index: 10; /* Ensure it's on top */
+            z-index: 10;
         }
-     .cards-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-start; /* Align cards to the start */
-    }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 10px;
+            justify-content: center;
+            gap: 10px;
+            max-height: 100%;
+            width: max-content;
+            min-width: 100%;
+        }
+
+        .cards-container .popup-card:first-child {
+        }
+
+        .cards-container::-webkit-scrollbar {
+            height: 8px; /* Custom scrollbar height */
+        }
+
+        .cards-container::-webkit-scrollbar-thumb {
+            background-color: #888; /* Custom scrollbar color */
+            border-radius: 4px;
+        }
+
+        .cards-container::-webkit-scrollbar-thumb:hover {
+            background-color: #555; /* Darker color on hover */
+        }
+
+        .card{
+        background: none;
+        background-color: nonce;
+        border: none;
+        }
+
+        .popup-card {
+            min-width: 200px;
+            max-width: 250px;
+            flex-shrink: 0;
+            margin-left: 10px;
+            text-align: center;
+            overflow: hidden;
+        }
 
     .individuallootelement {
         display: flex;
         flex-direction: column;
-        align-items: flex-start; /* Align items to the start */
-        padding: 15px;
-    }
-       .individuallootelement p {
-        margin: 5px 0;
+        justify-content: center;
+        align-items: center;
     }
 
     .cards {
-        margin-right: 15px;
-        margin-left: 15px;
+        /*margin-right: 15px;
+        margin-left: 15px;*/
         flex: 1 1 200px;
-        margin: 10px;
+       /*margin: 10px;*/
         box-sizing: border-box;
         display: flex;
         flex-direction: column; /* Align elements vertically */
-        align-items: flex-start; /* Align items to the start */
-        align-items: left;
+        align-items: center; /* Centers horizontally */
+        justify-content: center; /* Centers vertically */
+        text-align: center;
+        height: 20em;
+        width: 10em;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
     }
-.slider img{
-    width: 15vh;
-    height: 20vh;
-    margin-top: -2vh;
-    margin-left: -0.5vh;
-    border: 2px solid;
-    border-color: transparent; /*to change later*/
-    border-radius: 7px;
-}
+
+    .slider img {
+        width: 15vh;
+        height: 20vh;
+        border: 2px solid;
+        border-color: transparent;
+        border-radius: 7px;
+        object-fit: contain;
+    }
 
         :root {
             --gold: #FFD700;
@@ -117,7 +187,6 @@
 
         .containerev {
             width: 100%;
-            margin: 0 auto;
             padding: 20px;
         }
 
@@ -158,9 +227,9 @@
         }
 
         .loot-item img {
+            width: 25%;
             height: auto;
             border-radius: 5px;
-            margin-bottom: 1rem;
         }
 
         .loot-details {
@@ -205,46 +274,1567 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .button{
+        padding: 5px;
+        }
+
+        .copyright-section {
+        background: linear-gradient(
+            to right,
+            rgba(191, 151, 255, 0.1),
+            rgba(255, 255, 255, 0.05),
+            rgba(191, 151, 255, 0.1)
+        );
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        text-align: center;
+        position: relative;
+        z-index: 100;
+    }
+
+    .copyright-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .copyright-section p {
+        color: var(--text);
+        font-family: 'Cinzel', serif;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        margin: 0;
+    }
+
+.sell-button:hover {
+  box-shadow: rgba(44,187,99,.35) 0 -25px 18px -14px inset,rgba(44,187,99,.25) 0 1px 2px,rgba(44,187,99,.25) 0 2px 4px,rgba(44,187,99,.25) 0 4px 8px,rgba(44,187,99,.25) 0 8px 16px,rgba(44,187,99,.25) 0 16px 32px;
+  transform: scale(1.05) rotate(-1deg);
+}
+.selections{
+    background: linear-gradient(rgba(0, 0, 0, 0.3), silver) !important;
+}
+
+
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
+
+        :root {
+            --primary: #bf97ff;
+            --primary-dark: #9a6bff;
+            --background: #0a0a13;
+            --text: #ffffff;
+            --accent: #4db2ea;
+            --accent2: #ffd700;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            background-color: transparent;
+        }
+
+        .container {
+            gap: 3rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+
+        .user-info {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .username {
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
+        }
+
+        .user-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 1rem;
+        }
+
+        .user-stat {
+            background: rgba(191, 151, 255, 0.1);
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid var(--primary);
+        }
+
+        .user-stat-icon {
+            font-size: 1.5rem;
+        }
+
+        .filters {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters h2, .collection-title {
+            color: var(--primary);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .filters h2::after, .collection-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .type-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .view-collection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-collection::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .view-collection:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .view-collection:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .main-content h1 {
+            color: var(--primary);
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+        }
+
+        .main-content h1::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .pokemon-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+        .pokemon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
+            z-index: 1;
+        }
+
+        .pokemon-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pokemon-image::after {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pokemon-info {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .pokemon-name {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+            font-family: 'Cinzel', serif;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .pokemon-type {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .add-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .add-button:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .add-button:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .legendary-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: var(--accent);
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.75rem;
+            border-radius: 50%;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--accent2);
+            font-size: 1.5rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+        }
+
+                .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1200px) {
+            .inventory-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .inventory-item {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .inventory-item:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+
+
+.view-toggle {
+    text-align: right;
+    margin-bottom: 1rem;
+}
+
+.inventory-grid.compact-view {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.inventory-grid.compact-view .inventory-item {
+    font-size: 0.9em;
+}
+
+.inventory-grid.compact-view .pokemon-image {
+    aspect-ratio: 16/9;
+}
+
+.inventory-grid.compact-view .product-description {
+    display: none;
+}
+
+.inventory-grid.compact-view .action-buttons {
+    flex-direction: column;
+}
+
+.inventory-grid.compact-view .action-buttons form {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.legendary-icon {
+    font-size: 2em;
+    margin-bottom: 0.5rem;
+}
+
+.empty-inventory {
+    text-align: center;
+}
+
+.empty-inventory img {
+    max-width: 50%;
+    margin: 2rem auto;
+}
+
+p.blog-meta span {
+    margin-right: 15px;
+    opacity: 0.6;
+    color: rgba(255, 255, 255, 1);
+    font-size: 0.85em;
+}
+
+.lootelement {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    height: 10em;
+    width: 100px;
+    padding: 10px;
+    display: flex;
+     flex-direction: column;
+     align-items: center;
+     height: 100%;
+     align-self:
+     flex-start;
+     border-top: none;
+     width: 10em;
+}
+
+.sliderPrice {
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+
+}
+         .labeltag {
+    position: absolute;
+    left: 20%;
+    background-color: #4299e1;
+    margin-top: 65px;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 5;
+}
+
+.labeltag h4 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+         /* Popup Overlay */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Popup Container */
+.popup-container {
+  position: relative;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  background: linear-gradient(to bottom, #2a2139, #1a1625);
+  border-radius: 16px;
+  box-shadow: 0 0 30px rgba(123, 97, 255, 0.3),
+              0 0 60px rgba(99, 102, 241, 0.2);
+  overflow: hidden;
+  animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Popup Content */
+.popup-content {
+  padding: 2.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+/* Treasure Header */
+.treasure-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.treasure-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  text-align: center;
+  margin: 1rem 0;
+  text-shadow: 0 0 10px rgba(123, 97, 255, 0.7);
+  background: linear-gradient(to right, #c084fc, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: pulse 2s infinite;
+}
+
+.treasure-subtitle {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.cards-container {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1.5rem 0.5rem;
+  justify-content: center;
+  gap: 1.5rem;
+  width: 100%;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.cards-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.cards-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.cards-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.cards-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Card Styles */
+.popup-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+  transform-origin: center bottom;
+  animation: cardAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+.popup-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  z-index: 10;
+}
+
+.popup-card:nth-child(1) { animation-delay: 0.1s; }
+.popup-card:nth-child(2) { animation-delay: 0.2s; }
+.popup-card:nth-child(3) { animation-delay: 0.3s; }
+.popup-card:nth-child(4) { animation-delay: 0.4s; }
+.popup-card:nth-child(5) { animation-delay: 0.5s; }
+
+.card-background {
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 80%);
+  z-index: 1;
+}
+
+.card-image {
+  position: relative;
+  z-index: 2;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.card-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.diamond {
+  display: inline-block;
+  animation: sparkle 2s infinite;
+}
+
+/* Fire Effects */
+.fire {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-bottom: -20px;
+  transform: scale(0);
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fire.active {
+  transform: scale(1);
+}
+
+.flames {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+}
+
+.flame {
+  position: absolute;
+  bottom: 0;
+  width: 30px;
+  height: 60px;
+  background: linear-gradient(to top, var(--flame-color, #f472b6), transparent);
+  border-radius: 50% 50% 20% 20%;
+  animation: flicker 1.5s infinite alternate;
+}
+
+.flame:nth-child(1) {
+  left: 25px;
+  height: 60px;
+  width: 30px;
+  opacity: 1;
+  animation-delay: 0.1s;
+}
+
+.flame:nth-child(2) {
+  left: 15px;
+  height: 45px;
+  width: 20px;
+  opacity: 0.8;
+  animation-delay: 0.3s;
+}
+
+.flame:nth-child(3) {
+  left: 45px;
+  height: 45px;
+  width: 20px;
+  opacity: 0.8;
+  animation-delay: 0.5s;
+}
+
+.fire[data-color="#6366f1"] .flame {
+  --flame-color: #6366f1;
+}
+
+.fire[data-color="#8b5cf6"] .flame {
+  --flame-color: #8b5cf6;
+}
+
+.fire[data-color="#ec4899"] .flame {
+  --flame-color: #ec4899;
+}
+
+/* Card Fire Effects */
+.card-fire {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.6);
+  width: 40px;
+  height: 40px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.popup-card:hover .card-fire {
+  opacity: 1;
+}
+
+.card-flames {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+}
+
+.card-flame {
+  position: absolute;
+  bottom: 0;
+  left: 15px;
+  width: 10px;
+  height: 30px;
+  background: linear-gradient(to top, currentColor, transparent);
+  border-radius: 50% 50% 20% 20%;
+  animation: flicker 1.5s infinite alternate;
+}
+
+/* Popup Actions */
+.popup-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.popup-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  min-width: 120px;
+}
+
+.popup-button.primary {
+  background: linear-gradient(to right, #6366f1, #8b5cf6);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.5);
+}
+
+.popup-button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.6);
+}
+
+.popup-button.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.popup-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes cardAppear {
+  from {
+    transform: translateY(30px) scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes flicker {
+  0%, 100% {
+    transform: scaleY(1) scaleX(1);
+  }
+  50% {
+    transform: scaleY(1.1) scaleX(0.9);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .popup-container {
+    width: 95%;
+  }
+
+  .treasure-title {
+    font-size: 2rem;
+  }
+
+  .cards-container {
+    gap: 1rem;
+  }
+
+  .popup-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .popup-button {
+    width: 100%;
+    max-width: 250px;
+  }
+}
     </style>
+</head>
+<body>
+
+<script>
+  const csrfToken = "{{ csrf_token }}";
+  const inventory_pk = "{{ Inventory.pk }}";
 
 
-    <!-- Inline JavaScript -->
+
+ </script>
 
 
 
-    <script src="{% static 'css/js/build.js' %}"></script>
-    <script src="{% static 'css/js/start.js' %}"></script>
-    <script src="{% static 'css/js/test.js' %}"></script>
-    <style>
-    </style>
+<div class="total" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;
+    position: relative;">
+	<!-- header -->
+	<!-- end header -->
+
+    <div class="selectionsWrapper">
+<div class="selections" style="background: linear-gradient(rgba(0, 0, 0, 0.3), silver);">
+    <div class="flame-effect"></div>
+    <div class="content" style="display: none;">
+        <label style="background: rgba(255, 255, 255, 0.3); padding: 2px; border-radius: 10px;"> Spin Boost Power</label>
+        <div id="spinCount">
+            <button class="spin-option" data-value="1">1x</button>
+            <button class="spin-option" data-value="2">2x</button>
+            <button class="spin-option" data-value="3">3x</button>
+            <button class="spin-option" data-value="4">4x</button>
+            <button class="spin-option" data-value="5">5x</button>
+            <button class="spin-option" data-value="10">10x</button>
+        </div>
+        <br>
+        <h3 id="cost-display">
+                {% if game.discount_cost %}
+                    <span id="base-cost">{{ game.discount_cost }}</span> 💎
+                {% else %}
+                    <span id="base-cost">{{ game.cost }}</span> 💎
+                {% endif %}
+        </h3>
+
+        <script>
+  function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+function sellInventory(inventoryPk) {
+  formData.append('action', 'sell');
+  formData.append('pk', inventoryPk);
+  formData.append('csrfmiddlewaretoken', getCSRFToken());
+
+  fetch('/sell/', {
+    method: 'POST',
+    body: formData,
+  })
+  .then(response => response.json())
+  .then(data => {
+    if(data.success){
+      console.log(`Sell action completed for inventory_pk ${inventoryPk}`);
+    } else {
+      console.error(data.error);
+    }
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+
+function sellAllTargetCards() {
+  const targetCards = document.querySelectorAll('.target-card');
+  targetCards.forEach(card => {
+    const inventory_pk = card.getAttribute('data-inventory_pk');
+    if (inventory_pk) {
+      sellInventory(inventory_pk);
+    } else {
+      console.warn('No inventory_pk found for card:', card);
+    }
+  });
+}
+
+document.querySelector('.sell-button').addEventListener('click', (e) => {
+  e.preventDefault();
+  // Find all target cards (assume they have the class "target-card")
+  const targetCards = document.querySelectorAll('.target-card');
+  targetCards.forEach(card => {
+    // Get the inventory_pk from the card's data attribute
+    const inventoryPk = card.getAttribute('data-inventory_pk');
+    if (inventoryPk) {
+     console.log('here it is set inventory_pk: ' + inventory_pk);')
+      sellInventory(inventoryPk);
+    }
+  });
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const spinButtons = document.querySelectorAll(".spin-option");
+    const baseCostElement = document.getElementById("base-cost");
+    const costDisplayElement = document.getElementById("cost-display");
+
+    // Parse the base cost as a number (default to 0 if not a number)
+    const baseCost = parseFloat(baseCostElement.textContent) || 0;
+
+    spinButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            const spinMultiplier = parseInt(this.dataset.value, 10); // Get the spin multiplier
+            const totalCost = baseCost * spinMultiplier; // Calculate the total cost
+            costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`; // Update the display
+        });
+    });
+});
+</script>
+
+        <input type="checkbox" id="quickspin-checkbox">
+        <label for="quickspin-checkbox">Quick Spin</label>
+        <input type="checkbox" id="persist-spin-checkbox">
+        <label for="persist-spin-checkbox">Save Spin Boost</label><br>
+    </div>
+
+
+<button class="start"
+        id="start" style="display: none;"
+        data-game-id="{{ game.id }}"
+        data-nonce="{{ nonce }}"
+        data-slug="{{ game.slug }}"
+        data-daily="false"
+         style="position: absolute; bottom: 5px; left: 5px;">
+    Spin!
+</button>
+<button class="start gamer-button"
+        id="start2"
+        data-game-id="{{ game.id }}"
+        data-nonce="{{ nonce }}"
+        data-slug="{{ game.slug }}"
+        data-daily="false"
+         style="bottom: -150px;">Try FREE!
+</button>
+
+<style>
+.gamer-button {
+    position: relative;
+    padding: 0.5em 1em;
+    background: linear-gradient(to bottom, #4f1cb1, #2e0a6e);
+    color: white;
+    font-family: 'Exo 2', 'Rajdhani', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4), 0 0 20px rgba(79, 28, 177, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    /* text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); */
+    outline: none;
+    transform: perspective(1px) translateZ(0);
+}
+
+.gamer-button:before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+    border-radius: 5px 5px 0 0;
+    pointer-events: none;
+}
+
+.button-text {
+    position: relative;
+    z-index: 2;
+}
+
+
+.button-shine {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0) 40%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0) 60%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    z-index: 1;
+    transform: translateX(-100%);
+    animation: shine 6s infinite;
+    pointer-events: none;
+}
+
+.gamer-button:hover {
+    background: linear-gradient(to bottom, #5f2cc1, #3e1a7e);
+    transform: perspective(1px) translateZ(0) scale(1.05);
+    box-shadow:
+        0 7px 20px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(79, 28, 177, 0.7),
+        inset 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.gamer-button:active {
+    transform: perspective(1px) translateZ(0) scale(0.98);
+    background: linear-gradient(to bottom, #3e1a7e, #2e0a6e);
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.4),
+        0 0 15px rgba(79, 28, 177, 0.5),
+        inset 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+@keyframes shine {
+    0%, 15%, 100% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    20%, 25% {
+        opacity: 1;
+        transform: translateX(100%);
+    }
+    26% {
+        opacity: 0;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.button-edge-top,
+.button-edge-right,
+.button-edge-bottom,
+.button-edge-left {
+    animation: pulse 2s infinite;
+}
+
+@media (max-width: 768px) {
+    .gamer-button {
+        font-size: 1rem;
+        padding: 0.7em 1.5em;
+    }
+}
+</style>
+
+</div>
+        <div id="gameSlug" data-slug="{{ slug }}"></div>
+<script>
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const spinButtons = document.querySelectorAll(".spin-option");
+    const baseCostElement = document.getElementById("base-cost");
+    const costDisplayElement = document.getElementById("cost-display");
+    const startButton = document.getElementById("start");
+    const baseCost = parseFloat(baseCostElement.textContent) || 0;
+
+    // Initialize user cash as a proxy
+    let userCash = parseFloat({{ user_cash|safe }});
+    const userCashProxy = new Proxy({ value: userCash }, {
+        set(target, key, newValue) {
+            if (key === "value") {
+                target[key] = newValue;
+                updateStartButton(); // Re-run the logic on change
+            }
+            return true;
+        }
+    });
+
+    function updateStartButton() {
+        const spinMultiplier = parseInt(
+            document.querySelector(".spin-option.active")?.dataset.value || 1,
+            10
+        );
+        const totalCost = baseCost * spinMultiplier;
+
+        costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`;
+
+        if (userCashProxy.value < totalCost) {
+            if (!startButton.parentElement.matches("a")) {
+                const link = document.createElement("a");
+                link.href = "currencymarket.html";
+                link.style.textDecoration = "none";
+                startButton.parentNode.replaceChild(link, startButton);
+                link.appendChild(startButton);
+            }
+            startButton.disabled = true;
+        } else {
+            if (startButton.parentElement.matches("a")) {
+                const parent = startButton.parentElement;
+                const container = parent.parentNode;
+                parent.replaceWith(startButton);
+                container.appendChild(startButton);
+            }
+        }
+    }
+
+    // Add event listeners for spin buttons
+    spinButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            spinButtons.forEach(btn => btn.classList.remove("active"));
+            this.classList.add("active");
+            updateStartButton();
+        });
+    });
+
+    // Periodically fetch the updated user cash from the API
+    function fetchUserCash() {
+        fetch('/api/get-user-cash/')
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.user_cash !== undefined) {
+                    userCashProxy.value = data.user_cash; // Update proxy value
+                }
+            })
+            .catch(error => console.error('Error fetching user cash:', error));
+    }
+
+    // Poll the API every 0.5 seconds
+    setInterval(fetchUserCash, 500);
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    let selectedMultiplier = 1; // Default multiplier
+
+    // Add event listener to each spin-option button
+    document.querySelectorAll(".spin-option").forEach(button => {
+        button.addEventListener("click", function () {
+            selectedMultiplier = parseInt(this.getAttribute("data-value"));
+            console.log("Selected multiplier:", selectedMultiplier); // For debugging
+        });
+    });
+
+    // Add event listener to the spin button
+    document.getElementById("start").addEventListener("click", function () {
+        console.log("Spin button clicked!"); // Debug log
+
+        const button = this;
+        const gameId = button.getAttribute("data-game-id");
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value; // Fetch CSRF token
+
+        console.log("Game ID:", gameId); // Debug log
+        console.log("CSRF Token:", csrfToken); // Debug log
+        console.log("Spin Multiplier:", selectedMultiplier); // Debug log
+
+        // Perform the fetch request to initiate the spin
+        fetch("{% url 'showcase:spin_game' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({
+                game_id: gameId,
+                spin_multiplier: selectedMultiplier
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Response data:", data); // Debug log
+            if (data.daily === false) { // Check if daily is explicitly false
+                if (data.success) {
+                    // Update the currency amount automatically
+                    const currencyElement = document.getElementById("currency-amount");
+                    if (currencyElement) {
+                        currencyElement.innerText = `${data.updated_currency_amount} ${data.currency_name}`;
+                    }
+                    // Optionally, display a success message
+                    console.log("Spin successful:", data.message);
+                } else {
+                    alert(data.error); // Show error message if the spin fails
+                }
+            } else {
+                console.log("The game is marked as daily, action skipped.");
+            }
+
+        })
+        .catch(error => {
+            console.error("Error during fetch:", error); // Log any fetch errors
+        });
+    });
+});
+
+$(document).ready(function() {
+    console.log("jQuery is loaded.");
+
+    let spinMultiplier = 1; // Default to 1 spin if no option is selected
+
+    // Set spin multiplier based on selected option
+    $('.spin-option').on('click', function() {
+        $('.spin-option').removeClass('selected');
+        $(this).addClass('selected');
+        spinMultiplier = parseInt($(this).data('value'));
+        console.log("Spin multiplier selected:", spinMultiplier);
+    });
+
+    $('#start').on('click', function() {
+        const gameId = $(this).data('game-id');
+        const slug = $(this).data('slug');
+        const csrfToken = '{{ csrf_token }}';
+        const url = '{% url "showcase:create_outcome" "SLUG_PLACEHOLDER" %}'.replace('SLUG_PLACEHOLDER', slug);
+
+        let completedSpins = 0;
+        let allChoices = [];
+
+        // Check if Quick Spin is active
+        const isQuickSpin = $('#quickspin-checkbox').is(':checked');
+        console.log("Quick Spin mode:", isQuickSpin);
+
+        for (let i = 0; i < spinMultiplier; i++) {
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                    csrfmiddlewaretoken: csrfToken,
+                    game_id: gameId,
+                    console.log('the game id is ', game_id);
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        completedSpins++;
+                        allChoices = allChoices.concat(response.choices);
+                        console.log('Choice received successfully for spin', i + 1);
+
+                        // Update the UI only after all spins are completed
+                        if (completedSpins === spinMultiplier) {
+                            console.log('All spins completed.');
+                            //updateWheelContents(allChoices); // Display all outcomes at once
+                            initializeAnimation(response.nonce, isQuickSpin); // Pass Quick Spin mode to the animation
+                        }
+                    } else {
+                        console.error(response.message);
+                    }
+                },
+                error: function(error) {
+                    console.error('Error during spin', i + 1, ':', error);
+                }
+            });
+        }
+    });
+
+    function initializeAnimation(targetNonce, isQuickSpin) {
+        // Disable the spin button to avoid multiple clicks
+        $(".start").prop('disabled', true);
+
+        function addAnimation() {
+            document.querySelectorAll('.slider').forEach(scroller => {
+                scroller.style.animation = 'none';
+                scroller.offsetHeight;
+                const animationDuration = isQuickSpin ? '9s' : '18s';
+                scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
+                scroller.style.animationPlayState = 'running';
+            });
+        }
+
+        function stopAtSelectedCard() {
+            document.querySelectorAll('.cards').forEach(card => {
+                const cardNonce = card.getAttribute('data-nonce');
+
+                // Highlight and position the card with matching nonce
+                if (cardNonce === targetNonce) {
+                    $(card).addClass('highlighted');
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                } else {
+                    $(card).removeClass('highlighted');
+                }
+            });
+
+            // Enable the button after animation ends
+            $(".start").prop('disabled', false);
+        }
+
+        // Start spinning
+        addAnimation();
+
+        // Stop the animation after a delay
+        setTimeout(() => {
+            document.querySelectorAll('.slider').forEach(scroller => {
+                scroller.style.animationPlayState = 'paused';
+            });
+
+            // Find and stop at the selected card
+            stopAtSelectedCard();
+        }, isQuickSpin ? 4500 : 9000);  // Adjust time based on Quick Spin setting
+    }
+});
+
+</script>
+
+
+    </div>
+
+<div class="popupWrapper">
+    <div id="popup" class="popup">
+        <div class="fire-container">
+            <div class="fire">
+                <div class="flames">
+                    <div class="flame"></div>
+                    <div class="flame"></div>
+                    <div class="flame"></div>
+                    <div class="flame"></div>
+                </div>
+                <div class="glow"></div>
+            </div>
+        </div>
+
+        <div class="text">
+            <h2>Congratulations!</h2>
+            <p>You got:</p>
+<p id="choice-id"></p>
+<p id="choice-text"></p>
+<p id="choice-color"></p>
+<img id="choice-file" src="" alt="Selected Choice Image" style="display:none;">
+<div id="hidden-form" style="display:none;">
+
+</div>
+
+        </div>
+    </div>
+</div>
+
+    </div>
+    <div class="wrapper">
+        <div class="containerre"  style="display: flex;">
+            <div class="slider" id="slider">
+<!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
+{% for item in choices_with_nonce %}
+            {% with choice=item.choice %}
+            {% with color=game|get_color:choice %}
+                <div id="{{ choice.choice_text }}" class="cards" style="background: url({% static 'css/images/'|add:color|add:'.png' %});">
+
+                        <div class="lootelement"
+                             data-price="{{ choice.value }}"
+                             data-currency-file="{{ item.currency.file_url }}"
+                             data-currency-symbol="{{ item.currency.symbol }}">
+                                {% if choice.file.url %}
+                                <div class="sliderImg" style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
+                                {% endif %}
+                            <div class="sliderPrice">{{ choice.value }} 💎</div>
+                        </div>
+                    {% endwith %}
+                </div>
+            {% endwith %}
+        {% endfor %}
+
+        {% for nonce, choice in matching_choices %}
+            <p>Value: {{ choice.value }}</p>
+            <p>Nonces: {{ nonce }}</p>
+            <p>Choice: {{ choice.choice_text }}</p>
+
+            {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 cost_threshold_100000=game.cost|mul:1000 cost_threshold_100000000=game.cost|mul:1000000 %}
+
+                {% if choice.value <= cost_threshold_80 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/gray.png' %}); color: black;">
+                {% elif choice.value <= cost_threshold_100 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); color: black;">
+                {% elif choice.value <= cost_threshold_200 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); color: black;">
+                {% elif choice.value <= cost_threshold_500 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); color: black;">
+                {% elif choice.value <= cost_threshold_10000 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); color: black;">
+                {% elif choice.value <= cost_threshold_100000 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); color: black;">
+                {% elif choice.value <= cost_threshold_100000000 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); color: black;">
+                {% else %}
+                    <div class="lootelement" style="background: url({% static 'css/images/redgold.png' %}); color: black;">
+                {% endif %}
+
+                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                </div>
+
+            {% endwith %}
+        {% endfor %}
+
+
+            </div>
+
+            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow" style="">
+        </div>
+                        <a href="/game/{{ slug }}/">
+      <div class="labeltag">
+        <h4 style="">{{game.name}}</h4>
+      </div>
+                        </a>
+    </div>
+
+    <script>
+    const choicesWithNonce = {{ choices_with_nonce|safe }};
+</script>
+
+
+    <script>
+
+function createOutcome(gameId, slug) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+fetch(`/create_outcome/${slug}/`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken,
+    },
+    body: JSON.stringify({
+        game_id: gameId,
+        other_data: otherData,
+    })
+})
+}
+.then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const choiceFile = data.choice_file;
+
+            if (choiceFile) {
+                const slider = document.querySelector('.slider');
+                const newCard = document.createElement('div');
+                newCard.className = 'cards';
+                newCard.innerHTML = `
+                    <div class="lootelement"
+                         data-price="100"
+                         data-nonce="${data.nonce}"
+                         style="background: url('${choiceFile}'); padding: 6%; margin-left: 0px;">
+                       <img src="${choiceFile}" alt="Generated Card">
+                    </div>
+                    <h2 style="margin-left: 22px;">100 💎</h2>
+                    <p>Nonce: ${data.nonce}</p>
+                `;
+                slider.appendChild(newCard);
+            }
+        } else {
+            console.error('Error:', data.message);
+        }
+    })
+    .catch(error => console.error('Fetch error:', error));
+
+</script>
 
 
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('#quick_spin').change(function() {
-            savePreference(); // Automatically save the preference when the checkbox is toggled
-        });
-    });
-
-    function savePreference() {
-        const slug = "{{ slug }}";  // Ensure slug is correctly retrieved from the template context
-        $.ajax({
-            url: "{% url 'showcase:game' slug=slug %}",
-            type: "POST",
-            data: {
-                'quick_spin': $('#quick_spin').is(':checked'),
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
-            },
-            success: function(response) {
-                console.log("Preference saved successfully.");
-            },
-            error: function(xhr, status, error) {
-                console.error("Error saving preference:", error);
-            }
-        });
-    }
 
 </script>
 
@@ -261,7 +1851,10 @@ $(".start").click(function () {
                 id: data.choice_id,
                 choice_text: data.choice_text,
                 color: data.choice_color,
-                file: data.choice_file
+                file: data.choice_file,
+                value: data.choice_value || 0,
+                lowerNonce: data.lower_nonce || 'N/A',
+                upperNonce: data.upper_nonce || 'N/A',
             };
 
             // Log the choice object to verify its structure
@@ -269,7 +1862,6 @@ $(".start").click(function () {
 
             renderChoiceDetails(choice);
 
-            // Other code to handle the outcome...
         } else {
             console.error('Error:', data.message);
             button.prop('disabled', false); // Re-enable the button if there's an error
@@ -366,7 +1958,7 @@ $(".start").click(function () {
                     // Re-enable the button after the animation finishes
                     button.prop('disabled', false);
 
-                }, 9000); // Stop after 9 seconds (adjustable)
+                }, 9000);
 
             } else {
                 console.error('Error:', data.message);
@@ -379,387 +1971,157 @@ $(".start").click(function () {
         });
 });
 
-function createOutcome(gameId, slug) {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-return fetch(`/create_outcome/${slug}/`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken,  // Ensure csrf token is being sent
-    },
-    body: JSON.stringify({
-        game_id: gameId,  // Pass the game_id as needed
-        other_data: otherData,  // Add any additional data as needed
-    })
-})
-}.then(response => response.json())
-.then(data => {
-    if (data.status === 'success') {
-        document.getElementById('choice-id').innerText = `ID: ${data.choice_id}`;
-        document.getElementById('choice-text').innerText = `Text: ${data.choice_text}`;
-        document.getElementById('choice-color').innerText = `Color: ${data.choice_color}`;
-
-        const choiceFile = document.getElementById('choice-file');
-        if (data.choice_file) {
-            choiceFile.src = data.choice_file;
-            choiceFile.style.display = 'block';
-        } else {
-            choiceFile.style.display = 'none';
-        }
-    } else {
-        console.error('Error:', data.message);
-    }
-})
-.catch(error => console.error('Error:', error));
-
-
 
 
 </script>
 
+<br>
+<br></div>
 
-</head>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const forms = document.querySelectorAll(".ajax-form");
 
+    forms.forEach(form => {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
 
- {% for BackgroundImage in Background %}
-            {% if BackgroundImage.page == "game.html" %}
-                {% if BackgroundImage.position == 1 %}
-	<body style="background: url('{{BackgroundImage.image.url}}'); background-size: cover;">
-    {% else %}
-    <body>
-                {% endif %}
-            {% endif %}
-        {% endfor %}
+            const formData = new FormData(this);
+            const url = this.getAttribute("action");
+            const csrfToken = formData.get("csrfmiddlewaretoken");
 
-<div class="loader" style="display: none;">
-        <div class="loader-inner">
-            <div class="circle"></div>
-        </div>
-    </div>
-	<!-- header -->
-                <div id="sticker-sticky-wrapper" class="sticky-wrapper is-sticky" style="height: 86px;">
-	<div class="top-header-area" id="sticker" style="width: 1129px; position: fixed;    top: 0px;    z-index: 17;">
-		<div class="" style='font-family: "Open Sans", sans-serif;
-    font-weight: 400;
-    font-size: 1rem;
-    letter-spacing: 0.1px;
-    line-height: 1.8;
-    color: #051922;'>
-			<div class="row">
-				<div class="col-lg-12 col-sm-12 text-center" style="z-index: 5;">
-					<div class="main-menu-wrap">
-						<!-- logo -->
-        {% for GameHub in Logo %}
-        {% if GameHub.page == 'gamehub.html' %}
+            fetch(url, {
+                method: "POST",
+				headers: {
+					"X-Requested-With": "XMLHttpRequest",
+					"X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+				},
 
-        <a class="logo" href="{{GameHub.hyperlink}}">
-          <img class="imageicon" src="{{GameHub.logocover.url}}"
-                alt="{{GameHub.alternate}}" style="length: {{GameHub.length_for_resize}}px; width: {{GameHub.width_for_resize}}px;"></a>
-        {% endif %}
-        {% endfor %}
-						<!-- logo -->
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Update stock count
+                    const stockCountElement = document.querySelector("#stock-count");
+                    if (stockCountElement) {
+                        stockCountElement.textContent = data.stock_count;
+                    }
 
+                    // Update currency amount
+                    const currencyAmountElement = document.querySelector("#currency-amount");
+                    if (currencyAmountElement) {
+                        currencyAmountElement.textContent = data.currency_amount;
+                    }
 
-						<!-- menu start -->
-						<nav class="main-menu">
-							<ul>
-							  {% for column in Header %}
-
-      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
-									<ul class="sub-menu">
-										{% for row in DropDown %}
-          {% if row.row == column.row %}
-            {% if row.url == 'http://127.0.0.1:8000/profile' %}
-              {% if row.opennew %}
-										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
-              {% else %}
-										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
-              {% endif %}
-            {% else %}
-              {% if row.opennew %}
-										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
-              {% else %}
-										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
-              {% endif %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-									</ul>
-        {% endfor %}
-								</li>
-								<li>
-									<div class="header-icons">
-										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
-											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
-										</a>
-										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
-									</div>
-								</li>
-							</ul>
-						</nav>
-						<a class="mobile-show search-bar-icon" href="#"><i class="fas fa-search"></i></a>
-						<div class="mobile-menu"></div>
-						<!-- menu end -->
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	</div>
-	<!-- end header -->
-{% for GameHub in Background %}
-  {% if GameHub.page == "game.html" %}
-  {% if GameHub.position == 1 %}
-	<div class="breadcrumb-section breadcrumb-bg" style="background: url({{GameHub.cover.url}}); background-size: cover;
-margin-left: 0; margin-right: 0; width: 100%; height: 15vh;">
-        {% endif %}
-        {% endif %}
-        {% endfor %}
+                    // Example: Remove the item from the UI
+                    this.closest(".inventory-item").remove();
+                } else {
+                    console.error("Action failed.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    });
+});
 
 
 
-			<div class="row">
-				<div class="col-lg-8 offset-lg-2 text-center">
-					<div class="breadcrumb-text">
-    <h2 style=" font-size: 30px; color: #F28123;">{{ game.name }}</h2>
-						<h1></h1>
-					</div>
-			</div>
-		</div>
-	</div>
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const withdrawButtons = document.querySelectorAll(".withdraw-button");
+
+    withdrawButtons.forEach((button) => {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            const form = button.closest("form");
+            const formData = new FormData(form);
+            const actionUrl = form.getAttribute("action") || window.location.href;
+
+            console.log("Submitting form to:", actionUrl); // Debug URL
+            console.log("Form Data:", [...formData.entries()]); // Debug form data
+
+            fetch(actionUrl, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP status ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        const inventoryItem = form.closest(".inventory-item");
+                        if (inventoryItem) inventoryItem.remove();
+
+                        const stockCountElement = document.getElementById("stock-count");
+                        if (stockCountElement) {
+                            stockCountElement.textContent = data.stock_count;
+                        }
+                    } else {
+                        console.error("Server error:", data.error);
+                        alert(data.error || "An error occurred.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error);
+                    alert("An unexpected error occurred. Please try again.");
+                });
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    const toggleBtn = document.getElementById("toggleViewBtn");
+    const inventoryGrid = document.getElementById("inventoryGrid");
+
+    toggleBtn.addEventListener("click", function() {
+        inventoryGrid.classList.toggle("compact-view");
+        inventoryGrid.classList.toggle("comfortable-view");
+
+        // Save the current view preference to localStorage
+        const isCompact = inventoryGrid.classList.contains("compact-view");
+        localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
+    });
+
+    // Load the saved view preference on page load
+    const savedViewPreference = localStorage.getItem("inventoryViewPreference");
+    if (savedViewPreference === "compact") {
+        inventoryGrid.classList.remove("comfortable-view");
+        inventoryGrid.classList.add("compact-view");
+    }
+});
+</script>
 
 
-    <div>
-<div class="selections">
-    <label> Select Number of Spins:</label>
-    <div id="spinCount">
-        <button class="spin-option" data-value="1">1x</button>
-        <button class="spin-option" data-value="2">2x</button>
-        <button class="spin-option" data-value="3">3x</button>
-        <button class="spin-option" data-value="4">4x</button>
-        <button class="spin-option" data-value="5">5x</button>
-        <button class="spin-option" data-value="10">10x</button>
-    </div>
-    <br>
-    <input type="checkbox" id="quickspin-checkbox">
-    <label for="quickspin-checkbox">Quick Spin</label>
-    <input type="checkbox" id="persist-spin-checkbox">
-    <label for="persist-spin-checkbox">Preserve Spin Count</label>
+	<!-- jquery -->
+     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+     <script src="{% static 'css/js/main.js' %}"></script>
+     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+     <script src="{% static 'css/js/waypoints.js' %}"></script>
+	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+     <script src="{% static 'css/js/sticker.js' %}"></script>
 
-</div>
-
-
-        <label>
-        </label>
-        <button class="start" id="start">Spin!</button>
-
-    </div>
-    <div class="popup" id="popup">
-        <div class="contents">
-            <span class="close">&times;</span>
-            <div class="text">
-                <img id="cardImage" src="" alt="" style="display: block; width: 200px; height: auto; margin-left: auto; margin-right: auto;">
-
-
-            </div>
-
-            <button class="close" style="margin-left: auto; margin-right: auto;">Collect</button>
-        </div>
-    </div>
-
-    <div class="wrapper">
-        <div class="container">
-            <div class="slider" id="slider">
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-                <div id="Mewtwo" class="cards">
-                    <img src="Mewtwo.png" alt="Mewtwo">
-                </div>
-                <div id="Venusaur" class="cards">
-                    <img src="Venusaur.png" alt="Venusaur">
-                </div>
-                <div id="Charizard" class="cards">
-                    <img src="Charizard.png" alt="Charizard">
-                </div>
-                <div id="Blastoise" class="cards">
-                    <img src="Blastoise.png" alt="Blastoise">
-                </div>
-
-            </div>
-            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
-        </div>
-    </div>
-
-        <!-- Game nonce decides cards displayed in spinner -->
-        <br>
-        <br>
-        <br>
-        <br>
-    <div class="game" style="display: flex; flex-direction: row; justify-content: center; border-radius: 20px;width: 140%;" >
-
-        <div class="containerev" style="font-family: 'Lato', sans-serif;
-            background-color: var(--background);
-            color: var(--light-gold);
-            margin: 0;
-            padding: 0; border-radius: 20px;">
-        <h1>Loot Drop Table</h1>
-        <div class="loot-grid" style="padding: 20px; border-radius: 20px;">
-            {% for item in choices %}
-            <div class="loot-item" style="width: 80%;">
-                <h2>{{ item.choice_text }}</h2>
-                <img src="{{ item.file.url }}" alt="{{ item.choice_text }}" width="{{ item.image_width }}px" height="{{ item.image_length }}px">
-                <div class="loot-details">
-                    <p><strong>Value:</strong> {{ item.value }} Rubies</p>
-                    <p><strong>Rarity:</strong> <span class="rarity">{{ item.formatted_rarity }}%</span></p>
-                    <p><strong>Category:</strong> {{ item.category }}</p>
-                    {% if item.get_display_tier %}
-                    <p><strong>Tier:</strong> <span class="tier">{{ item.get_tier_display }}</span></p>
-                    {% endif %}
-                    <p><strong>Color:</strong> {{ item.get_color_display }}</p>
-                </div>
-                <div class="nerd-stats">
-                    <p><strong>Number of Choices:</strong> {{ item.number_of_choice }}</p>
-                    <p><strong>Total Number of Choices:</strong> {{ item.total_number_of_choice }}</p>
-                    <p><strong>Nonce:</strong> {{ item.nonce }} (within range {{ item.lower_nonce }} - {{ item.upper_nonce }})</p>
-                </div>
-            </div>
-            {% empty %}
-            <p>No choices available for this game.</p>
-            {% endfor %}
-        </div>
-    </div>
-    </div>
-    <!-- Static script files -->
-    <script defer src="zsavedscript.js"></script>
-    </body></body>
+</body>
 </html>
+
+{% endblock content %}

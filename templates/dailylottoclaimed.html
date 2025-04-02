@@ -2,9 +2,721 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claimed Daily Lottery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00f0ff;
+            --primary-dark: #00a0a8;
+            --secondary: #ff00e5;
+            --accent: #4ecca3;
+            --dark: #0a0a20;
+            --darker: #050510;
+            --light: #e1e1ff;
+            --success: #00ff66;
+            --warning: #ffcc00;
+            --danger: #ff3366;
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --card-glow: 0 0 15px rgba(0, 240, 255, 0.3);
+            --ticket-gold: #ffd700;
+            --ticket-glow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--darker);
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(0, 240, 255, 0.15) 0%, transparent 50%);
+            color: var(--light);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .cosmic-holo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .celestial-entity {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.1);
+            opacity: 0.4;
+            animation: float 20s linear infinite;
+        }
+
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.5);
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-30px) translateX(20px) rotate(120deg);
+            }
+            66% {
+                transform: translateY(20px) translateX(-20px) rotate(240deg);
+            }
+            100% {
+                transform: translateY(0) translateX(0) rotate(360deg);
+            }
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .claim-container {
+            max-width: 800px;
+            width: 90%;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .claim-card {
+            background: linear-gradient(145deg, rgba(20, 20, 40, 0.7), rgba(10, 10, 19, 0.8));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            text-align: center;
+        }
+
+        .claim-card::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 16px;
+            background: linear-gradient(45deg, var(--primary-dark), transparent, var(--ticket-gold), transparent, var(--primary-dark));
+            background-size: 400%;
+            z-index: -1;
+            animation: borderAnimation 15s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes borderAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .confetti-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0.7;
+            animation: confetti-fall linear, confetti-shake ease-in-out;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                top: -10%;
+            }
+            100% {
+                top: 100%;
+            }
+        }
+
+        @keyframes confetti-shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(5px);
+            }
+            50% {
+                transform: translateX(-5px);
+            }
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .ticket-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ticket-corner {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            opacity: 0.7;
+        }
+
+        .ticket-corner-tl {
+            top: 0;
+            left: 0;
+            border-top: 3px solid var(--ticket-gold);
+            border-left: 3px solid var(--ticket-gold);
+            border-top-left-radius: 15px;
+        }
+
+        .ticket-corner-tr {
+            top: 0;
+            right: 0;
+            border-top: 3px solid var(--ticket-gold);
+            border-right: 3px solid var(--ticket-gold);
+            border-top-right-radius: 15px;
+        }
+
+        .ticket-corner-bl {
+            bottom: 0;
+            left: 0;
+            border-bottom: 3px solid var(--ticket-gold);
+            border-left: 3px solid var(--ticket-gold);
+            border-bottom-left-radius: 15px;
+        }
+
+        .ticket-corner-br {
+            bottom: 0;
+            right: 0;
+            border-bottom: 3px solid var(--ticket-gold);
+            border-right: 3px solid var(--ticket-gold);
+            border-bottom-right-radius: 15px;
+        }
+
+        .ticket-dots {
+            position: absolute;
+            border: 2px dashed var(--ticket-gold);
+            opacity: 0.5;
+        }
+
+        .ticket-dots-top {
+            top: 15px;
+            left: 70px;
+            right: 70px;
+            height: 1px;
+        }
+
+        .ticket-dots-bottom {
+            bottom: 15px;
+            left: 70px;
+            right: 70px;
+            height: 1px;
+        }
+
+        .ticket-dots-left {
+            left: 15px;
+            top: 70px;
+            bottom: 70px;
+            width: 1px;
+        }
+
+        .ticket-dots-right {
+            right: 15px;
+            top: 70px;
+            bottom: 70px;
+            width: 1px;
+        }
+
+        .ticket-serial {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--ticket-gold);
+            opacity: 0.7;
+            letter-spacing: 2px;
+        }
+
+        .ticket-stamp {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            border: 2px solid var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(15deg);
+            opacity: 0.8;
+            background: rgba(0, 255, 102, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
+        }
+
+        .ticket-stamp-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: var(--success);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .claim-icon {
+            font-size: 4rem;
+            color: var(--ticket-gold);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite ease-in-out;
+            text-shadow: var(--ticket-glow);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            }
+            50% {
+                transform: scale(1.1);
+                text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.5);
+            }
+        }
+
+        .claim-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--success);
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+            position: relative;
+            display: inline-block;
+            animation: pop-in 1s ease-out;
+        }
+
+        @keyframes pop-in {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            80% {
+                transform: scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .username {
+            color: var(--ticket-gold);
+            font-weight: 700;
+            text-shadow: var(--ticket-glow);
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            }
+            to {
+                text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.5);
+            }
+        }
+
+        .claim-message {
+            font-size: 1.2rem;
+            color: var(--light);
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+            animation: fade-in 1.5s ease-out;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .drawing-info {
+            background: rgba(10, 10, 30, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            position: relative;
+            z-index: 1;
+            animation: slide-up 1s ease-out 0.5s both;
+        }
+
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .drawing-info h5 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .drawing-time {
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        .winners-link {
+            display: inline-block;
+            background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+            color: var(--darker);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: bounce 1s ease-out 1s both;
+        }
+
+        @keyframes bounce {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.95);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .winners-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .winners-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 240, 255, 0.4);
+        }
+
+        .winners-link:hover::before {
+            left: 100%;
+        }
+
+        .firework {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px;
+            animation: firework-animation 2s ease-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes firework-animation {
+            0% {
+                transform: translate(0, 0);
+                width: 5px;
+                height: 5px;
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--x), var(--y));
+                width: 0;
+                height: 0;
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .claim-card {
+                padding: 30px 20px;
+            }
+
+            .claim-title {
+                font-size: 2rem;
+            }
+
+            .claim-icon {
+                font-size: 3rem;
+            }
+
+            .ticket-stamp {
+                width: 60px;
+                height: 60px;
+                top: 15px;
+                right: 15px;
+            }
+
+            .ticket-stamp-text {
+                font-size: 0.6rem;
+            }
+        }
+        .main-menu{
+            position: fixed !important;
+        }
+    </style>
+</head>
+<body style="display: flex; flex-direction: column;">
+{% include 'navtrove.html' %}
+
+    <div class="cosmic-holo">
+        <!-- Cosmic elements will be added with JavaScript -->
+    </div>
+
+    <div class="confetti-container">
+        <!-- Confetti will be added with JavaScript -->
+    </div>
+
+    <div class="claim-container">
+        <div class="claim-card">
+            <div class="ticket-decoration">
+                <div class="ticket-corner ticket-corner-tl"></div>
+                <div class="ticket-corner ticket-corner-tr"></div>
+                <div class="ticket-corner ticket-corner-bl"></div>
+                <div class="ticket-corner ticket-corner-br"></div>
+                <div class="ticket-dots ticket-dots-top"></div>
+                <div class="ticket-dots ticket-dots-bottom"></div>
+                <div class="ticket-dots ticket-dots-left"></div>
+                <div class="ticket-dots ticket-dots-right"></div>
+                <div class="ticket-serial">№ CLAIM-{% now "YmdHis" %}</div>
+                <div class="ticket-stamp">
+                    <div class="ticket-stamp-text">Claimed<br>Verified<br>Official</div>
+                </div>
+            </div>
+
+            <i class="fas fa-trophy claim-icon"></i>
+            <h3 class="claim-title">Ticket Claimed!</h3>
+            <p class="claim-message">Congratulations <span class="username">{{user.username}}</span>! Your daily lottery ticket has been successfully claimed.</p>
+
+            <div class="drawing-info">
+                <h5>Drawings are held at <span class="drawing-time">5:00pm PST daily</span>. Tune in to check if you won!</h5>
+            </div>
+
+            <a href="{% url 'showcase:lotterywinners' %}" class="winners-link">
+                <i class="fas fa-award"></i> View Daily Winners
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add cosmic holographic elements
+            const cosmicHolo = document.querySelector('.cosmic-holo');
+
+            // Add celestial entities
+            for (let i = 0; i < 12; i++) {
+                const celestial = document.createElement('div');
+                celestial.classList.add('celestial-entity');
+
+                // Random size between 30px and 150px
+                const size = Math.random() * 120 + 30;
+                celestial.style.width = `${size}px`;
+                celestial.style.height = `${size}px`;
+
+                // Random position
+                celestial.style.left = `${Math.random() * 100}%`;
+                celestial.style.top = `${Math.random() * 100}%`;
+
+                // Random animation delay
+                celestial.style.animationDelay = `${Math.random() * 20}s`;
+
+                cosmicHolo.appendChild(celestial);
+            }
+
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+
+                // Random position
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+
+                // Random animation delay
+                star.style.animationDelay = `${Math.random() * 4}s`;
+
+                cosmicHolo.appendChild(star);
+            }
+
+
+            const confettiContainer = document.querySelector('.confetti-container');
+            const confettiColors = [
+                '#00f0ff', '#ff00e5', '#ffd700', '#00ff66', '#ffcc00', '#ff3366'
+            ];
+
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+
+                // Random color
+                const colorIndex = Math.floor(Math.random() * confettiColors.length);
+                confetti.style.backgroundColor = confettiColors[colorIndex];
+
+                // Random position
+                confetti.style.left = `${Math.random() * 100}%`;
+
+                // Random size
+                const size = Math.random() * 8 + 5;
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+
+                // Random rotation
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+                // Random shape (square or circle)
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+
+                // Random animation duration and delay
+                const fallDuration = Math.random() * 3 + 2;
+                const shakeDuration = Math.random() * 2 + 1;
+                const delay = Math.random() * 5;
+
+                confetti.style.animationDuration = `${fallDuration}s, ${shakeDuration}s`;
+                confetti.style.animationDelay = `${delay}s`;
+
+                confettiContainer.appendChild(confetti);
+            }
+
+            function createFirework() {
+                const fireworksContainer = document.querySelector('.claim-container');
+                const firework = document.createElement('div');
+                firework.classList.add('firework');
+
+                // Random position
+                const posX = Math.random() * fireworksContainer.offsetWidth;
+                const posY = Math.random() * (fireworksContainer.offsetHeight / 2) + 100;
+
+                firework.style.left = `${posX}px`;
+                firework.style.top = `${posY}px`;
+
+                // Random color
+                const colorIndex = Math.floor(Math.random() * confettiColors.length);
+                firework.style.boxShadow = `0 0 10px 2px ${confettiColors[colorIndex]}`;
+
+                // Create particles
+                const particleCount = 20 + Math.floor(Math.random() * 30);
+
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('firework');
+
+                    // Random direction
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 50 + Math.random() * 100;
+                    const x = Math.cos(angle) * distance;
+                    const y = Math.sin(angle) * distance;
+
+                    particle.style.setProperty('--x', `${x}px`);
+                    particle.style.setProperty('--y', `${y}px`);
+
+                    // Random color
+                    const particleColorIndex = Math.floor(Math.random() * confettiColors.length);
+                    particle.style.boxShadow = `0 0 10px 2px ${confettiColors[particleColorIndex]}`;
+
+                    // Random animation duration and delay
+                    const duration = 0.5 + Math.random() * 1;
+                    const delay = Math.random() * 0.2;
+
+                    particle.style.animationDuration = `${duration}s`;
+                    particle.style.animationDelay = `${delay}s`;
+
+                    particle.style.left = `${posX}px`;
+                    particle.style.top = `${posY}px`;
+
+                    fireworksContainer.appendChild(particle);
+
+                    // Remove particle after animation
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, (duration + delay) * 1000);
+                }
+            }
+
+            setInterval(createFirework, 2000);
+
+            for (let i = 0; i < 3; i++) {
+                setTimeout(createFirework, i * 300);
+            }
+        });
+    </script>
 </body>
 </html>

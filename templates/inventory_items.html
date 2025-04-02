@@ -5,12 +5,14 @@
         <input type="checkbox" class="item-select-checkbox" id="checkbox-{{ Inventory.pk }}"
                data-id="{{ Inventory.pk }}">
         <div class="gridCardItem">
-            <div class="legendary-icon">🐉</div>
+            {% if Inventory.locked == True %}
+            <div class="legendary-icon"></div>
+            {% endif %}
             <div class="pokemon-image">
                 <img src="{{ Inventory.image.url }}" alt="{{ Inventory.choice_text }} Image">
+                <h3 class="pokemon-name">{{ Inventory.choice.choice_text }}</h3>
             </div>
             <div class="pokemon-info">
-                <h3 class="pokemon-name">{{ Inventory.choice.choice_text }}</h3>
                 <p class="pokemon-type">{{ Inventory.price }} 💎</p>
                 <p class="product-condition" style="color: rgba(255, 255, 255, 0.8);">
                     Card Condition: {{ Inventory.condition }}

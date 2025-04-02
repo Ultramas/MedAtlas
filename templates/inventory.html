@@ -392,11 +392,17 @@
         }
 
         .pokemon-name {
-            font-size: 1.75rem;
+            font-size: 1.00rem;
             margin-bottom: 0.75rem;
             font-family: 'Cinzel', serif;
             color: var(--primary);
+            position:fixed;
             text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            width: 100%;
+            color: white;
+            padding-left: 5px;
+            padding-right: 5px;
         }
 
         .pokemon-type {
@@ -806,6 +812,40 @@ document.querySelectorAll(".withdraw-form").forEach(form => {
     <main class="main-content">
         <h1>My Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)</h1>
 
+            {% if StockObject %}
+    <div style="margin-top: 20px;">
+        <button id="sell-everything-button" class="card-button add-button sell-button" style="width: 120px; position: fixed; right: 50px; top: 175px;">Sell All</button>
+    </div>
+{% endif %}
+
+<script>
+document.getElementById('sell-everything-button').addEventListener('click', function() {
+    if (confirm('Are you sure you want to sell all inventory items?')) {
+        fetch("{% url 'showcase:sell_everything_inventory_objects' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('inventory-list').innerHTML = data.inventory_html;
+                document.getElementById('currency-amount').textContent = data.currency_amount;
+                alert('All items have been sold successfully.');
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while processing your request.');
+        });
+    }
+});
+</script>
         <section id="inventoryGrid" class="inventory-grid comfortable-view">
             <!-- Sell All Form (hidden by default) -->
           <!-- Bulk Sell Form -->
@@ -816,14 +856,15 @@ document.querySelectorAll(".withdraw-form").forEach(form => {
     <button type="submit" class="sell-all-button" style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">Sell Selected</button>
 </form>
 
+
 <!-- Inventory Items -->
 <div id="inventory-items-container" style="display: grid; grid-template-columns: repeat(3, 1fr); space-between: 10px;">
     {% include "inventory_items.html" with StockObject=StockObject %}
 </div>
 
+
 <script>
 $(document).ready(function() {
-  // Cache selectors
   const $checkboxes = $('.item-select-checkbox');
   const $sellAllForm = $('#sell-all-form');
   const $sellAllSelectedIds = $('#sell-all-selected-ids');

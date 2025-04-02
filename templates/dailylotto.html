@@ -1,5 +1,3 @@
-<!--posts to users-->
-{% extends 'memberbase.html' %}
 
 {% load static %}
 
@@ -11,133 +9,663 @@
     {% endfor %}
 {% endblock title %}
 
-{% block content %}
 
-<head>
-   <style>
-        .advertisement-image {
-            position: absolute;
-            left: {{ advertising.x_position }}px;
-            top: {{ advertising.y_position }}px;
-        }
-        .boedy{
-      display: flex;
-      justify-content: center;
-        }
-
-    /* DEMO-SPECIFIC STYLES */
-    .containereatede h1 {
-      font-family: 'Playfair Display', serif;
-      overflow: hidden; /* Ensures the content is not revealed until the animation */
-      border-right: .15em solid red; /* The typewriter cursor */
-      white-space: nowrap; /* Keeps the content on a single line */
-      margin: 0 auto; /* Gives that scrolling effect as the typing happens */
-      letter-spacing: .0em; /* Adjust as needed */
-      animation:
-        typing 3.5s steps(30, end),
-        blink-caret .5s step-end infinite;
+<style>
+    :root {
+        --primary: #00f0ff;
+        --primary-dark: #00a0a8;
+        --secondary: #ff00e5;
+        --accent: #4ecca3;
+        --dark: #0a0a20;
+        --darker: #050510;
+        --light: #e1e1ff;
+        --success: #00ff66;
+        --warning: #ffcc00;
+        --danger: #ff3366;
+        --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        --card-glow: 0 0 15px rgba(0, 240, 255, 0.3);
+        --ticket-gold: #ffd700;
+        --ticket-glow: 0 0 15px rgba(255, 215, 0, 0.5);
     }
 
-    /* The typing effect */
+    .advertisement-image {
+        position: absolute;
+        left: {{ advertising.x_position }}px;
+        top: {{ advertising.y_position }}px;
+    }
+
+    .backgroundimages {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: -2;
+        filter: brightness(0.4) blur(3px);
+    }
+
+    .ticket-container {
+        max-width: 800px;
+        margin: 100px auto 50px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cosmic-holo {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: -1;
+        opacity: 0.4;
+        pointer-events: none;
+    }
+
+    .celestial-entity {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.1);
+        opacity: 0.4;
+        animation: float 20s linear infinite;
+    }
+
+    .star {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.5);
+        animation: twinkle 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0% {
+            transform: translateY(0) translateX(0) rotate(0deg);
+        }
+        33% {
+            transform: translateY(-30px) translateX(20px) rotate(120deg);
+        }
+        66% {
+            transform: translateY(20px) translateX(-20px) rotate(240deg);
+        }
+        100% {
+            transform: translateY(0) translateX(0) rotate(360deg);
+        }
+    }
+
+    @keyframes twinkle {
+        0%, 100% {
+            opacity: 0.3;
+            transform: scale(0.8);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+    }
+
+    .ticket-card {
+        background: linear-gradient(145deg, rgba(20, 20, 40, 0.7), rgba(10, 10, 19, 0.8));
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(0, 240, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 30px;
+    }
+
+    .ticket-card::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border-radius: 16px;
+        background: linear-gradient(45deg, var(--primary-dark), transparent, var(--ticket-gold), transparent, var(--primary-dark));
+        background-size: 400%;
+        z-index: -1;
+        animation: borderAnimation 15s linear infinite;
+        opacity: 0.7;
+    }
+
+    @keyframes borderAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .ticket-header {
+        text-align: center;
+        margin-bottom: 30px;
+        position: relative;
+    }
+
+    .ticket-title {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--ticket-gold);
+        font-size: 2.5rem;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        text-shadow: var(--ticket-glow);
+        margin-bottom: 10px;
+        position: relative;
+        display: inline-block;
+        overflow: hidden;
+        white-space: nowrap;
+        border-right: 0.15em solid var(--ticket-gold);
+        animation: typing 3.5s steps(30, end), blink-caret 0.5s step-end infinite;
+    }
+
     @keyframes typing {
-      from { width: 0 }
-      to { width: 100% }
+        from { width: 0 }
+        to { width: 100% }
     }
 
-    /* The typewriter cursor effect */
     @keyframes blink-caret {
-      from, to { border-color: transparent }
-      35% { border-color: rgba(255, 255, 255, 0.637)}
+        from, to { border-color: transparent }
+        35% { border-color: var(--ticket-gold) }
     }
-        </style>
 
-</head>
-<body>
-  <div class="column three mobile-twelve section_header_logo vertical-align-middle"
-        style="position: -webkit-sticky; position: sticky; top: 10px; left: -10px; z-index: 100;">
-        {% for PostingView in Logo %}
-        {% if PostingView.page == 'showcase.html' %}
+    .ticket-subtitle {
+        font-family: 'Rajdhani', sans-serif;
+        color: var(--light);
+        font-size: 1.2rem;
+        opacity: 0.8;
+        margin-top: 10px;
+    }
 
-        <a class="logo" href="{{PostingView.hyperlink}}">
-          <img class="imageicon" src="{{PostingView.logocover.url}}"
-                alt="{{PostingView.alternate}}" style="length: {{PostingView.length_for_resize}}px; width: {{PostingView.width_for_resize}}px;"></a>
-        {% endif %}
-        {% endfor %}
-    </div>
+    .ticket-form {
+        position: relative;
+        z-index: 1;
+    }
 
-     {% for PostingView in Background %}
-    <img class = "backgroundimages" src="{{PostingView.cover.url}}" alt="{{ PostingView.backgroundtitle }}">
-       <div class="view overlay">
-                  <div class="mask rgba-white-slight"></div>
-              </div>
-  {% endfor %}
-    <div class = "navbarx">
+    .ticket-form p {
+        margin-bottom: 20px;
+        position: relative;
+    }
 
-    <ul>
-      {% for column in Header %}
-        <div class="dropdown">
-          <a href="#{{ column.section }}" class="glass"> {{ column.text }}</a>
-          <div class="dropdown-content">
-          {% for row in DropDown %}
+    .ticket-form label {
+        display: block;
+        font-family: 'Rajdhani', sans-serif;
+        color: var(--primary);
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+        text-shadow: 0 0 5px rgba(0, 240, 255, 0.3);
+    }
 
-            {% if row.row == column.row %}
+    .ticket-form input[type="text"],
+    .ticket-form input[type="email"],
+    .ticket-form input[type="number"],
+    .ticket-form textarea,
+    .ticket-form select {
+        width: 100%;
+        background: rgba(10, 10, 30, 0.5);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-family: 'Rajdhani', sans-serif;
+        color: var(--light);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+    }
 
-                {% if row.opennew == True %}
-                    <a href="{{ row.url }}" target="_blank">{{ row.text }}</a>
-                {% else %}
-                    <a href="{{ row.url }}">{{ row.text }}</a>
-                {% endif %}
-            {% endif %}
+    .ticket-form input[type="text"]:focus,
+    .ticket-form input[type="email"]:focus,
+    .ticket-form input[type="number"]:focus,
+    .ticket-form textarea:focus,
+    .ticket-form select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3), inset 0 0 10px rgba(0, 0, 0, 0.2);
+        outline: none;
+    }
 
-          {% endfor %}
-          </div>
+    .ticket-form input[type="file"] {
+        width: 100%;
+        background: rgba(10, 10, 30, 0.5);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-family: 'Rajdhani', sans-serif;
+        color: var(--light);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .ticket-form input[type="file"]::file-selector-button {
+        background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+        color: var(--darker);
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        margin-right: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .ticket-form input[type="file"]::file-selector-button:hover {
+        background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        transform: translateY(-2px);
+    }
+
+    .ticket-submit-btn {
+        background: linear-gradient(90deg, var(--ticket-gold), #e6b800, var(--ticket-gold));
+        color: var(--darker);
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.2rem;
+        font-weight: 600;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(255, 215, 0, 0.5);
+        margin-top: 20px;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .ticket-submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: all 0.5s ease;
+    }
+
+    .ticket-submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 215, 0, 0.7);
+    }
+
+    .ticket-submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .ticket-decoration {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .ticket-corner {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        opacity: 0.7;
+    }
+
+    .ticket-corner-tl {
+        top: 0;
+        left: 0;
+        border-top: 3px solid var(--ticket-gold);
+        border-left: 3px solid var(--ticket-gold);
+        border-top-left-radius: 15px;
+    }
+
+    .ticket-corner-tr {
+        top: 0;
+        right: 0;
+        border-top: 3px solid var(--ticket-gold);
+        border-right: 3px solid var(--ticket-gold);
+        border-top-right-radius: 15px;
+    }
+
+    .ticket-corner-bl {
+        bottom: 0;
+        left: 0;
+        border-bottom: 3px solid var(--ticket-gold);
+        border-left: 3px solid var(--ticket-gold);
+        border-bottom-left-radius: 15px;
+    }
+
+    .ticket-corner-br {
+        bottom: 0;
+        right: 0;
+        border-bottom: 3px solid var(--ticket-gold);
+        border-right: 3px solid var(--ticket-gold);
+        border-bottom-right-radius: 15px;
+    }
+
+    .ticket-dots {
+        position: absolute;
+        border: 2px dashed var(--ticket-gold);
+        opacity: 0.5;
+    }
+
+    .ticket-dots-top {
+        top: 15px;
+        left: 70px;
+        right: 70px;
+        height: 1px;
+    }
+
+    .ticket-dots-bottom {
+        bottom: 15px;
+        left: 70px;
+        right: 70px;
+        height: 1px;
+    }
+
+    .ticket-dots-left {
+        left: 15px;
+        top: 70px;
+        bottom: 70px;
+        width: 1px;
+    }
+
+    .ticket-dots-right {
+        right: 15px;
+        top: 70px;
+        bottom: 70px;
+        width: 1px;
+    }
+
+    .ticket-serial {
+        position: absolute;
+        bottom: 10px;
+        right: 20px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+        color: var(--ticket-gold);
+        opacity: 0.7;
+        letter-spacing: 2px;
+    }
+
+    .ticket-stamp {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 80px;
+        height: 80px;
+        border: 2px solid var(--ticket-gold);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: rotate(15deg);
+        opacity: 0.7;
+    }
+
+    .ticket-stamp-text {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.7rem;
+        color: var(--ticket-gold);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-align: center;
+        line-height: 1.2;
+    }
+
+    .drop {
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: var(--primary);
+        box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+        animation: drop-animation 10s infinite;
+        opacity: 0.7;
+    }
+
+    .drop-1 {
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .drop-2 {
+        left: 30%;
+        animation-delay: 2s;
+    }
+
+    .drop-3 {
+        left: 50%;
+        animation-delay: 4s;
+    }
+
+    .drop-4 {
+        left: 70%;
+        animation-delay: 6s;
+    }
+
+    .drop-5 {
+        left: 90%;
+        animation-delay: 8s;
+    }
+
+    @keyframes drop-animation {
+        0% {
+            top: -50px;
+            opacity: 0.7;
+        }
+        70% {
+            opacity: 0.7;
+        }
+        100% {
+            top: calc(100% + 50px);
+            opacity: 0;
+        }
+    }
+
+    .success-message {
+        background: linear-gradient(145deg, rgba(20, 20, 40, 0.7), rgba(10, 10, 19, 0.8));
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(0, 240, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 30px;
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    .success-message::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border-radius: 16px;
+        background: linear-gradient(45deg, var(--success), transparent, var(--ticket-gold), transparent, var(--success));
+        background-size: 400%;
+        z-index: -1;
+        animation: borderAnimation 15s linear infinite;
+        opacity: 0.7;
+    }
+
+    .success-message h3 {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--success);
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+    }
+
+    .success-message img {
+        border-radius: 10px;
+        border: 2px solid var(--primary);
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        max-width: 100%;
+    }
+
+    @media (max-width: 768px) {
+        .ticket-container {
+            margin: 80px auto 30px;
+            padding: 0 20px;
+        }
+
+        .ticket-card {
+            padding: 20px;
+        }
+
+        .ticket-title {
+            font-size: 1.8rem;
+        }
+
+        .ticket-stamp {
+            width: 60px;
+            height: 60px;
+            top: 15px;
+            right: 15px;
+        }
+
+        .ticket-stamp-text {
+            font-size: 0.6rem;
+        }
+    }
+</style>
+
+{% for PostingView in Background %}
+<img class="backgroundimages" src="{{PostingView.cover.url}}" alt="{{ PostingView.backgroundtitle }}">
+<div class="view overlay">
+    <div class="mask rgba-white-slight"></div>
+</div>
+{% endfor %}
+
+{% include 'navtrove.html' %}
+
+<div class="cosmic-holo">
+    <!-- Cosmic elements will be added with JavaScript -->
+</div>
+
+<div class="ticket-container">
+    <div class="ticket-card">
+        <div class="ticket-decoration">
+            <div class="ticket-corner ticket-corner-tl"></div>
+            <div class="ticket-corner ticket-corner-tr"></div>
+            <div class="ticket-corner ticket-corner-bl"></div>
+            <div class="ticket-corner ticket-corner-br"></div>
+            <div class="ticket-dots ticket-dots-top"></div>
+            <div class="ticket-dots ticket-dots-bottom"></div>
+            <div class="ticket-dots ticket-dots-left"></div>
+            <div class="ticket-dots ticket-dots-right"></div>
+            <div class="ticket-serial">№ {% now "YmdHis" %}-{% now "U" %}</div>
+            <div class="ticket-stamp">
+                <div class="ticket-stamp-text">Daily Ticket<br>PokeTrove<br>Official</div>
+            </div>
         </div>
-      {% endfor %}
-     </ul>
+
+        <div class="ticket-header">
+            <h1 class="ticket-title">Get The Daily Ticket!</h1>
+            <p class="ticket-subtitle">Enter for your chance to win exclusive prizes!</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="ticket-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="ticket-submit-btn">Get My Ticket</button>
+            <div class="drops">
+                <div class="drop drop-1"></div>
+                <div class="drop drop-2"></div>
+                <div class="drop drop-3"></div>
+                <div class="drop drop-4"></div>
+                <div class="drop drop-5"></div>
+            </div>
+        </form>
     </div>
-<div class="postww">
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-<div class="post2v">
 
-            <div class = "boedy">
-  <div class="containereatede">
-     <h1 class = "banh1">Get The Daily Ticket</h1>
-      </div>
-                </div>
-     <br>
-     <br>
-  <form method="POST"  enctype="multipart/form-data" class="post">
-    {% csrf_token %}
-    {{form.as_p}}
-    <button type="submit">Get My Ticket</button>
-           <div class="drops">
-               <!--fix the drop classes in style-->
-        <div class="drop drop-1"></div>
-        <div class="drop drop-2"></div>
-        <div class="drop drop-3"></div>
-        <div class="drop drop-4"></div>
-        <div class="drop drop-5"></div>
-     </div>
-  </form>
-</div>
+    {% if img_obj %}
+    <div class="success-message">
+        <h3>Successfully uploaded: {{img_obj.title}}</h3>
+        <img src="{{ img_obj.image}}" alt="connect" style="max-height:300px">
+    </div>
+    {% endif %}
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add cosmic holographic elements
+        const cosmicHolo = document.querySelector('.cosmic-holo');
+        
+        // Add celestial entities
+        for (let i = 0; i < 12; i++) {
+            const celestial = document.createElement('div');
+            celestial.classList.add('celestial-entity');
+            
+            // Random size between 30px and 150px
+            const size = Math.random() * 120 + 30;
+            celestial.style.width = `${size}px`;
+            celestial.style.height = `${size}px`;
+            
+            // Random position
+            celestial.style.left = `${Math.random() * 100}%`;
+            celestial.style.top = `${Math.random() * 100}%`;
+            
+            // Random animation delay
+            celestial.style.animationDelay = `${Math.random() * 20}s`;
+            
+            cosmicHolo.appendChild(celestial);
+        }
+        
+        // Add stars
+        for (let i = 0; i < 80; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            
+            // Random position
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            
+            // Random animation delay
+            star.style.animationDelay = `${Math.random() * 4}s`;
+            
+            cosmicHolo.appendChild(star);
+        }
+        
+        // Add pulsing glow effect to title
+        function pulseGlowEffect() {
+            const title = document.querySelector('.ticket-title');
+            if (title) {
+                title.style.textShadow = '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.5)';
 
-  {% if img_obj %}
-  <h3>Succesfully uploaded : {{img_obj.title}}</h3>
-  <img src="{{ img_obj.image}}" alt="connect" style="max-height:300px">
-{% endif %}
+                setTimeout(() => {
+                    title.style.textShadow = '0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3)';
+                }, 1000);
+            }
+        }
 
-
-
-</div>
- </body>
-
-{% endblock content %}
+        // Run glow effect every 2 seconds
+        setInterval(pulseGlowEffect, 2000);
+        
+        // Generate random ticket serial number
+        const generateSerial = () => {
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let serial = '';
+            for (let i = 0; i < 12; i++) {
+                if (i > 0 && i % 4 === 0) serial += '-';
+                serial += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return serial;
+        };
+        
+        // Set random serial number
+        const serialElement = document.querySelector('.ticket-serial');
+        if (serialElement) {
+            const timestamp = new Date().getTime().toString().slice(-6);
+            serialElement.textContent = `№ ${generateSerial()}-${timestamp}`;
+        }
+    });
+</script>

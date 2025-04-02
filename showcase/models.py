@@ -1488,6 +1488,7 @@ class InventoryObject(models.Model):
     length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
     width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Creation Time")
+    locked = models.BooleanField(default=False, verbose_name='Sell-Locked')
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,

@@ -113,11 +113,11 @@
         }
 
         .cards-container .popup-card:first-child {
-            margin-left: 250px; /* Adjust as needed to make the first card fully visible */
+            margin-left: 250px;
         }
 
         .cards-container::-webkit-scrollbar {
-            height: 8px; /* Custom scrollbar height */
+            height: 8px;
         }
 
         .cards-container::-webkit-scrollbar-thumb {
@@ -173,9 +173,9 @@
         width: 15vh;
         height: 20vh;
         border: 2px solid;
-        border-color: transparent; /* To change later */
+        border-color: transparent;
         border-radius: 7px;
-        object-fit: contain; /* Ensures image fits without cropping */
+        object-fit: contain;
     }
 
         :root {
@@ -902,7 +902,134 @@ p.blog-meta span {
     width: 100%;
 
 }
-    </style>
+
+         .labeltag {
+    position: absolute;
+    left: 20%;
+    margin-top: 170px;
+    background-color: #4299e1;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: -1;
+}
+
+.labeltag h4 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.gamer-button {
+    position: relative;
+    padding: 0.5em 1em;
+    background: linear-gradient(to bottom, #4f1cb1, #2e0a6e);
+    color: white;
+    font-family: 'Exo 2', 'Rajdhani', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4), 0 0 20px rgba(79, 28, 177, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    /* text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); */
+    outline: none;
+    transform: perspective(1px) translateZ(0);
+}
+
+.gamer-button:before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+    border-radius: 5px 5px 0 0;
+    pointer-events: none;
+}
+
+.button-text {
+    position: relative;
+    z-index: 2;
+}
+
+
+.button-shine {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0) 40%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0) 60%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    z-index: 1;
+    transform: translateX(-100%);
+    animation: shine 6s infinite;
+    pointer-events: none;
+}
+
+.gamer-button:hover {
+    background: linear-gradient(to bottom, #5f2cc1, #3e1a7e);
+    transform: perspective(1px) translateZ(0) scale(1.05);
+    box-shadow:
+        0 7px 20px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(79, 28, 177, 0.7),
+        inset 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.gamer-button:active {
+    transform: perspective(1px) translateZ(0) scale(0.98);
+    background: linear-gradient(to bottom, #3e1a7e, #2e0a6e);
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.4),
+        0 0 15px rgba(79, 28, 177, 0.5),
+        inset 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+@keyframes shine {
+    0%, 15%, 100% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    20%, 25% {
+        opacity: 1;
+        transform: translateX(100%);
+    }
+    26% {
+        opacity: 0;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.button-edge-top,
+.button-edge-right,
+.button-edge-bottom,
+.button-edge-left {
+    animation: pulse 2s infinite;
+}
+
+@media (max-width: 768px) {
+    .gamer-button {
+        font-size: 1rem;
+        padding: 0.7em 1.5em;
+    }
+}
+</style>
 </head>
 <body>
 
@@ -916,7 +1043,6 @@ p.blog-meta span {
 
 
 
-<body>
   <script>
 
   </script>
@@ -933,7 +1059,7 @@ p.blog-meta span {
     height: 120%;
     opacity: 0.20;
     background: linear-gradient(to bottom, rgba(0,0,255,0) 70%, rgb(10, 10, 19) 100%), url('{{ game.image.url }}');
-    background-size: cover;selections
+    background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
 " alt="{{ game.name }}">
@@ -995,8 +1121,6 @@ p.blog-meta span {
 }
 
 function sellInventory(inventoryPk) {
-  // Construct form data or JSON payload as needed. For example:
-  const formData = new FormData();
   formData.append('action', 'sell');
   formData.append('pk', inventoryPk);
   formData.append('csrfmiddlewaretoken', getCSRFToken());
@@ -1075,8 +1199,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 {% if game.daily %}
  {% if user.is_authenticated %}
-<button class="start"
-        id="start"
+
+
+<button class="start gamer-button"
+        id="start" style="display: none;"
         data-game-id="{{ game.id }}"
         data-nonce="{{ nonce }}"
         data-slug="{{ game.slug }}"
@@ -1084,9 +1210,10 @@ document.addEventListener("DOMContentLoaded", function () {
          style="position: absolute; bottom: 5px; left: 5px;">
     Spin!
 </button>
+
     {% else %}
         <a href="{% url 'login' %}?next={{ request.path }}">
-    <button class="start"
+    <button class="start gamer-button"
         id="login"
          style="position: absolute; bottom: 5px; left: 5px;">
     Login
@@ -1134,7 +1261,7 @@ document.addEventListener("DOMContentLoaded", function () {
         </script>
 {% else %}
     {% if user.is_authenticated %}
-<button class="start"
+<button class="start gamer-button"
         id="start"
         data-game-id="{{ game.id }}"
         data-nonce="{{ nonce }}"
@@ -1145,7 +1272,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </button>
     {% else %}
     <a href="{% url 'login' %}?next={{ request.path }}">
-    <button class="start"
+    <button class="start gamer-button"
         id="login"
          style="position: absolute; bottom: 5px; left: 5px;">
     Login
@@ -1155,7 +1282,7 @@ document.addEventListener("DOMContentLoaded", function () {
 {% endif %}
 
         {% if game.daily %}
-<button class="start"
+<button class="start gamer-button"
         id="start2"
         data-game-id="{{ game.id }}"
         data-nonce="{{ nonce }}"
@@ -1206,7 +1333,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         </script>
 {% else %}
-<button class="start"
+<button class="start gamer-button"
         id="start2"
         data-game-id="{{ game.id }}"
         data-nonce="{{ nonce }}"
@@ -1571,6 +1698,10 @@ $(document).ready(function() {
 
             <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow" style="">
         </div>
+
+      <div class="labeltag" style="">
+        <h4 style="">{{game.name}}</h4>
+      </div>
     </div>
 
     <script>
@@ -1751,7 +1882,7 @@ $(".start").click(function () {
                     // Re-enable the button after the animation finishes
                     button.prop('disabled', false);
 
-                }, 9000); // Stop after 9 seconds (adjustable)
+                }, 9000);
 
             } else {
                 console.error('Error:', data.message);
@@ -1778,7 +1909,6 @@ $(".start").click(function () {
 
 <br>
 <br></div>
-</body>
 
 
 <script>
@@ -1911,7 +2041,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
-    <footer class="copyright-section">
+    <footer class="copyright-section" style="">
         <div class="container" style="padding: 10px;">
             <p>
             {% for BaseCopyrightTextField in BaseCopyrightTextFielded %}

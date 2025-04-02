@@ -1211,9 +1211,76 @@ function toggleChatWidget() {
 .hero-area.hero-bg {
     position: relative;
     width: 100%;
-    height: 100vh;
     margin-top: 0;
     overflow: hidden;
+}
+.hero-area {
+    min-height: 100vh; /* Ensures the hero section always takes full viewport height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden; /* Prevents elements from getting cut off */
+    padding: 5% 0; /* Adds spacing for better visibility */
+}
+
+.video-background {
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    width: 100%;
+    min-height: 100vh; /* Ensures background always covers the section */
+}
+
+
+.hero-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.boxed-btn, .bordered-btn {
+    padding: 12px 20px;
+    font-size: 18px;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    margin-top: 10px;
+}
+
+.gameaddition {
+}
+
+/* Responsive Fixes */
+@media (max-width: 768px) {
+    .hero-area {
+        min-height: auto; /* Prevents height from forcing content out */
+        padding: 10% 5%;
+    }
+
+    .hero-text h1 {
+        font-size: 2rem; /* Adjust heading size for mobile */
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .hero-btns {
+        flex-direction: column; /* Stack buttons on small screens */
+        align-items: center;
+    }
+
+    .boxed-btn, .bordered-btn {
+        width: 100%; /* Ensure full width on mobile */
+        text-align: center;
+    }
+
+    .gameaddition {
+    }
 }
 
 .video-background {
@@ -1294,7 +1361,6 @@ window.onscroll = function() {
       // Reset position
       slot.style.transform = 'translateY(0)';
 
-      // Create temporary items for spinning
       slot.innerHTML = '';
 
       // Generate random sequence for spinning effect
@@ -1450,34 +1516,1009 @@ window.onscroll = function() {
 							{% endfor %}
 							</div>
 						</div>
-
 					</div>
 				</div>
 			</div>
+                        <div class="gameaddition" style="top: 300px;">
+                              {% if game %}
+                                {% include 'gametemplate.html' with game=game %}
+                              {% else %}
+                                <p>No active games available.</p>
+                              {% endif %}
+
+                        </div>
 		</div>
-	</div>
+   <div class="play-banner {% if user.is_authenticated %}collapsed{% endif %}" id="playBanner">
+    <!-- Toggle button -->
+    <div class="play-banner-toggle">
+        <button id="togglePlayBanner" aria-label="Toggle How To Play">
+            <span class="toggle-icon"></span>
+        </button>
+    </div>
+
+    <!-- Decorative background cards -->
+    <div class="bg-card card-1"></div>
+    <div class="bg-card card-2"></div>
+    <div class="bg-card card-3"></div>
+    <div class="bg-card card-4"></div>
+    <div class="bg-card card-5"></div>
+    <div class="bg-card card-6"></div>
+
+    <!-- Featured larger cards -->
+    <div class="featured-card featured-card-1">
+        <div class="card-glow"></div>
+    </div>
+    <div class="featured-card featured-card-2">
+        <div class="card-glow"></div>
+    </div>
+    <div class="featured-card featured-card-3">
+        <div class="card-glow"></div>
+    </div>
+
+    <!-- Banner header (always visible) -->
+    <div class="play-banner-header">
+        <h2 class="play-title">How To Play</h2>
+        <div class="header-glow"></div>
+    </div>
+
+    <!-- Collapsible content -->
+    <div class="play-banner-collapsible">
+        <div class="play-banner-content">
+            <div class="play-steps">
+                <div class="play-step">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" class="step-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 7.5V18C21 19.6569 19.6569 21 18 21H6C4.34315 21 3 19.6569 3 18V7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M3 7.5V6C3 4.34315 4.34315 3 6 3H18C19.6569 3 21 4.34315 21 6V7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9C9 10.6569 10.3431 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M12 12V16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M9.5 14.5L14.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>Spin Boxs</h3>
+                    <p>Choose a treasure chest and spin to pull banger cards!</p>
+                </div>
+
+                <div class="step-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <div class="play-step">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" class="step-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 5L2 12.5L9 13.5L18 7L11 17L14 21L21 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Win REAL Cards</h3>
+                    <p>What you see is what you get! Hit them virtually, see them physically!</p>
+                </div>
+
+                <div class="step-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <div class="play-step">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" class="step-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 3V4M12 20V21M4 12H3M6.31412 6.31412L5.5 5.5M17.6859 6.31412L18.5 5.5M6.31412 17.69L5.5 18.5M17.69 17.69L18.5 18.5M21 12H20M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>Ship or Sell</h3>
+                    <p>Have your cards shipped to you or sell them for rubies to open more chests!</p>
+                </div>
+            </div>
+
+            <div class="play-actions">
+                <a href="/about/" class="play-button secondary">Learn More</a>
+                <a href="{% url 'showcase:cv-form' %}?next=gameroom/123" class="play-button primary">Sign Up Now!</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Collapsible Play Banner */
+.play-banner {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+}
+
+/* Default expanded state */
+.play-banner {
+    padding: 2rem;
+    min-height: 500px;
+}
+
+/* Collapsed state */
+.play-banner.collapsed {
+    padding: 0;
+    min-height: 100px;
+    height: 100px;
+}
+
+.play-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%232a3a5a' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    z-index: 0;
+}
+
+/* Toggle button */
+.play-banner-toggle {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 10;
+}
+
+.play-banner-toggle button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.play-banner-toggle button:hover {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 215, 0, 0.5);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.toggle-icon {
+    position: relative;
+    width: 14px;
+    height: 14px;
+}
+
+.toggle-icon::before,
+.toggle-icon::after {
+    content: '';
+    position: absolute;
+    background: #ffd700;
+    transition: all 0.3s ease;
+}
+
+.toggle-icon::before {
+    width: 14px;
+    height: 2px;
+    top: 6px;
+    left: 0;
+}
+
+.toggle-icon::after {
+    width: 2px;
+    height: 14px;
+    top: 0;
+    left: 6px;
+}
+
+.collapsed .toggle-icon::after {
+    transform: rotate(90deg);
+    opacity: 0;
+}
+
+/* Banner header (always visible) */
+.play-banner-header {
+    position: relative;
+    text-align: center;
+    padding: 1.5rem 0;
+    z-index: 2;
+}
+
+.play-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    text-align: center;
+    color: white;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    background: linear-gradient(to right, #ffd700, #ff9900);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    display: inline-block;
+    margin: 0;
+    transition: all 0.3s ease;
+}
+
+.collapsed .play-title {
+    font-size: 2rem;
+}
+
+.header-glow {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #ffd700, transparent);
+}
+
+/* Collapsible content */
+.play-banner-collapsible {
+    max-height: 2000px;
+    opacity: 1;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    z-index: 1;
+}
+
+.collapsed .play-banner-collapsible {
+    max-height: 0;
+    opacity: 0;
+}
+
+/* Background decorative cards */
+.bg-card {
+    position: absolute;
+    background-size: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    opacity: 0.15;
+    z-index: 0;
+    transform: rotate(var(--rotation));
+    transition: all 0.5s ease;
+}
+
+.collapsed .bg-card {
+    opacity: 0.05;
+    transform: translateY(20px) rotate(var(--rotation));
+}
+
+.bg-card:nth-child(odd) {
+    background-image: linear-gradient(45deg, #6366f1, #8b5cf6);
+}
+
+.bg-card:nth-child(even) {
+    background-image: linear-gradient(45deg, #ec4899, #f43f5e);
+}
+
+.card-1 {
+    width: 60px;
+    height: 90px;
+    top: 10%;
+    left: 5%;
+    --rotation: -15deg;
+    animation: float 8s ease-in-out infinite;
+}
+
+.card-2 {
+    width: 50px;
+    height: 75px;
+    top: 20%;
+    right: 8%;
+    --rotation: 10deg;
+    animation: float 7s ease-in-out infinite 1s;
+}
+
+.card-3 {
+    width: 40px;
+    height: 60px;
+    bottom: 15%;
+    left: 12%;
+    --rotation: 5deg;
+    animation: float 9s ease-in-out infinite 0.5s;
+}
+
+.card-4 {
+    width: 45px;
+    height: 68px;
+    bottom: 25%;
+    right: 15%;
+    --rotation: -8deg;
+    animation: float 10s ease-in-out infinite 1.5s;
+}
+
+.card-5 {
+    width: 55px;
+    height: 83px;
+    top: 40%;
+    left: 20%;
+    --rotation: 12deg;
+    animation: float 8.5s ease-in-out infinite 0.7s;
+}
+
+.card-6 {
+    width: 50px;
+    height: 75px;
+    bottom: 10%;
+    right: 25%;
+    --rotation: -5deg;
+    animation: float 7.5s ease-in-out infinite 1.2s;
+}
+
+/* Featured larger cards */
+.featured-card {
+    position: absolute;
+    width: 120px;
+    height: 180px;
+    border-radius: 10px;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    z-index: 0;
+    transform: rotate(var(--rotation)) translateZ(0);
+    transition: all 0.5s ease;
+    overflow: hidden;
+}
+
+.collapsed .featured-card {
+    opacity: 0;
+    transform: translateY(50px) rotate(var(--rotation)) translateZ(0);
+}
+
+.featured-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 80%);
+    z-index: 1;
+}
+
+.featured-card-1 {
+    background-image: url('/static/images/cards/card1.jpg'), linear-gradient(45deg, #6366f1, #8b5cf6);
+    top: 5%;
+    right: 5%;
+    --rotation: 8deg;
+    animation: float-featured 10s ease-in-out infinite;
+}
+
+.featured-card-2 {
+    background-image: url('/static/images/cards/card2.jpg'), linear-gradient(45deg, #ec4899, #f43f5e);
+    bottom: 10%;
+    left: 7%;
+    --rotation: -5deg;
+    animation: float-featured 12s ease-in-out infinite 1s;
+}
+
+.featured-card-3 {
+    background-image: url('/static/images/cards/card3.jpg'), linear-gradient(45deg, #fbbf24, #f59e0b);
+    bottom: 15%;
+    right: 10%;
+    --rotation: 3deg;
+    animation: float-featured 11s ease-in-out infinite 0.5s;
+}
+
+.card-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 0;
+}
+
+.featured-card:hover {
+    transform: rotate(0) translateY(-10px) scale(1.05) translateZ(0);
+    z-index: 2;
+}
+
+.featured-card:hover .card-glow {
+    opacity: 1;
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(var(--rotation));
+    }
+    50% {
+        transform: translateY(-10px) rotate(var(--rotation));
+    }
+}
+
+@keyframes float-featured {
+    0%, 100% {
+        transform: translateY(0) rotate(var(--rotation)) translateZ(0);
+    }
+    50% {
+        transform: translateY(-15px) rotate(var(--rotation)) translateZ(0);
+    }
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+.play-banner-content {
+    position: relative;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+    padding: 2rem;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.play-steps {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.play-step {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 220px;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.play-step:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 215, 0, 0.3);
+}
+
+.step-number {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #ffd700, #ff9900);
+    color: #000;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.step-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffd700;
+    transition: all 0.3s ease;
+}
+
+.play-step:hover .step-icon {
+    background: rgba(255, 215, 0, 0.2);
+    transform: scale(1.1);
+}
+
+.step-svg {
+    width: 30px;
+    height: 30px;
+}
+
+.play-step h3 {
+    color: #ffd700;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.play-step p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.step-arrow {
+    display: flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.3);
+    width: 24px;
+    height: 24px;
+    margin-top: 60px;
+}
+
+.play-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.play-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    min-width: 150px;
+}
+
+.play-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.play-button:hover::before {
+    left: 100%;
+}
+
+.play-button.primary {
+    background: linear-gradient(to right, #ffd700, #ff9900);
+    color: #000;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);
+}
+
+.play-button.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 215, 0, 0.6);
+}
+
+.play-button.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.play-button.secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .play-steps {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .step-arrow {
+        transform: rotate(90deg);
+        margin: 0.5rem 0;
+    }
+
+    .play-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .play-button {
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .featured-card {
+        width: 90px;
+        height: 135px;
+    }
+
+    .bg-card {
+        display: none;
+    }
+
+    .featured-card-1 {
+        top: 2%;
+        right: 2%;
+    }
+
+    .featured-card-2 {
+        bottom: 5%;
+        left: 2%;
+    }
+
+    .featured-card-3 {
+        bottom: 5%;
+        right: 2%;
+    }
+
+    .play-banner.collapsed {
+        min-height: 80px;
+        height: 80px;
+    }
+
+    .collapsed .play-title {
+        font-size: 1.5rem;
+    }
+}
+</style>
+
+<script>
+// JavaScript for toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const playBanner = document.getElementById('playBanner');
+    const toggleButton = document.getElementById('togglePlayBanner');
+
+    // Toggle banner when button is clicked
+    toggleButton.addEventListener('click', function() {
+        playBanner.classList.toggle('collapsed');
+
+        // Store preference in localStorage
+        if (playBanner.classList.contains('collapsed')) {
+            localStorage.setItem('playBannerState', 'collapsed');
+        } else {
+            localStorage.setItem('playBannerState', 'expanded');
+        }
+    });
+
+    // Check localStorage for returning users
+    const savedState = localStorage.getItem('playBannerState');
+    if (savedState) {
+        if (savedState === 'collapsed') {
+            playBanner.classList.add('collapsed');
+        } else {
+            playBanner.classList.remove('collapsed');
+        }
+    }
+});
+</script>
 	<!-- end hero area -->
 
 	<div class="list-section pt-80 pb-80 sticky-top" style="background: rgba(0, 255, 255, 0); z-index: 3;">
     <div class="container">
 
-        <div class="row">
-            {% for TopHits in tophit %}
-            <a href="{% url 'showcase:game' TopHits.game.slug %}">
-                <div class="list-box d-flex align-items-center" style="position: relative;">
-                    <div class="content"
-                        style="padding: 5px; margin: 5px; height: 150px; border-radius: 3px; background: radial-gradient(circle at center, blue, {{TopHits.color}}, white 100%);">
-                        <div class="image-container">
-                            <img src="{{ TopHits.file.url }}" alt="Image" style="width: 100px; height: 140px;">
-                            <h3>{{ TopHits.user.username }}</h3>
+       <div class="top-hits-container">
 
+    <div class="top-hits-row">
+        {% for TopHits in tophit %}
+        <a href="{% url 'showcase:game' TopHits.game.slug %}" class="top-hit-link">
+            <div class="top-hit-card">
+                <div class="top-hit-content" style="--card-color: {{ TopHits.color }};">
+                    <div class="card-frame">
+                        <div class="card-glow"></div>
+                        <div class="card-image-container">
+                            <img src="{{ TopHits.file.url }}" alt="{{ TopHits.user.username }}'s card" class="card-image">
+                        </div>
+                    </div>
+                    <div class="top-hit-info">
+                        <div class="username-badge">
+                            <span class="username-text">{{ TopHits.user.username }}</span>
+                        </div>
+                        <div class="hit-details">
+                            <div class="hit-game">{{ TopHits.game.name }}</div>
                         </div>
                     </div>
                 </div>
-            </a>
-            {% endfor %}
-        </div>
+                <div class="card-shine"></div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
 
+<style>
+.top-hits-container {
+    /*background: linear-gradient(to bottom,
+rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
+    border-radius: 16px;
+    padding: 2rem 1rem;
+    margin: 2rem 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+    /*border: 1px solid rgba(255, 255, 255, 0.1);*/
+}
+
+.top-hits-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+}
+
+.top-hits-header {
+    position: relative;
+    text-align: center;
+    margin-bottom: 2rem;
+    z-index: 1;
+}
+
+.top-hits-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.top-hits-title h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    background: linear-gradient(to right, #ffd700, #ff9900);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0 1rem;
+    letter-spacing: 2px;
+}
+
+.title-icon {
+    font-size: 2rem;
+    animation: bounce 2s infinite;
+}
+
+.top-hits-glow {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #ffd700, transparent);
+    bottom: -10px;
+    left: 0;
+}
+
+.top-hits-row {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem 0.5rem;
+    position: relative;
+    z-index: 1;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 215, 0, 0.5) rgba(0, 0, 0, 0.2);
+}
+
+.top-hits-row::-webkit-scrollbar {
+    height: 8px;
+}
+
+.top-hits-row::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.top-hits-row::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.5);
+    border-radius: 4px;
+}
+
+.top-hit-link {
+    text-decoration: none;
+    color: white;
+    flex: 0 0 auto;
+}
+
+.top-hit-card {
+    position: relative;
+    width: 180px;
+    transition: all 0.3s ease;
+    transform-origin: center bottom;
+    transform: perspective(800px) rotateY(0deg);
+}
+
+.top-hit-card:hover {
+    transform: perspective(800px) rotateY(5deg) translateY(-10px) scale(1.02);
+    z-index: 10;
+}
+
+.top-hit-rank {
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #ffd700, #ff9900);
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+    z-index: 2;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.top-hit-content {
+    background: linear-gradient(135deg, #2a2a3a, #1e1e2e);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-frame {
+    position: relative;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+.top-hit-card:hover .card-frame {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 20px var(--card-color, rgba(0, 100, 255, 0.5));
+}
+
+.card-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, var(--card-color, rgba(0, 100, 255, 0.5)), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 1;
+    mix-blend-mode: screen;
+}
+
+.top-hit-card:hover .card-glow {
+    opacity: 0.7;
+    animation: pulse-glow 2s infinite;
+}
+
+.card-image-container {
+    position: relative;
+    padding-top: 140%; /* Aspect ratio for card */
+    background: radial-gradient(circle at center, white 0%, var(--card-color, blue) 70%, #1a1a2e 100%);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 2;
+    transition: transform 0.5s ease;
+}
+
+.top-hit-card:hover .card-image {
+    transform: scale(1.05);
+}
+
+.top-hit-info {
+    margin-top: auto;
+    text-align: center;
+}
+
+.username-badge {
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5));
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--card-color, rgba(0, 100, 255, 0.5));
+    box-shadow: 0 0 10px var(--card-color, rgba(0, 100, 255, 0.3));
+}
+
+.username-text {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: white;
+    text-shadow: 0 0 5px var(--card-color, rgba(0, 100, 255, 0.8));
+}
+
+.hit-details {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.hit-game {
+    font-style: italic;
+}
+
+.card-shine {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0) 40%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0) 60%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    pointer-events: none;
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+}
+
+.top-hit-card:hover .card-shine {
+    transform: translateX(100%);
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .top-hits-title h2 {
+        font-size: 1.8rem;
+    }
+
+    .top-hit-card {
+        width: 150px;
+    }
+
+    .top-hit-rank {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+        top: -10px;
+        left: -10px;
+    }
+}
+</style>
     </div>
 </div>
 
@@ -4121,9 +5162,9 @@ Bounce
     var popup = document.getElementById("chatwidget2");
     if (popup.style.display === "none" || popup.style.display === "") {
         popup.style.display = "block";
-        popup.style.opacity = "1"; // Ensures full visibility
+        popup.style.opacity = "1";
     } else {
-        popup.style.opacity = "0"; // Smooth transition before hiding
+        popup.style.opacity = "0";
         setTimeout(() => {
             popup.style.display = "none";
         }, 300); // Delay to allow opacity transition

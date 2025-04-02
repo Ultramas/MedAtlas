@@ -228,7 +228,7 @@
             z-index: 100;
         }
 
-        /* Main Navigation */
+
         .main-menu {
             align-items: center;
             padding: 1rem 2rem;
@@ -799,7 +799,6 @@
             }
         }
 
-        /* Main Content */
         .main-content {
             padding: 20px;
             transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -809,8 +808,6 @@
             margin-left: var(--sidebar-collapsed-width);
         }
 
-
-        /* Responsive */
         /* @media (max-width: 768px) {
             .sidebar-container {
                 width: 100%;
@@ -848,90 +845,94 @@
             z-index: 100;
         }
 
-nav.main-menu ul li a {
-    color: #fff;
-    font-weight: 700;
-    display: block;
-    padding: 15px;
-}
+    nav.main-menu ul li a {
+        color: #fff;
+        font-weight: 700;
+        display: block;
+        padding: 15px;
+    }
 
 
-.button-85 {
-  padding: 0.6em 2em;
-  border: none;
-  outline: none;
-  color: rgb(255, 255, 255);
-  background: #111;
-  cursor: pointer;
-  position: relative;
-  z-index: 0;
-  border-radius: 10px;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-}
+    .button-85 {
+      padding: 0.6em 2em;
+      border: none;
+      outline: none;
+      color: rgb(255, 255, 255);
+      background: #111;
+      cursor: pointer;
+      position: relative;
+      z-index: 0;
+      border-radius: 10px;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
 
-.button-85:before {
-  content: "";
-  background: linear-gradient(
-    45deg,
-    #ff0000,
-    #ff7300,
-    #fffb00,
-    #48ff00,
-    #00ffd5,
-    #002bff,
-    #7a00ff,
-    #ff00c8,
-    #ff0000
-  );
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  background-size: 400%;
-  z-index: -1;
-  filter: blur(5px);
-  -webkit-filter: blur(5px);
-  width: calc(100% + 4px);
-  height: calc(100% + 4px);
-  animation: glowing-button-85 20s linear infinite;
-  transition: opacity 0.3s ease-in-out;
-  border-radius: 10px;
-}
+    .button-85:before {
+      content: "";
+      background: linear-gradient(
+        45deg,
+        #ff0000,
+        #ff7300,
+        #fffb00,
+        #48ff00,
+        #00ffd5,
+        #002bff,
+        #7a00ff,
+        #ff00c8,
+        #ff0000
+      );
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      background-size: 400%;
+      z-index: -1;
+      filter: blur(5px);
+      -webkit-filter: blur(5px);
+      width: calc(100% + 4px);
+      height: calc(100% + 4px);
+      animation: glowing-button-85 20s linear infinite;
+      transition: opacity 0.3s ease-in-out;
+      border-radius: 10px;
+    }
 
-@keyframes glowing-button-85 {
-  0% {
-    background-position: 0 0;
-  }
-  50% {
-    background-position: 400% 0;
-  }
-  100% {
-    background-position: 0 0;
-  }
-}
+    @keyframes glowing-button-85 {
+      0% {
+        background-position: 0 0;
+      }
+      50% {
+        background-position: 400% 0;
+      }
+      100% {
+        background-position: 0 0;
+      }
+    }
 
-.button-85:after {
-  z-index: -1;
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: #222;
-  left: 0;
-  top: 0;
-  border-radius: 10px;
-}
+    .button-85:after {
+      z-index: -1;
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #222;
+      left: 0;
+      top: 0;
+      border-radius: 10px;
+    }
 
-         #visual-mode-text {
-    color: #0a0a13;
-    transition: color 0.3s ease;
-  }
+             #visual-mode-text {
+        color: #0a0a13;
+        transition: color 0.3s ease;
+      }
 
-  /* Change color when hovered */
-  .buttonets:hover #visual-mode-text {
-    color: white;
-  }
+      .buttonets:hover #visual-mode-text {
+        color: white;
+      }
+
+        @media (max-width: 768px) {
+            .copyright-section {
+                display: none;
+            }
     </style>
 </head>
 <body>
@@ -985,7 +986,7 @@ nav.main-menu ul li a {
                 </li>
                 {% endfor %}
                 <a href="{% url 'showcase:currencymarket' %}">
-                    <button class="button-85" role="button" style="margin-left: 50px;">💎➕</button>
+                    <button class="button-85" role="button" style="margin-left: 50px; display: flex; flex-direction: row;"><i class="fas fa-gem user-stat-icon" style="color: #ED2221; margin-top: 4px;"></i>➕</button>
                 </a>
             </ul>
             <ul id="simpleNavbar" style="display: none; flex-direction: row; align-items: center;">
@@ -1037,8 +1038,7 @@ nav.main-menu ul li a {
                 </a>
             </div>
         </div>
-            <br>
-            <button class="buttonets" onclick="toggleMode()" style="margin-left: auto; margin-right: auto;">
+            <button class="buttonets" onclick="toggleMode()" style="margin-left: auto; margin-right: auto; margin-top: 10px;">
               <strong><h6 id="visual-mode-text">Visual Mode</h6></strong>
               <div id="containerteed-stars">
                 <div id="stars"></div>
@@ -1102,7 +1102,7 @@ nav.main-menu ul li a {
                         <li class="nav-item">
                             <a href="{% url 'showcase:currencymarket' %}" class="nav-link">
                                 <i class="fas fa-diamond"></i>
-                                <span class="nav-text">Rubies</span>
+                                <span class="nav-text" style="color: rgba(255, 50, 0, 1);">Rubies</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -1112,13 +1112,19 @@ nav.main-menu ul li a {
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="{% url 'showcase:order-summary' %}" class="nav-link">
+                                <i class="fas fa-trophy"></i>
+                                <span class="nav-text">My Cart</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{% url 'showcase:gamehub' slug='123'  %}" class="nav-link">
                                 <i class="fas fa-box"></i>
                                 <span class="nav-text">Chests</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{% url 'showcase:ehome' %}" class="nav-link">
+                            <a href="{% url 'showcase:achievements' %}" class="nav-link">
                                 <i class="fas fa-trophy"></i>
                                 <span class="nav-text">Achievements</span>
                             </a>
@@ -1127,7 +1133,7 @@ nav.main-menu ul li a {
                         <li class="nav-item">
                             <a href="#" class="nav-link">
                                 <i class="fas fa-exchange-alt"></i>
-                                <span class="nav-text">Trades</span>
+                                <span class="nav-text">Trades</span>a
                                 <span class="nav-badge">3</span>
                             </a>
                         </li>-->
@@ -1206,13 +1212,13 @@ nav.main-menu ul li a {
                                 <span class="nav-text">Privacy Policy</span>
                             </a>
                         </li>
-                       <li class="nav-item">
                             <form action="{% url 'logout' %}" class="nav-link" method="post" id="logout-form">
+                       <li class="nav-item">
                                 {% csrf_token %}
                                 <i class="fas fa-sign-out-alt"></i>
                                 <span class="nav-text" onclick="document.getElementById('logout-form').submit();" style="cursor: pointer;">Logout</span>
-                            </form>
                         </li>
+                            </form>
                     </ul>
                 </div>
             </div>
@@ -1222,6 +1228,7 @@ nav.main-menu ul li a {
                 <h3 class="section-title"><i class="fas fa-chart-line"></i> Progress</h3>
                 <div class="progress-title">
                     <span>Level Progress</span>
+                    {% if user.is_authenticated %}
 
                {% for userprofile in NewsProfiles %}
 
@@ -1238,17 +1245,39 @@ nav.main-menu ul li a {
                         </div>
                     </div>
                 </div>
+                {% else %}
+                <a href="{% url 'login' %}?next={{ request.path }}" style="text-decoration: none; display: flex: flex-direction: column;">
+                    <span>
+                        Login To Earn EXP!
+                    </span>
+                <div class="progress-bar">
+                    <div class="progress-bar" style="width: 100%; height: 20px; background: #ddd; border-radius: 4px; overflow: hidden;">
+                        <div class="progress-fill" style="width: 65%;">
+                        </div>
+                    </div>
+                </div>
+                </a>
+                {% endif %}
             </div>
 
 
             <div class="collection">
                 <h2 class="collection-title">My Collection</h2>
                 <button class="view-collection">
+                    {% if user.is_authenticated %}
                     <a href="{% url 'showcase:inventory' %}" class="collection-item">
 
                     🐉 View Collection (<span id="stock-count">{{ StockObject|length }}</span>)
 
                     </a>
+                    {% else %}
+
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="collection-item">
+
+                    Login To Collect!
+
+                    </a>
+                    {% endif %}
                 </button>
             </div>
         </aside>
@@ -1427,4 +1456,3 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 </body>
-</html>
