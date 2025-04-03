@@ -1208,44 +1208,6 @@ class MemberHomeBackgroundView(ListView):
         return context
 
 
-class BusinessMessageBackgroundView(ListView):
-    model = BusinessMessageBackgroundImage
-    template_name = "businessemail.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['BusinessMessageBackgroundImage'] = BusinessMessageBackgroundImage.objects.all()
-        if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-        else:
-            userprofile = None
-
-        if userprofile:
-            context['NewsProfiles'] = userprofile
-        else:
-            context['NewsProfiles'] = None
-
-        if context['NewsProfiles'] == None:
-
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
-        else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-        return context
 
 
 class PatreonBackgroundView(ListView):
@@ -2131,7 +2093,7 @@ class ChestBackgroundView(BaseView):
 
             context['Money'] = Currency.objects.filter(is_active=1).first()
             context['wager_form'] = WagerForm()
-
+            context['tophit'] = TopHits.objects.filter(game=game, is_active=True).order_by('-mfg_date')[:8]
             newprofile = UpdateProfile.objects.filter(is_active=1)
 
 
@@ -2315,10 +2277,11 @@ def create_outcome(request, slug):
         try:
             body = json.loads(request.body)
             game_id = body.get('game_id')
+            button_id = body.get('button_id')  # Capture button_id from request
             user = request.user
 
             print(f"Received JSON body: {body}")
-            print(f"Game ID: {game_id}, User: {user}")
+            print(f"Game ID: {game_id}, User: {user}, Button ID: {button_id}")
 
             if not game_id:
                 return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
@@ -2326,7 +2289,7 @@ def create_outcome(request, slug):
             game = Game.objects.get(id=game_id, slug=slug)
             nonce = random.randint(1, 1000000)
 
-            # First, try to find a matching GameChoice instance using nonce filtering.
+            # Select choice based on nonce
             game_choice_instance = GameChoice.objects.filter(
                 game=game,
                 lower_nonce__lte=nonce,
@@ -2334,10 +2297,8 @@ def create_outcome(request, slug):
             ).first()
 
             if game_choice_instance:
-                # If a GameChoice instance is found, use its related choice.
                 choice = game_choice_instance.choice
             else:
-                # Otherwise, fall back to filtering Choice objects directly.
                 choices = Choice.objects.filter(
                     game=game,
                     lower_nonce__lte=nonce,
@@ -2353,34 +2314,23 @@ def create_outcome(request, slug):
 
             print(f"Game: {game}, Selected Choice: {choice.id}, {choice.choice_text}, {choice.color}")
 
+            # Determine whether it's a demo spin
+            demonstration_flag = True if button_id == "start2" else False
+
+            # Create outcome
             outcome_data = {
                 'game': game,
                 'choice': choice,
                 'nonce': nonce,
                 'value': random.randint(1, 1000000),
                 'ratio': random.randint(1, 10),
-                'type': game.type
+                'type': game.type,
+                'demonstration': demonstration_flag  # Set demonstration based on button
             }
             if user.is_authenticated:
                 outcome_data['user'] = user
 
             outcome = Outcome.objects.create(**outcome_data)
-
-            if game_choice_instance:
-                game_choice_data = {
-                    'lower_nonce': game_choice_instance.lower_nonce,
-                    'upper_nonce': game_choice_instance.upper_nonce,
-                    'value': game_choice_instance.value,
-                    'rarity': game_choice_instance.rarity,
-                }
-                print('game choice instance returned')
-            else:
-                game_choice_data = {
-                    'lower_nonce': choice.lower_nonce,
-                    'upper_nonce': choice.upper_nonce,
-                    'value': choice.value,
-                    'rarity': choice.rarity,
-                }
 
             return JsonResponse({
                 'status': 'success',
@@ -2388,12 +2338,10 @@ def create_outcome(request, slug):
                 'nonce': outcome.nonce,
                 'choice_id': choice.id,
                 'choice_value': choice.value,
-                'upper_nonce': choice.upper_nonce,
-                'lower_nonce': choice.lower_nonce,
                 'choice_text': choice.choice_text,
                 'choice_color': choice.color,
                 'choice_file': choice.file.url if choice.file else None,
-                'game_choice': game_choice_data,
+                'demonstration': outcome.demonstration  # Send demonstration flag in response
             })
 
         except Game.DoesNotExist:
@@ -2402,6 +2350,7 @@ def create_outcome(request, slug):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
 
 
 def game_view(request, game_id):
@@ -2773,6 +2722,7 @@ class DailyChestView(BaseView):
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['wager_form'] = WagerForm()
 
+        context['tophit'] = TopHits.objects.filter(game=game, is_active=True).order_by('-mfg_date')[:8]
         game = get_object_or_404(Game, slug=slug)
         context['games'] = game
         choices = Choice.objects.filter(game=game)
@@ -8935,6 +8885,7 @@ class MemberHomeBackgroundView(ListView):
         return context
 
 
+
 class BusinessMessageBackgroundView(ListView):
     model = BusinessMessageBackgroundImage
     template_name = "businessemail.html"
@@ -8945,8 +8896,11 @@ class BusinessMessageBackgroundView(ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['BusinessMessageBackgroundImage'] = BusinessMessageBackgroundImage.objects.all()
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -8972,7 +8926,6 @@ class BusinessMessageBackgroundView(ListView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
-
 
 class PatreonBackgroundView(ListView):
     model = Patreon
@@ -9714,7 +9667,7 @@ class BackgroundView(FormMixin, BaseView):
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
-        context['tophit'] = TopHits.objects.filter(is_active=True).order_by('-mfg_date')[:4]
+        context['tophit'] = TopHits.objects.filter(is_active=True).order_by('-mfg_date')[:8]
         print(FaviconBase.objects.all())
         print(213324)
         # Retrieve the signed-in user's profile and profile picture URL
@@ -13327,6 +13280,7 @@ class GameChestBackgroundView(BaseView):
         game = get_object_or_404(Game, slug=slug)
         context['game'] = game
 
+        context['tophit'] = TopHits.objects.filter(game=game, is_active=True).order_by('-mfg_date')[:8]
         user = self.request.user
         if user.is_authenticated:
             try:

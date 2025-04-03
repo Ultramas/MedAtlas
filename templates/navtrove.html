@@ -1212,6 +1212,7 @@
                                 <span class="nav-text">Privacy Policy</span>
                             </a>
                         </li>
+                        {% if user.is_authenticated %}
                             <form action="{% url 'logout' %}" class="nav-link" method="post" id="logout-form">
                        <li class="nav-item">
                                 {% csrf_token %}
@@ -1219,6 +1220,7 @@
                                 <span class="nav-text" onclick="document.getElementById('logout-form').submit();" style="cursor: pointer;">Logout</span>
                         </li>
                             </form>
+                        {% endif %}
                     </ul>
                 </div>
             </div>

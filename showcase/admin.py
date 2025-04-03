@@ -291,8 +291,6 @@ class authorAdmin(admin.ModelAdmin):
         }),
     )
 
-
-
 admin.site.register(VoteQuery, authorAdmin)
 
 
@@ -806,9 +804,18 @@ admin.site.register(Game, GameAdmin)
 class TopHitsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Top Hits Information - Categorial Description', {
-            'fields': ('user', 'game', 'choice', 'color', 'file', 'is_active',),
+            'fields': ('user', 'game', 'choice', 'color', 'file', 'demonstration', 'is_active',),
             'classes': ('open',),
         }),
+    )
+    list_display = (
+        'user',
+        'game',
+        'choice',
+        'color',
+        'file',
+        'demonstration',
+        'is_active',
     )
     readonly_fields = ('mfg_date',)
 
@@ -2041,8 +2048,18 @@ class OutcomeAdmin(admin.ModelAdmin):
            'fields': ('file', 'image_length', 'image_width',)
        }),
        ('Outcome Information - Attributes', {
-           'fields': ('game', 'game_creator', 'choice', 'nonce', 'is_active',)
+           'fields': ('game', 'game_creator', 'choice', 'nonce', 'demonstration', 'is_active',)
        }),
+   )
+   list_display = (
+       'user',
+       'value',
+       'file',
+       'game',
+       'choice',
+       'nonce',
+       'demonstration',
+       'is_active',
    )
    readonly_fields = ('date_and_time',)
 
@@ -2362,7 +2379,6 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
     readonly_fields = ('position',)
     inlines = [ProfileCurrencyInline]
 
-    # Display user, selling status, and membership as separate columns in the admin list view
     list_display = ('user', 'trader', 'get_selling_status', 'get_membership')
 
     def get_selling_status(self, obj):
@@ -2499,6 +2515,7 @@ class BetAdmin(admin.ModelAdmin):
 
 admin.site.register(Bet, BetAdmin)
 
+
 class AffiliationAdmin(admin.ModelAdmin):
     list_display = ('type', 'flavor_text', 'icon', 'unlocking_level', 'is_active')
 
@@ -2543,7 +2560,6 @@ class LevelAdmin(admin.ModelAdmin):
             level.save()  # Save the instance
         self.message_user(request, f"{queryset.count()} levels have been saved successfully.")
 
-    # Add the action to the admin
     actions = ['mass_save']
 
 admin.site.register(Level, LevelAdmin)
@@ -2556,7 +2572,9 @@ class LevelIconAdmin(admin.ModelAdmin):
             'fields': ('name', 'level_icon', 'is_active',)
         }),
     )
+
 admin.site.register(LevelIcon, LevelIconAdmin)
+
 
 class MonstrosityAdmin(admin.ModelAdmin):
     fieldsets = (

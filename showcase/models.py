@@ -3372,6 +3372,7 @@ class TopHits(models.Model):
     file = models.FileField(null=True, verbose_name='File')
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     button_pressed = models.CharField(max_length=10)
+    demonstration = models.BooleanField(default=False)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -3386,7 +3387,7 @@ class TopHits(models.Model):
             self.color = self.choice.color
         if not self.file:
             self.file = self.choice.file
-        super().save(*args, **kwargs)  # Ensure changes are persisted
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Top Hit"

@@ -1,387 +1,470 @@
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Responsive Bootstrap4 Shop Template, Created by Imran Hossain from https://imransdesign.com/">
 
-    {% for ContactViewe in Titles %}
-      {% if ContactViewe.page == 'contact.html' %}
-    <title>{{ ContactViewe.overtitle }}</title>
-      {% endif %}
-    {% endfor %}
-
-	<!-- favicon -->
-	<link rel="shortcut icon" type="image/png" href="static/img/favicon.png">
-	<!-- google font -->
-	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
-	<!-- fontawesome -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+{% block content %}
 <style>
-	.contact-form form p input[type=text], .contact-form form p input[type=tel], .contact-form form p input[type=email] {
-    width: 105%;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 3px;
-}
-    .form-control {
-        padding: 10px;
-        box-sizing: border-box;
-        margin-bottom: 10px;
-        height: 50px;
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
+
+    :root {
+        --primary: #00f0ff;
+        --primary-dark: #00a0a8;
+        --secondary: #ff00e5;
+        --accent: #4ecca3;
+        --dark: #0a0a20;
+        --darker: #050510;
+        --light: #e1e1ff;
+        --success: #00ff66;
     }
 
-    .form-control.full-width {
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Rajdhani', sans-serif;
+    }
+
+    .signup-container {
+        background-color: var(--darker);
+        background-image:
+            radial-gradient(circle at 20% 35%, rgba(0, 240, 255, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 75% 65%, rgba(255, 0, 229, 0.15) 0%, transparent 40%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        color: var(--light);
+    }
+
+    .form-card {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        border-radius: 16px;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 500px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .form-header h1 {
+        color: var(--primary);
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+    }
+
+    .form-header p {
+        color: var(--light);
+        opacity: 0.8;
+    }
+
+    .form-content {
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .form-field {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .form-content label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--primary);
+        font-weight: 600;
+        transition: color 0.3s ease;
+        letter-spacing: 0.5px;
+    }
+
+    .form-content input {
+        width: 100%;
+        padding: 12px 15px;
+        background: rgba(10, 10, 32, 0.6);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        color: var(--light);
+    }
+
+    .form-content input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .submit-button {
+        background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+        color: var(--darker);
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        width: 100%;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-button::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent 70%);
+        transition: transform 0.5s ease;
+    }
+
+    .submit-button:hover::before {
+        transform: translate(25%, 25%);
+    }
+
+    .submit-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+    }
+
+    .submit-button:active {
+        transform: translateY(-1px);
+    }
+
+    .signuphere, .passwordreset {
+        margin: 1rem 0;
+        text-align: center;
+    }
+
+    .signuphere a, .passwordreset a {
+        color: var(--primary);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        position: relative;
+        padding-bottom: 2px;
+    }
+
+    .signuphere a::after, .passwordreset a::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: var(--primary);
+        transition: width 0.3s ease;
+    }
+
+    .signuphere a:hover::after, .passwordreset a:hover::after {
         width: 100%;
     }
 
-    textarea.form-control {
-        height: 100px;
+    .signuphere a:hover, .passwordreset a:hover {
+        text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
     }
 
-    .form-row {
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
+    @keyframes slideDown {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Error message styling */
+    .errorlist {
+        color: var(--secondary);
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0;
+        font-size: 0.875rem;
+        animation: pulse 2s infinite;
+    }
+
+    /* Help text styling */
+    .helptext {
+        color: rgba(225, 225, 255, 0.7);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* Password tooltip styles */
+    .password-label-wrapper {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .info-icon {
+        cursor: pointer;
+        color: var(--primary);
+        padding: 4px;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .info-icon:hover {
+        color: var(--light);
+        background-color: rgba(0, 240, 255, 0.2);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .info-icon:focus {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+    }
+
+    .info-tooltip {
+        position: absolute;
+        top: calc(100% + 10px);
+        left: -10px;
+        background: rgba(10, 10, 32, 0.9);
+        border-radius: 8px;
+        padding: 12px 16px;
+        width: 280px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 240, 255, 0.3);
+        z-index: 50;
+        font-size: 14px;
+        color: var(--light);
+        visibility: hidden;
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    .info-tooltip::before {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: 20px;
+        width: 10px;
+        height: 10px;
+        background: rgba(10, 10, 32, 0.9);
+        transform: rotate(45deg);
+        border-left: 1px solid rgba(0, 240, 255, 0.3);
+        border-top: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    .info-tooltip.visible {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .tooltip-content {
+        position: relative;
+        padding-left: 20px;
+    }
+
+    .tooltip-content::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 80%;
+        background: linear-gradient(to bottom, var(--primary), var(--secondary));
+        border-radius: 4px;
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
+    @media (max-width: 640px) {
+        .info-tooltip {
+            width: 260px;
+            left: -50%;
+        }
+
+        .form-card {
+            padding: 2rem 1.5rem;
+        }
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.7; }
+        50% { opacity: 1; }
+        100% { opacity: 0.7; }
+    }
+
+    @keyframes glow {
+        0% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.5); }
+        50% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.8); }
+        100% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.5); }
     }
 </style>
 
-</head>
-<body>
-
-	<!--PreLoader-->
-    <div class="loader">
-        <div class="loader-inner">
-            <div class="circle"></div>
+{% if not user.is_authenticated %}
+    <head>
+        <meta http-equiv="refresh" content="0; url=http://{{ request.get_host }}/showcase">
+    </head>
+{% else %}
+    <div class="wrapperew">
+        <div class="containerert">
+            <div class="formert">
+                <div class="forming"></div>
+            </div>
         </div>
     </div>
-    <!--PreLoader Ends-->
+{% endif %}
 
-	<!-- header -->
-	<div class="top-header-area" id="sticker">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-12 col-sm-12 text-center">
-					<div class="main-menu-wrap">
-						<!-- logo -->
-                        <div class="site-logo">
-                        {% for ContactViewe in Logo %}
-                        {% if ContactViewe.page == 'contact.html' %}
-                        <a class="logo" href="{{ContactViewe.hyperlink}}">
-                        <img class="imageicon" src="{{ContactViewe.logocover.url}}"
-                        alt="{{ContactViewe.alternate}}" style="length: {{ContactViewe.length_for_resize}}px; width: {{ContactViewe.width_for_resize}}px; position: fixed;"></a>
-                        {% endif %}
-                        {% endfor %}
+{% include 'navtrove.html' %}
+<div class="signup-container">
+    <div class="form-card">
+        <div class="form-header">
+			<h1>Contact Us</h1>
+			<p>We strive to respond within 1 business day or less. </p>
+        </div>
 
-						</div>
-						<!-- logo -->
+        <form method="POST" class="form-content">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-field">
+                    {% if field.name == 'password1' %}
+                        <div class="password-label-wrapper">
+                            {{ field.label_tag }}
+                            <span class="info-icon" role="button" tabindex="0" aria-label="Password information">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
 
-						<!-- menu start -->
-						<nav class="main-menu">
-							<ul>
-							  {% for column in Header %}
+                                <div class="info-tooltip" role="tooltip">
+                                    <div class="tooltip-content">
+                                        Your password must be at least 8 characters long and include a mix of letters, numbers, and special characters.
+                                    </div>
+                                </div>
+                            </span>
+                        </div>
+                        {{ field }}
+                    {% else %}
+                        {{ field.label_tag }}
+                        {{ field }}
+                    {% endif %}
+                    {% if field.help_text %}
+                        <span class="helptext">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
 
-      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
-									<ul class="sub-menu">
-										{% for row in DropDown %}
-          {% if row.row == column.row %}
-            {% if row.url == 'http://127.0.0.1:8000/profile' %}
-              {% if row.opennew %}
-										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
-              {% else %}
-										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
-              {% endif %}
-            {% else %}
-              {% if row.opennew %}
-										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
-              {% else %}
-										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
-              {% endif %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-									</ul>
-        {% endfor %}
-								</li>
-								<li>
-									<div class="header-icons">
-										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
-											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
-										</a>
-										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
-									</div>
-								</li>
-							</ul>
-						</nav>
-						<a class="mobile-show search-bar-icon" href="#"><i class="fas fa-search"></i></a>
-						<div class="mobile-menu"></div>
-						<!-- menu end -->
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end header -->
+            <button type="submit" class="submit-button">Submit</button>
+        </form>
 
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const infoIcon = document.querySelector('.info-icon');
+                const tooltip = document.querySelector('.info-tooltip');
+                let isTooltipVisible = false;
 
-	<!-- search area -->
-	<div class="search-area">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-12">
-					<span class="close-btn"><i class="fas fa-window-close"></i></span>
-					<div class="search-bar">
-						<div class="search-bar-tablecell">
-							<h3>Search For:</h3>
-							<input type="text" placeholder="Keywords">
-							<button type="submit">Search <i class="fas fa-search"></i></button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end search arewa -->
+                // Ensure tooltip is hidden on page load
+                tooltip.classList.remove('visible');
 
-	<!-- breadcrumb-section -->
-{% for ContactViewe in Background %}
-{% if ContactViewe.page == "contact.html" %}
-	<div class="breadcrumb-section breadcrumb-bg" style="background: url('{{ContactViewe.cover.url}}'); background-size: cover;">
-    {% endif %}
-    {% endfor %}
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-8 offset-lg-2 text-center">
-					<div class="breadcrumb-text">
-						<p>PokeTrove 24/7 Support</p>
-						<h1>Contact Us</h1>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end breadcrumb section -->
+                function toggleTooltip(event) {
+                    event.stopPropagation(); // Prevent event from bubbling
+                    isTooltipVisible = !isTooltipVisible;
+                    tooltip.classList.toggle('visible');
+                }
 
-	<!-- contact form -->
-	<div class="contact-from-section mt-150 mb-150">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-8 mb-5 mb-lg-0">
-					<div class="form-title">
-						<h2>Contact Us</h2>
-						<p>We strive to respond within 1 business day or less. </p>
-					</div>
-				 	<div id="form_status"></div>
-					<div class="contact-form">
-						<form method="post">
-							{% csrf_token %}
-							<ul style="display: flex; justify-content: space-between;">
-								<div class="form-row" style="margin-right: 2.5%;">
-									<p style="width: 100%; height: 40%;">{{ form.name }}</p>
-									<p>{{ form.email }}</p>
-								</div>
-								<div class="form-row" style="margin-left: 2.5%;">
-									<p style="width: 100%; height: 40%;">{{ form.inquiry }}</p>
-								</div>
-							</ul>
+                // Show/hide tooltip on click or Enter key
+                infoIcon?.addEventListener('click', toggleTooltip);
+                infoIcon?.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        toggleTooltip(e);
+                    }
+                });
 
+                // Hide tooltip when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (infoIcon && !infoIcon.contains(e.target) && isTooltipVisible) {
+                        isTooltipVisible = false;
+                        tooltip.classList.remove('visible');
+                    }
+                });
 
-							<div class="form-row">
-								<p style="width: 75%; height: 200%;">{{ form.message }}</p>
-							</div>
-							<input type="submit" value="Submit">
-						</form>
+                // Hide tooltip when pressing Escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && isTooltipVisible) {
+                        isTooltipVisible = false;
+                        tooltip.classList.remove('visible');
+                    }
+                });
 
-					</div>
-				</div>
-				<div class="col-lg-4">
-					<div class="contact-form-wrap">
-						<div class="contact-form-box">
-							<h4>
+                // Add animation to form fields
+                const inputs = document.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.addEventListener('focus', function() {
+                        const label = this.parentElement.querySelector('label');
+                        if (label) label.style.color = 'var(--secondary)';
+                    });
 
-						{% for BackgroundImage in Image %}
-						{% if BackgroundImage.image_position == 1 %}
-								{% if BackgroundImage.page == 'contact.html' %}
-							<img src="{{ BackgroundImage.image.url }}" style="width: 25px; length: 25px;">
-							{% endif %}
-							{% endif %}
-							{% endfor %}
-								Shop Address</h4>
-							<p>To Be Added <br> Sacramento, California. <br>United States</p>
-						</div>
-						<div class="contact-form-box">
-							<h4>
+                    input.addEventListener('blur', function() {
+                        const label = this.parentElement.querySelector('label');
+                        if (label) label.style.color = 'var(--primary)';
+                    });
+                });
 
-						{% for BackgroundImage in Image %}
-						{% if BackgroundImage.image_position == 2 %}
-								{% if BackgroundImage.page == 'contact.html' %}
-							<img src="{{ BackgroundImage.image.url }}" style="width: 25px; length: 25px;">
-							{% endif %}
-							{% endif %}
-							{% endfor %}
-								Live Chat Support Hours</h4>
-							<p>MONDAY - FRIDAY: 8 to 9 PM <br> SATURDAY - SUNDAY: 10 to 8 PM </p>
-						</div>
-						<div class="contact-form-box">
-							<h4>
+                // Add subtle animation to the form on load
+                const formCard = document.querySelector('.form-card');
+                formCard.style.opacity = '0';
+                formCard.style.transform = 'translateY(20px)';
 
-						{% for BackgroundImage in Image %}
-						{% if BackgroundImage.image_position == 3 %}
-								{% if BackgroundImage.page == 'contact.html' %}
-							<img src="{{ BackgroundImage.image.url }}" style="width: 25px; length: 25px;">
-							{% endif %}
-							{% endif %}
-							{% endfor %}
-								Contact</h4>
-							<p>Phone: To Be Added <br> Email: poketrovecompany@gmail.com</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end contact form -->
-
-	<!-- find our location -->
-	<div class="find-location blue-bg">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-12 text-center">
-					<p>
-							{% for BackgroundImage in Image %}
-						{% if BackgroundImage.image_position == 4 %}
-								{% if BackgroundImage.page == 'contact.html' %}
-							<img src="{{ BackgroundImage.image.url }}" style="width: 35px; length: 35px;">
-							{% endif %}
-							{% endif %}
-							{% endfor %}
-						Find Our Location</p>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end find our location -->
-
-	<!-- google map section -->
-	<div class="embed-responsive embed-responsive-21by9">
-		<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d26432.42324808999!2d-118.34398767954286!3d34.09378509738966!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80c2bf07045279bf%3A0xf67a9a6797bdfae4!2sHollywood%2C%20Los%20Angeles%2C%20CA%2C%20USA!5e0!3m2!1sen!2sbd!4v1576846473265!5m2!1sen!2sbd" width="600" height="450" frameborder="0" style="border:0;" allowfullscreen="" class="embed-responsive-item"></iframe>
-	</div>
-	<!-- end google map section -->
-
-	<!-- footer -->
-	<div class="footer-area">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-3 col-md-6">
-					<div class="footer-box about-widget">
-						<h2 class="widget-title">About Us</h2>
-                            {% for BackgroundImage in TextFielde %}
-							{% if BackgroundImage.page == "index.html" %}
-							{% if BackgroundImage.section == 15 %}
-							<p>{{BackgroundImage.text}}</p>
-						  	{% endif %}
-							{% endif %}
-							{% endfor %}
-					</div>
-				</div>
-				<div class="col-lg-3 col-md-6">
-					<div class="footer-box get-in-touch">
-						<h2 class="widget-title">Join Our Community! </h2>
-						<ul>
-							<li>Address To Be Added</li>
-							<li><a href="{% url 'showcase:contact' %}" target='_blank' style="text-decoration: none;">PokeTroveCompany@gmail.com</a></li>
-							<li>Number To Be Added</li>
-							<li><a href="{% url 'showcase:home' %}" target='_blank' style="text-decoration: none;">Find Your Community</a></li>
-						</ul>
-					</div>
-				</div>
-				<div class="col-lg-3 col-md-6">
-					<div class="footer-box pages">
-						<h2 class="widget-title">Pages</h2>
-						<br>
-						<ul>
-							<li><a href="{% url 'showcase:index' %}">Home</a></li>
-							<li><a href="{% url 'showcase:about' %}">About</a></li>
-							<li><a href="{% url 'showcase:ehome' %}">Shop</a></li>
-							<li><a href="{% url 'showcase:newsfeed' %}">News</a></li>
-							<li><a href="{% url 'showcase:contact' %}">Contact</a></li>
-						</ul>
-					</div>
-				</div>
-				<div class="col-lg-3 col-md-6">
-					<div class="footer-box subscribe">
-						<h2 class="widget-title">Subscribe</h2>
-						<p>Subscribe to our mailing list to get the latest updates.</p>
-						<form method="post" action="">
-
-							<div class="form-row" style="display: flex;">
-								<p style="width: 75%; height: 200%;">{{ form.message }}</p>
-							<input type="submit" value="Submit">
-							</div>
-						</form>
-    						{% csrf_token %}
-							{{ form.email }}
-							<br>
-							<br>
-							<button type="submit"><img src="{% static 'css/images/sendemailairplane.png' %}" style="width: 30px; height: 15px; margin-top: 15px;"></button>
-													<br>
-							</div>
-							I agree to the Terms & Conditions: {{ form.confirmation }}
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end footer -->
-
-	<!-- copyright -->
-	<div class="copyright" style="margin-bottom: -10%;">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-6 col-md-12">
-					{% for BackgroundImage in BaseCopyrightTextFielded %}
-					{% if BackgroundImage.page == "index.html" %}
-					<p>{{BackgroundImage.copyright}}</p>
-					{% endif %}
-					{% endfor %}
-				</div>
-				<div class="col-lg-6 text-right col-md-12">
-					<div class="social-icons">
-						<ul>
-					{% for BackgroundImage in Social %}
-					{% if BackgroundImage.page == "index.html" %}
-							<li><a href="{{BackgroundImage.hyperlink}}" target="_blank"><img src="{{BackgroundImage.icon.url}}" alt="{{ BackgroundImage.alternate }}" style="width: 30px; height: 30px;"></a></li>
-					{% endif %}
-					{% endfor %}
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end copyright -->
-
-	<!-- jquery -->
-     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-     <script src="{% static 'css/js/main.js' %}"></script>
-     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
-     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
-     <script src="{% static 'css/js/waypoints.js' %}"></script>
-	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
-     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
-     <script src="{% static 'css/js/sticker.js' %}"></script>
-
-</body>
-</html>
+                setTimeout(() => {
+                    formCard.style.transition = 'all 0.6s ease-out';
+                    formCard.style.opacity = '1';
+                    formCard.style.transform = 'translateY(0)';
+                }, 100);
+            });
+        </script>
+    </div>
+</div>
+{% endblock content %}

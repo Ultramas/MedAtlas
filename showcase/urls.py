@@ -151,6 +151,7 @@ urlpatterns = [
     path('showcase/', views.ShowcaseBackgroundView.as_view(), name='showcase'),
     path('memberhome/', views.MemberHomeBackgroundView.as_view(), name='memberhome'),
     path('post_edit/', views.PostingView.as_view(), name='post_edit'),
+    path('mypreferences/', views.PostingView.as_view(), name='mypreferences'),
     # path('post_edit/', views.PostBackgroundView.as_view(), name='post_edit'),
     # works at the cost of the post display
     path('blog/', views.PostList.as_view(), name='blog'),
@@ -426,7 +427,6 @@ urlpatterns = [
 
     #path("password_reset", views.password_reset_request, name="password_reset"),
 
-    path('contact/', contactView, name='contact'),
 
     path('success/', successView, name='success'),
 

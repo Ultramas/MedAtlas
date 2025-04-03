@@ -74,9 +74,20 @@ async function randomizeContents() {
     console.log("Nonce:", nonce);
     console.log("Slug:", slug);
 
+
     try {
-        const payload = { game_id: gameId };
+        const payload = {
+            game_id: gameId,
+            button_id: buttonId
+        };
+
         console.log("Payload sent to server:", payload);
+
+        if (buttonId === "start") {
+            console.log("Regular Spin triggered");
+        } else if (buttonId === "start2") {
+            console.log("Demo Spin triggered");
+        }
 
         const response = await fetch(`/create_outcome/${slug}/`, {
             method: 'POST',

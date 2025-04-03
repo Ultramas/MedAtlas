@@ -75,8 +75,18 @@ async function randomizeContents() {
     console.log("Slug:", slug);
 
     try {
-        const payload = { game_id: gameId };
+        const payload = {
+            game_id: gameId,
+            button_id: buttonId
+        };
+
         console.log("Payload sent to server:", payload);
+
+        if (buttonId === "start") {
+            console.log("Regular Spin triggered");
+        } else if (buttonId === "start2") {
+            console.log("Demo Spin triggered");
+        }
 
         const response = await fetch(`/create_outcome/${slug}/`, {
             method: 'POST',
@@ -365,11 +375,14 @@ function playCasinoRedGoldSound() {
     });
 }
 
-function createTopHit(data) {
+function createTopHit(data, buttonId) {
+    data.demonstration = buttonId === "start2";
+
     fetch('/top-hits/create/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}',
         },
         body: JSON.stringify(data),
     })
@@ -385,6 +398,7 @@ function createTopHit(data) {
         console.error('Network error:', error);
     });
 }
+
 
 
 function getCSRFToken() {
