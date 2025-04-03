@@ -2277,7 +2277,7 @@ def create_outcome(request, slug):
         try:
             body = json.loads(request.body)
             game_id = body.get('game_id')
-            button_id = body.get('button_id')  # Capture button_id from request
+            button_id = body.get('button_id')
             user = request.user
 
             print(f"Received JSON body: {body}")
@@ -2314,7 +2314,6 @@ def create_outcome(request, slug):
 
             print(f"Game: {game}, Selected Choice: {choice.id}, {choice.choice_text}, {choice.color}")
 
-            # Determine whether it's a demo spin
             demonstration_flag = True if button_id == "start2" else False
 
             # Create outcome
@@ -2548,50 +2547,45 @@ def sell_game_inventory_object(request, pk):
 @csrf_exempt
 def create_top_hit(request):
     if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-        except JSONDecodeError:
-            logger.error("Invalid JSON payload")
-            return JsonResponse({'error': 'Invalid JSON payload'}, status=400)
+        data = json.loads(request.body)
+        required_fields = ['choice_id', 'game_id']
+        button_id = data.get('button_id')
 
-        required_fields = ['choice_id', 'game_id', 'button_id']
+        print(f"Top Hits Button ID: {button_id}")
         missing_fields = [field for field in required_fields if field not in data]
         if missing_fields:
-            logger.warning(f"Missing fields: {', '.join(missing_fields)}")
             return JsonResponse({'error': f'Missing fields: {", ".join(missing_fields)}'}, status=400)
 
         try:
             choice = Choice.objects.get(id=data['choice_id'])
-        except Choice.DoesNotExist:
-            logger.error(f"Choice with id {data['choice_id']} does not exist.")
-            return JsonResponse({'error': 'Invalid choice_id. Choice does not exist.'}, status=400)
 
-        try:
-            game = Game.objects.get(id=data['game_id'])
-        except Game.DoesNotExist:
-            logger.error(f"Game with id {data['game_id']} does not exist.")
-            return JsonResponse({'error': 'Invalid game_id. Game does not exist.'}, status=400)
+            try:
+                game = Game.objects.get(id=data['game_id'])
+            except Game.DoesNotExist:
+                return JsonResponse({'error': 'Invalid game_id. Game does not exist.'}, status=400)
 
-        button_id = data['button_id']
+            try:
+                top_hit = TopHits.objects.create(
+                    user=request.user if request.user.is_authenticated else None,
+                    game=game,
+                    choice=choice,
+                    color=choice.color,
+                    file=choice.file if hasattr(choice, 'file') else None,
+                )
+                print(
+                    f"Creating TopHits with data: user={request.user}, game={game}, choice={choice}, color={choice.color}, file={choice.file}"
+                )
+            except Exception as e:
+                print(f"Error while creating TopHits: {str(e)}")
+                raise
 
-        try:
-            top_hit = TopHits.objects.create(
-                user=request.user if request.user.is_authenticated else None,
-                game=game,
-                choice=choice,
-                color=choice.color,
-                file=choice.file,
-                button_pressed=button_id,
-            )
-            logger.info(f"Top Hit created successfully with id {top_hit.id}")
             return JsonResponse({'message': 'Top Hit created successfully', 'id': top_hit.id})
+        except Choice.DoesNotExist:
+            return JsonResponse({'error': 'Invalid choice_id. Choice does not exist.'}, status=400)
         except Exception as e:
-            logger.exception("Error creating Top Hit")
             return JsonResponse({'error': str(e)}, status=400)
 
-    logger.warning("Invalid request method")
     return JsonResponse({'error': 'Invalid request method'}, status=405)
-
 
 from django.template.loader import render_to_string
 

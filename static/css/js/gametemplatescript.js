@@ -75,18 +75,18 @@ async function randomizeContents() {
     console.log("Slug:", slug);
 
     try {
+        if (buttonId === "start") {
+            console.log("Regular Spin triggered");
+        } else if (buttonId === "start2") {
+            console.log("Demo Spin triggered");
+        }
+
         const payload = {
             game_id: gameId,
             button_id: buttonId
         };
 
         console.log("Payload sent to server:", payload);
-
-        if (buttonId === "start") {
-            console.log("Regular Spin triggered");
-        } else if (buttonId === "start2") {
-            console.log("Demo Spin triggered");
-        }
 
         const response = await fetch(`/create_outcome/${slug}/`, {
             method: 'POST',
@@ -545,7 +545,6 @@ setTimeout(() => {
                     color: choiceColor,
                     game_id: gameId,
                 };
-                // Create the Top Hit
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
                 console.log('processed the top hit')
@@ -579,7 +578,6 @@ setTimeout(() => {
                     color: choiceColor,
                     game_id: gameId,
                 };
-                // Create the Top Hit
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
                 console.log('processed the top hit')
