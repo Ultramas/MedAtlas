@@ -88,6 +88,12 @@ BATTLE_STATUS = (
     ('C', 'Complete'),
 )
 
+SPIN_TYPE = (
+    ('C', 'Classic'),
+    ('S', 'Simultaneous'),
+    ('I', 'Instant'),
+)
+
 TYPE_CHOICES = (('S', 'Singles'), ('BP', 'Booster Pack'),
                 ('BB', 'Booster Box'), ('PP', 'Pokemon Product'), ('O',
                                                                    'Other'))
@@ -180,14 +186,13 @@ POWER = (
 
 # relative level, based on chest cost
 COLOR = (
-    ('Gra', 'Gray'),
-    ('Gre', 'Green'),
-    ('Y', 'Yellow'),
-    ('O', 'Orange'),
-    ('R', 'Red'),
-    ('B', 'Black'),
-    ('G', 'Gold'),  # subject to change perhaps
-
+    ('gray',   'Gray'),
+    ('green',  'Green'),
+    ('yellow', 'Yellow'),
+    ('orange', 'Orange'),
+    ('red',    'Red'),
+    ('black',  'Black'),
+    ('gold',   'Gold'),
 )
 
 PRIVACY = (
@@ -2901,6 +2906,9 @@ class Game(models.Model):
         if self.daily and not self.unlocking_level:
             raise ValidationError("An unlocking level must be set for daily games.")
 
+    def get_absolute_url(self):
+        return reverse("showcase:game", kwargs={'slug': self.slug})
+
     def save(self, *args, **kwargs):
         self.full_clean()
         if not self.type:
@@ -3161,7 +3169,7 @@ class Choice(models.Model):
         help_text='Original width of the advertisement (use for original ratio).',
         verbose_name="image width"
     )
-    color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
+    color = models.CharField(choices=COLOR, max_length=6, blank=True, null=True)
     votes = models.IntegerField(default=0)
     category = models.CharField(max_length=2,
                                 choices=CARD_CATEGORIES, blank=True, null=True)
@@ -3368,7 +3376,7 @@ class TopHits(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE, blank=True, null=True)
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE, blank=True, null=True)
-    color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
+    color = models.CharField(choices=COLOR, max_length=6, blank=True, null=True)
     file = models.FileField(null=True, verbose_name='File')
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     button_pressed = models.CharField(max_length=10)
@@ -3422,7 +3430,7 @@ class Outcome(models.Model):
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
-    color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
+    color = models.CharField(choices=COLOR, max_length=6, blank=True, null=True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     game_creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="creator")
     green_counter = models.IntegerField(blank=True, null=True, default=0)
@@ -3478,7 +3486,6 @@ class Outcome(models.Model):
         cost_threshold_100000000 = self.game.cost * 1000000
 
         if choice.game.value is None:
-            # Handle the case where value is None, perhaps by setting a default value
             choice.value = random.randint(0, 1000000)
 
         if choice.game.value >= cost_threshold_100000000:
@@ -3680,7 +3687,7 @@ class SpinnerChoiceRenders(models.Model):
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
-    color = models.CharField(choices=COLOR, max_length=3, blank=True, null=True)
+    color = models.CharField(choices=COLOR, max_length=6, blank=True, null=True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     game_creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="game_creator")
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
@@ -4092,7 +4099,6 @@ class SellerApplication(models.Model):
     class Meta:
         verbose_name = "Seller Application"
         verbose_name_plural = "Seller Applications"
-
 
 
 class Preference(models.Model):
@@ -4624,12 +4630,34 @@ class SettingsModel(models.Model):
         verbose_name_plural = "Settings"
 
 
+class MyPreferences(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    spintype = models.CharField(choices=SPIN_TYPE, max_length=1, default='C')
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    def save(self, *args, **kwargs):
+        MyPreferences.objects.filter(user=self.user).exclude(pk=self.pk).delete()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.user.username
+
+    class Meta:
+        verbose_name = "My Preference"
+        verbose_name_plural = "My Preferences"
+
+
 class Donate(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
     nickname = models.CharField(max_length=100, blank=True, null=True)
-
-    # Add more fields if needed
 
     # ForeignKey to link each donation to a specific user (donor)
     donor = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -15,7 +15,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     GeneralMessage, DefaultAvatar, Achievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
-    TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable
+    TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -2040,6 +2040,7 @@ admin.site.register(SupportLine, SupportThreadAdmin)
 
 
 class OutcomeAdmin(admin.ModelAdmin):
+
    fieldsets = (
        ('Outcome Information - Categorial Descriptions', {
            'fields': ('user', 'value', 'ratio', 'type', 'color',)
@@ -2051,9 +2052,11 @@ class OutcomeAdmin(admin.ModelAdmin):
            'fields': ('game', 'game_creator', 'choice', 'nonce', 'demonstration', 'is_active',)
        }),
    )
+
    list_display = (
        'user',
        'value',
+       'color',
        'file',
        'game',
        'choice',
@@ -2079,6 +2082,26 @@ class BanAppealAdmin(admin.ModelAdmin):
 
 
 admin.site.register(BanAppeal, BanAppealAdmin)
+
+
+class MyPreferencesAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('My Preferences Information - Categorial Descriptions', {
+            'fields': ('user', 'spintype',)
+        }),
+        ('My Preferences Information - Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+
+    list_display = (
+        'user',
+        'spintype',
+        'is_active',
+    )
+
+
+admin.site.register(MyPreferences, MyPreferencesAdmin)
 
 
 class BaseCopyrightTextFieldAdmin(admin.ModelAdmin):

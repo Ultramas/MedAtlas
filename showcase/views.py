@@ -28,7 +28,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
-    UserNotification, TopHits, Card, Clickable, GameChoice, Robot
+    UserNotification, TopHits, Card, Clickable, GameChoice, Robot, MyPreferences, UserClickable
 from .models import Idea
 from .models import VoteQuery
 from .models import StaffApplication
@@ -123,7 +123,7 @@ from .forms import VoteQueryForm, EmailForm, AnswerForm, ItemForm, TradeItemForm
     RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, InventoryGameForm, PlayerInventoryGameForm, \
     CardUploading, MoveToTradeForm, \
     SpinPreferenceForm, BattleCreationForm, BattleJoinForm, AddMonstrosityForm, AscensionCreateForm, InventoryTradeForm, \
-    InventoryTradeOfferResponseForm, BetForm
+    InventoryTradeOfferResponseForm, BetForm, MyPreferencesForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -232,6 +232,8 @@ class SignupView(FormMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['signup'] = SignupBackgroundImage.objects.all()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -306,6 +308,8 @@ class TotalView(ListView):
     def _context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -508,6 +512,8 @@ class BaseView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         print(f'User: {user.username}, is_authenticated: {user.is_authenticated}, is_staff: {user.is_staff}')
@@ -624,6 +630,8 @@ class BlogBaseView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
@@ -723,6 +731,8 @@ class AdminRolesView(BaseView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Roles'] = AdminRoles.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -766,6 +776,8 @@ class AdminTasksView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -809,6 +821,8 @@ class AdminPagesView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -852,6 +866,8 @@ class AdministrationView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
@@ -895,6 +911,8 @@ class DonateBaseView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
@@ -943,6 +961,8 @@ class MemberBaseView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         user = self.request.user
         if user.is_authenticated:
             context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
@@ -1488,128 +1508,6 @@ class ImageCarouselView(BaseView):
         return context
 
 
-# class BackgroundView(FormMixin, BaseView):
-#    model = BackgroundImage
-#    form_class = EmailForm
-#    template_name = "index.html"
-#    section = TextBase.section
-
-#    def post(self, request, *args, **kwargs):
-#        form = EmailForm(request.POST)
-
-#        if form.is_valid():
-#            post = form.save(commit=False)
-#            form.instance.user = request.user
-#            post.save()
-#            messages.success(request, 'Email subscription added!')
-#            try:
-#                email = EmailField.objects.get(user=request.user)
-#                profile = ProfileDetails.objects.get(user=request.user)
-#                profile.email = email.email
-#                profile.save()
-#            except ProfileDetails.DoesNotExist:
-#                messages.error(request, 'Profile details not found.')
-#            except EmailField.DoesNotExist:
-#                print("EmailField does not exist.")
-#            except Exception as e:
-#                messages.error(request, f'An error occurred: {e}')
-#            try:
-#                email = EmailField.objects.get(user=request.user)
-#                user = request.user
-#                user.email = email.email
-#                user.save()
-#            except Exception as e:
-#                messages.error(request, f'An error occurred: {e}')
-
-#            return render(request, "emaildone.html", {'form': form})
-
-#        else:
-#            messages.error(request, "Form submission invalid")
-#            print(form.errors)
-#            print(form.non_field_errors())
-#            print(form.cleaned_data)
-#            return render(request, "index.html", {'form': form})
-#            return redirect('showcase:index')
-
-#    def get_context_data(self, **kwargs):
-#        context = super().get_context_data(**kwargs)
-#        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-#        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-#        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
-#        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-#        context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by(
-#            "carouselposition")
-#        context['Advertisement'] = AdvertisementBase.objects.filter(page=self.template_name, is_active=1).order_by(
-#            "advertisement_position")
-#        context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by("image_position")
-#        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
-#        context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
-#        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
-#        context['Email'] = EmailField.objects.filter(is_active=1)
-#        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-#        context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
-# context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
-#        print(FaviconBase.objects.all())
-#        print(213324)
-#        # Retrieve the signed-in user's profile and profile picture URL
-
-# Retrieve the items
-#        product = Item.objects.filter(is_active=1)
-
-#        context['Products'] = product
-
-#        for product in context['Products']:
-#            image = product.image
-#            item = Item.objects.filter(slug=product.slug).first()
-#            if product:
-#                product.title = item.title
-#                product.price = item.price
-#                product.discount_price = item.discount_price
-#                product.image_url = item.image.url
-#                product.label = item.label
-#                product.hyperlink = item.get_profile_url()
-#                product.description = item.description
-
-#        events = Event.objects.filter(is_active=1)
-#        context['NewEvents'] = events
-
-#        for events in context['NewEvents']:
-#            image = events.image
-#            eventful = Event.objects.filter(date_and_time=events.date_and_time).first()
-#            if events:
-#                events.name = eventful.name
-#                events.image_url = eventful.image.url
-#                events.hyperlink = eventful.get_profile_url()
-#                events.description = eventful.description
-
-#        context['News'] = NewsFeed.objects.all()
-
-#        newprofile = NewsFeed.objects.filter(is_active=1)
-
-
-#        context['Profiles'] = newprofile
-
-#        for newprofile in context['Profiles']:
-#            user = newprofile.user
-#            profile = ProfileDetails.objects.filter(user=user).first()
-#            if profile:
-#                newprofile.newprofile_profile_picture_url = profile.avatar.url
-#                newprofile.newprofile_profile_url = newprofile.get_profile_url()
-
-#        feedback_objects = Feedback.objects.filter(slug=slug)
-
-# Add the feedback_objects to the context
-#        context['Feed'] = feedback_objects
-
-#        for feedback_objects in context['Feed']:
-#            user = feedback_objects.username
-#            profile = ProfileDetails.objects.filter(user=user).first()
-#            if profile:
-#                feedback_objects.newprofile_profile_picture_url = profile.avatar.url
-#                feedback_objects.newprofile_profile_url = feedback_objects.get_profile_url2()
-
-#        return context
-
 
 from django.views.generic import TemplateView
 from .models import BackgroundImage
@@ -1687,6 +1585,8 @@ class ShowcaseBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['UpdateProfile'] = UpdateProfile.objects.all()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
 
@@ -1810,6 +1710,8 @@ class ChatBackgroundView(BaseView):
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -1941,6 +1843,8 @@ class SupportChatBackgroundView(BaseView):
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -2289,7 +2193,6 @@ def create_outcome(request, slug):
             game = Game.objects.get(id=game_id, slug=slug)
             nonce = random.randint(1, 1000000)
 
-            # Select choice based on nonce
             game_choice_instance = GameChoice.objects.filter(
                 game=game,
                 lower_nonce__lte=nonce,
@@ -2310,21 +2213,22 @@ def create_outcome(request, slug):
 
             color = game.get_color(choice)
             choice.color = color
+            print('the color is ' + choice.color)
             choice.save()
 
             print(f"Game: {game}, Selected Choice: {choice.id}, {choice.choice_text}, {choice.color}")
 
             demonstration_flag = True if button_id == "start2" else False
 
-            # Create outcome
             outcome_data = {
                 'game': game,
                 'choice': choice,
+                'color': choice.color,
                 'nonce': nonce,
-                'value': random.randint(1, 1000000),
+                'value': choice.value,
                 'ratio': random.randint(1, 10),
                 'type': game.type,
-                'demonstration': demonstration_flag  # Set demonstration based on button
+                'demonstration': demonstration_flag
             }
             if user.is_authenticated:
                 outcome_data['user'] = user
@@ -2340,7 +2244,7 @@ def create_outcome(request, slug):
                 'choice_text': choice.choice_text,
                 'choice_color': choice.color,
                 'choice_file': choice.file.url if choice.file else None,
-                'demonstration': outcome.demonstration  # Send demonstration flag in response
+                'demonstration': outcome.demonstration
             })
 
         except Game.DoesNotExist:
@@ -2349,7 +2253,6 @@ def create_outcome(request, slug):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-
 
 
 def game_view(request, game_id):
@@ -2603,6 +2506,143 @@ class TopHitsListView(ListView):
             html = render_to_string('partials/top_hits_partial.html', context, request=self.request)
             return JsonResponse({'html': html})
         return super().render_to_response(context, **response_kwargs)
+
+
+class MyPreferencesView(FormMixin, LoginRequiredMixin, ListView):
+    model = MyPreferences
+    form_class = MyPreferencesForm
+    template_name = 'mypreferences.html'
+
+    def post(self, request, *args, **kwargs):
+        form = MyPreferencesForm(request.POST, user=request.user)
+        if form.is_valid():
+            preference = form.save(commit=False)
+            preference.user = request.user
+            preference.save()
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
+            except ObjectDoesNotExist:
+                context['SentProfile'] = None
+        else:
+            context['SentProfile'] = None
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['Game'] = GameHub.objects.filter(is_active=1).first()
+        context['GameRoom'] = Game.objects.filter(is_active=1, daily=True).first()
+
+        newprofile = Game.objects.filter(is_active=1, daily=True)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
+
+class PreferencesDoneView(ListView):
+    model = MyPreferences
+    template_name = 'mypreferencesdone.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
+            except ObjectDoesNotExist:
+                context['SentProfile'] = None
+        else:
+            context['SentProfile'] = None
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['Game'] = GameHub.objects.filter(is_active=1).first()
+        context['GameRoom'] = Game.objects.filter(is_active=1, daily=True).first()
+        context['form'] = EmailForm()
+
+        newprofile = Game.objects.filter(is_active=1, daily=True)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
 
 
 class DailyRoomView(BaseView):
@@ -2864,6 +2904,8 @@ class DailyChestView(BaseView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['next_5pm'] = get_next_5pm_pst()
         context['is_daily'] = game.daily
         if self.request.user.is_authenticated:
@@ -2953,30 +2995,24 @@ def spin_game(request):
             game_id = data.get("game_id")
             spin_multiplier = int(data.get("spin_multiplier", 1))
 
-            # Get the game instance
             game = get_object_or_404(Game, id=game_id)
 
-            # Get the user's profile
             profile = ProfileDetails.objects.filter(user=request.user).first()
             if not profile:
                 return JsonResponse({"success": False, "error": "User profile not found."})
 
-            # Calculate the cost
             effective_cost = game.get_effective_cost()
             total_cost = effective_cost * spin_multiplier
 
             if game.daily:
                 print('daily game spin initiated, do not charge')
             else:
-                # Check if the user has enough currency
                 if profile.currency_amount < total_cost:
                     return JsonResponse({"success": False, "error": "Insufficient currency."})
 
-                # Deduct the cost
                 profile.currency_amount -= total_cost
                 profile.save()
 
-            # Return updated data in the response
             return JsonResponse({
                 "success": True,
                 "message": f"Spin charged {total_cost} {profile.currency.name}",
@@ -3050,6 +3086,8 @@ class OpenBattleListView(ListView):
             ).order_by("created_at")
         context['game_values'] = self.request.session.pop('game_values', '')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -3139,6 +3177,8 @@ class SingleBattleListView(DetailView):
         related_games = Game.objects.filter(game_battles__battle=battle).distinct()
         context['related_games'] = related_games
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         user = self.request.user
         context['is_participant'] = battle.battle_joined.filter(user=user).exists()
 
@@ -3334,6 +3374,8 @@ class ActualBattleView(DetailView):
         context['participant_windows'] = participant_windows
         context['grid_columns'] = max(1, min(5, len(participants)))
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         user = self.request.user
 
         context['SentProfile'] = UserProfile.objects.filter(user=user).first() if user.is_authenticated else None
@@ -3656,6 +3698,8 @@ class ActualBattleView(DetailView):
             context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
 
             context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
             if self.request.user.is_authenticated:
                 userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
             else:
@@ -3717,6 +3761,8 @@ class BattleCreationView(CreateView):
             ).order_by("created_at")
         games = Game.objects.filter(daily=False)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -3940,6 +3986,8 @@ class EarningAchievement(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -4380,6 +4428,8 @@ class AchievementsView(TemplateView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -4480,8 +4530,6 @@ class BlogCreatePostView(CreateView):
     success_url = reverse_lazy("blog")
 
 
-# @login_required
-# @RegularUserRequiredMixin
 class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
     model = UpdateProfile
     template_name = "post_edit.html"
@@ -4608,6 +4656,8 @@ class BilletBackgroundView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -4654,6 +4704,8 @@ class RuleBackgroundView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -4698,6 +4750,8 @@ class PolicyBackgroundView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -4735,6 +4789,8 @@ class ServersView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -4780,6 +4836,8 @@ class FaqBackgroundView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -4824,6 +4882,8 @@ class StaffBackgroundView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -4875,6 +4935,8 @@ class StaffApplyBackgroundView(FormMixin, ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -4979,6 +5041,8 @@ class TagBackgroundView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -5023,6 +5087,8 @@ class UserBackgroundView(BaseView):
         context['UserBackgroundImage'] = UserBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -5302,6 +5368,8 @@ class SingleNewsView(DetailView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['News'] = NewsFeed.objects.all()
         context['Money'] = Currency.objects.filter(is_active=1)
 
@@ -5795,6 +5863,8 @@ class AddMonstrosityView(FormMixin, LoginRequiredMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -5924,6 +5994,8 @@ class RoomView(TemplateView):
         room_details = Room.objects.get(name=roomed)
         profile_details = ProfileDetails.objects.filter(user__username=username).first()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
@@ -6673,6 +6745,8 @@ class CustomLoginView(LoginView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
 
         print('the login context is ' + context)
         return context
@@ -6686,6 +6760,8 @@ class SignupView(FormMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['signup'] = SignupBackgroundImage.objects.all()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -6758,6 +6834,8 @@ class TotalView(ListView):
     def _context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -6962,6 +7040,8 @@ class BaseView(ListView):
             ).order_by("created_at")
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
@@ -7060,6 +7140,8 @@ class BlogBaseView(ListView):
             ).order_by("created_at")
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
@@ -7098,6 +7180,16 @@ class NavView(ListView):
     template_name = "navtrove.html"
     model = LogoBase
 
+    def post(self, request, *args, **kwargs):
+        form = MyPreferencesForm(request.POST, user=request.user)
+        if form.is_valid():
+            preference = form.save(commit=False)
+            preference.user = request.user
+            preference.save()
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -7112,6 +7204,7 @@ class NavView(ListView):
                                                   is_active=1)
 
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['form'] = MyPreferencesForm(user=self.request.user)
 
         print("navtrove here")
         for logo in context['Logo']:
@@ -7225,6 +7318,8 @@ class AdminRolesView(BaseView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Roles'] = AdminRoles.objects.filter(is_active=1)
 
         if self.request.user.is_authenticated:
@@ -7270,6 +7365,8 @@ class AdminTasksView(BaseView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -7314,6 +7411,8 @@ class AdminPagesView(BaseView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         AdminPage = AdminPages.objects.filter(is_active=1)
 
@@ -7359,6 +7458,8 @@ class AdministrationView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
@@ -7402,6 +7503,8 @@ class DonateBaseView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
@@ -7446,6 +7549,8 @@ class ShippingBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         context['form'] = ShippingForm(user=self.request.user)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
@@ -7516,6 +7621,8 @@ class ShippingProfileView(ListView):
         current_user = self.request.user
         newprofile = UserProfile2.objects.filter(is_active=1, user=current_user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
@@ -7567,6 +7674,8 @@ class PrintShippingLabelView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
@@ -7614,6 +7723,8 @@ class MembershipView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
@@ -7668,6 +7779,8 @@ class MemberBaseView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
@@ -7754,6 +7867,8 @@ class PostList(BaseView):
             ).order_by("created_at")
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by("image_position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1).order_by('image_position')
         # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
@@ -8519,6 +8634,8 @@ class eventview(ListView):
         room_details = Room.objects.get(name=room)
         profile_details = ProfileDetails.objects.filter(user__username=username).first()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+        
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -8584,6 +8701,8 @@ class SupportRoomView(TemplateView):
         # room_details = SupportChat.objects.get(name=signed_in_user)  # Use 'signed_in_user' here
         profile_details = ProfileDetails.objects.filter(user__username=signed_in_user).first()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -8690,6 +8809,8 @@ class SupportLineView(TemplateView):
         room_details = SupportInterface.objects.get(name=room)
         profile_details = ProfileDetails.objects.filter(user__username=username).first()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
@@ -8891,6 +9012,8 @@ class BusinessMessageBackgroundView(ListView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -9603,6 +9726,8 @@ class BackgroundView(FormMixin, BaseView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -9636,6 +9761,8 @@ class BackgroundView(FormMixin, BaseView):
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['Email'] = EmailField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['About'] = Event.objects.filter(page=self.template_name, is_active=1)
         context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
         context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
@@ -10262,6 +10389,8 @@ class SupportLineBackgroundView(BaseView):
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -11059,6 +11188,8 @@ class NewsBackgroundView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1)
         context['Email'] = EmailField.objects.filter(is_active=1)
 
@@ -12229,6 +12360,8 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             ).order_by("created_at")
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         try:
             context['SentProfile'] = ProfileDetails.objects.get(
                 user=self.request.user)  # specifically used to get ruby amount
@@ -13073,6 +13206,8 @@ class DirectChestView(BaseView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -13277,12 +13412,24 @@ class GameChestBackgroundView(BaseView):
         context['tophit'] = TopHits.objects.filter(game=game, is_active=True).order_by('-mfg_date')[:8]
         user = self.request.user
         if user.is_authenticated:
+            preference_instance = MyPreferences.objects.filter(user=user).first()
+            if preference_instance:
+                context['preferenceform'] = MyPreferencesForm(instance=preference_instance, user=user)
+                context['preference_instance'] = preference_instance
+                context['is_signed_in'] = user.is_authenticated
+                context['has_preference'] = preference_instance is not None
+                context[
+                    'preference_value'] = preference_instance.spintype if preference_instance else None
+            else:
+                context['preferenceform'] = MyPreferencesForm(user=user)
+                context['preference_instance'] = None
             try:
                 context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
             except UserProfile.DoesNotExist:
                 context['SentProfile'] = None
         else:
             context['SentProfile'] = None
+            context['preferenceform'] = MyPreferencesForm()
 
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['wager_form'] = WagerForm()
@@ -13500,6 +13647,8 @@ class GameChestBackgroundView(BaseView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -13783,6 +13932,8 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
         context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -13949,6 +14100,8 @@ class DailyLotteryView(FormMixin, ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -14029,6 +14182,8 @@ class DailyLotteryClaimedView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -14388,6 +14543,8 @@ class TradeHistory(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -14501,6 +14658,8 @@ class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         # context['name'] = Showcase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -14562,6 +14721,8 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         print(FaviconBase.objects.all())
         context['SettingsBackgroundView'] = self.model.objects.all()
         if self.request.user.is_authenticated:
@@ -14725,6 +14886,8 @@ class BlogSearchResultsView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         # settings to alter the username & password
 
         # Add type information for each item
@@ -14819,6 +14982,8 @@ class GameSearchResultsView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
 
         newprofile = Game.objects.filter(is_active=1)
         context['Profiles'] = newprofile
@@ -14929,6 +15094,8 @@ class SearchResultsView(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         # settings to alter the username & password
 
         # Add type information for each item
@@ -15143,6 +15310,8 @@ class WithdrawView(LoginRequiredMixin, ListView):
             "position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
 
         completed_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state='C',
                                                       shipping_state='C')
@@ -15229,6 +15398,8 @@ class WithdrawDetailView(LoginRequiredMixin, DetailView):
             "position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         
@@ -15290,6 +15461,8 @@ class ProcessingWithdrawView(LoginRequiredMixin, ListView):
             "position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
 
         completed_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state='I',
                                                       shipping_state='Y')
@@ -15444,6 +15617,8 @@ class ProfileView(LoginRequiredMixin, UpdateView):
             ).order_by("created_at")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
         profile = self.get_object()
         context['profile'] = profile
@@ -15527,6 +15702,8 @@ class MyLevelView(LoginRequiredMixin, ListView):
             ).order_by("created_at")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
 
         # Add Level objects and fields
@@ -15756,6 +15933,8 @@ class CommerceExchangeView(CreateView):
         context['Prizes'] = ExchangePrize.objects.filter(
             is_active=1).order_by('value')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -15839,6 +16018,8 @@ class InventoryTradeView(CreateView):
         # Add disabled items to the context
         context['disabled_items'] = set(items_in_pending_offers)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
 
         context['other_trade_items'] = [
             {
@@ -16140,6 +16321,8 @@ class ExchangePrizesView(FormMixin, ListView):
             is_active=1).order_by('position')
         context['BanAppeal'] = BanAppeal.objects.all()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -16365,6 +16548,8 @@ class BusinessMailingView(FormView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
@@ -16418,6 +16603,8 @@ class BusinessSuccessMailingView(TemplateView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         print(context["Contact"])
@@ -16475,6 +16662,8 @@ class PostDetailView(View):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -16650,6 +16839,8 @@ class CurrencyMarketView(EBaseView):
             ).order_by("created_at")
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Currency'] = CurrencyMarket.objects.filter(is_active=1).order_by(
             'price')  # deals/non-deals can be seperated in the templates
         if self.request.user.is_authenticated:
@@ -16689,6 +16880,8 @@ class CurrencyCheckoutView(EBaseView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['endowment_form'] = EndowmentForm(request=self.request)
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         if self.request.user.is_authenticated:
@@ -17120,6 +17313,8 @@ class ProductView(DetailView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -17169,6 +17364,8 @@ class OrderSummaryView(EBaseView):
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -17250,6 +17447,8 @@ class CheckoutView(EBaseView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['address'] = Address.objects.filter(is_active=1, user=self.request.user).first()
         context.update(kwargs)
 
@@ -18210,6 +18409,8 @@ class ProfileEditView(FormView):
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -18265,6 +18466,8 @@ class SignupView(FormMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['signup'] = SignupBackgroundImage.objects.all()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -18816,6 +19019,8 @@ class ContactViewe(CreateView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         print(context["Contact"])
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
@@ -18868,6 +19073,8 @@ class ContactSuccessView(BaseView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         print(context["Contact"])
         # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
@@ -19593,6 +19800,8 @@ class FeedbackView(LoginRequiredMixin, FormView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+            
             context['Feed'] = Feedback.objects.filter(is_active=1).order_by("slug")
             context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
             context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -19893,6 +20102,8 @@ class SubmitFeedbackView(DetailView):
        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
             "created_at")
        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+       
        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -20317,6 +20528,8 @@ class OrderHistory(ListView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -20526,14 +20739,12 @@ def submit_answer(request, question_id):
         form = AnswerForm(request.POST, questions=questions)
 
         if form.is_valid():
-            # Handle the submitted answers here
             for question in questions:
                 answer_text = form.cleaned_data[f'answer_{question.id}']
                 correct_answer = getattr(questionaire, f'correct_answer_{question.form_type}')
                 is_correct = answer_text == correct_answer
-                # Save the answer and correctness status to the database or perform any necessary processing
 
-            # Redirect or render a success page
+
             return HttpResponseRedirect(reverse('showcase:index'))
     else:
         form = AnswerForm(questions=questions)

@@ -564,6 +564,11 @@
             gap: 15px;
         }
 
+        .linker {
+            background: rgb(23, 207, 177, 10%);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
         .nav-link:hover {
             background: rgba(191, 151, 255, 0.1);
             color: var(--primary);
@@ -933,6 +938,26 @@
             .copyright-section {
                 display: none;
             }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .form-header h1 {
+        color: var(--primary);
+        font-size: 2.0rem;
+        margin-bottom: 0.5rem;
+        transform: translate(0px, 0px);
+        text-transform: uppercase;
+        text-align: center;
+        ng: 2px;
+        text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+    }
+    .form-content {
+        animation: fadeIn 0.8s ease-out;
+    }
     </style>
 </head>
 <body>
@@ -1221,6 +1246,27 @@
                         </li>
                             </form>
                         {% endif %}
+
+                        {% if user.is_authenticated %}
+                        <li class="nav-item">
+                        <button onclick="togglePreferences()" class="nav-link linker" style="">
+                            <i class="fas fa-wheel-alt"></i>
+                                <span class="nav-text">Spin Preferences</span>
+                        </button>
+                        </li>
+                        <script>
+                        function togglePreferences() {
+                            const container = document.getElementById("preferencescontainer");
+                            if (container.style.display === "none" || container.style.display === "") {
+                                container.style.display = "block";
+                            } else {
+                                container.style.display = "none";
+                            }
+                        }
+                        </script>
+                        {% endif %}
+
+
                     </ul>
                 </div>
             </div>
@@ -1261,8 +1307,143 @@
                 </a>
                 {% endif %}
             </div>
+            <style>
+.volume {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.volume input[type=range] {
+  display: none;
+}
+.volume .icon-size {
+  font-size: 2rem;
+}
+.volume .bar-hoverbox {
+  padding: 10px 15px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.volume .bar-hoverbox:hover {
+  opacity: 1;
+  cursor: pointer;
+}
+.volume .bar {
+  background: #999;
+  height: 7px;
+  width: 120px;
+  border-radius: 15px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.volume .bar .bar-fill {
+  background: #FFF;
+  width: 0%;
+  height: 100%;
+  background-clip: border-box;
+  pointer-events: none;
+}
+            </style>
+<div class="volume">
+  <input type="range" min="0" max="100" value="50" class="volume-range">
+  <div class="icon">
+    <i class="fa fa-volume-up icon-size" aria-hidden="true"></i>
+  </div>
+  <div class="bar-hoverbox">
+    <div class="bar">
+      <div class="bar-fill"></div>
+    </div>
+  </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+  const range = document.querySelector(".volume input[type=range]");
+
+  const barHoverBox = document.querySelector(".volume .bar-hoverbox");
+  const fill = document.querySelector(".volume .bar .bar-fill");
+
+  range.addEventListener("change", e => {
+    console.log("value", e.target.value);
+  });
+
+  const setValue = value => {
+    fill.style.width = value + "%";
+    range.setAttribute("value", value);
+    range.dispatchEvent(new Event("change"));
+  };
+
+  // Дефолт
+  setValue(range.value);
+
+  const calculateFill = e => {
+    // Отнимаем ширину двух 15-пиксельных паддингов из css
+    let offsetX = e.offsetX;
+
+    if (e.type === "touchmove") {
+      offsetX = e.touches[0].pageX - e.touches[0].target.offsetLeft;
+    }
+
+    const width = e.target.offsetWidth - 30;
+
+    setValue(
+    Math.max(
+    Math.min(
+    // Отнимаем левый паддинг
+    (offsetX - 15) / width * 100.0,
+    100.0),
+
+    0));
 
 
+  };
+
+  let barStillDown = false;
+
+  barHoverBox.addEventListener("touchstart", e => {
+    barStillDown = true;
+
+    calculateFill(e);
+  }, true);
+
+  barHoverBox.addEventListener("touchmove", e => {
+    if (barStillDown) {
+      calculateFill(e);
+    }
+  }, true);
+
+  barHoverBox.addEventListener("mousedown", e => {
+    barStillDown = true;
+
+    calculateFill(e);
+  }, true);
+
+  barHoverBox.addEventListener("mousemove", e => {
+    if (barStillDown) {
+      calculateFill(e);
+    }
+  });
+
+  barHoverBox.addEventListener("wheel", e => {
+    const newValue = +range.value + e.deltaY * 0.5;
+
+    setValue(Math.max(
+    Math.min(
+    newValue,
+    100.0),
+
+    0));
+
+  });
+
+  document.addEventListener("mouseup", e => {
+    barStillDown = false;
+  }, true);
+
+  document.addEventListener("touchend", e => {
+    barStillDown = false;
+  }, true);
+});
+</script>
             <div class="collection">
                 <h2 class="collection-title">My Collection</h2>
                 <button class="view-collection">
@@ -1284,8 +1465,6 @@
             </div>
         </aside>
     </div>
-
-
 
     <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -1452,9 +1631,11 @@ document.addEventListener("DOMContentLoaded", function() {
     }, 1000);
 });
 </script>
-
-
-
+{% if user.is_authenticated %}
+<div id="preferencescontainer" style="display: none;">
+    {% include 'mypreferences.html' %}
+</div>
+{% endif %}
 
 
 </body>

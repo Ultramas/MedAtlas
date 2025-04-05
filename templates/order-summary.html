@@ -701,7 +701,7 @@ nav.main-menu ul li a {
             <th scope="col" style="color: white;">#</th>
             <th scope="col" style="color: white;">Item Name</th>
             <th scope="col" style="color: white;">Price</th>
-            <th scope="col" style="color: white;">Quantity</th>
+            <th scope="col" style="color: white; display: flex; flex-direction: row;">Quantity</th>
             <th scope="col" style="color: white;">Total Item Price</th>
         </tr>
         </thead>
@@ -728,7 +728,7 @@ nav.main-menu ul li a {
             {% endif %}
 
             </td>
-            <td style="color: white;">
+            <td style="color: white; display: flex; flex-direction: row;">
                 <a href="{% url 'showcase:reduce-quantity-item' order_item.item.slug %}"><i class="fas fa-minus mr-2" style="color: white;"></i></a>
                 {{ order_item.quantity }}
                 <a href="{% url 'showcase:add-to-cart' order_item.item.slug %}"><i class="fas fa-plus ml-2" style="color: white;"></i></a>

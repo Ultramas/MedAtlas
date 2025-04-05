@@ -151,7 +151,6 @@ urlpatterns = [
     path('showcase/', views.ShowcaseBackgroundView.as_view(), name='showcase'),
     path('memberhome/', views.MemberHomeBackgroundView.as_view(), name='memberhome'),
     path('post_edit/', views.PostingView.as_view(), name='post_edit'),
-    path('mypreferences/', views.PostingView.as_view(), name='mypreferences'),
     # path('post_edit/', views.PostBackgroundView.as_view(), name='post_edit'),
     # works at the cost of the post display
     path('blog/', views.PostList.as_view(), name='blog'),
@@ -374,6 +373,8 @@ urlpatterns = [
     path('dailyroom/', views.DailyRoomView.as_view(), name='dailyroom'), #game with a single game
     path('dailygame/<slug:slug>/', views.DailyChestView.as_view(), name='dailygame'), #game with a single game
     path('spin_game/', views.spin_game, name='spin_game'),
+    path('mypreferences/', views.MyPreferencesView.as_view(), name='mypreferences'),
+    path('mypreferencesdone/', views.PreferencesDoneView.as_view(), name='mypreferencesdone'),
     path('api/get-user-cash/', views.get_user_cash, name='get_user_cash'),
     path('create-card-instance/', views.create_card_instance, name='create-card-instance'),
     path('top-hits/create/', views.create_top_hit, name='create_top_hit'),

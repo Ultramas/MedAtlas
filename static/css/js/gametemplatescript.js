@@ -13,12 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
 
-    // Set the checkbox state based on localStorage value
     if (persistSpin) {
         $('#persist-spin-checkbox').prop('checked', true);
     }
 
-    // Handle the checkbox state change
     $('#persist-spin-checkbox').change(function () {
         localStorage.setItem('persistSpinChecked', $(this).prop('checked').toString());
     });
@@ -27,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('quickSpinChecked', $(this).prop('checked').toString());
     });
 
-    // Update total spins when a spin option is clicked
     $(".spin-option").click(function () {
         $(".spin-option").removeClass("selected");
 
@@ -73,6 +70,41 @@ async function randomizeContents() {
     console.log("Game ID:", gameId);
     console.log("Nonce:", nonce);
     console.log("Slug:", slug);
+    if (
+        userContext.isSignedIn &&
+        userContext.hasPreference &&
+        userContext.preferenceValue === "I"
+    ) {
+        console.log("User has preference 'I' - showing popup instantly.");
+
+
+        const payload = {
+            game_id: gameId,
+            button_id: buttonId,
+            color: choiceColor
+        };
+        console.log("Payload sent to server:", payload);
+
+        try {
+            const response = await fetch(`/create_outcome/${slug}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await response.json();
+            console.log("Instant Outcome Response:", result);
+
+        } catch (error) {
+            console.error("Error during instant outcome fetch:", error);
+        }
+
+        return;
+    }
+
 
     try {
         if (buttonId === "start") {
@@ -83,7 +115,8 @@ async function randomizeContents() {
 
         const payload = {
             game_id: gameId,
-            button_id: buttonId
+            button_id: buttonId,
+            color: choiceColor
         };
 
         console.log("Payload sent to server:", payload);
@@ -135,7 +168,7 @@ async function randomizeContents() {
      data-currency-symbol="${attributes.currencySymbol || ''}"
      style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border-top: none; width: 10em;">
     ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-    <div class="sliderPrice">${attributes.value} 💎 </div>
+    <div class="sliderPrice">${attributes.value} 💎 targetcard </div>
 </div>
 </div>
 `;
@@ -460,23 +493,45 @@ function spin(buttonId) {
     $(".spin-option").prop('disabled', true);
 
     randomizeContents();
+    if (
+    !userContext.isSignedIn ||
+    !userContext.hasPreference ||
+    userContext.preferenceValue !== "I"
+)
+{   console.log('not an instant spin')
     randomizedContents();
     addAnimation();
+    }
+
+    else{
+     console.log('actually instant spin')
+    }
 
     if (buttonId === "start") {
         console.log("Regular Spin triggered");
     } else if (buttonId === "start2") {
         console.log("Demo Spin triggered");
     }
-
+        if (
+    !userContext.isSignedIn ||
+    !userContext.hasPreference ||
+    userContext.preferenceValue !== "I"
+)
+{
     const animationDuration = isQuickSpin ? 4500 : 9000;
+    }
+
+    else{
+
+    const animationDuration = 0000;
+    }
+
     const buffer = 150;
     const audiobuffer = 100;
     const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
 
     audio.addEventListener('loadedmetadata', () => {
-        // Calculate the adjusted duration
-        const adjustedDuration = (animationDuration + audiobuffer) / 1000; // Convert ms to seconds
+        const adjustedDuration = (animationDuration + audiobuffer) / 1000;
         const originalDuration = audio.duration;
 
         if (originalDuration) {
@@ -499,7 +554,12 @@ setTimeout(() => {
 
     const startButton = document.getElementById('start');
 
-
+    if (
+    !userContext.isSignedIn ||
+    !userContext.hasPreference ||
+    userContext.preferenceValue !== "I"
+)
+{
     if (targetCard) {
         let choiceColor = targetCard.getAttribute('data-color') || 'gray';
         let choiceId = targetCard.getAttribute('id');
@@ -584,6 +644,10 @@ setTimeout(() => {
         }
         }
 
+    }
+    else {
+    }
+
     });
 
 function randomizedContents() {
@@ -662,6 +726,7 @@ function randomizedContents() {
 }, animationDuration);
 
 }
+
 spin(buttonId);
 
 }
@@ -699,6 +764,55 @@ spin(buttonId);
     }
 
  async function showPopup(buttonId) {
+    function adjustCardsContainer() {
+        const container = document.querySelector('.cards-container');
+        const innerContainer = document.querySelector('.inner-container');
+        if (!container || !innerContainer) return;
+
+        innerContainer.style.display = "flex";
+        innerContainer.style.width = `${innerContainer.scrollWidth}px`;
+
+        const maxLimit = 600;
+
+        console.log(`Checked the size of the inner container (Width: ${innerContainer.scrollWidth}px, Max Width: ${maxLimit}px)`);
+
+        if (innerContainer.scrollWidth > maxLimit) {
+            container.style.justifyContent = 'flex-start';
+            console.log(`Inner-container exceeds 600px → Align Left`);
+        } else {
+            container.style.justifyContent = 'center';
+            console.log(`Inner-container within 600px → Centering`);
+        }
+    }
+
+    textContainer.classList.add('scrollablecontainer');
+    textContainer.innerHTML = `
+      <h2>Congratulations!</h2>
+      <p>You got:</p>
+      <div class="cards-container">
+        <div class="inner-container"></div>
+      </div>
+      <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
+        <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
+        <input type="hidden" name="action" value="sell">
+        <input type="hidden" name="pk" value="${window.inventory_pk}">
+        <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
+          style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
+            Sell
+        </button>
+      </form>
+      <button class="close">Collect</button>
+    `;
+
+       setTimeout(() => {
+            adjustCardsContainer();
+        }, 100);
+
+    window.addEventListener('resize', adjustCardsContainer);
+
+
+
+
 
 if (buttonId === "start") {
   console.log("Show Regular Start");
@@ -777,7 +891,6 @@ $(document).on("click", ".sell-button, .close", function() {
         return;
     }
 
-    // Use a generic endpoint for bulk selling rather than one based on a single item's pk.
     let sellUrl = `/sell/`;
     console.log("Sell URL:", sellUrl);
 
@@ -814,23 +927,24 @@ $(document).on("click", ".sell-button, .close", function() {
 });
 
 
-
-   textContainer.innerHTML = `
-    <h2>Congratulations!</h2>
-    <p>You got:</p>
-    <div class="cards-container"></div>
-    <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
-      <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
-      <input type="hidden" name="action" value="sell">
-      <input type="hidden" name="pk" value="${window.inventory_pk}">
-      <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
-        style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
-          Sell
-      </button>
-    </form>
-
-  <button class="close" style="">Collect</button>
-`;
+    textContainer.classList.add('scrollablecontainer');
+    textContainer.innerHTML = `
+      <h2>Congratulations!</h2>
+      <p>You got:</p>
+      <div class="cards-container">
+        <div class="inner-container"></div>
+        </div>
+      <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
+        <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
+        <input type="hidden" name="action" value="sell">
+        <input type="hidden" name="pk" value="${window.inventory_pk}">
+        <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
+          style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
+            Sell
+        </button>
+      </form>
+      <button class="close" style="">Collect</button>
+    `;
 
   } else if (buttonId === "start2") {
       console.log("Show Demo Start");
@@ -838,14 +952,17 @@ $(document).on("click", ".sell-button, .close", function() {
       textContainer.innerHTML = `
             <h2></h2>
             <p>You would have hit:</p>
-            <div class="cards-container"></div>
-
+            <div class="cards-container">
+            <div class="inner-container"></div>
+            </div>
+               <br>
+               <br>
+               <br>
             <button class="close">I see</button>
         `;
   }
 
-
-     const cardsContainer = textContainer.querySelector('.cards-container');
+     const innerContainer = textContainer.querySelector('.inner-container');
      selectedItems.forEach((item, index) => {
          const cardElement = document.createElement('div');
          cardElement.innerHTML = `
@@ -865,7 +982,7 @@ $(document).on("click", ".sell-button, .close", function() {
         `;
 
 
-            cardsContainer.appendChild(cardElement);
+            innerContainer.appendChild(cardElement);
 
             if (index === 0) {
                 const fire = document.querySelector('.fire');
@@ -875,7 +992,6 @@ $(document).on("click", ".sell-button, .close", function() {
 
         popup.style.display = 'block';
 
-        // Trigger the fire animation
         setTimeout(() => {
             const fire = document.querySelector('.fire');
             fire.classList.add('active');
@@ -993,5 +1109,8 @@ sellBtn.addEventListener('click', () => {
 
 
     }
+
+
+
 });
 

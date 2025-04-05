@@ -15,7 +15,7 @@ from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewTy
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
     SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame, Monstrosity, \
-    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet, GameChoice
+    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet, GameChoice, MyPreferences
 from .models import UpdateProfile
 from .models import VoteQuery
 from .models import StaffApplication
@@ -426,10 +426,24 @@ class GameChoiceForm(forms.ModelForm):
         fields = '__all__'
 
 
+class MyPreferencesForm(forms.ModelForm):
+    class Meta:
+        model = MyPreferences
+        fields = ('spintype',)
+        widgets = {
+            'spintype': forms.RadioSelect
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(MyPreferencesForm, self).__init__(*args, **kwargs)
+        self.user = user
+
+
 class AscensionCreateForm(forms.ModelForm):
     class Meta:
         model = Ascension
-        fields = []  # No fields are required; only the submit button will be shown
+        fields = []
 
 
 class CardUploading(forms.ModelForm):

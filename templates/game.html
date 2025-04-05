@@ -104,13 +104,13 @@
             overflow-x: auto;
             overflow-y: hidden;
             padding: 10px;
-            justify-content: center;
             gap: 10px;
             max-height: 100%;
             position: relative;
-            width: max-content;
             min-width: 100%;
+            transition: justify-content 0.3s ease-in-out;
         }
+
 
         .cards-container .popup-card:first-child {
             margin-left: 250px;
@@ -317,10 +317,6 @@
   box-shadow: rgba(44,187,99,.35) 0 -25px 18px -14px inset,rgba(44,187,99,.25) 0 1px 2px,rgba(44,187,99,.25) 0 2px 4px,rgba(44,187,99,.25) 0 4px 8px,rgba(44,187,99,.25) 0 8px 16px,rgba(44,187,99,.25) 0 16px 32px;
   transform: scale(1.05) rotate(-1deg);
 }
-</style>
-
-    <style>
-
 
 
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
@@ -1035,17 +1031,18 @@ p.blog-meta span {
 
 <script>
   const csrfToken = "{{ csrf_token }}";
-  const inventory_pk = "{{ Inventory.pk }}"; /*ensure each of the pks are passed rather than simply the first one*/
+  const inventory_pk = "{{ Inventory.pk }}";
+
+
+    const userContext = {
+        isSignedIn: {{ is_signed_in|yesno:"true,false" }},
+        hasPreference: {{ has_preference|yesno:"true,false" }},
+        preferenceValue: "{{ preference_value|default_if_none:'' }}"
+    };
+</script>
 
 
 
- </script>
-
-
-
-  <script>
-
-  </script>
 <div class="total" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;
     position: relative;">
 	<!-- header -->
@@ -1528,7 +1525,14 @@ document.addEventListener("DOMContentLoaded", function () {
         data-slug="{{ game.slug }}"
         data-daily="false"
          style="position: absolute; bottom: 5px; left: 5px;">
+
+{% if preference and preference.spintype == 'I' %}
+⚡Spin!
+    {% elif preference and preference.spintype == 'S' %}
+🔥Spin!
+    {% else %}
     Spin!
+    {% endif %}
 </button>
 
     {% else %}
@@ -1588,7 +1592,13 @@ document.addEventListener("DOMContentLoaded", function () {
         data-slug="{{ game.slug }}"
         data-daily="false"
          style="position: absolute; bottom: 5px; left: 5px;">
+{% if preference and preference.spintype == 'I' %}
+⚡Spin!
+    {% elif preference and preference.spintype == 'S' %}
+🔥Spin!
+    {% else %}
     Spin!
+    {% endif %}
 </button>
     {% else %}
     <a href="{% url 'login' %}?next={{ request.path }}">
@@ -1611,7 +1621,14 @@ document.addEventListener("DOMContentLoaded", function () {
         data-next-5pm="{{ next_5pm.timestamp }}"
          style="position: absolute; bottom: 5px; right: 5px;"
         disabled>
-   Demo
+
+{% if preference and preference.spintype == 'I' %}
+⚡Demo
+    {% elif preference and preference.spintype == 'S' %}
+🔥Demo
+    {% else %}
+    Demo
+    {% endif %}
 </button>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -1660,7 +1677,13 @@ document.addEventListener("DOMContentLoaded", function () {
         data-slug="{{ game.slug }}"
         data-daily="false"
          style="position: absolute; bottom: 5px; right: 5px;">
+    {% if preference and preference.spintype == 'I' %}
+⚡Demo
+    {% elif preference and preference.spintype == 'S' %}
+🔥Demo
+    {% else %}
     Demo
+    {% endif %}
 </button>
 {% endif %}
 </div>
@@ -1841,7 +1864,6 @@ $(document).ready(function() {
         let completedSpins = 0;
         let allChoices = [];
 
-        // Check if Quick Spin is active
         const isQuickSpin = $('#quickspin-checkbox').is(':checked');
         console.log("Quick Spin mode:", isQuickSpin);
 
@@ -1958,6 +1980,12 @@ $(document).ready(function() {
 </div>
 
     </div>
+<!--check mypreference of user, should one exist; default is classic-->
+{% if user.is_authenticated %}
+{% if preference_instance and preference_instance.spintype == 'I' %}
+wqes
+{% else %}
+
     <div class="wrapper">
         <div class="containerre"  style="display: flex;">
             <div class="slider" id="slider">
@@ -2022,6 +2050,8 @@ $(document).ready(function() {
         <h4 style="">{{game.name}}</h4>
       </div>
     </div>
+{% endif %}
+{% endif %}
 
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
@@ -2169,19 +2199,17 @@ $(".start").click(function () {
                             behavior: 'smooth'
                         });
 
-                        // Assuming 'choice' is an object you receive via AJAX or another method
                         function renderChoiceDetails(choice) {
                             document.getElementById('choice-id').innerText = `Selected Choice ID: ${choice.id || 'N/A'}`;
                             document.getElementById('choice-text').innerText = `Selected Choice Text: ${choice.choice_text || 'N/A'}`;
                             document.getElementById('choice-color').innerText = `Selected Choice Color: ${choice.color || 'N/A'}`;
 
-                            // Handle the file field
                             const choiceFileElement = document.getElementById('choice-file');
                             if (choice.file) {
-                                choiceFileElement.src = choice.file; // Assuming file is a URL
-                                choiceFileElement.style.display = 'block'; // Show the image
+                                choiceFileElement.src = choice.file;
+                                choiceFileElement.style.display = 'block';
                             } else {
-                                choiceFileElement.style.display = 'none'; // Hide the image if there's no file
+                                choiceFileElement.style.display = 'none';
                             }
                         }
 
