@@ -105,7 +105,6 @@ async function randomizeContents() {
         return;
     }
 
-
     try {
         if (buttonId === "start") {
             console.log("Regular Spin triggered");
@@ -168,7 +167,7 @@ async function randomizeContents() {
      data-currency-symbol="${attributes.currencySymbol || ''}"
      style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border-top: none; width: 10em;">
     ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-    <div class="sliderPrice">${attributes.value} 💎 targetcard </div>
+    <div class="sliderPrice">${attributes.value} 💎targetcard </div>
 </div>
 </div>
 `;
@@ -494,37 +493,38 @@ function spin(buttonId) {
 
     randomizeContents();
     if (
-    !userContext.isSignedIn ||
-    !userContext.hasPreference ||
-    userContext.preferenceValue !== "I"
-)
-{   console.log('not an instant spin')
-    randomizedContents();
-    addAnimation();
-    }
+        !userContext.isSignedIn ||
+        !userContext.hasPreference ||
+        userContext.preferenceValue !== "I"
+    )
+    {   console.log('not an instant spin')
+        randomizedContents();
+        addAnimation();
+        }
 
-    else{
-     console.log('actually instant spin')
-    }
+        else{
+         console.log('actually instant spin')
+        }
+
 
     if (buttonId === "start") {
         console.log("Regular Spin triggered");
     } else if (buttonId === "start2") {
         console.log("Demo Spin triggered");
     }
-        if (
+
+let animationDuration;
+
+if (
     !userContext.isSignedIn ||
     !userContext.hasPreference ||
     userContext.preferenceValue !== "I"
-)
-{
-    const animationDuration = isQuickSpin ? 4500 : 9000;
-    }
+) {
+    animationDuration = isQuickSpin ? 4500 : 9000;
+} else {
+    animationDuration = 0;
+}
 
-    else{
-
-    const animationDuration = 0000;
-    }
 
     const buffer = 150;
     const audiobuffer = 100;
@@ -554,12 +554,7 @@ setTimeout(() => {
 
     const startButton = document.getElementById('start');
 
-    if (
-    !userContext.isSignedIn ||
-    !userContext.hasPreference ||
-    userContext.preferenceValue !== "I"
-)
-{
+
     if (targetCard) {
         let choiceColor = targetCard.getAttribute('data-color') || 'gray';
         let choiceId = targetCard.getAttribute('id');
@@ -644,10 +639,6 @@ setTimeout(() => {
         }
         }
 
-    }
-    else {
-    }
-
     });
 
 function randomizedContents() {
@@ -726,7 +717,6 @@ function randomizedContents() {
 }, animationDuration);
 
 }
-
 spin(buttonId);
 
 }
@@ -811,9 +801,6 @@ spin(buttonId);
     window.addEventListener('resize', adjustCardsContainer);
 
 
-
-
-
 if (buttonId === "start") {
   console.log("Show Regular Start");
   window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -891,6 +878,7 @@ $(document).on("click", ".sell-button, .close", function() {
         return;
     }
 
+    // Use a generic endpoint for bulk selling rather than one based on a single item's pk.
     let sellUrl = `/sell/`;
     console.log("Sell URL:", sellUrl);
 
@@ -927,24 +915,23 @@ $(document).on("click", ".sell-button, .close", function() {
 });
 
 
-    textContainer.classList.add('scrollablecontainer');
-    textContainer.innerHTML = `
-      <h2>Congratulations!</h2>
-      <p>You got:</p>
-      <div class="cards-container">
-        <div class="inner-container"></div>
-        </div>
-      <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
-        <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
-        <input type="hidden" name="action" value="sell">
-        <input type="hidden" name="pk" value="${window.inventory_pk}">
-        <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
-          style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
-            Sell
-        </button>
-      </form>
-      <button class="close" style="">Collect</button>
-    `;
+
+   textContainer.innerHTML = `
+    <h2>Congratulations!</h2>
+    <p>You got:</p>
+    <div class="cards-container"></div>
+    <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
+      <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
+      <input type="hidden" name="action" value="sell">
+      <input type="hidden" name="pk" value="${window.inventory_pk}">
+      <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
+        style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
+          Sell
+      </button>
+    </form>
+
+  <button class="close" style="">Collect</button>
+`;
 
   } else if (buttonId === "start2") {
       console.log("Show Demo Start");
@@ -952,17 +939,14 @@ $(document).on("click", ".sell-button, .close", function() {
       textContainer.innerHTML = `
             <h2></h2>
             <p>You would have hit:</p>
-            <div class="cards-container">
-            <div class="inner-container"></div>
-            </div>
-               <br>
-               <br>
-               <br>
+            <div class="cards-container"></div>
+
             <button class="close">I see</button>
         `;
   }
 
-     const innerContainer = textContainer.querySelector('.inner-container');
+
+     const cardsContainer = textContainer.querySelector('.cards-container');
      selectedItems.forEach((item, index) => {
          const cardElement = document.createElement('div');
          cardElement.innerHTML = `
@@ -982,7 +966,7 @@ $(document).on("click", ".sell-button, .close", function() {
         `;
 
 
-            innerContainer.appendChild(cardElement);
+            cardsContainer.appendChild(cardElement);
 
             if (index === 0) {
                 const fire = document.querySelector('.fire');
@@ -992,6 +976,7 @@ $(document).on("click", ".sell-button, .close", function() {
 
         popup.style.display = 'block';
 
+        // Trigger the fire animation
         setTimeout(() => {
             const fire = document.querySelector('.fire');
             fire.classList.add('active');
@@ -1109,8 +1094,5 @@ sellBtn.addEventListener('click', () => {
 
 
     }
-
-
-
 });
 
