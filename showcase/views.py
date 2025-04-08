@@ -3349,23 +3349,26 @@ class ActualBattleView(DetailView):
     template_name = "actualbattle.html"
     context_object_name = "battle"
 
+
     def get_object(self):
         battle_id = self.kwargs.get('battle_id')
-        return get_object_or_404(Battle, id=battle_id)
+        return get_object_or_404(Battle.objects.prefetch_related('battle_games__game'), id=battle_id)
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         battle = self.get_object()
+
         battle_games = battle.battle_games.all().order_by('order')
-        ordered_games = [bg.game for bg in battle_games]
+
+        ordered_games = [bg.game for bg in battle_games if bg.game_id and bg.game]
         context['ordered_games'] = ordered_games
 
-        participants = list(battle.participants.all())  # Get all participants
-        total_capacity = min(len(participants), 10)  # Ensure max display is 10
+        participants = list(battle.participants.all())
+        total_capacity = min(len(participants), 10)
 
-        # Create a mapping of participants to their games
         participant_windows = []
-        for participant in participants:
+        for participant in participants[:total_capacity]:
             participant_windows.append({
                 'participant': participant,
                 'games': ordered_games
@@ -3394,7 +3397,7 @@ class ActualBattleView(DetailView):
         context['bet_form'] = BetForm(battle=battle)
         context['ordered_games'] = ordered_games
         context['default_game'] = ordered_games[0] if ordered_games else None
-        related_games = Game.objects.filter(game_battles__battle=battle).distinct()
+        related_games = Game.objects.filter(game_battles__battle=battle, is_active=True).distinct()
         context['related_games'] = related_games
         cost = sum(game.discount_cost or game.cost for game in related_games)
         context.update({
@@ -3865,7 +3868,7 @@ def add_robot(request, battle_id):
     )
 
     messages.success(request, f"Robot '{selected_robot.name}' added successfully!")
-    return redirect('battle_detail', battle_id=battle.id)
+    return redirect('showcase:battle_detail', battle_id=battle.id)
 
 
 def battle_detail_view(request, battle_id):

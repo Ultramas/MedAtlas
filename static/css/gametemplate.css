@@ -195,7 +195,7 @@ body{
     font-size: 0.9em;
 }
 
-/* Popup container */
+
 .popup {
     display: none;
     position: fixed;
@@ -215,6 +215,39 @@ body{
     
 }
 
+
+.popup {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 50em;
+    max-width: 1200px;
+    height: 43em;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border: 3px solid #323c52;
+    border-radius: 15px;
+    z-index: 120;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+    .popup {
+        width: 100vw;
+        height: auto;
+        max-height: 90vh;
+        top: 50%;
+        transform: translate(0%, -50%);
+        left: 0%;
+        padding: 20px;
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+}
 
 .fire-container {
     position: absolute;
@@ -445,6 +478,12 @@ body{
 
     .text h2 {
         font-size: 2em;
+    }
+
+@media (max-width: 500px) {
+    .text h2 {
+        font-size: 1.5em;
+    }
     }
 
     .text p {

@@ -1737,6 +1737,7 @@ class AdministrationRoleAdmin(admin.ModelAdmin):
 
 admin.site.register(AdminRoles, AdministrationRoleAdmin)
 
+admin.site.register(BattleGame)
 
 class InventoryAdmin(admin.ModelAdmin):
     fieldsets = (

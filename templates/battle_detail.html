@@ -245,16 +245,6 @@
             background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
-        .nav-links h1::after {
-            content: '';
-            position: absolute;
-            left: 10%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
         .pokemon-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -606,15 +596,16 @@ nav.main-menu ul li a {
         .battle-info-item {
             display: flex;
             align-items: center;
+            color: white;
         }
 
         .battle-info-item svg {
             margin-right: 0.5rem;
         }
 
-        /* Participant Slots */
         .participant-slots {
             margin-bottom: 2rem;
+            color: white;
         }
 
         .participant-slots h2 {
@@ -898,7 +889,7 @@ nav.main-menu ul li a {
     <div class="form-group">
         <label for="team-select">Select Team To Win</label>
         <div class="select-wrapper" style="color: black;">
-            <label> {{ bet_form.winning_team }}</label>
+            <label style="color: black;"> {{ bet_form.winning_team }}</label>
         </div>
     </div>
     {% endif %}
@@ -975,7 +966,7 @@ nav.main-menu ul li a {
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
-        color: #fff;
+        color: black;
         font-size: 1rem;
         appearance: none;
         cursor: pointer;
@@ -1024,7 +1015,7 @@ nav.main-menu ul li a {
 
     .bet-limits {
         text-align: center;
-        color: #6c757d;
+        color: #ffffff;
         font-size: 0.875rem;
     }
 
@@ -1067,11 +1058,13 @@ nav.main-menu ul li a {
         {% endif %}
         <br>
         {% if battle.status == 'O' %}
-            <h2>Battle Slots</h2>
+        <div class="battle-slots" style="margin: auto; display: flex; flex-direction: column; justify-content:center;">
+            <h2 style="color:white; text-align: center;">Battle Slots</h2>
             <table class="battle-grid" border="1" cellspacing="0" cellpadding="5">
               <tr>
                     {% for slot in grid %}
-  <td style="width: 100px; height: 50px; text-align: center;">
+  <td style="width: 100px; height: 50px; text-align: center;
+    color: white;">
     {% if slot %}
       {% if slot.user %}
         {{ slot.user.username }}
@@ -1146,9 +1139,13 @@ nav.main-menu ul li a {
 {% endfor %}
 
             {% endfor %}
-        </div>
+        </div></div>
       </div>
  {% endif %}
+      <br>
+      <br>
+      <br>
+      <br>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         const choicesWithNonce = {{ choices_with_nonce|safe }};

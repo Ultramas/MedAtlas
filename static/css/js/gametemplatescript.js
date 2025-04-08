@@ -13,6 +13,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
 
+    const popuep = document.querySelector('.popup');
+    const closewBtn = popup.querySelector('.close');
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    popuep.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    popuep.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    });
+
+    function handleSwipe() {
+      const swipeDistance = touchEndX - touchStartX;
+      if (Math.abs(swipeDistance) > 50) {
+        closewBtn.click();
+      }
+    }
+
     if (persistSpin) {
         $('#persist-spin-checkbox').prop('checked', true);
     }
@@ -777,7 +799,7 @@ spin(buttonId);
 
     textContainer.classList.add('scrollablecontainer');
     textContainer.innerHTML = `
-      <h2>Congratulations!</h2>
+      <h2 class='congratulations'>Congratulations!</h2>
       <p>You got:</p>
       <div class="cards-container">
         <div class="inner-container"></div>
@@ -786,12 +808,14 @@ spin(buttonId);
         <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
         <input type="hidden" name="action" value="sell">
         <input type="hidden" name="pk" value="${window.inventory_pk}">
+        <div class="finish-buttons" style="display: flex; flex-direction: row; gap: 15px; justify-content: center;">
         <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
           style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
             Sell
         </button>
-      </form>
       <button class="close">Collect</button>
+      </div>
+      </form>
     `;
 
        setTimeout(() => {
@@ -924,13 +948,15 @@ $(document).on("click", ".sell-button, .close", function() {
       <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
       <input type="hidden" name="action" value="sell">
       <input type="hidden" name="pk" value="${window.inventory_pk}">
-      <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
-        style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
-          Sell
-      </button>
+      <div class="finish-buttons" style="display: flex; flex-direction: row; gap: 15px; justify-content: center;">
+        <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
+          style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
+            Sell
+        </button>
+      <button class="close">Collect</button>
+      </div>
     </form>
 
-  <button class="close" style="">Collect</button>
 `;
 
   } else if (buttonId === "start2") {

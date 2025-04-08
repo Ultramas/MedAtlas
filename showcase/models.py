@@ -3899,6 +3899,9 @@ class Battle(models.Model):
 
     logger = logging.getLogger(__name__)
 
+    def get_absolute_url(self):
+        return reverse("showcase:battle_detail", kwargs={"battle_id": self.id})
+
     def get_total_capacity(self):
         if 've' in self.slots:
             parts = self.slots.split('ve')
@@ -4154,7 +4157,6 @@ class Comment(models.Model):
         return reverse('showcase:profile', args=[str(self.slug)])
 
     def get_absolute_url(self):
-        from django.urls import reverse
 
         return reverse("showcase:post_detail", kwargs={"slug": self.post.slug})
 
