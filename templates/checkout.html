@@ -372,7 +372,7 @@
     {% include 'navtrove.html' %}
 
     <div class="container">
-        <h1 class="checkout-title">Secure Checkout</h1>
+        <h1 class="checkout-title">PokeTrove Checkout</h1>
 
         <div class="checkout-grid">
             <div class="checkout-form">
@@ -516,7 +516,6 @@
 
 
 <script>
-    // Load audio files
     const sellAudio = new Audio("/static/css/sounds/sell_coin.mp3");
     const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
     const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
@@ -597,7 +596,6 @@
             });
         }
 
-        // Form submission handling
         document.addEventListener('DOMContentLoaded', function() {
             const checkoutForm = document.getElementById('checkout-form');
             if (checkoutForm) {

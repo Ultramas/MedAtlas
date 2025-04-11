@@ -19,6 +19,7 @@ import stripe  # Official Stripe library
 from social_core.backends.stripe import StripeOAuth2
 from django.utils.text import slugify
 from urllib.parse import quote, urlparse
+from django.db import close_old_connections
 from django.contrib.auth.forms import UserChangeForm, AuthenticationForm
 
 from . import models
@@ -28,7 +29,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
-    UserNotification, TopHits, Card, Clickable, GameChoice, Robot, MyPreferences, UserClickable
+    UserNotification, TopHits, Card, Clickable, GameChoice, Robot, MyPreferences, UserClickable, GiftCodeRedemption, GiftCode
 from .models import Idea
 from .models import VoteQuery
 from .models import StaffApplication
@@ -161,6 +162,7 @@ from .forms import BaseCopyrightTextField
 from .forms import ContactForme
 from .forms import SignUpForm
 from .forms import StoreViewTypeForm
+from .forms import GiftCodeForm
 # from .forms import OrderItems
 from django.contrib import messages
 from django.contrib.auth import authenticate
@@ -2027,7 +2029,7 @@ class PokeChestBackgroundView(BaseView):
         else:
             return self.get(request, *args, **kwargs)
 
-    @csrf_exempt  # Handle CSRF if needed
+    @csrf_exempt
     def update_wager(request):
         if request.method == 'POST':
             wager_id = request.POST.get('wager_id')
@@ -2093,10 +2095,8 @@ class PokeChestBackgroundView(BaseView):
 
 
 def find_choice(request):
-    # Generate a random nonce between 0 and 1000000
     generated_nonce = random.randint(0, 1000000)
 
-    # Query the Choice model to find the choice that includes the generated nonce
     choice = Choice.objects.filter(lower_nonce__lte=generated_nonce, upper_nonce__gte=generated_nonce).first()
 
     # Pass the generated nonce and the found choice to the template
@@ -2112,13 +2112,10 @@ class FindChoiceView(View):
     template_name = 'game.html'
 
     def get(self, request, *args, **kwargs):
-        # Generate a random nonce between 0 and 1000000
         generated_nonce = random.randint(0, 1000000)
 
-        # Query the Choice model to find the choice that includes the generated nonce
         choice = Choice.objects.filter(lower_nonce__lte=generated_nonce, upper_nonce__gte=generated_nonce).first()
 
-        # Pass the generated nonce and the found choice to the template
         context = {
             'generated_nonce': generated_nonce,
             'choice': choice
@@ -2144,21 +2141,17 @@ def game_view(request, slug):
     }
 
     if request.method == 'POST':
-        # Generate between 500 and 1000 nonces dynamically
         num_nonces = random.randint(500, 1000)
         nonces = [random.randint(0, 1000000) for _ in range(num_nonces)]
 
-        # Find the choices that match the nonces
         matching_choices = []
         for nonce in nonces:
             choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce, game=game)
             for choice in choices:
                 matching_choices.append((nonce, choice))
 
-        # Randomize the order of choices
         random.shuffle(matching_choices)
 
-        # Prepare data to return as JSON
         choices_data = [{
             'nonce': nonce,
             'choice_text': choice.choice_text,
@@ -2179,61 +2172,59 @@ def game_view(request, slug):
 def create_outcome(request, slug):
     if request.method == 'POST':
         try:
-            body = json.loads(request.body)
-            game_id = body.get('game_id')
-            button_id = body.get('button_id')
-            user = request.user
+            django.db.close_old_connections()
 
-            print(f"Received JSON body: {body}")
-            print(f"Game ID: {game_id}, User: {user}, Button ID: {button_id}")
+            with transaction.atomic():
+                body = json.loads(request.body)
+                game_id = body.get('game_id')
+                button_id = body.get('button_id')
+                user = request.user
 
-            if not game_id:
-                return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
+                if not game_id:
+                    return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
 
-            game = Game.objects.get(id=game_id, slug=slug)
-            nonce = random.randint(1, 1000000)
+                game = Game.objects.get(id=game_id, slug=slug)
+                nonce = random.randint(1, 1000000)
 
-            game_choice_instance = GameChoice.objects.filter(
-                game=game,
-                lower_nonce__lte=nonce,
-                upper_nonce__gte=nonce
-            ).first()
-
-            if game_choice_instance:
-                choice = game_choice_instance.choice
-            else:
-                choices = Choice.objects.filter(
+                game_choice_instance = GameChoice.objects.filter(
                     game=game,
                     lower_nonce__lte=nonce,
                     upper_nonce__gte=nonce
-                )
-                if not choices.exists():
-                    return JsonResponse({'status': 'error', 'message': 'No valid choice found for the given nonce.'})
-                choice = choices.order_by('?').first()
+                ).first()
 
-            color = game.get_color(choice)
-            choice.color = color
-            print('the color is ' + choice.color)
-            choice.save()
+                if game_choice_instance:
+                    choice = game_choice_instance.choice
+                else:
+                    choices = Choice.objects.filter(
+                        game=game,
+                        lower_nonce__lte=nonce,
+                        upper_nonce__gte=nonce
+                    )
+                    if not choices.exists():
+                        return JsonResponse(
+                            {'status': 'error', 'message': 'No valid choice found for the given nonce.'})
+                    choice = choices.order_by('?').first()
 
-            print(f"Game: {game}, Selected Choice: {choice.id}, {choice.choice_text}, {choice.color}")
+                color = game.get_color(choice)
+                choice.color = color
+                choice.save()
 
-            demonstration_flag = True if button_id == "start2" else False
+                demonstration_flag = True if button_id == "start2" else False
 
-            outcome_data = {
-                'game': game,
-                'choice': choice,
-                'color': choice.color,
-                'nonce': nonce,
-                'value': choice.value,
-                'ratio': random.randint(1, 10),
-                'type': game.type,
-                'demonstration': demonstration_flag
-            }
-            if user.is_authenticated:
-                outcome_data['user'] = user
+                outcome_data = {
+                    'game': game,
+                    'choice': choice,
+                    'color': choice.color,
+                    'nonce': nonce,
+                    'value': choice.value,
+                    'ratio': random.randint(1, 10),
+                    'type': game.type,
+                    'demonstration': demonstration_flag
+                }
+                if user.is_authenticated:
+                    outcome_data['user'] = user
 
-            outcome = Outcome.objects.create(**outcome_data)
+                outcome = Outcome.objects.create(**outcome_data)
 
             return JsonResponse({
                 'status': 'success',
@@ -2250,10 +2241,11 @@ def create_outcome(request, slug):
         except Game.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Game not found.'})
         except Exception as e:
+            # Log the error
+            django.db.close_old_connections()  # Close connections on error
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-
 
 def game_view(request, game_id):
     game = get_object_or_404(Game, id=game_id)
@@ -2361,11 +2353,9 @@ def bulk_sell_view(request):
             if inventory_object.user != request.user:
                 return JsonResponse({"success": False, "error": f"Permission denied for item {inv_pk}"}, status=403)
 
-            # "Sell" the item by disassociating it
             inventory_object.user = None
             inventory_object.inventory = None
 
-            # Log the sale via a Transaction record
             Transaction.objects.create(
                 inventory_object=inventory_object,
                 user=request.user,
@@ -2412,6 +2402,7 @@ def sell_game_inventory_object(request, pk):
 
         total_sale_value = sum(float(item["price"]) for item in items if "price" in item)
 
+        django.db.close_old_connections()
         with transaction.atomic():
             for item in items:
                 item_pk = item.get("inventory_pk")
@@ -2513,18 +2504,79 @@ class MyPreferencesView(FormMixin, LoginRequiredMixin, ListView):
     form_class = MyPreferencesForm
     template_name = 'mypreferences.html'
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def post(self, request, *args, **kwargs):
-        form = MyPreferencesForm(request.POST, user=request.user)
+        # Check if this is an AJAX request
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+        try:
+            preference = MyPreferences.objects.get(user=request.user)
+            form = MyPreferencesForm(request.POST, instance=preference, user=request.user)
+        except MyPreferences.DoesNotExist:
+            form = MyPreferencesForm(request.POST, user=request.user)
+
         if form.is_valid():
-            preference = form.save(commit=False)
-            preference.user = request.user
-            preference.save()
-            return JsonResponse({'status': 'success'})
+            try:
+                preference = form.save(commit=False)
+                preference.user = request.user
+                preference.save()
+
+                if is_ajax:
+                    return JsonResponse({'status': 'success'})
+                else:
+                    # For non-AJAX requests, redirect to a success page
+                    messages.success(request, 'Spin preferences updated successfully!')
+                    return redirect('mypreferences')
+            except IntegrityError:
+                if is_ajax:
+                    return JsonResponse({'status': 'error', 'errors': {'general': 'Database error occurred'}},
+                                        status=400)
+                else:
+                    messages.error(request, 'Database error occurred')
+                    return self.form_invalid(form)
         else:
-            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+            if is_ajax:
+                return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+            else:
+                return self.form_invalid(form)
+
+    def get(self, request, *args, **kwargs):
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+        if is_ajax:
+            try:
+                preferences = MyPreferences.objects.get(user=request.user)
+                data = {
+                    'spintype': preferences.spintype,
+                    'is_active': preferences.is_active,
+                    'spintype_display': preferences.get_spintype_display()
+                }
+                return JsonResponse({'status': 'success', 'preferences': data})
+            except MyPreferences.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'No preferences found'})
+        else:
+            # For regular GET requests, proceed with normal ListView behavior
+            return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Use the form from get_form() to ensure user is passed correctly
+        context['preferenceform'] = self.get_form()
+
+        # Get current preferences
+        try:
+            preferences = MyPreferences.objects.get(user=self.request.user)
+            context['current_spintype'] = preferences.get_spintype_display()
+            context['is_active'] = preferences.is_active
+        except MyPreferences.DoesNotExist:
+            context['current_spintype'] = 'Classic (Default)'
+            context['is_active'] = 1
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
@@ -6732,8 +6784,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic import ListView, DetailView, View
 from django.utils import timezone
 from .forms import CheckoutForm
-from .models import (Item, OrderItem, Order, Address, Payment, Coupon, Refund,
-                     UserProfile)
 
 
 class CustomLoginView(LoginView):
@@ -12453,7 +12503,6 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         else:
             return JsonResponse({'success': False, 'error': 'Invalid action'}, status=400)
 
-        # Update inventory count after performing the action
         inventory_object.inventory.update_inventory_count()
         updated_count = inventory_object.inventory.number_of_cards
 
@@ -12524,35 +12573,62 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             'currency_amount': user_profile.currency_amount  # include updated currency amount
         })
 
-    def sell_inventory_object(self, request, pk):
-        inventory_object = get_object_or_404(InventoryObject, pk=pk)
+    @csrf_exempt
+    def sell_inventory_object(request, pk):
+        if request.method != "POST":
+            return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
 
-        if inventory_object.user != request.user:
-            return JsonResponse({'success': False}, status=403)
+        try:
+            # Check authorization outside transaction
+            inventory_object = get_object_or_404(InventoryObject, pk=pk)
+            if inventory_object.user != request.user:
+                return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
 
-        inventory_object.user = None
-        inventory_object.inventory = None
+            data = json.loads(request.body)
+            items = data.get("items", [])
+            if not items:
+                return JsonResponse({'success': False, 'message': 'No items provided'}, status=400)
 
-        with transaction.atomic():
-            Transaction.objects.create(
-                inventory_object=inventory_object,
-                user=request.user,
-                currency=inventory_object.currency,
-                amount=inventory_object.price
-            )
-            inventory_object.save()
+            total_sale_value = sum(float(item["price"]) for item in items if "price" in item)
+            django.db.close_old_connections()
 
-            user_profile = get_object_or_404(ProfileDetails, user=request.user)
-            user_profile.currency_amount += inventory_object.price
-            user_profile.save()
+            # Process each item in separate small transactions
+            for item in items:
+                item_pk = item.get("inventory_pk")
 
-        stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
-        print('inventory sell committed')
-        return JsonResponse({
-            'success': True,
-            'stock_count': stock_count,
-            'currency_amount': user_profile.currency_amount
-        })
+                with transaction.atomic():
+                    item_inventory = get_object_or_404(InventoryObject, pk=item_pk)
+                    item_inventory.user = None
+                    item_inventory.inventory = None
+                    item_inventory.save()
+
+                with transaction.atomic():
+                    Transaction.objects.create(
+                        inventory_object=item_inventory,
+                        user=request.user,
+                        currency=item.get("currencySymbol", ""),
+                        amount=float(item.get("price", 0))
+                    )
+
+            with transaction.atomic():
+                user_profile = get_object_or_404(ProfileDetails, user=request.user)
+                user_profile.currency_amount += total_sale_value
+                user_profile.save()
+
+            stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+
+            return JsonResponse({
+                'success': True,
+                'stock_count': stock_count,
+                'currency_amount': user_profile.currency_amount,
+                'message': f"Sold {len(items)} items for {total_sale_value} currency."
+            })
+
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'message': 'Invalid JSON data'}, status=400)
+        except Exception as e:
+            django.db.close_old_connections()
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
     def move_to_trade(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
@@ -13369,17 +13445,16 @@ class GameChestBackgroundView(BaseView):
 
             total_sale_value = sum(float(item["price"]) for item in items if "price" in item)
 
+            django.db.close_old_connections()
             with transaction.atomic():
                 for item in items:
                     item_pk = item.get("inventory_pk")
                     item_inventory = get_object_or_404(InventoryObject, pk=item_pk)
 
-                    # Mark inventory as sold
                     item_inventory.user = None
                     item_inventory.inventory = None
                     item_inventory.save()
 
-                    # Create a transaction entry
                     Transaction.objects.create(
                         inventory_object=item_inventory,
                         user=request.user,
@@ -13387,7 +13462,6 @@ class GameChestBackgroundView(BaseView):
                         amount=float(item.get("price", 0))
                     )
 
-                # Update user profile currency
                 user_profile = get_object_or_404(ProfileDetails, user=request.user)
                 user_profile.currency_amount += total_sale_value
                 user_profile.save()
@@ -14776,7 +14850,6 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
         user.email = new_email
         user.save()
 
-        # Update the SettingsModel with the new form data
         settings_model.email = form.cleaned_data['email']
         settings_model.coupons = form.cleaned_data['coupons']
         settings_model.news = form.cleaned_data['news']
@@ -16805,13 +16878,10 @@ class CurrencyProductView(DetailView):
                     userprofile.newprofile_profile_picture_url = profile.avatar.url
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
-        # New: Determine if this CurrencyMarket item is in the user's cart
         in_cart = False
         if self.request.user.is_authenticated:
             try:
-                # Get the active cart for the user
                 order = CurrencyFullOrder.objects.get(user=self.request.user, ordered=False)
-                # Check if any CurrencyOrder in the cart refers to the current CurrencyMarket object
                 in_cart = order.items.filter(items=self.object).exists()
             except CurrencyFullOrder.DoesNotExist:
                 in_cart = False
@@ -16845,7 +16915,7 @@ class CurrencyMarketView(EBaseView):
         context['preferenceform'] = MyPreferencesForm(user=self.request.user)
 
         context['Currency'] = CurrencyMarket.objects.filter(is_active=1).order_by(
-            'price')  # deals/non-deals can be seperated in the templates
+            'price')
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -16915,7 +16985,7 @@ class CurrencyCheckoutView(EBaseView):
     def get(self, *args, **kwargs):
         if not self.request.user.is_authenticated:
             messages.warning(self.request, "Please log in to see your order history.")
-            return redirect("accounts/login")  # replace "login" with your login route
+            return redirect("accounts/login")
         try:
             order = CurrencyFullOrder.objects.get(user=self.request.user, ordered=False)
             form = CurrencyCheckoutForm()
@@ -16977,6 +17047,7 @@ class CurrencyPaymentView(EBaseView):
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=True, page=self.template_name
         ).order_by("position")
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -17046,14 +17117,12 @@ class CurrencyPaymentView(EBaseView):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        # Parse the JSON payload from the request body
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
             messages.warning(request, "Invalid JSON received")
             return redirect("/currencypayment/stripe")
 
-        # Retrieve the token from the JSON data
         token = data.get("token")
         if not token:
             messages.warning(request, "Invalid data received")
@@ -17072,7 +17141,7 @@ class CurrencyPaymentView(EBaseView):
 
         try:
             charge = stripe.Charge.create(
-                amount=int(total_amount * 100),  # e.g., $10.00 => 1000 cents
+                amount=int(total_amount * 100),
                 currency="usd",
                 source=token,
                 description=f"Order(s) for user {order_user.id}",
@@ -17082,6 +17151,16 @@ class CurrencyPaymentView(EBaseView):
 
         ruby_profile.currency_amount += total_currency_amount
         ruby_profile.save()
+
+        full_order = CurrencyFullOrder.objects.create(
+            user=order_user,
+            ordered=True,
+            ordered_date=timezone.now(),
+            stripe_transaction_id=charge.id,
+            is_active=1
+        )
+        full_order.items.set(orders)
+        full_order.save()
 
         for order in orders:
             order.ordered = True
@@ -17154,7 +17233,6 @@ class CurrencyPaypalFormView(FormView):
 def currency_add_to_cart(request, slug):
     item = get_object_or_404(CurrencyMarket, slug=slug)
 
-    # Check for an existing order item for this user and item
     order_item_qs = CurrencyOrder.objects.filter(
         user=request.user,
         items=item,
@@ -17163,22 +17241,19 @@ def currency_add_to_cart(request, slug):
 
     if order_item_qs.exists():
         order_item = order_item_qs.first()
-        # Increase the quantity
         order_item.quantity += 1
         order_item.save()
         messages.info(request, f"Updated quantity of \"{item.name}\" in your cart.")
     else:
-        # Create a new order item for a different CurrencyMarket item
         order_item = CurrencyOrder.objects.create(
             user=request.user,
             items=item,
             ordered=False,
-            quantity=1,  # New item with quantity 1
-            slug=item.slug  # Optional: ensure slug is set if needed elsewhere
+            quantity=1,
+            slug=item.slug
         )
         messages.info(request, f"Added \"{item.name}\" to your cart.")
 
-    # Get or create the active full order (cart) for the user
     order_qs = CurrencyFullOrder.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs.first()
@@ -17189,7 +17264,6 @@ def currency_add_to_cart(request, slug):
             ordered_date=timezone.now()
         )
 
-    # Add the order item to the cart if it's not already present
     if not order.items.filter(id=order_item.id).exists():
         order.items.add(order_item)
 
@@ -17206,13 +17280,11 @@ def currency_remove_from_cart(request, slug):
         ordered=False
     )
 
-    # Get the active cart for the user
     order_qs = CurrencyFullOrder.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs.first()
         if order.items.filter(id=order_item.id).exists():
             order.items.remove(order_item)
-            # Optionally delete the order item (if you don’t need to keep it once removed)
             order_item.delete()
             messages.info(request, f"Removed \"{order_item.items.name}\" from your cart.")
         else:
@@ -17250,6 +17322,130 @@ class CurrencyAddCouponView(View):
             except ObjectDoesNotExist:
                 messages.info(self.request, "You do not have an active order")
                 return redirect("showcase:currencycheckout")
+
+
+class GiftCodeRedemptionView(LoginRequiredMixin, ListView, FormMixin):
+    model = GiftCodeRedemption
+    template_name = "giftcoderedemption.html"
+    context_object_name = "redemptions"
+    form_class = GiftCodeForm
+
+    def get_queryset(self):
+        return GiftCodeRedemption.objects.filter(user=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+        if 'form' not in context:
+            context['form'] = self.get_form()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form_class()(request.POST, user=request.user)
+        if self.request.user.is_authenticated:
+            if form.is_valid():
+                code_str = form.cleaned_data['code']
+                gift_code = GiftCode.objects.get(code=code_str)
+
+                if gift_code.tracking_total_uses < gift_code.total_uses and gift_code.is_active == 1:
+                    GiftCodeRedemption.objects.create(user=request.user, gift_code=gift_code)
+
+                    profile = ProfileDetails.objects.filter(user=request.user).first()
+                    if profile:
+                        profile.currency_amount += gift_code.value
+                        profile.save()
+
+                    gift_code.tracking_total_uses += 1
+                    gift_code.save()
+
+                    messages.success(request, "Gift code redeemed successfully.")
+                    return redirect('showcase:giftcodeclaimed')
+                else:
+                    messages.error(request, "This gift code has reached its maximum number of uses or is inactive.")
+            else:
+                messages.error(request, "Form submission invalid.")
+        else:
+            return redirect('accounts/login')
+
+        return self.get(request, *args, **kwargs)
+
+
+class GiftCodeClaimedView(ListView):
+    model = Lottery
+    template_name = "giftcodeclaimed.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
+            "position")
+        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
+
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
+        context['Profile'] = UpdateProfile.objects.all()
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
 
 
 def index(request):
@@ -17362,7 +17558,6 @@ class OrderSummaryView(EBaseView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Adding data to the context dictionary
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
@@ -17430,7 +17625,7 @@ def check_and_deduct_currency(user, amount_required):
         profile.save()
         return True, profile.currency_amount  # Sufficient funds and deduction successful
     except ProfileDetails.DoesNotExist:
-        return False, 0  # User profile not found
+        return False, 0
 
 
 class CheckoutView(EBaseView):
@@ -17455,7 +17650,6 @@ class CheckoutView(EBaseView):
         context['address'] = Address.objects.filter(is_active=1, user=self.request.user).first()
         context.update(kwargs)
 
-        # Checking user profile existence
         user_profile_exists = UserProfile2.objects.filter(user=self.request.user, is_active=1).exists()
         context['user_profile_exists'] = user_profile_exists
 
@@ -17487,14 +17681,23 @@ class CheckoutView(EBaseView):
     def get(self, *args, **kwargs):
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
+
+            if hasattr(order, "update_total_prices"):
+                order.update_total_prices()
+
+            try:
+                currency_order = CurrencyOrder.objects.filter(user=self.request.user, ordered=False)
+                if hasattr(currency_order, "update_total_prices"):
+                    currency_order.update_total_prices()
+            except CurrencyOrder.DoesNotExist:
+                currency_order = None
+
             all_items_currency_based = self.are_all_items_currency_based(order)
             form = CheckoutForm(all_items_currency_based=all_items_currency_based)
 
-            # Get the existing addresses if available
             shipping_address_qs = Address.objects.filter(user=self.request.user, address_type='S', is_active=1)
             if shipping_address_qs.exists():
                 shipping_address = shipping_address_qs.first()
-                # Prepopulate the form with the shipping address
                 form.fields['shipping_address'].initial = shipping_address.street_address
                 form.fields['shipping_address2'].initial = shipping_address.apartment_address
                 form.fields['shipping_country'].initial = shipping_address.country
@@ -17503,13 +17706,18 @@ class CheckoutView(EBaseView):
             billing_address_qs = Address.objects.filter(user=self.request.user, address_type='B', is_active=1)
             if billing_address_qs.exists():
                 billing_address = billing_address_qs.first()
-                # Prepopulate the form with the billing address
                 form.fields['billing_address'].initial = billing_address.street_address
                 form.fields['billing_address2'].initial = billing_address.apartment_address
                 form.fields['billing_country'].initial = billing_address.country
                 form.fields['billing_zip'].initial = billing_address.zip
 
-            context = self.get_context_data(form=form, couponform=CouponForm(), order=order, DISPLAY_COUPON_FORM=True)
+            context = self.get_context_data(
+                form=form,
+                couponform=CouponForm(),
+                order=order,
+                currency_order=currency_order,
+                DISPLAY_COUPON_FORM=True
+            )
 
             return render(self.request, self.template_name, context)
 
@@ -17522,17 +17730,15 @@ class CheckoutView(EBaseView):
             order = Order.objects.get(user=request.user, ordered=False)
             all_items_currency_based = self.are_all_items_currency_based(order)
             form = CheckoutForm(request.POST or None, all_items_currency_based=all_items_currency_based)
-            print(f'Form valid: {form.is_valid()}')  # Debug print
+            print(f'Form valid: {form.is_valid()}')
             if form.is_valid():
                 if form.fields['payment_option'].widget.is_hidden:
-                    print('hidden formats')  # Debug print
+                    print('hidden formats')
 
-                    # Calculate the total currency amount required for the order
                     total_order_currency_amount = sum(
                         item.item.currency_price for item in OrderItem.objects.filter(order=order)
                     )
 
-                    # Check and deduct currency
                     sufficient_funds, remaining_amount = check_and_deduct_currency(
                         request.user, total_order_currency_amount
                     )
@@ -17553,7 +17759,7 @@ class CheckoutView(EBaseView):
                     return redirect('showcase:orderdone')
 
             else:
-                print("Form errors:", form.errors)  # Debug print
+                print("Form errors:", form.errors)
                 messages.warning(request, "Form is not valid. Please correct the errors below.")
                 context = self.get_context_data(form=form)
                 context['order'] = order
@@ -17890,59 +18096,60 @@ class OrderDoneView(ListView):
 @allow_guest_user
 def add_to_cart(request, slug):
     item = get_object_or_404(Item, slug=slug)
-    order_item, created = OrderItem.objects.get_or_create(
-        item=item,
-        user=request.user,
-        ordered=False,
-        # id=10,
-    )
+
+    # Check if an existing order exists for the user
     order_qs = Order.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
+
+        # Check if an OrderItem already exists for the current order
+        order_item = OrderItem.objects.filter(
+            item=item, user=request.user, ordered=False
+        ).first()
+
+        if order_item:
+            # If the item already exists in the cart, increase the quantity
+            order_item.quantity += 1
+            order_item.save()
+            messages.info(request, f"\"{order_item.item.title}\" was added to your cart.")
+        else:
+            # Create a new OrderItem and add it to the order
+            order_item = OrderItem(item=item, user=request.user, ordered=False, quantity=1)
+            order_item.save()  # Save the OrderItem before adding to the order
+            order.items.add(order_item)
+            messages.info(request, "This item was added to your cart.")
+
+        # Optionally, assign shipping and billing address if available
         address = Address.objects.filter(user=request.user, is_active=1).first()
         if address:
             order.shipping_address = address
-            order.billing_address = address  # get billing address from templates, if provided
+            order.billing_address = address  # Get billing address from templates, if provided
+            order.save()
 
-        # check if the order item is in the order
-        if order.items.filter(item__slug=item.slug).exists():
-            order_item.quantity += 1
-            order_item.save()
-            messages.info(
-                request,
-                "\"" + order_item.item.title + "\" was added to your cart.")
-            return redirect("showcase:order-summary")
-        else:
-            order.items.add(order_item)
-            messages.info(request, "This item was added to your cart.")
-            return redirect("showcase:order-summary")
+        return redirect("showcase:order-summary")
+
     else:
-        order_qs = Order.objects.create(
+        # If no active order exists, create a new one
+        order = Order.objects.create(
             user=request.user,
             ordered=False,
             ordered_date=timezone.now()
         )
         print("Order created")
 
+        # Assign shipping and billing address to the order
         address = Address.objects.filter(user=request.user, is_active=1).first()
         if address:
-            order_qs.shipping_address = address
-            order_qs.billing_address = address  # Get billing address from templates if provided
-            order_qs.save()  # Save the order instance to persist the changes
+            order.shipping_address = address
+            order.billing_address = address
+            order.save()
             print('Added an address to the created order')
 
-        # check if the order item is in the order
-        if order_qs.items.filter(item__slug=item.slug).exists():
-            order_item.quantity += 1
-            order_item.save()
-            messages.info(
-                request,
-                "\"" + order_item.item.title + "\" was added to your cart.")
-            return redirect("showcase:order-summary")
-        else:
-            order_qs.items.add(order_item)
-            messages.info(request, "This item was added to your cart.")
-            return redirect("showcase:order-summary")
+        order_item = OrderItem(item=item, user=request.user, ordered=False, quantity=1)
+        order_item.save()
+        order.items.add(order_item)
+        messages.info(request, "This item was added to your cart.")
+        return redirect("showcase:order-summary")
 
 
 @login_required
@@ -18109,9 +18316,14 @@ class AddCouponView(View):
                 order = Order.objects.get(user=self.request.user,
                                           ordered=False)
                 order.coupon = get_coupon(self.request, code)
-                order.save()
-                messages.success(self.request, "Successfully added coupon")
-                return redirect("showcase:checkout")
+
+                if order.coupon:
+                    order.save()
+                    messages.success(self.request, "Successfully added coupon")
+                    return redirect("showcase:checkout")
+                else:
+                    messages.info(self.request, "Coupon did not work, maybe it expired?")
+                    return redirect("showcase:checkout")
             except ObjectDoesNotExist:
                 messages.info(self.request, "You do not have an active order")
                 return redirect("showcase:checkout")

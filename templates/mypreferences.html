@@ -1,5 +1,5 @@
 {% load static %}
-
+<head>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 
@@ -335,48 +335,80 @@
         100% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.5); }
     }
 </style>
+</head>
 
+<body>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('preferences-form');
+function togglePreferences() {
+    const container = document.getElementById("preferencescontainer");
+    if (container.style.display === "none" || container.style.display === "") {
+        container.style.display = "block";
 
-    form.addEventListener('change', function () {
-        const formData = new FormData(form);
+        // Optional: Pre-fill from current preference
+        fetch("{% url 'showcase:mypreferences' %}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.spintype) {
+                    document.getElementById("spintypeSelect").value = data.spintype;
+                }
+            });
+    } else {
+        container.style.display = "none";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const spinSelect = document.getElementById("spintypeSelect");
+
+    spinSelect.addEventListener("change", function () {
+        const selectedValue = spinSelect.value;
+
         fetch("{% url 'showcase:mypreferences' %}", {
             method: "POST",
             headers: {
-                'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
             },
-            body: formData,
+            body: JSON.stringify({ spintype: selectedValue })
         })
-        .then(response => {
-            if (response.ok) {
-                console.log("Preference updated successfully.");
-                // Optional: show confirmation message, animation, or badge here
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                document.getElementById("preferencescontainer").style.display = "none";
+                alert("Spin type set to " + selectedValue + " successfully!");
             } else {
-                console.error("Error updating preference.");
+                alert("Failed to update spin type.");
             }
         })
-        .catch(error => {
-            console.error("AJAX request failed:", error);
+        .catch(err => {
+            console.error("Error:", err);
+            alert("Something went wrong. Please try again.");
         });
     });
 });
+
 </script>
 
 {% if user.is_authenticated %}
- <div class="signup-container">
-    <div class="form-card">
-        <div class="form-header">
-            <h1>My Preferences</h1>
-            <p>Set Spin Settings</p>
-        </div>
 
-        <form id="preferences-form" method="POST" class="form-content">
+    <form id="spinPreferenceForm" style="">
+       <div class="preference-content">
+        <h3>Spin Preferences</h3>
+        <form id="preferencesForm" method="post">
             {% csrf_token %}
-            {{ preferenceform.as_p }}
+            <div class="form-group">
+                <label for="id_spintype">Spin Type:</label>
+                <select name="spintype" id="id_spintype" class="form-control">
+                    <option value="C" {% if preferenceform.spintype.value == 'C' %}selected{% endif %}>Classic</option>
+                    <option value="S" {% if preferenceform.spintype.value == 'S' %}selected{% endif %}>Simultaneous</option>
+                    <option value="I" {% if preferenceform.spintype.value == 'I' %}selected{% endif %}>Instant</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" onclick="togglePreferences()" class="btn btn-secondary">Close</button>
+            </div>
         </form>
     </div>
-</div>
+    </form>
 {% endif %}
-
+</body>

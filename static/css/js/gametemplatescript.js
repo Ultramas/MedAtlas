@@ -50,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     $(".spin-option").click(function () {
         $(".spin-option").removeClass("selected");
 
-        // Play sound bubble_selection.mp3
         let audio = new Audio("/static/css/sounds/bubble_selection.mp3");
         audio.play();
 
@@ -60,14 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // Start animation on button click
     $(".start").click(function (event) {
-        const buttonId = event.target.id; // Extract the ID of the clicked button
-        console.log(`Button clicked: ${buttonId}`); // Debug: Log the button's ID
+        const buttonId = event.target.id;
+        console.log(`Button clicked: ${buttonId}`);
         sessionStorage.setItem("startAnimation", "true");
         sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
-
-        // Reset current spin count and initialize the animation
 
 
         let currentSpin = 0;
@@ -79,68 +75,46 @@ document.addEventListener('DOMContentLoaded', () => {
         $(".start").prop('disabled', true);
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
         selectedItems = [];
-        console.log(`Initializing animation for button: ${buttonId}`); // Debug log for button ID
+        console.log(`Initializing animation for button: ${buttonId}`);
 
 
 
-async function randomizeContents() {
+let requestInProgress = false;
+const requestQueue = [];
+const requestDelay = 300;
+
+async function processQueue() {
+    if (requestQueue.length === 0 || requestInProgress) return;
+
+    requestInProgress = true;
+    const nextRequest = requestQueue.shift();
+
+    try {
+        const result = await nextRequest();
+        requestInProgress = false;
+        setTimeout(processQueue, requestDelay);
+        return result;
+    } catch (error) {
+        requestInProgress = false;
+        setTimeout(processQueue, requestDelay);
+        throw error;
+    }
+}
+
+async function randomizeContents(buttonId, choiceColor) {
     const startButton = document.getElementById("start");
     const gameId = startButton.getAttribute("data-game-id");
     const nonce = startButton.getAttribute("data-nonce");
     const slug = startButton.getAttribute("data-slug");
 
-    console.log("Game ID:", gameId);
-    console.log("Nonce:", nonce);
-    console.log("Slug:", slug);
-    if (
-        userContext.isSignedIn &&
-        userContext.hasPreference &&
-        userContext.preferenceValue === "I"
-    ) {
-        console.log("User has preference 'I' - showing popup instantly.");
-
-
-        const payload = {
-            game_id: gameId,
-            button_id: buttonId,
-            color: choiceColor
-        };
-        console.log("Payload sent to server:", payload);
-
-        try {
-            const response = await fetch(`/create_outcome/${slug}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: JSON.stringify(payload),
-            });
-
-            const result = await response.json();
-            console.log("Instant Outcome Response:", result);
-
-        } catch (error) {
-            console.error("Error during instant outcome fetch:", error);
-        }
-
-        return;
-    }
-
-    try {
-        if (buttonId === "start") {
-            console.log("Regular Spin triggered");
-        } else if (buttonId === "start2") {
-            console.log("Demo Spin triggered");
-        }
-
+    const executeRequest = async () => {
         const payload = {
             game_id: gameId,
             button_id: buttonId,
             color: choiceColor
         };
 
-        console.log("Payload sent to server:", payload);
+        await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
 
         const response = await fetch(`/create_outcome/${slug}/`, {
             method: 'POST',
@@ -151,12 +125,17 @@ async function randomizeContents() {
             body: JSON.stringify(payload),
         });
 
+        if (!response.ok) {
+            if (response.status === 500 && response.statusText.includes("database is locked")) {
+                throw new Error("database_locked");
+            }
+            throw new Error(`HTTP error ${response.status}`);
+        }
+
         const data = await response.json();
-        console.log("Response from server:", data);
 
         if (data.status === 'success') {
             startButton.setAttribute('data-nonce', data.nonce);
-            console.log(`Nonce updated: ${data.nonce}`);
 
             clearCards();
 
@@ -172,8 +151,7 @@ async function randomizeContents() {
             };
 
             const targetCardElement = document.createElement('div');
-            targetCardElement.classList.add('card', 'target-card');
-            targetCardElement.classList.add('sellattribute');
+            targetCardElement.classList.add('card', 'target-card', 'sellattribute');
             targetCardElement.setAttribute('id', `card-${attributes.id}`);
             targetCardElement.setAttribute('data-nonce', attributes.nonce);
             targetCardElement.setAttribute('data-color', attributes.color);
@@ -182,17 +160,17 @@ async function randomizeContents() {
             targetCardElement.setAttribute('data-upper_nonce', attributes.upperNonce);
 
             targetCardElement.innerHTML = `
-    <div class="cards" style="background: url(/static/css/images/${attributes.color}.png);">
-            <div class="lootelement"
-     data-price="${attributes.value || ''}"
-     data-currency-file="${attributes.currencyFile || ''}"
-     data-currency-symbol="${attributes.currencySymbol || ''}"
-     style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border-top: none; width: 10em;">
-    ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-    <div class="sliderPrice">${attributes.value} 💎targetcard </div>
-</div>
-</div>
-`;
+                <div class="cards" style="background: url(/static/css/images/${attributes.color}.png);">
+                    <div class="lootelement"
+                        data-price="${attributes.value || ''}"
+                        data-currency-file="${attributes.currencyFile || ''}"
+                        data-currency-symbol="${attributes.currencySymbol || ''}"
+                        style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border-top: none; width: 10em;">
+                        ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
+                        <div class="sliderPrice" style="color: white;">${attributes.value} 💎 </div>
+                    </div>
+                </div>
+            `;
 
             selectedItems.push({
                 id: attributes.id,
@@ -207,22 +185,11 @@ async function randomizeContents() {
 
             const cardContainer = document.querySelector('.slider');
 
-
             function updateCardPosition() {
                 const windowWidth = window.innerWidth;
-
-
-                function getRandomDecimal(min, max) {
-                    const randomDecimal = Math.random() * (max - min) + min;
-                    return Math.round(randomDecimal * 10000) / 10000;
-                }
-
-                const randomDivisor = getRandomDecimal(1.3265, 1.3375);
-
+                const randomDivisor = Math.random() * (1.3375 - 1.3265) + 1.3265;
                 const cardContainer = document.querySelector('.slider');
                 const middleIndex = Math.floor(cardContainer.children.length / 1.327);
-
-                console.log(randomDivisor);
                 const targetIndex = Math.min(cardContainer.children.length, middleIndex);
 
                 if (cardContainer.children[targetIndex]) {
@@ -230,88 +197,106 @@ async function randomizeContents() {
                 } else {
                     cardContainer.appendChild(targetCardElement);
                 }
-
-                console.log(`Window Width: ${windowWidth}, Divisor: ${randomDivisor}, Target Index: ${targetIndex}`);
             }
 
             window.addEventListener('resize', updateCardPosition);
-
             updateCardPosition();
 
-            console.log("Target card inserted 4 cards to the right of the middle.");
+            try {
+                const inventoryPayload = {
+                    choice_id: data.choice_id,
+                    choice_value: data.choice_value,
+                    category: data.category,
+                    price: 100,
+                    condition: 'New',
+                    quantity: 1,
+                    buttonId: buttonId,
+                };
 
-            const inventoryPayload = {
-                choice_id: data.choice_id,
-                choice_value: data.choice_value,
-                category: data.category,
-                price: 100,
-                condition: 'New',
-                quantity: 1,
-                buttonId: buttonId,
-            };
-            console.log("Calling /create_inventory_object/ with payload:", inventoryPayload);
+                const inventoryResponse = await fetch('/create_inventory_object/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify(inventoryPayload),
+                });
 
-            const inventoryResponse = await fetch('/create_inventory_object/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: JSON.stringify(inventoryPayload),
-            });
+                const inventoryData = await inventoryResponse.json();
 
-            const inventoryData = await inventoryResponse.json();
-            console.log("Response from /create_inventory_object/:", inventoryData);
-
-            if (inventoryData.status === 'success') {
-                if (inventoryData.button_id === "start") {
-                    console.log("Inventory object created successfully with user.");
-                     let inventory_pk = inventoryData.inventory_object_id;
-                        console.log("inventory_pk:", inventory_pk);
+                if (inventoryData.status === 'success') {
+                    if (inventoryData.button_id === "start") {
+                        let inventory_pk = inventoryData.inventory_object_id;
                         window.inventory_pk = inventory_pk;
                         targetCardElement.setAttribute('data-inventory_pk', window.inventory_pk);
 
                         window.sellUrl = `/inventory/${inventory_pk}/sell/`;
                         const sellForm = document.getElementById(`sell-form-${window.inventory_pk}`);
-                        console.log('sellform: ' + sellForm);
+
                         if (sellForm) {
-                          console.log("Sell form found:", sellForm);
+                            sellForm.addEventListener('submit', function(event) {
+                                event.preventDefault();
+                                const pk = this.querySelector('[name="pk"]').value;
 
-                          sellForm.addEventListener('submit', function(event) {
-                            event.preventDefault();
-                            const pk = this.querySelector('[name="pk"]').value;
-                            console.log("Sell form submitted. pk =", pk);
-
-                            $(".spin-option").removeClass("selected");
-
-
-                            $(this).addClass("selected");
-                            totalSpins = parseInt($(this).data("value"));
-                            sessionStorage.setItem("totalSpins", totalSpins);
-                            sellInventory(pk);
-                          });
-                        } else {
-                          console.error("Sell form not found for inventory_pk:", window.inventory_pk);
+                                $(".spin-option").removeClass("selected");
+                                $(this).addClass("selected");
+                                totalSpins = parseInt($(this).data("value"));
+                                sessionStorage.setItem("totalSpins", totalSpins);
+                                sellInventory(pk);
+                            });
                         }
-
-                } else if (inventoryData.button_id === "start2") {
-                    console.log("Temporary inventory object created without user. ID:", inventoryData.inventory_object_id);
+                    }
                 }
-            } else {
-                console.error("Failed to create inventory object:", inventoryData.message);
+            } catch (inventoryError) {
+                console.error(`Inventory creation error: ${inventoryError}`);
             }
 
             return data;
         } else {
-            console.error(`Error: ${data.message}`);
-            return null;
+            if (data.message && data.message.includes("database is locked")) {
+                throw new Error("database_locked");
+            }
+            throw new Error(data.message || "Unknown error");
         }
-    } catch (error) {
-        console.error(`Request failed: ${error}`);
-        return null;
-    }
-}
+    };
 
+    const executeWithRetry = async () => {
+        const maxRetries = 3;
+        let retryCount = 0;
+
+        while (retryCount < maxRetries) {
+            try {
+                return await executeRequest();
+            } catch (error) {
+                retryCount++;
+
+                if (error.message === "database_locked" && retryCount < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, 500 * retryCount));
+                    continue;
+                }
+
+                throw error;
+            }
+        }
+    };
+
+    return new Promise((resolve, reject) => {
+        requestQueue.push(async () => {
+            try {
+                const result = await executeWithRetry();
+                resolve(result);
+                return result;
+            } catch (error) {
+                reject(error);
+                throw error;
+            }
+        });
+
+        if (!requestInProgress) {
+            processQueue();
+        }
+    });
+}
 
 function clearCards() {
     const cardContainer = document.querySelector('.slider');
@@ -331,7 +316,13 @@ function clearCards() {
             document.querySelectorAll('.slider').forEach(scroller => {
                 scroller.style.animation = 'none';
                 scroller.offsetHeight;
-                let animationDuration = isQuickSpin ? '9s' : '18s';
+                let animationDuration;
+                if (isQuickSpinInteractive) {
+                    animationDuration = isQuickSpin ? '1s' : '2s';
+                } else {
+                    animationDuration = isQuickSpin ? '9s' : '18s';
+                }
+
                 scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
                 scroller.style.animationPlayState = 'running';
             });
@@ -475,33 +466,49 @@ function randomizedContents() {
     const slider = document.querySelector('.slider');
     const children = Array.from(slider.children);
 
+    // Find the target card
     const targetIndex = children.findIndex(child => child.classList.contains('target-card'));
     let targetCard = null;
     if (targetIndex !== -1) {
         targetCard = children[targetIndex];
     }
 
+    // Get all non-target cards
     const nonTargetCards = children.filter(child => !child.classList.contains('target-card'));
 
+    // Shuffle non-target cards
     for (let i = nonTargetCards.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [nonTargetCards[i], nonTargetCards[j]] = [nonTargetCards[j], nonTargetCards[i]];
     }
 
+    // Clear the slider
     slider.innerHTML = '';
 
-    const totalCards = nonTargetCards.length + (targetCard ? 1 : 0);
-    for (let i = 0, j = 0; i < totalCards; i++) {
-        if (i === targetIndex && targetCard) {
+    // Calculate middle position
+    const middlePosition = Math.floor(nonTargetCards.length / 2);
+
+    // Add cards to the slider with target card in the middle
+    for (let i = 0; i < nonTargetCards.length; i++) {
+        if (i === middlePosition && targetCard) {
+            // Insert target card in the middle position
             slider.appendChild(targetCard);
-        } else {
-            slider.appendChild(nonTargetCards[j]);
-            j++;
         }
+        slider.appendChild(nonTargetCards[i]);
     }
 
-    console.log("Slider contents randomized without affecting target card position.");
+    // If we haven't added the target card yet (in case the middle position calculation was off)
+    if (targetCard && !slider.querySelector('.target-card')) {
+        const allCards = Array.from(slider.children);
+        const middleIndex = Math.floor(allCards.length / 2);
+
+        // Insert target card in the exact middle
+        slider.insertBefore(targetCard, allCards[middleIndex]);
+    }
+
+    console.log("Slider contents randomized with target card positioned in the middle.");
 }
+
 
 
 
@@ -526,6 +533,8 @@ function spin(buttonId) {
 
         else{
          console.log('actually instant spin')
+        randomizedContents();
+        addAnimation();
         }
 
 
@@ -544,7 +553,7 @@ if (
 ) {
     animationDuration = isQuickSpin ? 4500 : 9000;
 } else {
-    animationDuration = 0;
+    animationDuration = isQuickSpin ? 500 : 1000;
 }
 
 
@@ -902,7 +911,6 @@ $(document).on("click", ".sell-button, .close", function() {
         return;
     }
 
-    // Use a generic endpoint for bulk selling rather than one based on a single item's pk.
     let sellUrl = `/sell/`;
     console.log("Sell URL:", sellUrl);
 
@@ -1002,7 +1010,6 @@ $(document).on("click", ".sell-button, .close", function() {
 
         popup.style.display = 'block';
 
-        // Trigger the fire animation
         setTimeout(() => {
             const fire = document.querySelector('.fire');
             fire.classList.add('active');

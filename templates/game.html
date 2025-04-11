@@ -100,15 +100,13 @@
 
         .cards-container {
             display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 10px;
-            max-height: 100%;
-            position: relative;
-            min-width: 100%;
+            height: 300px;
+            overflow-y: auto;
             transition: justify-content 0.3s ease-in-out;
+            gap: 10px;
         }
 
 
@@ -891,7 +889,7 @@ p.blog-meta span {
 }
 
 .sliderPrice {
-    color: black;
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -899,6 +897,9 @@ p.blog-meta span {
 
 }
 
+.innerprice{
+    text-shadow: 1px -1px 0 #ff0000, -1px 1px 0 #000fff, 1px 1px 0 #090907;
+}
          .labeltag {
     position: absolute;
     left: 20%;
@@ -1028,7 +1029,6 @@ p.blog-meta span {
 
          .scrollablecontainer {
   max-width: 90vw;
-  max-height: 80vh;
   overflow-y: auto;
   padding: 20px;
   box-sizing: border-box;
@@ -1040,7 +1040,6 @@ p.blog-meta span {
 
 .cards-container, .inner-container {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
 }
@@ -1448,11 +1447,10 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
 
                     <span>Chest Value: {{ game.cost }}</span> 💎
              <script>
-            // Disable the cost calculation JavaScript
             document.addEventListener("DOMContentLoaded", function () {
                 const costDisplayElement = document.getElementById("cost-display");
                 if (costDisplayElement) {
-                    costDisplayElement.innerHTML = `<span id="base-cost"> {{ game.cost }}</span> 💎`; // Set cost to 0
+                    costDisplayElement.innerHTML = `<span id="base-cost"> {{ game.cost }}</span> 💎`;
                 }
             });
         </script>
@@ -1519,10 +1517,8 @@ function sellAllTargetCards() {
 
 document.querySelector('.sell-button').addEventListener('click', (e) => {
   e.preventDefault();
-  // Find all target cards (assume they have the class "target-card")
   const targetCards = document.querySelectorAll('.target-card');
   targetCards.forEach(card => {
-    // Get the inventory_pk from the card's data attribute
     const inventoryPk = card.getAttribute('data-inventory_pk');
     if (inventoryPk) {
      console.log('here it is set inventory_pk: ' + inventory_pk);')
@@ -1532,15 +1528,11 @@ document.querySelector('.sell-button').addEventListener('click', (e) => {
 });
 
 
-        </script>
-
-        <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function () {
     const spinButtons = document.querySelectorAll(".spin-option");
     const baseCostElement = document.getElementById("base-cost");
     const costDisplayElement = document.getElementById("cost-display");
 
-    // Parse the base cost as a number (default to 0 if not a number)
     const baseCost = parseFloat(baseCostElement.textContent) || 0;
 
     spinButtons.forEach(button => {
@@ -1599,13 +1591,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const next5pmTimestamp = parseInt(startButton.getAttribute("data-next-5pm"), 10);
 
         if (isDaily) {
-            const now = Date.now() / 1000; // Current time in seconds
+            const now = Date.now() / 1000;
             const timeRemaining = next5pmTimestamp - now;
 
             if (timeRemaining > 0) {
                 startButton.disabled = true;
 
-                // Optionally display a countdown
                 const countdownInterval = setInterval(() => {
                     const now = Date.now() / 1000;
                     const timeLeft = next5pmTimestamp - now;
@@ -1622,7 +1613,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     startButton.innerText = `Spin in ${hours}h ${minutes}m ${seconds}s`;
                 }, 1000);
             } else {
-                startButton.disabled = false; // Enable immediately if past 5 PM
+                startButton.disabled = false;
             }
         }
     }
@@ -1691,7 +1682,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (timeRemaining > 0) {
                 startButton.disabled = true;
 
-                // Optionally display a countdown
                 const countdownInterval = setInterval(() => {
                     const now = Date.now() / 1000;
                     const timeLeft = next5pmTimestamp - now;
@@ -1701,14 +1691,13 @@ document.addEventListener("DOMContentLoaded", function () {
                         startButton.disabled = false;
                     }
 
-                    // Update button text or display countdown (optional)
                     const hours = Math.floor(timeLeft / 3600);
                     const minutes = Math.floor((timeLeft % 3600) / 60);
                     const seconds = Math.floor(timeLeft % 60);
                     startButton.innerText = `Spin in ${hours}h ${minutes}m ${seconds}s`;
                 }, 1000);
             } else {
-                startButton.disabled = false; // Enable immediately if past 5 PM
+                startButton.disabled = false;
             }
         }
     }
@@ -1738,6 +1727,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function getCSRFToken() {
         return document.querySelector('[name=csrfmiddlewaretoken]').value;
     }
+
+    const isQuickSpinInteractive = {% if user.is_authenticated and preference_instance and preference_instance.spintype == 'I' %}true{% else %}false{% endif %};
 </script>
 
 <script type="text/javascript">
@@ -1788,7 +1779,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Add event listeners for spin buttons
     spinButtons.forEach(button => {
         button.addEventListener("click", function () {
             spinButtons.forEach(btn => btn.classList.remove("active"));
@@ -1797,20 +1787,18 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Periodically fetch the updated user cash from the API
-    function fetchUserCash() {
+    /*function fetchUserCash() {
         fetch('/api/get-user-cash/')
             .then(response => response.json())
             .then(data => {
                 if (data && data.user_cash !== undefined) {
-                    userCashProxy.value = data.user_cash; // Update proxy value
+                    userCashProxy.value = data.user_cash;
                 }
             })
             .catch(error => console.error('Error fetching user cash:', error));
     }
 
-    // Poll the API every 0.5 seconds
-    setInterval(fetchUserCash, 500);
+    setInterval(fetchUserCash, 5000);*/
 });
 
 </script>
@@ -1841,9 +1829,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         console.log("Game ID:", gameId); // Debug log
         console.log("CSRF Token:", csrfToken); // Debug log
-        console.log("Spin Multiplier:", selectedMultiplier); // Debug log
+        console.log("Spin Multiplier:", selectedMultiplier);
 
-        // Perform the fetch request to initiate the spin
         fetch("{% url 'showcase:spin_game' %}", {
             method: "POST",
             headers: {
@@ -1946,7 +1933,6 @@ $(document).ready(function() {
     });
 
     function initializeAnimation(targetNonce, isQuickSpin) {
-        // Disable the spin button to avoid multiple clicks
         $(".start").prop('disabled', true);
 
         function addAnimation() {
@@ -1963,7 +1949,6 @@ $(document).ready(function() {
             document.querySelectorAll('.cards').forEach(card => {
                 const cardNonce = card.getAttribute('data-nonce');
 
-                // Highlight and position the card with matching nonce
                 if (cardNonce === targetNonce) {
                     $(card).addClass('highlighted');
                     card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
@@ -1972,22 +1957,21 @@ $(document).ready(function() {
                 }
             });
 
-            // Enable the button after animation ends
             $(".start").prop('disabled', false);
         }
 
-        // Start spinning
         addAnimation();
+        const quickSpinDuration = isQuickSpinInteractive
+            ? (isQuickSpin ? 500 : 1000)
+            : (isQuickSpin ? 4500 : 9000);
 
-        // Stop the animation after a delay
         setTimeout(() => {
             document.querySelectorAll('.slider').forEach(scroller => {
                 scroller.style.animationPlayState = 'paused';
             });
 
-            // Find and stop at the selected card
             stopAtSelectedCard();
-        }, isQuickSpin ? 4500 : 9000);  // Adjust time based on Quick Spin setting
+        },quickSpinDuration);
     }
 });
 
@@ -2027,10 +2011,6 @@ $(document).ready(function() {
 
     </div>
 <!--check mypreference of user, should one exist; default is classic-->
-{% if user.is_authenticated %}
-{% if preference_instance and preference_instance.spintype == 'I' %}
-wqes
-{% else %}
 
     <div class="wrapper">
         <div class="containerre"  style="display: flex;">
@@ -2048,7 +2028,7 @@ wqes
                                 {% if choice.file.url %}
                                 <div class="sliderImg" style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
                                 {% endif %}
-                            <div class="sliderPrice">{{ choice.value }} 💎</div>
+                            <div class="sliderPrice"><b class="innerprice">{{ choice.value }}</b>💎</div>
                         </div>
                     {% endwith %}
                 </div>
@@ -2096,15 +2076,11 @@ wqes
         <h4 style="">{{game.name}}</h4>
       </div>
     </div>
-{% endif %}
-{% endif %}
+
 
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
-</script>
 
-
-    <script>
 
 function createOutcome(gameId, slug) {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -2153,9 +2129,7 @@ fetch(`/create_outcome/${slug}/`, {
 
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
 
-</script>
 
 <script>
 $(".start").click(function () {
@@ -2176,7 +2150,6 @@ $(".start").click(function () {
                 upperNonce: data.upper_nonce || 'N/A',
             };
 
-            // Log the choice object to verify its structure
             console.log('Choice Object:', choice);
 
             renderChoiceDetails(choice);
@@ -2198,7 +2171,6 @@ $(".start").click(function () {
                 console.log('Choice Color:', choiceColor);
                 console.log('Choice File:', choiceFile);
 
-                // Step 2: Set the animation to randomize the cards
                 let randomizeFlag = true;
 
                 function randomizeContents() {
@@ -2222,11 +2194,9 @@ $(".start").click(function () {
                 setTimeout(() => {
                     randomizeFlag = false;
 
-                    // Step 3: Control the final stop based on the nonce or choiceId
                     const slider = document.querySelector('.slider');
                     const cards = slider.querySelectorAll('.card');
 
-                    // Calculate the position to center the chosen card
                     let targetCard = null;
                     cards.forEach(card => {
                         if (parseInt(card.dataset.choiceId) === choiceId) {
@@ -2279,12 +2249,12 @@ $(".start").click(function () {
 
             } else {
                 console.error('Error:', data.message);
-                button.prop('disabled', false); // Re-enable the button if there's an error
+                button.prop('disabled', false);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            button.prop('disabled', false); // Re-enable the button if there's an error
+            button.prop('disabled', false);
         });
 });
 
@@ -2293,9 +2263,6 @@ $(".start").click(function () {
 </script>
 
     <!--sell item(s) after spins-->
-<script>
-
-</script>
 
 
     {% include 'gameloottable.html' %}
@@ -2338,8 +2305,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (stockCountElement) {
                         stockCountElement.textContent = data.stock_count;
                     }
-
-                    // Update currency amount
                     const currencyAmountElement = document.querySelector("#currency-amount");
                     if (currencyAmountElement) {
                         currencyAmountElement.textContent = data.currency_amount;
@@ -2360,8 +2325,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-</script>
-<script>
+
 document.addEventListener("DOMContentLoaded", function () {
     const withdrawButtons = document.querySelectorAll(".withdraw-button");
 
@@ -2373,8 +2337,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const formData = new FormData(form);
             const actionUrl = form.getAttribute("action") || window.location.href;
 
-            console.log("Submitting form to:", actionUrl); // Debug URL
-            console.log("Form Data:", [...formData.entries()]); // Debug form data
+            console.log("Submitting form to:", actionUrl);
+            console.log("Form Data:", [...formData.entries()]);
 
             fetch(actionUrl, {
                 method: "POST",
@@ -2425,7 +2389,6 @@ document.addEventListener("DOMContentLoaded", function() {
         localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
     });
 
-    // Load the saved view preference on page load
     const savedViewPreference = localStorage.getItem("inventoryViewPreference");
     if (savedViewPreference === "compact") {
         inventoryGrid.classList.remove("comfortable-view");

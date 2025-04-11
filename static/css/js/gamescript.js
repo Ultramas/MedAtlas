@@ -1,13 +1,12 @@
 $(".start").click(function () {
     const button = $(this);
-    button.prop('disabled', true); // Disable the button when clicked
+    button.prop('disabled', true);
 
-    let randomizeFlag = true; // Flag to track randomization
+    let randomizeFlag = true;
     const slider = document.querySelector('.slider');
-    const popup = document.querySelector('.popup'); // Assuming you have a popup element
-    let Touching = ''; // Initialize Touching with an empty string
+    const popup = document.querySelector('.popup');
+    let Touching = '';
 
-    // Function to randomly change the order of elements
     function randomizeContents() {
         if (randomizeFlag) {
             $('div#slider').each(function(){

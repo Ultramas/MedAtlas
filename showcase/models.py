@@ -59,10 +59,16 @@ LABEL_CHOICES = (
     ('BS', 'Best Seller'),
     ('BV', 'Best Value'),
 )
+
 SHUFFLE_CHOICES = (
     ('L', 'Luck'),
     ('S', 'Skill'),
     ('G', 'Grade'),
+)
+
+COUPON_TYPE = (
+    ('S', 'Sale'),
+    ('B', 'Bonus'),
 )
 
 AVALIABLE_CHOICES = (
@@ -744,6 +750,95 @@ class CurrencyMarket(models.Model):
         verbose_name_plural = "Currency Markets"
 
 
+def generate_unique_code(length=16):
+    while True:
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+        if not GiftCode.objects.filter(code=code).exists():
+            return code
+
+def generate_unique_serial():
+    while True:
+        serial = random.randint(10**15, (10**16) - 1)
+        if not GiftCode.objects.filter(serial=serial).exists():
+            return serial
+
+def default_expiration():
+    return timezone.now() + timedelta(days=7)
+
+
+class GiftCode(models.Model):
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    code = models.CharField(
+        max_length=64,
+        validators=[MinLengthValidator(16)],
+        unique=True,
+        blank=True,
+        null=True
+    )
+    serial = models.BigIntegerField(blank=True, null=True, unique=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    expiration_date = models.DateTimeField(default=default_expiration)
+    value = models.IntegerField(default=100)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
+    uses = models.IntegerField(default=1)
+    total_uses = models.IntegerField(default=1)
+    tracking_total_uses = models.IntegerField(default=0)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    def __str__(self):
+        return f"{self.code} (Serial: {self.serial})"
+
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = generate_unique_code()
+        if self.tracking_total_uses >= self.total_uses:
+            self.is_active = 0
+        if not self.serial:
+            self.serial = generate_unique_serial()
+
+        if self.expiration_date and timezone.now() > self.expiration_date:
+            self.is_active = 0
+
+        if not self.currency:
+            self.currency = Currency.objects.filter(is_active=1).first()
+
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Gift Code"
+        verbose_name_plural = "Gift Codes"
+
+
+class GiftCodeRedemption(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    gift_code = models.ForeignKey(GiftCode, on_delete=models.CASCADE)
+    redeemed_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    def __str__(self):
+        return str(self.user)
+
+    class Meta:
+        unique_together = ('user', 'gift_code')
+        verbose_name = "Gift Code Redemption"
+        verbose_name_plural = "Gift Codes Redemptions"
+
+
 class LevelIcon(models.Model):
     name = models.CharField(max_length=200, blank=True, null=True)
     level_icon = models.ImageField(blank=True, null=True)
@@ -758,7 +853,7 @@ class LevelIcon(models.Model):
 
     class Meta:
         verbose_name = "Level Icon"
-        verbose_name_plural = "Level Icon"
+        verbose_name_plural = "Level Icons"
 
 
 class ProfileDetails(models.Model):
@@ -987,12 +1082,19 @@ class CurrencyOrder(models.Model):
 
     def get_total_price(self):
         total = 0
-        total += self.items.price  # or another field representing the item's price
+        total += self.items.price
         if self.coupon:
-            if self.coupon.percentDollars:
-                total *= 1 - (0.01 * self.coupon.amount)
+            if order.coupon.type == 'B':
+                if self.coupon.percentDollars:
+                    self.amount = self.amount * (1.01 * self.coupon.amount)
+                else:
+                    self.amount = self.amount + self.coupon.currency_amount
             else:
-                total -= self.coupon.amount
+                if self.coupon.percentDollars:
+                    total *= 1 - (0.01 * self.coupon.amount)
+                else:
+                    total -= self.coupon.amount
+
         return total
 
     def get_final_price(self):
@@ -1014,19 +1116,19 @@ class CurrencyOrder(models.Model):
 class CurrencyFullOrder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
-    items = models.ManyToManyField(CurrencyOrder)
-    itemhistory = models.ForeignKey(CurrencyMarket, on_delete=models.CASCADE, verbose_name="Order history", null=True)
+    items = models.ManyToManyField('CurrencyOrder')
+    itemhistory = models.ForeignKey('CurrencyMarket', on_delete=models.CASCADE, verbose_name="Order history", null=True)
     start_date = models.DateTimeField(auto_now_add=True)
     ordered_date = models.DateTimeField()
     ordered = models.BooleanField(default=False)
-    # billing_address = models.ForeignKey('Address', related_name='billing-address', on_delete=models.SET_NULL,
-    #                                    blank=True, null=True)
     payment = models.ForeignKey('Payment', on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, blank=True, null=True)
     being_delivered = models.BooleanField(default=False)
     received = models.BooleanField(default=False)
     refund_requested = models.BooleanField(default=False)
     refund_granted = models.BooleanField(default=False)
+    stripe_transaction_id = models.CharField(max_length=255, blank=True, null=True,
+                                             help_text="Stripe charge ID")
     id = uuid4()
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -1049,8 +1151,8 @@ class CurrencyFullOrder(models.Model):
 
     def get_final_price(self):
         if self.items.discount_price:
-            return Decimal(self.get_discount_item_price())  # Ensure Decimal type
-        return Decimal(self.get_total_item_price())  # Ensure Decimal type
+            return Decimal(self.get_discount_item_price())
+        return Decimal(self.get_total_item_price())
 
     def get_discount_item_price(self):
         return self.round_decimal(Decimal(self.item.discount_price))
@@ -2869,6 +2971,7 @@ class Game(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     cost = models.IntegerField(default=0, blank=True, null=True)
     discount_cost = models.IntegerField(blank=True, null=True)
+    heat = models.CharField(choices=HEAT, max_length=2, blank=True, null=True)
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE, blank=True, null=True)
     category = models.CharField(max_length=2,
                                 choices=CARD_CATEGORIES, blank=True, null=True)
@@ -2908,15 +3011,15 @@ class Game(models.Model):
 
     def get_absolute_url(self):
         return reverse("showcase:game", kwargs={'slug': self.slug})
-
+    def increase_on_card(self):
+        if self.cost:
+            self.cost = self.cost * 1.05
     def save(self, *args, **kwargs):
         self.full_clean()
         if not self.type:
             first_gamehub = GameHub.objects.first()
             if first_gamehub:
                 self.type = first_gamehub
-        if self.cost:
-            self.cost = self.cost * 1.05
 
         if not self.slug:
             base_slug = slugify(self.name)
@@ -2937,10 +3040,32 @@ class Game(models.Model):
                 if choice.value and choice.rarity:
                     choice_cost = (choice.value * float(choice.rarity)) / 100
                     total_cost += choice_cost
+
+                    if not self.heat and (total_cost or self.discount_cost):
+                        if choice.value < choice.total_cost:
+                            lower_rarity = choice.rarity / 100
+                            lower_value = choice.value / total_cost
+                            total_lower_rarity += lower_rarity
+                            total_lower_value += lower_value
+                        else:
+                            upper_rarity = choice.rarity / 100
+                            upper_value = choice.value / total_cost
+                            total_upper_rarity += upper_rarity
+                            total_upper_value += upper_value
+                        if total_lower_rarity * total_lower_value < 1:
+                            self.heat = 'M'
+                        if total_lower_rarity * total_lower_value < 1:
+                            self.heat = 'S'
+                        if total_lower_rarity * total_lower_value < 1:
+                            self.heat = 'F'
+                        if total_lower_rarity * total_lower_value < 1:
+                            self.heat = 'W'
+                        if total_lower_rarity * total_lower_value < 1:
+                            self.heat = 'E'
             self.cost = int(total_cost * 1.12)
             print('the cost was edited')
 
-        # 5:00 PM PST logic for cooldown and locked status.
+
         pst = pytz.timezone('US/Pacific')
         current_time_pst = now().astimezone(pst)
         today = current_time_pst.date()
@@ -4644,16 +4769,12 @@ class MyPreferences(models.Model):
         verbose_name="Set active?"
     )
 
-    def save(self, *args, **kwargs):
-        MyPreferences.objects.filter(user=self.user).exclude(pk=self.pk).delete()
-        super().save(*args, **kwargs)
+    class Meta:
+        unique_together = ('user',)
+        verbose_name = 'My Preferences'
 
     def __str__(self):
-        return self.user.username
-
-    class Meta:
-        verbose_name = "My Preference"
-        verbose_name_plural = "My Preferences"
+        return f"{self.user.username}'s Preferences - {self.get_spintype_display()}"
 
 
 class Donate(models.Model):
@@ -7178,8 +7299,11 @@ class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
     items = models.ManyToManyField(OrderItem)
-    orderprice = models.FloatField(verbose_name="Order price", default=0)
-    currencyorderprice = models.IntegerField(verbose_name="Curency order price", default=0)
+    orderprice = models.DecimalField(verbose_name="Order price",
+        default=Decimal('0.00'),
+        max_digits=20,
+        decimal_places=2)
+    currencyorderprice = models.IntegerField(verbose_name="Currency order price", default=0)
     itemhistory = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name="Order history", blank=True, null=True)
     feedback_url = models.URLField(blank=True)
     start_date = models.DateTimeField(auto_now_add=True)
@@ -7223,7 +7347,6 @@ class Order(models.Model):
             self.billing_address = self.profile.billing_address
 
     def update_total_prices(self):
-        """ Updates orderprice and currencyorderprice based on order items. """
         self.orderprice = sum(item.get_final_price() for item in self.items.all() if item.get_final_price())
         self.currencyorderprice = sum(item.get_final_currency_price() for item in self.items.all() if item.get_final_currency_price())
 
@@ -7302,9 +7425,15 @@ class Payment(models.Model):
 
 
 class Coupon(models.Model):
-    code = models.CharField(max_length=150)
-    amount = models.FloatField()
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    code = models.CharField(unique=True, max_length=150)
+    type = models.CharField(choices=COUPON_TYPE, default='B', max_length=1)
+    amount = models.FloatField(blank=True, null=True, default=0)
     percentDollars = models.BooleanField(default=False, verbose_name="Percent-off Coupon")
+    currency_amount = models.IntegerField(blank=True, null=True, default=0)
+    created_date = models.DateTimeField(auto_now_add=True)
+    expiration_date = models.DateTimeField(blank=True, null=True)
+    uses = models.IntegerField(default=1)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -7314,6 +7443,10 @@ class Coupon(models.Model):
     def __str__(self):
         return self.code
 
+    def clean(self):
+        super().clean()
+        if (str(self.amount) is None or str(self.amount == 0)) and (str(self.currency_amount) is None or str(self.currency_amount == 0)):
+            raise ValidationError("Either 'amount' or 'currency_amount' must be filled with a non-zero value.")
 
 class Refund(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)

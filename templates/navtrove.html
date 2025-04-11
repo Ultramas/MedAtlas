@@ -4,6 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="PokeTrove - Catch and Collect!" />
+    <meta property="og:description" content="Play, collect, and trade unique creatures and rewards at PokeTrove!" />
+    <meta property="og:image" content="https://www.poketrove.store/static/images/embed-banner.png" />
+    <meta property="og:url" content="https://www.poketrove.store/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="PokeTrove" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="PokeTrove - Catch and Collect!" />
+    <meta name="twitter:description" content="Play, collect, and trade unique creatures and rewards at PokeTrove!" />
+    <meta name="twitter:image" content="https://www.poketrove.store/static/images/embed-banner.png" />
+    <meta name="twitter:url" content="https://www.poketrove.store/" />
+    <title>PokeTrove</title>
+    <meta name="description" content="Unboxing like never before. Because it <i>hits different</i>.">
+
     <title>PokeTrove</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -257,7 +272,6 @@
         }
 
         a {
-            display: block;
             text-decoration: none;
             color: inherit;
         }
@@ -1248,11 +1262,12 @@
                         {% endif %}
 
                         {% if user.is_authenticated %}
+                        <br>
                         <li class="nav-item">
-                        <button onclick="togglePreferences()" class="nav-link linker" style="">
-                            <i class="fas fa-wheel-alt"></i>
+                            <button onclick="togglePreferences()" class="nav-link linker">
+                                <i class="fas fa-wheel-alt"></i>
                                 <span class="nav-text">Spin Preferences</span>
-                        </button>
+                            </button>
                         </li>
                         <script>
                         function togglePreferences() {
@@ -1584,7 +1599,6 @@ document.addEventListener("DOMContentLoaded", function() {
         img.style.height = "auto";
         img.style.borderRadius = "20px";
 
-        // Ensure proper positioning with specified margins
         const maxX = window.innerWidth - 80 - (2.5 * 16);
         const maxY = window.innerHeight - 80 - (3.5 * 16);
         img.style.left = (Math.random() * maxX + (2.5 * 16)) + "px";
@@ -1596,7 +1610,6 @@ document.addEventListener("DOMContentLoaded", function() {
             img.remove();
             clickable.sound.play();
 
-            // Send AJAX request to update the currency
             fetch("{% url 'showcase:update_currency' %}", {
                 method: "POST",
                 headers: {
@@ -1632,9 +1645,10 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 {% if user.is_authenticated %}
-<div id="preferencescontainer" style="display: none;">
+<div id="preferencescontainer" style="display: none;" class="preference-popup">
     {% include 'mypreferences.html' %}
 </div>
+
 {% endif %}
 
 

@@ -718,11 +718,17 @@
                             </div>
                             
                             <div class="action-buttons">
+                                {% if user.is_authenticated %}
                                 <a href="{{ object.currency_get_add_to_cart_url  }}" class="cyber-button add-to-cart-btn">
                                     <span class="cyber-button-text">ADD TO CART</span>
                                     <span class="cyber-button-glitch"></span>
                                 </a>
-
+                                {% else %}
+                                 <a href="{% url 'login' %}?next={{ object.currency_get_add_to_cart_url  }}"" class="cyber-button add-to-cart-btn">
+                                    <span class="cyber-button-text">Login To Buy</span>
+                                    <span class="cyber-button-glitch"></span>
+                                </a>
+                                {% endif %}
                               {% if in_cart %}
                                   <a href="{{ object.currency_get_remove_from_cart_url }}" class="cyber-button add-to-cart-btn">
                                       <span class="cyber-button-text">REMOVE FROM CART</span>

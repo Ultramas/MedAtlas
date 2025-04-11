@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ValidationError
 import re
+from django.contrib.auth import get_user_model
 
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
     SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
@@ -15,7 +16,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     GeneralMessage, DefaultAvatar, Achievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
-    TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences
+    TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences, GiftCode, GiftCodeRedemption
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -400,6 +401,7 @@ class CurrencyOrderAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('ordered_date', 'id',)
 
+    list_display = ('ordered_date', 'quantity', 'items', 'id',)
 
 admin.site.register(CurrencyOrder, CurrencyOrderAdmin)
 
@@ -411,7 +413,7 @@ class CurrencyFullOrderAdmin(admin.ModelAdmin):
             'classes': ('open',),
         }),
         ('Order Item Information - Personal Information', {
-            'fields': ('payment',),
+            'fields': ('payment', 'stripe_transaction_id'),
             'classes': ('open',),
         }),
         ('Order Item Information - Attributes', {
@@ -423,6 +425,15 @@ class CurrencyFullOrderAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('start_date', 'id',)
 
+    list_display = ('user', 'coupon', 'ordered_date', 'display_items', 'display_total_price', 'stripe_transaction_id')
+
+    def display_items(self, obj):
+        return ", ".join([str(item) for item in obj.items.all()])
+    display_items.short_description = "Items"
+
+    def display_total_price(self, obj):
+        return f"${obj.get_total_price():.2f}"
+    display_total_price.short_description = "Total Price"
 
 admin.site.register(CurrencyFullOrder, CurrencyFullOrderAdmin)
 
@@ -774,7 +785,7 @@ class GameAdmin(admin.ModelAdmin):
         ('Game Information - Categorial Description', {
             'fields': (
                 'name', 'user', 'type', 'category', 'cost', 'discount_cost',
-                'image', 'power_meter', 'slug', 'filter',
+                'heat', 'image', 'power_meter', 'slug', 'filter',
                 'player_made', 'player_inventory', 'daily', 'is_active'
             ),
             'classes': ('open',),
@@ -797,6 +808,16 @@ class GameAdmin(admin.ModelAdmin):
             readonly_fields += ('unlocking_level', 'cooldown', 'locked')
         return readonly_fields
 
+    list_display = (
+        'name',
+        'user',
+        'cost',
+        'discount_cost',
+        'heat',
+        'type',
+        'category',
+        'is_active',
+    )
 
 admin.site.register(Game, GameAdmin)
 
@@ -2281,12 +2302,43 @@ admin.site.register(FeaturedNavigationBar, FeaturedNavBarAdmin)
 class CouponAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Coupon Information', {
-            'fields': ('code', 'amount', 'percentDollars', 'is_active',)
+            'fields': ('user', 'code', 'type', 'amount', 'percentDollars', 'currency_amount', 'expiration_date', 'uses', 'is_active',)
         }),
     )
-
-
+    readonly_fields = ('created_date',)
 admin.site.register(Coupon, CouponAdmin)
+
+
+class GiftCodeAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Gift Code Information', {
+            'fields': ('user', 'code', 'serial', 'expiration_date', 'value', 'currency', 'uses', 'total_uses', 'tracking_total_uses', 'is_active',)
+        }),
+    )
+    readonly_fields = ('created_date',)
+    list_display = (
+        'code',
+        'expiration_date',
+        'value',
+        'total_uses',
+        'tracking_total_uses',
+        'is_active',
+    )
+
+admin.site.register(GiftCode, GiftCodeAdmin)
+
+
+class GiftCodeRedemptionAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Gift Code Information', {
+            'fields': ('user', 'gift_code', 'is_active',)
+        }),
+    )
+    readonly_fields = ('redeemed_at',)
+
+    list_display = ('user', 'gift_code',)
+
+admin.site.register(GiftCodeRedemption, GiftCodeRedemptionAdmin)
 
 
 class CustomerSupportAdmin(admin.ModelAdmin):
@@ -2386,7 +2438,41 @@ admin.site.register(DefaultAvatar, DefaultAvatarAdmin)
 
 class ProfileCurrencyInline(admin.TabularInline):
     model = ProfileCurrency
-    extra = 1  # Number of empty forms to display for adding new instances
+    extra = 1
+
+User = get_user_model()
+
+class UserTypeFilter(admin.SimpleListFilter):
+    title = 'User Type'
+    parameter_name = 'user_type'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('registered', 'Registered Users'),
+            ('guest', 'Guest Users'),
+        )
+
+    def queryset(self, request, queryset):
+        user_ids = queryset.values_list('user', flat=True)
+        guest_ids = [
+            profile.user.id for profile in queryset.select_related('user')
+            if hasattr(profile.user, 'is_guest_user') and callable(
+                profile.user.is_guest_user) and profile.user.is_guest_user()
+        ]
+
+        for uid in user_ids:
+            try:
+                user = User.objects.get(id=uid)
+                if hasattr(user, 'is_guest_user') and callable(user.is_guest_user) and user.is_guest_user():
+                    guest_ids.append(user.id)
+            except User.DoesNotExist:
+                continue
+
+        if self.value() == 'registered':
+            return queryset.exclude(user_id__in=guest_ids)
+        if self.value() == 'guest':
+            return queryset.filter(user_id__in=guest_ids)
+        return queryset
 
 class ProfileDetailsAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -2403,17 +2489,25 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
     readonly_fields = ('position',)
     inlines = [ProfileCurrencyInline]
 
-    list_display = ('user', 'trader', 'get_selling_status', 'get_membership')
+    list_display = ('display_user_with_tag', 'trader', 'currency_amount', 'rubies_spent', 'get_selling_status', 'get_membership')
+    list_filter = [UserTypeFilter, 'trader', 'membership', 'is_active']
+
+    def display_user_with_tag(self, obj):
+        user = obj.user
+        if hasattr(user, 'is_guest_user') and callable(user.is_guest_user) and user.is_guest_user():
+            return f"👤 Guest ({str(user.username)[:8]}…)"
+        return str(user)
+    display_user_with_tag.short_description = 'User'
 
     def get_selling_status(self, obj):
         return 'Yes' if obj.seller else 'No'
-    get_selling_status.short_description = 'Selling Status'  # Column header in admin
+    get_selling_status.short_description = 'Selling Status'
 
     def get_membership(self, obj):
         return obj.membership if obj.membership else 'None'
-    get_membership.short_description = 'Membership'  # Column header in admin
+    get_membership.short_description = 'Membership'
 
-# Register the admin
+
 admin.site.register(ProfileDetails, ProfileDetailsAdmin)
 
 

@@ -15,7 +15,7 @@ from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewTy
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
     SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame, Monstrosity, \
-    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet, GameChoice, MyPreferences
+    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet, GameChoice, MyPreferences, GiftCode, GiftCodeRedemption
 from .models import UpdateProfile
 from .models import VoteQuery
 from .models import StaffApplication
@@ -429,16 +429,19 @@ class GameChoiceForm(forms.ModelForm):
 class MyPreferencesForm(forms.ModelForm):
     class Meta:
         model = MyPreferences
-        fields = ('spintype',)
-        widgets = {
-            'spintype': forms.RadioSelect
-        }
+        fields = ['spintype',]
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
+        self.user = kwargs.pop('user', None)
         super(MyPreferencesForm, self).__init__(*args, **kwargs)
-        self.user = user
 
+        if self.user and not self.instance.pk:
+            try:
+                preferences = MyPreferences.objects.get(user=self.user)
+                self.initial['spintype'] = preferences.spintype
+                self.instance = preferences
+            except MyPreferences.DoesNotExist:
+                pass
 
 class AscensionCreateForm(forms.ModelForm):
     class Meta:
@@ -945,6 +948,37 @@ class CouponForm(forms.Form):
         'aria-describedby': 'basic-addon2'
     }))
 
+
+
+class GiftCodeForm(forms.Form):
+    code = forms.CharField(max_length=64)
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        code = cleaned_data.get("code")
+
+        try:
+            gift_code = GiftCode.objects.get(code=code)
+        except GiftCode.DoesNotExist:
+            raise forms.ValidationError("Invalid gift code.")
+
+        if gift_code.is_active != 1:
+            raise forms.ValidationError("This gift code is inactive.")
+
+        if gift_code.expiration_date and gift_code.expiration_date < timezone.now():
+            gift_code.is_active = 0
+            gift_code.save()
+            raise forms.ValidationError("This gift code has expired.")
+
+        redemptions = GiftCodeRedemption.objects.filter(user=self.user, gift_code=gift_code).count()
+        if redemptions >= gift_code.uses:
+            raise forms.ValidationError("You have already redeemed this gift code the maximum number of times.")
+
+        return cleaned_data
 
 class RefundForm(forms.Form):
     ref_code = forms.CharField()
