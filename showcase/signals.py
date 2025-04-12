@@ -174,3 +174,24 @@ def create_notification_on_message(sender, instance, created, **kwargs):
 
         except Room.DoesNotExist:
             print(f"Room '{message.room}' does not exist.")
+
+import queue
+from .models import InventoryObject
+
+inventory_sse_queue = queue.Queue()
+
+@receiver([post_save, post_delete], sender=InventoryObject)
+def inventory_object_changed(sender, instance, **kwargs):
+    inventory_sse_queue.put("changed")
+
+@receiver(post_save, sender=Outcome)
+def increment_card_counter(sender, instance, created, **kwargs):
+    print('started profile card counter')
+    if created and instance.user and not getattr(instance, "demonstration", False):
+        try:
+            profile = instance.user.profiledetails
+            profile.cards_counter = (profile.cards_counter or 0) + 1
+            profile.save()
+            print('profile card counter updated')
+        except ProfileDetails.DoesNotExist:
+            pass

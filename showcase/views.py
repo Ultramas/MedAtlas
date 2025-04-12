@@ -29,7 +29,8 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
-    UserNotification, TopHits, Card, Clickable, GameChoice, Robot, MyPreferences, UserClickable, GiftCodeRedemption, GiftCode
+    UserNotification, TopHits, Card, Clickable, GameChoice, Robot, MyPreferences, UserClickable, GiftCodeRedemption, GiftCode, \
+    IndividualChestStatistics
 from .models import Idea
 from .models import VoteQuery
 from .models import StaffApplication
@@ -15699,10 +15700,24 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        games = Game.objects.filter(user=self.request.user)
+        popular_chests = []
+        favorites = []
 
-        popular_chests = Game.objects.filter(user=request.user, chest=game).first()
-        favorite = FavoriteChests.objects.filter(user=request.user, chest=game).first()
-        context['favorites'] = favorite
+        for game in games:
+            chest_stat = IndividualChestStatistics.objects.filter(user=self.request.user, chest=game).order_by(
+                "-plays").first()
+            if chest_stat:
+                popular_chests.append(chest_stat)
+
+            fav = FavoriteChests.objects.filter(user=self.request.user, chest=game).first()
+            if fav:
+                favorites.append(fav)
+
+        popular_chests = sorted(popular_chests, key=lambda c: c.plays, reverse=True)[:5]
+
+        context['popular_chested'] = popular_chests
+        context['favorites'] = favorites
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -15726,42 +15741,68 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context['earned_achievements'] = earned_achievements
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
         profile = self.get_object()
-
         if profile:
             context['profile'] = profile
-            remaining_rubies = profile.level.experience - profile.rubies_spent
-            context['remaining_rubies'] = remaining_rubies
+            context['remaining_rubies'] = profile.level.experience - profile.rubies_spent
 
         if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=profile.user)
+            news_profiles = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
-            userprofile = None
+            news_profiles = None
 
-        if userprofile:
-            context['NewsProfiles'] = userprofile
+        if news_profiles:
+            for news_profile in news_profiles:
+                user = news_profile.user
+                user_profile = ProfileDetails.objects.filter(user=user).first()
+                if user_profile:
+                    news_profile.newprofile_profile_picture_url = user_profile.avatar.url
+                    news_profile.newprofile_profile_url = news_profile.get_profile_url()
         else:
-            context['NewsProfiles'] = None
+            news_profiles = [type('Dummy', (), {
+                "newprofile_profile_picture_url": 'static/css/images/a.jpg',
+                "newprofile_profile_url": None,
+            })]
 
-        if context['NewsProfiles'] == None:
+        context['NewsProfiles'] = news_profiles
 
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
+        if self.request.user.is_authenticated:
+            player_profiles = ProfileDetails.objects.filter(is_active=1, user=profile.user)
         else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+            player_profiles = None
+
+        if player_profiles:
+            for player_profile in player_profiles:
+                user = player_profile.user
+                user_profile = ProfileDetails.objects.filter(user=user).first()
+                if user_profile:
+                    player_profile.newprofile_profile_picture_url = user_profile.avatar.url
+                    player_profile.newprofile_profile_url = player_profile.get_profile_url()
+                    if player_profile.level and player_profile.level.experience:
+                        player_profile.progress_percent = (
+                                player_profile.rubies_spent * 100
+                        )
+                    else:
+                        player_profile.progress_percent = 0
+        else:
+            player_profiles = [type('Dummy', (), {
+                "newprofile_profile_picture_url": 'static/css/images/a.jpg',
+                "newprofile_profile_url": None,
+                "progress_percent": 0,
+                "rubies_spent": 0,
+                "level": type('DummyLevel', (), {"experience": 0})(),
+            })]
+
+        context['PlayerProfiles'] = player_profiles
 
         return context
 
+
 @login_required
-def fetch_remaining_rubies(request):
-    profile = ProfileDetails.objects.get(user=request.user)
+def fetch_remaining_rubies(request, pk):
+    profile = get_object_or_404(ProfileDetails, is_active=1, pk=pk)
     remaining = profile.level.experience - profile.rubies_spent
     return JsonResponse({'remaining_rubies': remaining})
+
 
 @login_required
 def profile_edit(request, pk):

@@ -1015,12 +1015,15 @@ class IndividualChestStatistics(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     ranking = models.IntegerField(default=0)
     plays = models.IntegerField(default=0)
-    chests = models.ForeignKey('Game', blank=True, on_delete=models.CASCADE)
+    chest = models.ForeignKey('Game', blank=True, on_delete=models.CASCADE)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active order?")
+
+    class Meta:
+        verbose_name = "Individual Chest Statistic"
 
 #if a totalcheststatistics instance exists with a specified chest, update it
 class TotalChestStatistics(models.Model):
@@ -1033,6 +1036,8 @@ class TotalChestStatistics(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active order?")
 
+    class Meta:
+        verbose_name = "Total Chest Statistic"
 
 class CurrencyOrder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -3617,15 +3622,11 @@ class Outcome(models.Model):
         if not self.slug and self.choice:
             self.slug = slugify(self.choice)
         if not self.nonce:
-            self.nonce = random.randint(0, 1000000)  # Set nonce to a random number between 0 and 1,000,000
+            self.nonce = random.randint(0, 1000000)
         if not self.game_creator:
             self.game_creator = self.game.user
         if not self.file:
             self.file = self.choice.file
-        if self.user and demonstration == False:
-            profile = self.user.profiledetails
-            profile.cards_counter = (profile.cards_counter or 0) + 1
-            profile.save()
         super().save(*args, **kwargs)
 
     def get_profile_url(self):

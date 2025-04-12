@@ -1751,16 +1751,22 @@ input:checked + .slider:before {
       <div class="sidebar">
         <div class="sidebar-card">
           <nav class="sidebar-nav">
-            {%  %}
-            <button class="nav-item active">
-              <svg viewBox="0 0 24 24"><path d="M3,13H11V3H3V13M3,21H11V15H3V21M13,21H21V11H13V21M13,3V9H21V3H13Z" /></svg>
-              <span>Dashboard</span>
-            </button>
-            <!--return user's favorited boxes-->
-            <button class="nav-item">
-              <svg viewBox="0 0 24 24"><path d="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L5,8.09V15.91L12,19.85L19,15.91V8.09L12,4.15Z" /></svg>
-              <span>Diagnostics</span>
-            </button>
+            {% for popular_chests in popular_chested %}
+    {% if forloop.first %}
+        <!-- First (highest) chest: Dashboard -->
+        <button class="nav-item active">
+          <svg viewBox="0 0 24 24"><path d="M3,13H11V3H3V13M3,21H11V15H3V21M13,21H21V11H13V21M13,3V9H21V3H13Z" /></svg>
+          <span>{{popular_chests.chest.name}}</span>
+        </button>
+    {% else %}
+        <!-- Remaining chests: Diagnostics -->
+        <button class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L5,8.09V15.91L12,19.85L19,15.91V8.09L12,4.15Z" /></svg>
+          <span>Diagnostics</span>
+        </button>
+    {% endif %}
+{% endfor %}
+
             <button class="nav-item">
               <svg viewBox="0 0 24 24"><path d="M12,3C7.58,3 4,4.79 4,7C4,9.21 7.58,11 12,11C16.42,11 20,9.21 20,7C20,4.79 16.42,3 12,3M4,9V12C4,14.21 7.58,16 12,16C16.42,16 20,14.21 20,12V9C20,11.21 16.42,13 12,13C7.58,13 4,11.21 4,9M4,14V17C4,19.21 7.58,21 12,21C16.42,21 20,19.21 20,17V14C20,16.21 16.42,18 12,18C7.58,18 4,16.21 4,14Z" /></svg>
               <span>Data Center</span>
@@ -1860,29 +1866,25 @@ input:checked + .slider:before {
               <div class="metric-card cpu">
                 <div class="metric-header">
 
-             {% for userprofile in NewsProfiles %}
+{% for playerprofile in PlayerProfiles %}
 
-                     <div class="user-stat">
-                       <div class="metric-title">{{ userprofile.level }}</div>
-                     </div>
-{% empty %}
-      <div class="user-stat">
-                        <i class="fas fa-trophy user-stat-icon" style="color: var(--accent);"></i>
-                        <span>Level 1</span>
-                    </div>
+    <div class="metric-detail">
+        ({{ playerprofile.rubies_spent }}/{{ playerprofile.level.experience }})
+    </div>
 {% endfor %}
+
                   <svg viewBox="0 0 24 24"><path d="M18,3V5H16V3H8V5H6V3H4V21H6V19H8V21H16V19H18V21H20V3H18M18,9H16V7H18V9M18,13H16V11H18V13M18,17H16V15H18V17M8,9H6V7H8V9M8,13H6V11H8V13M8,17H6V15H8V17Z" /></svg>
                 </div>
-                  {% for userprofile in NewsProfiles %}
+                  {% for playerprofile in PlayerProfiles %}
                 <div class="metricshere" style="display: flex; flex-direction: row;">
-              <div class="metric-value" id="cpu-value" data-target="{% widthratio userprofile.rubies_spent userprofile.level.experience 100 %}">
+              <div class="metric-value" id="cpu-value" data-target="{% widthratio playerprofile.rubies_spent playerprofile.level.experience 100 %}">
   <span id="percent">0</span>% Till
 </div>
-                <div class="metric2-value" style="margin-left:5px;" id="cpu-value" data-target="{% widthratio userprofile.rubies_spent userprofile.level.experience 100 %}">
+                <div class="metric2-value" style="margin-left:5px;" id="cpu-value" data-target="{% widthratio playerprofile.rubies_spent playerprofile.level.experience 100 %}">
   ⏫
 </div>
                   </div>
-                <div class="metric-detail">  ({{ userprofile.rubies_spent }}/{{ userprofile.level.experience }})
+                <div class="metric-detail">  ({{ playerprofile.rubies_spent }}/{{ playerprofile.level.experience }})
 </div>
                     {% endfor %}
                 <div class="metric-trend up">
@@ -1963,13 +1965,14 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 setInterval(() => {
-    fetch("{% url 'showcase:fetch_remaining_rubies' %}")
+    fetch("{% url 'showcase:fetch_remaining_rubies' profile.pk %}")
         .then(response => response.json())
         .then(data => {
             const el = document.getElementById("system-load");
             el.textContent = data.remaining_rubies;
         });
-}, 5000); // Check every 5 seconds
+}, 5000);
+
 </script>
 
               {% widthratio earned_count total_count 100 as percent %}
@@ -2070,11 +2073,11 @@ setInterval(() => {
                   <canvas id="performance-canvas"></canvas>
                   <div class="chart-overlay">
                     <div class="chart-label" style="color: #e4e5e2;">XP Till Upgrade</div>
-                     {% for userprofile in NewsProfiles %}
+                     {% for playerprofile in PlayerProfiles %}
             <div class="chart-value" id="system-load"
-                 data-max="{{ profile.level.experience }}"
-                 data-remaining="{{ remaining_rubies }}">
-            </div>
+         data-max="{{ playerprofile.level.experience }}"
+         data-remaining="{{ remaining_rubies }}">
+    </div>
 
                     {% endfor %}
                   </div>
@@ -2627,12 +2630,9 @@ setInterval(() => {
     </div>
   </div>
 
-  <script src="script.js"></script>
 
   <script>
-  // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize loading screen
   initLoading();
 
   // Initialize particle background

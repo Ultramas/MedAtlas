@@ -393,8 +393,8 @@ urlpatterns = [
     path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
     path('inventory/', views.PlayerInventoryView.as_view(), name='inventory'),
     path('inventory2/', TemplateView.as_view(template_name='inventory2.html'), name='inventory2'),
-    path('sse/total-value/', views.sse_total_value, name='sse_total_value'),
-    path('profile/fetch_remaining_rubies/', views.fetch_remaining_rubies, name='fetch_remaining_rubies'),
+    path('sse/total-value/', views.sse_total_value, name='sse_total_value'),# urls.py
+    path('profile/<int:pk>/fetch_remaining_rubies/', views.fetch_remaining_rubies, name='fetch_remaining_rubies'),
     path('navtrove/', views.NavView.as_view(), name='navtrove'),
     path('inventory/<int:pk>/sell/',  views.PlayerInventoryView.as_view(), name='sell_inventory_object'),
     path('inventory/<int:pk>/withdraw/', views.PlayerInventoryView.as_view(), name='withdraw_inventory_object'),

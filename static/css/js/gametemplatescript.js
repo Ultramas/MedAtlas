@@ -167,7 +167,7 @@ async function randomizeContents(buttonId, choiceColor) {
                         data-currency-symbol="${attributes.currencySymbol || ''}"
                         style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border-top: none; width: 10em;">
                         ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-                        <div class="sliderPrice" style="color: white;">${attributes.value} 💎 </div>
+                        <div class="sliderPrice" style="color: white;">${attributes.value} 💎targetcard </div>
                     </div>
                 </div>
             `;

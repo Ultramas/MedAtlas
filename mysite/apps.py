@@ -8,7 +8,7 @@ class Showcase(AppConfig):
     name = 'showcase'
 
     def ready(self):
-        import showcase.signals  # Ensure this line is correctly included and executed
+        import showcase.signals
         logger.debug("ShowcaseConfig ready method called, signals.py imported")
 
 

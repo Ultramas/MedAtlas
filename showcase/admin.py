@@ -826,7 +826,7 @@ admin.site.register(Game, GameAdmin)
 class IndividualChestStatisticsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Individual Chest Statistics Information - Categorial Description', {
-            'fields': ('user', 'ranking', 'plays', 'chests', 'is_active',),
+            'fields': ('user', 'ranking', 'plays', 'chest', 'is_active',),
             'classes': ('open',),
         }),
     )
@@ -834,7 +834,7 @@ class IndividualChestStatisticsAdmin(admin.ModelAdmin):
         'user',
         'ranking',
         'plays',
-        'chests',
+        'chest',
         'is_active',
     )
 admin.site.register(IndividualChestStatistics, IndividualChestStatisticsAdmin)

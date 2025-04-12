@@ -4,9 +4,8 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 from .models import ChangeLog
-from .utils import get_current_user, get_changes  # Ensure these are implemented correctly
-
-# mysite/signals.py
+from .utils import get_current_user, get_changes
+from django.db import transaction
 
 @receiver(post_save)
 def log_model_save(sender, instance, created, **kwargs):
@@ -75,7 +74,6 @@ def set_notifications_off(sender, request, user, **kwargs):
             pass
 
 
-# Signal to handle status change
 
 @receiver(post_save, sender=InventoryTradeOffer)
 def notify_initiator_on_status_change(sender, instance, created, **kwargs):
@@ -85,8 +83,10 @@ def notify_initiator_on_status_change(sender, instance, created, **kwargs):
             message=f"Your trade offer (ID: {instance.id}) has been {instance.status}.",
             content_type=content_type,
             object_id=instance.id,
-            user=instance.initiator
-            from django.db import transaction
+            user=instance.initiator,
+
+        )
+
 
 def calculate_final_cost(offer):
     return sum(item.value or 0 for item in offer.offered_items.all())
@@ -99,3 +99,15 @@ inventory_sse_queue = queue.Queue()
 @receiver([post_save, post_delete], sender=InventoryObject)
 def inventory_object_changed(sender, instance, **kwargs):
     inventory_sse_queue.put("changed")
+
+@receiver(post_save, sender=Outcome)
+def increment_card_counter(sender, instance, created, **kwargs):
+    print('started profile card counter')
+    if created and instance.user and not getattr(instance, "demonstration", False):
+        try:
+            profile = instance.user.profiledetails
+            profile.cards_counter = (profile.cards_counter or 0) + 1
+            profile.save()
+            print('profile card counter updated')
+        except ProfileDetails.DoesNotExist:
+            pass
