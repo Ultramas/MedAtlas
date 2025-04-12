@@ -4284,8 +4284,34 @@ class GameRoomView(BaseView):
         return context
 
 
-from django.core.serializers.json import DjangoJSONEncoder
-import json
+@login_required
+def toggle_favorite(request):
+    if request.method == 'POST':
+        form = ToggleFavoriteForm(request.POST)
+        if form.is_valid():
+            game_id = form.cleaned_data['game_id']
+            game = get_object_or_404(Game, id=game_id)
+            profile = get_object_or_404(ProfileDetails, user=request.user)
+
+            # Try to get an existing favorite for this game and user.
+            favorite = FavoriteChests.objects.filter(user=request.user, chest=game).first()
+
+            if favorite:
+                # Unfavorite: remove from the user's favorites and delete the instance.
+                profile.favorite_chests.remove(favorite)
+                favorite.delete()
+            else:
+                # Favorite: create the FavoriteChests instance.
+                # (Other fields such as `precedence` and `is_active` are automatically set.)
+                favorite = FavoriteChests.objects.create(user=request.user, chest=game)
+                profile.favorite_chests.add(favorite)
+
+            # Redirect back (or to a suitable page) after toggling.
+            return redirect(request.META.get('HTTP_REFERER', 'home'))
+    else:
+        form = ToggleFavoriteForm()
+
+    return render(request, 'toggle_favorite.html', {'form': form})
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render
@@ -4458,23 +4484,16 @@ class AchievementsView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.request.user  # Assuming the user is authenticated
-
-        # All active achievements
+        user = self.request.user
         total_achievements = Achievements.objects.filter(is_active=1)
 
-        # Achievements the user has earned
-
-        # Achievements the user has earned
         earned_achievements = Achievements.objects.filter(
             is_active=1, user=user
-        ).distinct()  # Filter by the ManyToManyField `user`
+        ).distinct()
 
-        # Counts for achievements
         context['earned_count'] = earned_achievements.count()
         context['total_count'] = total_achievements.count()
 
-        # Add achievements to context
         context['total_achievements'] = total_achievements
         context['earned_achievements'] = earned_achievements
 
@@ -6715,7 +6734,6 @@ from .forms import ReportIssues
 from .forms import BanAppeale
 from .forms import Staffprofile
 from .forms import Eventform
-from .forms import ProfileDetail
 from .forms import SupportForm
 from .forms import SettingsForm
 from .forms import BackgroundImagery
@@ -7093,7 +7111,9 @@ class BaseView(ListView):
             ).order_by("created_at")
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+        current_user = self.request.user
+        if current_user:
+            context['preferenceform'] = MyPreferencesForm(user=current_user)
 
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
@@ -12392,6 +12412,30 @@ def inventory_view(request):
     return render(request, 'inventory.html', {'number_of_cards': number_of_cards})
 
 
+@method_decorator(login_required, name='dispatch')
+def sse_total_value(request):
+    if not request.user.is_authenticated:
+        return HttpResponse("Unauthorized", status=401)
+
+    def event_stream():
+        last_total = None
+        while True:
+            try:
+                event = inventory_sse_queue.get(timeout=30)
+            except queue.Empty:
+                yield ":\n\n"
+                continue
+
+            if event == "changed":
+                stock_objects = InventoryObject.objects.filter(is_active=1, user=request.user)
+                total_value = stock_objects.aggregate(total=Sum('price'))['total'] or 0
+
+                if total_value != last_total:
+                    last_total = total_value
+                    yield f"data: {total_value}\n\n"
+
+    return StreamingHttpResponse(event_stream(), content_type="text/event-stream")
+
 class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
     model = InventoryObject
     template_name = "inventory.html"
@@ -12406,11 +12450,14 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
-            context['StockObject'] = InventoryObject.objects.filter(
-                is_active=1, user=self.request.user
-            ).order_by("created_at")
+            stock_objects = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by("created_at")
+            context['StockObject'] = stock_objects
+
+            total_value = stock_objects.aggregate(total=Sum('price'))['total'] or 0
+            context['total_value'] = total_value
+
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['preferenceform'] = MyPreferencesForm(user=self.request.user)
@@ -12574,35 +12621,41 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         })
 
     @csrf_exempt
-    def sell_inventory_object(request, pk):
+    def sell_inventory_object(self, request, pk):
         if request.method != "POST":
             return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
 
         try:
-            # Check authorization outside transaction
+            # Get the inventory object referenced by the URL
             inventory_object = get_object_or_404(InventoryObject, pk=pk)
             if inventory_object.user != request.user:
                 return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
 
-            data = json.loads(request.body)
+            # Decode and parse the JSON data from the request body.
+            data = json.loads(request.body.decode('utf-8'))
             items = data.get("items", [])
             if not items:
                 return JsonResponse({'success': False, 'message': 'No items provided'}, status=400)
 
+            # Calculate the total sale value from the items provided
             total_sale_value = sum(float(item["price"]) for item in items if "price" in item)
             django.db.close_old_connections()
 
-            # Process each item in separate small transactions
+            # Process each item in one atomic block per item.
             for item in items:
                 item_pk = item.get("inventory_pk")
+                if not item_pk:
+                    continue  # Skip or handle missing item_pk accordingly
 
                 with transaction.atomic():
+                    # Retrieve the InventoryObject to sell
                     item_inventory = get_object_or_404(InventoryObject, pk=item_pk)
+                    # Set the owner and inventory pointer to None (or perform other "sell" logic)
                     item_inventory.user = None
                     item_inventory.inventory = None
                     item_inventory.save()
 
-                with transaction.atomic():
+                    # Create a Transaction record for this sale
                     Transaction.objects.create(
                         inventory_object=item_inventory,
                         user=request.user,
@@ -12610,11 +12663,13 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
                         amount=float(item.get("price", 0))
                     )
 
+            # Update the user's ProfileDetails with the total sale value and save within one atomic block.
             with transaction.atomic():
                 user_profile = get_object_or_404(ProfileDetails, user=request.user)
                 user_profile.currency_amount += total_sale_value
                 user_profile.save()
 
+            # Get the current stock count after the sale.
             stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
 
             return JsonResponse({
@@ -15662,8 +15717,6 @@ def generate_invite_link(request):
 from .models import ProfileDetails
 
 
-# Edit Profile View
-
 class ProfileView(LoginRequiredMixin, UpdateView):
     model = ProfileDetails
     form_class = ProfileForm
@@ -15680,6 +15733,7 @@ class ProfileView(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
+        context['current_user'] = user
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -15695,10 +15749,22 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['preferenceform'] = MyPreferencesForm(user=self.request.user)
 
+        user = self.request.user
+        total_achievements = Achievements.objects.filter(is_active=1)
+
+        earned_achievements = Achievements.objects.filter(
+            is_active=1, user=user
+        ).distinct()
+
+        context['earned_count'] = earned_achievements.count()
+        context['total_count'] = total_achievements.count()
+
+        context['total_achievements'] = total_achievements
+        context['earned_achievements'] = earned_achievements
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
         profile = self.get_object()
         context['profile'] = profile
-        # settings to alter the username & password
+
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -18598,10 +18664,6 @@ def edit_profile(request, pk):
         args = {'form': form}
         return render(request, 'edit_profile.html', args)
 
-
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import ProfileDetail
-from .models import ProfileDetails
 
 
 class ProfileEditView(FormView):

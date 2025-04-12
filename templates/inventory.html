@@ -807,11 +807,28 @@ document.querySelectorAll(".withdraw-form").forEach(form => {
 {% include 'navtrove.html' %}
 
 <div class="container">
+<script>
+  if (typeof(EventSource) !== "undefined") {
+      var source = new EventSource("{% url 'showcase:sse_total_value' %}");
 
+      source.onmessage = function(event) {
+          document.getElementById("total_value_element").innerText = event.data;
+      };
+
+      source.onerror = function(error) {
+          console.error("SSE encountered an error:", error);
+      };
+  } else {
+      console.error("Your browser does not support server-sent events (SSE).");
+  }
+</script>
 
     <main class="main-content">
         <h1>My Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)</h1>
-
+<div>
+    <strong>Total Value:</strong>
+    <span id="total_value_element">{{ total_value }}</span>
+</div>
             {% if StockObject %}
     <div style="margin-top: 20px;">
         <button id="sell-everything-button" class="card-button add-button sell-button" style="width: 120px; position: fixed; right: 50px; top: 175px;">Sell All</button>

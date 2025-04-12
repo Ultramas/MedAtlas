@@ -425,6 +425,9 @@ class GameChoiceForm(forms.ModelForm):
         model = GameChoice
         fields = '__all__'
 
+class ToggleFavoriteForm(forms.Form):
+    game_id = forms.IntegerField(widget=forms.HiddenInput())
+
 
 class MyPreferencesForm(forms.ModelForm):
     class Meta:

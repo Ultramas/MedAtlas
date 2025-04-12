@@ -16,7 +16,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     GeneralMessage, DefaultAvatar, Achievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
-    TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences, GiftCode, GiftCodeRedemption
+    TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences, GiftCode, GiftCodeRedemption, FavoriteChests
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -2124,6 +2124,27 @@ class MyPreferencesAdmin(admin.ModelAdmin):
 
 
 admin.site.register(MyPreferences, MyPreferencesAdmin)
+
+
+class FavoriteChestsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Favorite Chests Information - Categorial Descriptions', {
+            'fields': ('user', 'chest', 'precedence',)
+        }),
+        ('Favorite Chests Information - Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+
+    list_display = (
+        'user',
+        'chest',
+        'precedence',
+        'is_active',
+    )
+
+
+admin.site.register(FavoriteChests, FavoriteChestsAdmin)
 
 
 class BaseCopyrightTextFieldAdmin(admin.ModelAdmin):

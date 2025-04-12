@@ -89,6 +89,13 @@ def notify_initiator_on_status_change(sender, instance, created, **kwargs):
             from django.db import transaction
 
 def calculate_final_cost(offer):
-    # Sum the fees or values of all offered items
     return sum(item.value or 0 for item in offer.offered_items.all())
 
+import queue
+from .models import InventoryObject
+
+inventory_sse_queue = queue.Queue()
+
+@receiver([post_save, post_delete], sender=InventoryObject)
+def inventory_object_changed(sender, instance, **kwargs):
+    inventory_sse_queue.put("changed")

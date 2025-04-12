@@ -668,11 +668,13 @@ p.blog-meta span {
 							</p>
                             <div class="heat_level">
                     <h5 style="color: white;">Heat:
-                        {% if newprofile.cards.heat == 'M' %}🌶️
-                        {% elif newprofile.cards.heat == 'S' %}🌶️🌶️ (2)
-                        {% elif newprofile.cards.heat == 'F' %}🌶️🌶️🌶️ (3)
-                        {% elif newprofile.cards.heat == 'W' %}🌶️🌶️🌶️🌶️ (4)
-                        {% else %}🌶️🌶️🌶️🌶️🌶️ (5)
+
+                        {% if newprofile.heat == 'M' %}🌶️
+                        {% elif newprofile.heat == 'S' %}🌶️🌶️ (2)
+                        {% elif newprofile.heat == 'F' %}🌶️🌶️🌶️ (3)
+                        {% elif newprofile.heat == 'W' %}🌶️🌶️🌶️🌶️ (4)
+                        {% elif newprofile.heat == 'E' %}🌶️🌶️🌶️🌶️🌶️ (5)
+                        {% else %}🌶️(*)️
                         {% endif %}
                     </h5>
                             <h4>{{newprofile.cost}}</h4>
@@ -752,19 +754,16 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(data => {
                 if (data.success) {
-                    // Update stock count
                     const stockCountElement = document.querySelector("#stock-count");
                     if (stockCountElement) {
                         stockCountElement.textContent = data.stock_count;
                     }
 
-                    // Update currency amount
                     const currencyAmountElement = document.querySelector("#currency-amount");
                     if (currencyAmountElement) {
                         currencyAmountElement.textContent = data.currency_amount;
                     }
 
-                    // Example: Remove the item from the UI
                     this.closest(".inventory-item").remove();
                 } else {
                     console.error("Action failed.");
@@ -779,8 +778,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-</script>
-<script>
+
 document.addEventListener("DOMContentLoaded", function () {
     const withdrawButtons = document.querySelectorAll(".withdraw-button");
 
@@ -839,12 +837,10 @@ document.addEventListener("DOMContentLoaded", function() {
         inventoryGrid.classList.toggle("compact-view");
         inventoryGrid.classList.toggle("comfortable-view");
 
-        // Save the current view preference to localStorage
         const isCompact = inventoryGrid.classList.contains("compact-view");
         localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
     });
 
-    // Load the saved view preference on page load
     const savedViewPreference = localStorage.getItem("inventoryViewPreference");
     if (savedViewPreference === "compact") {
         inventoryGrid.classList.remove("comfortable-view");

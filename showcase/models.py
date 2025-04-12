@@ -890,6 +890,7 @@ class ProfileDetails(models.Model):
     trader = models.BooleanField(default=False, null=True)
     partner = models.BooleanField(default=False, null=True)
     membership = models.ForeignKey(Membership, blank=True, null=True, on_delete=models.CASCADE)
+    favorite_chests = models.ManyToManyField('FavoriteChests', blank=True)
     position = models.UUIDField(
         default=uuid.uuid4,
         editable=False,
@@ -3042,7 +3043,11 @@ class Game(models.Model):
                     total_cost += choice_cost
 
                     if not self.heat and (total_cost or self.discount_cost):
-                        if choice.value < choice.total_cost:
+                        total_lower_rarity = 0
+                        total_lower_value = 0
+                        total_upper_rarity = 0
+                        total_upper_value = 0
+                        if choice.value < total_cost:
                             lower_rarity = choice.rarity / 100
                             lower_value = choice.value / total_cost
                             total_lower_rarity += lower_rarity
@@ -3052,6 +3057,7 @@ class Game(models.Model):
                             upper_value = choice.value / total_cost
                             total_upper_rarity += upper_rarity
                             total_upper_value += upper_value
+
                         if total_lower_rarity * total_lower_value < 1:
                             self.heat = 'M'
                         if total_lower_rarity * total_lower_value < 1:
@@ -4777,12 +4783,39 @@ class MyPreferences(models.Model):
         return f"{self.user.username}'s Preferences - {self.get_spintype_display()}"
 
 
+class FavoriteChests(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    chest = models.ForeignKey(Game, on_delete=models.CASCADE)
+    precedence = models.IntegerField(default=1)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            FavoriteChests.objects.filter(
+                user=self.user,
+                precedence__gte=self.precedence
+            ).update(precedence=models.F('precedence') + 1)
+
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Favorite Chest"
+        verbose_name_plural = "Favorite Chests"
+
+
 class Donate(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
     nickname = models.CharField(max_length=100, blank=True, null=True)
 
-    # ForeignKey to link each donation to a specific user (donor)
     donor = models.ForeignKey(User, on_delete=models.CASCADE)
     anonymous = models.BooleanField(default=False, help_text="Donate anonymously?")
     # position = models.IntegerField(
