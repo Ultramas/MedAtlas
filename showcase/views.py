@@ -7106,7 +7106,7 @@ class BaseView(ListView):
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         current_user = self.request.user
-        if current_user:
+        if current_user.is_authenticated:
             context['preferenceform'] = MyPreferencesForm(user=current_user)
 
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
@@ -9792,11 +9792,12 @@ class BackgroundView(FormMixin, BaseView):
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         else:
             userprofile = None
 
@@ -9828,7 +9829,6 @@ class BackgroundView(FormMixin, BaseView):
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['Email'] = EmailField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
 
         context['About'] = Event.objects.filter(page=self.template_name, is_active=1)
         context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
@@ -16942,14 +16942,16 @@ class CurrencyMarketView(EBaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
-        if self.request.user.is_authenticated:
+
+        current_user = self.request.user
+        if current_user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
 
         context['Currency'] = CurrencyMarket.objects.filter(is_active=1).order_by(
             'price')
