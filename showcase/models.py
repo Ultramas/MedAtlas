@@ -875,13 +875,14 @@ class ProfileDetails(models.Model):
     rubies_spent = models.IntegerField(blank=True, null=True, default=0)  # linked to experience
     other_currencies_amount = models.ManyToManyField(Currency, through='ProfileCurrency',
                                                      related_name="profile_currencies")  # get the integer fieds of all the other currencies besides the first (Rubies)
-    green_cards_hit = models.IntegerField(blank=True, null=True)
-    yellow_cards_hit = models.IntegerField(blank=True, null=True)
-    orange_cards_hit = models.IntegerField(blank=True, null=True)
-    red_cards_hit = models.IntegerField(blank=True, null=True)
-    black_cards_hit = models.IntegerField(blank=True, null=True)
-    gold_cards_hit = models.IntegerField(blank=True, null=True)
-    red_gold_cards_hit = models.IntegerField(blank=True, null=True)
+    green_cards_hit = models.IntegerField(blank=True, null=True, default=0)
+    yellow_cards_hit = models.IntegerField(blank=True, null=True, default=0)
+    orange_cards_hit = models.IntegerField(blank=True, null=True, default=0)
+    red_cards_hit = models.IntegerField(blank=True, null=True, default=0)
+    black_cards_hit = models.IntegerField(blank=True, null=True, default=0)
+    gold_cards_hit = models.IntegerField(blank=True, null=True, default=0)
+    red_gold_cards_hit = models.IntegerField(blank=True, null=True, default=0)
+    cards_counter = models.IntegerField(blank=True, null=True, default=0)
     times_subtract_called = models.IntegerField(default=0)
     monstrosity = models.ForeignKey(Monstrosity, blank=True, null=True, on_delete=models.CASCADE,
                                     related_name="monster")
@@ -1008,6 +1009,29 @@ class ProfileCurrency(models.Model):
 
     def __str__(self):
         return f"{self.profile.user}'s {self.currency.name} ({self.quantity})"
+
+
+class IndividualChestStatistics(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ranking = models.IntegerField(default=0)
+    plays = models.IntegerField(default=0)
+    chests = models.ForeignKey('Game', blank=True, on_delete=models.CASCADE)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active order?")
+
+#if a totalcheststatistics instance exists with a specified chest, update it
+class TotalChestStatistics(models.Model):
+    ranking = models.IntegerField(default=0)
+    plays = models.IntegerField(default=0)
+    chests = models.ForeignKey('Game', blank=True, on_delete=models.CASCADE)
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Is this an active order?")
 
 
 class CurrencyOrder(models.Model):
@@ -3598,8 +3622,10 @@ class Outcome(models.Model):
             self.game_creator = self.game.user
         if not self.file:
             self.file = self.choice.file
-        #if self.shuffler and self.shuffler.demonstration == 'P':
-        #   self.demonstration = False
+        if self.user and demonstration == False:
+            profile = self.user.profiledetails
+            profile.cards_counter = (profile.cards_counter or 0) + 1
+            profile.save()
         super().save(*args, **kwargs)
 
     def get_profile_url(self):
@@ -4777,7 +4803,7 @@ class MyPreferences(models.Model):
 
     class Meta:
         unique_together = ('user',)
-        verbose_name = 'My Preferences'
+        verbose_name = 'My Preference'
 
     def __str__(self):
         return f"{self.user.username}'s Preferences - {self.get_spintype_display()}"

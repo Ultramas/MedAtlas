@@ -3945,7 +3945,6 @@ def update_profile_level(profile):
         highest_level = Level.objects.filter(
             experience__lte=profile.rubies_spent
         ).order_by('-level').first()
-
         if highest_level:
             print(f"Highest level found: {highest_level}")
             profile.level = highest_level
@@ -4293,20 +4292,15 @@ def toggle_favorite(request):
             game = get_object_or_404(Game, id=game_id)
             profile = get_object_or_404(ProfileDetails, user=request.user)
 
-            # Try to get an existing favorite for this game and user.
             favorite = FavoriteChests.objects.filter(user=request.user, chest=game).first()
 
             if favorite:
-                # Unfavorite: remove from the user's favorites and delete the instance.
                 profile.favorite_chests.remove(favorite)
                 favorite.delete()
             else:
-                # Favorite: create the FavoriteChests instance.
-                # (Other fields such as `precedence` and `is_active` are automatically set.)
                 favorite = FavoriteChests.objects.create(user=request.user, chest=game)
                 profile.favorite_chests.add(favorite)
 
-            # Redirect back (or to a suitable page) after toggling.
             return redirect(request.META.get('HTTP_REFERER', 'home'))
     else:
         form = ToggleFavoriteForm()
@@ -12620,70 +12614,35 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             'currency_amount': user_profile.currency_amount  # include updated currency amount
         })
 
-    @csrf_exempt
+
     def sell_inventory_object(self, request, pk):
-        if request.method != "POST":
-            return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+        inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
-        try:
-            # Get the inventory object referenced by the URL
-            inventory_object = get_object_or_404(InventoryObject, pk=pk)
-            if inventory_object.user != request.user:
-                return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
+        if inventory_object.user != request.user:
+            return JsonResponse({'success': False}, status=403)
 
-            # Decode and parse the JSON data from the request body.
-            data = json.loads(request.body.decode('utf-8'))
-            items = data.get("items", [])
-            if not items:
-                return JsonResponse({'success': False, 'message': 'No items provided'}, status=400)
+        inventory_object.user = None
+        inventory_object.inventory = None
 
-            # Calculate the total sale value from the items provided
-            total_sale_value = sum(float(item["price"]) for item in items if "price" in item)
-            django.db.close_old_connections()
+        with transaction.atomic():
+            Transaction.objects.create(
+                inventory_object=inventory_object,
+                user=request.user,
+                currency=inventory_object.currency,
+                amount=inventory_object.price
+            )
+            inventory_object.save()
 
-            # Process each item in one atomic block per item.
-            for item in items:
-                item_pk = item.get("inventory_pk")
-                if not item_pk:
-                    continue  # Skip or handle missing item_pk accordingly
+            user_profile = get_object_or_404(ProfileDetails, user=request.user) #was UserProfile, also has a currency_amount attribute
+            user_profile.currency_amount += inventory_object.price
+            user_profile.save()
 
-                with transaction.atomic():
-                    # Retrieve the InventoryObject to sell
-                    item_inventory = get_object_or_404(InventoryObject, pk=item_pk)
-                    # Set the owner and inventory pointer to None (or perform other "sell" logic)
-                    item_inventory.user = None
-                    item_inventory.inventory = None
-                    item_inventory.save()
-
-                    # Create a Transaction record for this sale
-                    Transaction.objects.create(
-                        inventory_object=item_inventory,
-                        user=request.user,
-                        currency=item.get("currencySymbol", ""),
-                        amount=float(item.get("price", 0))
-                    )
-
-            # Update the user's ProfileDetails with the total sale value and save within one atomic block.
-            with transaction.atomic():
-                user_profile = get_object_or_404(ProfileDetails, user=request.user)
-                user_profile.currency_amount += total_sale_value
-                user_profile.save()
-
-            # Get the current stock count after the sale.
-            stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
-
-            return JsonResponse({
-                'success': True,
-                'stock_count': stock_count,
-                'currency_amount': user_profile.currency_amount,
-                'message': f"Sold {len(items)} items for {total_sale_value} currency."
-            })
-
-        except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'message': 'Invalid JSON data'}, status=400)
-        except Exception as e:
-            django.db.close_old_connections()
-            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+        stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+        return JsonResponse({
+            'success': True,
+            'stock_count': stock_count,
+            'currency_amount': user_profile.currency_amount
+        })
 
     def move_to_trade(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
@@ -15740,7 +15699,11 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
+        popular_chests = Game.objects.filter(user=request.user, chest=game).first()
+        favorite = FavoriteChests.objects.filter(user=request.user, chest=game).first()
+        context['favorites'] = favorite
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -15763,11 +15726,14 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context['earned_achievements'] = earned_achievements
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
         profile = self.get_object()
-        context['profile'] = profile
 
+        if profile:
+            context['profile'] = profile
+            remaining_rubies = profile.level.experience - profile.rubies_spent
+            context['remaining_rubies'] = remaining_rubies
 
         if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=profile.user)
         else:
             userprofile = None
 
@@ -15791,6 +15757,11 @@ class ProfileView(LoginRequiredMixin, UpdateView):
 
         return context
 
+@login_required
+def fetch_remaining_rubies(request):
+    profile = ProfileDetails.objects.get(user=request.user)
+    remaining = profile.level.experience - profile.rubies_spent
+    return JsonResponse({'remaining_rubies': remaining})
 
 @login_required
 def profile_edit(request, pk):

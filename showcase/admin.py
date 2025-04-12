@@ -16,7 +16,8 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     GeneralMessage, DefaultAvatar, Achievements, AdministrationChangeLog, TradeContract, BlogTips, \
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
-    TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences, GiftCode, GiftCodeRedemption, FavoriteChests
+    TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences, GiftCode, \
+    GiftCodeRedemption, FavoriteChests, IndividualChestStatistics, TotalChestStatistics
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -820,6 +821,39 @@ class GameAdmin(admin.ModelAdmin):
     )
 
 admin.site.register(Game, GameAdmin)
+
+
+class IndividualChestStatisticsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Individual Chest Statistics Information - Categorial Description', {
+            'fields': ('user', 'ranking', 'plays', 'chests', 'is_active',),
+            'classes': ('open',),
+        }),
+    )
+    list_display = (
+        'user',
+        'ranking',
+        'plays',
+        'chests',
+        'is_active',
+    )
+admin.site.register(IndividualChestStatistics, IndividualChestStatisticsAdmin)
+
+
+class TotalChestStatisticsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Individual Chest Statistics Information - Categorial Description', {
+            'fields': ('ranking', 'plays', 'chests', 'is_active',),
+            'classes': ('open',),
+        }),
+    )
+    list_display = (
+        'ranking',
+        'plays',
+        'chests',
+        'is_active',
+    )
+admin.site.register(TotalChestStatistics, TotalChestStatisticsAdmin)
 
 
 class TopHitsAdmin(admin.ModelAdmin):
@@ -2502,7 +2536,7 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
                 'user', 'email', 'avatar', 'alternate', 'about_me', 'level', 'unlocked_daily_chests', 'subscription',
                 'currency', 'currency_amount', 'total_currency_amount', 'total_currency_spent', 'rubies_spent',
                 'green_cards_hit', 'yellow_cards_hit', 'orange_cards_hit', 'red_cards_hit', 'black_cards_hit',
-                'gold_cards_hit', 'red_gold_cards_hit', 'times_subtract_called', 'monstrosity', 'seller', 'trader', 'membership',
+                'gold_cards_hit', 'red_gold_cards_hit', 'cards_counter', 'times_subtract_called', 'monstrosity', 'seller', 'trader', 'membership',
                 'position', 'is_active'
             )
         }),
@@ -2598,6 +2632,7 @@ class RobotAdmin(admin.ModelAdmin):
         }),
     )
 admin.site.register(Robot, RobotAdmin)
+
 
 class BattleGameInline(admin.TabularInline):
     model = BattleGame

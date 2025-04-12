@@ -378,7 +378,6 @@ header {
   object-fit: cover;
 }
 
-/* Dashboard grid */
 .dashboard-grid {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr var(--right-sidebar-width);
@@ -677,6 +676,16 @@ header {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.metric2-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  font-family: 'Share Tech Mono', monospace;
+  background: linear-gradient(90deg, #ffffff, #cccccc);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 .metric-detail {
@@ -1597,7 +1606,6 @@ input:checked + .slider:before {
   transform: translateX(20px);
 }
 
-/* Responsive design */
 @media (max-width: 1400px) {
   .dashboard-grid {
     grid-template-columns: 220px 1fr 250px;
@@ -1743,6 +1751,7 @@ input:checked + .slider:before {
       <div class="sidebar">
         <div class="sidebar-card">
           <nav class="sidebar-nav">
+            {%  %}
             <button class="nav-item active">
               <svg viewBox="0 0 24 24"><path d="M3,13H11V3H3V13M3,21H11V15H3V21M13,21H21V11H13V21M13,3V9H21V3H13Z" /></svg>
               <span>Dashboard</span>
@@ -1801,7 +1810,7 @@ input:checked + .slider:before {
               </div>
               <div class="status-item">
                 <div class="status-label">
-                  <span>Network</span>
+                  <span>About Me</span>
                   <span class="status-value" id="network-status-value">92%</span>
                 </div>
                 <div class="status-bar">
@@ -1826,9 +1835,13 @@ input:checked + .slider:before {
               My Statistics
             </div>
             {% else %}
+            <div class="titlecard">
             <div class="card-title">
               <svg viewBox="0 0 24 24"><path d="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L5,8.09V15.91L12,19.85L19,15.91V8.09L12,4.15Z" /></svg>
               {{profile.user.username}}'s Statistics
+              <br>
+            </div>
+            <h6 style="font-size:10px; margin-left:30px; color:white;">About Me: {{profile.about_me}}</h6>
             </div>
             {% endif %}
             {% endif %}
@@ -1861,11 +1874,14 @@ input:checked + .slider:before {
                   <svg viewBox="0 0 24 24"><path d="M18,3V5H16V3H8V5H6V3H4V21H6V19H8V21H16V19H18V21H20V3H18M18,9H16V7H18V9M18,13H16V11H18V13M18,17H16V15H18V17M8,9H6V7H8V9M8,13H6V11H8V13M8,17H6V15H8V17Z" /></svg>
                 </div>
                   {% for userprofile in NewsProfiles %}
-                <div class="metric-value" id="cpu-value">
-
-
-  {% widthratio userprofile.rubies_spent userprofile.level.experience 100 %}% Until ^
-   </div>
+                <div class="metricshere" style="display: flex; flex-direction: row;">
+              <div class="metric-value" id="cpu-value" data-target="{% widthratio userprofile.rubies_spent userprofile.level.experience 100 %}">
+  <span id="percent">0</span>% Till
+</div>
+                <div class="metric2-value" style="margin-left:5px;" id="cpu-value" data-target="{% widthratio userprofile.rubies_spent userprofile.level.experience 100 %}">
+  ⏫
+</div>
+                  </div>
                 <div class="metric-detail">  ({{ userprofile.rubies_spent }}/{{ userprofile.level.experience }})
 </div>
                     {% endfor %}
@@ -1874,14 +1890,89 @@ input:checked + .slider:before {
                 </div>
                 <div class="metric-glow"></div>
               </div>
-              <div class="metric-card memory">
+              <a href="{% url 'showcase:achievements' %}">
+              <div class="metric-card memory" style="height:155px;">
                 <div class="metric-header">
                    <div class="metric-title">Achievements</div>
                   <svg viewBox="0 0 24 24">
                         <i class="fas fa-trophy user-stat-icon" style="color: var(--accent);"></i></svg>
                 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const displayEl = document.getElementById("system-load");
+    const end = parseInt(displayEl.dataset.remaining);
+    const start = parseInt(displayEl.dataset.max);
+    const duration = 2000;
+    const frameRate = 1000 / 60;
+    const totalFrames = duration / frameRate;
 
-{% widthratio earned_count total_count 100 as percent %}
+    let frame = 0;
+
+    function logarithmicStep(t) {
+        return start - ((start - end) * Math.log(t * 9 + 1) / Math.log(10));
+    }
+
+    const animate = () => {
+        frame++;
+        const t = frame / totalFrames;
+        const value = Math.floor(logarithmicStep(t));
+        displayEl.textContent = value;
+
+        if (frame < totalFrames) {
+            requestAnimationFrame(animate);
+        } else {
+            displayEl.textContent = end;
+        }
+    };
+
+    animate();
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    var cpuValueElement = document.getElementById("cpu-value");
+    var target = parseInt(cpuValueElement.getAttribute("data-target"), 10) || 0;
+    var display = document.getElementById("percent");
+    var duration = 2000;
+    var startTime = null;
+    var lastDisplayed = 0;
+
+    function easeInOutQuad(t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
+    function update(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var elapsed = timestamp - startTime;
+        var progress = Math.min(elapsed / duration, 1);
+        var easedProgress = easeInOutQuad(progress);
+        var currentPercentage = Math.round(target * easedProgress);
+
+        if (currentPercentage > lastDisplayed) {
+            lastDisplayed = currentPercentage;
+            display.innerText = currentPercentage;
+        }
+
+        if (elapsed < duration) {
+            requestAnimationFrame(update);
+        } else {
+            display.innerText = target;
+        }
+    }
+
+    requestAnimationFrame(update);
+});
+
+setInterval(() => {
+    fetch("{% url 'showcase:fetch_remaining_rubies' %}")
+        .then(response => response.json())
+        .then(data => {
+            const el = document.getElementById("system-load");
+            el.textContent = data.remaining_rubies;
+        });
+}, 5000); // Check every 5 seconds
+</script>
+
+              {% widthratio earned_count total_count 100 as percent %}
 <div class="metric-value" id="memory-value">{{ percent }}% Earned</div>
                 <div class="metric-detail"> ({{ earned_count }}/{{ total_count }}))</div>
 
@@ -1890,9 +1981,37 @@ input:checked + .slider:before {
                 </div>
                 <div class="metric-glow"></div>
               </div>
+</a>
               <div class="metric-card network">
                 <div class="metric-header">
-                  <div class="metric-title">Network</div>
+                  <div class="metric-title">Cards Hit</div>
+                  <svg viewBox="0 0 24 24"><path d="M1,9L3,11C7.97,6.03 16.03,6.03 21,11L23,9C16.93,2.93 7.08,2.93 1,9M9,17L12,20L15,17C13.35,15.34 10.66,15.34 9,17M5,13L7,15C9.76,12.24 14.24,12.24 17,15L19,13C15.14,9.14 8.87,9.14 5,13Z" /></svg>
+                </div>
+                {% if profile %}
+                <div class="metric-value" id="network-value">{{profile.cards_counter}}</div>
+                {% endif %}
+                <div class="metric-detail">1.2 GB/s | 42ms</div>
+                <div class="metric-trend down">
+                  <svg viewBox="0 0 24 24"><path d="M21,11H8.59L10.59,9L9.17,7.59L4.76,12L9.17,16.41L10.59,15L8.59,13H21V11Z" /></svg>
+                </div>
+                <div class="metric-glow"></div>
+              </div>
+
+              <div class="metric-card network">
+                <div class="metric-header">
+                  <div class="metric-title"> Biggest Banger</div>
+                  <svg viewBox="0 0 24 24"><path d="M1,9L3,11C7.97,6.03 16.03,6.03 21,11L23,9C16.93,2.93 7.08,2.93 1,9M9,17L12,20L15,17C13.35,15.34 10.66,15.34 9,17M5,13L7,15C9.76,12.24 14.24,12.24 17,15L19,13C15.14,9.14 8.87,9.14 5,13Z" /></svg>
+                </div>
+                <div class="metric-value" id="network-value">92%</div>
+                <div class="metric-detail">1.2 GB/s | 42ms</div>
+                <div class="metric-trend down">
+                  <svg viewBox="0 0 24 24"><path d="M21,11H8.59L10.59,9L9.17,7.59L4.76,12L9.17,16.41L10.59,15L8.59,13H21V11Z" /></svg>
+                </div>
+                <div class="metric-glow"></div>
+              </div>
+              <div class="metric-card network">
+                <div class="metric-header">
+                  <div class="metric-title"> Chests Opened</div>
                   <svg viewBox="0 0 24 24"><path d="M1,9L3,11C7.97,6.03 16.03,6.03 21,11L23,9C16.93,2.93 7.08,2.93 1,9M9,17L12,20L15,17C13.35,15.34 10.66,15.34 9,17M5,13L7,15C9.76,12.24 14.24,12.24 17,15L19,13C15.14,9.14 8.87,9.14 5,13Z" /></svg>
                 </div>
                 <div class="metric-value" id="network-value">92%</div>
@@ -1905,7 +2024,13 @@ input:checked + .slider:before {
               <!--Monstrosity; locked until player reaches a certain level & unlocks Monstrosities -->
               <div class="metric-card network">
                 <div class="metric-header">
-                  <div class="metric-title">Monstrosity</div>
+                                  {% if profile %}
+                    {% if profile.user == current_user %}
+                        <div class="metric-title">Monstrosity</div>
+            {% else %}
+            <div class="metric-title">Monstrosity</div>
+            {% endif %}
+            {% endif %}
                   <svg viewBox="0 0 24 24"><path d="M1,9L3,11C7.97,6.03 16.03,6.03 21,11L23,9C16.93,2.93 7.08,2.93 1,9M9,17L12,20L15,17C13.35,15.34 10.66,15.34 9,17M5,13L7,15C9.76,12.24 14.24,12.24 17,15L19,13C15.14,9.14 8.87,9.14 5,13Z" /></svg>
                 </div>
                 <div class="metric-value" id="network-value">92%</div>
@@ -1920,7 +2045,7 @@ input:checked + .slider:before {
             <div class="performance-tabs">
               <div class="tabs-header">
                 <div class="tabs-nav">
-                  <button class="tab-button active" data-tab="performance">Performance</button>
+                  <button class="tab-button active" data-tab="performance">Progress</button>
                   <button class="tab-button" data-tab="processes">Processes</button>
                   <button class="tab-button" data-tab="storage">Storage</button>
                 </div>
@@ -1944,8 +2069,14 @@ input:checked + .slider:before {
                 <div class="performance-chart">
                   <canvas id="performance-canvas"></canvas>
                   <div class="chart-overlay">
-                    <div class="chart-label">System Load</div>
-                    <div class="chart-value" id="system-load">42%</div>
+                    <div class="chart-label" style="color: #e4e5e2;">XP Till Upgrade</div>
+                     {% for userprofile in NewsProfiles %}
+            <div class="chart-value" id="system-load"
+                 data-max="{{ profile.level.experience }}"
+                 data-remaining="{{ remaining_rubies }}">
+            </div>
+
+                    {% endfor %}
                   </div>
                 </div>
               </div>
@@ -2197,7 +2328,70 @@ input:checked + .slider:before {
           <div class="card-header">
             <div class="card-title">
               <svg viewBox="0 0 24 24"><path d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M6,9H18V11H6M14,14H6V12H14M18,8H6V6H18" /></svg>
-              Communications Log
+              Recent Bangers
+            </div>
+            <div class="messages-badge">4 New Messages</div>
+          </div>
+          <div class="card-content">
+            <div class="messages-list">
+              <div class="message-item unread">
+                <div class="message-avatar">
+                  <img src="https://via.placeholder.com/40" alt="System Administrator">
+                </div>
+                <div class="message-content">
+                  <div class="message-header">
+                    <div class="message-sender">System Administrator</div>
+                    <div class="message-time">15:42:12</div>
+                  </div>
+                  <div class="message-text">Scheduled maintenance will occur at 02:00. All systems will be temporarily offline.</div>
+                </div>
+                <div class="message-indicator"></div>
+              </div>
+              <div class="message-item unread">
+                <div class="message-avatar">
+                  <img src="https://via.placeholder.com/40" alt="Security Module">
+                </div>
+                <div class="message-content">
+                  <div class="message-header">
+                    <div class="message-sender">Security Module</div>
+                    <div class="message-time">14:30:45</div>
+                  </div>
+                  <div class="message-text">Unusual login attempt blocked from IP 192.168.1.45. Added to watchlist.</div>
+                </div>
+                <div class="message-indicator"></div>
+              </div>
+              <div class="message-item unread">
+                <div class="message-avatar">
+                  <img src="https://via.placeholder.com/40" alt="Network Control">
+                </div>
+                <div class="message-content">
+                  <div class="message-header">
+                    <div class="message-sender">Network Control</div>
+                    <div class="message-time">12:15:33</div>
+                  </div>
+                  <div class="message-text">Bandwidth allocation adjusted for priority services during peak hours.</div>
+                </div>
+                <div class="message-indicator"></div>
+              </div>
+              <div class="message-item unread">
+                <div class="message-avatar">
+                  <img src="https://via.placeholder.com/40" alt="Data Center">
+                </div>
+                <div class="message-content">
+                  <div class="message-header">
+                    <div class="message-sender">Data Center</div>
+                    <div class="message-time">09:05:18</div>
+                  </div>
+                  <div class="message-text">Backup verification complete. All data integrity checks passed.</div>
+                </div>
+                <div class="message-indicator"></div>
+              </div>
+            </div>
+          </div>
+            <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24"><path d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M6,9H18V11H6M14,14H6V12H14M18,8H6V6H18" /></svg>
+              Chat With Me!
             </div>
             <div class="messages-badge">4 New Messages</div>
           </div>
@@ -2460,25 +2654,22 @@ document.addEventListener('DOMContentLoaded', function() {
   initEventListeners();
 });
 
-// Loading screen
 function initLoading() {
   const loadingOverlay = document.getElementById('loading-overlay');
 
-  // Simulate loading time
   setTimeout(() => {
     loadingOverlay.style.opacity = '0';
     setTimeout(() => {
       loadingOverlay.style.display = 'none';
+      requestAnimationFrame(update);
     }, 500);
-  }, 2000);
+  }, 100);
 }
 
-// Particle background
 function initParticles() {
   const canvas = document.getElementById('particle-canvas');
   const ctx = canvas.getContext('2d');
 
-  // Set canvas size
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
