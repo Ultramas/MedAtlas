@@ -101,7 +101,7 @@ async function processQueue() {
     }
 }
 
-async function randomizeContents(buttonId, choiceColor) {
+async function randomizeContents() {
     const startButton = document.getElementById("start");
     const gameId = startButton.getAttribute("data-game-id");
     const nonce = startButton.getAttribute("data-nonce");
@@ -110,7 +110,6 @@ async function randomizeContents(buttonId, choiceColor) {
     const executeRequest = async () => {
         const payload = {
             game_id: gameId,
-            button_id: buttonId,
             color: choiceColor
         };
 
@@ -203,37 +202,47 @@ async function randomizeContents(buttonId, choiceColor) {
             updateCardPosition();
 
             try {
-                const inventoryPayload = {
-                    choice_id: data.choice_id,
-                    choice_value: data.choice_value,
-                    category: data.category,
-                    price: 100,
-                    condition: 'New',
-                    quantity: 1,
-                    buttonId: buttonId,
-                };
+                   const inventoryPayload = {
+        choice_id: data.choice_id,
+        choice_value: data.choice_value,
+        category: data.category,
+        price: data.choice_value,
+        condition: 'New',
+        quantity: 1,
+        buttonId: buttonId,
+    };
 
-                const inventoryResponse = await fetch('/create_inventory_object/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                    body: JSON.stringify(inventoryPayload),
-                });
+    console.log("Payload being sent:", inventoryPayload);
 
-                const inventoryData = await inventoryResponse.json();
+    const inventoryResponse = await fetch('/create_inventory_object/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: JSON.stringify(inventoryPayload),
+    });
+
+    const inventoryData = await inventoryResponse.json();
+    console.log("Response from /create_inventory_object/:", inventoryData);
+
+
 
                 if (inventoryData.status === 'success') {
+                    console.log("successful start on " + inventoryData.button_id);
                     if (inventoryData.button_id === "start") {
                         let inventory_pk = inventoryData.inventory_object_id;
+                        console.log("inventory_pk:", inventory_pk);
                         window.inventory_pk = inventory_pk;
                         targetCardElement.setAttribute('data-inventory_pk', window.inventory_pk);
+                         console.log("window_pk:", window.inventory_pk);
 
                         window.sellUrl = `/inventory/${inventory_pk}/sell/`;
                         const sellForm = document.getElementById(`sell-form-${window.inventory_pk}`);
-
+                        console.log('sellform: ' + sellForm);
                         if (sellForm) {
+                            console.log("Sell form found:", sellForm);
+
                             sellForm.addEventListener('submit', function(event) {
                                 event.preventDefault();
                                 const pk = this.querySelector('[name="pk"]').value;
@@ -244,11 +253,21 @@ async function randomizeContents(buttonId, choiceColor) {
                                 sessionStorage.setItem("totalSpins", totalSpins);
                                 sellInventory(pk);
                             });
+                        } else {
+                          console.error("Sell form not found for inventory_pk:", window.inventory_pk);
                         }
-                    }
+
+                    } else if (inventoryData.button_id === "start2") {
+                    console.log("Temporary inventory object created without user. ID:", inventoryData.inventory_object_id);
                 }
+                } else {
+                console.error("Failed to create inventory object:", inventoryData.message);
+            }
+            return data;
+
             } catch (inventoryError) {
                 console.error(`Inventory creation error: ${inventoryError}`);
+                return null;
             }
 
             return data;
@@ -361,6 +380,7 @@ $(".start").click(function (event) {
     console.log(`Button clicked: ${buttonId}`);
 
 });
+
 
 
 const casinoThump = new Audio('/static/css/sounds/thump.mp3');
@@ -785,53 +805,6 @@ spin(buttonId);
     }
 
  async function showPopup(buttonId) {
-    function adjustCardsContainer() {
-        const container = document.querySelector('.cards-container');
-        const innerContainer = document.querySelector('.inner-container');
-        if (!container || !innerContainer) return;
-
-        innerContainer.style.display = "flex";
-        innerContainer.style.width = `${innerContainer.scrollWidth}px`;
-
-        const maxLimit = 600;
-
-        console.log(`Checked the size of the inner container (Width: ${innerContainer.scrollWidth}px, Max Width: ${maxLimit}px)`);
-
-        if (innerContainer.scrollWidth > maxLimit) {
-            container.style.justifyContent = 'flex-start';
-            console.log(`Inner-container exceeds 600px → Align Left`);
-        } else {
-            container.style.justifyContent = 'center';
-            console.log(`Inner-container within 600px → Centering`);
-        }
-    }
-
-    textContainer.classList.add('scrollablecontainer');
-    textContainer.innerHTML = `
-      <h2 class='congratulations'>Congratulations!</h2>
-      <p>You got:</p>
-      <div class="cards-container">
-        <div class="inner-container"></div>
-      </div>
-      <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
-        <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
-        <input type="hidden" name="action" value="sell">
-        <input type="hidden" name="pk" value="${window.inventory_pk}">
-        <div class="finish-buttons" style="display: flex; flex-direction: row; gap: 15px; justify-content: center;">
-        <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
-          style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
-            Sell
-        </button>
-      <button class="close">Collect</button>
-      </div>
-      </form>
-    `;
-
-       setTimeout(() => {
-            adjustCardsContainer();
-        }, 100);
-
-    window.addEventListener('resize', adjustCardsContainer);
 
 
 if (buttonId === "start") {
@@ -947,25 +920,54 @@ $(document).on("click", ".sell-button, .close", function() {
 });
 
 
+   function adjustCardsContainer() {
+        const container = document.querySelector('.cards-container');
+        const innerContainer = document.querySelector('.inner-container');
+        if (!container || !innerContainer) return;
 
-   textContainer.innerHTML = `
-    <h2>Congratulations!</h2>
-    <p>You got:</p>
-    <div class="cards-container"></div>
-    <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
-      <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
-      <input type="hidden" name="action" value="sell">
-      <input type="hidden" name="pk" value="${window.inventory_pk}">
-      <div class="finish-buttons" style="display: flex; flex-direction: row; gap: 15px; justify-content: center;">
+        innerContainer.style.display = "flex";
+        innerContainer.style.width = `${innerContainer.scrollWidth}px`;
+
+        const maxLimit = 600;
+
+        console.log(`Checked the size of the inner container (Width: ${innerContainer.scrollWidth}px, Max Width: ${maxLimit}px)`);
+
+        if (innerContainer.scrollWidth > maxLimit) {
+            container.style.justifyContent = 'flex-start';
+            console.log(`Inner-container exceeds 600px → Align Left`);
+        } else {
+            container.style.justifyContent = 'center';
+            console.log(`Inner-container within 600px → Centering`);
+        }
+    }
+
+    textContainer.classList.add('scrollablecontainer');
+    textContainer.innerHTML = `
+      <h2 class='congratulations'>Congratulations!</h2>
+      <p>You got:</p>
+      <div class="cards-container">
+        <div class="inner-container"></div>
+      </div>
+      <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
+        <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
+        <input type="hidden" name="action" value="sell">
+        <input type="hidden" name="pk" value="${window.inventory_pk}">
+        <div class="finish-buttons" style="display: flex; flex-direction: row; gap: 15px; justify-content: center;">
         <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
           style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
             Sell
         </button>
       <button class="close">Collect</button>
       </div>
-    </form>
+      </form>
+    `;
 
-`;
+       setTimeout(() => {
+            adjustCardsContainer();
+        }, 100);
+
+    window.addEventListener('resize', adjustCardsContainer);
+
 
   } else if (buttonId === "start2") {
       console.log("Show Demo Start");
