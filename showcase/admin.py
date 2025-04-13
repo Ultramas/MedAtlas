@@ -102,8 +102,8 @@ from .models import AdminRoles
 from .models import AdminTasks
 from .models import AdminPages
 from django.contrib.auth.models import Group
-from django.contrib.admin import AdminSite
-from django.utils.translation import gettext_lazy
+
+from .views import PlayerInventoryView
 
 
 class UserProfile2Admin(admin.ModelAdmin):
@@ -273,20 +273,16 @@ class LotteryAdmin(admin.ModelAdmin):
 admin.site.register(Lottery, LotteryAdmin)
 
 
-from django.contrib import admin
 from .models import VoteQuery, VoteOption, Ballot
 
-# Create an inline admin for VoteOption
-class VoteOptionInline(admin.TabularInline):  # You can also use StackedInline if you prefer a different layout.
+class VoteOptionInline(admin.TabularInline):
     model = VoteOption
-    extra = 2  # Number of extra empty vote option forms to display
-
+    extra = 2
 
 class authorAdmin(admin.ModelAdmin):
     list_display = ('user', 'category', 'is_active', 'mfg_date')
     inlines = [VoteOptionInline]
 
-    # Optionally, you can define fieldsets to organize your fields.
     fieldsets = (
         ('Vote Information', {
             'fields': ('user', 'description', 'category', 'is_active')
@@ -540,8 +536,19 @@ class NotificationAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('created_at',)
 
+    # Define a custom method that returns a string representation of the user(s)
+    def display_users(self, obj):
+        # If obj.user is a many-to-many field, .all() retrieves them
+        return ", ".join([str(user) for user in obj.user.all()])
+
+    display_users.short_description = 'User'
+
+    # Use the custom method in list_display instead of directly using 'user'
+    list_display = ('display_users', 'message', 'content_type', 'object_id',)
+
 
 admin.site.register(Notification, NotificationAdmin)
+
 
 class UserNotificationAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -986,18 +993,6 @@ from django.contrib.auth.admin import UserAdmin
 # admin.site.register(SecurityQuestions)
 
 
-class MyAdminSite(AdminSite):
-    # Text to put at the end of each page's <title>.
-    site_title = gettext_lazy('MegaClan Administration')
-
-    # Text to put in each page's <h1> (and above login form).
-    site_header = gettext_lazy('〖𐌑𐌂〗 Administration')
-
-    # Text to put at the top of the admin index page.
-    index_title = gettext_lazy('Webite Administration')
-
-
-admin_site = MyAdminSite()
 
 
 # Admin Action Functions
@@ -1181,7 +1176,6 @@ admin.site.register(State, StateAdmin)
 # from .models import Group
 from .forms import GroupAdminForm, MemeForm
 
-# Unregister the original Group admin.
 admin.site.unregister(Group)
 
 
@@ -1803,7 +1797,6 @@ class InventoryAdmin(admin.ModelAdmin):
     )
 
 
-admin.site.register(Inventory, InventoryAdmin)
 
 
 class InventoryObjectAdmin(admin.ModelAdmin):
@@ -2563,8 +2556,6 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
     get_membership.short_description = 'Membership'
 
 
-admin.site.register(ProfileDetails, ProfileDetailsAdmin)
-
 
 class LevelInline(admin.TabularInline):
     model = Experience.level.through
@@ -2841,3 +2832,27 @@ class DonateIconAdmin(admin.ModelAdmin):
 
 
 admin.site.register(DonateIcon, DonateIconAdmin)
+
+class GroupedProfile(ProfileDetails):
+    class Meta:
+        proxy = True
+        app_label = 'user_management'
+        verbose_name = 'Account Profile'
+
+
+class PlayerInventory(Inventory):
+    class Meta:
+        proxy = True
+        app_label = 'user_management'
+        verbose_name = 'Player Inventory'
+        verbose_name_plural = 'Player Inventories'
+
+
+@admin.register(GroupedProfile)
+class GroupedProfileAdmin(ProfileDetailsAdmin):
+    pass
+
+
+@admin.register(PlayerInventory)
+class PlayerInventoryAdmin(InventoryAdmin):
+    pass

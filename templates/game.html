@@ -1075,15 +1075,15 @@ p.blog-meta span {
 <body>
 
 <script>
+
   const csrfToken = "{{ csrf_token }}";
-  const inventory_pk = "{{ Inventory.pk }}";
+  const inventory_pk = "{{ inventory.pk }}";
 
-
-    const userContext = {
-        isSignedIn: {{ is_signed_in|yesno:"true,false" }},
-        hasPreference: {{ has_preference|yesno:"true,false" }},
-        preferenceValue: "{{ preference_value|default_if_none:'' }}"
-    };
+  const userContext = {
+      isSignedIn: {{ is_signed_in|yesno:"true,false" }},
+      hasPreference: {{ has_preference|yesno:"true,false" }},
+      preferenceValue: "{{ preference_value|default_if_none:'' }}"
+  };
 </script>
 
 

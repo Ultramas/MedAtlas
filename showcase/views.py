@@ -13439,6 +13439,7 @@ class GameChestBackgroundView(BaseView):
         if action == 'sell':
             print('point-blank sell action called')
             response = self.sell_inventory_object(request, pk)
+            return response
         return JsonResponse({'error': 'Invalid action'}, status=400)
 
     @csrf_exempt
@@ -13448,11 +13449,13 @@ class GameChestBackgroundView(BaseView):
 
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
+        # Verify that the inventory object belongs to the current user.
         if inventory_object.user != request.user:
             return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
 
         try:
-            data = json.loads(request.body)  # Use request.body to read JSON data
+            # Expect JSON data from the AJAX request.
+            data = json.loads(request.body)
             items = data.get("items", [])
 
             if not items:

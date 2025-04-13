@@ -2,611 +2,898 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeTrove - My Inventory</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-
-  <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/inventory2.css' %}">
-    <style>
- /* Add this to the existing <style> tag or create a new one if it doesn't exist */
-    .copyright-section {
-        background: linear-gradient(
-            to right,
-            rgba(191, 151, 255, 0.1),
-            rgba(255, 255, 255, 0.05),
-            rgba(191, 151, 255, 0.1)
-        );
-        backdrop-filter: blur(10px);
-        padding: 1rem 0;
-        text-align: center;
-        position: relative;
-        z-index: 100;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PokeTrove - My Inventory</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Rajdhani", sans-serif;
     }
 
-    .copyright-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    :root {
+      /* Primary colors */
+      --primary: #00e5ff;
+      --primary-dark: #00b8d4;
+      --primary-light: #18ffff;
+      --primary-glow: rgba(0, 229, 255, 0.5);
+
+      /* Secondary colors */
+      --secondary: #ff0055;
+      --secondary-dark: #c6004e;
+      --secondary-light: #ff4081;
+
+      /* Accent colors */
+      --accent: #7c4dff;
+      --accent-dark: #651fff;
+      --accent-light: #b388ff;
+
+      /* Background colors */
+      --bg-dark: #0a0e17;
+      --bg-darker: #050a14;
+      --bg-card: rgba(16, 23, 41, 0.7);
+      --bg-card-hover: rgba(20, 29, 49, 0.8);
+
+      /* Text colors */
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-disabled: rgba(255, 255, 255, 0.5);
+      --text-hint: rgba(255, 255, 255, 0.3);
+
+      /* Status colors */
+      --success: #00e676;
+      --warning: #ffea00;
+      --error: #ff1744;
+      --info: #2979ff;
+
+      --legendary: #ffd700;
+      --ultra-rare: #ff00ff;
+      --holo: #00ffff;
+      --rare: #7c4dff;
+      --uncommon: #00e676;
+      --common: #ffffff;
+
+      /* Border colors */
+      --border-light: rgba(255, 255, 255, 0.1);
+      --border-medium: rgba(255, 255, 255, 0.15);
+
+      /* Shadows */
+      --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-medium: 0 6px 10px rgba(0, 0, 0, 0.15);
+      --shadow-hard: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+      /* Transitions */
+      --transition-fast: 0.2s ease;
+      --transition-medium: 0.3s ease;
+      --transition-slow: 0.5s ease;
+
+      /* Sizes */
+      --border-radius: 4px;
+      --border-radius-large: 8px;
+      --header-height: 70px;
+      --sidebar-width: 240px;
+      --right-sidebar-width: 280px;
     }
 
-    .copyright-section p {
-        color: var(--text);
-        font-family: 'Cinzel', serif;
-        font-size: 0.9rem;
-        letter-spacing: 1px;
-        margin: 0;
+    body {
+      background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      line-height: 1.5;
     }
-</style>
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
-
-        :root {
-            --primary: #bf97ff;
-            --primary-dark: #9a6bff;
-            --background: #0a0a13;
-            --text: #ffffff;
-            --accent: #4db2ea;
-            --accent2: #ffd700;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: var(--background);
-            color: var(--text);
-            font-family: 'Cormorant Garamond', serif;
-            background-image:
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
-            min-height: 100vh;
-        }
-
-        .main-menu {
-            display: flex;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(
-                to right,
-                rgba(191, 151, 255, 0.1),
-                rgba(255, 255, 255, 0.05),
-                rgba(191, 151, 255, 0.1)
-            );
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
-            position: relative;
-        }
-
-        .logo::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .logo-icon {
-            color: var(--accent);
-            font-size: 2rem;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
-        }
-
-        .nav-links {
-            margin-left: auto;
-            display: flex;
-            gap: 3rem;
-        }
-
-        .nav-links a {
-
-    color: var(--primary);
-            text-decoration: none;
-            position: relative;
-            padding: 0.5rem 0;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            /*font-size: 1rem;*/
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-    .logo-icon h1::after {
-        content: '';
-        position: absolute;
-        bottom: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 200px;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
     }
-        .container {
-            display: flex;
-            gap: 3rem;
-            padding: 3rem;
-            max-width: 1800px;
-            margin: 0 auto;
-        }
 
-        .sidebar {
-            width: 320px;
-            flex-shrink: 0;
-        }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+    }
 
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary-dark);
+      border-radius: 4px;
+    }
 
-        .username {
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            color: var(--primary);
-            margin-bottom: 0.75rem;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
-        }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary);
+    }
 
+    /* Loading overlay */
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(5, 10, 20, 0.9);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
 
-        .filters {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        .filters h2, .collection-title {
-            color: var(--primary);
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-            font-family: 'Cinzel', serif;
-            text-align: center;
-            position: relative;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
-        }
+    .loading-spinner {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
 
-        .filters h2::after, .collection-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
+    .spinner-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 4px solid transparent;
+    }
 
-        .search-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 100%;
-            color: var(--text);
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-        }
+    .spinner-ring.outer {
+      width: 100%;
+      height: 100%;
+      border-top-color: var(--primary);
+      animation: spin 2s linear infinite;
+    }
 
-        .search-box:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-        }
+    .spinner-ring.middle {
+      width: 80%;
+      height: 80%;
+      top: 10%;
+      left: 10%;
+      border-right-color: var(--secondary);
+      animation: spin 1.5s linear infinite reverse;
+    }
 
-        .type-select {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 100%;
-            color: var(--text);
-            margin-bottom: 2rem;
-            cursor: pointer;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-        }
+    .spinner-ring.inner {
+      width: 60%;
+      height: 60%;
+      top: 20%;
+      left: 20%;
+      border-bottom-color: var(--accent);
+      animation: spin 1s linear infinite;
+    }
 
-        .view-collection {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-            border: 2px solid var(--primary);
-            color: var(--text);
-            padding: 1rem;
-            border-radius: 8px;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 1.1rem;
-            position: relative;
-            overflow: hidden;
-        }
+    .loading-text {
+      margin-top: 20px;
+      font-family: "Share Tech Mono", monospace;
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: var(--primary);
+      text-shadow: 0 0 10px var(--primary-glow);
+    }
 
-        .view-collection::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
-            transition: transform 0.5s ease;
-        }
+    .loading-progress {
+      margin-top: 15px;
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
 
-        .view-collection:hover::before {
-            transform: translate(25%, 25%);
-        }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+      animation: progress 2s ease-in-out forwards;
+    }
 
-        .view-collection:hover {
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-            border-color: var(--accent);
-            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
-            transform: translateY(-2px);
-            color: var(--accent);
-        }
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
 
-        .main-content {
-            width: 100%;
-        }
-        .main-content h1 {
-            color: var(--primary);
-            font-size: 3rem;
-            margin-bottom: 3rem;
-            font-family: 'Cinzel', serif;
-            text-align: center;
-            position: relative;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
-        }
+    @keyframes progress {
+      0% {
+        width: 0%;
+      }
+      100% {
+        width: 100%;
+      }
+    }
 
-        .main-content h1::after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
+    /* Particle canvas */
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.3;
+    }
 
+    /* Main container */
+    .container {
+      max-width: 1920px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
 
-        .pokemon-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
-        }
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
 
-        .pokemon-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            overflow: hidden;
-            position: relative;
-            border: 2px solid var(--primary);
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
-        }
+    .logo {
+      display: flex;
+      align-items: center;
+    }
 
-        .pokemon-card:hover {
-            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
-            border-color: var(--accent);
-        }
+    .logo-hex {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+    }
 
-        .pokemon-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
-            z-index: 1;
-        }
+    .logo-icon {
+      width: 100%;
+      height: 100%;
+      fill: var(--primary);
+      filter: drop-shadow(0 0 5px var(--primary-glow));
+    }
 
-        .pokemon-image {
-            width: 100%;
-            aspect-ratio: 1;
-            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
+    .logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent-light) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 1px;
+    }
 
-        .pokemon-image::after {
-            content: '';
-            position: absolute;
-            width: 150%;
-            height: 150%;
-            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
-            animation: rotate 20s linear infinite;
-        }
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 5px 15px;
+      width: 250px;
+    }
 
-        .pokemon-info {
-            padding: 1.5rem;
-            position: relative;
-            z-index: 2;
-        }
+    .search-icon {
+      width: 18px;
+      height: 18px;
+      fill: var(--text-hint);
+      margin-right: 8px;
+    }
 
-        .pokemon-name {
-            font-size: 1.00rem;
-            margin-bottom: 0.75rem;
-            font-family: 'Cinzel', serif;
-            color: var(--primary);
-            position:fixed;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
-            background: rgba(0, 0, 0, 0.3);
-            width: 100%;
-            color: white;
-            padding-left: 5px;
-            padding-right: 5px;
-        }
+    .search-bar input {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 14px;
+      width: 100%;
+      outline: none;
+    }
 
-        .pokemon-type {
-            color: white;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 1rem;
-        }
+    .search-bar input::placeholder {
+      color: var(--text-hint);
+    }
 
+    .header-buttons {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
 
-        .legendary-icon {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            color: var(--accent);
-            background: rgba(255, 215, 0, 0.1);
-            padding: 0.75rem;
-            border-radius: 50%;
-            z-index: 2;
-            backdrop-filter: blur(5px);
-            border: 2px solid var(--accent2);
-            font-size: 1.5rem;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-            animation: pulse 2s infinite;
-        }
+    .icon-button {
+      background: transparent;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: background-color var(--transition-fast);
+    }
 
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
-            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-        }
+    .icon-button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
 
-                .inventory-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    .icon-button svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--text-secondary);
+    }
 
-        @media (max-width: 1200px) {
-            .inventory-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
+    .notification-dot {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      background-color: var(--secondary);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
 
-        @media (max-width: 768px) {
-            .inventory-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(255, 0, 85, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 0, 85, 0);
+      }
+    }
 
-  .inventory-items-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
 
-        @media (max-width: 1200px) {
-            .inventory-items-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-        @media (max-width: 768px) {
-            .inventory-items-container {
-                grid-template-columns: 1fr;
-            }
-        }
+    /* Dashboard grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr var(--right-sidebar-width);
+      gap: 20px;
+    }
 
-        .gridCardItem {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            overflow: hidden;
-            position: relative;
-            border: 2px solid var(--primary);
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
-        }
+    /* Sidebar */
+    .sidebar {
+      grid-column: 1;
+    }
 
-        .gridCardItem:hover {
-            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
-            border-color: var(--accent);
-        }
+    .sidebar-card {
+      background: var(--bg-card);
+      border-radius: var(--border-radius-large);
+      border: 1px solid var(--border-light);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+      box-shadow: var(--shadow-medium);
+      height: calc(100vh - var(--header-height) - 40px);
+      display: flex;
+      flex-direction: column;
+    }
 
+    .sidebar-nav {
+      padding: 15px;
+      flex-grow: 1;
+    }
 
+    .element-item {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 5px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 16px;
+      text-align: left;
+      cursor: pointer;
+      border-radius: var(--border-radius);
+      transition: all var(--transition-fast);
+      position: relative;
+      overflow: hidden;
+    }
 
-.view-toggle {
-    text-align: right;
-    margin-bottom: 1rem;
-}
+    .element-item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: transparent;
+      transition: all var(--transition-fast);
+    }
 
-.toggle-btn {
-    background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-    border: 2px solid var(--primary);
-    color: var(--text);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-}
+    .element-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+    }
 
-.toggle-btn:hover {
-    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-    border-color: var(--accent);
-    box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
-}
+    .element-item.active {
+      background: rgba(0, 229, 255, 0.1);
+      color: var(--primary);
+    }
 
-.inventory-grid.compact-view {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-}
+    .element-item.active::before {
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
 
-.inventory-grid.compact-view .gridCardItem {
-    font-size: 0.9em;
-}
+    .element-item svg {
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+      fill: currentColor;
+    }
 
-.inventory-grid.compact-view .pokemon-image {
-    aspect-ratio: 16/9;
-}
+    .system-status {
+      padding: 15px;
+      border-top: 1px solid var(--border-light);
+    }
 
-.inventory-grid.compact-view .product-description {
-    display: none;
-}
+    .status-heading {
+      font-size: 12px;
+      color: var(--text-hint);
+      margin-bottom: 15px;
+      font-family: "Share Tech Mono", monospace;
+      letter-spacing: 1px;
+    }
 
-.inventory-grid.compact-view .action-buttons {
-    flex-direction: column;
-}
+    .status-items {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
 
-.inventory-grid.compact-view .action-buttons form {
-    width: 100%;
-    margin-bottom: 0.5rem;
-}
+    .status-item {
+      width: 100%;
+    }
 
-.legendary-icon {
-    font-size: 2em;
-    margin-bottom: 0.5rem;
-}
+    .status-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
 
-.empty-inventory {
-    text-align: center;
-}
+    .status-value {
+      font-family: "Share Tech Mono", monospace;
+      color: var(--text-primary);
+    }
 
-.empty-inventory img {
-    max-width: 50%;
-    margin: 2rem auto;
-}
+    .status-bar {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
 
-nav.main-menu ul li a {
-    color: #fff;
-    font-weight: 700;
-    display: block;
-    padding: 15px;
-}
+    .status-progress {
+      height: 100%;
+      border-radius: 2px;
+      transition: width var(--transition-medium);
+    }
 
-/* Hide the default checkbox */
-.item-select-checkbox {
-    display: none;
-}
+    .status-progress.cyan {
+      background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
 
-.outerContainer {
-    position: relative;
-    cursor: pointer;
-}
+    .status-progress.green {
+      background: linear-gradient(90deg, #00c853, var(--success));
+      box-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+    }
 
-.item-select-checkbox:checked + .gridCardItem {
-    background-color: rgba(0, 128, 0, 0.1); /* Example: light green background */
-}
+    .status-progress.blue {
+      background: linear-gradient(90deg, #2962ff, var(--info));
+      box-shadow: 0 0 10px rgba(41, 121, 255, 0.5);
+    }
 
-.item-select-checkbox:checked + .gridCardItem::before {
-    content: '✔'; /* Checkmark symbol */
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    font-size: 20px;
-    color: green;
-    z-index: 100;
-}
+    /* Main content */
+    .main-content {
+      grid-column: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
-          .withdraw-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #fff;
-    border: 1px solid #ccc;
-    padding: 20px;
-    z-index: 1000;
-    display: none; /* Hidden by default */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  }
-  .popup-content {
-    text-align: center;
-  }
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--border-radius-large);
+      border: 1px solid var(--border-light);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+      box-shadow: var(--shadow-medium);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hard);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .card-title svg {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+      fill: var(--primary);
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      border-radius: 12px;
+      padding: 3px 10px;
+      font-size: 12px;
+      color: var(--primary);
+      font-family: "Share Tech Mono", monospace;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--primary);
+      border-radius: 50%;
+      margin-right: 5px;
+      animation: pulse 2s infinite;
+    }
+
+    .card-content {
+      padding: 20px;
+    }
+
+    /* Inventory items */
+    #inventory-items-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .gridCardItem {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+
+    .gridCardItem:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      border-color: var(--primary);
+    }
+
+    .card-image {
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .card-image img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .card-info {
+      padding: 12px;
+    }
+
+    .card-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--text-primary);
+    }
+
+    .card-type {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .card-button {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .sell-button {
+      background: linear-gradient(45deg, #00c853, var(--success));
+      color: #000;
+    }
+
+    .withdraw-button {
+      background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+      color: #000;
+    }
+
+    .trade-button {
+      background: linear-gradient(45deg, var(--accent-dark), var(--accent));
+      color: #fff;
+    }
+
+    .card-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Item selection checkbox styling */
+    .item-select-checkbox {
+      display: none;
+    }
+
+    .outerContainer {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .item-select-checkbox:checked + .gridCardItem {
+      background-color: rgba(0, 229, 255, 0.1);
+      border-color: var(--primary);
+    }
+
+    .item-select-checkbox:checked + .gridCardItem::before {
+      content: '✓';
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      font-size: 20px;
+      color: var(--primary);
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.5);
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+    }
+
+    /* Right sidebar */
+    .right-sidebar {
+      grid-column: 3;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* System time */
+    .system-time {
+      overflow: hidden;
+    }
+
+    .time-header {
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .time-label {
+      font-size: 12px;
+      color: var(--text-hint);
+      margin-bottom: 5px;
+      font-family: "Share Tech Mono", monospace;
+      letter-spacing: 1px;
+    }
+
+    .time-value {
+      font-size: 32px;
+      font-family: "Share Tech Mono", monospace;
+      color: var(--primary);
+      margin-bottom: 5px;
+      text-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .date-value {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .time-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 15px;
+    }
+
+    .time-detail-item {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-light);
+      padding: 10px;
+    }
+
+    .detail-label {
+      font-size: 12px;
+      color: var(--text-hint);
+      margin-bottom: 5px;
+    }
+
+    .detail-value {
+      font-size: 14px;
+      font-family: "Share Tech Mono", monospace;
+      color: var(--text-primary);
+    }
+
+    /* Quick actions */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .action-button {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-light);
+      border-radius: var(--border-radius);
+      padding: 15px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .action-button:hover {
+      background: rgba(0, 229, 255, 0.1);
+      border-color: rgba(0, 229, 255, 0.3);
+    }
+
+    .action-button svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--primary);
+    }
+
+    .action-button span {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Trade stats */
+    .stat-items {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: var(--border-radius);
+      padding: 12px;
+      border: 1px solid var(--border-light);
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 229, 255, 0.1);
+      border-radius: 50%;
+    }
+
+    .stat-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--primary);
+    }
+
+    .stat-details {
+      flex: 1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-family: "Share Tech Mono", monospace;
+      color: var(--text-primary);
+    }
+
+    /* Withdraw popup */
+    .withdraw-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 20px;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+    }
+
+    .popup-content {
+      text-align: center;
+    }
 
     .popup-content::before {
       content: '';
@@ -619,7 +906,8 @@ nav.main-menu ul li a {
       background: linear-gradient(90deg, #d4af37, #f9f095, #d4af37);
       border-radius: 2px;
     }
-            h2 {
+
+    .popup-content h2 {
       color: #1a1a1a;
       font-size: 24px;
       font-weight: 600;
@@ -628,14 +916,14 @@ nav.main-menu ul li a {
       letter-spacing: 0.5px;
     }
 
-    p {
+    .popup-content p {
       color: #555;
       font-size: 16px;
       line-height: 1.6;
       margin-bottom: 25px;
     }
 
-    p strong {
+    .popup-content p strong {
       color: #d4af37;
       font-weight: 600;
       font-size: 18px;
@@ -648,7 +936,7 @@ nav.main-menu ul li a {
       margin-top: 10px;
     }
 
-    button {
+    .popup-buttons button {
       padding: 12px 24px;
       border-radius: 8px;
       font-size: 15px;
@@ -684,550 +972,1716 @@ nav.main-menu ul li a {
       border-color: #bbb;
     }
 
-    /* Demo button */
-    #show-popup {
-      background: linear-gradient(135deg, #d4af37, #e5c760);
-      color: #000;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-      margin: 20px;
+    /* Copyright section */
+    .copyright-section {
+      background: linear-gradient(
+        to right,
+        rgba(191, 151, 255, 0.1),
+        rgba(255, 255, 255, 0.05),
+        rgba(191, 151, 255, 0.1)
+      );
+      backdrop-filter: blur(10px);
+      padding: 1rem 0;
+      text-align: center;
+      position: relative;
+      z-index: 100;
+      margin-top: 30px;
     }
 
-    #show-popup:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+    .copyright-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
     }
-    </style>
+
+    .copyright-section p {
+      color: var(--text-primary);
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      margin: 0;
+    }
+
+    /* Responsive design */
+    @media (max-width: 1400px) {
+      .dashboard-grid {
+        grid-template-columns: 220px 1fr 250px;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .dashboard-grid {
+        grid-template-columns: 200px 1fr;
+      }
+
+      .right-sidebar {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+
+      #inventory-items-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 992px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .right-sidebar {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .search-bar {
+        display: none;
+      }
+
+      .header-controls {
+        gap: 10px;
+      }
+
+      .time-details {
+        grid-template-columns: 1fr;
+      }
+
+      #inventory-items-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .container {
+        padding: 10px;
+      }
+
+      .logo-text {
+        font-size: 18px;
+      }
+
+      .card-content {
+        padding: 15px;
+      }
+    }
+
+      import { createGlobalStyle } from "styled-components"
+
+export const GlobalStyles = createGlobalStyle`
+  :root {
+    /* Primary colors */
+    --primary: #00e5ff;
+    --primary-dark: #00b8d4;
+    --primary-light: #18ffff;
+    --primary-glow: rgba(0, 229, 255, 0.5);
+
+    /* Secondary colors */
+    --secondary: #ff0055;
+    --secondary-dark: #c6004e;
+    --secondary-light: #ff4081;
+
+    /* Accent colors */
+    --accent: #7c4dff;
+    --accent-dark: #651fff;
+    --accent-light: #b388ff;
+
+    /* Background colors */
+    --bg-dark: #0a0e17;
+    --bg-darker: #050a14;
+    --bg-card: rgba(16, 23, 41, 0.7);
+    --bg-card-hover: rgba(20, 29, 49, 0.8);
+
+    /* Text colors */
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-disabled: rgba(255, 255, 255, 0.5);
+    --text-hint: rgba(255, 255, 255, 0.3);
+
+    /* Status colors */
+    --success: #00e676;
+    --warning: #ffea00;
+    --error: #ff1744;
+    --info: #2979ff;
+
+    --legendary: #ffd700;
+    --ultra-rare: #ff00ff;
+    --holo: #00ffff;
+    --rare: #7c4dff;
+    --uncommon: #00e676;
+    --common: #ffffff;
+
+    /* Border colors */
+    --border-light: rgba(255, 255, 255, 0.1);
+    --border-medium: rgba(255, 255, 255, 0.15);
+
+    /* Shadows */
+    --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 6px 10px rgba(0, 0, 0, 0.15);
+    --shadow-hard: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.3s ease;
+    --transition-slow: 0.5s ease;
+
+    /* Sizes */
+    --border-radius: 4px;
+    --border-radius-large: 8px;
+    --header-height: 70px;
+    --sidebar-width: 240px;
+    --right-sidebar-width: 280px;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Rajdhani", sans-serif;
+  }
+
+  body {
+    background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary-dark);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+  }
+
+  /* Animations */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes spin-reverse {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-360deg); }
+  }
+
+  @keyframes progress {
+    0% { width: 0%; }
+    100% { width: 100%; }
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.7);
+    }
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 6px rgba(255, 0, 85, 0);
+    }
+    100% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(255, 0, 85, 0);
+    }
+  }
+
+  /* Inventory Item Styling */
+  .gridCardItem {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+    transition: all var(--transition-fast);
+    position: relative;
+  }
+
+  .gridCardItem:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border-color: var(--primary);
+  }
+
+  .card-image {
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+
+  .card-image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .card-info {
+    padding: 12px;
+  }
+
+  .card-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+  }
+
+  .card-type {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+  }
+
+  .card-button {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .sell-button {
+    background: linear-gradient(45deg, #00c853, var(--success));
+    color: #000;
+  }
+
+  .withdraw-button {
+    background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+    color: #000;
+  }
+
+  .trade-button {
+    background: linear-gradient(45deg, var(--accent-dark), var(--accent));
+    color: #fff;
+  }
+
+  .card-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Item selection checkbox styling */
+  .item-select-checkbox {
+    display: none;
+  }
+
+  .outerContainer {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .item-select-checkbox:checked + .gridCardItem {
+    background-color: rgba(0, 229, 255, 0.1);
+    border-color: var(--primary);
+  }
+
+  .item-select-checkbox:checked + .gridCardItem::before {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 20px;
+    color: var(--primary);
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.5);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+  }
+
+  /* Responsive design */
+  @media (max-width: 1400px) {
+    .dashboard-grid {
+      grid-template-columns: 220px 1fr 250px;
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .dashboard-grid {
+      grid-template-columns: 200px 1fr;
+    }
+
+    .right-sidebar {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    #inventory-items-container {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 992px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+      display: none;
+    }
+
+    .right-sidebar {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .search-bar {
+      display: none;
+    }
+
+    .header-controls {
+      gap: 10px;
+    }
+
+    .time-details {
+      grid-template-columns: 1fr;
+    }
+
+    #inventory-items-container {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .container {
+      padding: 10px;
+    }
+
+    .logo-text {
+      font-size: 18px;
+    }
+
+    .card-content {
+      padding: 15px;
+    }
+  }
+
+
+  </style>
 </head>
 <body>
-<div id="withdraw-popup" class="withdraw-popup">
-  <div class="popup-content">
-    <h2>Confirm Withdrawal</h2>
-    <p>The shipping fee is <strong>599 rubies</strong>. Do you wish to proceed?</p>
-    <div class="popup-buttons">
-      <button id="confirm-withdraw">Yes, proceed</button>
-      <button id="cancel-withdraw">No, cancel</button>
+  {% include 'navtrove.html' %}
+
+  <!-- Loading overlay -->
+
+  <!-- Background particle effect -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Main container -->
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="logo">
+        <div class="logo-hex">
+          <svg viewBox="0 0 24 24" class="logo-icon">
+            <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M12,6C15.31,6 18,8.69 18,12C18,15.31 15.31,18 12,18C8.69,18 6,15.31 6,12C6,8.69 8.69,6 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" />
+          </svg>
+        </div>
+        <span class="logo-text">POKETROVE INVENTORY</span>
+      </div>
+
+      <div class="header-controls">
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24" class="search-icon">
+            <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+          </svg>
+          <input type="text" placeholder="Search inventory...">
+        </div>
+
+        <div class="header-buttons">
+          <button class="icon-button notification-button">
+            <svg viewBox="0 0 24 24">
+              <path d="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21" />
+            </svg>
+            <span class="notification-dot"></span>
+          </button>
+          <button class="icon-button theme-button">
+            <svg viewBox="0 0 24 24" id="theme-icon">
+              <path d="M12,18C11.11,18 10.26,17.8 9.5,17.45C11.56,16.5 13,14.42 13,12C13,9.58 11.56,7.5 9.5,6.55C10.26,6.2 11.11,6 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31L23.31,12L20,8.69Z" />
+            </svg>
+          </button>
+          <div class="user-avatar">
+            {% for userprofile in NewsProfiles %}
+              <a href="{{ userprofile.newprofile_profile_url }}">
+                <img src="{{ userprofile.newprofile_profile_picture_url|default:'/static/css/images/a.jpg' }}" alt="Profile Picture" onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
+              </a>
+            {% empty %}
+              <a href="{% url 'login' %}?next={{ request.path }}" style="display: contents;">
+                <img src="/static/css/images/a.jpg" alt="Profile Picture">
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard grid -->
+    <div class="dashboard-grid">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-card">
+          <nav class="sidebar-nav">
+            <button class="element-item">
+              <svg viewBox="0 0 24 24"><path d="M3,13H11V3H3V13M3,21H11V15H3V21M13,21H21V11H13V21M13,3V9H21V3H13Z" /></svg>
+              <span>Dashboard</span>
+            </button>
+            <button class="element-item">
+              <svg viewBox="0 0 24 24"><path d="M21,9L17,5V8H10V10H17V13M7,11L3,15L7,19V16H14V14H7V11Z" /></svg>
+              <span>Exchange Cards</span>
+            </button>
+            <button class="element-item active">
+              <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M12,6C15.31,6 18,8.69 18,12C18,15.31 15.31,18 12,18C8.69,18 6,15.31 6,12C6,8.69 8.69,6 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" /></svg>
+              <span>Your Inventory</span>
+            </button>
+            <button class="element-item">
+              <svg viewBox="0 0 24 24"><path d="M12,3C7.58,3 4,4.79 4,7C4,9.21 7.58,11 12,11C16.42,11 20,9.21 20,7C20,4.79 16.42,3 12,3M4,9V12C4,14.21 7.58,16 12,16C16.42,16 20,14.21 20,12V9C20,11.21 16.42,13 12,13C7.58,13 4,11.21 4,9M4,14V17C4,19.21 7.58,21 12,21C16.42,21 20,19.21 20,17V14C20,16.21 16.42,18 12,18C7.58,18 4,16.21 4,14Z" /></svg>
+              <span>Trade History</span>
+            </button>
+          </nav>
+
+          <div class="system-status">
+            <h3 class="status-heading">TRADER STATUS</h3>
+            <div class="status-items">
+              <div class="status-item">
+                <div class="status-label">
+                  <span>Collection</span>
+                  <span class="status-value" id="collection-status-value">85%</span>
+                </div>
+                <div class="status-bar">
+                  <div class="status-progress cyan" id="collection-status-bar" style="width: 85%"></div>
+                </div>
+              </div>
+              <div class="status-item">
+                <div class="status-label">
+                  <span>Reputation</span>
+                  <span class="status-value" id="reputation-status-value">75%</span>
+                </div>
+                <div class="status-bar">
+                  <div class="status-progress green" id="reputation-status-bar" style="width: 75%"></div>
+                </div>
+              </div>
+              <div class="status-item">
+                <div class="status-label">
+                  <span>Trade Rating</span>
+                  <span class="status-value" id="trade-status-value">92%</span>
+                </div>
+                <div class="status-bar">
+                  <div class="status-progress blue" id="trade-status-bar" style="width: 92%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div class="main-content">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M12,6C15.31,6 18,8.69 18,12C18,15.31 15.31,18 12,18C8.69,18 6,15.31 6,12C6,8.69 8.69,6 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" /></svg>
+              Your Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)
+            </div>
+            <div class="card-actions">
+              <div class="status-badge">
+                <span class="status-dot"></span>
+                ACTIVE
+              </div>
+              <button type="button" class="icon-button refresh-button">
+                <svg viewBox="0 0 24 24"><path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" /></svg>
+              </button>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="flex justify-between items-center mb-5">
+              <div>
+                <strong>Total Value:</strong>
+                <span id="total_value_element">{{ total_value }}</span>
+              </div>
+              {% if StockObject %}
+              <button id="sell-everything-button" class="card-button sell-button" style="width: 120px;">Sell All</button>
+              {% endif %}
+            </div>
+
+            <!-- Bulk Sell Form -->
+            <form id="sell-all-form" class="sell-all-form" action="{% url 'showcase:sell_all_inventory_objects' %}" method="post" style="display: none; margin-bottom: 20px;">
+              {% csrf_token %}
+              <input type="hidden" name="selected_ids" id="sell-all-selected-ids">
+              <button type="submit" class="card-button sell-button">Sell Selected</button>
+            </form>
+
+            <!-- Inventory Items -->
+            <div id="inventory-items-container">
+              {% include "inventory_items.html" with StockObject=StockObject %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right sidebar -->
+      <div class="right-sidebar">
+        <!-- System time -->
+        <div class="card system-time">
+          <div class="time-header">
+            <div class="time-label">SYSTEM TIME</div>
+            <div class="time-value" id="current-time">00:00:00</div>
+            <div class="date-value" id="current-date">Jan 1, 2023</div>
+          </div>
+          <div class="time-details">
+            <div class="time-detail-item">
+              <div class="detail-label">Trading Since</div>
+              <div class="detail-value" id="member-time">1y 3m 15d</div>
+            </div>
+            <div class="time-detail-item">
+              <div class="detail-label">Last Trade</div>
+              <div class="detail-value">2 days ago</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="card quick-actions">
+          <div class="card-header">
+            <div class="card-title">Quick Actions</div>
+          </div>
+          <div class="card-content">
+            <div class="actions-grid">
+              <button class="action-button">
+                <svg viewBox="0 0 24 24"><path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" /></svg>
+                <span>Add Card</span>
+              </button>
+              <button class="action-button">
+                <svg viewBox="0 0 24 24"><path d="M21,9L17,5V8H10V10H17V13M7,11L3,15L7,19V16H14V14H7V11Z" /></svg>
+                <span>New Trade</span>
+              </button>
+              <button class="action-button">
+                <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,10.5A1.5,1.5 0 0,1 13.5,12A1.5,1.5 0 0,1 12,13.5A1.5,1.5 0 0,1 10.5,12A1.5,1.5 0 0,1 12,10.5M7.5,12A1.5,1.5 0 0,1 9,13.5A1.5,1.5 0 0,1 7.5,15A1.5,1.5 0 0,1 6,13.5A1.5,1.5 0 0,1 7.5,12M16.5,12A1.5,1.5 0 0,1 18,13.5A1.5,1.5 0 0,1 16.5,15A1.5,1.5 0 0,1 15,13.5A1.5,1.5 0 0,1 16.5,12Z" /></svg>
+                <span>Scan Card</span>
+              </button>
+              <button class="action-button">
+                <svg viewBox="0 0 24 24"><path d="M20,8H4V6H20M20,18H4V12H20M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" /></svg>
+                <span>Wallet</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trade Statistics -->
+        <div class="card trade-stats">
+          <div class="card-header">
+            <div class="card-title">Trade Statistics</div>
+          </div>
+          <div class="card-content">
+            <div class="stat-items">
+              <div class="stat-item">
+                <div class="stat-icon">
+                  <svg viewBox="0 0 24 24"><path d="M21,9L17,5V8H10V10H17V13M7,11L3,15L7,19V16H14V14H7V11Z" /></svg>
+                </div>
+                <div class="stat-details">
+                  <div class="stat-label">Total Trades</div>
+                  <div class="stat-value">156</div>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon">
+                  <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,17V16H9V14H13V13H10A1,1 0 0,1 9,12V9A1,1 0 0,1 10,8H11V7H13V8H15V10H11V11H14A1,1 0 0,1 15,12V15A1,1 0 0,1 14,16H13V17H11Z" /></svg>
+                </div>
+                <div class="stat-details">
+                  <div class="stat-label">Value Traded</div>
+                  <div class="stat-value">$12,450</div>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon">
+                  <svg viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" /></svg>
+                </div>
+                <div class="stat-details">
+                  <div class="stat-label">Rare Cards</div>
+                  <div class="stat-value">89</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
+  <!-- Withdraw Popup -->
+  <div id="withdraw-popup" class="withdraw-popup">
+    <div class="popup-content">
+      <h2>Confirm Withdrawal</h2>
+      <p>The shipping fee is <strong>599 rubies</strong>. Do you wish to proceed?</p>
+      <div class="popup-buttons">
+        <button id="confirm-withdraw">Yes, proceed</button>
+        <button id="cancel-withdraw">No, cancel</button>
+      </div>
+    </div>
+  </div>
 
-<script>
+  <!-- Copyright Section -->
+  <div class="copyright-section">
+    <p>© 2023 PokeTrove. All rights reserved.</p>
+  </div>
+
+  <script>
+    // Audio elements
     const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
     const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
     const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
 
-    document.querySelectorAll('.sell-form').forEach(form => {
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
+    document.addEventListener('DOMContentLoaded', function () {
+      // Initialize loading screen
+      initLoading();
+
+      // Initialize particle background
+      initParticles();
+
+      // Initialize system time
+      initSystemTime();
+
+      // Initialize event listeners
+      initEventListeners();
+
+      // Attach event listeners to all checkboxes
+      document.querySelectorAll('.item-select-checkbox').forEach((checkbox) => {
+        checkbox.addEventListener('change', updateSellAllButton);
+      });
+
+      // Attach event listeners to all forms
+      document.querySelectorAll('.sell-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+          event.preventDefault();
+          sellAudio.play();
+          handleAjaxFormSubmission(form);
+        });
+      });
+
+      document.querySelectorAll('.withdraw-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+          event.preventDefault();
+
+          // Capture the form that triggered the submission
+          const currentForm = form;
+          const withdrawPopup = document.getElementById("withdraw-popup");
+          withdrawPopup.style.display = "block"; // Show confirmation popup
+
+          const confirmButton = document.getElementById("confirm-withdraw");
+          const cancelButton = document.getElementById("cancel-withdraw");
+
+          // Remove any previous onclick handlers to avoid duplicate submissions
+          confirmButton.onclick = null;
+          cancelButton.onclick = null;
+
+          confirmButton.onclick = () => {
+            withdrawAudio.play();
+            // Create new FormData from the current form
+            const confirmFormData = new FormData(currentForm);
+            // Append confirmation flag so the server knows to create a new withdraw
+            confirmFormData.append("confirm_withdraw", "true");
+
+            const actionUrl = currentForm.getAttribute("action");
+
+            fetch(actionUrl, {
+              method: "POST",
+              body: confirmFormData,
+              headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": confirmFormData.get("csrfmiddlewaretoken"),
+              },
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP status ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              if (data.success) {
+                // Remove item from UI if necessary
+                const inventoryItem = currentForm.closest(".gridCardItem");
+                if (inventoryItem) inventoryItem.remove();
+
+                // Update stock count
+                const stockCountElement = document.getElementById("stock-count");
+                if (stockCountElement) {
+                  stockCountElement.textContent = data.stock_count;
+                }
+
+                // Update total value
+                const totalValueElement = document.getElementById("total_value_element");
+                if (totalValueElement && data.total_value) {
+                  totalValueElement.textContent = data.total_value;
+                }
+              } else {
+                alert("Withdraw failed! " + (data.error || ""));
+              }
+              withdrawPopup.style.display = "none"; // Hide popup after processing
+            })
+            .catch(error => {
+              console.error("Error:", error);
+              withdrawPopup.style.display = "none";
+            });
+          };
+
+          cancelButton.onclick = () => {
+            withdrawPopup.style.display = "none"; // Close popup on cancel
+          };
+        });
+      });
+
+      document.querySelectorAll('.trade-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+          event.preventDefault();
+          tradeAudio.play();
+          handleAjaxFormSubmission(form);
+        });
+      });
+
+      // Handle sell everything button
+      const sellEverythingButton = document.getElementById('sell-everything-button');
+      if (sellEverythingButton) {
+        sellEverythingButton.addEventListener('click', function() {
+          if (confirm('Are you sure you want to sell all inventory items?')) {
             sellAudio.play();
-            console.log('')
-            handleAjaxFormSubmission(form);
-        });
-    });
-
-document.querySelectorAll(".withdraw-form").forEach(form => {
-  form.addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevent immediate submission
-
-    // Capture the form that triggered the submission
-    const currentForm = form;
-    const withdrawPopup = document.getElementById("withdraw-popup");
-    withdrawPopup.style.display = "block"; // Show confirmation popup
-
-    const confirmButton = document.getElementById("confirm-withdraw");
-    const cancelButton = document.getElementById("cancel-withdraw");
-
-    // Remove any previous onclick handlers to avoid duplicate submissions
-    confirmButton.onclick = null;
-    cancelButton.onclick = null;
-
-    confirmButton.onclick = () => {
-      // Create new FormData from the current form
-      const confirmFormData = new FormData(currentForm);
-      // Append confirmation flag so the server knows to create a new withdraw
-      confirmFormData.append("confirm_withdraw", "true");
-
-      const actionUrl = currentForm.getAttribute("action");
-
-      fetch(actionUrl, {
-        method: "POST",
-        body: confirmFormData,
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "X-CSRFToken": confirmFormData.get("csrfmiddlewaretoken"),
-        },
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP status ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.success) {
-            alert("Withdraw successful!");
-
-            // Remove item from UI if necessary
-            const inventoryItem = currentForm.closest(".gridCardItem");
-            if (inventoryItem) inventoryItem.remove();
-
-            // Update stock count
-            const stockCountElement = document.getElementById("stock-count");
-            if (stockCountElement) {
-              stockCountElement.textContent = data.stock_count;
-            }
-          } else {
-            alert("Withdraw failed! " + (data.error || ""));
-          }
-          withdrawPopup.style.display = "none"; // Hide popup after processing
-        })
-        .catch(error => {
-          console.error("Error:", error);
-          withdrawPopup.style.display = "none";
-        });
-    };
-
-    cancelButton.onclick = () => {
-      withdrawPopup.style.display = "none"; // Close popup on cancel
-    };
-  });
-});
-
-
-
-</script>
-
-{% include 'navtrove.html' %}
-
-<div class="container">
-<script>
-  if (typeof(EventSource) !== "undefined") {
-      var source = new EventSource("{% url 'showcase:sse_total_value' %}");
-
-      source.onmessage = function(event) {
-          document.getElementById("total_value_element").innerText = event.data;
-      };
-
-      source.onerror = function(error) {
-          console.error("SSE encountered an error:", error);
-      };
-  } else {
-      console.error("Your browser does not support server-sent events (SSE).");
-  }
-</script>
-
-    <main class="main-content">
-        <h1>My Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)</h1>
-<div>
-    <strong>Total Value:</strong>
-    <span id="total_value_element" style="color: white;">{{ total_value }}</span>
-</div>
-            {% if StockObject %}
-    <div style="margin-top: 20px;">
-        <button id="sell-everything-button" class="card-button add-button sell-button" style="width: 120px; position: fixed; right: 50px; top: 175px;">Sell All</button>
-    </div>
-{% endif %}
-
-<script>
-document.getElementById('sell-everything-button').addEventListener('click', function() {
-    if (confirm('Are you sure you want to sell all inventory items?')) {
-        fetch("{% url 'showcase:sell_everything_inventory_objects' %}", {
-            method: 'POST',
-            headers: {
+            fetch("{% url 'showcase:sell_everything_inventory_objects' %}", {
+              method: 'POST',
+              headers: {
                 'X-CSRFToken': '{{ csrf_token }}',
                 'Content-Type': 'application/json',
-            },
-            credentials: 'same-origin',
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('inventory-list').innerHTML = data.inventory_html;
-                document.getElementById('currency-amount').textContent = data.currency_amount;
-                alert('All items have been sold successfully.');
-            } else {
+                'X-Requested-With': 'XMLHttpRequest'
+              },
+              credentials: 'same-origin',
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                document.getElementById('inventory-items-container').innerHTML = data.inventory_html;
+                document.getElementById('stock-count').textContent = data.stock_count;
+
+                if (data.total_value) {
+                  document.getElementById('total_value_element').textContent = data.total_value;
+                }
+
+                if (data.currency_amount) {
+                  const currencyElement = document.getElementById('sellupdate');
+                  if (currencyElement) {
+                    currencyElement.textContent = data.currency_amount;
+                  }
+                }
+              } else {
                 alert('Error: ' + data.error);
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred while processing your request.');  error);
+              alert('An error occurred while processing your request.');
+            });
+          }
+        });
+      }
+
+      // Handle sell all form
+      const sellAllForm = document.getElementById('sell-all-form');
+      if (sellAllForm) {
+        sellAllForm.addEventListener('submit', function(event) {
+          event.preventDefault();
+          sellAudio.play();
+
+          fetch("{% url 'showcase:sell_all_inventory_objects' %}", {
+            method: 'POST',
+            body: new FormData(sellAllForm),
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              document.getElementById('stock-count').textContent = data.stock_count;
+              document.getElementById('inventory-items-container').innerHTML = data.inventory_html;
+
+              if (data.currency_amount) {
+                const currencyElement = document.getElementById('sellupdate');
+                if (currencyElement) {
+                  currencyElement.textContent = data.currency_amount;
+                }
+              }
+
+              if (data.total_value) {
+                document.getElementById('total_value_element').textContent = data.total_value;
+              }
+
+              // Hide the sell all form after selling
+              sellAllForm.style.display = 'none';
+            } else {
+              alert('Error: ' + (data.error || 'An unknown error occurred'));
             }
-        })
-        .catch(error => {
+          })
+          .catch(error => {
             console.error('Error:', error);
             alert('An error occurred while processing your request.');
+          });
         });
-    }
-});
-</script>
-        <section id="inventoryGrid" class="inventory-grid comfortable-view">
-            <!-- Sell All Form (hidden by default) -->
-          <!-- Bulk Sell Form -->
-<form id="sell-all-form" class="sell-all-form" action="{% url 'showcase:sell_all_inventory_objects' %}" method="post"
-      style="display: none; position: fixed; top: 210px; right: 50px; z-index: 50;">
-    {% csrf_token %}
-    <input type="hidden" name="selected_ids" id="sell-all-selected-ids">
-    <button type="submit" class="sell-all-button" style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">Sell Selected</button>
-</form>
-
-
-<!-- Inventory Items -->
-<div id="inventory-items-container" style="display: grid; grid-template-columns: repeat(3, 1fr); space-between: 10px;">
-    {% include "inventory_items.html" with StockObject=StockObject %}
-</div>
-
-
-<script>
-$(document).ready(function() {
-  const $checkboxes = $('.item-select-checkbox');
-  const $sellAllForm = $('#sell-all-form');
-  const $sellAllSelectedIds = $('#sell-all-selected-ids');
-
-  function updateSellAllButton() {
-      let selectedIds = [];
-      $checkboxes.each(function() {
-          if ($(this).prop('checked')) {
-              selectedIds.push($(this).data('id'));
-          }
-      });
-      if (selectedIds.length > 0) {
-          $sellAllForm.show();
-          $sellAllSelectedIds.val(selectedIds.join(','));
-      } else {
-          $sellAllForm.hide();
       }
-  }
 
-  $checkboxes.on('change', updateSellAllButton);
+      // Function to update sell all button visibility
+      function updateSellAllButton() {
+        const checkboxes = document.querySelectorAll('.item-select-checkbox');
+        const sellAllForm = document.getElementById('sell-all-form');
+        const sellAllSelectedIds = document.getElementById('sell-all-selected-ids');
 
-  $sellAllForm.on('submit', function(event) {
-      event.preventDefault();
-      console.log('called the method to sell selected inventory objects');
+        if (!sellAllForm || !sellAllSelectedIds) return;
 
-      const sellselectedAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
-      sellselectedAudio.play();
-
-      $.ajax({
-    url: "{% url 'showcase:sell_all_inventory_objects' %}",
-    type: 'POST',
-    data: $sellAllForm.serialize(),
-    dataType: 'json',  // expect JSON response
-    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-    success: function(response) {
-        $('#stock-count').html(response.stock_count);
-        $('#inventory-items-container').html(response.inventory_html);
-        $('#sellupdate').html(response.currency_amount);
-        console.log('Successfully sold selected inventory objects');
-    },
-    error: function(xhr, status, error) {
-        console.error("Error: ", error);
-    }
-});
-
-
-
-
-
-  });
-});
-
-    $(document).ready(function() {
-    const $checkboxes = $('.item-select-checkbox');
-    const $sellAllForm = $('#sell-all-form');
-    const $sellAllSelectedIds = $('#sell-all-selected-ids');
-
-    function updateSellAllButton() {
         let selectedIds = [];
-        $checkboxes.each(function() {
-            if ($(this).prop('checked')) {
-                selectedIds.push($(this).data('id'));
-            }
+        checkboxes.forEach(function(checkbox) {
+          if (checkbox.checked) {
+            selectedIds.push(checkbox.dataset.id);
+          }
         });
 
         if (selectedIds.length > 0) {
-            $sellAllForm.show();
-            $sellAllSelectedIds.val(selectedIds.join(','));
+          sellAllForm.style.display = 'block';
+          sellAllSelectedIds.value = selectedIds.join(',');
         } else {
-            $sellAllForm.hide();
+          sellAllForm.style.display = 'none';
         }
-    }
+      }
 
-    $checkboxes.on('change', updateSellAllButton);
-
-    function handleInventoryAction(event, $form) {
-        event.preventDefault();
-        console.log('Processing action:', $form.find('input[name="action"]').val());
-
-        $.ajax({
-            url: $form.attr('action'),
-            type: 'POST',
-            data: $form.serialize(),
-            dataType: 'json',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-            success: function(response) {
-                $('#stock-count').html(response.stock_count);
-                $('#inventory-items-container').html(response.inventory_html);
-                $('#sellupdate').html(response.currency_amount);
-
-                // Uncheck the checkbox associated with the affected item
-                const pk = $form.find('input[name="pk"]').val();
-                $('#checkbox-' + pk).prop('checked', false);
-                updateSellAllButton();
-
-                console.log('Action successful:', response);
-            },
-            error: function(xhr, status, error) {
-                console.error("Error:", error);
-            }
-        });
-    }
-
-    // Handle Sell Button Click
-    $(document).on('submit', '.sell-form', function(event) {
-        handleInventoryAction(event, $(this));
-    });
-
-    // Handle Withdraw Button Click
-    $(document).on('submit', '.withdraw-form', function(event) {
-        handleInventoryAction(event, $(this));
-    });
-
-    // Handle Set Tradable Button Click
-    $(document).on('submit', '.trade-form', function(event) {
-        handleInventoryAction(event, $(this));
-    });
-
-    // Handle Sell All Form Submission
-    $sellAllForm.on('submit', function(event) {
-        event.preventDefault();
-        console.log('Selling all selected items.');
-
-        const sellselectedAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
-        sellselectedAudio.play();
-
-        $.ajax({
-            url: "{% url 'showcase:sell_all_inventory_objects' %}",
-            type: 'POST',
-            data: $sellAllForm.serialize(),
-            dataType: 'json',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-            success: function(response) {
-                $('#stock-count').html(response.stock_count);
-                $('#inventory-items-container').html(response.inventory_html);
-                $('#sellupdate').html(response.currency_amount);
-
-                // Uncheck all selected checkboxes after selling
-                $checkboxes.prop('checked', false);
-                updateSellAllButton();
-
-                console.log('Successfully sold selected inventory objects');
-            },
-            error: function(xhr, status, error) {
-                console.error("Error:", error);
-            }
-        });
-    });
-});
-
-</script>
-
-        </section>
-    </main>
-    </div>
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const forms = document.querySelectorAll(".ajax-form");
-
-    forms.forEach(form => {
-        form.addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            const formData = new FormData(this);
-            const url = this.getAttribute("action");
-            const csrfToken = formData.get("csrfmiddlewaretoken");
-
-            fetch(url, {
-                method: "POST",
-				headers: {
-					"X-Requested-With": "XMLHttpRequest",
-					"X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-				},
-
-                body: formData,
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Update stock count
-                    const stockCountElement = document.querySelector("#stock-count");
-                    if (stockCountElement) {
-                        stockCountElement.textContent = data.stock_count;
-                    }
-
-                    // Update currency amount
-                    const currencyAmountElement = document.querySelector("#currency-amount");
-                    if (currencyAmountElement) {
-                        currencyAmountElement.textContent = data.currency_amount;
-                    }
-
-                    // Example: Remove the item from the UI
-                    this.closest(".gridCardItem").remove();
-                } else {
-                    console.error("Action failed.");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-        });
-    });
-});
-
-
-
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const withdrawButtons = document.querySelectorAll(".withdraw-button");
-
-    // Helper function to submit form via fetch
-    function submitWithdrawForm(form, confirmWithdraw = false) {
+      // Function to handle AJAX form submissions
+      function handleAjaxFormSubmission(form) {
         const formData = new FormData(form);
-        if (confirmWithdraw) {
-            formData.append("confirm_withdraw", "true");
-        }
-        const actionUrl = form.getAttribute("action") || window.location.href;
+        const url = form.getAttribute('action');
 
-        console.log("Submitting form to:", actionUrl);
-        console.log("Form Data:", [...formData.entries()]);
+        fetch(url, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+          },
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Update stock count
+            const stockCountElement = document.getElementById('stock-count');
+            if (stockCountElement) {
+              stockCountElement.textContent = data.stock_count;
+            }
+
+            // Update inventory items
+            if (data.inventory_html) {
+              document.getElementById('inventory-items-container').innerHTML = data.inventory_html;
+            }
+
+            // Update currency amount if available
+            if (data.currency_amount) {
+              const currencyElement = document.getElementById('sellupdate');
+              if (currencyElement) {
+                currencyElement.textContent = data.currency_amount;
+              }
+            }
+
+            // Update total value if available
+            if (data.total_value) {
+              document.getElementById('total_value_element').textContent = data.total_value;
+            }
+
+            // If the item was removed, remove it from the UI
+            if (!data.inventory_html) {
+              const inventoryItem = form.closest('.gridCardItem');
+              if (inventoryItem) {
+                inventoryItem.remove();
+              }
+            }
+
+            // Re-attach event listeners to checkboxes
+            document.querySelectorAll('.item-select-checkbox').forEach((checkbox) => {
+              checkbox.addEventListener('change', updateSellAllButton);
+            });
+          } else {
+            alert('Action failed: ' + (data.error || 'Unknown error'));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while processing your request.');
+        });
+      }
+    });
+
+    // Loading screen
+    function initLoading() {
+      const loadingOverlay = document.getElementById("loading-overlay");
+
+      // Simulate loading time
+      setTimeout(() => {
+        loadingOverlay.style.opacity = "0";
+        setTimeout(() => {
+          loadingOverlay.style.display = "none";
+        }, 500);
+      }, 2000);
+    }
+
+    // Particle background
+    function initParticles() {
+      const canvas = document.getElementById("particle-canvas");
+      if (!canvas) return;
+
+      const ctx = canvas.getContext("2d");
+
+      // Set canvas size
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      // Particle class
+      class Particle {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 3 + 1;
+          this.speedX = (Math.random() - 0.5) * 0.5;
+          this.speedY = (Math.random() - 0.5) * 0.5;
+
+          // Cyberpunk-inspired colors: cyan, magenta, blue
+          const colors = ["rgba(0, 229, 255, ", "rgba(255, 0, 128, ", "rgba(41, 121, 255, "];
+          this.color = colors[Math.floor(Math.random() * colors.length)] + (Math.random() * 0.5 + 0.2) + ")";
+        }
+
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+
+          // Wrap around edges
+          if (this.x > canvas.width) this.x = 0;
+          if (this.x < 0) this.x = canvas.width;
+          if (this.y > canvas.height) this.y = 0;
+          if (this.y < 0) this.y = canvas.height;
+        }
+
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Create particles
+      const particles = [];
+      const particleCount = 100;
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+
+      // Animation loop
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (const particle of particles) {
+          particle.update();
+          particle.draw();
+        }
+
+        // Draw connecting lines between nearby particles
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 100) {
+              ctx.beginPath();
+              ctx.strokeStyle = `rgba(0, 229, 255, ${0.1 * (1 - distance / 100)})`;
+              ctx.lineWidth = 0.5;
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    }
+
+    // System time
+    function initSystemTime() {
+      function updateTime() {
+        const now = new Date();
+
+        // Format time: HH:MM:SS
+        const hours = now.getHours().toString().padStart(2, "0");
+        const minutes = now.getMinutes().toString().padStart(2, "0");
+        const seconds = now.getSeconds().toString().padStart(2, "0");
+        const timeString = `${hours}:${minutes}:${seconds}`;
+
+        // Format date: MMM DD, YYYY
+        const options = { year: "numeric", month: "short", day: "numeric" };
+        const dateString = now.toLocaleDateString("en-US", options);
+
+        // Update DOM
+        const currentTimeElement = document.getElementById("current-time");
+        const currentDateElement = document.getElementById("current-date");
+
+        if (currentTimeElement) currentTimeElement.textContent = timeString;
+        if (currentDateElement) currentDateElement.textContent = dateString;
+      }
+
+      // Update immediately and then every second
+      updateTime();
+      setInterval(updateTime, 1000);
+    }
+
+    // Event listeners
+    function initEventListeners() {
+      // Theme toggle
+      const themeButton = document.querySelector(".theme-button");
+      const themeIcon = document.getElementById("theme-icon");
+      let darkTheme = true;
+
+      if (themeButton && themeIcon) {
+        themeButton.addEventListener("click", () => {
+          darkTheme = !darkTheme;
+
+          if (darkTheme) {
+            document.body.classList.remove("light-theme");
+            themeIcon.innerHTML = '<path d="M12,18C11.11,18 10.26,17.8 9.5,17.45C11.56,16.5 13,14.42 13,12C13,9.58 11.56,7.5 9.5,6.55C10.26,6.2 11.11,6 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31L23.31,12L20,8.69Z" />';
+          } else {
+            document.body.classList.add("light-theme");
+            themeIcon.innerHTML = '<path d="M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,2L14.39,5.42C13.65,5.15 12.84,5 12,5C11.16,5 10.35,5.15 9.61,5.42L12,2M3.34,7L7.5,6.65C6.9,7.16 6.36,7.78 5.94,8.5C5.5,9.24 5.25,10 5.11,10.79L3.34,7M3.36,17L5.12,13.23C5.26,14 5.53,14.78 5.95,15.5C6.37,16.24 6.91,16.86 7.5,17.37L3.36,17M20.65,7L18.88,10.79C18.74,10 18.47,9.23 18.05,8.5C17.63,7.78 17.1,7.15 16.5,6.64L20.65,7M20.64,17L16.5,17.36C17.09,16.85 17.62,16.22 18.04,15.5C18.46,14.77 18.73,14 18.87,13.21L20.64,17M12,22L9.59,18.56C10.33,18.83 11.14,19 12,19C12.82,19 13.63,18.83 14.37,18.56L12,22Z" />';
+          }
+        });
+      }
+
+      // Refresh button
+      const refreshButton = document.querySelector(".refresh-button");
+      if (refreshButton) {
+        refreshButton.addEventListener("click", () => {
+          // Add rotation animation
+          refreshButton.classList.add("rotating");
+
+          // Simulate refresh
+          setTimeout(() => {
+            refreshButton.classList.remove("rotating");
+            // Update data here if needed
+          }, 1000);
+        });
+      }
+
+      // Add CSS for rotation animation if not already present
+      if (!document.getElementById('animation-styles')) {
+        const style = document.createElement("style");
+        style.id = 'animation-styles';
+        style.textContent = `
+          .rotating {
+            animation: rotate 1s linear;
+          }
+
+          @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+
+          .highlight {
+            animation: highlight 0.5s ease;
+          }
+
+          @keyframes highlight {
+            0% { color: var(--primary); }
+            100% { color: var(--text-primary); }
+          }
+
+          .light-theme {
+            --bg-dark: #f0f2f5;
+            --bg-darker: #e0e4e8;
+            --bg-card: rgba(255, 255, 255, 0.7);
+            --bg-card-hover: rgba(255, 255, 255, 0.8);
+            --text-primary: #1a1a1a;
+            --text-secondary: rgba(0, 0, 0, 0.7);
+            --text-disabled: rgba(0, 0, 0, 0.5);
+            --text-hint: rgba(0, 0, 0, 0.4);
+            --border-light: rgba(0, 0, 0, 0.1);
+            --border-medium: rgba(0, 0, 0, 0.15);
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+
+    // Server-sent events for total value
+    if (typeof(EventSource) !== "undefined") {
+      var source = new EventSource("{% url 'showcase:sse_total_value' %}");
+
+      source.onmessage = function(event) {
+        document.getElementById("total_value_element").innerText = event.data;
+      };
+
+      source.onerror = function(error) {
+        console.error("SSE encountered an error:", error);
+      };
+    } else {
+      console.error("Your browser does not support server-sent events (SSE).");
+    }
+
+      // This script handles the inventory functionality
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Initialize loading screen
+  initLoading()
+
+  // Initialize particle background
+  initParticles()
+
+  // Initialize system time
+  initSystemTime()
+
+  // Initialize event listeners
+  initEventListeners()
+
+  // Initialize audio elements
+  const sellAudio = new Audio("/static/css/sounds/sell_coin.mp3")
+  const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3")
+  const tradeAudio = new Audio("/static/css/sounds/trade.mp3")
+
+  // Attach event listeners to all checkboxes
+  document.querySelectorAll(".item-select-checkbox").forEach((checkbox) => {
+    checkbox.addEventListener("change", updateSellAllButton)
+  })
+
+  // Attach event listeners to all forms
+  document.querySelectorAll(".sell-form").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault()
+      sellAudio.play()
+      handleAjaxFormSubmission(form)
+    })
+  })
+
+  document.querySelectorAll(".withdraw-form").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault()
+
+      // Capture the form that triggered the submission
+      const currentForm = form
+      const withdrawPopup = document.getElementById("withdraw-popup")
+      withdrawPopup.style.display = "block" // Show confirmation popup
+
+      const confirmButton = document.getElementById("confirm-withdraw")
+      const cancelButton = document.getElementById("cancel-withdraw")
+
+      // Remove any previous onclick handlers to avoid duplicate submissions
+      confirmButton.onclick = null
+      cancelButton.onclick = null
+
+      confirmButton.onclick = () => {
+        withdrawAudio.play()
+        // Create new FormData from the current form
+        const confirmFormData = new FormData(currentForm)
+        // Append confirmation flag so the server knows to create a new withdraw
+        confirmFormData.append("confirm_withdraw", "true")
+
+        const actionUrl = currentForm.getAttribute("action")
 
         fetch(actionUrl, {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-            },
+          method: "POST",
+          body: confirmFormData,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": confirmFormData.get("csrfmiddlewaretoken"),
+          },
         })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`HTTP status ${response.status}`);
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP status ${response.status}`)
+            }
+            return response.json()
+          })
+          .then((data) => {
+            if (data.success) {
+              // Remove item from UI if necessary
+              const inventoryItem = currentForm.closest(".gridCardItem")
+              if (inventoryItem) inventoryItem.remove()
+
+              // Update stock count
+              const stockCountElement = document.getElementById("stock-count")
+              if (stockCountElement) {
+                stockCountElement.textContent = data.stock_count
+              }
+
+              // Update total value
+              const totalValueElement = document.getElementById("total_value_element")
+              if (totalValueElement && data.total_value) {
+                totalValueElement.textContent = data.total_value
+              }
+            } else {
+              alert("Withdraw failed! " + (data.error || ""))
+            }
+            withdrawPopup.style.display = "none" // Hide popup after processing
+          })
+          .catch((error) => {
+            console.error("Error:", error)
+            withdrawPopup.style.display = "none"
+          })
+      }
+
+      cancelButton.onclick = () => {
+        withdrawPopup.style.display = "none" // Close popup on cancel
+      }
+    })
+  })
+
+  document.querySelectorAll(".trade-form").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault()
+      tradeAudio.play()
+      handleAjaxFormSubmission(form)
+    })
+  })
+
+  // Handle sell everything button
+  const sellEverythingButton = document.getElementById("sell-everything-button")
+  if (sellEverythingButton) {
+    sellEverythingButton.addEventListener("click", () => {
+      if (confirm("Are you sure you want to sell all inventory items?")) {
+        sellAudio.play()
+        fetch("/sell-everything-inventory-objects/", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          credentials: "same-origin",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              document.getElementById("inventory-items-container").innerHTML = data.inventory_html
+              document.getElementById("stock-count").textContent = data.stock_count
+
+              if (data.total_value) {
+                document.getElementById("total_value_element").textContent = data.total_value
+              }
+
+              if (data.currency_amount) {
+                const currencyElement = document.getElementById("sellupdate")
+                if (currencyElement) {
+                  currencyElement.textContent = data.currency_amount
                 }
-                return response.json();
-            })
-            .then((data) => {
-                if (data.success) {
-                    // Withdrawal succeeded, update the UI accordingly.
-                    if (data.new_withdraw) {
-                        console.log('Shipping fee charged 599');
-                    }
-                    // Remove the withdrawn inventory item
-                    const inventoryItem = form.closest(".gridCardItem");
-                    if (inventoryItem) inventoryItem.remove();
+              }
+            } else {
+              alert("Error: " + data.error)
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error)
+            alert("An error occurred while processing your request.")
+          })
+      }
+    })
+  }
 
-                    const stockCountElement = document.getElementById("stock-count");
-                    if (stockCountElement) {
-                        stockCountElement.textContent = data.stock_count;
-                    }
-                } else if (data.confirmation_required) {
-                    // Display confirmation popup if confirmation is needed.
-                    showConfirmationPopup(form);
-                } else {
-                    console.error("Server error:", data.error);
-                    alert(data.error || "An error occurred.");
-                }
-            })
-            .catch((error) => {
-                console.error("Fetch error:", error);
-                alert("An unexpected error occurred. Please try again.");
-            });
+  // Handle sell all form
+  const sellAllForm = document.getElementById("sell-all-form")
+  if (sellAllForm) {
+    sellAllForm.addEventListener("submit", (event) => {
+      event.preventDefault()
+      sellAudio.play()
+
+      fetch("/sell-all-inventory-objects/", {
+        method: "POST",
+        body: new FormData(sellAllForm),
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            document.getElementById("stock-count").textContent = data.stock_count
+            document.getElementById("inventory-items-container").innerHTML = data.inventory_html
+
+            if (data.currency_amount) {
+              const currencyElement = document.getElementById("sellupdate")
+              if (currencyElement) {
+                currencyElement.textContent = data.currency_amount
+              }
+            }
+
+            if (data.total_value) {
+              document.getElementById("total_value_element").textContent = data.total_value
+            }
+
+            // Hide the sell all form after selling
+            sellAllForm.style.display = "none"
+          } else {
+            alert("Error: " + (data.error || "An unknown error occurred"))
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error)
+          alert("An error occurred while processing your request.")
+        })
+    })
+  }
+
+  // Function to update sell all button visibility
+  function updateSellAllButton() {
+    const checkboxes = document.querySelectorAll(".item-select-checkbox")
+    const sellAllForm = document.getElementById("sell-all-form")
+    const sellAllSelectedIds = document.getElementById("sell-all-selected-ids")
+
+    if (!sellAllForm || !sellAllSelectedIds) return
+
+    const selectedIds = []
+    checkboxes.forEach((checkbox) => {
+      if (checkbox.checked) {
+        selectedIds.push(checkbox.dataset.id)
+      }
+    })
+
+    if (selectedIds.length > 0) {
+      sellAllForm.style.display = "block"
+      sellAllSelectedIds.value = selectedIds.join(",")
+    } else {
+      sellAllForm.style.display = "none"
+    }
+  }
+
+  // Function to handle AJAX form submissions
+  function handleAjaxFormSubmission(form) {
+    const formData = new FormData(form)
+    const url = form.getAttribute("action")
+
+    fetch(url, {
+      method: "POST",
+      body: formData,
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          // Update stock count
+          const stockCountElement = document.getElementById("stock-count")
+          if (stockCountElement) {
+            stockCountElement.textContent = data.stock_count
+          }
+
+          // Update inventory items
+          if (data.inventory_html) {
+            document.getElementById("inventory-items-container").innerHTML = data.inventory_html
+          }
+
+          // Update currency amount if available
+          if (data.currency_amount) {
+            const currencyElement = document.getElementById("sellupdate")
+            if (currencyElement) {
+              currencyElement.textContent = data.currency_amount
+            }
+          }
+
+          // Update total value if available
+          if (data.total_value) {
+            document.getElementById("total_value_element").textContent = data.total_value
+          }
+
+          // If the item was removed, remove it from the UI
+          if (!data.inventory_html) {
+            const inventoryItem = form.closest(".gridCardItem")
+            if (inventoryItem) {
+              inventoryItem.remove()
+            }
+          }
+
+          // Re-attach event listeners to checkboxes
+          document.querySelectorAll(".item-select-checkbox").forEach((checkbox) => {
+            checkbox.addEventListener("change", updateSellAllButton)
+          })
+        } else {
+          alert("Action failed: " + (data.error || "Unknown error"))
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error)
+        alert("An error occurred while processing your request.")
+      })
+  }
+})
+
+// Loading screen
+function initLoading() {
+  const loadingOverlay = document.getElementById("loading-overlay")
+
+  // Simulate loading time
+  setTimeout(() => {
+    loadingOverlay.style.opacity = "0"
+    setTimeout(() => {
+      loadingOverlay.style.display = "none"
+    }, 500)
+  }, 2000)
+}
+
+// Particle background
+function initParticles() {
+  const canvas = document.getElementById("particle-canvas")
+  if (!canvas) return
+
+  const ctx = canvas.getContext("2d")
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+  }
+
+  resizeCanvas()
+  window.addEventListener("resize", resizeCanvas)
+
+  class Particle {
+    constructor() {
+      this.x = Math.random() * canvas.width
+      this.y = Math.random() * canvas.height
+      this.size = Math.random() * 3 + 1
+      this.speedX = (Math.random() - 0.5) * 0.5
+      this.speedY = (Math.random() - 0.5) * 0.5
+
+      // Cyberpunk-inspired colors: cyan, magenta, blue
+      const colors = ["rgba(0, 229, 255, ", "rgba(255, 0, 128, ", "rgba(41, 121, 255, "]
+      this.color = colors[Math.floor(Math.random() * colors.length)] + (Math.random() * 0.5 + 0.2) + ")"
     }
 
-    // Show the confirmation popup and set up the confirm/cancel handlers.
-    function showConfirmationPopup(form) {
-        const popup = document.getElementById("withdraw-popup");
-        popup.style.display = "block";
+    update() {
+      this.x += this.speedX
+      this.y += this.speedY
 
-        const confirmButton = document.getElementById("confirm-withdraw");
-        const cancelButton = document.getElementById("cancel-withdraw");
-
-        // Define handlers so they can be removed after use.
-        function proceedWithWithdraw() {
-            popup.style.display = "none";
-            // Re-submit the form with confirmation flag.
-            submitWithdrawForm(form, true);
-            cleanup();
-        }
-
-        function cancelWithdraw() {
-            popup.style.display = "none";
-            cleanup();
-        }
-
-        function cleanup() {
-            confirmButton.removeEventListener("click", proceedWithWithdraw);
-            cancelButton.removeEventListener("click", cancelWithdraw);
-        }
-
-        confirmButton.addEventListener("click", proceedWithWithdraw);
-        cancelButton.addEventListener("click", cancelWithdraw);
+      // Wrap around edges
+      if (this.x > canvas.width) this.x = 0
+      if (this.x < 0) this.x = canvas.width
+      if (this.y > canvas.height) this.y = 0
+      if (this.y < 0) this.y = canvas.height
     }
 
-    // Attach event listeners to all withdraw buttons.
-    withdrawButtons.forEach((button) => {
-        button.addEventListener("click", function (event) {
-            event.preventDefault();
-            const form = button.closest("form");
-            // Initial submission without confirmation flag.
-            submitWithdrawForm(form, false);
-        });
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    const toggleBtn = document.getElementById("toggleViewBtn");
-    const inventoryGrid = document.getElementById("inventoryGrid");
-
-    toggleBtn.addEventListener("click", function() {
-        inventoryGrid.classList.toggle("compact-view");
-        inventoryGrid.classList.toggle("comfortable-view");
-
-        // Save the current view preference to localStorage
-        const isCompact = inventoryGrid.classList.contains("compact-view");
-        localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
-    });
-
-    // Load the saved view preference on page load
-    const savedViewPreference = localStorage.getItem("inventoryViewPreference");
-    if (savedViewPreference === "compact") {
-        inventoryGrid.classList.remove("comfortable-view");
-        inventoryGrid.classList.add("compact-view");
+    draw() {
+      ctx.fillStyle = this.color
+      ctx.beginPath()
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
+      ctx.fill()
     }
-});
-</script>
-	<!-- jquery -->
-     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-     <script src="{% static 'css/js/main.js' %}"></script>
-     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
-     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
-     <script src="{% static 'css/js/waypoints.js' %}"></script>
-	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
-     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
-     <script src="{% static 'css/js/sticker.js' %}"></script>
+  }
 
+  // Create particles
+  const particles = []
+  const particleCount = 100
+
+  for (let i = 0; i < particleCount; i++) {
+    particles.push(new Particle())
+  }
+
+  // Animation loop
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    for (const particle of particles) {
+      particle.update()
+      particle.draw()
+    }
+
+    // Draw connecting lines between nearby particles
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x
+        const dy = particles[i].y - particles[j].y
+        const distance = Math.sqrt(dx * dx + dy * dy)
+
+        if (distance < 100) {
+          ctx.beginPath()
+          ctx.strokeStyle = `rgba(0, 229, 255, ${0.1 * (1 - distance / 100)})`
+          ctx.lineWidth = 0.5
+          ctx.moveTo(particles[i].x, particles[i].y)
+          ctx.lineTo(particles[j].x, particles[j].y)
+          ctx.stroke()
+        }
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }
+
+  animate()
+}
+
+// System time
+function initSystemTime() {
+  function updateTime() {
+    const now = new Date()
+
+    // Format time: HH:MM:SS
+    const hours = now.getHours().toString().padStart(2, "0")
+    const minutes = now.getMinutes().toString().padStart(2, "0")
+    const seconds = now.getSeconds().toString().padStart(2, "0")
+    const timeString = `${hours}:${minutes}:${seconds}`
+
+    // Format date: MMM DD, YYYY
+    const options = { year: "numeric", month: "short", day: "numeric" }
+    const dateString = now.toLocaleDateString("en-US", options)
+
+    // Update DOM
+    const currentTimeElement = document.getElementById("current-time")
+    const currentDateElement = document.getElementById("current-date")
+
+    if (currentTimeElement) currentTimeElement.textContent = timeString
+    if (currentDateElement) currentDateElement.textContent = dateString
+  }
+
+  // Update immediately and then every second
+  updateTime()
+  setInterval(updateTime, 1000)
+}
+
+// Event listeners
+function initEventListeners() {
+  // Theme toggle
+  const themeButton = document.querySelector(".icon-button.theme-button")
+  const themeIcon = document.getElementById("theme-icon")
+  let darkTheme = true
+
+  if (themeButton && themeIcon) {
+    themeButton.addEventListener("click", () => {
+      darkTheme = !darkTheme
+
+      if (darkTheme) {
+        document.body.classList.remove("light-theme")
+        themeIcon.innerHTML =
+          '<path d="M12,18C11.11,18 10.26,17.8 9.5,17.45C11.56,16.5 13,14.42 13,12C13,9.58 11.56,7.5 9.5,6.55C10.26,6.2 11.11,6 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31L23.31,12L20,8.69Z" />'
+      } else {
+        document.body.classList.add("light-theme")
+        themeIcon.innerHTML =
+          '<path d="M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,2L14.39,5.42C13.65,5.15 12.84,5 12,5C11.16,5 10.35,5.15 9.61,5.42L12,2M3.34,7L7.5,6.65C6.9,7.16 6.36,7.78 5.94,8.5C5.5,9.24 5.25,10 5.11,10.79L3.34,7M3.36,17L5.12,13.23C5.26,14 5.53,14.78 5.95,15.5C6.37,16.24 6.91,16.86 7.5,17.37L3.36,17M20.65,7L18.88,10.79C18.74,10 18.47,9.23 18.05,8.5C17.63,7.78 17.1,7.15 16.5,6.64L20.65,7M20.64,17L16.5,17.36C17.09,16.85 17.62,16.22 18.04,15.5C18.46,14.77 18.73,14 18.87,13.21L20.64,17M12,22L9.59,18.56C10.33,18.83 11.14,19 12,19C12.82,19 13.63,18.83 14.37,18.56L12,22Z" />'
+      }
+    })
+  }
+
+  // Refresh button
+  const refreshButton = document.querySelector(".refresh-button")
+  if (refreshButton) {
+    refreshButton.addEventListener("click", () => {
+      // Add rotation animation
+      refreshButton.classList.add("rotating")
+
+      // Simulate refresh
+      setTimeout(() => {
+        refreshButton.classList.remove("rotating")
+        // Update data here if needed
+      }, 1000)
+    })
+  }
+
+  // Add CSS for rotation animation if not already present
+  if (!document.getElementById("animation-styles")) {
+    const style = document.createElement("style")
+    style.id = "animation-styles"
+    style.textContent = `
+      .rotating {
+        animation: rotate 1s linear;
+      }
+
+      @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      .highlight {
+        animation: highlight 0.5s ease;
+      }
+
+      @keyframes highlight {
+        0% { color: var(--primary); }
+        100% { color: var(--text-primary); }
+      }
+
+      .light-theme {
+        --bg-dark: #f0f2f5;
+        --bg-darker: #e0e4e8;
+        --bg-card: rgba(255, 255, 255, 0.7);
+        --bg-card-hover: rgba(255, 255, 255, 0.8);
+        --text-primary: #1a1a1a;
+        --text-secondary: rgba(0, 0, 0, 0.7);
+        --text-disabled: rgba(0, 0, 0, 0.5);
+        --text-hint: rgba(0, 0, 0, 0.4);
+        --border-light: rgba(0, 0, 0, 0.1);
+        --border-medium: rgba(0, 0, 0, 0.15);
+      }
+    `
+    document.head.appendChild(style)
+  }
+}
+
+  </script>
+
+  <!-- jQuery -->
+  <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+  <script src="{% static 'css/js/main.js' %}"></script>
 </body>
 </html>
-

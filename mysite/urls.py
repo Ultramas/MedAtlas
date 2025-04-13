@@ -22,7 +22,7 @@ from . import settings
 from django.contrib.staticfiles.urls import static, staticfiles_urlpatterns
 #from sendemail.views import contactView, successView
 
-from django.contrib.auth import views as auth_views #import this
+from django.contrib.auth import views as auth_views
 from . import views
 
 
@@ -35,8 +35,8 @@ router = routers.DefaultRouter()
 app_name = "main"
 
 urlpatterns = [
-    
-    path('admin/', admin.site.urls),  
+
+    path('admin/', admin.site.urls),
 
     path('accounts/', include('django.contrib.auth.urls')),  
     

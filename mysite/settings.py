@@ -78,7 +78,8 @@ INSTALLED_APPS = [
     'favicon',
     'rest_framework',
     'sslserver',
-    'showcase.apps.ShowcaseConfig',  # Ensure this is the correct path
+    'showcase.apps.ShowcaseConfig',
+    'user_management.apps.UserManagementConfig',
     # 'django.chatbot',
     # 'chat',
 ]
