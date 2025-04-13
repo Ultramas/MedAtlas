@@ -838,20 +838,7 @@ $(document).ready(function() {
                 });
         });
 
-        $.ajax({
-            type: "POST",
-            url: form.attr("action"),
-            data: form.serialize(),
-            success: function(response) {
-                console.log('Sell request succeeded:', response);
-                if (response.html) {
-                    $("#updated-content-container").html(response.html);
-                }
-            },
-            error: function(error) {
-                console.error("Sell request failed:", error);
-            }
-        });
+
     });
 
 $(document).on("click", ".sell-button, .close", function() {
