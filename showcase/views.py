@@ -9502,6 +9502,17 @@ from django.conf import settings
 from email.mime.image import MIMEImage
 
 
+def filter_games(request):
+    filter_type = request.GET.get('filter')
+    if filter_type in ['F', 'N', 'P']:
+        games = Game.objects.filter(is_active=1, filter=filter_type)
+    else:
+        games = Game.objects.filter(is_active=1, filter='F')
+
+    context = {'Games': games}
+    return render(request, 'partial_game.html', context)
+
+
 class BackgroundView(FormMixin, BaseView):
     model = BackgroundImage
     form_class = EmailForm
