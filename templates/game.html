@@ -1481,52 +1481,6 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
   return cookieValue;
 }
 
-function sellInventory(inventoryPk) {
-  formData.append('action', 'sell');
-  formData.append('pk', inventoryPk);
-  formData.append('csrfmiddlewaretoken', getCSRFToken());
-
-  fetch('/sell/', {
-    method: 'POST',
-    body: formData,
-  })
-  .then(response => response.json())
-  .then(data => {
-    if(data.success){
-      console.log(`Sell action completed for inventory_pk ${inventoryPk}`);
-      // You might update the UI here for this particular card
-    } else {
-      console.error(data.error);
-    }
-  })
-  .catch(error => console.error('Error:', error));
-}
-
-
-function sellAllTargetCards() {
-  const targetCards = document.querySelectorAll('.target-card');
-  targetCards.forEach(card => {
-    const inventory_pk = card.getAttribute('data-inventory_pk');
-    if (inventory_pk) {
-      sellInventory(inventory_pk);
-    } else {
-      console.warn('No inventory_pk found for card:', card);
-    }
-  });
-}
-
-document.querySelector('.sell-button').addEventListener('click', (e) => {
-  e.preventDefault();
-  const targetCards = document.querySelectorAll('.target-card');
-  targetCards.forEach(card => {
-    const inventoryPk = card.getAttribute('data-inventory_pk');
-    if (inventoryPk) {
-     console.log('here it is set inventory_pk: ' + inventory_pk);')
-      sellInventory(inventoryPk);
-    }
-  });
-});
-
 
 document.addEventListener("DOMContentLoaded", function () {
     const spinButtons = document.querySelectorAll(".spin-option");

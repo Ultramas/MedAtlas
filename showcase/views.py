@@ -9520,7 +9520,7 @@ class BackgroundView(FormMixin, BaseView):
             sender_email = settings.DEFAULT_FROM_EMAIL
 
             html_content = render_to_string('email_template.html', {'user': request.user})
-            text_content = strip_tags(html_content)  # Fallback text content
+            text_content = strip_tags(html_content)
 
             email = EmailMultiAlternatives(
                 subject,
@@ -9872,7 +9872,7 @@ class BackgroundView(FormMixin, BaseView):
         product = Item.objects.filter(is_active=1)
 
         context['Products'] = product
-
+        total_items = product.count()
         for product in context['Products']:
             image = product.image
             item = Item.objects.filter(slug=product.slug).first()
@@ -17449,6 +17449,29 @@ class GiftCodeRedemptionView(LoginRequiredMixin, ListView, FormMixin):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(

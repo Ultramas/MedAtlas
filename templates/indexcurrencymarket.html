@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PokeTrove Marketplace</title>
+  <title>THE TROVE</title>
   <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
@@ -442,12 +442,12 @@ header {
   color: var(--text-primary);
 }
 
-.element-newprofile.active {
+.element-CurrencyMarket.active {
   background: rgba(0, 229, 255, 0.1);
   color: var(--primary);
 }
 
-.element-newprofile.active::before {
+.element-CurrencyMarket.active::before {
   background: var(--primary);
   box-shadow: 0 0 10px var(--primary-glow);
 }
@@ -1554,7 +1554,6 @@ header {
   <canvas id="particle-canvas"></canvas>
   <div id="rising-sparks-container"></div>
   <div class="container">
-    {% include 'navtrove.html' %}
 
     <!-- Header -->
     <header style="margin-top:10%;">
@@ -1564,7 +1563,7 @@ header {
             <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M12,6C15.31,6 18,8.69 18,12C18,15.31 15.31,18 12,18C8.69,18 6,15.31 6,12C6,8.69 8.69,6 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" />
           </svg>
         </div>
-        <span class="logo-text">POKETROVE MARKETPLACE</span>
+        <span class="logo-text">THE TROVE</span>
       </div>
 
       <div class="header-controls">
@@ -1572,7 +1571,7 @@ header {
           <svg viewBox="0 0 24 24" class="search-icon">
             <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
           </svg>
-          <input type="text" placeholder="Search marketplace...">
+          <input type="text" placeholder="Search THE TROVE...">
         </div>
 
         <div class="header-buttons">
@@ -1605,7 +1604,7 @@ header {
       </div>
     </header>
 
-    <!-- Ehome dashboard grid -->
+    <!-- Dashboard grid -->
     <div class="dashboard-grid">
       <!-- Sidebar -->
       <div class="sidebar">
@@ -1617,7 +1616,7 @@ header {
             </button>
             <button class="element-item active">
               <svg viewBox="0 0 24 24"><path d="M12,13A5,5 0 0,1 7,8H9A3,3 0 0,0 12,11A3,3 0 0,0 15,8H17A5,5 0 0,1 12,13M12,3A3,3 0 0,1 15,6H9A3,3 0 0,1 12,3M19,6H17A5,5 0 0,0 12,1A5,5 0 0,0 7,6H5C3.89,6 3,6.89 3,8V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V8C21,6.89 20.1,6 19,6Z" /></svg>
-              <span>Marketplace</span>
+              <span>THE TROVE</span>
             </button>
             <button class="element-item">
               <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M12,6C15.31,6 18,8.69 18,12C18,15.31 15.31,18 12,18C8.69,18 6,15.31 6,12C6,8.69 8.69,6 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" /></svg>
@@ -1643,10 +1642,7 @@ header {
             </div>
 
             <div class="filter-group">
-                {% for newprofile in Profiles %}
-              <label class="filter-label"><span class="author"><i class="fas fa-user"></i> {{ newprofile.get_type_display }} </span>
-								<span class="date"><i class="fas fa-calendar"></i> {{ newprofile.date_and_time|date }} </span></label>
-              {% endfor %}
+              <label class="filter-label">Condition</label>
               <select class="filter-select">
                 <option value="all">All Conditions</option>
                 <option value="mint">Mint</option>
@@ -1703,9 +1699,9 @@ header {
       <div class="main-content">
         <div class="content-header">
           <div class="page-title">
-            <h1>Marketplace</h1>
+            <h1>THE TROVE</h1>
             <div class="item-count">
-              <span id="stock-count">{{ items|length }}</span> items available
+              <span id="stock-count">{{ Currency|length }}</span> items available
             </div>
           </div>
           <div class="view-controls">
@@ -1721,86 +1717,43 @@ header {
         </div>
 
         <div id="inventoryGrid" class="inventory-grid comfortable-view">
-          {% for newprofile in Profiles %}
+          {% for CurrencyMarket in Currency %}
             <div class="inventory-item">
-              <a href="{{ newprofile.get_profile_url2 }}">
-                <div class="item-rarity-indicator
-                   {% if newprofile.heat == 'M' %}🌶️
-                        {% elif newprofile.heat == 'S' %}🌶️🌶️ (2)
-                        {% elif newprofile.heat == 'F' %}🌶️🌶️🌶️ (3)
-                        {% elif newprofile.heat == 'W' %}🌶️🌶️🌶️🌶️ (4)
-                        {% elif newprofile.heat == 'E' %}🌶️🌶️🌶️🌶️🌶️ (5)
-                        {% else %}🌶️(*)️
-                        {% endif %}">
-                </div>
+              <a href="{{ CurrencyMarket.get_absolute_url }}">
                 <div class="item-image">
-                  <img src="{{ newprofile.image.url }}" alt="{{Inventory.choice_text}} Image">
+                  <img src="{{ CurrencyMarket.file.url }}" alt="{{CurrencyMarket.choice_text}} Image">
                   <div class="legendary-badge">
                     <svg viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" /></svg>
                   </div>
                 </div>
                 <div class="item-details">
                   <div class="item-header">
-                    <h3 class="item-name">{{ newprofile.title }}</h3>
+                    <h3 class="item-name">{{ CurrencyMarket.name }}</h3>
                     <div class="item-price">
-                      {% if newprofile.cost %}
-                        {% if newprofile.discount_cost %}
-                          <span class="original-price">💎{{ newprofile.cost }}</span>
-                          <span class="discount-price">💎{{ newprofile.discount_cost }}</span>
+                      {% if CurrencyMarket.price %}
+                        {% if CurrencyMarket.discount_price %}
+                          <span class="original-price">${{ CurrencyMarket.price }}</span>
+                          <span class="discount-price">${{ CurrencyMarket.discount_price }}</span>
                         {% else %}
-                          <span class="current-price">💎{{ newprofile.cost }}</span>
+                          <span class="current-price">${{ CurrencyMarket.price }}</span>
                         {% endif %}
-                      {% endif %}
-                    </div>
-                  </div>
-
-                  <h3 class="item-title">{{newprofile.title}}</h3>
-
-                  <div class="item-stats">
-                    <div class="stat-row">
-                      <div class="stat-label">CREATOR</div>
-                      {% if newprofile.user %}
-                      <div class="stat-value">{{ newprofile.user }}</div>
                       {% else %}
-                      <div class="stat-value">PokeTrove</div>
+                        {% if CurrencyMarket.discount_currency_price %}
+                          <span class="original-price">$ {{ CurrencyMarket.currency_price }}</span>
+                          <span class="discount-price">$ {{ CurrencyMarket.discount_currency_price }}</span>
+                        {% else %}
+                          <span class="current-price">$ {{ CurrencyMarket.currency_price }}</span>
+                        {% endif %}
                       {% endif %}
                     </div>
-                    <div class="stat-row">
-                      <div class="stat-label">CATEGORY</div>
-                      <div class="stat-value">
-                        {% if newprofile.category and newprofile.category.lower == 'p' %}
-                          Pokemon
-                        {% elif newprofile.category.lower == 'm' %}
-                          Magic The Gathering
-                        {% elif newprofile.category.lower == 'b' %}
-                          Bakugo
-                        {% elif newprofile.category.lower == 'y' %}
-                          Yu-Gi-Oh!
-                        {% else %}
-                          Other
-                        {% endif %}
-                      </div>
-                    </div>
-                    <div class="stat-row">
-                      <div class="stat-label">HEAT</div>
-                      <div class="stat-value tier-badge
-                        {% if newprofile.category and newprofile.category.lower == 'g' %}gold
-                        {% elif newprofile.category.lower == 'p' %}platinum
-                        {% elif newprofile.category.lower == 'e' %}emerald
-                        {% else %}diamond{% endif %}">
-                         {% if newprofile.heat == 'M' %}🌶️
-                        {% elif newprofile.heat == 'S' %}🌶️🌶️ (2)
-                        {% elif newprofile.heat == 'F' %}🌶️🌶️🌶️ (3)
-                        {% elif newprofile.heat == 'W' %}🌶️🌶️🌶️🌶️ (4)
-                        {% elif newprofile.heat == 'E' %}🌶️🌶️🌶️🌶️🌶️ (5)
-                        {% else %}🌶️(*)️
-                        {% endif %}
-                      </div>
-                    </div>
                   </div>
+
+                  <h3 class="item-title">{{CurrencyMarket.flavor_text}}</h3>
+
+
 
                   <div class="item-description">
-                    {{ newprofile.description }}
+                    {{ CurrencyMarket.description }}
                   </div>
 
                   <button class="add-to-cart-btn">
@@ -2321,5 +2274,11 @@ function initFireSparks() {
   <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
   <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
   <script src="{% static 'css/js/sticker.js' %}"></script>
+
+    <script src="js/index.js"></script>
+	<script src="{% static 'css/js/script.js' %}"></script>
+<script src="{% static 'css/js/darkmode.js' %}"></script>
+<script src="{% static 'css/js/navbar.js' %}"></script>
+<script src="{% static 'css/js/scroll.js' %}"></script>
 </body>
 </html>

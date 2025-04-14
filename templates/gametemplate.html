@@ -151,9 +151,9 @@
 
     .cards {
         /*margin-right: 15px;
-        margin-left: 15px;*/
+        margin-left: 15px;
         flex: 1 1 200px;
-       /*margin: 10px;*/
+       margin: 10px;*/
         box-sizing: border-box;
         display: flex;
         flex-direction: column; /* Align elements vertically */
@@ -1192,7 +1192,20 @@ p.blog-meta span {
 	<!-- end header -->
 
     <div class="selectionsWrapper">
-<div class="selections" style="background: linear-gradient(rgba(0, 0, 0, 0.3), silver);">
+<div class="selections" style="background: linear-gradient(rgba(0, 0, 0, 0.3), silver); display: flex; flex-direction: column;">
+    <div class="row" style="justify-content: center;">
+				<div class="col-lg-9 offset-lg-2 text-center" style="justify-content: center; display: flex;">
+					<div class="hero-text" style="justify-content: center;">
+						<div class="hero-text-tablecell" style="justify-content: center;">
+							<h1 style="color: #bf97ff;">PokeTrove</h1>
+              <p style="color: white" class="subtitle">New Arrivals</p>
+							<div class="hero-btns">
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
     <div class="flame-effect"></div>
     <div class="content" style="display: none;">
         <label style="background: rgba(255, 255, 255, 0.3); padding: 2px; border-radius: 10px;"> Spin Boost Power</label>
@@ -1318,7 +1331,7 @@ document.addEventListener("DOMContentLoaded", function () {
         data-nonce="{{ nonce }}"
         data-slug="{{ game.slug }}"
         data-daily="false"
-         style="bottom: -150px;">Try FREE!
+         style="bottom: -20px; z-index:10;">Try FREE!
 </button>
 
 <style>

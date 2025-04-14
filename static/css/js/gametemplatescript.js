@@ -238,24 +238,7 @@ async function randomizeContents() {
                          console.log("window_pk:", window.inventory_pk);
 
                         window.sellUrl = `/inventory/${inventory_pk}/sell/`;
-                        const sellForm = document.getElementById(`sell-form-${window.inventory_pk}`);
-                        console.log('sellform: ' + sellForm);
-                        if (sellForm) {
-                            console.log("Sell form found:", sellForm);
 
-                            sellForm.addEventListener('submit', function(event) {
-                                event.preventDefault();
-                                const pk = this.querySelector('[name="pk"]').value;
-
-                                $(".spin-option").removeClass("selected");
-                                $(this).addClass("selected");
-                                totalSpins = parseInt($(this).data("value"));
-                                sessionStorage.setItem("totalSpins", totalSpins);
-                                sellInventory(pk);
-                            });
-                        } else {
-                          console.error("Sell form not found for inventory_pk:", window.inventory_pk);
-                        }
 
                     } else if (inventoryData.button_id === "start2") {
                     console.log("Temporary inventory object created without user. ID:", inventoryData.inventory_object_id);
@@ -822,26 +805,12 @@ $(document).ready(function() {
         var sellCards = cardContainer.querySelectorAll('.sellattribute');
 
         console.log("Sell cards before modification:");
-        sellCards.forEach(card => {
-            console.log({
-                price: card.getAttribute("data-price"),
-                currencyFile: card.getAttribute("data-currency-file"),
-                currencySymbol: card.getAttribute("data-currency-symbol"),
-                background: card.style.background,
-            });
 
-                const targetCards = cardContainer.querySelectorAll('.target-card');
-                targetCards.forEach(card => {
-                    card.querySelectorAll('*').forEach(child => {
-                        child.style.display = 'none';
-                    });
-                });
-        });
 
 
     });
 
-$(document).on("click", ".sell-button, .close", function() {
+$(document).on("click", ".sell-button", function() {
     const cardContainer = document.querySelector('.slider');
     const sellCards = cardContainer.querySelectorAll('.sellattribute');
 
