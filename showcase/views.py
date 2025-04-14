@@ -2268,7 +2268,6 @@ def game_view(request, game_id):
     return render(request, 'game.html', context)
 
 
-# how the choices are rendered in game.html
 def game_detail(request, game_id):
     game = Game.objects.get(id=game_id)
     choice_nonce_list = []
@@ -4247,6 +4246,7 @@ class GameRoomView(BaseView):
         context['Game'] = GameHub.objects.filter(is_active=1).first()
         context['GameRoom'] = Game.objects.filter(is_active=1, daily=False).first()
         context['form'] = EmailForm()
+        context['tophit'] = TopHits.objects.filter(is_active=True).order_by('-mfg_date')[:3]
 
         newprofile = Game.objects.filter(is_active=1, daily=False)
         context['Profiles'] = newprofile
