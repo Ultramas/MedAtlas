@@ -30,7 +30,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     SpinnerChoiceRenders, DefaultAvatar, Achievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
     UserNotification, TopHits, Card, Clickable, GameChoice, Robot, MyPreferences, UserClickable, GiftCodeRedemption, GiftCode, \
-    IndividualChestStatistics
+    IndividualChestStatistics, FavoriteChests
 from .models import Idea
 from .models import VoteQuery
 from .models import StaffApplication
@@ -2129,46 +2129,6 @@ def generate_nonce():
     return random.randint(1, 1000000)
 
 
-def game_view(request, slug):
-    game = get_object_or_404(Game, slug=slug)
-    context = {
-        'game': game,
-        'games': Game.objects.all(),
-        'cost_threshold_80': game.cost * 0.8,
-        'cost_threshold_100': game.cost,
-        'cost_threshold_200': game.cost * 2,
-        'cost_threshold_500': game.cost * 5,
-        'cost_threshold_10000': game.cost * 100,
-    }
-
-    if request.method == 'POST':
-        num_nonces = random.randint(500, 1000)
-        nonces = [random.randint(0, 1000000) for _ in range(num_nonces)]
-
-        matching_choices = []
-        for nonce in nonces:
-            choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce, game=game)
-            for choice in choices:
-                matching_choices.append((nonce, choice))
-
-        random.shuffle(matching_choices)
-
-        choices_data = [{
-            'nonce': nonce,
-            'choice_text': choice.choice_text,
-            'value': choice.value,
-            'file_url': choice.file.url
-        } for nonce, choice in matching_choices]
-
-        return JsonResponse({
-            'status': 'success',
-            'choices': choices_data
-        })
-
-    nonce = random.randint(1, 1000000)
-    return render(request, 'game.html', {'game': game, 'nonce': nonce})
-
-
 @csrf_exempt
 def create_outcome(request, slug):
     if request.method == 'POST':
@@ -2268,20 +2228,47 @@ def game_view(request, game_id):
     return render(request, 'game.html', context)
 
 
-def game_detail(request, game_id):
-    game = Game.objects.get(id=game_id)
-    choice_nonce_list = []
 
-    for choice in game.choices.all():
-        nonce = random.randint(0, 1000000)
-        choice_nonce_list.append((choice, nonce))
-        print(f"Choice: {choice.choice_text}, Nonce: {nonce}, Range: {choice.lower_nonce} - {choice.upper_nonce}")
-        logger.info(f"Choice: {choice.choice_text}, Nonce: {nonce}, Range: {choice.lower_nonce} - {choice.upper_nonce}")
-
-    return render(request, 'game_detail.html', {
+def game_view(request, slug):
+    game = get_object_or_404(Game, slug=slug)
+    context = {
         'game': game,
-        'choice_nonce_list': choice_nonce_list,
-    })
+        'games': Game.objects.all(),
+        'cost_threshold_80': game.cost * 0.8,
+        'cost_threshold_100': game.cost,
+        'cost_threshold_200': game.cost * 2,
+        'cost_threshold_500': game.cost * 5,
+        'cost_threshold_10000': game.cost * 100,
+    }
+
+    if request.method == 'POST':
+        num_nonces = random.randint(500, 1000)
+        nonces = [random.randint(0, 1000000) for _ in range(num_nonces)]
+
+        matching_choices = []
+        for nonce in nonces:
+            choices = Choice.objects.filter(lower_nonce__lte=nonce, upper_nonce__gte=nonce, game=game)
+            for choice in choices:
+                matching_choices.append((nonce, choice))
+
+        random.shuffle(matching_choices)
+
+        choices_data = [{
+            'nonce': nonce,
+            'choice_text': choice.choice_text,
+            'value': choice.value,
+            'file_url': choice.file.url
+        } for nonce, choice in matching_choices]
+
+        return JsonResponse({
+            'status': 'success',
+            'choices': choices_data
+        })
+
+    nonce = random.randint(1, 1000000)
+    return render(request, 'game.html', {'game': game, 'nonce': nonce})
+
+
 
 
 def save_spin_preference(request):
@@ -4247,6 +4234,21 @@ class GameRoomView(BaseView):
         context['GameRoom'] = Game.objects.filter(is_active=1, daily=False).first()
         context['form'] = EmailForm()
         context['tophit'] = TopHits.objects.filter(is_active=True).order_by('-mfg_date')[:3]
+        context['FeaturedGame'] = Game.objects.filter(is_active=1, filter='F')
+        context['NewGame'] = Game.objects.filter(is_active=1, filter='N')
+        context['PopularGame'] = Game.objects.filter(is_active=1, filter='P')
+
+        # Prepare the favorites context.
+        if self.request.user.is_authenticated:
+            # Get all favorites for the user.
+            user_favs = FavoriteChests.objects.filter(user=self.request.user, is_active=1)
+            fav_dict = {fav.chest.id: fav for fav in user_favs}
+            # Add a separate queryset of favorite games.
+            context["FavoriteGames"] = Game.objects.filter(id__in=user_favs.values_list("chest_id", flat=True))
+        else:
+            fav_dict = {}
+            context["FavoriteGames"] = []
+        context['fav_dict'] = fav_dict
 
         newprofile = Game.objects.filter(is_active=1, daily=False)
         context['Profiles'] = newprofile
@@ -4283,30 +4285,22 @@ class GameRoomView(BaseView):
 
         return context
 
-
 @login_required
-def toggle_favorite(request):
-    if request.method == 'POST':
-        form = ToggleFavoriteForm(request.POST)
-        if form.is_valid():
-            game_id = form.cleaned_data['game_id']
-            game = get_object_or_404(Game, id=game_id)
-            profile = get_object_or_404(ProfileDetails, user=request.user)
+def toggle_favorite(request, game_id):
+    game = get_object_or_404(Game, id=game_id)
+    fav = FavoriteChests.objects.filter(user=request.user, chest=game).first()
 
-            favorite = FavoriteChests.objects.filter(user=request.user, chest=game).first()
-
-            if favorite:
-                profile.favorite_chests.remove(favorite)
-                favorite.delete()
-            else:
-                favorite = FavoriteChests.objects.create(user=request.user, chest=game)
-                profile.favorite_chests.add(favorite)
-
-            return redirect(request.META.get('HTTP_REFERER', 'home'))
+    if fav:
+        fav.is_active = 0 if fav.is_active == 1 else 1
+        fav.save()
     else:
-        form = ToggleFavoriteForm()
+        fav = FavoriteChests.objects.create(user=request.user, chest=game, is_active=1)
 
-    return render(request, 'toggle_favorite.html', {'form': form})
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'ok', 'is_active': fav.is_active})
+    else:
+        next_url = request.POST.get('next', request.META.get('HTTP_REFERER', '/'))
+        return redirect(next_url)
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render
@@ -9502,15 +9496,37 @@ from django.conf import settings
 from email.mime.image import MIMEImage
 
 
-def filter_games(request):
+def get_games_context(request):
     filter_type = request.GET.get('filter')
+    # Filter games based on the filter_type if valid; default to all active games otherwise.
     if filter_type in ['F', 'N', 'P']:
         games = Game.objects.filter(is_active=1, filter=filter_type)
     else:
-        games = Game.objects.filter(is_active=1, filter='F')
+        games = Game.objects.filter(is_active=1)
+    game_length = games.count()
 
-    context = {'Games': games}
+    if request.user.is_authenticated:
+        user_favs = FavoriteChests.objects.filter(user=request.user, is_active=1)
+        fav_dict = {fav.chest.id: fav for fav in user_favs}
+    else:
+        fav_dict = {}
+
+    context = {
+        'Games': games,
+        'fav_dict': fav_dict,
+        'game_length': game_length,
+    }
+    return context
+
+def filter_games(request):
+    context = get_games_context(request)
     return render(request, 'partial_game.html', context)
+
+
+@login_required
+def filter_games_count(request):
+    context = get_games_context(request)
+    return render(request, 'partial_game_count.html', context)
 
 
 class BackgroundView(FormMixin, BaseView):

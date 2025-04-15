@@ -1588,12 +1588,10 @@ header {
             </svg>
           </button>
           <div class="user-avatar">
-             {% for userprofile in NewsProfiles %}
-                     <a href="{{ userprofile.newprofile_profile_url }}">
-                        <img src="{{ userprofile.newprofile_profile_picture_url|default:'/static/css/images/a.jpg' }}" alt="Profile Picture" style="" onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
+                {% for newprofile in Profiles %}
+                     <a href="{{ newprofile.newprofile_profile_url }}">
+                        <img src="{{ newprofile.newprofile_profile_picture_url|default:'/static/css/images/a.jpg' }}" alt="Profile Picture" style="" onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
                     </a>
-
-
 {% empty %}
             <a href="{% url 'login' %}?next={{ request.path }}" style="display: contents;">
                 <img src="/static/css/images/a.jpg" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;">
@@ -1611,22 +1609,27 @@ header {
       <div class="sidebar">
         <div class="sidebar-card">
           <nav class="sidebar-nav">
-            <button class="element-item">
-              <svg viewBox="0 0 24 24"><path d="M3,13H11V3H3V13M3,21H11V15H3V21M13,21H21V11H13V21M13,3V9H21V3H13Z" /></svg>
-              <span>Dashboard</span>
-            </button>
-            <button class="element-item active">
-              <svg viewBox="0 0 24 24"><path d="M12,13A5,5 0 0,1 7,8H9A3,3 0 0,0 12,11A3,3 0 0,0 15,8H17A5,5 0 0,1 12,13M12,3A3,3 0 0,1 15,6H9A3,3 0 0,1 12,3M19,6H17A5,5 0 0,0 12,1A5,5 0 0,0 7,6H5C3.89,6 3,6.89 3,8V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V8C21,6.89 20.1,6 19,6Z" /></svg>
-              <span>PokeTrove Chests</span>
-            </button>
-            <button class="element-item">
-              <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M12,6C15.31,6 18,8.69 18,12C18,15.31 15.31,18 12,18C8.69,18 6,15.31 6,12C6,8.69 8.69,6 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" /></svg>
-              <span>My Collection</span>
-            </button>
-            <button class="element-item">
-              <svg viewBox="0 0 24 24"><path d="M21,9L17,5V8H10V10H17V13M7,11L3,15L7,19V16H14V14H7V11Z" /></svg>
-              <span>Trades</span>
-            </button>
+            <div class="filter-buttons">
+  <button class="element-item" data-filter="F">
+    <svg viewBox="0 0 24 24">
+      <path d="M3,13H11V3H3V13M3,21H11V15H3V21M13,21H21V11H13V21M13,3V9H21V3H13Z" />
+    </svg>
+    <span>Featured</span>
+  </button>
+  <button class="element-item" data-filter="N">
+    <svg viewBox="0 0 24 24">
+      <path d="M12,13A5,5 0 0,1 7,8H9A3,3 0 0,0 12,11A3,3 0 0,0 15,8H17A5,5 0 0,1 12,13M12,3A3,3 0 0,1 15,6H9A3,3 0 0,1 12,3M19,6H17A5,5 0 0,0 12,1A5,5 0 0,0 7,6H5C3.89,6 3,6.89 3,8V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V8C21,6.89 20.1,6 19,6Z" />
+    </svg>
+    <span>New</span>
+  </button>
+  <button class="element-item" data-filter="P">
+    <svg viewBox="0 0 24 24">
+      <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M12,6C15.31,6 18,8.69 18,12C18,15.31 15.31,18 12,18C8.69,18 6,15.31 6,12C6,8.69 8.69,6 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" />
+    </svg>
+    <span>Popular</span>
+  </button>
+</div>
+
           </nav>
 
           <div class="filter-section">
@@ -1643,10 +1646,7 @@ header {
             </div>
 
             <div class="filter-group">
-                {% for newprofile in Profiles %}
-              <label class="filter-label"><span class="author"><i class="fas fa-user"></i> {{ newprofile.get_type_display }} </span>
-								<span class="date"><i class="fas fa-calendar"></i> {{ newprofile.date_and_time|date }} </span></label>
-              {% endfor %}
+              <label class="filter-label">Category</label>
               <select class="filter-select">
                 <option value="all">All Conditions</option>
                 <option value="mint">Mint</option>
@@ -1703,10 +1703,23 @@ header {
       <div class="main-content">
         <div class="content-header">
           <div class="page-title">
-            <h1>Chests</h1>
-            <div class="item-count">
-              <span id="stock-count">{{ Profiles|length }}</span> items available
-            </div>
+            <h1>PokeTrove Chests</h1>
+              <div class="item-count">
+                {% include 'partial_game_count.html' %}
+              </div>
+             <script>
+    function updateGameCount() {
+      fetch("{% url 'showcase:partial_game_count' %}?filter=S")
+        .then(response => response.text())
+        .then(html => {
+          document.querySelector('.item-count').innerHTML = html;
+        })
+        .catch(error => {
+          console.error('Error updating game count:', error);
+        });
+    }
+    updateGameCount();
+  </script>
           </div>
           <div class="view-controls">
             <button id="toggleViewBtn" class="control-button">
@@ -1720,105 +1733,8 @@ header {
           </div>
         </div>
 
-        <div id="inventoryGrid" class="inventory-grid comfortable-view">
-          {% for newprofile in Profiles %}
-            <div class="inventory-item">
-              <a href="{{ newprofile.get_profile_url2 }}">
-                <div class="item-rarity-indicator
-                   {% if newprofile.heat == 'M' %}🌶️
-                        {% elif newprofile.heat == 'S' %}🌶️🌶️ (2)
-                        {% elif newprofile.heat == 'F' %}🌶️🌶️🌶️ (3)
-                        {% elif newprofile.heat == 'W' %}🌶️🌶️🌶️🌶️ (4)
-                        {% elif newprofile.heat == 'E' %}🌶️🌶️🌶️🌶️🌶️ (5)
-                        {% else %}🌶️(*)️
-                        {% endif %}">
-                </div>
-                <div class="item-image">
-                  <img src="{{ newprofile.image.url }}" alt="{{Inventory.choice_text}} Image">
-                  <div class="legendary-badge">
-                    <svg viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" /></svg>
-                  </div>
-                </div>
-                <div class="item-details">
-                  <div class="item-header">
-                    <h3 class="item-name">{{ newprofile.title }}</h3>
-                    <div class="item-price">
-                      {% if newprofile.cost %}
-                        {% if newprofile.discount_cost %}
-                          <span class="original-price">💎{{ newprofile.cost }}</span>
-                          <span class="discount-price">💎{{ newprofile.discount_cost }}</span>
-                        {% else %}
-                          <span class="current-price">💎{{ newprofile.cost }}</span>
-                        {% endif %}
-                      {% endif %}
-                    </div>
-                  </div>
-
-                  <h3 class="item-title">{{newprofile.title}}</h3>
-
-                  <div class="item-stats">
-                    <div class="stat-row">
-                      <div class="stat-label">CREATOR</div>
-                      {% if newprofile.user %}
-                      <div class="stat-value">{{ newprofile.user }}</div>
-                      {% else %}
-                      <div class="stat-value">PokeTrove</div>
-                      {% endif %}
-                    </div>
-                    <div class="stat-row">
-                      <div class="stat-label">CATEGORY</div>
-                      <div class="stat-value">
-                        {% if newprofile.category and newprofile.category.lower == 'p' %}
-                          Pokemon
-                        {% elif newprofile.category.lower == 'm' %}
-                          Magic The Gathering
-                        {% elif newprofile.category.lower == 'b' %}
-                          Bakugo
-                        {% elif newprofile.category.lower == 'y' %}
-                          Yu-Gi-Oh!
-                        {% else %}
-                          Other
-                        {% endif %}
-                      </div>
-                    </div>
-                    <div class="stat-row">
-                      <div class="stat-label">HEAT</div>
-                      <div class="stat-value tier-badge
-                        {% if newprofile.category and newprofile.category.lower == 'g' %}gold
-                        {% elif newprofile.category.lower == 'p' %}platinum
-                        {% elif newprofile.category.lower == 'e' %}emerald
-                        {% else %}diamond{% endif %}">
-                         {% if newprofile.heat == 'M' %}🌶️
-                        {% elif newprofile.heat == 'S' %}🌶️🌶️ (2)
-                        {% elif newprofile.heat == 'F' %}🌶️🌶️🌶️ (3)
-                        {% elif newprofile.heat == 'W' %}🌶️🌶️🌶️🌶️ (4)
-                        {% elif newprofile.heat == 'E' %}🌶️🌶️🌶️🌶️🌶️ (5)
-                        {% else %}🌶️(*)️
-                        {% endif %}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="item-description">
-                    {{ newprofile.description }}
-                  </div>
-
-                  <button class="add-to-cart-btn">
-                    PLAY
-                  </button>
-                </div>
-              </a>
-            </div>
-          {% empty %}
-            <div class="empty-state">
-              <div class="empty-icon">
-                <svg viewBox="0 0 24 24"><path d="M19,20H5V4H7V7H17V4H19M12,2A1,1 0 0,1 13,3A1,1 0 0,1 12,4A1,1 0 0,1 11,3A1,1 0 0,1 12,2M19,2H14.82C14.4,0.84 13.3,0 12,0C10.7,0 9.6,0.84 9.18,2H5A2,2 0 0,0 3,4V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V4A2,2 0 0,0 19,2Z" /></svg>
-              </div>
-              <h3>Inventory Empty</h3>
-              <p>Looks like you don't have anything here! Time to pull some bangers!</p>
-              <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy" class="empty-image">
-            </div>
-          {% endfor %}
+        <div id="inventoryGameGrid" class="inventory-grid comfortable-view">
+{% include "partial_game.html" with Games=tophit %}
         </div>
       </div>
 
@@ -1850,7 +1766,7 @@ header {
               <svg viewBox="0 0 24 24"><path d="M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75C7.17,14.7 7.18,14.66 7.2,14.63L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z" /></svg>
               Top Hits
             </div>
-            <div class="cart-count">{{tophit|length}} Hits</div>
+            <div class="cart-count">{{NewGame|length}} Hits</div>
           </div>
           <div class="card-content">
             <div class="cart-items">
@@ -1892,70 +1808,14 @@ header {
               </div>
             </div>
 
-            <div class="cart-total">
-              <div class="total-row">
-                <div class="total-label">Subtotal</div>
-                <div class="total-value">$270.75</div>
-              </div>
-              <div class="total-row">
-                <div class="total-label">Tax</div>
-                <div class="total-value">$21.66</div>
-              </div>
-              <div class="total-row final-total">
-                <div class="total-label">Total</div>
-                <div class="total-value">$292.41</div>
-              </div>
-            </div>
-
-            <button class="checkout-btn">
-              <svg viewBox="0 0 24 24"><path d="M20,8H4V6H20M20,18H4V12H20M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" /></svg>
-              CHECKOUT
-            </button>
           </div>
         </div>
 
         <!-- Featured items -->
-        <div class="card featured-items">
-          <div class="card-header">
-            <div class="card-title">
-              <svg viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" /></svg>
-              Featured Items
-            </div>
-          </div>
-          <div class="card-content">
-            <div class="featured-item">
-              <div class="featured-item-image">
-                <img src="https://via.placeholder.com/80" alt="Featured Card">
-              </div>
-              <div class="featured-item-details">
-                <div class="featured-item-name">Mewtwo GX Rainbow Rare</div>
-                <div class="featured-item-price">$350.00</div>
-                <div class="featured-item-tier diamond">Diamond</div>
-              </div>
-            </div>
-            <div class="featured-item">
-              <div class="featured-item-image">
-                <img src="https://via.placeholder.com/80" alt="Featured Card">
-              </div>
-              <div class="featured-item-details">
-                <div class="featured-item-name">Lugia V Alt Art</div>
-                <div class="featured-item-price">$275.00</div>
-                <div class="featured-item-tier platinum">Platinum</div>
-              </div>
-            </div>
-            <div class="featured-item">
-              <div class="featured-item-image">
-                <img src="https://via.placeholder.com/80" alt="Featured Card">
-              </div>
-              <div class="featured-item-details">
-                <div class="featured-item-name">Pikachu VMAX</div>
-                <div class="featured-item-price">$180.00</div>
-                <div class="featured-item-tier gold">Gold</div>
-              </div>
-            </div>
-          </div>
-        </div>
+
+
       </div>
+    </div>
     </div>
 
     <footer class="copyright-section">
@@ -1972,7 +1832,6 @@ header {
   <!-- Notification container -->
   <div id="notification-container"></div>
 
-  <script src="script.js"></script>
   <script>
     const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
     const withdrawAudio = new Audio("{% static 'css/sounds/withdraw.mp3'  %}");
@@ -2309,6 +2168,30 @@ function initFireSparks() {
 
 
   </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.filter-buttons .element-item');
+    buttons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        // Remove the active class from all buttons and add it to the selected one
+        buttons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        // Retrieve the selected filter from the data attribute
+        const filterType = button.getAttribute('data-filter');
+        // Construct the AJAX URL – adjust the path if necessary
+        const url = `/filter-games/?filter=${filterType}`;
+        // Fetch the updated partial from the server
+        fetch(url)
+          .then(response => response.text())
+          .then(html => {
+            document.getElementById('inventoryGameGrid').innerHTML = html;
+          })
+          .catch(error => console.error('Error fetching filtered games:', error));
+      });
+    });
+  });
+</script>
 
   <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
   <script src="{% static 'css/js/main.js' %}"></script>

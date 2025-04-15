@@ -3044,6 +3044,10 @@ class Game(models.Model):
     def increase_on_card(self):
         if self.cost:
             self.cost = self.cost * 1.05
+
+    def is_favorited(self, user):
+        from django.db.models import Q
+        return FavoriteChests.objects.filter(user=user, chest=self, is_active=1).exists()
     def save(self, *args, **kwargs):
         self.full_clean()
         if not self.type:
@@ -4811,7 +4815,8 @@ class MyPreferences(models.Model):
 
 
 class FavoriteChests(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # Change from OneToOneField to ForeignKey so multiple favorite records per user are allowed.
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     chest = models.ForeignKey(Game, on_delete=models.CASCADE)
     precedence = models.IntegerField(default=1)
     is_active = models.IntegerField(
@@ -4823,19 +4828,21 @@ class FavoriteChests(models.Model):
         verbose_name="Set active?"
     )
 
-
     def save(self, *args, **kwargs):
         if self.pk is None:
             FavoriteChests.objects.filter(
                 user=self.user,
                 precedence__gte=self.precedence
             ).update(precedence=models.F('precedence') + 1)
-
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Favorite Chest"
         verbose_name_plural = "Favorite Chests"
+        # Optionally, if you want to prevent a user from favoriting the same chest multiple times,
+        # you can enforce a unique constraint on the combination of user and chest:
+        unique_together = ('user', 'chest')
+
 
 
 class Donate(models.Model):

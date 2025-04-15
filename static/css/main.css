@@ -920,7 +920,7 @@ h2.widget-title:after {
   border: none;
   background-color: #012738;
   color: #bf97ff;
-  padding: 14px 0;
+  /*padding: 14px 0;*/
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
   cursor: pointer;
