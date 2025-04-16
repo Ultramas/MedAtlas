@@ -3483,7 +3483,12 @@ class Choice(models.Model):
         if self.prizes:
             return f"{self.choice_text} with prize {self.prizes}"
         else:
-            return str(self.choice_text)
+            if self.price:
+                cost_value =  self.price
+            else:
+                cost_value =  self.value
+
+            return f"{self.choice_text} (Value: {cost_value})"
 
     def asave(self):
         if self.value:
@@ -4509,11 +4514,9 @@ class BackgroundImageBase(models.Model):
         image = ImageBase.objects.get(id=image_id)
         print("Current coordinates: x={image.x}, y={image.y}")
 
-        # Set the x and y positions to the desired values
         image.x = xposition
         image.y = yposition
 
-        # Save the updated Image object back to the database
         image.save()
 
 
@@ -4523,7 +4526,7 @@ class StoreViewType(models.Model):
         ('stream', 'Streamlined View'),
         ('detail', 'Detailed View'),
     )
-    type = models.CharField(blank=True, null=True, choices=VIEW_TYPE_CHOICES, default='stream', max_length=6)
+    type = models.CharField(choices=VIEW_TYPE_CHOICES, default='stream', max_length=6)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -4535,18 +4538,14 @@ class StoreViewType(models.Model):
 
     def save(self, *args, **kwargs):
         if self.user_id is not None:
-            # If a StoreViewType for this user already exists, delete it
             StoreViewType.objects.filter(user=self.user).delete()
 
-            # Now save the new StoreViewType
             super().save(*args, **kwargs)
         else:
-            view_type_choice = 'stream'  # replace with the view type the user wants
+            view_type_choice = 'stream'
 
-            # Create a StoreViewType instance without saving it to the database
             store_view_type = StoreViewType(type=view_type_choice)
 
-            # Now you can use store_view_type as needed
             print(store_view_type.type)
 
     class Meta:

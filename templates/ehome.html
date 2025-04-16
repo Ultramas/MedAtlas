@@ -14,7 +14,939 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap">
   <link rel="stylesheet" href="styles.css">
+   </head>
+<br>
+<br>
+<br>
+<br>
+<br>
+<form id="store-view-type-form" method="post" action="{% url 'showcase:inventory_view_type_url' %}">
+  {% csrf_token %}
+  {{ store_view_form.type.label_tag }}
+  {{ store_view_form.type }}
+  {{ store_view_form.errors }}
+</form>
+{% if store_view == "stream" %}
+<!--streamlined view-->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeTrove Marketplace</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800&display=swap">
     <style>
+        :root {
+            --primary: #00f0ff;
+            --primary-dark: #00a0a8;
+            --secondary: #ff00e5;
+            --dark: #0a0a20;
+            --darker: #050510;
+            --light: #e1e1ff;
+            --gray: #2a2a40;
+            --success: #00ff66;
+            --warning: #ffcc00;
+            --danger: #ff3366;
+            --gold: #ffd700;
+            --platinum: #e5e4e2;
+            --emerald: #50c878;
+            --diamond: #b9f2ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--darker);
+            color: var(--light);
+            background-image: radial-gradient(circle at 20% 35%, rgba(0, 240, 255, 0.15) 0%, transparent 40%), radial-gradient(circle at 75% 65%, rgba(255, 0, 229, 0.15) 0%, transparent 40%);
+            background-attachment: fixed;
+            background-size: cover;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 0 0px;
+        }
+
+        /* Header Styles */
+        .cyber-header {
+            background: linear-gradient(
+                to right,
+                rgba(0, 240, 255, 0.1),
+                rgba(255, 255, 255, 0.05),
+                rgba(255, 0, 229, 0.1)
+            );
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+
+ .container {
+            display: flex;
+            gap: 3rem;
+            padding: 3rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+        .user-profile {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-profile::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .user-info {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .username {
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
+        }
+
+        .user-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 1rem;
+        }
+
+        .user-stat {
+            background: rgba(191, 151, 255, 0.1);
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid var(--primary);
+        }
+
+        .user-stat-icon {
+            font-size: 1.5rem;
+        }
+
+        .filters {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters h2, .collection-title {
+            color: var(--primary);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .filters h2::after, .collection-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .type-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .view-collection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-collection::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .view-collection:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .view-collection:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .main-menu {
+            display: flex;
+			position: fixed;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(
+                to right,
+                rgba(191, 151, 255, 0.1),
+                rgba(255, 255, 255, 0.05),
+                rgba(191, 151, 255, 0.1)
+            );
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            background-color: transparent;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+            position: relative;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 3rem;
+        }
+
+        .nav-links a {
+
+    color: var(--primary);
+            text-decoration: none;
+            position: relative;
+            padding: 0.5rem 0;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            /*font-size: 1rem;*/
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+    .logo-icon h1::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+    }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+            letter-spacing: 2px;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .main-nav a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 18px;
+            letter-spacing: 1px;
+            padding: 8px 0;
+            position: relative;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .main-nav a:hover, .main-nav a.active {
+            color: var(--primary);
+        }
+
+        .main-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+            transition: width 0.3s ease;
+        }
+
+        .main-nav a:hover::after, .main-nav a.active::after {
+            width: 100%;
+        }
+
+        .user-stats {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .currency, .level {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+            background: rgba(10, 10, 32, 0.6);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .currency {
+            color: var(--primary);
+        }
+
+        .level {
+            color: var(--secondary);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 0 2rem;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+            margin: 0;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .neon-button {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 10px 20px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        .neon-button:hover {
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        /* Inventory Grid */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding: 0 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .inventory-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .inventory-item {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .inventory-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--secondary);
+            box-shadow: 0 10px 30px rgba(255, 0, 229, 0.2);
+        }
+
+        .inventory-item a {
+            text-decoration: none;
+            color: var(--light);
+        }
+
+        .legendary-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 24px;
+            z-index: 2;
+            filter: drop-shadow(0 0 5px gold);
+        }
+
+        .pokemon-image {
+            width: 100%;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, rgba(0, 240, 255, 0.1), transparent);
+            overflow: hidden;
+        }
+
+        .pokemon-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .inventory-item:hover .pokemon-image img {
+            transform: scale(1.05);
+        }
+
+        .pokemon-info {
+            padding: 1.5rem;
+        }
+
+        .pokemon-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .pokemon-type {
+            font-size: 1.25rem;
+            color: var(--success);
+            margin-bottom: 0.5rem;
+        }
+
+        .product-title {
+            color: var(--light);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-condition {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .product-tier {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .product-description {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .copyright-section {
+            background: linear-gradient(
+                to right,
+                rgba(0, 240, 255, 0.1),
+                rgba(255, 255, 255, 0.05),
+                rgba(255, 0, 229, 0.1)
+            );
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 1rem 0;
+            text-align: center;
+            color: var(--light);
+        }
+
+        /* Animations */
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .glitch-effect {
+            animation: glitch 0.3s linear;
+        }
+
+        /* Empty State */
+        .empty-inventory {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-inventory img {
+            max-width: 300px;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+        }
+
+        .empty-inventory h3 {
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        {% include 'navtrove.html' %}
+
+        <main class="main-content" style="padding: 20px; margin: 20px; border-radius: 25px;">
+            <div class="content-header">
+                <h1>PokeTrove Marketplace - (<span id="stock-count">{{ Items|length }}</span>)</h1>
+                <!-- <button id="toggleViewBtn" class="neon-button"> -->
+                    <!-- <span class="cyber-button-text">TOGGLE VIEW</span> -->
+                </button>
+            </div>
+
+            <section id="inventoryGrid" class="inventory-grid comfortable-view">
+                {% for item in items %}
+                    <div class="inventory-item">
+                        <a href="{{ item.get_absolute_url }}">
+                            <div class="card-frame">
+                                <div class="legendary-icon">🐉</div>
+                                <div class="card-rarity-glow legendary"></div>
+                                <div class="pokemon-image">
+                                    <img src="{{ item.image.url }}" alt="{{Inventory.choice_text}} Image">
+                                </div>
+                                <div class="pokemon-info">
+                                    <div class="info-header">
+                                        <h3 class="pokemon-name">{{ Inventory.choice.choice_text }}</h3>
+                                        <div class="price-container">
+                                            {% if item.price %}
+                                                {% if item.discount_price %}
+                                                    <span class="mr-1">
+                                                        <del class="old-price">${{ item.price }}</del>
+                                                    </span>
+                                                    <p class="current-price">${{ item.discount_price }}</p>
+                                                {% else %}
+                                                    <p class="current-price">${{ item.price }}</p>
+                                                {% endif %}
+                                            {% else %}
+                                                {% if item.discount_currency_price %}
+                                                    <span class="mr-1">
+                                                        <del class="old-price">💎 {{ item.currency_price }}</del>
+                                                    </span>
+                                                    <p class="current-price">💎 {{ item.discount_currency_price }}</p>
+                                                {% else %}
+                                                    <p class="current-price">💎 {{ item.currency_price }}</p>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <h3 class="product-title">{{item.title}}</h3>
+
+                                    <div class="card-stats">
+                                        <div class="stat">
+                                            <span class="stat-label">CONDITION</span>
+                                            <span class="stat-value">{{ item.condition }}</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-label">CATEGORY</span>
+                                            <span class="stat-value">
+                                                {% if item.category and item.category.lower == 'p' %}
+                                                    Pokemon
+                                                {% elif item.category.lower == 'm' %}
+                                                    Magic The Gathering
+                                                {% elif item.category.lower == 'b' %}
+                                                    Bakugo
+                                                {% elif item.category.lower == 'y' %}
+                                                    Yu-Gi-Oh!
+                                                {% else %}
+                                                    Other
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-label">TIER</span>
+                                            <span class="stat-value {% if item.category and item.category.lower == 'g' %}gold
+                                                {% elif item.category.lower == 'p' %}platinum
+                                                {% elif item.category.lower == 'e' %}emerald
+                                                {% else %}diamond{% endif %}">
+                                                {% if item.category and item.category.lower == 'g' %}
+                                                    Gold
+                                                {% elif item.category.lower == 'p' %}
+                                                    Platinum
+                                                {% elif item.category.lower == 'e' %}
+                                                    Emerald
+                                                {% else %}
+                                                    Diamond
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="product-description">
+                                        {{ item.description }}
+                                    </div>
+
+                                    <div class="action-buttons">
+                                            <span class="cyber-button-text" style="font-size: 24px;">ADD TO CART</span>
+                                            <span class="cyber-button-glitch"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% empty %}
+                    <div class="empty-inventory">
+                        <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy">
+                        <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
+                    </div>
+                {% endfor %}
+            </section>
+        </main>
+
+        <footer class="copyright-section">
+            <div class="container">
+                <p>
+                    {% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
+                        {{BaseCopyrightTextField.copyright}}
+                    {% endfor %}
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Load audio files
+        const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
+        const withdrawAudio = new Audio("{% static 'css/sounds/withdraw.mp3' %}");
+        const tradeAudio = new Audio("{% static 'css/sounds/trade.mp3' %}");
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Toggle view functionality
+            const toggleBtn = document.getElementById("toggleViewBtn");
+            const inventoryGrid = document.getElementById("inventoryGrid");
+
+            toggleBtn.addEventListener("click", function() {
+                inventoryGrid.classList.toggle("compact-view");
+                inventoryGrid.classList.toggle("comfortable-view");
+
+                // Save preference to localStorage
+                const isCompact = inventoryGrid.classList.contains("compact-view");
+                localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
+
+                // Add glitch effect
+                this.classList.add("glitch-effect");
+                setTimeout(() => {
+                    this.classList.remove("glitch-effect");
+                }, 500);
+            });
+
+            // Load saved view preference
+            const savedViewPreference = localStorage.getItem("inventoryViewPreference");
+            if (savedViewPreference === "compact") {
+                inventoryGrid.classList.remove("comfortable-view");
+                inventoryGrid.classList.add("compact-view");
+            }
+
+            // Add to cart functionality with sound effects
+            const addToCartBtns = document.querySelectorAll(".add-to-cart-btn");
+            addToCartBtns.forEach(btn => {
+                btn.addEventListener("click", function(event) {
+                    if (this.tagName.toLowerCase() === 'button') {
+                        event.preventDefault();
+                    }
+
+                    // Play sound effect
+                    tradeAudio.play();
+
+                    // Create glitch effect
+                    createGlitchEffect(this);
+
+                    // Show notification
+                    showNotification("Item added to cart");
+                });
+            });
+
+            // AJAX form submission
+            const forms = document.querySelectorAll(".ajax-form");
+            forms.forEach(form => {
+                form.addEventListener("submit", function(event) {
+                    event.preventDefault();
+
+                    const formData = new FormData(this);
+                    const url = this.getAttribute("action");
+
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        },
+                        body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update stock count
+                            document.getElementById('stock-count').textContent = data.stock_count;
+
+                            // Remove item if needed
+                            this.closest(".inventory-item")?.remove();
+
+                            // Play appropriate sound
+                            if (this.classList.contains('sell-form')) {
+                                sellAudio.play();
+                            } else if (this.classList.contains('withdraw-form')) {
+                                withdrawAudio.play();
+                            }
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+                });
+            });
+
+            // Helper Functions
+            function createGlitchEffect(element) {
+                for (let i = 0; i < 5; i++) {
+                    const glitchLayer = document.createElement("div");
+                    glitchLayer.className = "glitch-layer";
+                    glitchLayer.style.cssText = `
+                        position: absolute;
+                        left: ${Math.random() * 100}%;
+                        top: ${Math.random() * 100}%;
+                        width: ${Math.random() * 10 + 10}px;
+                        height: ${Math.random() * 30 + 5}px;
+                        background: var(--primary);
+                        z-index: 10;
+                        opacity: 0.7;
+                        mix-blend-mode: screen;
+                    `;
+
+                    element.appendChild(glitchLayer);
+
+                    setTimeout(() => glitchLayer.remove(), 500);
+                }
+            }
+
+            function showNotification(message) {
+                const notification = document.createElement("div");
+                notification.className = "cyber-notification";
+                notification.innerHTML = `
+                    <div class="notification-content">
+                        <div class="notification-icon">✓</div>
+                        <div class="notification-text">${message}</div>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => notification.classList.add("show"), 10);
+                setTimeout(() => {
+                    notification.classList.remove("show");
+                    setTimeout(() => notification.remove(), 500);
+                }, 3000);
+            }
+        });
+    </script>
+
+    <!-- jQuery and other scripts -->
+    <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+    <script src="{% static 'css/js/main.js' %}"></script>
+    <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+    <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+    <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+    <script src="{% static 'css/js/waypoints.js' %}"></script>
+    <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+    <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+    <script src="{% static 'css/js/sticker.js' %}"></script>
+</body>
+</html>
+
+{% else %}
+
+<head>
+   <style>
 * {
   margin: 0;
   padding: 0;
@@ -212,11 +1144,8 @@ body {
 
 
 #particle-canvas {
-  position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
   z-index: 0;
   opacity: 0.3;
 }
@@ -1548,16 +2477,15 @@ header {
   box-shadow: 0 0 15px var(--secondary);
 }
     </style>
-</head>
 
+</head>
 <body>
-  <canvas id="particle-canvas"></canvas>
   <div id="rising-sparks-container"></div>
   <div class="container">
     {% include 'navtrove.html' %}
 
     <!-- Header -->
-    <header style="margin-top:10%;">
+    <header style="margin-top:0%;">
       <div class="logo">
         <div class="logo-hex">
           <svg viewBox="0 0 24 24" class="logo-icon">
@@ -2309,6 +3237,7 @@ function initFireSparks() {
 
 
   </script>
+  <canvas id="particle-canvas"></canvas>
 
   <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
   <script src="{% static 'css/js/main.js' %}"></script>
@@ -2322,3 +3251,4 @@ function initFireSparks() {
   <script src="{% static 'css/js/sticker.js' %}"></script>
 </body>
 </html>
+{% endif %}

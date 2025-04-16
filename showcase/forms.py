@@ -1316,33 +1316,33 @@ class ProfileDetail(forms.ModelForm):
         model = ProfileDetails
         fields = ('email', 'avatar', 'alternate', 'about_me')
 
-
 class StoreViewTypeForm(forms.ModelForm):
-
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+        # Ensure the type field reflects the instance's value
+        if self.instance and self.instance.pk and self.instance.type:
+            self.fields['type'].initial = self.instance.type
+        # Add onchange event to auto-submit the form
+        self.fields['type'].widget.attrs.update({'onchange': 'this.form.submit();'})
 
     class Meta:
         model = StoreViewType
         fields = ('type',)
+        widgets = {
+            'type': forms.Select(choices=StoreViewType.VIEW_TYPE_CHOICES),
+        }
 
     def save(self, commit=True):
-
         user = self.request.user if self.request.user.is_authenticated else None
-
         storeviewtype = super().save(commit=False)
-
-        # Set the user, star rating, and slug if available
-        if user and isinstance(user, User):  # Check if user is a User instance
+        if user and isinstance(user, User):
             storeviewtype.user = user
         else:
-            storeviewtype.user = None  # Set to None if user is not a valid User instance
-
+            storeviewtype.user = None
         if commit:
             storeviewtype.save()
         return storeviewtype
-
 
 # class PublicForm(forms.ModelForm):
 # class Meta:

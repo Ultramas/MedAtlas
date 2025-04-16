@@ -10185,7 +10185,6 @@ class EBackgroundView(BaseView, FormView):
         current_user = self.request.user
         total_items = Item.objects.filter(is_active=1).count()
 
-        # Get the paginate_by value from the form data or settings
         paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
 
         items_query = Item.objects.filter(is_active=1).order_by('price')
@@ -10207,21 +10206,31 @@ class EBackgroundView(BaseView, FormView):
                                                                                     is_active=1)
         context['Items'] = Item.objects.filter(is_active=1)
         context['Email'] = EmailField.objects.filter(is_active=1)
-        context['store_view_form'] = StoreViewTypeForm()
+        if self.request.user.is_authenticated:
+            try:
+                instance = StoreViewType.objects.get(user=self.request.user, is_active=1)
+            except StoreViewType.DoesNotExist:
+                instance = None
+            context['store_view_form'] = StoreViewTypeForm(instance=instance)
+        else:
+            context['store_view_form'] = StoreViewTypeForm()
         context['form'] = EmailForm()
 
+        current_user = self.request.user
         if isinstance(current_user, AnonymousUser):
-            context['store_view_type_str'] = 'stream'
+            context['store_view'] = 'stream'
             context['streamfilter_string'] = 'stream filter set by anonymous user'
             print('store view does not exist, setting to stream for anonymous user')
         else:
             try:
                 user_store_view_type = StoreViewType.objects.get(user=current_user, is_active=1)
+                context['store_view'] = user_store_view_type.type  # Pass the type directly!
                 context['store_view_type_str'] = str(user_store_view_type)
                 context['streamfilter_string'] = f'stream filter set by {self.request.user.username}'
                 print('store view exists')
                 print(str(user_store_view_type))
             except StoreViewType.DoesNotExist:
+                context['store_view'] = 'stream'
                 context['store_view_type_str'] = 'stream'
                 context['streamfilter_string'] = f'stream filter set by {self.request.user.username}'
                 print('store view does not exist, setting to stream for signed-in user')
@@ -10285,12 +10294,32 @@ class EBackgroundView(BaseView, FormView):
         return items
 
     def post(self, request, *args, **kwargs):
-        form = EmailForm(request.POST)
+        if 'store_view_submit' in request.POST:
+            if request.user.is_authenticated:
+                try:
+                    instance = StoreViewType.objects.get(user=request.user, is_active=1)
+                except StoreViewType.DoesNotExist:
+                    instance = None
+                store_view_form = StoreViewTypeForm(request.POST, instance=instance)
+                if store_view_form.is_valid():
+                    store_view_form.instance.user = request.user
+                    store_view_form.save()
+                    messages.success(request, 'View type updated successfully.')
+                    return redirect('ehome')
+                else:
+                    messages.error(request, 'Error updating view type.')
+            else:
+                messages.error(request, 'You must be logged in to update your view type.')
 
+            context = self.get_context_data()
+            context['store_view_form'] = store_view_form
+            return render(request, self.template_name, context)
+
+        # Otherwise, process the email form submission as before
+        form = EmailForm(request.POST)
         if form.is_valid():
-            post = form.save(commit=False)
             form.instance.user = request.user
-            post.save()
+            form.save()
             messages.success(request, 'EmailForm submitted successfully.')
             try:
                 email = EmailField.objects.get(user=request.user)
@@ -10310,12 +10339,11 @@ class EBackgroundView(BaseView, FormView):
                 user.save()
             except Exception as e:
                 messages.error(request, f'An error occurred: {e}')
-
         else:
             messages.error(request, "EmailForm submission invalid")
-            print("there was an error in registering the email")
+            print("There was an error in registering the email")
 
-        return render(request, 'ehome.html', {'form': form})
+        return render(request, self.template_name, self.get_context_data(form=form))
 
 
 class StoreView(BaseView, FormView, ListView):
@@ -10342,7 +10370,7 @@ class StoreView(BaseView, FormView, ListView):
                                                                                     is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -10381,8 +10409,84 @@ class StoreView(BaseView, FormView, ListView):
             post.save()
             return redirect('showcase:ehome')
         else:
-            print('the errors with the storeviewtype form are ' + str(eform.errors))
-        return render(request, 'storeviewtypesnippet.html', {'eform': eform})
+            print('the errors with the ehomeviewtype form are ' + str(eform.errors))
+        return render(request, 'ehomeviewtypesnippet.html', {'eform': eform})
+
+
+class InventoreView(BaseView, FormView, ListView):
+    model = StoreViewType
+    template_name = "inventoryviewtypesnippet.html"
+    form_class = StoreViewTypeForm
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+
+        # Get the active StoreViewType instance for the user
+        try:
+            instance = StoreViewType.objects.get(user=request.user, is_active=1)
+        except StoreViewType.DoesNotExist:
+            instance = None
+
+        store_view_form = StoreViewTypeForm(instance=instance, request=request)
+        context['store_view_form'] = store_view_form
+
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        eform = StoreViewTypeForm(request.POST, request=request)
+
+        if eform.is_valid():
+            post = eform.save(commit=False)
+            post.save()
+            return redirect('showcase:inventory')
+        else:
+            print('the errors with the inventoryviewtype form are ' + str(eform.errors))
+        return render(request, 'inventoryviewtypesnippet.html', {'eform': eform})
+
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'BaseCopyrightTextFielded': BaseCopyrightTextField.objects.filter(is_active=1),
+            'Background': BackgroundImageBase.objects.filter(page=self.template_name).order_by("position"),
+            'TextFielde': TextBase.objects.filter(page=self.template_name).order_by("section"),
+            'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+            'Favicon': FaviconBase.objects.filter(is_active=1),
+            'Image': ImageBase.objects.filter(is_active=1, page=self.template_name),
+            'Social': SocialMedia.objects.filter(page=self.template_name, is_active=1),
+            'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
+            'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
+        })
+
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] is None:
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
 
 
 class ECreatePostView(CreateView):
@@ -10626,7 +10730,7 @@ class MemeView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -11285,7 +11389,7 @@ class NewsBackgroundView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -11356,7 +11460,7 @@ class UploadACardView(FormMixin, LoginRequiredMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -11538,7 +11642,7 @@ class PartnerBackgroundView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -11933,7 +12037,7 @@ class PostView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -12037,7 +12141,7 @@ class SupportBackgroundView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -12106,7 +12210,7 @@ class PostingView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -12396,7 +12500,7 @@ class InventoryView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -12472,6 +12576,7 @@ def sse_total_value(request):
 
     return StreamingHttpResponse(event_stream(), content_type="text/event-stream")
 
+
 class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
     model = InventoryObject
     template_name = "inventory.html"
@@ -12486,6 +12591,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['store_view_form'] = StoreViewTypeForm()
 
         if self.request.user.is_authenticated:
             stock_objects = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by("created_at")
@@ -12493,6 +12599,26 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
             total_value = stock_objects.aggregate(total=Sum('price'))['total'] or 0
             context['total_value'] = total_value
+
+        current_user = self.request.user
+        if current_user.is_authenticated:
+            try:
+                store_view_instance = StoreViewType.objects.get(user=current_user, is_active=1)
+                context['store_view'] = store_view_instance.type
+                context['store_view_type_str'] = str(store_view_instance)
+                context['streamfilter_string'] = f'stream filter set by {current_user.username}'
+            except StoreViewType.DoesNotExist:
+                store_view_instance = None
+                context['store_view'] = 'stream'
+                context['store_view_type_str'] = 'stream'
+                context['streamfilter_string'] = f'stream filter set by {current_user.username}'
+        else:
+            store_view_instance = None
+            context['store_view'] = 'stream'
+            context['streamfilter_string'] = 'stream filter set by anonymous user'
+
+        store_view_form = StoreViewTypeForm(instance=store_view_instance, request=self.request)
+        context['store_view_form'] = store_view_form
 
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
@@ -12525,7 +12651,6 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             context['Profiles'] = None
 
         if context['Profiles'] == None:
-            # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None

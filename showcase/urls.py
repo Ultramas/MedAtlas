@@ -311,6 +311,8 @@ urlpatterns = [
     path('api/trade-items/<int:user_id>/', views.get_trade_items, name='get_trade_items'),
     path('pagesearch/', views.PageSearchResultsView.as_view(), name='pagesearch'),
     path('i2/', TemplateView.as_view(template_name='i2.html'), name='i2'),
+    path('store_view_type_url/', views.StoreView.as_view(), name='store_view_type_url'),
+    path('inventory_view_type_url/', views.InventoreView.as_view(), name='inventory_view_type_url'),
 
     # might try to switch to using slug filter format like the below comment rather than primary key filter format
     # path('product/<slug>/', views.ProductView.as_view(), name='product'),
