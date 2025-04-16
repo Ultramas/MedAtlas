@@ -2737,8 +2737,27 @@ function initEventListeners() {
 
 
 {% else %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeTrove - My Inventory</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+
+  <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/inventory2.css' %}">
+    <style>
  /* Add this to the existing <style> tag or create a new one if it doesn't exist */
     .copyright-section {
         background: linear-gradient(
@@ -2771,7 +2790,9 @@ function initEventListeners() {
         letter-spacing: 1px;
         margin: 0;
     }
+</style>
 
+    <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
 
         :root {
@@ -3513,7 +3534,7 @@ document.querySelectorAll(".withdraw-form").forEach(form => {
     };
 
     cancelButton.onclick = () => {
-      withdrawPopup.style.display = "none";
+      withdrawPopup.style.display = "none"; // Close popup on cancel
     };
   });
 });
@@ -3528,9 +3549,6 @@ document.querySelectorAll(".withdraw-form").forEach(form => {
 
 
     <main class="main-content">
-        <br>
-        <br>
-        <br>
         <h1>My Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)</h1>
 
             {% if StockObject %}
@@ -3920,7 +3938,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 </script>
-  <canvas id="particle-canvas"></canvas>
 	<!-- jquery -->
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
      <script src="{% static 'css/js/main.js' %}"></script>
@@ -3935,6 +3952,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
 
 
 {% endif %}
