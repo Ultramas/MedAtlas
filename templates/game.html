@@ -1511,7 +1511,7 @@ document.addEventListener("DOMContentLoaded", function () {
  {% if user.is_authenticated %}
 
 
-<button class="start gamer-button"
+<button class="start gamer-button begin-button"
         id="start" style="display: none;"
         data-game-id="{{ game.id }}"
         data-nonce="{{ nonce }}"
@@ -1577,7 +1577,7 @@ document.addEventListener("DOMContentLoaded", function () {
         </script>
 {% else %}
     {% if user.is_authenticated %}
-<button class="start gamer-button"
+<button class="start gamer-button begin-button"
         id="start"
         data-game-id="{{ game.id }}"
         data-nonce="{{ nonce }}"
@@ -1604,7 +1604,7 @@ document.addEventListener("DOMContentLoaded", function () {
 {% endif %}
 
         {% if game.daily %}
-<button class="start gamer-button"
+<button class="start gamer-button demo-button"
         id="start2"
         data-game-id="{{ game.id }}"
         data-nonce="{{ nonce }}"
@@ -1660,17 +1660,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         </script>
 {% else %}
-<button class="start gamer-button"
+<button class="start gamer-button demo-button"
         id="start2"
         data-game-id="{{ game.id }}"
         data-nonce="{{ nonce }}"
         data-slug="{{ game.slug }}"
         data-daily="false"
-         style="position: absolute; bottom: 5px; right: 5px;">
+        style="position: absolute; bottom: 5px; right: 5px;">
     {% if preference and preference.spintype == 'I' %}
-⚡Demo
+    ⚡Demo
     {% elif preference and preference.spintype == 'S' %}
-🔥Demo
+    🔥Demo
     {% else %}
     Demo
     {% endif %}
@@ -1682,9 +1682,33 @@ document.addEventListener("DOMContentLoaded", function () {
     function getCSRFToken() {
         return document.querySelector('[name=csrfmiddlewaretoken]').value;
     }
+let currentSpintype = null;
 
-    const isQuickSpinInteractive = {% if user.is_authenticated and preference_instance and preference_instance.spintype == 'I' %}true{% else %}false{% endif %};
-</script>
+function triggerSpin(spintype) {
+    currentSpintype = spintype;
+    // Update UI elements
+    const demoButtons = document.querySelectorAll('.demo-button');
+    demoButtons.forEach(button => {
+        if (spintype === 'I') {
+            button.textContent = "⚡Demo";
+        } else if (spintype === 'S') {
+            button.textContent = "🔥Demo";
+        } else {
+            button.textContent = "Demo";
+        }
+    });
+    const beginButtons = document.querySelectorAll('.begin-button');
+    beginButtons.forEach(ebutton => {
+        if (spintype === 'I') {
+            ebutton.textContent = "⚡Spin!";
+        } else if (spintype === 'S') {
+            ebutton.textContent = "🔥Spin!";
+        } else {
+            ebutton.textContent = "Spin!";
+        }
+    });
+}
+    </script>
 
 
 <script type="text/javascript">

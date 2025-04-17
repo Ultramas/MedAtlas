@@ -364,7 +364,6 @@
     document.addEventListener("DOMContentLoaded", function () {
     const spinSelect = document.getElementById("id_spintype");
 
-    // Fetch and set initial spin preference
     fetch("{% url 'showcase:mypreferences' %}", {
         method: "GET",
         headers: {

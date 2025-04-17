@@ -331,21 +331,33 @@ function clearCards() {
     console.log("All target cards modified (class removed, child elements hidden, but kept 'sellattribute').");
 }
 
-        function addAnimation() {
-            document.querySelectorAll('.slider').forEach(scroller => {
-                scroller.style.animation = 'none';
-                scroller.offsetHeight;
-                let animationDuration;
-                if (isQuickSpinInteractive) {
-                    animationDuration = isQuickSpin ? '1s' : '2s';
-                } else {
-                    animationDuration = isQuickSpin ? '9s' : '18s';
-                }
-
-                scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
-                scroller.style.animationPlayState = 'running';
-            });
+function addAnimation() {
+    if (typeof currentSpintype === 'undefined' || currentSpintype === null) {
+        console.error("currentSpintype is not set");
+        return;
+    }
+    const isQuickSpin = window.isQuickSpin || false;
+    document.querySelectorAll('.slider').forEach(scroller => {
+        scroller.style.animation = 'none';
+        scroller.offsetHeight;
+        let animationDuration;
+        if (currentSpintype === 'I') {
+            animationDuration = isQuickSpin ? '1s' : '2s';
+            console.log('instant spin occured')
+        } else if (currentSpintype === 'S') {
+            animationDuration = isQuickSpin ? '8s' : '16s';
+            console.log('simultaneous spin occured')
+        } else if (currentSpintype === 'C') {
+            animationDuration = isQuickSpin ? '9s' : '18s';
+            console.log('classic spin occured')
+        } else {
+            animationDuration = isQuickSpin ? '9s' : '18s';
+            console.log('fallback')
         }
+        scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
+        scroller.style.animationPlayState = 'running';
+    });
+}
 
 function alignCardWithSpinner() {
     const spinnerTick = document.getElementById('selector');
@@ -565,17 +577,19 @@ function spin(buttonId) {
     }
 
 let animationDuration;
-
-if (
-    !userContext.isSignedIn ||
-    !userContext.hasPreference ||
-    userContext.preferenceValue !== "I"
-) {
-    animationDuration = isQuickSpin ? 4500 : 9000;
-} else {
-    animationDuration = isQuickSpin ? 500 : 1000;
-}
-
+if (typeof currentSpintype === 'undefined' || currentSpintype === null) {
+        console.error("currentSpintype is not set");
+        return;
+    }
+if (currentSpintype === 'I') {
+            animationDuration = isQuickSpin ? 500 : 1000;
+        } else if (currentSpintype === 'S') {
+            animationDuration = isQuickSpin ? 4000 : 8000;
+        } else if (currentSpintype === 'C') {
+            animationDuration = isQuickSpin ? 4500 : 9000;
+        } else {
+            animationDuration = isQuickSpin ? 4500 : 9000;
+        }
 
     const buffer = 150;
     const audiobuffer = 100;
