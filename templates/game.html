@@ -1519,7 +1519,13 @@ document.addEventListener("DOMContentLoaded", function () {
         data-daily="false"
          style="position: absolute; bottom: 5px; left: 5px;">
 
-<p><span id="actualSpinModeDisplay">Spin!</span></p>
+{% if preference and preference.spintype == 'I' %}
+⚡Spin!
+    {% elif preference and preference.spintype == 'S' %}
+🔥Spin!
+    {% else %}
+    Spin!
+    {% endif %}
 </button>
 
     {% else %}
@@ -1578,7 +1584,13 @@ document.addEventListener("DOMContentLoaded", function () {
         data-slug="{{ game.slug }}"
         data-daily="false"
          style="position: absolute; bottom: 5px; left: 5px;">
-<p><span id="actualSpinModeDisplay">Spin!</span></p>
+{% if preference and preference.spintype == 'I' %}
+⚡Spin!
+    {% elif preference and preference.spintype == 'S' %}
+🔥Spin!
+    {% else %}
+    Spin!
+    {% endif %}
 </button>
     {% else %}
     <a href="{% url 'login' %}?next={{ request.path }}">
@@ -1602,7 +1614,13 @@ document.addEventListener("DOMContentLoaded", function () {
          style="position: absolute; bottom: 5px; right: 5px;"
         disabled>
 
-<p><span id="spinModeDisplay">Demo</span></p>
+{% if preference and preference.spintype == 'I' %}
+⚡Demo
+    {% elif preference and preference.spintype == 'S' %}
+🔥Demo
+    {% else %}
+    Demo
+    {% endif %}
 </button>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -1649,7 +1667,13 @@ document.addEventListener("DOMContentLoaded", function () {
         data-slug="{{ game.slug }}"
         data-daily="false"
          style="position: absolute; bottom: 5px; right: 5px;">
-    <p><span id="spinModeDisplay">Demo</span></p>
+    {% if preference and preference.spintype == 'I' %}
+⚡Demo
+    {% elif preference and preference.spintype == 'S' %}
+🔥Demo
+    {% else %}
+    Demo
+    {% endif %}
 </button>
 {% endif %}
 </div>
@@ -1658,39 +1682,10 @@ document.addEventListener("DOMContentLoaded", function () {
     function getCSRFToken() {
         return document.querySelector('[name=csrfmiddlewaretoken]').value;
     }
+
+    const isQuickSpinInteractive = {% if user.is_authenticated and preference_instance and preference_instance.spintype == 'I' %}true{% else %}false{% endif %};
 </script>
-        <script>
-let isQuickSpinInteractive = "{{ preference_value }}" === "I";
 
-function triggerSpin(spintype) {
-    const preferenceDisplay = document.getElementById("preferenceValueDisplay");
-    if (preferenceDisplay) {
-        preferenceDisplay.textContent = spintype;
-    }
-    const display = document.getElementById("spinModeDisplay");
-    if (display) {
-        if (spintype === "I") {
-            display.textContent = "⚡Demo";
-        } else if (spintype === "S") {
-            display.textContent = "🔥Demo";
-        } else {
-            display.textContent = "Demo";
-        }
-    }
-    const displayspin = document.getElementById("actualSpinModeDisplay");
-    if (displayspin) {
-        if (spintype === "I") {
-            displayspin.textContent = "⚡Spin!";
-        } else if (spintype === "S") {
-            displayspin.textContent = "🔥Spin!";
-        } else {
-            displayspin.textContent = "Spin!";
-        }
-    }
-
-    isQuickSpinInteractive = spintype === "I";
-}
-    </script>
 
 <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function () {
