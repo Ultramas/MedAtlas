@@ -15491,10 +15491,8 @@ class CreateWithdrawView(LoginRequiredMixin, CreateView):
                 # Save the Withdraw instance first (without M2M)
                 withdraw = form.save()
 
-                # Now set the selected cards to the 'cards' M2M field
                 withdraw.cards.set(selected_cards)
 
-                # Finally, save the complete instance to persist the M2M relation
                 withdraw.save()
 
                 messages.success(request, 'Form submitted successfully.')

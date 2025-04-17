@@ -238,7 +238,24 @@ async function randomizeContents() {
                          console.log("window_pk:", window.inventory_pk);
 
                         window.sellUrl = `/inventory/${inventory_pk}/sell/`;
+                        const sellForm = document.getElementById(`sell-form-${window.inventory_pk}`);
+                        console.log('sellform: ' + sellForm);
+                        if (sellForm) {
+                            console.log("Sell form found:", sellForm);
 
+                            sellForm.addEventListener('submit', function(event) {
+                                event.preventDefault();
+                                const pk = this.querySelector('[name="pk"]').value;
+
+                                $(".spin-option").removeClass("selected");
+                                $(this).addClass("selected");
+                                totalSpins = parseInt($(this).data("value"));
+                                sessionStorage.setItem("totalSpins", totalSpins);
+                                sellInventory(pk);
+                            });
+                        } else {
+                          console.error("Sell form not found for inventory_pk:", window.inventory_pk);
+                        }
 
                     } else if (inventoryData.button_id === "start2") {
                     console.log("Temporary inventory object created without user. ID:", inventoryData.inventory_object_id);
@@ -724,15 +741,21 @@ function randomizedContents() {
     }, 250);
 
                if (!persistSpin) {
-                totalSpins = 1;
+    totalSpins = 1;
+    console.log("persistSpin not enabled; reset spins to 1");
+    sessionStorage.setItem("totalSpins", totalSpins);
+    $(".spin-option").removeClass("selected active");
+    $(".spin-option[data-value='1']").addClass("selected active");
 
-                console.log(`persist spin not enabled; reset spins to 1`); // Debug: Log the button's ID
-                sessionStorage.setItem("totalSpins", totalSpins);
-                $(".spin-option").removeClass("selected");
-                $('.spin-option').removeClass('active');
-                $(".spin-option[data-value='1']").addClass("selected");
-                $('.spin-option[data-value="1"]').addClass('active');
-            }
+    const baseCost = document.getElementById('spin-container').getAttribute('data-base-cost');
+    console.log('Base cost:', baseCost);
+
+    const totalCost = parseInt(baseCost) * totalSpins;
+    const costDisplay = document.getElementById('cost-display');
+    if (costDisplay) {
+    costDisplay.innerHTML = `<span id="total-cost">${totalCost}</span> 💎`;
+    }
+}
              else {
                     const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
 
@@ -961,7 +984,12 @@ $(document).on("click", ".sell-button", function() {
         `;
 
 
-            cardsContainer.appendChild(cardElement);
+            if (cardsContainer) {
+                cardsContainer.appendChild(cardElement);
+            } else {
+                console.error("cardsContainer not found in DOM");
+            }
+
 
             if (index === 0) {
                 const fire = document.querySelector('.fire');
@@ -1001,31 +1029,6 @@ $(document).on("click", ".sell-button", function() {
             $(".spin-option").prop('disabled', false);
             $(".start").prop('disabled', false);
 
-            if (!persistSpin) {
-                totalSpins = 1;
-
-                console.log(`persist spin not enabled; reset spins to 1`); // Debug: Log the button's ID
-                sessionStorage.setItem("totalSpins", totalSpins);
-                $(".spin-option").removeClass("selected");
-                $('.spin-option').removeClass('active');
-                $(".spin-option[data-value='1']").addClass("selected");
-                $('.spin-option[data-value="1"]').addClass('active');
-            }
-                 else {
-                    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
-
-                    $(".spin-option").removeClass("selected active");
-                    $(".spin-option[data-value='1']").addClass("selected active");
-
-                    setTimeout(() => {
-                        $(".spin-option").removeClass("selected active");
-                        $(".spin-option[data-value='" + currentSelectionValue + "']")
-                            .addClass("selected active");
-
-                        totalSpins = currentSelectionValue;
-                        console.log("Reverted spin to:", totalSpins);
-                    }, 0);
-                }
         });
 
 const sellBtn = textContainer.querySelector('.sell-button');
@@ -1046,29 +1049,6 @@ sellBtn.addEventListener('click', () => {
     $(".spin-option").prop('disabled', false);
     $(".start").prop('disabled', false);
 
-    if (!persistSpin) {
-                    totalSpins = 1;
-                    console.log("persistSpin disabled; reset spins to 1");
-                    sessionStorage.setItem("totalSpins", totalSpins);
-
-                    $(".spin-option").removeClass("selected active");
-                    $(".spin-option[data-value='1']").addClass("selected active");
-
-                } else {
-                    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
-
-                    $(".spin-option").removeClass("selected active");
-                    $(".spin-option[data-value='1']").addClass("selected active");
-
-                    setTimeout(() => {
-                        $(".spin-option").removeClass("selected active");
-                        $(".spin-option[data-value='" + currentSelectionValue + "']")
-                            .addClass("selected active");
-
-                        totalSpins = currentSelectionValue;
-                        console.log("Reverted spin to:", totalSpins);
-                    }, 0);
-                }
 
     setTimeout(() => {
         $.ajax({
