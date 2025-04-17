@@ -1644,7 +1644,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 {% if user.is_authenticated %}
-<div id="preferencescontainer" style="display: none;" class="preference-popup">
+<div id="preferencescontainer" style="display: none;  position: fixed; z-index: 30; top: 40%; background: rgba(0, 0, 0, 0.5); padding: 20px; border-radius: 15px;" class="preference-popup">
     {% include 'mypreferences.html' %}
 </div>
 

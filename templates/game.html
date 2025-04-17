@@ -1440,6 +1440,7 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
             <button class="spin-option" data-value="10">10x</button>
         </div>
         <br>
+    <div id="spin-container" data-base-cost="{{ game.cost }}">
         <h3 id="cost-display">
             {% if game.daily %}
                 {% if game.discount_cost == 0 %}
@@ -1463,7 +1464,7 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
                 {% endif %}
             {% endif %}
         </h3>
-
+    </div>
         <script>
   function getCookie(name) {
   let cookieValue = null;

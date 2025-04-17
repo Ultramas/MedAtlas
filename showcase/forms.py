@@ -432,19 +432,11 @@ class ToggleFavoriteForm(forms.Form):
 class MyPreferencesForm(forms.ModelForm):
     class Meta:
         model = MyPreferences
-        fields = ['spintype',]
+        fields = ['spintype', 'is_active']
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
-        super(MyPreferencesForm, self).__init__(*args, **kwargs)
-
-        if self.user and not self.instance.pk:
-            try:
-                preferences = MyPreferences.objects.get(user=self.user)
-                self.initial['spintype'] = preferences.spintype
-                self.instance = preferences
-            except MyPreferences.DoesNotExist:
-                pass
+        super().__init__(*args, **kwargs)
 
 class AscensionCreateForm(forms.ModelForm):
     class Meta:

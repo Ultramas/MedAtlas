@@ -337,78 +337,102 @@
 </style>
 </head>
 
-<body>
-<script>
-function togglePreferences() {
-    const container = document.getElementById("preferencescontainer");
-    if (container.style.display === "none" || container.style.display === "") {
-        container.style.display = "block";
+<body>{% if user.is_authenticated %}
+    <div id="preferencescontainer" class="preference-content" style="display: block;">
+        <h3>Spin Preferences</h3>
+       <form id="preferencesForm" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_spintype">Spin Type:</label>
+            <select name="spintype" id="id_spintype" class="form-control">
+                <option value="C">Classic</option>
+                <option value="S">Simultaneous</option>
+                <option value="I">Instant</option>
+            </select>
+        </div>
 
-        // Optional: Pre-fill from current preference
-        fetch("{% url 'showcase:mypreferences' %}")
-            .then(response => response.json())
-            .then(data => {
-                if (data.spintype) {
-                    document.getElementById("spintypeSelect").value = data.spintype;
-                }
-            });
-    } else {
-        container.style.display = "none";
-    }
-}
+        <!-- Close button -->
+        <button type="button" class="btn btn-secondary" onclick="togglePreferences();">Close</button>
+    </form>
 
-document.addEventListener("DOMContentLoaded", function () {
-    const spinSelect = document.getElementById("spintypeSelect");
+    </div>
 
-    spinSelect.addEventListener("change", function () {
-        const selectedValue = spinSelect.value;
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const spinSelect = document.getElementById("id_spintype");
 
         fetch("{% url 'showcase:mypreferences' %}", {
-            method: "POST",
+            method: "GET",
             headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: JSON.stringify({ spintype: selectedValue })
+                "X-Requested-With": "XMLHttpRequest"
+            }
         })
         .then(response => response.json())
         .then(data => {
-            if (data.status === "success") {
-                document.getElementById("preferencescontainer").style.display = "none";
-                alert("Spin type set to " + selectedValue + " successfully!");
-            } else {
-                alert("Failed to update spin type.");
+            if (data.status === "success" && data.preferences.spintype) {
+                spinSelect.value = data.preferences.spintype;
+                // Trigger spin with the current spintype
+                triggerSpin(data.preferences.spintype);
             }
         })
         .catch(err => {
-            console.error("Error:", err);
-            alert("Something went wrong. Please try again.");
+            console.error("Error fetching preferences:", err);
         });
+
+        // Automatically submit the form when spintype changes
+        spinSelect.addEventListener("change", function () {
+            const selectedValue = spinSelect.value;
+            const formData = new FormData();
+            formData.append("spintype", selectedValue);
+
+            fetch("{% url 'showcase:mypreferences' %}", {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    triggerSpin(data.spintype);
+                } else {
+                    alert("Failed to update spin type: " + (data.errors ? JSON.stringify(data.errors) : "Unknown error"));
+                }
+            })
+            .catch(err => {
+                console.error("Error updating preferences:", err);
+            });
+        });
+
+       function triggerSpin(spintype) {
+    const preferenceDisplay = document.getElementById("preferenceValueDisplay");
+    if (preferenceDisplay) {
+        preferenceDisplay.textContent = spintype;
+    }
+
+    // Example parameters (adjust this based on your real `spin()` logic)
+    const buttonId = 'exampleButton';
+    const totalSpins = 5;
+    const data = {
+        status: 'success',
+        nonce: '12345',
+        choice_id: 'card1',
+        choice_text: 'Example Card',
+        choice_color: 'blue',
+        choice_file: '/static/images/example.png',
+        choice_value: 100,
+        lower_nonce: '12344',
+        upper_nonce: '12346',
+        currencyFile: '',
+        currencySymbol: ''
+    };
+
+    const buffer = spintype === 'I' ? 500 : spintype === 'S' ? 800 : 1000;
+}
+
     });
-});
-
-</script>
-
-{% if user.is_authenticated %}
-
-    <form id="spinPreferenceForm" style="">
-       <div class="preference-content">
-        <h3>Spin Preferences</h3>
-        <form id="preferencesForm" method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="id_spintype">Spin Type:</label>
-                <select name="spintype" id="id_spintype" class="form-control">
-                    <option value="C" {% if preferenceform.spintype.value == 'C' %}selected{% endif %}>Classic</option>
-                    <option value="S" {% if preferenceform.spintype.value == 'S' %}selected{% endif %}>Simultaneous</option>
-                    <option value="I" {% if preferenceform.spintype.value == 'I' %}selected{% endif %}>Instant</option>
-                </select>
-            </div>
-            <div class="form-actions">
-                <button type="button" onclick="togglePreferences()" class="btn btn-secondary">Close</button>
-            </div>
-        </form>
-    </div>
-    </form>
+    </script>
 {% endif %}
 </body>

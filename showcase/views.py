@@ -2470,8 +2470,6 @@ def create_top_hit(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-from django.template.loader import render_to_string
-
 
 class TopHitsListView(ListView):
     model = TopHits
@@ -2499,32 +2497,33 @@ class MyPreferencesView(FormMixin, LoginRequiredMixin, ListView):
         return kwargs
 
     def post(self, request, *args, **kwargs):
-        # Check if this is an AJAX request
         is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
         user = self.request.user
-        if user.is_authenticated:
-            try:
-                preference_instance = MyPreferences.objects.filter(user=user).first()
-                form = MyPreferencesForm(request.POST, instance=preference, user=request.user)
-            except MyPreferences.DoesNotExist:
-                form = MyPreferencesForm(request.POST, user=request.user)
+
+        if not user.is_authenticated:
+            if is_ajax:
+                return JsonResponse({'status': 'error', 'message': 'User not authenticated'}, status=401)
+            else:
+                messages.error(request, 'You must be logged in to update preferences.')
+                return redirect('login')
+
+        preference_instance, created = MyPreferences.objects.get_or_create(user=user)
+        form = MyPreferencesForm(request.POST, instance=preference_instance, user=user)
 
         if form.is_valid():
             try:
                 preference = form.save(commit=False)
-                preference.user = request.user
+                preference.user = user
                 preference.save()
 
                 if is_ajax:
-                    return JsonResponse({'status': 'success'})
+                    return JsonResponse({'status': 'success', 'spintype': preference.spintype})
                 else:
-                    # For non-AJAX requests, redirect to a success page
                     messages.success(request, 'Spin preferences updated successfully!')
-                    return redirect('mypreferences')
+                    return redirect('showcase:mypreferences')
             except IntegrityError:
                 if is_ajax:
-                    return JsonResponse({'status': 'error', 'errors': {'general': 'Database error occurred'}},
-                                        status=400)
+                    return JsonResponse({'status': 'error', 'errors': {'general': 'Database error occurred'}}, status=400)
                 else:
                     messages.error(request, 'Database error occurred')
                     return self.form_invalid(form)
@@ -2547,80 +2546,9 @@ class MyPreferencesView(FormMixin, LoginRequiredMixin, ListView):
                 }
                 return JsonResponse({'status': 'success', 'preferences': data})
             except MyPreferences.DoesNotExist:
-                return JsonResponse({'status': 'error', 'message': 'No preferences found'})
+                return JsonResponse({'status': 'success', 'preferences': {'spintype': 'C', 'is_active': 1}})
         else:
-            # For regular GET requests, proceed with normal ListView behavior
             return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # Use the form from get_form() to ensure user is passed correctly
-        context['preferenceform'] = self.get_form()
-
-        # Get current preferences
-        try:
-            preferences = MyPreferences.objects.get(user=self.request.user)
-            context['current_spintype'] = preferences.get_spintype_display()
-            context['is_active'] = preferences.is_active
-        except MyPreferences.DoesNotExist:
-            context['current_spintype'] = 'Classic (Default)'
-            context['is_active'] = 1
-
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
-        context['preferenceform'] = MyPreferencesForm(user=self.request.user)
-        user = self.request.user
-        if user.is_authenticated:
-            try:
-                context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
-            except ObjectDoesNotExist:
-                context['SentProfile'] = None
-        else:
-            context['SentProfile'] = None
-        context['Money'] = Currency.objects.filter(is_active=1).first()
-        context['Game'] = GameHub.objects.filter(is_active=1).first()
-        context['GameRoom'] = Game.objects.filter(is_active=1, daily=True).first()
-
-        newprofile = Game.objects.filter(is_active=1, daily=True)
-        context['Profiles'] = newprofile
-
-        for newprofile in context['Profiles']:
-            user = newprofile.user
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
-
-        if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-        else:
-            userprofile = None
-
-        if userprofile:
-            context['NewsProfiles'] = userprofile
-        else:
-            context['NewsProfiles'] = None
-
-        if context['NewsProfiles'] == None:
-
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
-        else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-        return context
 
 
 class PreferencesDoneView(ListView):
@@ -7245,7 +7173,10 @@ class NavView(ListView):
             preference = form.save(commit=False)
             preference.user = request.user
             preference.save()
-            return JsonResponse({'status': 'success'})
+            return JsonResponse({
+                'status': 'success',
+                'preference_value': preference.spintype
+            })
         else:
             return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
 
@@ -7263,6 +7194,18 @@ class NavView(ListView):
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'),
                                                   is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            preference_instance = MyPreferences.objects.filter(user=user).first()
+            if preference_instance:
+                context['preferenceform'] = MyPreferencesForm(instance=preference_instance, user=user)
+                context['preference_instance'] = preference_instance
+                context['is_signed_in'] = user.is_authenticated
+                context['has_preference'] = preference_instance is not None
+                context['preference_value'] = preference_instance.spintype if preference_instance else None
+            else:
+                context['preferenceform'] = MyPreferencesForm(user=user)
+                context['preference_instance'] = None
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['form'] = MyPreferencesForm(user=self.request.user)
 
@@ -13677,8 +13620,7 @@ class GameChestBackgroundView(BaseView):
                 context['preference_instance'] = preference_instance
                 context['is_signed_in'] = user.is_authenticated
                 context['has_preference'] = preference_instance is not None
-                context[
-                    'preference_value'] = preference_instance.spintype if preference_instance else None
+                context['preference_value'] = preference_instance.spintype if preference_instance else None
             else:
                 context['preferenceform'] = MyPreferencesForm(user=user)
                 context['preference_instance'] = None

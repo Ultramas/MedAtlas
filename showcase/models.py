@@ -4794,6 +4794,11 @@ class SettingsModel(models.Model):
 
 
 class MyPreferences(models.Model):
+    SPIN_TYPE = (
+        ('C', 'Classic'),
+        ('S', 'Simultaneous'),
+        ('I', 'Instant'),
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     spintype = models.CharField(choices=SPIN_TYPE, max_length=1, default='C')
     is_active = models.IntegerField(
@@ -4811,7 +4816,6 @@ class MyPreferences(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s Preferences - {self.get_spintype_display()}"
-
 
 class FavoriteChests(models.Model):
     # Change from OneToOneField to ForeignKey so multiple favorite records per user are allowed.

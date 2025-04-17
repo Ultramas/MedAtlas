@@ -166,7 +166,7 @@ async function randomizeContents() {
                         data-currency-symbol="${attributes.currencySymbol || ''}"
                         style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border-top: none; width: 10em;">
                         ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-                        <div class="sliderPrice" style="color: white;"><b class="innerprice">${attributes.value} </b>💎 </div>
+                        <div class="sliderPrice" style="color: white;"><b class="innerprice">${attributes.value} </b>💎targetcard </div>
                     </div>
                 </div>
             `;
@@ -675,6 +675,7 @@ setTimeout(() => {
 
     });
 
+
 function randomizedContents() {
     const slider = document.querySelector('.slider');
     const children = Array.from(slider.children);
@@ -714,7 +715,7 @@ function randomizedContents() {
         setTimeout(() => spin(buttonId), buffer);
          setTimeout(() => {
         randomizedContents();
-    }, 500);
+    }, 200);
     } else {
         animationStopped = true;
         console.log(`The spins have ended.`);
@@ -722,15 +723,17 @@ function randomizedContents() {
         showPopup(buttonId);
     }, 250);
 
-                if (!persistSpin) {
-                    totalSpins = 1;
-                    console.log("persistSpin disabled; reset spins to 1");
-                    sessionStorage.setItem("totalSpins", totalSpins);
+               if (!persistSpin) {
+                totalSpins = 1;
 
-                    $(".spin-option").removeClass("selected active");
-                    $(".spin-option[data-value='1']").addClass("selected active");
-
-                } else {
+                console.log(`persist spin not enabled; reset spins to 1`); // Debug: Log the button's ID
+                sessionStorage.setItem("totalSpins", totalSpins);
+                $(".spin-option").removeClass("selected");
+                $('.spin-option').removeClass('active');
+                $(".spin-option[data-value='1']").addClass("selected");
+                $('.spin-option[data-value="1"]').addClass('active');
+            }
+             else {
                     const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
 
                     $(".spin-option").removeClass("selected active");
@@ -920,7 +923,7 @@ $(document).on("click", ".sell-button", function() {
 
        setTimeout(() => {
             adjustCardsContainer();
-        }, 100);
+        }, 200);
 
     window.addEventListener('resize', adjustCardsContainer);
 
@@ -998,15 +1001,17 @@ $(document).on("click", ".sell-button", function() {
             $(".spin-option").prop('disabled', false);
             $(".start").prop('disabled', false);
 
- if (!persistSpin) {
-                    totalSpins = 1;
-                    console.log("persistSpin disabled; reset spins to 1");
-                    sessionStorage.setItem("totalSpins", totalSpins);
+            if (!persistSpin) {
+                totalSpins = 1;
 
-                    $(".spin-option").removeClass("selected active");
-                    $(".spin-option[data-value='1']").addClass("selected active");
-
-                } else {
+                console.log(`persist spin not enabled; reset spins to 1`); // Debug: Log the button's ID
+                sessionStorage.setItem("totalSpins", totalSpins);
+                $(".spin-option").removeClass("selected");
+                $('.spin-option').removeClass('active');
+                $(".spin-option[data-value='1']").addClass("selected");
+                $('.spin-option[data-value="1"]').addClass('active');
+            }
+                 else {
                     const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
 
                     $(".spin-option").removeClass("selected active");
