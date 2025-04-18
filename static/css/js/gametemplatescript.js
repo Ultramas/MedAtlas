@@ -1,4 +1,3 @@
-//both randomizecontents & randomizedcontents
 document.addEventListener('DOMContentLoaded', () => {
     const slider = document.getElementById('slider');
     const popup = document.getElementById('popup');
@@ -244,6 +243,8 @@ async function randomizeContents() {
                         sellForm.addEventListener('submit', function(event) {
                             event.preventDefault();
                             const pk = this.querySelector('[name="pk"]').value;
+                            console.log("Sell form submitted. pk =", pk);
+
                             $(".spin-option").removeClass("selected");
                             $(this).addClass("selected");
                             totalSpins = parseInt($(this).data("value"));
@@ -303,15 +304,26 @@ function clearCards() {
     const cardContainer = document.querySelector('.slider');
     const targetCards = cardContainer.querySelectorAll('.target-card');
 
-    targetCards.forEach(card => {
+    targetCards.forEach(card => cardContainer.removeChild(card));
 
-        card.querySelectorAll('*').forEach(child => {
-            child.style.display = 'none';
-        });
-    });
-
-    console.log("All target cards modified (class removed, child elements hidden, but kept 'sellattribute').");
+    console.log("All target cards removed.");
 }
+
+// Function to center the card in the slider
+function centerCard(cardElement) {
+    const slider = document.getElementById('slider');
+    const cardOffset = cardElement.offsetLeft;
+    const sliderWidth = slider.offsetWidth;
+    const cardWidth = cardElement.offsetWidth;
+
+    // Adjust margin-left to center the card
+    slider.scrollTo({
+        left: cardOffset - sliderWidth / 2 + cardWidth / 2,
+        behavior: 'smooth',
+    });
+}
+
+
 
 function addAnimation() {
     if (typeof currentSpintype === 'undefined' || currentSpintype === null) {
