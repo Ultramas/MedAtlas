@@ -10,8 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let totalSpins = 1;
     let currentSpin = 0;
 
-    const persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
+    let persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
+    window.gameSpinCount = 1;
+
 
     const popuep = document.querySelector('.popup');
     const closewBtn = popup.querySelector('.close');
@@ -35,12 +37,24 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    if (persistSpin) {
-        $('#persist-spin-checkbox').prop('checked', true);
-    }
 
-    $('#persist-spin-checkbox').change(function () {
-        localStorage.setItem('persistSpinChecked', $(this).prop('checked').toString());
+if (persistSpin) {
+    $('#persist-spin-checkbox').prop('checked', true);
+    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
+    const spinValue = isNaN(currentSelectionValue) ? 1 : currentSelectionValue;    sessionStorage.setItem("totalSpins", String(spinValue));
+    window.gameSpinCount = spinValue;
+    console.log("Initialized totalSpins globally:", window.gameSpinCount);
+} else {
+    sessionStorage.setItem("totalSpins", "1");
+    window.gameSpinCount = 1;
+    console.log("Reset totalSpins to 1 (persistSpin disabled)");
+}
+
+    $('#persist-spin-checkbox').change(function() {
+        const isChecked = $(this).prop('checked');
+        localStorage.setItem('persistSpinChecked', isChecked.toString());
+        persistSpin = isChecked;
+        console.log("persistSpin updated to:", persistSpin);
     });
 
     $('#quickspin-checkbox').change(function () {
@@ -336,20 +350,20 @@ function addAnimation() {
         console.error("currentSpintype is not set");
         return;
     }
-    const isQuickSpin = window.isQuickSpin || false;
+
     document.querySelectorAll('.slider').forEach(scroller => {
         scroller.style.animation = 'none';
         scroller.offsetHeight;
         let animationDuration;
         if (currentSpintype === 'I') {
             animationDuration = isQuickSpin ? '1s' : '2s';
-            console.log('instant spin occured')
+            console.log('instant spin occurred')
         } else if (currentSpintype === 'S') {
             animationDuration = isQuickSpin ? '8s' : '16s';
-            console.log('simultaneous spin occured')
+            console.log('simultaneous spin occurred')
         } else if (currentSpintype === 'C') {
             animationDuration = isQuickSpin ? '9s' : '18s';
-            console.log('classic spin occured')
+            console.log('classic spin occurred')
         } else {
             animationDuration = isQuickSpin ? '9s' : '18s';
             console.log('fallback')
@@ -742,15 +756,32 @@ function randomizedContents() {
     currentSpin++;
     console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`);
 
-    if (currentSpin < totalSpins) {
-        setTimeout(() => spin(buttonId), buffer);
-         setTimeout(() => {
-        randomizedContents();
-    }, 200);
+let totalSpins = 1;
+
+const storedValue = sessionStorage.getItem("totalSpins");
+console.log("Raw value from sessionStorage:", storedValue, "type:", typeof storedValue);
+
+if (storedValue) {
+    const parsedValue = parseInt(storedValue, 10);
+    if (!isNaN(parsedValue)) {
+        totalSpins = parsedValue;
+        console.log("Successfully parsed totalSpins:", totalSpins);
     } else {
-        animationStopped = true;
-        console.log(`The spins have ended.`);
-        setTimeout(() => {
+        console.warn("Failed to parse totalSpins, using default value of 1");
+    }
+}
+
+console.log("Using totalSpins value:", totalSpins);
+
+if (currentSpin < window.gameSpinCount) {
+    setTimeout(() => spin(buttonId), buffer);
+    setTimeout(() => {
+        randomizedContents();
+    }, 150);
+} else {
+    animationStopped = true;
+    console.log(`The spins have ended after ${window.gameSpinCount} spins.`);
+    setTimeout(() => {
         showPopup(buttonId);
     }, 250);
 
@@ -770,21 +801,25 @@ function randomizedContents() {
     costDisplay.innerHTML = `<span id="total-cost">${totalCost}</span> 💎`;
     }
 }
-             else {
-                    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
+else {
+    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
+    $(".spin-option").removeClass("selected active");
+    $(".spin-option[data-value='1']").addClass("selected active");
 
-                    $(".spin-option").removeClass("selected active");
-                    $(".spin-option[data-value='1']").addClass("selected active");
+    setTimeout(() => {
+        $(".spin-option").removeClass("selected active");
+        $(".spin-option[data-value='" + currentSelectionValue + "']")
+            .addClass("selected active");
 
-                    setTimeout(() => {
-                        $(".spin-option").removeClass("selected active");
-                        $(".spin-option[data-value='" + currentSelectionValue + "']")
-                            .addClass("selected active");
+        const spinValue = isNaN(currentSelectionValue) ? 1 : currentSelectionValue;
+        totalSpins = spinValue;
+        window.gameSpinCount = spinValue; // Update the global variable
+        console.log("Reverted spin to:", totalSpins);
 
-                        totalSpins = currentSelectionValue;
-                        console.log("Reverted spin to:", totalSpins);
-                    }, 0);
-                }
+        sessionStorage.setItem("totalSpins", String(spinValue));
+        console.log("Saved totalSpins to sessionStorage:", spinValue);
+    }, 0);
+}
 
         $(".spin-option").prop('disabled', false);
     }
@@ -960,7 +995,7 @@ $(document).on("click", ".sell-button", function() {
 
        setTimeout(() => {
             adjustCardsContainer();
-        }, 200);
+        }, 100);
 
     window.addEventListener('resize', adjustCardsContainer);
 

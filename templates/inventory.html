@@ -21,10 +21,81 @@
 </form>
 
 {% if store_view == "detail" %}
-<!--streamlined view-->
+<!--detailed view-->
 
 <head>
    <style>
+     img{
+          height:220px;
+        }
+
+        .pokemon-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+        .pokemon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
+            z-index: 1;
+        }
+
+        .pokemon-image {
+            aspect-ratio: 1;
+            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pokemon-image::after {
+            content: '';
+            position: absolute;
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pokemon-info {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+        .pokemon-name {
+            font-size: 1.00rem;
+            margin-bottom: 0.75rem;
+            font-family: 'Cinzel', serif;
+            color: var(--primary);
+            position:fixed;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            width: 100%;
+            color: white;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
     * {
       margin: 0;
       padding: 0;
@@ -1573,7 +1644,7 @@ export const GlobalStyles = createGlobalStyle`
           <div class="card-header">
             <div class="card-title">
               <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M12,6C15.31,6 18,8.69 18,12C18,15.31 15.31,18 12,18C8.69,18 6,15.31 6,12C6,8.69 8.69,6 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" /></svg>
-              Your Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)
+              My Inventory - (<span id="stock-count">{{ stock_count }}</span>)
             </div>
             <div class="card-actions">
               <div class="status-badge">
@@ -1591,9 +1662,13 @@ export const GlobalStyles = createGlobalStyle`
                 <strong>Total Value:</strong>
                 <span id="total_value_element">{{ total_value }}</span>
               </div>
-              {% if StockObject %}
-              <button id="sell-everything-button" class="card-button sell-button" style="width: 120px;">Sell All</button>
-              {% endif %}
+                  <p>Total Value: <span id="total-value">{{ total_value|default:0 }}</span></p>
+
+    {% if stock_count > 0 %}
+    <div style="margin-top: 20px;">
+        <button id="sell-everything-button" class="card-button add-button sell-button" style="width: 120px; position: fixed; right: 50px; top: 175px;">Sell All</button>
+    </div>
+    {% endif %}
             </div>
 
             <!-- Bulk Sell Form -->
@@ -1831,51 +1906,6 @@ export const GlobalStyles = createGlobalStyle`
         });
       });
 
-      // Handle sell everything button
-      const sellEverythingButton = document.getElementById('sell-everything-button');
-      if (sellEverythingButton) {
-        sellEverythingButton.addEventListener('click', function() {
-          if (confirm('Are you sure you want to sell all inventory items?')) {
-            sellAudio.play();
-            fetch("{% url 'showcase:sell_everything_inventory_objects' %}", {
-              method: 'POST',
-              headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-              },
-              credentials: 'same-origin',
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                document.getElementById('inventory-items-container').innerHTML = data.inventory_html;
-                document.getElementById('stock-count').textContent = data.stock_count;
-
-                if (data.total_value) {
-                  document.getElementById('total_value_element').textContent = data.total_value;
-                }
-
-                if (data.currency_amount) {
-                  const currencyElement = document.getElementById('sellupdate');
-                  if (currencyElement) {
-                    currencyElement.textContent = data.currency_amount;
-                  }
-                }
-              } else {
-                alert('Error: ' + data.error);
-              }
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              alert('An error occurred while processing your request.');  error);
-              alert('An error occurred while processing your request.');
-            });
-          }
-        });
-      }
-
-      // Handle sell all form
       const sellAllForm = document.getElementById('sell-all-form');
       if (sellAllForm) {
         sellAllForm.addEventListener('submit', function(event) {
@@ -1920,7 +1950,6 @@ export const GlobalStyles = createGlobalStyle`
         });
       }
 
-      // Function to update sell all button visibility
       function updateSellAllButton() {
         const checkboxes = document.querySelectorAll('.item-select-checkbox');
         const sellAllForm = document.getElementById('sell-all-form');
@@ -2342,52 +2371,35 @@ document.addEventListener("DOMContentLoaded", () => {
       handleAjaxFormSubmission(form)
     })
   })
-
-  // Handle sell everything button
-  const sellEverythingButton = document.getElementById("sell-everything-button")
-  if (sellEverythingButton) {
-    sellEverythingButton.addEventListener("click", () => {
-      if (confirm("Are you sure you want to sell all inventory items?")) {
-        sellAudio.play()
-        fetch("/sell-everything-inventory-objects/", {
-          method: "POST",
-          headers: {
-            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-            "Content-Type": "application/json",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          credentials: "same-origin",
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              document.getElementById("inventory-items-container").innerHTML = data.inventory_html
-              document.getElementById("stock-count").textContent = data.stock_count
-
-              if (data.total_value) {
-                document.getElementById("total_value_element").textContent = data.total_value
-              }
-
-              if (data.currency_amount) {
-                const currencyElement = document.getElementById("sellupdate")
-                if (currencyElement) {
-                  currencyElement.textContent = data.currency_amount
-                }
-              }
+.then(data => {
+    console.log('Response data:', data);
+    if (data.success) {
+        console.log('Updating inventory...');
+        document.getElementById('inventory-items-container').innerHTML = data.inventory_html;
+        console.log('Inventory updated:', document.getElementById('inventory-items-container').innerHTML);
+        document.getElementById('stock-count').textContent = data.stock_count;
+        if (data.currency_amount) {
+            const currencyElement = document.getElementById('sellupdate');
+            if (currencyElement) {
+                currencyElement.textContent = data.currency_amount;
             } else {
-              alert("Error: " + data.error)
+                console.log('Currency element not found');
             }
-          })
-          .catch((error) => {
-            console.error("Error:", error)
-            alert("An error occurred while processing your request.")
-          })
-      }
-    })
-  }
+        }
+        if (data.total_value) {
+            document.getElementById('total_value_element').textContent = data.total_value;
+        }
+    } else {
+        console.log('Error:', data.error);
+        alert('Error: ' + data.error);
+    }
+})
+.catch(error => {
+    console.error('Fetch error:', error);
+    alert('An error occurred while processing your request.');
+});
 
-  // Handle sell all form
-  const sellAllForm = document.getElementById("sell-all-form")
+    const sellAllForm = document.getElementById("sell-all-form")
   if (sellAllForm) {
     sellAllForm.addEventListener("submit", (event) => {
       event.preventDefault()
@@ -2402,36 +2414,36 @@ document.addEventListener("DOMContentLoaded", () => {
         },
       })
         .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            document.getElementById("stock-count").textContent = data.stock_count
-            document.getElementById("inventory-items-container").innerHTML = data.inventory_html
-
-            if (data.currency_amount) {
-              const currencyElement = document.getElementById("sellupdate")
-              if (currencyElement) {
-                currencyElement.textContent = data.currency_amount
-              }
+.then(data => {
+    console.log('Response data:', data);
+    if (data.success) {
+        console.log('Updating inventory...');
+        document.getElementById('inventory-items-container').innerHTML = data.inventory_html;
+        console.log('Inventory updated:', document.getElementById('inventory-items-container').innerHTML);
+        document.getElementById('stock-count').textContent = data.stock_count;
+        if (data.currency_amount) {
+            const currencyElement = document.getElementById('sellupdate');
+            if (currencyElement) {
+                currencyElement.textContent = data.currency_amount;
+            } else {
+                console.log('Currency element not found');
             }
-
-            if (data.total_value) {
-              document.getElementById("total_value_element").textContent = data.total_value
-            }
-
-            // Hide the sell all form after selling
-            sellAllForm.style.display = "none"
-          } else {
-            alert("Error: " + (data.error || "An unknown error occurred"))
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error)
-          alert("An error occurred while processing your request.")
-        })
+        }
+        if (data.total_value) {
+            document.getElementById('total_value_element').textContent = data.total_value;
+        }
+    } else {
+        console.log('Error:', data.error);
+        alert('Error: ' + data.error);
+    }
+})
+.catch(error => {
+    console.error('Fetch error:', error);
+    alert('An error occurred while processing your request.');
+});
     })
   }
 
-  // Function to update sell all button visibility
   function updateSellAllButton() {
     const checkboxes = document.querySelectorAll(".item-select-checkbox")
     const sellAllForm = document.getElementById("sell-all-form")
@@ -2494,7 +2506,6 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("total_value_element").textContent = data.total_value
           }
 
-          // If the item was removed, remove it from the UI
           if (!data.inventory_html) {
             const inventoryItem = form.closest(".gridCardItem")
             if (inventoryItem) {
@@ -2502,7 +2513,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           }
 
-          // Re-attach event listeners to checkboxes
           document.querySelectorAll(".item-select-checkbox").forEach((checkbox) => {
             checkbox.addEventListener("change", updateSellAllButton)
           })
@@ -2758,7 +2768,6 @@ function initEventListeners() {
         rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{% static 'css/inventory2.css' %}">
     <style>
- /* Add this to the existing <style> tag or create a new one if it doesn't exist */
     .copyright-section {
         background: linear-gradient(
             to right,
@@ -3100,7 +3109,6 @@ function initEventListeners() {
         }
 
         .pokemon-image {
-            width: 100%;
             aspect-ratio: 1;
             background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
             display: flex;
@@ -3113,8 +3121,6 @@ function initEventListeners() {
         .pokemon-image::after {
             content: '';
             position: absolute;
-            width: 150%;
-            height: 150%;
             background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
             animation: rotate 20s linear infinite;
         }
@@ -3513,7 +3519,6 @@ document.querySelectorAll(".withdraw-form").forEach(form => {
           if (data.success) {
             alert("Withdraw successful!");
 
-            // Remove item from UI if necessary
             const inventoryItem = currentForm.closest(".gridCardItem");
             if (inventoryItem) inventoryItem.remove();
 
@@ -3534,7 +3539,7 @@ document.querySelectorAll(".withdraw-form").forEach(form => {
     };
 
     cancelButton.onclick = () => {
-      withdrawPopup.style.display = "none"; // Close popup on cancel
+      withdrawPopup.style.display = "none";
     };
   });
 });
@@ -3549,9 +3554,9 @@ document.querySelectorAll(".withdraw-form").forEach(form => {
 
 
     <main class="main-content">
-        <h1>My Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)</h1>
+        <h1>My Inventory - (<span id="stock-count">{{ stock_count }}</span>)</h1>
 
-            {% if StockObject %}
+            {% if stock_count > 0 %}
     <div style="margin-top: 20px;">
         <button id="sell-everything-button" class="card-button add-button sell-button" style="width: 120px; position: fixed; right: 50px; top: 175px;">Sell All</button>
     </div>
@@ -3571,15 +3576,29 @@ document.getElementById('sell-everything-button').addEventListener('click', func
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                document.getElementById('inventory-list').innerHTML = data.inventory_html;
-                document.getElementById('currency-amount').textContent = data.currency_amount;
-                alert('All items have been sold successfully.');
+                document.getElementById('inventory-items-container').innerHTML = data.inventory_html;
+                document.getElementById('stock-count').textContent = data.stock_count;
+                const sellButton = document.getElementById('sell-everything-button');
+                if (sellButton) {
+                    sellButton.style.display = data.stock_count > 0 ? 'block' : 'none';
+                }
+                if (data.currency_amount) {
+                    const currencyElement = document.getElementById('sellupdate');
+                    if (currencyElement) {
+                        currencyElement.textContent = data.currency_amount;
+                    }
+                }
+                const totalValueElement = document.getElementById('total-value');
+                if (totalValueElement) {
+                    totalValueElement.textContent = data.total_value || 0;
+                }
             } else {
+                console.log('Error:', data.error);
                 alert('Error: ' + data.error);
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Fetch error:', error);
             alert('An error occurred while processing your request.');
         });
     }
@@ -3803,7 +3822,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         currencyAmountElement.textContent = data.currency_amount;
                     }
 
-                    // Example: Remove the item from the UI
                     this.closest(".gridCardItem").remove();
                 } else {
                     console.error("Action failed.");
@@ -3850,11 +3868,11 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then((data) => {
                 if (data.success) {
-                    // Withdrawal succeeded, update the UI accordingly.
+
                     if (data.new_withdraw) {
                         console.log('Shipping fee charged 599');
                     }
-                    // Remove the withdrawn inventory item
+
                     const inventoryItem = form.closest(".gridCardItem");
                     if (inventoryItem) inventoryItem.remove();
 

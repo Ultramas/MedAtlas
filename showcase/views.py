@@ -12682,7 +12682,6 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             ).first()
 
             if withdraw:
-                # Remove inventory ownership and add to the existing withdraw
                 inventory_object.user = None
                 inventory_object.inventory = None
                 inventory_object.save()
@@ -12916,10 +12915,18 @@ class SellAllInventoryObjectsView(View):
         })
 
 
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.http import JsonResponse
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
+from .models import InventoryObject, Transaction, ProfileDetails
+
 @method_decorator(login_required, name='dispatch')
 class SellEverythingInventoryObjectsView(View):
     def post(self, request, *args, **kwargs):
-        # Fetch all active inventory items for the logged-in user
         inventory_objects = InventoryObject.objects.filter(is_active=True, user=request.user)
 
         if not inventory_objects.exists():
@@ -12929,11 +12936,9 @@ class SellEverythingInventoryObjectsView(View):
 
         with transaction.atomic():
             for inventory_object in inventory_objects:
-                # Perform necessary operations to mark the item as sold
-                inventory_object.is_active = False  # Example: Marking the item as inactive
+                inventory_object.is_active = False
                 inventory_object.save()
 
-                # Create a transaction record
                 Transaction.objects.create(
                     inventory_object=inventory_object,
                     user=request.user,
@@ -12941,22 +12946,23 @@ class SellEverythingInventoryObjectsView(View):
                     amount=inventory_object.price
                 )
 
-            # Update the user's currency amount
             user_profile = get_object_or_404(ProfileDetails, user=request.user)
             user_profile.currency_amount += total_price
             user_profile.save()
 
-        # Prepare the updated inventory HTML to refresh the inventory list on the frontend
+        stock_objects = InventoryObject.objects.filter(is_active=True, user=request.user)
+        stock_count = stock_objects.count()
         updated_inventory_html = render_to_string(
             "inventory_items.html",
-            {"StockObject": InventoryObject.objects.filter(is_active=True, user=request.user)},
+            {"StockObject": stock_objects},
             request=request
         )
 
         return JsonResponse({
             'success': True,
-            'stock_count': InventoryObject.objects.filter(is_active=True, user=request.user).count(),
+            'stock_count': stock_count,
             'currency_amount': user_profile.currency_amount,
+            'total_value': total_price,  # Add total_value
             'inventory_html': updated_inventory_html
         })
 

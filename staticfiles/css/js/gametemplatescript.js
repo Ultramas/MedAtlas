@@ -13,12 +13,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
 
-    // Set the checkbox state based on localStorage value
+    const popuep = document.querySelector('.popup');
+    const closewBtn = popup.querySelector('.close');
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    popuep.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    popuep.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    });
+
+    function handleSwipe() {
+      const swipeDistance = touchEndX - touchStartX;
+      if (Math.abs(swipeDistance) > 50) {
+        closewBtn.click();
+      }
+    }
+
     if (persistSpin) {
         $('#persist-spin-checkbox').prop('checked', true);
     }
 
-    // Handle the checkbox state change
     $('#persist-spin-checkbox').change(function () {
         localStorage.setItem('persistSpinChecked', $(this).prop('checked').toString());
     });
@@ -27,11 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('quickSpinChecked', $(this).prop('checked').toString());
     });
 
-    // Update total spins when a spin option is clicked
     $(".spin-option").click(function () {
         $(".spin-option").removeClass("selected");
 
-        // Play sound bubble_selection.mp3
         let audio = new Audio("/static/css/sounds/bubble_selection.mp3");
         audio.play();
 
@@ -41,14 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // Start animation on button click
     $(".start").click(function (event) {
-        const buttonId = event.target.id; // Extract the ID of the clicked button
-        console.log(`Button clicked: ${buttonId}`); // Debug: Log the button's ID
+        const buttonId = event.target.id;
+        console.log(`Button clicked: ${buttonId}`);
         sessionStorage.setItem("startAnimation", "true");
         sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
-
-        // Reset current spin count and initialize the animation
 
 
         let currentSpin = 0;
@@ -60,9 +75,31 @@ document.addEventListener('DOMContentLoaded', () => {
         $(".start").prop('disabled', true);
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
         selectedItems = [];
-        console.log(`Initializing animation for button: ${buttonId}`); // Debug log for button ID
+        console.log(`Initializing animation for button: ${buttonId}`);
 
 
+
+let requestInProgress = false;
+const requestQueue = [];
+const requestDelay = 300;
+
+async function processQueue() {
+    if (requestQueue.length === 0 || requestInProgress) return;
+
+    requestInProgress = true;
+    const nextRequest = requestQueue.shift();
+
+    try {
+        const result = await nextRequest();
+        requestInProgress = false;
+        setTimeout(processQueue, requestDelay);
+        return result;
+    } catch (error) {
+        requestInProgress = false;
+        setTimeout(processQueue, requestDelay);
+        throw error;
+    }
+}
 
 async function randomizeContents() {
     const startButton = document.getElementById("start");
@@ -70,15 +107,14 @@ async function randomizeContents() {
     const nonce = startButton.getAttribute("data-nonce");
     const slug = startButton.getAttribute("data-slug");
 
-    console.log("Game ID:", gameId);
-    console.log("Nonce:", nonce);
-    console.log("Slug:", slug);
+    const executeRequest = async () => {
+        const payload = {
+            game_id: gameId,
+            color: choiceColor
+        };
 
-    try {
-        const payload = { game_id: gameId };
-        console.log("Payload sent to server:", payload);
+        await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
 
-        // Call the create_outcome endpoint
         const response = await fetch(`/create_outcome/${slug}/`, {
             method: 'POST',
             headers: {
@@ -88,14 +124,18 @@ async function randomizeContents() {
             body: JSON.stringify(payload),
         });
 
+        if (!response.ok) {
+            if (response.status === 500 && response.statusText.includes("database is locked")) {
+                throw new Error("database_locked");
+            }
+            throw new Error(`HTTP error ${response.status}`);
+        }
+
         const data = await response.json();
-        console.log("Response from server:", data);
 
         if (data.status === 'success') {
             startButton.setAttribute('data-nonce', data.nonce);
-            console.log(`Nonce updated: ${data.nonce}`);
 
-            // Clear existing cards
             clearCards();
 
             const attributes = {
@@ -110,7 +150,7 @@ async function randomizeContents() {
             };
 
             const targetCardElement = document.createElement('div');
-            targetCardElement.classList.add('card', 'target-card');
+            targetCardElement.classList.add('card', 'target-card', 'sellattribute');
             targetCardElement.setAttribute('id', `card-${attributes.id}`);
             targetCardElement.setAttribute('data-nonce', attributes.nonce);
             targetCardElement.setAttribute('data-color', attributes.color);
@@ -119,17 +159,17 @@ async function randomizeContents() {
             targetCardElement.setAttribute('data-upper_nonce', attributes.upperNonce);
 
             targetCardElement.innerHTML = `
-    <div class="cards" style="background: url(/static/css/images/${attributes.color}.png);">
-            <div class="lootelement"
-     data-price="${attributes.value || ''}"
-     data-currency-file="${attributes.currencyFile || ''}"
-     data-currency-symbol="${attributes.currencySymbol || ''}"
-     style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border: 0.1em solid grey; border-top: none; width: 10em;">
-    ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-    <div class="sliderPrice">${attributes.value} 💎</div>
-</div>
-</div>
-`;
+                <div class="cards" style="background: url(/static/css/images/${attributes.color}.png);">
+                    <div class="lootelement"
+                        data-price="${attributes.value || ''}"
+                        data-currency-file="${attributes.currencyFile || ''}"
+                        data-currency-symbol="${attributes.currencySymbol || ''}"
+                        style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border-top: none; width: 10em;">
+                        ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
+                        <div class="sliderPrice" style="color: white;"><b class="innerprice">${attributes.value} </b>💎targetcard </div>
+                    </div>
+                </div>
+            `;
 
             selectedItems.push({
                 id: attributes.id,
@@ -142,169 +182,217 @@ async function randomizeContents() {
                 upperNonce: attributes.upperNonce
             });
 
-            const cardContainer = document.querySelector('.slider'); // Adjust selector if necessary
+            const cardContainer = document.querySelector('.slider');
 
-            // Calculate the position to insert: 4 cards to the right of the middle
-            const middleIndex = Math.floor(cardContainer.children.length / 2);
-            const targetIndex = Math.min(
-                cardContainer.children.length,
-                middleIndex + 4
-            );
+            function updateCardPosition() {
+                const windowWidth = window.innerWidth;
+                const randomDivisor = Math.random() * (1.3375 - 1.3265) + 1.3265;
+                const cardContainer = document.querySelector('.slider');
+                const middleIndex = Math.floor(cardContainer.children.length / 1.327);
+                const targetIndex = Math.min(cardContainer.children.length, middleIndex);
 
-            if (cardContainer.children[targetIndex]) {
-                cardContainer.insertBefore(targetCardElement, cardContainer.children[targetIndex]);
-            } else {
-                cardContainer.appendChild(targetCardElement);
+                if (cardContainer.children[targetIndex]) {
+                    cardContainer.insertBefore(targetCardElement, cardContainer.children[targetIndex]);
+                } else {
+                    cardContainer.appendChild(targetCardElement);
+                }
             }
 
-            console.log("Target card inserted 4 cards to the right of the middle.");
+            window.addEventListener('resize', updateCardPosition);
+            updateCardPosition();
 
-            // Call create_inventory_object after the card is created
-            const inventoryPayload = {
-                choice_id: data.choice_id, // Use choice_id from outcome response
-                choice_value: data.choice_value, // Use choice_value
-                category: data.category, // Additional data as needed
-                price: 100,
-                condition: 'New',
-                quantity: 1,
-                buttonId: buttonId,
-            };
-            console.log("Calling /create_inventory_object/ with payload:", inventoryPayload);
+            try {
+                   const inventoryPayload = {
+        choice_id: data.choice_id,
+        choice_value: data.choice_value,
+        category: data.category,
+        price: data.choice_value,
+        condition: 'New',
+        quantity: 1,
+        buttonId: buttonId,
+    };
 
-            const inventoryResponse = await fetch('/create_inventory_object/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is correctly passed
-                },
-                body: JSON.stringify(inventoryPayload),
-            });
+    console.log("Payload being sent:", inventoryPayload);
 
-            const inventoryData = await inventoryResponse.json();
-            console.log("Response from /create_inventory_object/:", inventoryData);
+    const inventoryResponse = await fetch('/create_inventory_object/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: JSON.stringify(inventoryPayload),
+    });
 
-            if (inventoryData.status === 'success') {
-                if (inventoryData.button_id === "start") {
-                    console.log("Inventory object created successfully with user.");
-                     let inventory_pk = inventoryData.inventory_object_id;
+    const inventoryData = await inventoryResponse.json();
+    console.log("Response from /create_inventory_object/:", inventoryData);
+
+
+
+                if (inventoryData.status === 'success') {
+                    console.log("successful start on " + inventoryData.button_id);
+                    if (inventoryData.button_id === "start") {
+                        let inventory_pk = inventoryData.inventory_object_id;
                         console.log("inventory_pk:", inventory_pk);
-                        inventory_pk = inventory_pk;
+                        window.inventory_pk = inventory_pk;
                         targetCardElement.setAttribute('data-inventory_pk', window.inventory_pk);
+                         console.log("window_pk:", window.inventory_pk);
 
                         window.sellUrl = `/inventory/${inventory_pk}/sell/`;
                         const sellForm = document.getElementById(`sell-form-${window.inventory_pk}`);
                         console.log('sellform: ' + sellForm);
                         if (sellForm) {
-                          console.log("Sell form found:", sellForm);
+                            console.log("Sell form found:", sellForm);
 
-                          sellForm.addEventListener('submit', function(event) {
-                            event.preventDefault();
-                            const pk = this.querySelector('[name="pk"]').value;
-                            console.log("Sell form submitted. pk =", pk);
+                            sellForm.addEventListener('submit', function(event) {
+                                event.preventDefault();
+                                const pk = this.querySelector('[name="pk"]').value;
 
-                            $(".spin-option").removeClass("selected");
-
-
-                            $(this).addClass("selected");
-                            totalSpins = parseInt($(this).data("value"));
-                            sessionStorage.setItem("totalSpins", totalSpins);
-                            sellInventory(pk);
-                          });
+                                $(".spin-option").removeClass("selected");
+                                $(this).addClass("selected");
+                                totalSpins = parseInt($(this).data("value"));
+                                sessionStorage.setItem("totalSpins", totalSpins);
+                                sellInventory(pk);
+                            });
                         } else {
                           console.error("Sell form not found for inventory_pk:", window.inventory_pk);
                         }
 
-                } else if (inventoryData.button_id === "start2") {
+                    } else if (inventoryData.button_id === "start2") {
                     console.log("Temporary inventory object created without user. ID:", inventoryData.inventory_object_id);
                 }
-            } else {
+                } else {
                 console.error("Failed to create inventory object:", inventoryData.message);
+            }
+            return data;
+
+            } catch (inventoryError) {
+                console.error(`Inventory creation error: ${inventoryError}`);
+                return null;
             }
 
             return data;
         } else {
-            console.error(`Error: ${data.message}`);
-            return null;
+            if (data.message && data.message.includes("database is locked")) {
+                throw new Error("database_locked");
+            }
+            throw new Error(data.message || "Unknown error");
         }
-    } catch (error) {
-        console.error(`Request failed: ${error}`);
-        return null;
-    }
-}
+    };
 
+    const executeWithRetry = async () => {
+        const maxRetries = 3;
+        let retryCount = 0;
+
+        while (retryCount < maxRetries) {
+            try {
+                return await executeRequest();
+            } catch (error) {
+                retryCount++;
+
+                if (error.message === "database_locked" && retryCount < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, 500 * retryCount));
+                    continue;
+                }
+
+                throw error;
+            }
+        }
+    };
+
+    return new Promise((resolve, reject) => {
+        requestQueue.push(async () => {
+            try {
+                const result = await executeWithRetry();
+                resolve(result);
+                return result;
+            } catch (error) {
+                reject(error);
+                throw error;
+            }
+        });
+
+        if (!requestInProgress) {
+            processQueue();
+        }
+    });
+}
 
 function clearCards() {
     const cardContainer = document.querySelector('.slider');
     const targetCards = cardContainer.querySelectorAll('.target-card');
 
-    targetCards.forEach(card => cardContainer.removeChild(card));
+    targetCards.forEach(card => {
 
-    console.log("All target cards removed.");
+        card.querySelectorAll('*').forEach(child => {
+            child.style.display = 'none';
+        });
+    });
+
+    console.log("All target cards modified (class removed, child elements hidden, but kept 'sellattribute').");
 }
 
-// Function to center the card in the slider
-function centerCard(cardElement) {
-    const slider = document.getElementById('slider');
-    const cardOffset = cardElement.offsetLeft;
-    const sliderWidth = slider.offsetWidth;
-    const cardWidth = cardElement.offsetWidth;
+function addAnimation() {
+    if (typeof currentSpintype === 'undefined' || currentSpintype === null) {
+        console.error("currentSpintype is not set");
+        return;
+    }
 
-    // Adjust margin-left to center the card
-    slider.scrollTo({
-        left: cardOffset - sliderWidth / 2 + cardWidth / 2,
-        behavior: 'smooth',
+    document.querySelectorAll('.slider').forEach(scroller => {
+        scroller.style.animation = 'none';
+        scroller.offsetHeight;
+        let animationDuration;
+        if (currentSpintype === 'I') {
+            animationDuration = isQuickSpin ? '1s' : '2s';
+            console.log('instant spin occurred')
+        } else if (currentSpintype === 'S') {
+            animationDuration = isQuickSpin ? '8s' : '16s';
+            console.log('simultaneous spin occurred')
+        } else if (currentSpintype === 'C') {
+            animationDuration = isQuickSpin ? '9s' : '18s';
+            console.log('classic spin occurred')
+        } else {
+            animationDuration = isQuickSpin ? '9s' : '18s';
+            console.log('fallback')
+        }
+        scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
+        scroller.style.animationPlayState = 'running';
     });
 }
 
-
-
-        function addAnimation() {
-            document.querySelectorAll('.slider').forEach(scroller => {
-                scroller.style.animation = 'none';
-                scroller.offsetHeight;  // Trigger reflow
-                let animationDuration = isQuickSpin ? '9s' : '18s';
-                scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
-                scroller.style.animationPlayState = 'running';
-            });
-        }
-
 function alignCardWithSpinner() {
-    const spinnerTick = document.getElementById('selector'); // The spinner tick element
+    const spinnerTick = document.getElementById('selector');
     const slider = document.getElementById('slider');
-    const targetCard = document.querySelector('.target-card'); // The new card to align
+    const targetCard = document.querySelector('.target-card');
 
     if (!targetCard || !spinnerTick) {
         console.error('Target card or spinner tick not found!');
         return;
     }
 
-    // Get the center position of the spinner tick
     const spinnerTickRect = spinnerTick.getBoundingClientRect();
     const spinnerTickCenter = spinnerTickRect.left + spinnerTickRect.width / 2;
 
-    // Get the center position of the target card
     const targetCardRect = targetCard.getBoundingClientRect();
     const targetCardCenter = targetCardRect.left + targetCardRect.width / 2;
 
-    // Calculate the offset needed to align the card with the spinner tick
     const offset = spinnerTickCenter - targetCardCenter;
 
-    // Update the slider's translateX value
     const currentTransform = getComputedStyle(slider).transform;
-    const matrix = new DOMMatrix(currentTransform); // Use DOMMatrix for robust transformation parsing
+    const matrix = new DOMMatrix(currentTransform);
     const currentTranslateX = matrix.m41 || 0;
 
-    //slider.style.transform = `translateX(${currentTranslateX + offset}px)`;
+    slider.style.transform = `translateX(${currentTranslateX + offset}px)`;
     //console.log(`Slider adjusted by offset: ${offset}px`);
 }
 
 
 
 $(".start").click(function (event) {
-    const buttonId = event.target.id; // Extract the ID of the clicked button
-    console.log(`Button clicked: ${buttonId}`); // Debug: Log the button's ID
+    const buttonId = event.target.id;
+    console.log(`Button clicked: ${buttonId}`);
 
 });
+
 
 
 const casinoThump = new Audio('/static/css/sounds/thump.mp3');
@@ -364,11 +452,14 @@ function playCasinoRedGoldSound() {
     });
 }
 
-function createTopHit(data) {
+function createTopHit(data, buttonId) {
+    data.demonstration = buttonId === "start2";
+
     fetch('/top-hits/create/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}',
         },
         body: JSON.stringify(data),
     })
@@ -386,7 +477,7 @@ function createTopHit(data) {
 }
 
 
-// Function to get CSRF token
+
 function getCSRFToken() {
     const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
@@ -398,59 +489,86 @@ function getCSRFToken() {
     return null;
 }
 
-// Select the target card
 const targetCard = document.querySelector('.target-card');
 let choiceColor = targetCard ? targetCard.getAttribute('data-color') : 'gray';
 
-// Log and handle choiceColor
 console.log('Given the choice color:', choiceColor);
 
 function randomizedContents() {
     const slider = document.querySelector('.slider');
     const children = Array.from(slider.children);
 
+    // Find the target card
     const targetIndex = children.findIndex(child => child.classList.contains('target-card'));
     let targetCard = null;
     if (targetIndex !== -1) {
         targetCard = children[targetIndex];
     }
 
+    // Get all non-target cards
     const nonTargetCards = children.filter(child => !child.classList.contains('target-card'));
 
+    // Shuffle non-target cards
     for (let i = nonTargetCards.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [nonTargetCards[i], nonTargetCards[j]] = [nonTargetCards[j], nonTargetCards[i]];
     }
 
+    // Clear the slider
     slider.innerHTML = '';
 
-    const totalCards = nonTargetCards.length + (targetCard ? 1 : 0);
-    for (let i = 0, j = 0; i < totalCards; i++) {
-        if (i === targetIndex && targetCard) {
+    // Calculate middle position
+    const middlePosition = Math.floor(nonTargetCards.length / 2);
+
+    // Add cards to the slider with target card in the middle
+    for (let i = 0; i < nonTargetCards.length; i++) {
+        if (i === middlePosition && targetCard) {
+            // Insert target card in the middle position
             slider.appendChild(targetCard);
-        } else {
-            slider.appendChild(nonTargetCards[j]);
-            j++;
         }
+        slider.appendChild(nonTargetCards[i]);
     }
 
-    console.log("Slider contents randomized without affecting target card position.");
+    // If we haven't added the target card yet (in case the middle position calculation was off)
+    if (targetCard && !slider.querySelector('.target-card')) {
+        const allCards = Array.from(slider.children);
+        const middleIndex = Math.floor(allCards.length / 2);
+
+        // Insert target card in the exact middle
+        slider.insertBefore(targetCard, allCards[middleIndex]);
+    }
+
+    console.log("Slider contents randomized with target card positioned in the middle.");
 }
 
 
 
+
 function spin(buttonId) {
-    // Reset currentSpin to 0 when a button is pressed
     if (currentSpin === totalSpins || animationStopped) {
-        currentSpin = 0; // Reset spin count
-        animationStopped = false; // Ensure animations are not marked as stopped
+        currentSpin = 0;
+        animationStopped = false;
     }
 
     $(".spin-option").prop('disabled', true);
 
     randomizeContents();
-    randomizedContents();
-    addAnimation();
+    if (
+        !userContext.isSignedIn ||
+        !userContext.hasPreference ||
+        userContext.preferenceValue !== "I"
+    )
+    {   console.log('not an instant spin')
+        randomizedContents();
+        addAnimation();
+        }
+
+        else{
+         console.log('actually instant spin')
+        randomizedContents();
+        addAnimation();
+        }
+
 
     if (buttonId === "start") {
         console.log("Regular Spin triggered");
@@ -458,14 +576,27 @@ function spin(buttonId) {
         console.log("Demo Spin triggered");
     }
 
-    const animationDuration = isQuickSpin ? 4500 : 9000;
+let animationDuration;
+if (typeof currentSpintype === 'undefined' || currentSpintype === null) {
+        console.error("currentSpintype is not set");
+        return;
+    }
+if (currentSpintype === 'I') {
+            animationDuration = isQuickSpin ? 500 : 1000;
+        } else if (currentSpintype === 'S') {
+            animationDuration = isQuickSpin ? 4000 : 8000;
+        } else if (currentSpintype === 'C') {
+            animationDuration = isQuickSpin ? 4500 : 9000;
+        } else {
+            animationDuration = isQuickSpin ? 4500 : 9000;
+        }
+
     const buffer = 150;
-    const audiobuffer = 300;
+    const audiobuffer = 100;
     const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
 
     audio.addEventListener('loadedmetadata', () => {
-        // Calculate the adjusted duration
-        const adjustedDuration = (animationDuration + audiobuffer) / 1000; // Convert ms to seconds
+        const adjustedDuration = (animationDuration + audiobuffer) / 1000;
         const originalDuration = audio.duration;
 
         if (originalDuration) {
@@ -475,20 +606,18 @@ function spin(buttonId) {
         audio.play().catch((error) => console.error('Error playing audio:', error));
     });
 
-    // Handle audio load errors
     audio.addEventListener('error', (e) => {
         console.error('Audio failed to load:', e);
     });
 
-    // Call this function when the spin ends
 setTimeout(() => {
     document.querySelectorAll('.slider').forEach((scroller) => {
         scroller.style.animationPlayState = 'paused';
 
 
-    const targetCard = document.querySelector('.target-card'); // Find the target element
+    const targetCard = document.querySelector('.target-card');
 
-    const startButton = document.getElementById('start'); // Or use querySelector('.start')
+    const startButton = document.getElementById('start');
 
 
     if (targetCard) {
@@ -510,9 +639,9 @@ setTimeout(() => {
                 console.log('yellow hit')
             playCasinoGreenSound();
                 const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
-                    game_id: gameId, // Ensure this is set correctly
+                    game_id: gameId,
                 };
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
@@ -521,11 +650,10 @@ setTimeout(() => {
                 console.log('orange hit')
             playCasinoYellowSound();
                 const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
                     game_id: gameId,
                 };
-                // Create the Top Hit
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
                 console.log('processed the top hit')
@@ -533,11 +661,10 @@ setTimeout(() => {
                 console.log('red hit')
             playCasinoRedSound();
                 const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
                     game_id: gameId,
                 };
-                // Create the Top Hit
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
                 console.log('processed the top hit')
@@ -545,7 +672,7 @@ setTimeout(() => {
                 console.log('black hit')
             playCasinoBlackSound();
                 const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
                     game_id: gameId,
                 };
@@ -556,7 +683,7 @@ setTimeout(() => {
                 console.log('redblack hit')
             playCasinoRedBlackSound();
                 const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
                     game_id: gameId,
                 };
@@ -567,11 +694,10 @@ setTimeout(() => {
                 console.log('redgold hit')
             playCasinoRedGoldSound();
                 const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1], // Extract Choice ID
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
                     game_id: gameId,
                 };
-                // Create the Top Hit
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
                 console.log('processed the top hit')
@@ -579,6 +705,7 @@ setTimeout(() => {
         }
 
     });
+
 
 function randomizedContents() {
     const slider = document.querySelector('.slider');
@@ -619,7 +746,7 @@ function randomizedContents() {
         setTimeout(() => spin(buttonId), buffer);
          setTimeout(() => {
         randomizedContents();
-    }, 500);
+    }, 150);
     } else {
         animationStopped = true;
         console.log(`The spins have ended.`);
@@ -627,15 +754,23 @@ function randomizedContents() {
         showPopup(buttonId);
     }, 250);
 
-                if (!persistSpin) {
-                    totalSpins = 1;
-                    console.log("persistSpin disabled; reset spins to 1");
-                    sessionStorage.setItem("totalSpins", totalSpins);
+               if (!persistSpin) {
+    totalSpins = 1;
+    console.log("persistSpin not enabled; reset spins to 1");
+    sessionStorage.setItem("totalSpins", totalSpins);
+    $(".spin-option").removeClass("selected active");
+    $(".spin-option[data-value='1']").addClass("selected active");
 
-                    $(".spin-option").removeClass("selected active");
-                    $(".spin-option[data-value='1']").addClass("selected active");
+    const baseCost = document.getElementById('spin-container').getAttribute('data-base-cost');
+    console.log('Base cost:', baseCost);
 
-                } else {
+    const totalCost = parseInt(baseCost) * totalSpins;
+    const costDisplay = document.getElementById('cost-display');
+    if (costDisplay) {
+    costDisplay.innerHTML = `<span id="total-cost">${totalCost}</span> 💎`;
+    }
+}
+             else {
                     const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
 
                     $(".spin-option").removeClass("selected active");
@@ -660,39 +795,6 @@ spin(buttonId);
 
 }
 
-function findSelectedCard() {
-    const selector = document.getElementById('selector').getBoundingClientRect();
-    let currentSelection = null;
-
-    document.querySelectorAll('.cards').forEach(card => {
-        const cardRect = card.getBoundingClientRect();
-
-        if (
-            !(selector.right < cardRect.left ||
-              selector.left > cardRect.right ||
-              selector.bottom < cardRect.top ||
-              selector.top > cardRect.bottom)
-        ) {
-            currentSelection = {
-                id: card.id,
-                src: card.querySelector('img')?.src || '',
-                price: card.dataset.price,
-                color: card.dataset.color,
-                value: card.dataset.value,
-                text: card.dataset.text, // Include additional data like text
-            };
-
-            if (card.classList.contains('target-card')) {
-                card.classList.add('highlight'); // Apply a class for visual indication
-                console.log('Target card landed:', currentSelection);
-            }
-        }
-    });
-
-    if (currentSelection) {
-        selectedItems.push(currentSelection);
-    }
-}
 
     const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
     document.querySelectorAll('.sell-form').forEach(form => {
@@ -727,57 +829,141 @@ function findSelectedCard() {
 
  async function showPopup(buttonId) {
 
+
 if (buttonId === "start") {
   console.log("Show Regular Start");
   window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
   console.log("Sell Imported CSRFToken:", window.csrfToken);
 
-  // Attach the event handler (using delegated binding in case the form is inserted dynamically)
-  $(document).ready(function() {
+$(document).ready(function() {
     $(document).on("submit", "#sell-form-" + window.inventory_pk, function(e) {
-      e.preventDefault();
-      console.log('submitting here'); // Debug output
+        e.preventDefault();
+        console.log('Submitting sell request');
 
-      var form = $(this);
+        var form = $(this);
+        var cardContainer = document.querySelector('.slider');
+        var sellCards = cardContainer.querySelectorAll('.sellattribute');
 
-      // Send the form data via AJAX
-      $.ajax({
+        console.log("Sell cards before modification:");
+
+
+
+    });
+
+$(document).on("click", ".sell-button", function() {
+    const cardContainer = document.querySelector('.slider');
+    const sellCards = cardContainer.querySelectorAll('.sellattribute');
+
+    if (sellCards.length === 0) {
+        console.log("No items to sell.");
+        return;
+    }
+
+    let itemsToSell = [];
+    sellCards.forEach(card => {
+        const inventory_pk = card.getAttribute("data-inventory_pk");
+        if (!inventory_pk) {
+            console.error("Card missing inventory_pk:", card);
+            return;
+        }
+        itemsToSell.push({
+            inventory_pk: inventory_pk,
+            price: card.getAttribute("data-price"),
+            currencySymbol: card.getAttribute("data-currency-symbol")
+        });
+    });
+
+    console.log("Selling items:", itemsToSell);
+
+    if (itemsToSell.length === 0) {
+        console.error("No valid items to sell.");
+        return;
+    }
+
+    let sellUrl = `/sell/`;
+    console.log("Sell URL:", sellUrl);
+
+    $.ajax({
         type: "POST",
-        url: form.attr("action"),
-        data: form.serialize(),
+        url: sellUrl,
+        data: JSON.stringify({ items: itemsToSell }),
+        contentType: "application/json",
+        headers: { "X-CSRFToken": window.csrfToken },
         success: function(response) {
-          console.log('Sell request succeeded:', response);
-          // Instead of refreshing the page, update the relevant part of your page.
-          // For example, update a container with the new HTML provided by the server:
-          if(response.html) {
-            $("#updated-content-container").html(response.html);
-          }
-          // Alternatively, perform other DOM updates here if needed.
+            console.log("Sell request succeeded:", response);
+
+            if (response.success) {
+                sellCards.forEach(card => {
+                    console.log("Removing sold item:", {
+                        inventory_pk: card.getAttribute("data-inventory_pk"),
+                        price: card.getAttribute("data-price"),
+                        currencySymbol: card.getAttribute("data-currency-symbol")
+                    });
+                    card.remove();
+                });
+                console.log(`Sold ${itemsToSell.length} items.`);
+            }
+            if (response.html) {
+                $("#updated-content-container").html(response.html);
+            }
         },
         error: function(error) {
-
-          console.error("Sell request failed:", error);
+            console.error("Sell request failed:", error);
         }
-      });
     });
-  });
+});
 
-   textContainer.innerHTML = `
-    <h2>Congratulations!</h2>
-    <p>You got:</p>
-    <div class="cards-container"></div>
-    <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
-      <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
-      <input type="hidden" name="action" value="sell">
-      <input type="hidden" name="pk" value="${window.inventory_pk}">
-      <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
-        style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
-          Sell
-      </button>
-    </form>
+});
 
-  <button class="close" style="">Collect</button>
-`;
+
+   function adjustCardsContainer() {
+        const container = document.querySelector('.cards-container');
+        const innerContainer = document.querySelector('.inner-container');
+        if (!container || !innerContainer) return;
+
+        innerContainer.style.display = "flex";
+        innerContainer.style.width = `${innerContainer.scrollWidth}px`;
+
+        const maxLimit = 600;
+
+        console.log(`Checked the size of the inner container (Width: ${innerContainer.scrollWidth}px, Max Width: ${maxLimit}px)`);
+
+        if (innerContainer.scrollWidth > maxLimit) {
+            container.style.justifyContent = 'flex-start';
+            console.log(`Inner-container exceeds 600px → Align Left`);
+        } else {
+            container.style.justifyContent = 'center';
+            console.log(`Inner-container within 600px → Centering`);
+        }
+    }
+
+    textContainer.classList.add('scrollablecontainer');
+    textContainer.innerHTML = `
+      <h2 class='congratulations'>Congratulations!</h2>
+      <p>You got:</p>
+      <div class="cards-container">
+        <div class="inner-container"></div>
+      </div>
+      <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
+        <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
+        <input type="hidden" name="action" value="sell">
+        <input type="hidden" name="pk" value="${window.inventory_pk}">
+        <div class="finish-buttons" style="display: flex; flex-direction: row; gap: 15px; justify-content: center;">
+        <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
+          style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
+            Sell
+        </button>
+      <button class="close">Collect</button>
+      </div>
+      </form>
+    `;
+
+       setTimeout(() => {
+            adjustCardsContainer();
+        }, 100);
+
+    window.addEventListener('resize', adjustCardsContainer);
+
 
   } else if (buttonId === "start2") {
       console.log("Show Demo Start");
@@ -796,21 +982,28 @@ if (buttonId === "start") {
      selectedItems.forEach((item, index) => {
          const cardElement = document.createElement('div');
          cardElement.innerHTML = `
-            <div class="card-fire" data-color="${item.color}">
+            <div class="card-fire" data-color="${item.color}" style="background-color: ${item.color}">
               <div class="card-flames">
                 <div class="card-flame"></div>
               </div>
             </div>
             <!--<p>ID: ${item.id}</p>
             <p>Nonceword: ${item.nonce}</p>-->
+            <div class="background" style="background-color: ${item.color}; padding: 10px; border-radius: 3px;">
             <img src="${item.src || ''}" alt="${item.id}" width=150 height=225>
+            </div>
             <p>${item.value} 💎</p>
             <!--<p>Lower Nonce: ${item.lowerNonce}</p>
             <p>Upper Nonce: ${item.upperNonce}</p>-->
         `;
 
 
-            cardsContainer.appendChild(cardElement);
+            if (cardsContainer) {
+                cardsContainer.appendChild(cardElement);
+            } else {
+                console.error("cardsContainer not found in DOM");
+            }
+
 
             if (index === 0) {
                 const fire = document.querySelector('.fire');
@@ -820,7 +1013,6 @@ if (buttonId === "start") {
 
         popup.style.display = 'block';
 
-        // Trigger the fire animation
         setTimeout(() => {
             const fire = document.querySelector('.fire');
             fire.classList.add('active');
@@ -851,29 +1043,6 @@ if (buttonId === "start") {
             $(".spin-option").prop('disabled', false);
             $(".start").prop('disabled', false);
 
- if (!persistSpin) {
-                    totalSpins = 1;
-                    console.log("persistSpin disabled; reset spins to 1");
-                    sessionStorage.setItem("totalSpins", totalSpins);
-
-                    $(".spin-option").removeClass("selected active");
-                    $(".spin-option[data-value='1']").addClass("selected active");
-
-                } else {
-                    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
-
-                    $(".spin-option").removeClass("selected active");
-                    $(".spin-option[data-value='1']").addClass("selected active");
-
-                    setTimeout(() => {
-                        $(".spin-option").removeClass("selected active");
-                        $(".spin-option[data-value='" + currentSelectionValue + "']")
-                            .addClass("selected active");
-
-                        totalSpins = currentSelectionValue;
-                        console.log("Reverted spin to:", totalSpins);
-                    }, 0);
-                }
         });
 
 const sellBtn = textContainer.querySelector('.sell-button');
@@ -894,31 +1063,7 @@ sellBtn.addEventListener('click', () => {
     $(".spin-option").prop('disabled', false);
     $(".start").prop('disabled', false);
 
-    if (!persistSpin) {
-                    totalSpins = 1;
-                    console.log("persistSpin disabled; reset spins to 1");
-                    sessionStorage.setItem("totalSpins", totalSpins);
 
-                    $(".spin-option").removeClass("selected active");
-                    $(".spin-option[data-value='1']").addClass("selected active");
-
-                } else {
-                    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
-
-                    $(".spin-option").removeClass("selected active");
-                    $(".spin-option[data-value='1']").addClass("selected active");
-
-                    setTimeout(() => {
-                        $(".spin-option").removeClass("selected active");
-                        $(".spin-option[data-value='" + currentSelectionValue + "']")
-                            .addClass("selected active");
-
-                        totalSpins = currentSelectionValue;
-                        console.log("Reverted spin to:", totalSpins);
-                    }, 0);
-                }
-
-    // Fetch and update only the .sell.update div without affecting the rest of the page
     setTimeout(() => {
         $.ajax({
             url: window.location.href,
