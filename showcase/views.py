@@ -13968,10 +13968,9 @@ class GameChestBackgroundView(BaseView):
 class CreateInventoryChestView(FormView):
     template_name = "inventory_create_chest.html"
     form_class = PlayerInventoryGameForm
-    success_url = reverse_lazy('showcase:game')  # set to the new game
+    success_url = reverse_lazy('showcase:game')
 
     def form_valid(self, form):
-        # Save the game instance
         game = form.save(commit=False)
         game.user = self.request.user
         game.save()

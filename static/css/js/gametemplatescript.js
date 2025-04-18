@@ -75,6 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeAnimation(buttonId);
     });
 
+
+observer.observe(document.querySelector('#card-container'), { childList: true });
+
+
     function initializeAnimation(buttonId) {
         $(".start").prop('disabled', true);
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
@@ -192,7 +196,7 @@ async function randomizeContents() {
                 const windowWidth = window.innerWidth;
                 const randomDivisor = Math.random() * (1.3375 - 1.3265) + 1.3265;
                 const cardContainer = document.querySelector('.slider');
-                const middleIndex = Math.floor(cardContainer.children.length / 1.327);
+                const middleIndex = Math.floor(cardContainer.children.length / 1.3275);
                 const targetIndex = Math.min(cardContainer.children.length, middleIndex);
 
                 if (cardContainer.children[targetIndex]) {
@@ -503,43 +507,34 @@ function randomizedContents() {
     const slider = document.querySelector('.slider');
     const children = Array.from(slider.children);
 
-    // Find the target card
     const targetIndex = children.findIndex(child => child.classList.contains('target-card'));
     let targetCard = null;
     if (targetIndex !== -1) {
         targetCard = children[targetIndex];
     }
 
-    // Get all non-target cards
     const nonTargetCards = children.filter(child => !child.classList.contains('target-card'));
 
-    // Shuffle non-target cards
     for (let i = nonTargetCards.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [nonTargetCards[i], nonTargetCards[j]] = [nonTargetCards[j], nonTargetCards[i]];
     }
 
-    // Clear the slider
     slider.innerHTML = '';
 
-    // Calculate middle position
     const middlePosition = Math.floor(nonTargetCards.length / 2);
 
-    // Add cards to the slider with target card in the middle
     for (let i = 0; i < nonTargetCards.length; i++) {
         if (i === middlePosition && targetCard) {
-            // Insert target card in the middle position
             slider.appendChild(targetCard);
         }
         slider.appendChild(nonTargetCards[i]);
     }
 
-    // If we haven't added the target card yet (in case the middle position calculation was off)
     if (targetCard && !slider.querySelector('.target-card')) {
         const allCards = Array.from(slider.children);
         const middleIndex = Math.floor(allCards.length / 2);
 
-        // Insert target card in the exact middle
         slider.insertBefore(targetCard, allCards[middleIndex]);
     }
 

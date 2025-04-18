@@ -2065,12 +2065,12 @@ $(document).ready(function() {
 
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
+    </script>
 
+                        <script>
+                        const slug = document.getElementById('start').dataset.slug;
 
-function createOutcome(gameId, slug) {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-fetch(`/create_outcome/${slug}/`, {
+    fetch(`/create_outcome/${slug}/`, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
@@ -2078,36 +2078,33 @@ fetch(`/create_outcome/${slug}/`, {
     },
     body: JSON.stringify({
         game_id: gameId,
-        other_data: otherData,
-    })
+        button_id: buttonId,
+    }),
 })
-}
-.then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            const choiceFile = data.choice_file;
+.then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+})
+.then(data => {
+    if (data.status === 'success') {
+        const attributes = {};
+        attributes.color = data.choice_color;
 
-            if (choiceFile) {
-                const slider = document.querySelector('.slider');
-                const newCard = document.createElement('div');
-                newCard.className = 'cards';
-                newCard.innerHTML = `
-                    <div class="lootelement"
-                         data-price="100"
-                         data-nonce="${data.nonce}"
-                         style="background: url('${choiceFile}'); padding: 6%; margin-left: 0px;">
-                       <img src="${choiceFile}" alt="Generated Card">
-                    </div>
-                    <h2 style="margin-left: 22px;">100 💎</h2>
-                    <p>Nonce: ${data.nonce}</p>
-                `;
-                slider.appendChild(newCard);
-            }
-        } else {
-            console.error('Error:', data.message);
-        }
-    })
-    .catch(error => console.error('Fetch error:', error));
+        const targetCardElement = document.createElement('div');
+        targetCardElement.classList.add('target-card');
+        targetCardElement.setAttribute('data-color', attributes.color);
+        console.log('set color to ' + attributes.color);
+
+        document.querySelector('#card-container').appendChild(targetCardElement);
+    } else {
+        console.error('Error from server:', data.message);
+    }
+})
+.catch(error => {
+    console.error('Fetch error:', error);
+});
 
 </script>
 
@@ -2119,9 +2116,8 @@ fetch(`/create_outcome/${slug}/`, {
 <script>
 $(".start").click(function () {
     const button = $(this);
-    button.prop('disabled', true); // Disable the button when clicked
+    button.prop('disabled', true);
 
-    // Step 1: Create the outcome and get the relevant choice
    createOutcome(button.data('game-id'), button.data('slug'))
     .then(data => {
         if (data.status === 'success') {
@@ -2141,15 +2137,15 @@ $(".start").click(function () {
 
         } else {
             console.error('Error:', data.message);
-            button.prop('disabled', false); // Re-enable the button if there's an error
+            button.prop('disabled', false);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        button.prop('disabled', false); // Re-enable the button if there's an error
+        button.prop('disabled', false);
     });
 
-                // Log the values to ensure they are correct
+
                 console.log('Nonce:', chosenNonce);
                 console.log('Choice ID:', choiceId);
                 console.log('Choice Text:', choiceText);
@@ -2369,7 +2365,6 @@ document.addEventListener("DOMContentLoaded", function() {
         inventoryGrid.classList.toggle("compact-view");
         inventoryGrid.classList.toggle("comfortable-view");
 
-        // Save the current view preference to localStorage
         const isCompact = inventoryGrid.classList.contains("compact-view");
         localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
     });
