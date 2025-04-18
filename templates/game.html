@@ -1737,7 +1737,6 @@ document.addEventListener("DOMContentLoaded", function () {
             10
         );
         const totalCost = baseCost * spinMultiplier;
-        console.log('spinmultiplier sets here')
 
         costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`;
 
@@ -1859,8 +1858,9 @@ document.addEventListener("DOMContentLoaded", function () {
 $(document).ready(function() {
     console.log("jQuery is loaded.");
 
-    let spinMultiplier = 1;
+    let spinMultiplier = 1; // Default to 1 spin if no option is selected
 
+    // Set spin multiplier based on selected option
     $('.spin-option').on('click', function() {
         $('.spin-option').removeClass('selected');
         $(this).addClass('selected');
@@ -1895,10 +1895,11 @@ $(document).ready(function() {
                         allChoices = allChoices.concat(response.choices);
                         console.log('Choice received successfully for spin', i + 1);
 
+                        // Update the UI only after all spins are completed
                         if (completedSpins === spinMultiplier) {
                             console.log('All spins completed.');
-                            //updateWheelContents(allChoices);
-                            initializeAnimation(response.nonce, isQuickSpin);
+                            //updateWheelContents(allChoices); // Display all outcomes at once
+                            initializeAnimation(response.nonce, isQuickSpin); // Pass Quick Spin mode to the animation
                         }
                     } else {
                         console.error(response.message);

@@ -12,8 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
-    window.gameSpinCount = 1;
-
 
     const popuep = document.querySelector('.popup');
     const closewBtn = popup.querySelector('.close');
@@ -37,18 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-
-if (persistSpin) {
-    $('#persist-spin-checkbox').prop('checked', true);
-    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
-    const spinValue = isNaN(currentSelectionValue) ? 1 : currentSelectionValue;    sessionStorage.setItem("totalSpins", String(spinValue));
-    window.gameSpinCount = spinValue;
-    console.log("Initialized totalSpins globally:", window.gameSpinCount);
-} else {
-    sessionStorage.setItem("totalSpins", "1");
-    window.gameSpinCount = 1;
-    console.log("Reset totalSpins to 1 (persistSpin disabled)");
-}
+    if (persistSpin) {
+        $('#persist-spin-checkbox').prop('checked', true);
+    }
 
     $('#persist-spin-checkbox').change(function() {
         const isChecked = $(this).prop('checked');
@@ -70,6 +59,7 @@ if (persistSpin) {
         $(this).addClass("selected");
         totalSpins = parseInt($(this).data("value"));
         sessionStorage.setItem("totalSpins", totalSpins);
+        console.log('the value of totalspins at step 1 is ' + totalSpins)
     });
 
 
@@ -171,7 +161,7 @@ async function randomizeContents() {
             targetCardElement.setAttribute('data-choice_value', attributes.value);
             targetCardElement.setAttribute('data-lower_nonce', attributes.lowerNonce);
             targetCardElement.setAttribute('data-upper_nonce', attributes.upperNonce);
-
+            console.log('color is ' + attributes.color)
             targetCardElement.innerHTML = `
                 <div class="cards" style="background: url(/static/css/images/${attributes.color}.png);">
                     <div class="lootelement"
@@ -265,6 +255,7 @@ async function randomizeContents() {
                                 $(this).addClass("selected");
                                 totalSpins = parseInt($(this).data("value"));
                                 sessionStorage.setItem("totalSpins", totalSpins);
+                                console.log('the value of totalspins at step 2 is ' + totalSpins)
                                 sellInventory(pk);
                             });
                         } else {
@@ -562,6 +553,7 @@ function spin(buttonId) {
     if (currentSpin === totalSpins || animationStopped) {
         currentSpin = 0;
         animationStopped = false;
+        console.log('the value of totalspins at step 3 is ' + totalSpins)
     }
 
     $(".spin-option").prop('disabled', true);
@@ -644,9 +636,11 @@ setTimeout(() => {
         console.log('The choice id is:', choiceId);
         console.log('The game id is:', gameId);
         if (choiceColor === 'gray') {
+                console.log('gray hit')
             playThump();
 
         } else if (choiceColor === 'green') {
+                console.log('green hit')
             playCasinoGreenSound();
             $(".start").prop('disabled', true);
         } else if (choiceColor === 'yellow') {
@@ -756,32 +750,15 @@ function randomizedContents() {
     currentSpin++;
     console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`);
 
-let totalSpins = 1;
-
-const storedValue = sessionStorage.getItem("totalSpins");
-console.log("Raw value from sessionStorage:", storedValue, "type:", typeof storedValue);
-
-if (storedValue) {
-    const parsedValue = parseInt(storedValue, 10);
-    if (!isNaN(parsedValue)) {
-        totalSpins = parsedValue;
-        console.log("Successfully parsed totalSpins:", totalSpins);
-    } else {
-        console.warn("Failed to parse totalSpins, using default value of 1");
-    }
-}
-
-console.log("Using totalSpins value:", totalSpins);
-
-if (currentSpin < window.gameSpinCount) {
-    setTimeout(() => spin(buttonId), buffer);
-    setTimeout(() => {
+    if (currentSpin < totalSpins) {
+        setTimeout(() => spin(buttonId), buffer);
+         setTimeout(() => {
         randomizedContents();
     }, 150);
-} else {
-    animationStopped = true;
-    console.log(`The spins have ended after ${window.gameSpinCount} spins.`);
-    setTimeout(() => {
+    } else {
+        animationStopped = true;
+        console.log(`The spins have ended.`);
+        setTimeout(() => {
         showPopup(buttonId);
     }, 250);
 
@@ -801,25 +778,21 @@ if (currentSpin < window.gameSpinCount) {
     costDisplay.innerHTML = `<span id="total-cost">${totalCost}</span> 💎`;
     }
 }
-else {
-    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
-    $(".spin-option").removeClass("selected active");
-    $(".spin-option[data-value='1']").addClass("selected active");
+             else {
+                    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
 
-    setTimeout(() => {
-        $(".spin-option").removeClass("selected active");
-        $(".spin-option[data-value='" + currentSelectionValue + "']")
-            .addClass("selected active");
+                    $(".spin-option").removeClass("selected active");
+                    $(".spin-option[data-value='1']").addClass("selected active");
 
-        const spinValue = isNaN(currentSelectionValue) ? 1 : currentSelectionValue;
-        totalSpins = spinValue;
-        window.gameSpinCount = spinValue; // Update the global variable
-        console.log("Reverted spin to:", totalSpins);
+                    setTimeout(() => {
+                        $(".spin-option").removeClass("selected active");
+                        $(".spin-option[data-value='" + currentSelectionValue + "']")
+                            .addClass("selected active");
 
-        sessionStorage.setItem("totalSpins", String(spinValue));
-        console.log("Saved totalSpins to sessionStorage:", spinValue);
-    }, 0);
-}
+                        totalSpins = currentSelectionValue;
+                        console.log("Reverted spin to:", totalSpins);
+                    }, 0);
+                }
 
         $(".spin-option").prop('disabled', false);
     }
@@ -1060,8 +1033,6 @@ $(document).on("click", ".sell-button", function() {
 
 
         $(this).addClass("selected");
-        totalSpins = parseInt($(this).data("value"));
-        sessionStorage.setItem("totalSpins", totalSpins);
         const audio = new Audio('/static/css/sounds/collect.mp3');
         audio.play();
 
