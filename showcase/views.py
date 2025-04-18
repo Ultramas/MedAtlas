@@ -15,7 +15,7 @@ from django.db import transaction
 from django.shortcuts import render, redirect
 from django.utils.html import strip_tags
 from django.views.generic import ListView
-import stripe  # Official Stripe library
+import stripe
 from social_core.backends.stripe import StripeOAuth2
 from django.utils.text import slugify
 from urllib.parse import quote, urlparse
@@ -117,7 +117,7 @@ from .models import AdminPages
 from .models import Ascension
 from .models import (Item, OrderItem, Order, Address, Payment, Coupon, Refund,
                      UserProfile)
-# from .models import Background2aImage
+
 from .forms import VoteQueryForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, \
     SellerApplicationForm, \
     MemeForm, CurrencyCheckoutForm, CurrencyPaymentForm, CurrencyPaypalPaymentForm, HitStandForm, WagerForm, \
@@ -164,7 +164,7 @@ from .forms import ContactForme
 from .forms import SignUpForm
 from .forms import StoreViewTypeForm
 from .forms import GiftCodeForm
-# from .forms import OrderItems
+
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth import login
@@ -225,7 +225,6 @@ from django.views.decorators.http import require_POST
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-
 class SignupView(FormMixin, ListView):
     model = SignupBackgroundImage
     template_name = "cv-form.html"
@@ -240,14 +239,14 @@ class SignupView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         if self.request.user.is_authenticated:
@@ -284,11 +283,10 @@ class SignupView(FormMixin, ListView):
                 print('is_valid')
                 user = form.save()
                 user.refresh_from_db()
-                # load the profile instance created by the signal
+
                 user.save()
                 raw_password = form.cleaned_data.get('password')
 
-                # login user after signing up
                 user = form.save()
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 subject = "Welcome to IntelleX!"
@@ -297,13 +295,11 @@ class SignupView(FormMixin, ListView):
                 recipent_list = [user.email, ]
                 send_mail(subject, message, email_from, recipent_list)
 
-                # redirect user to home page
                 return redirect('showcase:showcase')
                 messages.info(request, "You have signed up successfully! Welcome!")
         else:
             form = SignUpForm()
         return render(request, 'cv-form.html', {'form': form})
-
 
 class TotalView(ListView):
     model = BackgroundImageBase
@@ -316,14 +312,14 @@ class TotalView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['TextFielde'] = TextBase.objects.filter(is_active=1).order_by("section")
@@ -352,11 +348,8 @@ class TotalView(ListView):
 
         return context
 
-
 class LogoView(ListView):
     model = LogoBase
-
-    # ought to span multiple pages, not simply index
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -386,13 +379,11 @@ class LogoView(ListView):
 
         return context
 
-
 from io import BytesIO
 from PIL import Image
 from django.core.files.base import ContentFile
 
 from .models import Advertising
-
 
 class AdvertisementView(ListView):
     model = AdvertisementBase
@@ -430,9 +421,8 @@ class AdvertisementView(ListView):
 
         return context
 
-
 """    def handle_uploaded_image(i):
-       # resize image
+
        imagefile  = StringIO.StringIO(i.read())
        imageImage = Image
 
@@ -444,33 +434,27 @@ class AdvertisementView(ListView):
        imagefile = StringIO.StringIO()
        resizedImage.save(imagefile,'JPEG')"""
 
-
 def set_image_position(image_id, xposition, yposition):
-    # Retrieve the Image object from the database
+
     image = ImageBase.objects.get(id=image_id)
     print("Current coordinates: x={image.x}, y={image.y}")
 
-    # Set the x and y positions to the desired values
     image.x = xposition
     image.y = yposition
 
-    # Save the updated Image object back to the database
     image.save()
-
 
 class ImageView(ListView):
     model = ImageBase
 
     def post(self, request, *args, **kwargs):
-        # Get the image ID and new position values from the request
+
         image_id = request.POST.get('image_id')
         xposition = request.POST.get('xposition')
         yposition = request.POST.get('yposition')
 
-        # Update the image position in the database
         set_image_position(image_id, xposition, yposition)
 
-        # Render a response to the user
         return HttpResponse('Image position updated.')
 
     def get_context_data(self, **kwargs):
@@ -501,7 +485,6 @@ class ImageView(ListView):
 
         return context
 
-
 class BaseView(ListView):
     template_name = "base.html"
     model = LogoBase
@@ -509,7 +492,7 @@ class BaseView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -521,18 +504,16 @@ class BaseView(ListView):
         user = self.request.user
         print(f'User: {user.username}, is_authenticated: {user.is_authenticated}, is_staff: {user.is_staff}')
 
-        # Check if the user is an administrator and filter NavBarHeader accordingly
         if user.is_authenticated and user.is_staff:
             print('Staff is presently present')
             context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         else:
-            # Filter NavBarHeader to exclude "admin" items
+
             print('User is not staff')
             context['Header'] = NavBarHeader.objects.filter(is_active=1).exclude(
                 text__icontains="Admin"
             ).order_by("row")
 
-            # Print the headers for debugging
             print('Headers:')
             for header in context['Header']:
                 print(header.text)
@@ -568,17 +549,16 @@ class BaseView(ListView):
 
         return context
 
-
 class EBaseView(ListView):
     template_name = "ebase.html"
     model = NavBar
 
     def get_context_data(self, **kwargs):
-        # context = super().get_context_data(**kwargs)
+
         context = {}
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -618,7 +598,6 @@ class EBaseView(ListView):
 
         return context
 
-
 class BlogBaseView(ListView):
     template_name = "blogbase.html"
     model = LogoBase
@@ -628,7 +607,7 @@ class BlogBaseView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -671,9 +650,7 @@ class BlogBaseView(ListView):
 
         return context
 
-
 from .models import Preference
-
 
 def detail_post_view(request, id=None):
     eachpost = get_object_or_404(Post, id=id)
@@ -681,7 +658,6 @@ def detail_post_view(request, id=None):
     context = {'eachpost': eachpost}
 
     return render(request, 'showcase:likes.html', context)
-
 
 @login_required
 def postpreference(request, post_name, like_or_dislike):
@@ -710,14 +686,9 @@ def postpreference(request, post_name, like_or_dislike):
 
         return render(request, 'showcase:likes.html', context)
 
-
-# like is not connected to blog yet is used to filter
-
-# id is used by this model but the blogpost uses slugs
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views import View
 from django.utils.decorators import method_decorator
-
 
 @method_decorator(staff_member_required, name='dispatch')
 class AdminRolesView(BaseView):
@@ -729,7 +700,7 @@ class AdminRolesView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -763,7 +734,6 @@ class AdminRolesView(BaseView):
 
         return context
 
-
 @method_decorator(staff_member_required, name='dispatch')
 class AdminTasksView(ListView):
     template_name = "administrativetasks.html"
@@ -774,7 +744,7 @@ class AdminTasksView(ListView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -807,7 +777,6 @@ class AdminTasksView(ListView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
-
 
 @method_decorator(staff_member_required, name='dispatch')
 class AdminPagesView(ListView):
@@ -819,7 +788,7 @@ class AdminPagesView(ListView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -853,7 +822,6 @@ class AdminPagesView(ListView):
 
         return context
 
-
 @method_decorator(staff_member_required, name='dispatch')
 class AdministrationView(ListView):
     template_name = "administration.html"
@@ -864,7 +832,7 @@ class AdministrationView(ListView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -899,7 +867,6 @@ class AdministrationView(ListView):
 
         return context
 
-
 class DonateBaseView(ListView):
     template_name = "donatebase.html"
     model = LogoBase
@@ -909,7 +876,7 @@ class DonateBaseView(ListView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -948,7 +915,6 @@ class DonateBaseView(ListView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
-
 
 class MemberBaseView(ListView):
     template_name = "memberbase.html"
@@ -959,7 +925,7 @@ class MemberBaseView(ListView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -999,7 +965,6 @@ class MemberBaseView(ListView):
 
         return context
 
-
 class usersview(ListView):
     paginate_by = 10
     template_name = 'users.html'
@@ -1007,13 +972,10 @@ class usersview(ListView):
     def get_queryset(self):
         return Idea.objects.all()
 
-
 """
 class PostList(BaseView):
     model = BlogBackgroundImage
-    # backgroundqueryset = BackgroundImageBase.objects.filter('page').order_by('position')
-    # queryset = Blog.objects.filter(status=1).order_by('-created_on')
-    # normally can only filter once per view
+
     paginate_by = 10
     template_name = 'blog.html'
 
@@ -1026,19 +988,16 @@ class PostList(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['TextFielde'] = TextBase.objects.filter(is_active=1)
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
 
-        # Retrieve the signed-in user's profile and profile picture URL
-
-        
         blog_posts = Blog.objects.filter(status=1).order_by('-created_on')
 
         context['BlogPosts'] = blog_posts
@@ -1097,7 +1056,7 @@ class votingview(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -1106,7 +1065,6 @@ class votingview(ListView):
         context['VoteQuery'] = VoteQuery.objects.all()
 
         newprofile = VoteQuery.objects.filter(is_active=1)
-        
 
         context['Profiles'] = newprofile
 
@@ -1146,14 +1104,12 @@ class votingview(ListView):
         return VoteQuery.objects.all()
 """
 
-
 class partnerview(ListView):
     paginate_by = 10
     template_name = 'partners.html'
 
     def get_queryset(self):
         return PartnerApplication.objects.all()
-
 
 class newsfeedview(ListView):
     paginate_by = 10
@@ -1162,14 +1118,12 @@ class newsfeedview(ListView):
     def get_queryset(self):
         return NewsFeed.objects.all()
 
-
 class Issueview(ListView):
     paginate_by = 10
     template_name = 'issues.html'
 
     def get_queryset(self):
         return ReportIssue.objects.all()
-
 
 class staffview(ListView):
     paginate_by = 10
@@ -1178,14 +1132,12 @@ class staffview(ListView):
     def get_queryset(self):
         return StaffProfile.objects.all()
 
-
 class eventview(ListView):
     paginate_by = 10
     template_name = 'events.html'
 
     def get_queryset(self):
         return Event.objects.all()
-
 
 class supportview(ListView):
     paginate_by = 10
@@ -1194,18 +1146,17 @@ class supportview(ListView):
     def get_queryset(self):
         return Support.objects.all()
 
-
 class MemberHomeBackgroundView(ListView):
     model = MemberHomeBackgroundImage
     template_name = "memberhome.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['MemberHomeBackgroundImage'] = MemberHomeBackgroundImage.objects.all()
         if self.request.user.is_authenticated:
@@ -1233,22 +1184,19 @@ class MemberHomeBackgroundView(ListView):
 
         return context
 
-
-
-
 class PatreonBackgroundView(ListView):
     model = Patreon
     template_name = "patreon.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        # context['Patreon'] = Patreon.objects.all()
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -1274,7 +1222,6 @@ class PatreonBackgroundView(ListView):
 
         return context
 
-
 class BlogComment(generic.DetailView):
     model = Blog
     paginate_by = 10
@@ -1285,9 +1232,6 @@ class BlogComment(generic.DetailView):
 
         post = get_object_or_404(Blog, slug=slug)
         category_count = post.likes
-
-        # if request.user.is_authenticated:
-        #    BlogLikeView.objects.get_or_create(user=request.user, post=post)
 
         form = CommentForm(request.POST or None)
         if request.method == "POST":
@@ -1307,31 +1251,7 @@ class BlogComment(generic.DetailView):
         }
         return render(request, 'blog_comment.html', context)
 
-
-# def BlogPostLike(request, slug):
-#    post = get_object_or_404(Blog, id=request.POST.get('blog_id'))
-#    if post.likes.filter(id=request.user.id).exists():
-#        post.likes.remove(request.user)
-#    else:
-#        post.likes.add(request.user)
-
-#    return HttpResponseRedirect(reverse('showcase:post_detail', args=[str(slug)]))
-
-
-# class BackgroundView(ListView):
-#  paginate_by = 10
-#  template_name = 'index.html'
-
-#  def get_queryset(self):
-#    return BackgroundImage.objects.all()
-
 from django.views.generic import ListView, CreateView
-
-
-# class TextFieldView(ListView):
-#    model = TextField
-#    template_name = "index.html"
-
 
 class FaviconBaseView(ListView):
     model = FaviconBase
@@ -1371,11 +1291,8 @@ class FaviconBaseView(ListView):
 
         return context
 
-
 class BackgroundBaseView(ListView):
     model = BackgroundImageBase
-
-    # ought to span multiple pages, not simply index
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1412,34 +1329,8 @@ class BackgroundBaseView(ListView):
 
         return context
 
-    # def backgrounds(request, showcase, index, blog):
-    #    page = get_object_or_404(BackgroundImageBase,
-    #                             showcase=showcase,
-    #                             index=index,
-    #                             blog=blog)
-
-    # context = {
-    #    'page': page,
-    # }
-
-    # if index == 'index':
-    #    template = 'index.html'
-    #    print(index)
-    # elif index == 'showcase':
-    #    template = 'showcase.html'
-    #    print(index)
-    # else render the one you're already rendering
-    # else:
-    #    template = 'blog.html'
-    #    print(index)
-
-    # return render(request, template, context)
-
-
 class TextBaseView(ListView):
     model = TextBase
-
-    # ought to span multiple pages, not simply index
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1451,36 +1342,8 @@ class TextBaseView(ListView):
             if profile:
                 context['profile_pk'] = profile.pk
                 context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
-        # texts = TextBase.objects.all()
-
-        # if texts.exists():
-        #    return JsonResponse({})
-        # else:
-        #    return context
-
-        # def backgrounds(request, showcase, index, blog):
-        #    page = get_object_or_404(BackgroundImageBase,
-        #                             showcase=showcase,
-        #                             index=index,
-        #                             blog=blog)
-
-        # context = {
-        #    'page': page,
-        # }
-
-        # if index == 'index':
-        #    template = 'index.html'
-        #    print(index)
-        # elif index == 'showcase':
-        #    template = 'showcase.html'
-        #    print(index)
-        # else render the one you're already rendering
-        # else:
-        #    template = 'blog.html'
-        #    print(index)
 
         return render(context)
-
 
 class ImageCarouselView(BaseView):
     model = ImageCarousel
@@ -1513,11 +1376,8 @@ class ImageCarouselView(BaseView):
 
         return context
 
-
-
 from django.views.generic import TemplateView
 from .models import BackgroundImage
-
 
 class BackgroundStyleView(TemplateView):
     template_name = "style.css"
@@ -1525,9 +1385,9 @@ class BackgroundStyleView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Get the first BackgroundImage object from the database
+
         background_image = BackgroundImageBase.objects.first()
-        # Add it to the context with the name 'BackgroundImage'
+
         context['Background'] = background_image
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -1554,7 +1414,6 @@ class BackgroundStyleView(TemplateView):
 
         return context
 
-
 def dynamic_css(request):
     background_objects = BackgroundImageBase.objects.filter(page='index').order_by("position")
 
@@ -1564,13 +1423,11 @@ def dynamic_css(request):
 
     return render(request, 'dynamic_css.css', context, content_type='text/css')
 
-
 class CreatePostView(CreateView):
     model = BackgroundImage
     form_class = BackgroundImagery
     template_name = "backgroundimagechange.html"
     success_url = reverse_lazy("index")
-
 
 class ECreatePostView(CreateView):
     model = EBackgroundImage
@@ -1578,23 +1435,20 @@ class ECreatePostView(CreateView):
     template_name = "ebackgroundimagechange.html"
     success_url = reverse_lazy("ehome")
 
-
 class ShowcaseBackgroundView(BaseView):
     model = ShowcaseBackgroundImage
     template_name = "showcase.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['UpdateProfile'] = UpdateProfile.objects.all()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
-
         newprofile = UpdateProfile.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -1630,13 +1484,11 @@ class ShowcaseBackgroundView(BaseView):
 
         return context
 
-
 class ShowcaseCreatePostView(CreateView):
     model = ShowcaseBackgroundImage
     form_class = ShowcaseBackgroundImagery
     template_name = "showcasebackgroundimagechange.html"
     success_url = reverse_lazy("showcase")
-
 
 def create_responding_tradeoffer(request, tradeoffer_pk):
     related_offer = TradeOffer.objects.get(pk=tradeoffer_pk)
@@ -1644,11 +1496,10 @@ def create_responding_tradeoffer(request, tradeoffer_pk):
         form = RespondingTradeOfferForm(request.POST, related_offer=related_offer)
         if form.is_valid():
             form.save()
-            # Handle successful form submission
+
     else:
         form = RespondingTradeOfferForm(related_offer=related_offer)
     return render(request, 'tradingcentral.html', {'form': form})
-
 
 class ChatBackgroundView(BaseView):
     model = ChatBackgroundImage
@@ -1715,7 +1566,6 @@ class ChatBackgroundView(BaseView):
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -1800,29 +1650,25 @@ class ChatBackgroundView(BaseView):
 
         return context
 
-
 from django.views.generic import ListView
-
 
 class FriendSearchResultsView(ListView):
     model = Friend
     template_name = 'friendssearchresultview.html'
 
     def get_queryset(self):
-        search_term = self.request.GET.get('search', '')  # Get the search term (default empty string)
+        search_term = self.request.GET.get('search', '')
         if search_term:
             item_list = Friend.objects.filter(
-                Q(friend_username__icontains=search_term)  # Filter on friend's username
+                Q(friend_username__icontains=search_term)
             )
             print('item_list contains' + str(item_list))
         else:
-            item_list = Friend.objects.none()  # Return an empty queryset if no search term
+            item_list = Friend.objects.none()
             print('item_list is empty')
         return item_list
 
-
 from django.shortcuts import render
-
 
 def friendlysearchresultview(request):
     search_term = request.GET.get('search', '')
@@ -1832,9 +1678,8 @@ def friendlysearchresultview(request):
         )
     else:
         item_list = Friend.objects.none()
-    context = {'item_list': item_list}  # Add item_list to context
-    return render(request, 'friendssearchresultview.html', context)  # Render the template
-
+    context = {'item_list': item_list}
+    return render(request, 'friendssearchresultview.html', context)
 
 class SupportChatBackgroundView(BaseView):
     model = SupportChatBackgroundImage
@@ -1873,11 +1718,10 @@ class SupportChatBackgroundView(BaseView):
 
         return context
 
-
 class PlaceWagerView(FormView):
     template_name = 'template_name.html'
     form_class = WagerForm
-    success_url = reverse_lazy('showcase')  # replace with your actual view name
+    success_url = reverse_lazy('showcase')
 
     def form_valid(self, form):
         wager = form.save(commit=False)
@@ -1885,9 +1729,7 @@ class PlaceWagerView(FormView):
         wager.save()
         return super().form_valid(form)
 
-
 from django.core.exceptions import ValidationError
-
 
 @csrf_exempt
 def update_wager(request, wager_id):
@@ -1895,28 +1737,25 @@ def update_wager(request, wager_id):
         outcome = request.POST.get('outcome')
         wager = get_object_or_404(Wager, pk=wager_id)
 
-        # Validate the outcome
-        valid_outcomes = ('W', 'L', 'D', 'B')  # Replace with your model choices
+        valid_outcomes = ('W', 'L', 'D', 'B')
         if outcome not in valid_outcomes:
             raise ValidationError("Invalid outcome submitted")
 
         wager.outcome = outcome
         wager.save()
 
-        # Optionally return a JSON response with success message
         return JsonResponse({'success': True, 'message': 'Wager updated successfully'})
 
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
-
 
 def create_spinner_choice_render_automatically(request):
     nonce = random.randint(0, 1000000)
     choice = Choice.objects.filter(Q(lower_nonce__lte=nonce) & Q(upper_nonce__gte=nonce)).first()
 
     if choice:
-        game = choice.game  # Assuming the game is related to the choice
-        game_hub = GameHub.objects.first()  # Replace with your logic to select a game hub
+        game = choice.game
+        game_hub = GameHub.objects.first()
 
         spinner_choice_render = SpinnerChoiceRenders.objects.create(
             user=choice.user,
@@ -1934,16 +1773,13 @@ def create_spinner_choice_render_automatically(request):
     else:
         return render(request, 'error.html', {'message': 'No choice found for the generated nonce'})
 
-
 def spinner_choice_render_list(request):
     spinner_choice_renders = SpinnerChoiceRenders.objects.all()
     return render(request, 'spinner_choice_render_list.html', {'spinner_choice_renders': spinner_choice_renders})
 
-
 def spinner_choice_render_list(request):
     spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=self.game)
     return render(request, 'game.html', {'spinner_choice_renders': spinner_choice_renders})
-
 
 class ChestBackgroundView(BaseView):
     model = UserProfile
@@ -1955,13 +1791,13 @@ class ChestBackgroundView(BaseView):
             wager = form.save(commit=False)
             wager.user_profile = request.user.user_profile
             wager.save()
-            # Return the wager id to the client
+
             return JsonResponse({'wager_id': wager.id})
         else:
-            # If the form is not valid, re-render the page with the form errors
+
             return self.get(request, *args, **kwargs)
 
-    @csrf_exempt  # Handle CSRF if needed
+    @csrf_exempt
     def update_wager(request):
         if request.method == 'POST':
             wager_id = request.POST.get('wager_id')
@@ -1984,7 +1820,7 @@ class ChestBackgroundView(BaseView):
 
         def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
-            # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
             context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
             context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
             context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
@@ -2003,7 +1839,6 @@ class ChestBackgroundView(BaseView):
             context['tophit'] = TopHits.objects.filter(game=game, is_active=True).order_by('-mfg_date')[:8]
             newprofile = UpdateProfile.objects.filter(is_active=1)
 
-
             context['Profiles'] = newprofile
 
             for newprofile in context['Profiles']:
@@ -2014,7 +1849,6 @@ class ChestBackgroundView(BaseView):
                     newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
             return context
-
 
 class PokeChestBackgroundView(BaseView):
     model = UserProfile
@@ -2048,17 +1882,16 @@ class PokeChestBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
         context['Money'] = Currency.objects.filter(is_active=1).first()
-        context['games'] = Game.objects.filter(is_active=1)  # Queryset of active games
+        context['games'] = Game.objects.filter(is_active=1)
         context['wager_form'] = WagerForm()
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -2094,20 +1927,17 @@ class PokeChestBackgroundView(BaseView):
 
         return context
 
-
 def find_choice(request):
     generated_nonce = random.randint(0, 1000000)
 
     choice = Choice.objects.filter(lower_nonce__lte=generated_nonce, upper_nonce__gte=generated_nonce).first()
 
-    # Pass the generated nonce and the found choice to the template
     context = {
         'generated_nonce': generated_nonce,
         'choice': choice
     }
 
     return render(request, 'game.html', context)
-
 
 class FindChoiceView(View):
     template_name = 'game.html'
@@ -2124,10 +1954,8 @@ class FindChoiceView(View):
 
         return render(request, self.template_name, context)
 
-
 def generate_nonce():
     return random.randint(1, 1000000)
-
 
 @csrf_exempt
 def create_outcome(request, slug):
@@ -2202,8 +2030,8 @@ def create_outcome(request, slug):
         except Game.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Game not found.'})
         except Exception as e:
-            # Log the error
-            django.db.close_old_connections()  # Close connections on error
+
+            django.db.close_old_connections()
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
@@ -2226,8 +2054,6 @@ def game_view(request, game_id):
     }
 
     return render(request, 'game.html', context)
-
-
 
 def game_view(request, slug):
     game = get_object_or_404(Game, slug=slug)
@@ -2268,9 +2094,6 @@ def game_view(request, slug):
     nonce = random.randint(1, 1000000)
     return render(request, 'game.html', {'game': game, 'nonce': nonce})
 
-
-
-
 def save_spin_preference(request):
     if request.method == "POST" and request.is_ajax():
         quick_spin = request.POST.get('quick_spin') == 'true'
@@ -2279,7 +2102,6 @@ def save_spin_preference(request):
         spinpreference.save()
         return JsonResponse({'success': True})
     return JsonResponse({'success': False}, status=400)
-
 
 def display_choices(request, game_id, slug):
     game = get_object_or_404(Game, id=game_id, slug=slug)
@@ -2292,7 +2114,6 @@ def display_choices(request, game_id, slug):
             choice.save()
 
     return render(request, 'game.html', {'game': game, 'choices': choices})
-
 
 @login_required
 def get_user_cash(request):
@@ -2307,7 +2128,6 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from .models import InventoryObject, Transaction, ProfileDetails
-
 
 @csrf_exempt
 def bulk_sell_view(request):
@@ -2328,7 +2148,6 @@ def bulk_sell_view(request):
     items_to_update = []
     transactions_to_create = []
 
-    # Collect data outside transaction
     user_profile = get_object_or_404(ProfileDetails, user=request.user)
     for item in items:
         inv_pk = item.get("inventory_pk")
@@ -2339,7 +2158,6 @@ def bulk_sell_view(request):
         if inventory_object.user != request.user:
             return JsonResponse({"success": False, "error": f"Permission denied for item {inv_pk}"}, status=403)
 
-        # Prepare changes
         inventory_object.user = None
         inventory_object.inventory = None
         items_to_update.append(inventory_object)
@@ -2355,7 +2173,6 @@ def bulk_sell_view(request):
         total_added += inventory_object.price
         sold_count += 1
 
-    # Only perform DB writes in an atomic block
     with transaction.atomic():
         Transaction.objects.bulk_create(transactions_to_create)
         for inv_obj in items_to_update:
@@ -2397,7 +2214,6 @@ def sell_game_inventory_object(request, pk):
                 item_pk = item.get("inventory_pk")
                 item_inventory = get_object_or_404(InventoryObject, pk=item_pk)
 
-
                 item_inventory.user = None
                 item_inventory.inventory = None
                 item_inventory.save()
@@ -2425,7 +2241,6 @@ def sell_game_inventory_object(request, pk):
 
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'message': 'Invalid JSON data'}, status=400)
-
 
 @csrf_exempt
 def create_top_hit(request):
@@ -2470,7 +2285,6 @@ def create_top_hit(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
 class TopHitsListView(ListView):
     model = TopHits
     template_name = 'top_hits_list.html'
@@ -2484,7 +2298,6 @@ class TopHitsListView(ListView):
             html = render_to_string('partials/top_hits_partial.html', context, request=self.request)
             return JsonResponse({'html': html})
         return super().render_to_response(context, **response_kwargs)
-
 
 class MyPreferencesView(FormMixin, LoginRequiredMixin, ListView):
     model = MyPreferences
@@ -2550,7 +2363,6 @@ class MyPreferencesView(FormMixin, LoginRequiredMixin, ListView):
         else:
             return super().get(request, *args, **kwargs)
 
-
 class PreferencesDoneView(ListView):
     model = MyPreferences
     template_name = 'mypreferencesdone.html'
@@ -2612,7 +2424,6 @@ class PreferencesDoneView(ListView):
 
         return context
 
-
 class DailyRoomView(BaseView):
     model = GameHub
     template_name = "dailyroom.html"
@@ -2631,7 +2442,7 @@ class DailyRoomView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
@@ -2683,19 +2494,16 @@ class DailyRoomView(BaseView):
 
         return context
 
-
 def get_next_5pm_pst():
-    # Set the timezone to PST
+
     pst = pytz.timezone('US/Pacific')
     now = datetime.now(pst)
 
-    # Determine the next 5 PM
     next_5pm = now.replace(hour=17, minute=0, second=0, microsecond=0)
     if now >= next_5pm:
-        next_5pm += timedelta(days=1)  # Move to the next day if past 5 PM today
+        next_5pm += timedelta(days=1)
 
     return next_5pm
-
 
 class DailyChestView(BaseView):
     template_name = "game.html"
@@ -2705,11 +2513,8 @@ class DailyChestView(BaseView):
         slug = self.kwargs.get('slug')
         context['slug'] = slug
 
-        # Fetch data related to the user and game
-
         game = get_object_or_404(Game, slug=slug)
 
-        # Pass the game as a list
         context['game'] = game
 
         user = self.request.user
@@ -2752,11 +2557,10 @@ class DailyChestView(BaseView):
                 newprofile.newprofile_profile_picture_url = profile.avatar.url
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
-        user_profile = None  # Initialize to ensure it always exists
+        user_profile = None
         if game.user:
-            # Perform actions only if the `user` field is filled
+
             user_profile, created = UserProfile.objects.get_or_create(user=game.user)
-            # Additional logic if necessary
 
         context['SentProfile'] = user_profile
         if game.user:
@@ -2768,7 +2572,7 @@ class DailyChestView(BaseView):
 
         context['Money'] = Currency.objects.filter(is_active=1).first()
 
-        spinpreference = None  # Initialize spinpreference to ensure it exists
+        spinpreference = None
 
         if user.is_authenticated:
             try:
@@ -2842,20 +2646,16 @@ class DailyChestView(BaseView):
                             'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
                         }
                     })
-                    break  # Exit after finding the first match for this nonce
+                    break
 
         context['choices_with_nonce'] = choices_with_nonce
 
-        # Get the game_id from the URL kwargs
         game_id = self.kwargs.get('slug')
 
-        # Retrieve the Game object
         game = get_object_or_404(Game, slug=slug)
 
-        # Retrieve related Choice objects
         choices = Choice.objects.filter(game=game)
 
-        # Add them to the context
         context['game'] = game
         context['choices'] = choices
 
@@ -2866,7 +2666,7 @@ class DailyChestView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -2903,14 +2703,13 @@ class DailyChestView(BaseView):
 
     def game_detail(request, slug):
         game = get_object_or_404(Game, slug=slug)
-        choices = game.choices.all()  # Get all related choices for the game
+        choices = game.choices.all()
         return render(request, 'game_detail.html', {'game': game, 'choices': choices})
 
     def display_choices(request, game_id, slug):
         game = get_object_or_404(Game, id=game_id, slug=slug)
         choices = Choice.objects.filter(game=game)
 
-        # Ensure each choice has a nonce
         for choice in choices:
             if choice.lower_nonce is None or choice.upper_nonce is None:
                 choice.lower_nonce = random.randint(0, 1000000)
@@ -2919,7 +2718,6 @@ class DailyChestView(BaseView):
 
         return render(request, 'game.html', {'game': game, 'choices': choices})
 
-    # Example usage in a view or any other part of your application
     def take_spinner_slot(user, game, choice):
         SpinnerChoiceRenders.take_up_slot(user=user, game=game, choice=choice, value=100, ratio=2,
                                           type=game.type,
@@ -2953,12 +2751,11 @@ class DailyChestView(BaseView):
             return JsonResponse({'success': True})
         return JsonResponse({'success': False}, status=400)
 
-
 @csrf_exempt
 def spin_game(request):
     if request.method == "POST":
         try:
-            # Parse JSON body
+
             data = json.loads(request.body)
             game_id = data.get("game_id")
             spin_multiplier = int(data.get("spin_multiplier", 1))
@@ -2994,7 +2791,6 @@ def spin_game(request):
 
     return JsonResponse({"success": False, "error": "Invalid request method."})
 
-
 def game_detail(request, game_id):
     game = get_object_or_404(Game, id=game_id)
     choices = Choice.objects.filter(game=game)
@@ -3006,13 +2802,11 @@ def game_detail(request, game_id):
 
     return render(request, 'game.html', context)
 
-
 from django.http import JsonResponse
 
-
-@csrf_exempt  # Temporarily disable CSRF to test the view (remove this in production)
+@csrf_exempt
 def create_card_instance(request):
-    print("View called")  # Ensure this prints in the terminal
+    print("View called")
 
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -3025,7 +2819,6 @@ def create_card_instance(request):
         return JsonResponse({'success': True, 'message': 'Debugging response'})
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
-
 
 class OpenBattleListView(ListView):
     model = Battle
@@ -3042,9 +2835,9 @@ class OpenBattleListView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
 
-        active_games = Game.objects.filter(is_active=1) #include games included in the battle
+        active_games = Game.objects.filter(is_active=1)
         if active_games.exists():
-            context['game'] = random.choice(active_games) #include full selection, in selected order
+            context['game'] = random.choice(active_games)
         else:
             context['game'] = None
 
@@ -3055,7 +2848,6 @@ class OpenBattleListView(ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['game_values'] = self.request.session.pop('game_values', '')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -3113,7 +2905,6 @@ class OpenBattleListView(ListView):
             return redirect('showcase:battle_detail', battle_id=battle.id)
         return self.get(request, *args, **kwargs)
 
-
 class SingleBattleListView(DetailView):
     model = Battle
     template_name = "battle_detail.html"
@@ -3161,7 +2952,7 @@ class SingleBattleListView(DetailView):
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -3242,7 +3033,6 @@ class SingleBattleListView(DetailView):
                     userprofile.newprofile_profile_picture_url = profile.avatar.url
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
-        # Update participant status and creator check
         if hasattr(self, 'object') and self.object is not None and self.request.user.is_authenticated:
             battle = self.object
             context['is_participant'] = battle.participants.filter(user=user).exists()
@@ -3311,17 +3101,14 @@ class SingleBattleListView(DetailView):
         messages.error(request, 'Invalid form submission.')
         return redirect('showcase:battle_detail', battle_id=battle.id)
 
-
 class ActualBattleView(DetailView):
     model = Battle
     template_name = "actualbattle.html"
     context_object_name = "battle"
 
-
     def get_object(self):
         battle_id = self.kwargs.get('battle_id')
         return get_object_or_404(Battle.objects.prefetch_related('battle_games__game'), id=battle_id)
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -3352,7 +3139,7 @@ class ActualBattleView(DetailView):
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -3439,7 +3226,6 @@ class ActualBattleView(DetailView):
                 if profile:
                     userprofile.newprofile_profile_picture_url = profile.avatar.url
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
 
             slug = self.kwargs.get('slug')
             context['slug'] = slug
@@ -3578,7 +3364,6 @@ class ActualBattleView(DetailView):
             random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
             context['random_nonces'] = random_nonces
 
-            #get the games from the battle's games
             game_id = self.kwargs.get('slug')
 
             game = get_object_or_404(Game, slug=slug)
@@ -3652,7 +3437,7 @@ class ActualBattleView(DetailView):
                             'nonce': nonce,
                             'lower_nonce': lower,
                             'upper_nonce': upper,
-                            'rarity': choice_data['rarity'],  # Use the rarity from choice_data
+                            'rarity': choice_data['rarity'],
                             'file_url': choice_data['file_url'],
                             'currency': choice_data['currency']
                         })
@@ -3695,7 +3480,6 @@ class ActualBattleView(DetailView):
 
             return context
 
-
 class BattleCreationView(CreateView):
     model = Battle
     form_class = BattleCreationForm
@@ -3725,7 +3509,7 @@ class BattleCreationView(CreateView):
 
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -3778,7 +3562,6 @@ class BattleCreationView(CreateView):
 
         return context
 
-
 def join_battle(request):
     battle_id = request.POST.get('battle_id')
     battle = Battle.objects.get(id=battle_id)
@@ -3808,7 +3591,6 @@ def join_battle(request):
 
     return render(request, 'showcase/join_battle.html', {'form': form, 'battle': battle})
 
-
 def add_robot(request, battle_id):
     battle = get_object_or_404(Battle, id=battle_id)
 
@@ -3816,7 +3598,6 @@ def add_robot(request, battle_id):
         messages.error(request, "Only the battle creator can add robots.")
         return redirect('battle_detail', battle_id=battle.id)
 
-    # Get all available robots that are not already in the battle
     used_robot_ids = battle.battle_joined.filter(robot__isnull=False).values_list('robot_id', flat=True)
     available_robots = Robot.objects.filter(is_active=1).exclude(id__in=used_robot_ids)
 
@@ -3824,12 +3605,10 @@ def add_robot(request, battle_id):
         messages.error(request, "No available robots to add.")
         return redirect(reverse('showcase:battle_detail', kwargs={'battle_id': battle.id}))
 
-    # Randomly select one of the available robots
     selected_robot = random.choice(available_robots)
 
-    # Create a BattleParticipant as a bot and assign the robot
     bot_participant = BattleParticipant.objects.create(
-        user=None,  # No user since it's a bot
+        user=None,
         is_bot=True,
         robot=selected_robot,
         battle=battle
@@ -3838,11 +3617,9 @@ def add_robot(request, battle_id):
     messages.success(request, f"Robot '{selected_robot.name}' added successfully!")
     return redirect('showcase:battle_detail', battle_id=battle.id)
 
-
 def battle_detail_view(request, battle_id):
     battle = get_object_or_404(Battle, id=battle_id)
 
-    # Convert the slots to an integer for rendering
     slot_number = int(slugify(battle.slots).split('v')[-1]) if 'v' in battle.slots else int(battle.slots)
 
     return render(
@@ -3854,7 +3631,6 @@ def battle_detail_view(request, battle_id):
             'slots': slot_number
         }
     )
-
 
 def update_profile_level(profile):
     if profile.rubies_spent is not None:
@@ -3868,7 +3644,6 @@ def update_profile_level(profile):
         else:
             print(f"No level matches rubies_spent: {profile.rubies_spent}")
 
-
 @receiver(post_save, sender=Ascension)
 def reset_currency_spent_if_high_level(sender, instance, created, **kwargs):
     if created:
@@ -3876,16 +3651,13 @@ def reset_currency_spent_if_high_level(sender, instance, created, **kwargs):
         if profile and profile.level.level >= 100:
             profile.rubies_spent = 0
 
-            # Assuming 'currency.amount' holds the numeric value
             if hasattr(profile.rubies_spent, 'amount'):
-                profile.rubies_spent.amount += int(profile.rubies_spent.amount / 10)  # 10% gain in rubies
+                profile.rubies_spent.amount += int(profile.rubies_spent.amount / 10)
 
             print(f'User {profile.user} ascended at level {profile.level.level}')
 
-            # Reset level to the first level
-            profile.level = Level.objects.order_by('id').first()  # Adjust based on your level model
+            profile.level = Level.objects.order_by('id').first()
             profile.save()
-
 
 class AscendView(BaseView):
     model = Ascension
@@ -3922,29 +3694,27 @@ class AscendView(BaseView):
 
         return context
 
-
 @login_required
 def create_ascension(request):
     profile = ProfileDetails.objects.filter(user=request.user).first()
     if not profile:
         messages.error(request, "Profile not found.")
-        return redirect('showcase:index')  # Replace with your desired fallback page
+        return redirect('showcase:index')
 
     if request.method == "POST":
-        # Create the Ascension instance
+
         ascension = Ascension(
             final_level=profile.level,
-            reward=1,  # Customize as needed
+            reward=1,
             user=request.user,
-            profile=profile,  # Set the profile field
+            profile=profile,
         )
         ascension.save()
         messages.success(request, "Ascension created successfully!")
-        return redirect('showcase:index')  # Replace with the success redirect page
+        return redirect('showcase:index')
 
     form = AscensionCreateForm()
     return render(request, 'ascend.html', {'form': form})
-
 
 class EarningAchievement(BaseView):
     model = Achievements
@@ -3987,17 +3757,14 @@ class EarningAchievement(BaseView):
         achievement = get_object_or_404(Achievements, id=achievement_id)
         user_profile = get_object_or_404(ProfileDetails, user=self.request.user)
 
-        # Check if the achievement is not already earned
         if not achievement.earned:
-            # Update the achievement status and associate it with the user
+
             achievement.earned = True
             achievement.user = self.request.user
             achievement.save()
 
-            # Add the achievement's value to the user's currency amount
             user_profile.add_currency(achievement.value)
 
-            # Set the currency to the first applicable currency if not already set
             if not user_profile.currency:
                 first_currency = Currency.objects.first()
                 if first_currency:
@@ -4009,11 +3776,9 @@ class EarningAchievement(BaseView):
         else:
             return JsonResponse({"status": "failure", "message": "Achievement has already been earned."})
 
-
 def earningachievement(self, achievement_id):
     achievement = get_object_or_404(Achievements, id=achievement_id)
 
-    # Check if the achievement is not already earned
     if not achievement.earned:
         achievement.earned = True
         achievement.user = self.request.user
@@ -4022,13 +3787,11 @@ def earningachievement(self, achievement_id):
     else:
         return JsonResponse({"status": "failure", "message": "Achievement has already been earned."})
 
-
 class ChatCreatePostView(CreateView):
     model = ChatBackgroundImage
     form_class = ChatBackgroundImagery
     template_name = "chatbackgroundimagechange.html"
     success_url = reverse_lazy("home")
-
 
 class WhyBackgroundView(BaseView):
     model = WhyBackgroundImage
@@ -4065,7 +3828,6 @@ class WhyBackgroundView(BaseView):
 
         return context
 
-
 class GameHubView(BaseView):
     model = GameHub
     template_name = "gamehub.html"
@@ -4084,7 +3846,7 @@ class GameHubView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
@@ -4126,7 +3888,6 @@ class GameHubView(BaseView):
 
         return context
 
-
 class GameRoomView(BaseView):
     model = GameHub
     template_name = "gameroom.html"
@@ -4145,7 +3906,7 @@ class GameRoomView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
@@ -4166,12 +3927,11 @@ class GameRoomView(BaseView):
         context['NewGame'] = Game.objects.filter(is_active=1, filter='N')
         context['PopularGame'] = Game.objects.filter(is_active=1, filter='P')
 
-        # Prepare the favorites context.
         if self.request.user.is_authenticated:
-            # Get all favorites for the user.
+
             user_favs = FavoriteChests.objects.filter(user=self.request.user, is_active=1)
             fav_dict = {fav.chest.id: fav for fav in user_favs}
-            # Add a separate queryset of favorite games.
+
             context["FavoriteGames"] = Game.objects.filter(id__in=user_favs.values_list("chest_id", flat=True))
         else:
             fav_dict = {}
@@ -4233,7 +3993,6 @@ def toggle_favorite(request, game_id):
 from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render
 import json
-
 
 class OutcomeHistoryView(BaseView):
     model = Outcome
@@ -4308,7 +4067,6 @@ class OutcomeHistoryView(BaseView):
 
         return context
 
-
 class ClubRoomView(BaseView):
     model = GameHub
     template_name = "clubroom.html"
@@ -4327,7 +4085,7 @@ class ClubRoomView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
@@ -4337,7 +4095,6 @@ class ClubRoomView(BaseView):
         context['form'] = EmailForm()
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -4373,27 +4130,24 @@ class ClubRoomView(BaseView):
 
         return context
 
-
 @shared_task
 def update_locked_status():
-    # Get current time for comparison
+
     now = datetime.now()
     for game in Game.objects.filter(daily=True):
-        # Check if cooldown has passed
+
         if game.cooldown and game.cooldown <= now:
-            # Fetch users associated with this game and check unlocking levels
+
             users = ProfileDetails.objects.filter(level__gte=game.unlocking_level.level)
 
-            if users.exists():  # If at least one user meets the requirement
+            if users.exists():
                 game.locked = False
             else:
                 game.locked = True
 
-            # Reset cooldown to tomorrow's 5:00 PM
             tomorrow_5pm = datetime.combine(now.date() + timedelta(days=1), time(17, 0))
             game.cooldown = tomorrow_5pm
             game.save()
-
 
 class AchievementsView(TemplateView):
     model = Achievements
@@ -4420,7 +4174,6 @@ class AchievementsView(TemplateView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
-        
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -4459,7 +4212,6 @@ class AchievementsView(TemplateView):
         context['CheckedAchievements'] = self.CheckAchievements(request.user)
         return self.render_to_response(context)
 
-
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'registration/password_reset_form.html'
     email_template_name = 'registration/password_reset_email.html'
@@ -4467,12 +4219,10 @@ class CustomPasswordResetView(PasswordResetView):
     success_url = reverse_lazy('password_reset_done')
 
     def form_valid(self, form):
-        # Optionally, add custom logging here
+
         response = super().form_valid(form)
         print("Password reset email sent (if user exists).")
         return response
-
-
 
 class BlogBackgroundView(ListView):
     model = BlogBackgroundImage
@@ -4486,7 +4236,7 @@ class BlogBackgroundView(ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['BlogBackgroundImage'] = BlogBackgroundImage.objects.all()
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -4513,13 +4263,11 @@ class BlogBackgroundView(ListView):
 
         return context
 
-
 class BlogCreatePostView(CreateView):
     model = BlogBackgroundImage
     form_class = BlogBackgroundImagery
     template_name = "blogbackgroundimagechange.html"
     success_url = reverse_lazy("blog")
-
 
 class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
     model = UpdateProfile
@@ -4532,7 +4280,7 @@ class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -4559,7 +4307,6 @@ class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
 
         return context
 
-    # @login_required
     def post(self, request, *args, **kwargs):
         form = PostForm(request.POST)
         if form.is_valid():
@@ -4575,14 +4322,13 @@ class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
             print(form.cleaned_data)
             return render(request, "post_edit.html", {'form': form})
 
-
 class ShufflerBackgroundView(BaseView):
     model = Shuffler
     template_name = "pack_home.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
@@ -4590,7 +4336,6 @@ class ShufflerBackgroundView(BaseView):
         context['Shuffle'] = Shuffler.objects.filter(is_active=1).order_by("category")
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -4626,13 +4371,11 @@ class ShufflerBackgroundView(BaseView):
 
         return context
 
-
 class PostCreatePostView(CreateView):
     model = PostBackgroundImage
     form_class = PostBackgroundImagery
     template_name = "postbackgroundimagechange.html"
     success_url = reverse_lazy("post_edit")
-
 
 class BilletBackgroundView(BaseView):
     model = BilletBackgroundImage
@@ -4673,13 +4416,11 @@ class BilletBackgroundView(BaseView):
 
         return context
 
-
 class BilletCreatePostView(CreateView):
     model = BilletBackgroundImage
     form_class = BilletBackgroundImagery
     template_name = "billetbackgroundimagechange.html"
     success_url = reverse_lazy("billets")
-
 
 class RuleBackgroundView(BaseView):
     model = RuleBackgroundImage
@@ -4720,13 +4461,11 @@ class RuleBackgroundView(BaseView):
 
         return context
 
-
 class RuleCreatePostView(CreateView):
     model = RuleBackgroundImage
     form_class = RuleBackgroundImagery
     template_name = "rulebackgroundimagechange.html"
     success_url = reverse_lazy("rules")
-
 
 class PolicyBackgroundView(BaseView):
     template_name = "policy.html"
@@ -4765,7 +4504,6 @@ class PolicyBackgroundView(BaseView):
 
         return context
 
-
 class ServersView(BaseView):
     model = RuleBackgroundImage
     template_name = "servers.html"
@@ -4803,13 +4541,11 @@ class ServersView(BaseView):
 
         return context
 
-
 class AboutCreatePostView(CreateView):
     model = AboutBackgroundImage
     form_class = AboutBackgroundImagery
     template_name = "aboutbackgroundimagechange.html"
     success_url = reverse_lazy("about")
-
 
 class FaqBackgroundView(BaseView):
     model = FaqBackgroundImage
@@ -4849,13 +4585,11 @@ class FaqBackgroundView(BaseView):
 
         return context
 
-
 class FaqCreatePostView(CreateView):
     model = FaqBackgroundImage
     form_class = FaqBackgroundImagery
     template_name = "faqbackgroundimagechange.html"
     success_url = reverse_lazy("faq")
-
 
 class StaffBackgroundView(BaseView):
     model = BackgroundImage
@@ -4894,13 +4628,11 @@ class StaffBackgroundView(BaseView):
 
         return context
 
-
 class StaffCreatePostView(CreateView):
     model = StaffBackgroundImage
     form_class = StaffBackgroundImagery
     template_name = "staffbackgroundimagechange.html"
     success_url = reverse_lazy("staff")
-
 
 class StaffApplyBackgroundView(FormMixin, ListView):
     model = StaffApplyBackgroundImage
@@ -4914,7 +4646,7 @@ class StaffApplyBackgroundView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -4922,7 +4654,6 @@ class StaffApplyBackgroundView(FormMixin, ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         if self.request.user.is_authenticated:
@@ -4971,7 +4702,6 @@ class StaffApplyBackgroundView(FormMixin, ListView):
             messages.error(request, form.errors)
             return render(request, "staffapplications.html", {'form': form})
 
-
 class InformationBackgroundView(BaseView):
     InformationBackgroundImage
     template_name = "information.html"
@@ -5007,13 +4737,11 @@ class InformationBackgroundView(BaseView):
 
         return context
 
-
 class InformationCreatePostView(CreateView):
     model = InformationBackgroundImage
     form_class = InformationBackgroundImagery
     template_name = "Informationbackgroundimagechange.html"
     success_url = reverse_lazy("Information")
-
 
 class TagBackgroundView(BaseView):
     model = TagBackgroundImage
@@ -5052,13 +4780,11 @@ class TagBackgroundView(BaseView):
 
         return context
 
-
 class TagCreatePostView(CreateView):
     model = TagBackgroundImage
     form_class = TagBackgroundImagery
     template_name = "tagbackgroundimagechange.html"
     success_url = reverse_lazy("tag")
-
 
 class UserBackgroundView(BaseView):
     model = UserBackgroundImage
@@ -5098,13 +4824,11 @@ class UserBackgroundView(BaseView):
 
         return context
 
-
 class UserCreatePostView(CreateView):
     model = UserBackgroundImage
     form_class = UserBackgroundImagery
     template_name = "userbackgroundimagechange.html"
     success_url = reverse_lazy("users")
-
 
 class StaffRanksBackgroundView(BaseView):
     model = StaffRanksBackgroundImage
@@ -5142,13 +4866,11 @@ class StaffRanksBackgroundView(BaseView):
 
         return context
 
-
 class StaffRanksCreatePostView(CreateView):
     model = StaffRanksBackgroundImage
     form_class = StaffRanksBackgroundImagery
     template_name = "staffranksbackgroundimagechange.html"
     success_url = reverse_lazy("staffranks")
-
 
 class MegaBackgroundView(BaseView):
     model = MegaBackgroundImage
@@ -5186,13 +4908,11 @@ class MegaBackgroundView(BaseView):
 
         return context
 
-
 class MegaCreatePostView(CreateView):
     model = MegaBackgroundImage
     form_class = MegaBackgroundImagery
     template_name = "megacoinsbackgroundimagechange.html"
     success_url = reverse_lazy("megacoins")
-
 
 class EventBackgroundView(BaseView):
     model = EventBackgroundImage
@@ -5209,7 +4929,6 @@ class EventBackgroundView(BaseView):
 
         newprofile = Event.objects.filter(is_active=1)
 
-
         context['Profiles'] = newprofile
 
         for newprofile in context['Profiles']:
@@ -5244,13 +4963,11 @@ class EventBackgroundView(BaseView):
 
         return context
 
-
 class EventCreatePostView(CreateView):
     model = EventBackgroundImage
     form_class = EventBackgroundImagery
     template_name = "eventbackgroundimagechange.html"
     success_url = reverse_lazy("event")
-
 
 class NewsBackgroundView(BaseView):
     model = NewsBackgroundImage
@@ -5267,7 +4984,6 @@ class NewsBackgroundView(BaseView):
 
         newprofile = NewsFeed.objects.filter(is_active=1)
 
-
         context['Profiles'] = newprofile
 
         for newprofile in context['Profiles']:
@@ -5325,17 +5041,16 @@ class NewsBackgroundView(BaseView):
 
         return context
 
-
 class SingleNewsView(DetailView):
     model = NewsFeed
     paginate_by = 10
     template_name = "singlenews.html"
 
     def get_object(self):
-        slug = self.kwargs.get("slug")  # Get slug from URL parameters
+        slug = self.kwargs.get("slug")
         if slug:
-            return get_object_or_404(NewsFeed, slug=slug)  # Retrieve profile or raise 404 for invalid slug
-        return None  # Handle case where no slug is provided (optional
+            return get_object_or_404(NewsFeed, slug=slug)
+        return None
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -5345,7 +5060,7 @@ class SingleNewsView(DetailView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -5358,7 +5073,6 @@ class SingleNewsView(DetailView):
 
         newprofile = NewsFeed.objects.filter(is_active=1)
 
-
         context['Profiles'] = newprofile
 
         for newprofile in context['Profiles']:
@@ -5416,13 +5130,11 @@ class SingleNewsView(DetailView):
 
         return context
 
-
 class NewsCreatePostView(CreateView):
     model = NewsBackgroundImage
     form_class = NewsBackgroundImagery
     template_name = "newsbackgroundimagechange.html"
     success_url = reverse_lazy("newsfeed")
-
 
 class DonorView(BaseView):
     model = DonorBackgroundImage
@@ -5431,7 +5143,7 @@ class DonorView(BaseView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        # context['BaseHomeTexted'] = BaseHomeText.objects.all()
+
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -5461,17 +5173,15 @@ class DonorView(BaseView):
         return context
 
     def dispatch(self, request, *args, **kwargs):
-        # Check if there is a signed-in user
+
         if request.user.is_authenticated:
             user = request.user
             print(user)
         else:
-            # If no signed-in user, use a default user or None as desired
-            user = None  # Or use default_user if it is previously defined
 
-        # Continue with the regular flow, passing the determined user to the view
+            user = None
+
         return super().dispatch(request, *args, user=user, **kwargs)
-
 
 class ContributorBackgroundView(BaseView):
     model = ContributorBackgroundImage
@@ -5508,7 +5218,6 @@ class ContributorBackgroundView(BaseView):
 
         return context
 
-
 class ContentBackgroundView(BaseView):
     model = ContentBackgroundImage
     template_name = "morecontent.html"
@@ -5544,7 +5253,6 @@ class ContentBackgroundView(BaseView):
 
         return context
 
-
 class PartnerApplicationView(FormMixin, LoginRequiredMixin, ListView):
     model = PartnerApplication
     template_name = "partnerapplication.html"
@@ -5556,11 +5264,11 @@ class PartnerApplicationView(FormMixin, LoginRequiredMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -5591,7 +5299,6 @@ class PartnerApplicationView(FormMixin, LoginRequiredMixin, ListView):
 
         return context
 
-    # @login_required
     def post(self, request, *args, **kwargs):
         form = Server_Partner(request.POST, request.FILES)
         if form.is_valid():
@@ -5607,21 +5314,20 @@ class PartnerApplicationView(FormMixin, LoginRequiredMixin, ListView):
             print(form.cleaned_data)
             return render(request, "partnerapplication.html", {'form': form})
 
-
 class PartnerBackgroundView(BaseView):
     model = PartnerBackgroundImage
     template_name = "partners.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['PartnerBackgroundImage'] = PartnerBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -5630,7 +5336,6 @@ class PartnerBackgroundView(BaseView):
         context['Partner'] = PartnerApplication.objects.all()
 
         newprofile = Partner.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -5666,14 +5371,13 @@ class PartnerBackgroundView(BaseView):
 
         return context
 
-
 class ConvertBackgroundView(BaseView):
     model = ConvertBackgroundImage
     template_name = "convert.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ConvertBackgroundImage'] = ConvertBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -5702,7 +5406,6 @@ class ConvertBackgroundView(BaseView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
-
 
 class ReasonsBackgroundView(BaseView):
     model = ReasonsBackgroundImage
@@ -5710,7 +5413,7 @@ class ReasonsBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ConvertBackgroundImage'] = ConvertBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -5740,14 +5443,13 @@ class ReasonsBackgroundView(BaseView):
 
         return context
 
-
 class PerksBackgroundView(BaseView):
     model = PerksBackgroundImage
     template_name = "perks.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
@@ -5777,7 +5479,6 @@ class PerksBackgroundView(BaseView):
 
         return context
 
-
 class MonstrosityView(ListView):
     model = Monstrosity
     template_name = "mymonstrosity.html"
@@ -5793,7 +5494,7 @@ class MonstrosityView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -5824,17 +5525,16 @@ class MonstrosityView(ListView):
 
         return context
 
-
 class AddMonstrosityView(FormMixin, LoginRequiredMixin, ListView):
     model = Monstrosity
     form_class = AddMonstrosityForm
     template_name = "addamonstrosity.html"
 
     def dispatch(self, request, *args, **kwargs):
-        # Check if the user already has a Monstrosity
+
         if Monstrosity.objects.filter(user=request.user).exists():
             messages.error(request, "You already have a Monstrosity and cannot create another.")
-            return redirect('showcase:mymonstrosity')  # Redirect to the user's existing Monstrosity page
+            return redirect('showcase:mymonstrosity')
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -5882,7 +5582,7 @@ class AddMonstrosityView(FormMixin, LoginRequiredMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # The user check is already done in `dispatch`, so this handles form submission
+
         form = AddMonstrosityForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
@@ -5897,32 +5597,28 @@ class AddMonstrosityView(FormMixin, LoginRequiredMixin, ListView):
             print(form.cleaned_data)
             return render(request, "addamonstrosity.html", {'form': form})
 
-
 from .forms import FeedMonstrosityForm
-
 
 @login_required
 def feedmonstrosity(request, monstrosity_id):
     monstrosity = get_object_or_404(Monstrosity, id=monstrosity_id)
 
-    # Ensure the Monstrosity belongs to the current user
     if monstrosity.user != request.user:
         messages.error(request, "You do not have permission to feed this Monstrosity.")
-        return redirect('mymonstrosity')  # Replace with the appropriate redirect URL
+        return redirect('mymonstrosity')
 
     if request.method == 'POST':
         form = FeedMonstrosityForm(request.POST)
         if form.is_valid():
 
-            # Check if the Monstrosity has enough currency
             if monstrosity.currency_amount >= monstrosity.feed_amount:
-                # Deduct currency from the Monstrosity's currency_amount
+
                 monstrosity.currency_amount -= monstrosity.feed_amount
-                monstrosity.experience += monstrosity.feed_amount  # Add experience
+                monstrosity.experience += monstrosity.feed_amount
                 monstrosity.save()
 
                 messages.success(request, f"You have successfully fed {monstrosity.monstrositys_name}.")
-                return redirect('showcase:mymonstrosity')  # Replace with the appropriate redirect URL
+                return redirect('showcase:mymonstrosity')
             else:
                 messages.error(request, "This Monstrosity does not have enough currency to be fed.")
     else:
@@ -5930,29 +5626,8 @@ def feedmonstrosity(request, monstrosity_id):
 
     return render(request, 'feed_monstrosity.html', {'form': form, 'monstrosity': monstrosity})
 
-
-#  def get_queryset(self):
-#    return BackgroundImage.objects.all()
-
-#  def get_context_data(request):
-#    images = os.listdir("static/css/images") #Can use glob as well
-#    context = {'images': images}
-#    return render(request,'/home/runner/PokeTrove-Attempt-Backedmore/templates',context)
-
-# class Background2aView(ListView):
-#  model = Background2aImage
-#  paginate_by = 10
-#  template_name = 'index.html'
-#  extra_context = {'Background2aIm
-#  age.url': Background2aImage.objects.all()[0].get_absolute_url()}
-
-#  def get_queryset(self):
-#    return Background2aImage.objects.all()
-
-
 from django.http import HttpRequest, JsonResponse
 from django.views.generic import TemplateView
-
 
 class RoomView(TemplateView):
     model = Room
@@ -5969,7 +5644,7 @@ class RoomView(TemplateView):
         context['rooms_with_logo_same_name'] = rooms_with_logo_same_name
 
         if self.request.user.is_authenticated and getattr(self.request.user, 'current_room', None) == room_name:
-            # Mark related UserNotifications as read
+
             UserNotification.objects.filter(
                 user=self.request.user,
                 notification__content_type=ContentType.objects.get_for_model(Room),
@@ -5983,7 +5658,7 @@ class RoomView(TemplateView):
 
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -5996,7 +5671,6 @@ class RoomView(TemplateView):
         context['username'] = username
         context['room_details'] = room_details
         context['profile_details'] = profile_details
-
 
         messages = Message.objects.all().order_by('-date')
 
@@ -6037,7 +5711,6 @@ class RoomView(TemplateView):
                 onlineprofile.friend_name = onlineprofile.friend.username
                 print('activeprofile exists')
 
-
         blog_posts = Blog.objects.filter(status=1).order_by('-created_on')
 
         context['BlogPosts'] = blog_posts
@@ -6047,23 +5720,22 @@ class RoomView(TemplateView):
             activeprofile = ProfileDetails.objects.filter(user=friend).first()
             if activeprofile:
                 onlineprofile.author_profile_picture_url = profile.avatar.url
-                onlineprofile.friend_profile_picture_url = profile.avatar.url  # Add this line
+                onlineprofile.friend_profile_picture_url = profile.avatar.url
                 onlineprofile.author_profile_url = onlineprofile.get_profile_url()
                 onlineprofile.friend_name = onlineprofile.friend.username
                 print('currentfriendprofile exists')
 
         friends = Friend.objects.filter(user=self.request.user).order_by('last_messaged')
 
-        # Prepare a list to hold the friends' data
         friends_data = []
 
         for friend in friends:
-            # Get the friend's profile
+
             profile = ProfileDetails.objects.filter(user=friend.friend).first()
             friend_pk = self.request.GET.get('friend_pk')
 
             if profile:
-                # Add the friend's data to the list
+
                 friends_data.append({
                     'username': friend.friend.username,
                     'profile_picture_url': profile.avatar.url,
@@ -6071,18 +5743,17 @@ class RoomView(TemplateView):
                     'currently_active': friend.currently_active,
                     'user_profile_url': friend.get_profile_url2()
                 })
-            if friend_pk and int(friend_pk) == friend.pk:  # Check if PK matches
+            if friend_pk and int(friend_pk) == friend.pk:
                 print('setting currently active')
                 friend.currently_active = True
-                friend.save()  # Update the friend's currently_active field
-                return redirect('showcase:room', room=room)  # Redirect back to the room URL
+                friend.save()
+                return redirect('showcase:room', room=room)
 
-        # Add the friends' data to the context
         context['friends_data'] = friends_data
 
         search_term = self.request.GET.get('search', '')
         if search_term:
-            context = self.search_friends(context)  # Call search_friends if search term exists
+            context = self.search_friends(context)
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -6114,9 +5785,8 @@ class RoomView(TemplateView):
         if search_term:
             item_list = Friend.objects.filter(
                 Q(friend__username__icontains=search_term)
-            ).prefetch_related('friend')  # Prefetch the friend object
+            ).prefetch_related('friend')
 
-            # Prepare a list to hold the searched friends' data
             search_results_data = []
             current_user = self.request.user
 
@@ -6128,22 +5798,22 @@ class RoomView(TemplateView):
                     search_results_data.append({
                         'username': friend.friend.username,
                         'profile_picture_url': profile.avatar.url if profile else None,
-                        # Handle cases where profile might be missing
+
                         'profile_url': reverse('showcase:profile', args=[str(profile.pk)]),
                     })
                     print('the friend does have a profile')
                 else:
-                    # Handle cases where profile details might be missing (optional)
+
                     search_results_data.append({
                         'username': friend.friend.username,
-                        'profile_picture_url': None,  # Set to None or a default image URL
+                        'profile_picture_url': None,
                         'profile_url': reverse('showcase:profile', args=[str(friend.friend.pk)]),
                     })
                     print('no profile on the friend')
 
-            context['search_results'] = search_results_data  # Update context with search results data
+            context['search_results'] = search_results_data
         else:
-            context['search_results'] = []  # Empty list if no search
+            context['search_results'] = []
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -6170,7 +5840,6 @@ class RoomView(TemplateView):
 
         return context
 
-
 def room(request, room):
     username = request.GET.get('username')
 
@@ -6190,7 +5859,6 @@ def room(request, room):
         'Dropdown': DropDown,
     })
 
-
 def checkview(request):
     room = request.POST['room_name']
     username = request.POST['username']
@@ -6198,23 +5866,21 @@ def checkview(request):
     request.session['room_name'] = room
     request.session['username'] = username
 
-    # Check if room exists in the database
     if Room.objects.filter(name=room).exists():
         return redirect('/home/' + room + '/?username=' + username)
     else:
-        # Create room and assign user if authenticated
+
         new_room = Room.objects.create(name=room)
         signed_in_user = request.user
         print('the room owner is ' + str(signed_in_user))
         new_room.signed_in_user = signed_in_user if signed_in_user.is_authenticated else None
 
         if hasattr(new_room, 'file_field') and new_room.file_field:
-            new_room.file_field = os.path.basename(new_room.file_field.name)  # Save file name or path instead
+            new_room.file_field = os.path.basename(new_room.file_field.name)
 
         new_room.save()
-        # Redirect to create_room page after successful creation (assuming it exists)
-        return redirect('showcase:create_room')  # Assuming you have a URL pattern named 'create_room'
 
+        return redirect('showcase:create_room')
 
 @csrf_exempt
 def send(request):
@@ -6258,7 +5924,6 @@ def send(request):
                 )
             new_message.save()
 
-            # Return only serializable data
             file_url = new_message.file.url if new_message.file and hasattr(new_message.file, 'url') else None
 
             response_data = {
@@ -6279,7 +5944,6 @@ def send(request):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
-
 def mark_notifications_as_read(request):
     if request.method == "POST":
         try:
@@ -6288,10 +5952,8 @@ def mark_notifications_as_read(request):
             if not room_id:
                 return JsonResponse({"status": "error", "message": "Room ID not provided."}, status=400)
 
-            # Get ContentType for Room
             room_content_type = ContentType.objects.get_for_model(Room)
 
-            # Filter UserNotifications based on Notification's content_type and object_id
             user_notifications = UserNotification.objects.filter(
                 user=request.user,
                 notification__content_type=room_content_type,
@@ -6299,7 +5961,6 @@ def mark_notifications_as_read(request):
                 is_read=False
             )
 
-            # Debugging to validate query behavior
             print(f"Room ContentType: {room_content_type}")
             print(f"Room ID: {room_id}")
             if not user_notifications.exists():
@@ -6308,7 +5969,6 @@ def mark_notifications_as_read(request):
                 for notification in user_notifications:
                     print(f"Found UserNotification: {notification}")
 
-            # Mark notifications as read
             notifications_updated = user_notifications.update(is_read=True)
             print(f"Notifications updated: {notifications_updated}")
 
@@ -6319,7 +5979,6 @@ def mark_notifications_as_read(request):
             return JsonResponse({"status": "error", "message": "An error occurred."}, status=500)
 
     return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
-
 
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import JsonResponse
@@ -6332,7 +5991,6 @@ def get_profile_url(message):
 """
 from django.http import JsonResponse
 
-
 class NewRoomSettingsView(LoginRequiredMixin, TemplateView):
     template_name = "create_room.html"
 
@@ -6342,11 +6000,11 @@ class NewRoomSettingsView(LoginRequiredMixin, TemplateView):
         username = self.request.session.get('username')
 
         room = Room.objects.filter(name=room_name).first()
-        form = RoomSettings(instance=room)  # replace with your actual form class
+        form = RoomSettings(instance=room)
 
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -6354,7 +6012,6 @@ class NewRoomSettingsView(LoginRequiredMixin, TemplateView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['form'] = form
         context['room'] = room
-        # add other context variables as needed
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -6385,7 +6042,7 @@ class NewRoomSettingsView(LoginRequiredMixin, TemplateView):
         room_name = self.request.session.get('room_name')
         username = self.request.session.get('username')
         room = Room.objects.filter(name=room_name).first()
-        form = RoomSettings(request.POST, request.FILES, instance=room)  # replace with your actual form class
+        form = RoomSettings(request.POST, request.FILES, instance=room)
 
         if form.is_valid():
             form.save()
@@ -6393,8 +6050,6 @@ class NewRoomSettingsView(LoginRequiredMixin, TemplateView):
 
         return render(request, self.template_name, {'form': form})
 
-
-# Utility function to serialize a DefaultAvatar instance
 def serialize_default_avatar(avatar):
     if avatar:
         return {
@@ -6404,8 +6059,6 @@ def serialize_default_avatar(avatar):
         }
     return None
 
-
-# Utility function to serialize a ProfileDetails instance
 def serialize_profile(profile_details):
     if profile_details:
         return {
@@ -6413,7 +6066,6 @@ def serialize_profile(profile_details):
             "profile_url": profile_details.get_absolute_url(),
         }
     return None
-
 
 def getMessages(request, room):
     try:
@@ -6428,7 +6080,6 @@ def getMessages(request, room):
         profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
         default_avatar = DefaultAvatar.objects.first()
 
-        # Use the profile avatar if available, otherwise fallback to default avatar
         avatar_url = (
             profile_details.avatar.url if profile_details and profile_details.avatar else
             serialize_default_avatar(default_avatar)['default_avatar_url']
@@ -6451,7 +6102,6 @@ def getMessages(request, room):
 
     return JsonResponse({'messages': messages_data})
 
-
 def supportroom(request):
     username = request.user.username
     room_details = SupportChat.objects.get(name=username)
@@ -6464,16 +6114,13 @@ def supportroom(request):
         'profile_details': profile_details,
     })
 
-
 def index(request):
     generalmessages = Message.objects.filter(room='GeneralChatMessages').order_by('-date')
     messages = SupportMessage.objects.filter(room=request.user.username).order_by('-timestamp')
     return render(request, 'index.html', {'messages': messages})
 
-
 def supportchat(request):
     return render(request, 'supportchat.html')
-
 
 def privateroom(request, room):
     username = request.user.username
@@ -6484,10 +6131,9 @@ def privateroom(request, room):
         'room_details': room_details
     })
 
-
 def supportcheckview(request):
     help = request.POST['help']
-    # user = request.POST['username'] #based off def checkview
+
     username = request.user.username
 
     if SupportChat.objects.filter(name=username).exists():
@@ -6495,7 +6141,7 @@ def supportcheckview(request):
                                                     user=username,
                                                     room=username)
         new_message.save()
-        # return redirect('/supportchat/room')
+
         return redirect('/supportchat/room/' + username)
     else:
         new_room = SupportChat.objects.create(name=username)
@@ -6506,37 +6152,31 @@ def supportcheckview(request):
                                                     room=username)
         new_message.save()
 
-        # return redirect('/supportchat/room')
         return redirect('/supportchat/room/' + username)
         print('support message sent')
-
 
 def supportsend(request):
     if request.method == 'POST':
         message = request.POST.get('message')
         username = request.POST.get('username')
         room = request.POST.get('username')
-        # room_id = request.POST.get('room_id')
-        # profile = request.POST.get('profile')
-        # signed_in_user = request.POST.get('signed_in_user')
 
         print(f"message: {message}, username: {username}, room_name: {username}")
         print('the support chat is where it is from')
-        # print(f"profile: {profile}")
-        # Check if the user is authenticated
+
         if request.user.is_authenticated:
-            # User is authenticated, use their user ID for the message user field
+
             new_message = SupportMessage.objects.create(
                 value=message,
                 user=username,
                 room=username,
-                # room=room_id,
-                signed_in_user=request.user  # Set the signed_in_user to the authenticated user
+
+                signed_in_user=request.user
             )
-            # print(f"signed_in_user: {signed_in_user}")
+
             new_message.save()
         else:
-            # User is not authenticated, use the provided username for the message user field
+
             new_message = SupportMessage.objects.create(
                 value=message,
                 user=username,
@@ -6544,12 +6184,9 @@ def supportsend(request):
             )
             new_message.save()
 
-        # Return a response indicating the message was sent successfully
         return HttpResponse('Message sent successfully')
 
-    # If the request method is not POST, handle the appropriate response here
     return HttpResponse('Invalid request method. Please use POST to send a message.')
-
 
 import django
 from django.shortcuts import render, redirect
@@ -6634,7 +6271,7 @@ from .models import SocialMedia
 from .models import AdminRoles
 from .models import AdminTasks
 from .models import AdminPages
-# from .models import Background2aImage
+
 from .forms import VoteQueryForm, EmailForm
 from .forms import PostForm
 from .forms import Postit
@@ -6671,7 +6308,7 @@ from .forms import PaypalPaymentForm
 from .forms import BaseCopyrightTextField
 from .forms import ContactForme
 from .forms import SignUpForm
-# from .forms import OrderItems
+
 from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.contrib.auth import login
@@ -6716,7 +6353,6 @@ from django.views.generic import ListView, DetailView, View
 from django.utils import timezone
 from .forms import CheckoutForm
 
-
 class CustomLoginView(LoginView):
     template_name = "login.html"
 
@@ -6729,7 +6365,6 @@ class CustomLoginView(LoginView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
 
         print('the login context is ' + context)
         return context
@@ -6748,14 +6383,14 @@ class SignupView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         if self.request.user.is_authenticated:
@@ -6803,13 +6438,11 @@ class SignupView(FormMixin, ListView):
                 recipent_list = [user.email, ]
                 send_mail(subject, message, email_from, recipent_list)
 
-                # redirect user to home page
                 return redirect('showcase:showcase')
                 messages.info(request, "You have signed up successfully! Welcome!")
         else:
             form = SignUpForm()
         return render(request, 'cv-form.html', {'form': form})
-
 
 class TotalView(ListView):
     model = BackgroundImageBase
@@ -6822,14 +6455,14 @@ class TotalView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['TextFielde'] = TextBase.objects.filter(is_active=1).order_by("section")
@@ -6858,11 +6491,8 @@ class TotalView(ListView):
 
         return context
 
-
 class LogoView(ListView):
     model = LogoBase
-
-    # ought to span multiple pages, not simply index
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -6892,13 +6522,11 @@ class LogoView(ListView):
 
         return context
 
-
 from io import BytesIO
 from PIL import Image
 from django.core.files.base import ContentFile
 
 from .models import Advertising
-
 
 class AdvertisementView(ListView):
     model = AdvertisementBase
@@ -6936,9 +6564,8 @@ class AdvertisementView(ListView):
 
         return context
 
-
 """    def handle_uploaded_image(i):
-       # resize image
+
        imagefile  = StringIO.StringIO(i.read())
        imageImage = Image
 
@@ -6950,33 +6577,27 @@ class AdvertisementView(ListView):
        imagefile = StringIO.StringIO()
        resizedImage.save(imagefile,'JPEG')"""
 
-
 def set_image_position(image_id, xposition, yposition):
-    # Retrieve the Image object from the database
+
     image = ImageBase.objects.get(id=image_id)
     print("Current coordinates: x={image.x}, y={image.y}")
 
-    # Set the x and y positions to the desired values
     image.x = xposition
     image.y = yposition
 
-    # Save the updated Image object back to the database
     image.save()
-
 
 class ImageView(ListView):
     model = ImageBase
 
     def post(self, request, *args, **kwargs):
-        # Get the image ID and new position values from the request
+
         image_id = request.POST.get('image_id')
         xposition = request.POST.get('xposition')
         yposition = request.POST.get('yposition')
 
-        # Update the image position in the database
         set_image_position(image_id, xposition, yposition)
 
-        # Render a response to the user
         return HttpResponse('Image position updated.')
 
     def get_context_data(self, **kwargs):
@@ -7007,7 +6628,6 @@ class ImageView(ListView):
 
         return context
 
-
 class BaseView(ListView):
     template_name = "base.html"
     model = LogoBase
@@ -7016,7 +6636,7 @@ class BaseView(ListView):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7061,17 +6681,16 @@ class BaseView(ListView):
 
         return context
 
-
 class EBaseView(ListView):
     template_name = "ebase.html"
     model = NavBar
 
     def get_context_data(self, **kwargs):
-        # context = super().get_context_data(**kwargs)
+
         context = {}
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7111,7 +6730,6 @@ class EBaseView(ListView):
 
         return context
 
-
 class BlogBaseView(ListView):
     template_name = "blogbase.html"
     model = LogoBase
@@ -7120,7 +6738,7 @@ class BlogBaseView(ListView):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7162,7 +6780,6 @@ class BlogBaseView(ListView):
 
         return context
 
-
 class NavView(ListView):
     template_name = "navtrove.html"
     model = LogoBase
@@ -7184,7 +6801,7 @@ class NavView(ListView):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7259,14 +6876,12 @@ class NavView(ListView):
 
         return context
 
-
 def detail_post_view(request, id=None):
     eachpost = get_object_or_404(Post, id=id)
 
     context = {'eachpost': eachpost}
 
     return render(request, 'showcase:likes.html', context)
-
 
 @login_required
 def postpreference(request, post_name, like_or_dislike):
@@ -7295,14 +6910,9 @@ def postpreference(request, post_name, like_or_dislike):
 
         return render(request, 'showcase:likes.html', context)
 
-
-# like is not connected to blog yet is used to filter
-
-# id is used by this model but the blogpost uses slugs
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views import View
 from django.utils.decorators import method_decorator
-
 
 @method_decorator(staff_member_required, name='dispatch')
 class AdminRolesView(BaseView):
@@ -7315,7 +6925,7 @@ class AdminRolesView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7350,7 +6960,6 @@ class AdminRolesView(BaseView):
 
         return context
 
-
 @method_decorator(staff_member_required, name='dispatch')
 class AdminTasksView(BaseView):
     template_name = "administrativetasks.html"
@@ -7362,7 +6971,7 @@ class AdminTasksView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7396,7 +7005,6 @@ class AdminTasksView(BaseView):
 
         return context
 
-
 @method_decorator(staff_member_required, name='dispatch')
 class AdminPagesView(BaseView):
     template_name = "administrativepages.html"
@@ -7408,7 +7016,7 @@ class AdminPagesView(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7444,7 +7052,6 @@ class AdminPagesView(BaseView):
 
         return context
 
-
 @method_decorator(staff_member_required, name='dispatch')
 class AdministrationView(ListView):
     template_name = "administration.html"
@@ -7455,7 +7062,7 @@ class AdministrationView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7491,7 +7098,6 @@ class AdministrationView(ListView):
 
         return context
 
-
 class DonateBaseView(ListView):
     template_name = "donatebase.html"
     model = LogoBase
@@ -7500,7 +7106,7 @@ class DonateBaseView(ListView):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7541,7 +7147,6 @@ class DonateBaseView(ListView):
 
         return context
 
-
 class ShippingBackgroundView(FormMixin, LoginRequiredMixin, ListView):
     model = UserProfile2
     template_name = "shippingform.html"
@@ -7555,11 +7160,11 @@ class ShippingBackgroundView(FormMixin, LoginRequiredMixin, ListView):
 
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7590,7 +7195,6 @@ class ShippingBackgroundView(FormMixin, LoginRequiredMixin, ListView):
 
         return context
 
-    # @login_required
     def post(self, request, *args, **kwargs):
         form = ShippingForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
@@ -7606,7 +7210,6 @@ class ShippingBackgroundView(FormMixin, LoginRequiredMixin, ListView):
             print(form.cleaned_data)
             return render(request, "shippingform.html", {'form': form})
 
-
 class ShippingProfileView(ListView):
     model = UserProfile2
     template_name = "shippingprofile.html"
@@ -7616,7 +7219,7 @@ class ShippingProfileView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
@@ -7627,7 +7230,7 @@ class ShippingProfileView(ListView):
 
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7668,7 +7271,6 @@ class ShippingProfileView(ListView):
 
         return context
 
-
 class PrintShippingLabelView(LoginRequiredMixin, ListView):
     model = TradeShippingLabel
     template_name = "printandship.html"
@@ -7680,11 +7282,11 @@ class PrintShippingLabelView(LoginRequiredMixin, ListView):
 
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7717,7 +7319,6 @@ class PrintShippingLabelView(LoginRequiredMixin, ListView):
 
         return context
 
-
 class MembershipView(LoginRequiredMixin, ListView):
     model = Membership
     template_name = "membership.html"
@@ -7729,11 +7330,11 @@ class MembershipView(LoginRequiredMixin, ListView):
 
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7767,7 +7368,6 @@ class MembershipView(LoginRequiredMixin, ListView):
 
         return context
 
-
 class MemberBaseView(ListView):
     template_name = "memberbase.html"
     model = LogoBase
@@ -7776,7 +7376,7 @@ class MemberBaseView(ListView):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7817,7 +7417,6 @@ class MemberBaseView(ListView):
 
         return context
 
-
 class usersview(ListView):
     paginate_by = 10
     template_name = 'users.html'
@@ -7825,15 +7424,11 @@ class usersview(ListView):
     def get_queryset(self):
         return Idea.objects.all()
 
-
 from django.db.models import Count, F
-
 
 class PostList(BaseView):
     model = BlogBackgroundImage
-    # backgroundqueryset = BackgroundImageBase.objects.filter('page').order_by('position')
-    # queryset = Blog.objects.filter(status=1).order_by('-created_on')
-    # normally can only filter once per view
+
     template_name = 'blog.html'
 
     def get_context_data(self, **kwargs):
@@ -7847,14 +7442,11 @@ class PostList(BaseView):
         page_number = self.request.GET.get('page')
         paginated_blog = paginator.get_page(page_number)
 
-        # Annotate each blog post with the difference between the number of likes and dislikes
         PopularBlogOrder = Blog.objects.annotate(like_dislike_diff=Count(F('likes')) - Count(F('dislikes'))).order_by(
             '-like_dislike_diff', '-created_on')
 
-        # Order the blog posts by this difference
         PopularBlogOrder = PopularBlogOrder.order_by('-like_dislike_diff')
 
-        # Pass the ordered blog posts to the template
         context = {'PopularBlogOrder': PopularBlogOrder}
 
         context['BlogBackgroundImage'] = BlogBackgroundImage.objects.all()
@@ -7863,7 +7455,7 @@ class PostList(BaseView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['TextFielde'] = TextBase.objects.filter(is_active=1)
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -7873,7 +7465,7 @@ class PostList(BaseView):
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1).order_by('image_position')
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['BlogFilter'] = BlogFilter.objects.filter(is_active=1).order_by('clicks')
         context['BlogHeader'] = BlogHeader.objects.filter(is_active=1).order_by('category')
@@ -7895,9 +7487,6 @@ class PostList(BaseView):
                 comments.author_profile_url = comments.get_profile_url()
 
                 print('imgsrcimg')
-
-        # Retrieve the signed-in user's profile and profile picture URL
-
 
         blog_posts = Blog.objects.filter(status=1).order_by('-created_on')
 
@@ -7955,12 +7544,9 @@ class PostList(BaseView):
     def get_queryset(self):
         return Blog.objects.filter(status=1).order_by('-created_on')
 
-
-# views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import VoteQuery, VoteOption, Ballot
 from .forms import VoteQueryForm, VoteOptionFormSet
-
 
 def vote(request, poll_id):
     poll = get_object_or_404(VoteQuery, pk=poll_id, is_active=True)
@@ -7969,7 +7555,6 @@ def vote(request, poll_id):
         option_id = request.POST.get('option')
         selected_option = get_object_or_404(VoteOption, pk=option_id)
 
-        # Check if user already voted
         if not Ballot.objects.filter(user=request.user, vote_query=poll).exists():
             Ballot.objects.create(
                 user=request.user,
@@ -7980,11 +7565,9 @@ def vote(request, poll_id):
 
     return render(request, 'ballot.html', {'poll': poll})
 
-
 def poll_results(request, poll_id):
     poll = get_object_or_404(VoteQuery, pk=poll_id)
     return render(request, 'results.html', {'poll': poll})
-
 
 class votingview(ListView):
     model = VoteBackgroundImage
@@ -8007,7 +7590,7 @@ class votingview(ListView):
         form = EmailForm()
         self.object_list = self.get_queryset()
         context = self.get_context_data(**kwargs)
-        # Integrate active polls (formerly in def active_polls)
+
         context['polls'] = VoteQuery.objects.filter(is_active=True)
         return render(request, "voting.html", {'form': form, **context})
 
@@ -8023,7 +7606,7 @@ class votingview(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -8063,7 +7646,6 @@ class votingview(ListView):
 
         return context
 
-
 class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
     model = Item
     paginate_by = 10
@@ -8079,7 +7661,7 @@ class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -8088,7 +7670,6 @@ class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
         context['Item'] = Item.objects.filter(is_active=1)
 
         newprofile = Item.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -8131,7 +7712,7 @@ class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
         return render(request, 'create_product.html', context)
 
     def post(self, request, *args, **kwargs):
-        form = ItemForm(request.POST, request.FILES)  # Include request.FILES
+        form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             form.instance.user = request.user
@@ -8156,7 +7737,6 @@ class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
             })
         return render(request, 'some_template.html', {'fields': fields})
 
-
 class TradeItemCreateView(ListView):
     model = TradeItem
     template_name = 'tradingcentral.html'
@@ -8171,7 +7751,7 @@ class TradeItemCreateView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -8187,12 +7767,10 @@ class TradeItemCreateView(ListView):
 
         slug = self.kwargs.get('slug')
 
-        # Check if a valid slug is provided
         if slug:
-            # Retrieve all feedback objects with the same slug
+
             trade_objects = TradeOffer.objects.filter(slug=slug)
 
-            # Add the feedback_objects to the context
             context['TradeOffered'] = trade_objects
 
         if self.request.user.is_authenticated:
@@ -8220,7 +7798,6 @@ class TradeItemCreateView(ListView):
 
         return context
 
-
 class TradeBackgroundView(FormMixin, LoginRequiredMixin, ListView):
     model = TradeItem
     template_name = "tradeitems.html"
@@ -8234,7 +7811,7 @@ class TradeBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -8268,7 +7845,7 @@ class TradeBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
-        form = TradeItemForm(request.POST, request.FILES)  # Include request.FILES
+        form = TradeItemForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             form.instance.user = request.user
@@ -8282,7 +7859,6 @@ class TradeBackgroundView(FormMixin, LoginRequiredMixin, ListView):
             print(form.cleaned_data)
             form = TradeItemForm()
         return render(request, 'tradeitems.html', {'form': form})
-
 
 class TradeOfferCreateView(CreateView):
     model = TradeOffer
@@ -8298,14 +7874,14 @@ class TradeOfferCreateView(CreateView):
         self.object_list = self.get_queryset()
         context = super().get_context_data(**kwargs)
         form = TradeProposalForm(self.request.POST or None, user=self.request.user)
-        context['form'] = form  # Add the form to the context
+        context['form'] = form
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -8338,17 +7914,13 @@ class TradeOfferCreateView(CreateView):
 
         return context
 
-
 def contact_trader(self, request, trade_item_id):
     trade_item = get_object_or_404(TradeItem, id=trade_item_id)
     current_user = request.user
 
-    # Create a room with the current user and the trade item's user
     room = trade_item.create_room(current_user)
 
-    # Redirect to the room view with the room name and current user
     return redirect('showcase:room', room=room.name, username=current_user.username)
-
 
 class ResponseTradeOfferCreateView(CreateView):
     model = RespondingTradeOffer
@@ -8390,14 +7962,14 @@ class ResponseTradeOfferCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = self.get_form_instance()  # Add the form to the context
+        context['form'] = self.get_form_instance()
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -8430,31 +8002,27 @@ class ResponseTradeOfferCreateView(CreateView):
 
         return context
 
-
 @login_required
 def contact_trader(request):
     trade_item_id = request.pk
     trade_item = get_object_or_404(TradeItem, id=trade_item_id)
     current_user = request.user
 
-    # Create a room with the current user and the trade item's user
     room = trade_item.create_room(current_user)
 
-    # Redirect to the room view with the room name and current user
     return redirect('showcase:room', room=room.name, username=current_user.username)
-
 
 @method_decorator(login_required, name='dispatch')
 class FriendRequestsView(View):
     def get(self, request, *args, **kwargs):
-        # Get all pending friend requests for the current user
+
         pending_requests = FriendRequest.objects.filter(receiver=request.user, status=FriendRequest.PENDING)
         outgoing_requests = FriendRequest.objects.filter(sender=request.user, status=FriendRequest.PENDING)
 
         context = {}
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -8479,9 +8047,7 @@ class FriendRequestsView(View):
         context.update({'pending_requests': pending_requests, 'outgoing_requests': outgoing_requests})
         return render(request, 'my_friend_requests.html', context)
 
-
 from django.contrib import messages
-
 
 @login_required
 def accept_friend_request(request, request_id):
@@ -8494,7 +8060,6 @@ def accept_friend_request(request, request_id):
     messages.success(request, 'You have accepted the friend request.')
     return redirect('showcase:my_friend_requests')
 
-
 @login_required
 def decline_friend_request(request, request_id):
     friend_request = get_object_or_404(FriendRequest, id=request_id)
@@ -8504,7 +8069,6 @@ def decline_friend_request(request, request_id):
     friend_request.save()
     messages.success(request, 'You have declined the friend request.')
     return redirect('showcase:my_friend_requests')
-
 
 class FriendlyView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
@@ -8527,7 +8091,6 @@ class FriendlyView(LoginRequiredMixin, View):
 
         return render(request, 'my_friends.html', context)
 
-
 @method_decorator(login_required, name='dispatch')
 class SendFriendRequestView(View):
     def post(self, request):
@@ -8536,7 +8099,6 @@ class SendFriendRequestView(View):
             friend_request = form.save(commit=False)
             friend_request.sender = request.user
 
-            # Check if a FriendRequest with the same sender and receiver already exists
             if not FriendRequest.objects.filter(sender=friend_request.sender,
                                                 receiver=friend_request.receiver).exists():
                 friend_request.save()
@@ -8546,7 +8108,7 @@ class SendFriendRequestView(View):
                                "You already sent a friend request to that user or you are already friends with them!")
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
         else:
-            # Handle the case where the form is not valid
+
             messages.error(request, "Please send a friend request to the trader to continue.")
             return render(request, 'send_friend_request.html', {'form': form})
 
@@ -8556,7 +8118,7 @@ class SendFriendRequestView(View):
         context['form'] = form
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -8565,34 +8127,29 @@ class SendFriendRequestView(View):
 
         return render(request, 'send_friend_request.html', context)
 
-
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
-
 
 @login_required
 def contact_trader(request, trade_offer_id):
     trade_offer = TradeOffer.objects.get(id=trade_offer_id)
     current_user = request.user
 
-    # Check if there's an accepted friend request between the current user and the trade offer creator
     if not FriendRequest.objects.filter(
             Q(sender=trade_offer.user, receiver=current_user, status=FriendRequest.ACCEPTED) |
             Q(sender=current_user, receiver=trade_offer.user, status=FriendRequest.ACCEPTED)
     ).exists():
-        # If not, create a new friend request with status pending
+
         FriendRequest.objects.create(sender=current_user, receiver=trade_offer.user, status=FriendRequest.PENDING)
     else:
-        # If there's an accepted friend request, check if a private room already exists between the two users
+
         room = Room.objects.filter(signed_in_user__in=[current_user, trade_offer.user], public=False).first()
         if not room:
-            # If not, create a new private room
+
             room = Room.objects.create(name=f'Private room: {current_user.username} and {trade_offer.user.username}',
                                        signed_in_user=current_user, public=False)
 
-        # Redirect to the room page
         return redirect(room.get_absolute_url())
-
 
 class partnerview(ListView):
     paginate_by = 10
@@ -8601,14 +8158,12 @@ class partnerview(ListView):
     def get_queryset(self):
         return PartnerApplication.objects.all()
 
-
 class newsfeedview(ListView):
     paginate_by = 10
     template_name = 'newsfeed.html'
 
     def get_queryset(self):
         return NewsFeed.objects.all()
-
 
 class Issueview(ListView):
     paginate_by = 10
@@ -8617,7 +8172,6 @@ class Issueview(ListView):
     def get_queryset(self):
         return ReportIssue.objects.all()
 
-
 class staffview(ListView):
     paginate_by = 10
     template_name = 'staff.html'
@@ -8625,14 +8179,12 @@ class staffview(ListView):
     def get_queryset(self):
         return StaffProfile.objects.all()
 
-
 class eventview(ListView):
     paginate_by = 10
     template_name = 'events.html'
 
     def get_queryset(self):
         return Event.objects.all()
-
 
 """class SupportRoomView(TemplateView):
     model = SupportMessage
@@ -8645,7 +8197,7 @@ class eventview(ListView):
         room_details = Room.objects.get(name=room)
         profile_details = ProfileDetails.objects.filter(user__username=username).first()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-        
+
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -8661,7 +8213,6 @@ class eventview(ListView):
         context['room_details'] = room_details
         context['profile_details'] = profile_details
 
-        
         messages = Message.objects.all().order_by('-date')
 
         context['Messaging'] = messages
@@ -8697,7 +8248,6 @@ class eventview(ListView):
 
         return context"""
 
-
 class SupportRoomView(TemplateView):
     model = SupportMessage
     template_name = 'supportroom.html'
@@ -8705,11 +8255,9 @@ class SupportRoomView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         signed_in_user = self.kwargs['signed_in_user']
-        # room_name = self.kwargs['room_name']
-        context['username'] = signed_in_user  # Set 'username' to the extracted 'signed_in_user'
 
-        # room = self.kwargs['room']
-        # room_details = SupportChat.objects.get(name=signed_in_user)  # Use 'signed_in_user' here
+        context['username'] = signed_in_user
+
         profile_details = ProfileDetails.objects.filter(user__username=signed_in_user).first()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
@@ -8719,7 +8267,7 @@ class SupportRoomView(TemplateView):
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -8728,19 +8276,15 @@ class SupportRoomView(TemplateView):
         context['room'] = signed_in_user
         context['profile_details'] = profile_details
 
-
-        # Retrieve the messages
         messages = SupportMessage.objects.all().order_by('-date')
 
         context['Messanger'] = messages
 
-        # Create a list to store formatted message data
         messages_data = []
 
         for messages in context['Messanger']:
             profile = ProfileDetails.objects.filter(user=messages.signed_in_user).first()
 
-            # Create a dictionary to store message data including profile information
             message_data = {
                 'user_profile_picture_url': profile.avatar.url if profile else '',
                 'user_profile_url': messages.get_profile_url(),
@@ -8751,7 +8295,6 @@ class SupportRoomView(TemplateView):
 
             messages_data.append(message_data)
 
-        # Assign the list of formatted message data to the context
         context['Messanger'] = messages_data
 
         if self.request.user.is_authenticated:
@@ -8779,7 +8322,6 @@ class SupportRoomView(TemplateView):
 
         return context
 
-
 def supportroom(request, signed_in_user):
     return render(request, 'supportroom.html', {
         'username': username,
@@ -8792,7 +8334,6 @@ def supportroom(request, signed_in_user):
         'Dropdown': DropDown,
     })
 
-
 class SupportCombinedView(SupportRoomView, ListView):
     paginate_by = 10
     template_name = 'supportroom.html'
@@ -8800,14 +8341,12 @@ class SupportCombinedView(SupportRoomView, ListView):
     def get_queryset(self):
         return SupportMessage.objects.all()
 
-
 class supportview(ListView):
     paginate_by = 10
     template_name = 'supportissues.html'
 
     def get_queryset(self):
         return Support.objects.all()
-
 
 class SupportLineView(TemplateView):
     model = SupportLine
@@ -8823,7 +8362,7 @@ class SupportLineView(TemplateView):
 
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -8837,7 +8376,6 @@ class SupportLineView(TemplateView):
         context['room'] = room
         context['room_details'] = room_details
         context['profile_details'] = profile_details
-
 
         messages = SupportLine.objects.all().order_by('-date')
 
@@ -8874,7 +8412,6 @@ class SupportLineView(TemplateView):
 
         return context
 
-
 def supportline(request, room):
     username = request.user.username
     room_details = SupportInterface.objects.get(name=username)
@@ -8887,24 +8424,21 @@ def supportline(request, room):
         'profile_details': profile_details,
     })
 
-
 def supportlinecheckview(request):
     room = request.POST['room_name']
 
     if SupportInterface.objects.filter(name=room).exists():
-        # return redirect('/supportchat/room')
+
         return redirect('/supportinterface/room/' + room)
     else:
         new_room = SupportInterface.objects.create(name=room)
         signed_in_user = request.user
         print('the room owner is ' + str(signed_in_user))
         new_room.save()
-        # return redirect('/supportchat/room')
+
         return redirect('/supportinterface/room/' + room)
 
-
 from django.shortcuts import get_object_or_404
-
 
 def supportlinesend(request):
     if request.method == 'POST':
@@ -8914,38 +8448,32 @@ def supportlinesend(request):
 
         print(f"message: {message}, username: {username}, room_id: {room_id}")
 
-        # Check if the user is authenticated and has permission to send a message
         if request.user.is_authenticated and request.user.is_staff:
-            # User is authenticated, use their user ID for the message user field
-            user = request.user  # Use the authenticated user
 
-        # Create a new SupportLine message with the correct room and user
+            user = request.user
+
         new_message = SupportLine.objects.create(
             value=message,
-            user=user,  # Assign the user to the message
+            user=user,
             room=room_id,
             signed_in_user=request.user if request.user.is_authenticated else None
         )
 
-        # Return a response indicating the message was sent successfully
         return HttpResponse('Message sent successfully')
 
-    # If the request method is not POST or the user is not authorized, handle the appropriate response here
     return HttpResponse('Invalid request or authorization.')
-
 
 def supportlinegetMessages(request, room, **kwargs):
     room_details = SupportInterface.objects.get(name=room)
     messages = SupportLine.objects.filter(room=room)
-    # Check if the user is authenticated
+
     if not request.user.is_authenticated or not request.user.is_staff:
         return HttpResponseForbidden("You do not have permission to access this chat room")
 
     chat_room = get_object_or_404(SupportInterface, name=room)
 
-    # Check if the requesting user is the creator of the room or an administrator
     if request.user.is_staff:
-        # Retrieve messages for the specified room
+
         messages = SupportLine.objects.filter(room=chat_room)
         messages_data = []
 
@@ -8971,18 +8499,17 @@ def supportlinegetMessages(request, room, **kwargs):
     else:
         return HttpResponseForbidden("You do not have permission to access this chat room")
 
-
 class MemberHomeBackgroundView(ListView):
     model = MemberHomeBackgroundImage
     template_name = "memberhome.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['MemberHomeBackgroundImage'] = MemberHomeBackgroundImage.objects.all()
         if self.request.user.is_authenticated:
@@ -9010,21 +8537,18 @@ class MemberHomeBackgroundView(ListView):
 
         return context
 
-
-
 class BusinessMessageBackgroundView(ListView):
     model = BusinessMessageBackgroundImage
     template_name = "businessemail.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -9060,13 +8584,13 @@ class PatreonBackgroundView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['PatreonBackgroundImage'] = PatreonBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        # context['Patreon'] = Patreon.objects.all()
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -9092,7 +8616,6 @@ class PatreonBackgroundView(ListView):
 
         return context
 
-
 """class BlogComment(generic.DetailView):
     model = Blog
     paginate_by = 10
@@ -9103,9 +8626,6 @@ class PatreonBackgroundView(ListView):
 
         post = get_object_or_404(Blog, slug=slug)
         category_count = post.likes
-
-        # if request.user.is_authenticated:
-        #    BlogLikeView.objects.get_or_create(user=request.user, post=post)
 
         form = CommentForm(request.POST or None)
         if request.method == "POST":
@@ -9125,30 +8645,7 @@ class PatreonBackgroundView(ListView):
         }
         return render(request, 'blog_comment.html', context)"""
 
-# def BlogPostLike(request, slug):
-#    post = get_object_or_404(Blog, id=request.POST.get('blog_id'))
-#    if post.likes.filter(id=request.user.id).exists():
-#        post.likes.remove(request.user)
-#    else:
-#        post.likes.add(request.user)
-
-#    return HttpResponseRedirect(reverse('showcase:post_detail', args=[str(slug)]))
-
-
-# class BackgroundView(ListView):
-#  paginate_by = 10
-#  template_name = 'index.html'
-
-#  def get_queryset(self):
-#    return BackgroundImage.objects.all()
-
 from django.views.generic import ListView, CreateView
-
-
-# class TextFieldView(ListView):
-#    model = TextField
-#    template_name = "index.html"
-
 
 class FaviconBaseView(ListView):
     model = FaviconBase
@@ -9188,11 +8685,8 @@ class FaviconBaseView(ListView):
 
         return context
 
-
 class BackgroundBaseView(ListView):
     model = BackgroundImageBase
-
-    # ought to span multiple pages, not simply index
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -9229,34 +8723,8 @@ class BackgroundBaseView(ListView):
 
         return context
 
-    # def backgrounds(request, showcase, index, blog):
-    #    page = get_object_or_404(BackgroundImageBase,
-    #                             showcase=showcase,
-    #                             index=index,
-    #                             blog=blog)
-
-    # context = {
-    #    'page': page,
-    # }
-
-    # if index == 'index':
-    #    template = 'index.html'
-    #    print(index)
-    # elif index == 'showcase':
-    #    template = 'showcase.html'
-    #    print(index)
-    # else render the one you're already rendering
-    # else:
-    #    template = 'blog.html'
-    #    print(index)
-
-    # return render(request, template, context)
-
-
 class TextBaseView(ListView):
     model = TextBase
-
-    # ought to span multiple pages, not simply index
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -9268,36 +8736,8 @@ class TextBaseView(ListView):
             if profile:
                 context['profile_pk'] = profile.pk
                 context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
-        # texts = TextBase.objects.all()
-
-        # if texts.exists():
-        #    return JsonResponse({})
-        # else:
-        #    return context
-
-        # def backgrounds(request, showcase, index, blog):
-        #    page = get_object_or_404(BackgroundImageBase,
-        #                             showcase=showcase,
-        #                             index=index,
-        #                             blog=blog)
-
-        # context = {
-        #    'page': page,
-        # }
-
-        # if index == 'index':
-        #    template = 'index.html'
-        #    print(index)
-        # elif index == 'showcase':
-        #    template = 'showcase.html'
-        #    print(index)
-        # else render the one you're already rendering
-        # else:
-        #    template = 'blog.html'
-        #    print(index)
 
         return render(context)
-
 
 class ImageCarouselView(BaseView):
     model = ImageCarousel
@@ -9330,12 +8770,10 @@ class ImageCarouselView(BaseView):
 
         return context
 
-
 def index(request):
     general_messages = Message.objects.filter(room="General").order_by('-date')
     context = {'GeneralMessanger': general_messages}
     return render(request, 'index.html', context)
-
 
 from django.http import HttpResponse
 from .models import Message
@@ -9346,7 +8784,6 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.decorators.csrf import csrf_exempt
 from .models import Message, Room, ProfileDetails
 import logging
-
 
 def getGeneralMessages(request):
     messages = GeneralMessage.objects.all().order_by('-date')[:30]
@@ -9380,13 +8817,12 @@ def getGeneralMessages(request):
 
     return JsonResponse({'messages': messages_data})
 
-
 @csrf_exempt
 def generalsend(request):
     if request.method == 'POST':
         generalmessage = request.POST.get('message')
         username = request.POST.get('username')
-        uploaded_file = request.FILES.get('file')  # Handle uploaded file
+        uploaded_file = request.FILES.get('file')
 
         print(f"message: {generalmessage}, username: {username}")
         print('This is a community-sent message')
@@ -9395,35 +8831,33 @@ def generalsend(request):
             return JsonResponse({'status': 'error', 'generalmessage': 'Message is required.'})
 
         try:
-            # Create a new message depending on the authentication status
+
             if request.user.is_authenticated:
                 new_message = GeneralMessage.objects.create(
                     value=generalmessage,
                     user=username,
                     signed_in_user=request.user,
-                    file=uploaded_file  # Attach the file if provided
+                    file=uploaded_file
                 )
             else:
                 new_message = GeneralMessage.objects.create(
                     value=generalmessage,
                     user=username,
-                    file=uploaded_file  # Attach the file if provided
+                    file=uploaded_file
                 )
             new_message.save()
 
-            # Handle file URL safely
             file_url = None
-            if new_message.file:  # Ensure a file was uploaded
+            if new_message.file:
                 file_url = new_message.file.url if hasattr(new_message.file, 'url') else None
 
-            # Prepare the JSON response
             response_data = {
                 'status': 'success',
                 'generalmessage': 'Message sent successfully',
                 'message_data': {
                     'value': new_message.value,
                     'user': new_message.user,
-                    'file_url': file_url,  # Include file URL only if available
+                    'file_url': file_url,
                 }
             }
             return JsonResponse(response_data)
@@ -9433,15 +8867,13 @@ def generalsend(request):
 
     return JsonResponse({'status': 'error', 'generalmessage': 'Invalid request method.'})
 
-
 from django.core.mail import send_mail
 from django.conf import settings
 from email.mime.image import MIMEImage
 
-
 def get_games_context(request):
     filter_type = request.GET.get('filter')
-    # Filter games based on the filter_type if valid; default to all active games otherwise.
+
     if filter_type in ['F', 'N', 'P']:
         games = Game.objects.filter(is_active=1, filter=filter_type)
     else:
@@ -9465,12 +8897,10 @@ def filter_games(request):
     context = get_games_context(request)
     return render(request, 'partial_game.html', context)
 
-
 @login_required
 def filter_games_count(request):
     context = get_games_context(request)
     return render(request, 'partial_game_count.html', context)
-
 
 class BackgroundView(FormMixin, BaseView):
     model = BackgroundImage
@@ -9748,7 +9178,7 @@ class BackgroundView(FormMixin, BaseView):
                         'nonce': nonce,
                         'lower_nonce': lower,
                         'upper_nonce': upper,
-                        'rarity': choice_data['rarity'],  # Use the rarity from choice_data
+                        'rarity': choice_data['rarity'],
                         'file_url': choice_data['file_url'],
                         'currency': choice_data['currency']
                     })
@@ -9822,12 +9252,12 @@ class BackgroundView(FormMixin, BaseView):
                 user.newprofile_profile_url = "#"
         context['Users'] = users
 
-        context['username'] = signed_in_user  # Set 'username' to the extracted 'signed_in_user'
+        context['username'] = signed_in_user
         context['room'] = signed_in_user
         context['show_chat'] = True
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -9836,9 +9266,7 @@ class BackgroundView(FormMixin, BaseView):
         context['tophit'] = TopHits.objects.filter(is_active=True).order_by('-mfg_date')[:8]
         print(FaviconBase.objects.all())
         print(213324)
-        # Retrieve the signed-in user's profile and profile picture URL
 
-        # Retrieve the items
         product = Item.objects.filter(is_active=1)
 
         context['Products'] = product
@@ -9884,7 +9312,6 @@ class BackgroundView(FormMixin, BaseView):
                 events.description = eventful.description
 
         newprofile = NewsFeed.objects.filter(is_active=1)
-
 
         context['News'] = newprofile
 
@@ -9933,10 +9360,6 @@ class BackgroundView(FormMixin, BaseView):
                 feed.feedback_profile_url = feed.get_profile_url()
                 print(user)
 
-
-        # Retrieve the messages
-
-        # Messages
         messages = SupportMessage.objects.all().order_by('-date')
         context['Messanger'] = messages
         messages_data = []
@@ -9954,8 +9377,6 @@ class BackgroundView(FormMixin, BaseView):
 
         context['Messanger'] = messages_data
 
-        # General Messages
-        # Get the three most recent messages, then reverse for chronological order
         general_messages = Message.objects.filter(room="General").order_by('-date')[:3][::-1]
         general_messages_data = []
 
@@ -9970,7 +9391,6 @@ class BackgroundView(FormMixin, BaseView):
             }
             general_messages_data.append(general_message_data)
 
-        # Set the limited messages in context
         context['GeneralMessanger'] = general_messages_data
 
         if self.request.user.is_authenticated:
@@ -9998,29 +9418,27 @@ class BackgroundView(FormMixin, BaseView):
 
         return context
 
-
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import EmailField
 
-
 def unsubscribe(request):
     if request.user.is_authenticated:
-        # Case 1: User is signed in and has an associated email
+
         try:
             email_entry = EmailField.objects.get(user=request.user)
             if request.method == "POST":
                 email_entry.delete()
                 messages.success(request, "Your email has been unsubscribed successfully.")
-                return redirect('home')  # Redirect to a suitable page
+                return redirect('home')
             return render(request, 'unsubscribe.html', {'email': email_entry.email})
         except EmailField.DoesNotExist:
-            # Case 2: User is signed in but has no associated email
+
             messages.info(request, "You do not have an associated email and are not currently subscribed.")
-            return redirect('home')  # Redirect to a suitable page
+            return redirect('home')
     else:
-        # Case 3: User is not signed in
+
         if request.method == "POST":
             email = request.POST.get('email')
             try:
@@ -10032,7 +9450,6 @@ def unsubscribe(request):
                 messages.error(request, "The email you entered is not subscribed.")
                 return redirect('showcase:unsubscribe')
         return render(request, 'unsubscribe.html')
-
 
 """
 @login_required
@@ -10053,7 +9470,6 @@ def get_general_messages(request, room_name):
 
     return JsonResponse({'messages': messages_data})"""
 
-
 def indexsupportroom(request, signed_in_user):
     return render(request, 'index.html', {
         'username': username,
@@ -10066,7 +9482,6 @@ def indexsupportroom(request, signed_in_user):
         'Dropdown': DropDown,
     })
 
-
 def dynamic_css(request):
     background_objects = BackgroundImageBase.objects.filter(page='index').order_by("position")
 
@@ -10076,13 +9491,11 @@ def dynamic_css(request):
 
     return render(request, 'dynamic_css.css', context, content_type='text/css')
 
-
 class CreatePostView(CreateView):
     model = BackgroundImage
     form_class = BackgroundImagery
     template_name = "backgroundimagechange.html"
     success_url = reverse_lazy("index")
-
 
 class TermsAndConditionsView(BaseView):
     model = BackgroundImage
@@ -10090,32 +9503,27 @@ class TermsAndConditionsView(BaseView):
     template_name = "termsandconditions.html"
     section = TextBase.section
 
-
 class PolicyView(BaseView):
     model = BackgroundImage
     form_class = EmailForm
     template_name = "policy.html"
     section = TextBase.section
 
-
 import urllib.request as url_request
 
-
 def get_items_by_category(category):
-    print(f"Filtering items by category: {category}")  # Debugging line
+    print(f"Filtering items by category: {category}")
 
     if category == 'all':
         items = Item.objects.all()
     elif category.lower() in ['gold', 'platinum', 'emerald', 'diamond']:
-        items = Item.objects.filter(category=category[0].upper())  # Simplified logic
+        items = Item.objects.filter(category=category[0].upper())
     else:
-        items = Item.objects.none()  # Return empty queryset if the category is unexpected
+        items = Item.objects.none()
 
     return items
 
-
 from django.contrib.auth.models import AnonymousUser
-
 
 class EBackgroundView(BaseView, FormView):
     model = EBackgroundImage
@@ -10135,9 +9543,6 @@ class EBackgroundView(BaseView, FormView):
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
 
-        # context['items'] = paginated_items
-
-        # context['items'] = Item.objects.filter(is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
@@ -10167,7 +9572,7 @@ class EBackgroundView(BaseView, FormView):
         else:
             try:
                 user_store_view_type = StoreViewType.objects.get(user=current_user, is_active=1)
-                context['store_view'] = user_store_view_type.type  # Pass the type directly!
+                context['store_view'] = user_store_view_type.type
                 context['store_view_type_str'] = str(user_store_view_type)
                 context['streamfilter_string'] = f'stream filter set by {self.request.user.username}'
                 print('store view exists')
@@ -10258,7 +9663,6 @@ class EBackgroundView(BaseView, FormView):
             context['store_view_form'] = store_view_form
             return render(request, self.template_name, context)
 
-        # Otherwise, process the email form submission as before
         form = EmailForm(request.POST)
         if form.is_valid():
             form.instance.user = request.user
@@ -10288,14 +9692,13 @@ class EBackgroundView(BaseView, FormView):
 
         return render(request, self.template_name, self.get_context_data(form=form))
 
-
 class StoreView(BaseView, FormView, ListView):
     model = StoreViewType
     template_name = "storeviewtypesnippet.html"
     form_class = StoreViewTypeForm
 
     def get(self, request, *args, **kwargs):
-        self.object_list = self.get_queryset()  # Add this line
+        self.object_list = self.get_queryset()
         context = self.get_context_data()
         eform = StoreViewTypeForm(request=request)
         return render(request, 'storeviewtypesnippet.html', {'eform': eform, **context})
@@ -10355,7 +9758,6 @@ class StoreView(BaseView, FormView, ListView):
             print('the errors with the ehomeviewtype form are ' + str(eform.errors))
         return render(request, 'ehomeviewtypesnippet.html', {'eform': eform})
 
-
 class InventoreView(BaseView, FormView, ListView):
     model = StoreViewType
     template_name = "inventoryviewtypesnippet.html"
@@ -10365,7 +9767,6 @@ class InventoreView(BaseView, FormView, ListView):
         self.object_list = self.get_queryset()
         context = self.get_context_data()
 
-        # Get the active StoreViewType instance for the user
         try:
             instance = StoreViewType.objects.get(user=request.user, is_active=1)
         except StoreViewType.DoesNotExist:
@@ -10386,8 +9787,6 @@ class InventoreView(BaseView, FormView, ListView):
         else:
             print('the errors with the inventoryviewtype form are ' + str(eform.errors))
         return render(request, 'inventoryviewtypesnippet.html', {'eform': eform})
-
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -10431,18 +9830,16 @@ class InventoreView(BaseView, FormView, ListView):
 
         return context
 
-
 class ECreatePostView(CreateView):
     model = EBackgroundImage
     form_class = EBackgroundImagery
     template_name = "ebackgroundimagechange.html"
     success_url = reverse_lazy("ehome")
 
-
 class ShowcaseBackgroundView(BaseView):
     model = ShowcaseBackgroundImage
     template_name = "showcase.html"
-    queryset = ShowcaseBackgroundImage.objects.all()  # Add this line
+    queryset = ShowcaseBackgroundImage.objects.all()
 
     def post(self, request, *args, **kwargs):
         form = EmailForm(request.POST)
@@ -10453,7 +9850,7 @@ class ShowcaseBackgroundView(BaseView):
             messages.success(request, 'Form submitted successfully.')
 
             return render(request, "emaildone.html", {'form': form})
-            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
+
         else:
             messages.error(request, "Form submission invalid")
             print(form.errors)
@@ -10464,8 +9861,8 @@ class ShowcaseBackgroundView(BaseView):
 
     def get(self, request, *args, **kwargs):
         form = EmailForm()
-        self.object_list = self.get_queryset()  # Add this line
-        context = self.get_context_data(**kwargs)  # Call get_context_data here
+        self.object_list = self.get_queryset()
+        context = self.get_context_data(**kwargs)
         return render(request, "showcase.html", {'form': form, **context})
 
     def get_queryset(self):
@@ -10473,14 +9870,13 @@ class ShowcaseBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['UpdateProfile'] = UpdateProfile.objects.all()
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -10516,17 +9912,14 @@ class ShowcaseBackgroundView(BaseView):
 
         return context
 
-
 class ShowcaseCreatePostView(CreateView):
     model = ShowcaseBackgroundImage
     form_class = ShowcaseBackgroundImagery
     template_name = "showcasebackgroundimagechange.html"
     success_url = reverse_lazy("showcase")
 
-
 def forbidden_access(request):
     return render(request, 'forbiddenaccess.html')
-
 
 class SupportLineBackgroundView(BaseView):
     model = SupportInterface
@@ -10565,13 +9958,11 @@ class SupportLineBackgroundView(BaseView):
 
         return context
 
-
 class ChatCreatePostView(CreateView):
     model = ChatBackgroundImage
     form_class = ChatBackgroundImagery
     template_name = "chatbackgroundimagechange.html"
     success_url = reverse_lazy("home")
-
 
 class WhyBackgroundView(BaseView):
     model = WhyBackgroundImage
@@ -10608,21 +9999,19 @@ class WhyBackgroundView(BaseView):
 
         return context
 
-
 class MemeHostView(BaseView):
     model = Meme
     template_name = "meme_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['UpdateProfile'] = UpdateProfile.objects.all()
 
         newprofile = Meme.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -10658,7 +10047,6 @@ class MemeHostView(BaseView):
 
         return context
 
-
 class MemeView(FormMixin, ListView):
     model = Meme
     template_name = "create_meme.html"
@@ -10669,7 +10057,7 @@ class MemeView(FormMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -10683,7 +10071,6 @@ class MemeView(FormMixin, ListView):
         context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -10741,7 +10128,6 @@ class MemeView(FormMixin, ListView):
             messages.error(request, form.errors)
             return render(request, "create_meme.html", {'form': form})
 
-
 class BlogBackgroundView(ListView):
     model = BlogBackgroundImage
     template_name = "blog.html"
@@ -10754,7 +10140,7 @@ class BlogBackgroundView(ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['BlogBackgroundImage'] = BlogBackgroundImage.objects.all()
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -10781,16 +10167,12 @@ class BlogBackgroundView(ListView):
 
         return context
 
-
 class BlogCreatePostView(CreateView):
     model = BlogBackgroundImage
     form_class = BlogBackgroundImagery
     template_name = "blogbackgroundimagechange.html"
     success_url = reverse_lazy("blog")
 
-
-# @login_required
-# @RegularUserRequiredMixin
 class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
     model = UpdateProfile
     template_name = "post_edit.html"
@@ -10802,7 +10184,7 @@ class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -10829,7 +10211,6 @@ class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
 
         return context
 
-    # @login_required
     def post(self, request, *args, **kwargs):
         form = PostForm(request.POST)
         if form.is_valid():
@@ -10845,13 +10226,11 @@ class PostBackgroundView(FormMixin, LoginRequiredMixin, ListView):
             print(form.cleaned_data)
             return render(request, "post_edit.html", {'form': form})
 
-
 class PostCreatePostView(CreateView):
     model = PostBackgroundImage
     form_class = PostBackgroundImagery
     template_name = "postbackgroundimagechange.html"
     success_url = reverse_lazy("post_edit")
-
 
 class BilletBackgroundView(BaseView):
     model = BilletBackgroundImage
@@ -10889,20 +10268,17 @@ class BilletBackgroundView(BaseView):
 
         return context
 
-
 class BilletCreatePostView(CreateView):
     model = BilletBackgroundImage
     form_class = BilletBackgroundImagery
     template_name = "billetbackgroundimagechange.html"
     success_url = reverse_lazy("billets")
 
-
 class RuleCreatePostView(CreateView):
     model = RuleBackgroundImage
     form_class = RuleBackgroundImagery
     template_name = "rulebackgroundimagechange.html"
     success_url = reverse_lazy("rules")
-
 
 class AboutBackgroundView(BaseView):
     model = AboutBackgroundImage
@@ -10917,7 +10293,7 @@ class AboutBackgroundView(BaseView):
             messages.success(request, 'Form submitted successfully.')
 
             return render(request, "emaildone.html", {'form': form})
-            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
+
         else:
             messages.error(request, "Form submission invalid")
             print(form.errors)
@@ -10928,8 +10304,8 @@ class AboutBackgroundView(BaseView):
 
     def get(self, request, *args, **kwargs):
         form = EmailForm()
-        self.object_list = self.get_queryset()  # Add this line
-        context = self.get_context_data(**kwargs)  # Call get_context_data here
+        self.object_list = self.get_queryset()
+        context = self.get_context_data(**kwargs)
         return render(request, "about.html", {'form': form, **context})
 
     def get_context_data(self, **kwargs):
@@ -10975,13 +10351,11 @@ class AboutBackgroundView(BaseView):
 
         return context
 
-
 class AboutCreatePostView(CreateView):
     model = AboutBackgroundImage
     form_class = AboutBackgroundImagery
     template_name = "aboutbackgroundimagechange.html"
     success_url = reverse_lazy("about")
-
 
 class FaqBackgroundView(BaseView):
     model = FaqBackgroundImage
@@ -11020,13 +10394,11 @@ class FaqBackgroundView(BaseView):
 
         return context
 
-
 class FaqCreatePostView(CreateView):
     model = FaqBackgroundImage
     form_class = FaqBackgroundImagery
     template_name = "faqbackgroundimagechange.html"
     success_url = reverse_lazy("faq")
-
 
 class StaffBackgroundView(BaseView):
     model = BackgroundImage
@@ -11063,13 +10435,11 @@ class StaffBackgroundView(BaseView):
 
         return context
 
-
 class StaffCreatePostView(CreateView):
     model = StaffBackgroundImage
     form_class = StaffBackgroundImagery
     template_name = "staffbackgroundimagechange.html"
     success_url = reverse_lazy("staff")
-
 
 class InformationBackgroundView(BaseView):
     InformationBackgroundImage
@@ -11106,13 +10476,11 @@ class InformationBackgroundView(BaseView):
 
         return context
 
-
 class InformationCreatePostView(CreateView):
     model = InformationBackgroundImage
     form_class = InformationBackgroundImagery
     template_name = "Informationbackgroundimagechange.html"
     success_url = reverse_lazy("Information")
-
 
 class TagBackgroundView(BaseView):
     model = TagBackgroundImage
@@ -11149,13 +10517,11 @@ class TagBackgroundView(BaseView):
 
         return context
 
-
 class TagCreatePostView(CreateView):
     model = TagBackgroundImage
     form_class = TagBackgroundImagery
     template_name = "tagbackgroundimagechange.html"
     success_url = reverse_lazy("tag")
-
 
 class UserBackgroundView(BaseView):
     model = UserBackgroundImage
@@ -11193,13 +10559,11 @@ class UserBackgroundView(BaseView):
 
         return context
 
-
 class UserCreatePostView(CreateView):
     model = UserBackgroundImage
     form_class = UserBackgroundImagery
     template_name = "userbackgroundimagechange.html"
     success_url = reverse_lazy("users")
-
 
 class StaffRanksBackgroundView(BaseView):
     model = StaffRanksBackgroundImage
@@ -11237,13 +10601,11 @@ class StaffRanksBackgroundView(BaseView):
 
         return context
 
-
 class StaffRanksCreatePostView(CreateView):
     model = StaffRanksBackgroundImage
     form_class = StaffRanksBackgroundImagery
     template_name = "staffranksbackgroundimagechange.html"
     success_url = reverse_lazy("staffranks")
-
 
 class MegaBackgroundView(BaseView):
     model = MegaBackgroundImage
@@ -11281,19 +10643,17 @@ class MegaBackgroundView(BaseView):
 
         return context
 
-
 class MegaCreatePostView(CreateView):
     model = MegaBackgroundImage
     form_class = MegaBackgroundImagery
     template_name = "megacoinsbackgroundimagechange.html"
     success_url = reverse_lazy("megacoins")
 
-
 class NewsBackgroundView(ListView):
     model = NewsBackgroundImage
     form_class = EmailForm
     template_name = "newsfeed.html"
-    queryset = NewsBackgroundImage.objects.all()  # Add this line
+    queryset = NewsBackgroundImage.objects.all()
 
     def post(self, request, *args, **kwargs):
         form = EmailForm(request.POST)
@@ -11304,7 +10664,7 @@ class NewsBackgroundView(ListView):
             messages.success(request, 'Form submitted successfully.')
 
             return render(request, "emaildone.html", {'form': form})
-            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
+
         else:
             messages.error(request, "Form submission invalid")
             print(form.errors)
@@ -11315,8 +10675,8 @@ class NewsBackgroundView(ListView):
 
     def get(self, request, *args, **kwargs):
         form = EmailForm()
-        self.object_list = self.get_queryset()  # Add this line
-        context = self.get_context_data(**kwargs)  # Call get_context_data here
+        self.object_list = self.get_queryset()
+        context = self.get_context_data(**kwargs)
         return render(request, "newsfeed.html", {'form': form, **context})
 
     def get_queryset(self):
@@ -11344,7 +10704,6 @@ class NewsBackgroundView(ListView):
         context['Email'] = EmailField.objects.filter(is_active=1)
 
         newprofile = NewsFeed.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -11380,13 +10739,11 @@ class NewsBackgroundView(ListView):
 
         return context
 
-
 class NewsCreatePostView(CreateView):
     model = NewsBackgroundImage
     form_class = NewsBackgroundImagery
     template_name = "newsbackgroundimagechange.html"
     success_url = reverse_lazy("newsfeed")
-
 
 class UploadACardView(FormMixin, LoginRequiredMixin, ListView):
     model = UploadACard
@@ -11399,7 +10756,7 @@ class UploadACardView(FormMixin, LoginRequiredMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -11434,7 +10791,6 @@ class UploadACardView(FormMixin, LoginRequiredMixin, ListView):
 
         return context
 
-    # @login_required
     def post(self, request, *args, **kwargs):
         form = UploadCardsForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
@@ -11450,7 +10806,6 @@ class UploadACardView(FormMixin, LoginRequiredMixin, ListView):
             print(form.cleaned_data)
             return render(request, "makeacard.html", {'form': form})
 
-
 class DonorView(BaseView):
     model = DonorBackgroundImage
     template_name = "donors.html"
@@ -11458,7 +10813,7 @@ class DonorView(BaseView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        # context['BaseHomeTexted'] = BaseHomeText.objects.all()
+
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -11488,17 +10843,15 @@ class DonorView(BaseView):
         return context
 
     def dispatch(self, request, *args, **kwargs):
-        # Check if there is a signed-in user
+
         if request.user.is_authenticated:
             user = request.user
             print(user)
         else:
-            # If no signed-in user, use a default user or None as desired
-            user = None  # Or use default_user if it is previously defined
 
-        # Continue with the regular flow, passing the determined user to the view
+            user = None
+
         return super().dispatch(request, *args, user=user, **kwargs)
-
 
 class ContributorBackgroundView(BaseView):
     model = ContributorBackgroundImage
@@ -11535,7 +10888,6 @@ class ContributorBackgroundView(BaseView):
 
         return context
 
-
 class ContentBackgroundView(BaseView):
     model = ContentBackgroundImage
     template_name = "morecontent.html"
@@ -11571,14 +10923,13 @@ class ContentBackgroundView(BaseView):
 
         return context
 
-
 class PartnerBackgroundView(BaseView):
     model = PartnerBackgroundImage
     template_name = "partners.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['PartnerBackgroundImage'] = PartnerBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -11595,7 +10946,6 @@ class PartnerBackgroundView(BaseView):
 
         newprofile = PartnerApplication.objects.filter(is_active=1)
 
-
         context['Profiles'] = newprofile
 
         for newprofile in context['Profiles']:
@@ -11630,7 +10980,6 @@ class PartnerBackgroundView(BaseView):
 
         return context
 
-
 class ShareBackgroundView(BaseView):
     model = ShareBackgroundImage
     template_name = "share.html"
@@ -11644,7 +10993,7 @@ class ShareBackgroundView(BaseView):
             messages.success(request, 'Form submitted successfully.')
 
             return render(request, "emaildone.html", {'form': form})
-            # return redirect('showcase:emaildone')  # possibly change to a finished email registration page
+
         else:
             messages.error(request, "Form submission invalid")
             print(form.errors)
@@ -11655,8 +11004,8 @@ class ShareBackgroundView(BaseView):
 
     def get(self, request, *args, **kwargs):
         form = EmailForm()
-        self.object_list = self.get_queryset()  # Add this line
-        context = self.get_context_data(**kwargs)  # Call get_context_data here
+        self.object_list = self.get_queryset()
+        context = self.get_context_data(**kwargs)
         return render(request, "share.html", {'form': form, **context})
 
     def get_queryset(self):
@@ -11672,7 +11021,6 @@ class ShareBackgroundView(BaseView):
 
         newprofile = Idea.objects.filter(is_active=1)
 
-
         context['Profiles'] = newprofile
 
         for newprofile in context['Profiles']:
@@ -11707,14 +11055,13 @@ class ShareBackgroundView(BaseView):
 
         return context
 
-
 class ConvertBackgroundView(BaseView):
     model = ConvertBackgroundImage
     template_name = "convert.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ConvertBackgroundImage'] = ConvertBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -11743,7 +11090,6 @@ class ConvertBackgroundView(BaseView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
-
 
 class ReasonsBackgroundView(BaseView):
     model = ReasonsBackgroundImage
@@ -11751,7 +11097,7 @@ class ReasonsBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ConvertBackgroundImage'] = ConvertBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -11781,14 +11127,13 @@ class ReasonsBackgroundView(BaseView):
 
         return context
 
-
 class PerksBackgroundView(BaseView):
     model = PerksBackgroundImage
     template_name = "perks.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
@@ -11818,28 +11163,7 @@ class PerksBackgroundView(BaseView):
 
         return context
 
-
-#  def get_queryset(self):
-#    return BackgroundImage.objects.all()
-
-#  def get_context_data(request):
-#    images = os.listdir("static/css/images") #Can use glob as well
-#    context = {'images': images}
-#    return render(request,'/home/runner/PokeTrove-Attempt-Backedmore/templates',context)
-
-# class Background2aView(ListView):
-#  model = Background2aImage
-#  paginate_by = 10
-#  template_name = 'index.html'
-#  extra_context = {'Background2aIm
-#  age.url': Background2aImage.objects.all()[0].get_absolute_url()}
-
-#  def get_queryset(self):
-#    return Background2aImage.objects.all()
-
-
 from django.shortcuts import render
-
 
 def home(request):
     events = [
@@ -11861,7 +11185,6 @@ def home(request):
     ]
     return render(request, 'home.html', {'events': events})
 
-
 from django.http import HttpRequest, JsonResponse
 from django.views.generic import TemplateView
 
@@ -11878,18 +11201,15 @@ from django.http import JsonResponse
 
 from django.shortcuts import get_object_or_404
 
-
 def supportgetMessages(request, signed_in_user, **kwargs):
-    # Check if the user is authenticated
+
     if not request.user.is_authenticated:
         return JsonResponse({'messages': []})
 
-    # Retrieve or create the chat room
     chat_room, created = SupportChat.objects.get_or_create(signed_in_user__username=signed_in_user, defaults={
         'signed_in_user': request.user,
     })
 
-    # Check if the requesting user is the creator or an admin
     if request.user != chat_room.signed_in_user and not request.user.is_staff:
         return HttpResponseForbidden("You do not have permission to access this chat room")
 
@@ -11901,7 +11221,6 @@ def supportgetMessages(request, signed_in_user, **kwargs):
     for message in messages:
         profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
 
-        # Serialize profile details or use default avatar
         avatar_url = (
             profile_details.avatar.url if profile_details and profile_details.avatar else
             serialize_default_avatar(default_avatar)['default_avatar_url']
@@ -11920,15 +11239,10 @@ def supportgetMessages(request, signed_in_user, **kwargs):
 
     return JsonResponse({'messages': messages_data})
 
-
 """def supportgetMessages(request, **kwargs):
    messages = SupportMessage.objects.filter(room=request.user.username)
    return JsonResponse({"messages": list(messages.values())})
 """
-
-# class post(ListView):
-#  template_name = 'users.html'
-
 
 """@login_required
 def poste(request):
@@ -11956,20 +11270,16 @@ def poste(request):
        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
            "position")
-       # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
        return context
 """
-
-
-# @login_required
-
 
 class PostView(FormMixin, ListView):
     model = PostBackgroundImage
     template_name = "ideas.html"
     form_class = Postit
-    queryset = PostBackgroundImage.objects.all()  # Add this line
+    queryset = PostBackgroundImage.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -12034,7 +11344,6 @@ class PostView(FormMixin, ListView):
             messages.error(request, form.errors)
             return render(request, "ideas.html", {'form': form})
 
-
 """@login_required
 def post_new(request):
   if (request.method == "POST"):
@@ -12054,7 +11363,6 @@ def post_new(request):
           request, 'Form submission failed to register, please try again.')
       messages.error(request, form.errors)"""
 
-
 class Title(ListView):
     model = Titled
 
@@ -12063,11 +11371,9 @@ class Title(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         return render(context)
 
-
 class DonateIconView(ListView):
     model = DonateIcon
     template_name = "donatebase.html"
-
 
 class SupportBackgroundView(FormMixin, ListView):
     model = Support
@@ -12080,7 +11386,7 @@ class SupportBackgroundView(FormMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -12138,7 +11444,6 @@ class SupportBackgroundView(FormMixin, ListView):
             messages.error(request, form.errors)
             return HttpResponse('Form submission failed to register, please try again.')
 
-
 class PostingView(FormMixin, ListView):
     model = UpdateProfile
     template_name = "post_edit.html"
@@ -12149,7 +11454,7 @@ class PostingView(FormMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -12163,7 +11468,6 @@ class PostingView(FormMixin, ListView):
         context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -12221,7 +11525,6 @@ class PostingView(FormMixin, ListView):
             messages.error(request, form.errors)
             return render(request, "post_edit.html", {'form': form})
 
-
 from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -12229,13 +11532,9 @@ from django.urls import reverse
 
 from .models import PollQuestion
 
-# Get questions and display them
-
-
 from django.shortcuts import render
 from django.views import View
 from .models import PollQuestion
-
 
 class PollQuestionsView(View):
     template_name = "pollquestions.html"
@@ -12279,21 +11578,17 @@ class PollQuestionsView(View):
         return context
 
     def get(self, request, *args, **kwargs):
-        # Retrieve the latest poll questions
+
         latest_question_list = PollQuestion.objects.order_by('-pub_date')[:5]
 
-        # Populate the context
         context = {
             'latest_question_list': latest_question_list,
-            'object_list': latest_question_list  # Add this for the generic view
+            'object_list': latest_question_list
         }
 
-        # Add additional context data
         context.update(self.get_context_data())
 
-        # Render the template with the context
         return render(request, self.template_name, context)
-
 
 def polldetail(request, question_id):
     try:
@@ -12301,7 +11596,6 @@ def polldetail(request, question_id):
     except PollQuestion.DoesNotExist:
         raise Http404("Question does not exist")
     return render(request, 'polldetail.html', {'question': question})
-
 
 class PollDetailView(TemplateView):
     template_name = 'polldetail.html'
@@ -12348,9 +11642,8 @@ class PollDetailView(TemplateView):
 
         return context
 
-
 class PollResultsView(View):
-    template_name = 'pollresults.html'  # specify your template name here
+    template_name = 'pollresults.html'
 
     def get(self, request, question_id):
         context = self.get_context_data(question_id)
@@ -12396,9 +11689,6 @@ class PollResultsView(View):
 
         return context
 
-
-# VoteQuery for a question choice
-
 class PollingView(View):
     model = Choice
     template_name = "pollvote.html"
@@ -12427,7 +11717,6 @@ class PollingView(View):
             selected_choice.votes += 1
             selected_choice.save()
             return HttpResponseRedirect(reverse('showcase:pollresults', args=(question.id,)))
-
 
 class InventoryView(FormMixin, ListView):
     model = PrizePool
@@ -12476,7 +11765,6 @@ class InventoryView(FormMixin, ListView):
 
         return context
 
-
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import render, get_object_or_404, redirect
@@ -12487,13 +11775,11 @@ from django.views.generic.edit import FormMixin
 from django.db import transaction
 from django.urls import reverse
 
-
 @login_required
 def inventory_view(request):
     inventory = Inventory.objects.get(user=request.user)
     number_of_cards = inventory.inventoryobject_set.filter(is_active=1).count()
     return render(request, 'inventory.html', {'number_of_cards': number_of_cards})
-
 
 @method_decorator(login_required, name='dispatch')
 def sse_total_value(request):
@@ -12518,7 +11804,6 @@ def sse_total_value(request):
                     yield f"data: {total_value}\n\n"
 
     return StreamingHttpResponse(event_stream(), content_type="text/event-stream")
-
 
 class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
     model = InventoryObject
@@ -12568,7 +11853,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
         try:
             context['SentProfile'] = ProfileDetails.objects.get(
-                user=self.request.user)  # specifically used to get ruby amount
+                user=self.request.user)
         except UserProfile.DoesNotExist:
             context['SentProfile'] = None
 
@@ -12648,7 +11933,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         elif action == 'withdraw':
             response = self.withdraw_inventory_object(request, pk)
         elif action == 'move':
-            print("Move action triggered")  # Debugging line
+            print("Move action triggered")
             response = self.move_to_trade(request, pk)
         else:
             return JsonResponse({'success': False, 'error': 'Invalid action'}, status=400)
@@ -12667,7 +11952,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
 
         user = request.user
-        # Retrieve user profile early
+
         user_profile = get_object_or_404(ProfileDetails, user=user)
         new_withdraw = False
         confirm_withdraw = request.POST.get("confirm_withdraw", "false").lower() == "true"
@@ -12719,9 +12004,8 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             'success': True,
             'stock_count': stock_count,
             'new_withdraw': new_withdraw,
-            'currency_amount': user_profile.currency_amount  # include updated currency amount
+            'currency_amount': user_profile.currency_amount
         })
-
 
     def sell_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
@@ -12741,7 +12025,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             )
             inventory_object.save()
 
-            user_profile = get_object_or_404(ProfileDetails, user=request.user) #was UserProfile, also has a currency_amount attribute
+            user_profile = get_object_or_404(ProfileDetails, user=request.user)
             user_profile.currency_amount += inventory_object.price
             user_profile.save()
 
@@ -12761,13 +12045,12 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
         user = request.user
 
-        # Use a transaction to ensure atomicity
         with transaction.atomic():
-            # Create a new TradeItem instance
+
             tradeitem = TradeItem.objects.create(
                 user=user,
-                title=inventory_object.choice_text or inventory_object.choice.text,  # Use choice_text if set
-                inventoryobject=inventory_object,  # Save reference to the InventoryObject
+                title=inventory_object.choice_text or inventory_object.choice.text,
+                inventoryobject=inventory_object,
                 category=inventory_object.category,
                 is_active=1,
                 currency=inventory_object.currency,
@@ -12783,9 +12066,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
             inventory_object.delete()
 
-            # Redirect to the trade inventory page
             return redirect('showcase:tradeinventory')
-
 
 @csrf_exempt
 def withdraw_cost(request):
@@ -12796,13 +12077,10 @@ def withdraw_cost(request):
             if not withdraw_id:
                 return JsonResponse({"success": False, "error": "Withdraw ID not provided."})
 
-            # Note: use the correct model name "Withdraw" instead of "Withdrawal"
             withdraw = get_object_or_404(Withdraw, pk=withdraw_id)
 
-            # Get the fee from the withdraw instance (using the "fees" field)
             cost = withdraw.fees
 
-            # Get the user's profile
             profile = ProfileDetails.objects.filter(user=request.user).first()
             if not profile:
                 return JsonResponse({"success": False, "error": "User profile not found."})
@@ -12810,7 +12088,6 @@ def withdraw_cost(request):
             if profile.currency_amount < cost:
                 return JsonResponse({"success": False, "error": "Insufficient currency."})
 
-            # Deduct the cost
             profile.currency_amount -= cost
             profile.save()
 
@@ -12827,7 +12104,6 @@ def withdraw_cost(request):
             return JsonResponse({"success": False, "error": str(e)})
 
     return JsonResponse({"success": False, "error": "Invalid request method."})
-
 
 @csrf_exempt
 def update_currency(request):
@@ -12850,11 +12126,9 @@ def update_currency(request):
 
     return JsonResponse({"success": False, "error": "Invalid request."}, status=400)
 
-
 def clickable_view(request):
     clickables = Clickable.objects.filter(is_active=1).values("name", "image", "value", "chance_per_thousand")
     return render(request, "navtrove.html", {"clickables": clickables})
-
 
 @method_decorator(login_required, name='dispatch')
 class SellAllInventoryObjectsView(View):
@@ -12870,7 +12144,7 @@ class SellAllInventoryObjectsView(View):
 
         inventory_objects = InventoryObject.objects.filter(pk__in=selected_ids, user=request.user)
         if not inventory_objects.exists():
-            # If no inventory objects found, re-render the updated inventory list (which may be empty)
+
             updated_inventory_html = render_to_string(
                 "inventory_items.html",
                 {"StockObject": InventoryObject.objects.filter(is_active=1, user=request.user)},
@@ -12913,7 +12187,6 @@ class SellAllInventoryObjectsView(View):
             'currency_amount': user_profile.currency_amount,
             'inventory_html': updated_inventory_html
         })
-
 
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -12962,10 +12235,9 @@ class SellEverythingInventoryObjectsView(View):
             'success': True,
             'stock_count': stock_count,
             'currency_amount': user_profile.currency_amount,
-            'total_value': total_price,  # Add total_value
+            'total_value': total_price,
             'inventory_html': updated_inventory_html
         })
-
 
 @csrf_exempt
 def create_inventory_object(request):
@@ -13016,7 +12288,6 @@ def create_inventory_object(request):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
-
 @csrf_exempt
 def delete_inventory_object(request, object_id):
     if request.method == 'DELETE':
@@ -13031,10 +12302,9 @@ def delete_inventory_object(request, object_id):
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-
 class CreateChestView(FormView):
     template_name = "create_chest.html"
-    form_class = InventoryGameForm  # Now without the M2M field
+    form_class = InventoryGameForm
 
     def get_game_instance(self):
         """
@@ -13051,9 +12321,9 @@ class CreateChestView(FormView):
         choice_formset = ChoiceFormSet(self.request.POST, self.request.FILES)
 
         if game_form.is_valid() and choice_formset.is_valid():
-            game = game_form.save()  # Save the game instance
+            game = game_form.save()
             print('saved game instance here')
-            # Save the formset choices and associate them with the game
+
             choices = choice_formset.save(commit=False)
             for choice in choices:
                 choice.save()
@@ -13066,23 +12336,21 @@ class CreateChestView(FormView):
         context = super().get_context_data(**kwargs)
         game = self.get_game_instance()
 
-        # Initialize formsets and forms
         if self.request.method == 'POST':
             game_form = InventoryGameForm(self.request.POST, self.request.FILES, instance=game)
             choice_formset = ChoiceFormSet(self.request.POST, self.request.FILES)
         else:
             game_form = InventoryGameForm(instance=game)
-            # Prepopulate with all Choices, marking selected ones
+
             choices_queryset = Choice.objects.all()
 
-            # Check if the game exists in DB before querying M2M
-            if game.pk:  # Game has been saved
+            if game.pk:
                 selected_choices = game.choices.all()
-            else:  # New unsaved game
+            else:
                 selected_choices = []
 
             initial_data = [
-                {'selected': choice in selected_choices}  # Use the precomputed list
+                {'selected': choice in selected_choices}
                 for choice in choices_queryset
             ]
 
@@ -13104,7 +12372,6 @@ class CreateChestView(FormView):
             'Shuffle': Shuffler.objects.filter(is_active=1).order_by("category"),
         })
 
-        # Example user profile handling (customize as needed)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -13115,7 +12382,6 @@ class CreateChestView(FormView):
         else:
             context['NewsProfiles'] = None
 
-        # Optionally add a default profile if none exists
         if context['NewsProfiles'] is None:
             dummy_profile = type('Dummy', (), {})()
             dummy_profile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
@@ -13144,7 +12410,7 @@ class CreateChestView(FormView):
             for choice in choices:
                 choice.game = game
                 choice.save()
-                print(choice)  # saves choice one time, not displayed choice instance form properly
+                print(choice)
             saved_game.choices.set(choices)
             return redirect('showcase:game', slug=saved_game.slug)
         else:
@@ -13153,18 +12419,14 @@ class CreateChestView(FormView):
             return self.render_to_response(self.get_context_data(game_form=game_form,
                                                                  choice_formset=choice_formset))
 
-
-# views.py
 from django.shortcuts import render
 from .models import Card
-
 
 def card_list(request):
     supertype = request.GET.get('supertype')
     type = request.GET.get('type')
-    view = request.GET.get('view', 'compact')  # Default to 'compact' if not specified
+    view = request.GET.get('view', 'compact')
 
-    # Filter cards based on the parameters
     cards = Card.objects.all()
     if supertype:
         cards = cards.filter(supertype=supertype)
@@ -13179,7 +12441,6 @@ def card_list(request):
     cards = cards.order_by(sort_by)
 
     return render(request, 'card_list.html', {'cards': cards, 'view': view})
-
 
 class DirectChestView(BaseView):
 
@@ -13392,7 +12653,7 @@ class DirectChestView(BaseView):
                         'nonce': nonce,
                         'lower_nonce': lower,
                         'upper_nonce': upper,
-                        'rarity': choice_data['rarity'],  # Use the rarity from choice_data
+                        'rarity': choice_data['rarity'],
                         'file_url': choice_data['file_url'],
                         'currency': choice_data['currency']
                     })
@@ -13439,10 +12700,9 @@ class DirectChestView(BaseView):
 
         return context
 
-
     def game_detail(request, slug):
         game = get_object_or_404(Game, slug=slug)
-        choices = game.choices.all()  # Get all related choices for the game
+        choices = game.choices.all()
         return render(request, 'game_detail.html', {'game': game, 'choices': choices})
 
     def display_choices(request, game_id, slug):
@@ -13460,7 +12720,6 @@ class DirectChestView(BaseView):
     def take_spinner_slot(user, game, choice):
         SpinnerChoiceRenders.take_up_slot(user=user, game=game, choice=choice, value=100, ratio=2, type=game.type,
                                           image=choice.image.url, color=choice.color)
-
 
     def post(self, request, *args, **kwargs):
         if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -13535,7 +12794,6 @@ class DirectChestView(BaseView):
 
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
-
 class GameChestBackgroundView(BaseView):
     template_name = "game.html"
     print("Debug: Received POST data:")
@@ -13562,12 +12820,11 @@ class GameChestBackgroundView(BaseView):
 
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
-        # Verify that the inventory object belongs to the current user.
         if inventory_object.user != request.user:
             return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
 
         try:
-            # Expect JSON data from the AJAX request.
+
             data = json.loads(request.body)
             items = data.get("items", [])
 
@@ -13833,7 +13090,7 @@ class GameChestBackgroundView(BaseView):
                         'nonce': nonce,
                         'lower_nonce': lower,
                         'upper_nonce': upper,
-                        'rarity': choice_data['rarity'],  # Use the rarity from choice_data
+                        'rarity': choice_data['rarity'],
                         'file_url': choice_data['file_url'],
                         'currency': choice_data['currency']
                     })
@@ -13856,7 +13113,6 @@ class GameChestBackgroundView(BaseView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -13893,7 +13149,7 @@ class GameChestBackgroundView(BaseView):
 
     def game_detail(request, slug):
         game = get_object_or_404(Game, slug=slug)
-        choices = game.choices.all()  # Get all related choices for the game
+        choices = game.choices.all()
         return render(request, 'game_detail.html', {'game': game, 'choices': choices})
 
     def display_choices(request, game_id, slug):
@@ -13964,7 +13220,6 @@ class GameChestBackgroundView(BaseView):
         else:
             return render(request, 'error.html', {'message': 'No choice found for the generated nonce'})
 
-
 class CreateInventoryChestView(FormView):
     template_name = "inventory_create_chest.html"
     form_class = PlayerInventoryGameForm
@@ -13975,10 +13230,8 @@ class CreateInventoryChestView(FormView):
         game.user = self.request.user
         game.save()
 
-        # Save ManyToMany relationship
         game.items.set(form.cleaned_data['items'])
 
-        # Handle quantities
         for prize_id, field_name in form.quantity_fields.items():
             quantity = self.request.POST.get(field_name)
             if quantity:
@@ -13986,7 +13239,6 @@ class CreateInventoryChestView(FormView):
                 print(f"Prize: {prize.prize_name}, Quantity: {quantity}")
 
         return super().form_valid(form)
-
 
 def move_to_trading(self, **kwargs):
     valid_fields = {
@@ -14006,14 +13258,11 @@ def move_to_trading(self, **kwargs):
         'width_for_resize': kwargs.get('width_for_resize'),
     }
 
-    # Ensure that null/blank values are properly handled
     valid_fields = {k: v for k, v in valid_fields.items() if v is not None}
 
-    # Create the TradeItem instance
     trade_item = TradeItem.objects.create(**valid_fields)
 
     return trade_item
-
 
 @method_decorator(login_required)
 def move_to_trade(self, request, pk):
@@ -14037,12 +13286,11 @@ def move_to_trade(self, request, pk):
                 length_for_resize=form.cleaned_data['length_for_resize'],
                 width_for_resize=form.cleaned_data['width_for_resize']
             )
-            return redirect('showcase:tradeitem_detail', trade_item.id)  # Redirect to the TradeItem detail view
+            return redirect('showcase:tradeitem_detail', trade_item.id)
     else:
         form = MoveToTradeForm()
 
     return render(request, 'inventory.html', {'form': form, 'inventory_item': inventory_item})
-
 
 from django.forms import inlineformset_factory, DecimalField
 from django.shortcuts import render, redirect
@@ -14050,7 +13298,6 @@ from .models import Game, Choice
 from django.shortcuts import render, redirect
 from .models import Game, Choice
 from .forms import ChoiceFormSet
-
 
 class SecretRoomView(LoginRequiredMixin, FormMixin, ListView):
     model = SecretRoom
@@ -14066,7 +13313,7 @@ class SecretRoomView(LoginRequiredMixin, FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -14103,7 +13350,6 @@ class SecretRoomView(LoginRequiredMixin, FormMixin, ListView):
 
         return context
 
-
 @login_required
 def delete_trade_item(request, item_id):
     trade_item = get_object_or_404(TradeItem, id=item_id)
@@ -14114,7 +13360,6 @@ def delete_trade_item(request, item_id):
     else:
         messages.error(request, 'You do not have permission to delete this item.')
         return redirect('showcase:tradeinventory')
-
 
 class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
     model = TradeItem
@@ -14130,7 +13375,7 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -14143,7 +13388,6 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
         context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -14183,7 +13427,6 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
             return self.existing_inventory_remove_trade_object(request, pk)
             print('inventory trade item moved from trading inventory to inventory!')
 
-        # If no action matches, return an appropriate response
         return HttpResponse(status=400)
 
     def remove_trade_object(self, request, pk):
@@ -14227,7 +13470,7 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
         user = request.user
 
         with transaction.atomic():
-            # Find or create an Inventory Object
+
             inventory_object = InventoryObject.objects.filter(user=user, is_active=1).first()
             if not inventory_object:
                 inventory_object = InventoryObject.objects.create(
@@ -14247,16 +13490,13 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
             inventory_object.save()
 
-            # Update InventoryObject (e.g., move to trade inventory)
             trade_item.delete()
 
         messages.success(request, f"Successfully removed {trade_item.title}!")
         return redirect('showcase:inventory')
 
-
 from .models import LotteryTickets, Lottery
 from .forms import TicketRequestForm
-
 
 class LotteryBackgroundView(BaseView):
     model = Lottery
@@ -14264,7 +13504,7 @@ class LotteryBackgroundView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
@@ -14295,7 +13535,6 @@ class LotteryBackgroundView(BaseView):
 
         return context
 
-
 class DailyLotteryView(FormMixin, ListView):
     model = Lottery
     template_name = "dailylotto.html"
@@ -14306,12 +13545,11 @@ class DailyLotteryView(FormMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -14321,7 +13559,6 @@ class DailyLotteryView(FormMixin, ListView):
         context['Profile'] = UpdateProfile.objects.all()
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -14366,7 +13603,7 @@ class DailyLotteryView(FormMixin, ListView):
                 name__in=['Daily Lotto', 'Daily Lottery'],
                 defaults={'name': 'Daily Lotto', 'flavor_text': 'Your daily chance to win!'}
             )
-            lottery.save()  # Save the lottery object to the database
+            lottery.save()
             post.lottery = lottery
             post.user = request.user
             post.save()
@@ -14378,7 +13615,6 @@ class DailyLotteryView(FormMixin, ListView):
             messages.error(request, 'You need to log in to claim your daily ticket!')
             return render(request, 'registration/login.html', {'form': form})
 
-
 class DailyLotteryClaimedView(ListView):
     model = Lottery
     template_name = "dailylottoclaimed.html"
@@ -14388,12 +13624,11 @@ class DailyLotteryClaimedView(ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -14403,7 +13638,6 @@ class DailyLotteryClaimedView(ListView):
         context['Profile'] = UpdateProfile.objects.all()
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -14439,7 +13673,6 @@ class DailyLotteryClaimedView(ListView):
 
         return context
 
-
 def login_view(request):
     next_url = request.GET.get('next', '/')
 
@@ -14459,7 +13692,6 @@ def login_view(request):
 
     return render(request, 'accounts/login.html', {'form': form, 'next': next_url})
 
-
 class Lottereal(BaseView):
     model = Lottery
     template_name = "lotteries.html"
@@ -14473,7 +13705,7 @@ class Lottereal(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -14505,7 +13737,6 @@ class Lottereal(BaseView):
 
         return context
 
-
 class PosteView(FormMixin, ListView):
     model = VoteBackgroundImage
     template_name = "vote.html"
@@ -14513,7 +13744,7 @@ class PosteView(FormMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Ensure the form and formset are in the context for GET requests
+
         if 'form' not in context:
             context['form'] = self.get_form(self.get_form_class())
         if 'formset' not in context:
@@ -14526,7 +13757,7 @@ class PosteView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -14564,23 +13795,21 @@ class PosteView(FormMixin, ListView):
             poll = form.save(commit=False)
             poll.user = request.user
             poll.save()
-            # Attach the poll to the formset and save the vote options
+
             formset.instance = poll
             formset.save()
             return redirect('showcase:voting')
         else:
-            # Re-render the page with validation errors for both form and formset
-            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
+            return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
 def is_ajax(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
-
 @method_decorator(login_required, name='dispatch')
 class TradeOffersView(View):
     def get(self, request, *args, **kwargs):
-        # Get all pending friend requests for the current user
+
         pending_requests = TradeOffer.objects.select_related('trade_items').filter(user2=request.user,
                                                                                    status=TradeOffer.PENDING)
         outgoing_requests = TradeOffer.objects.filter(user=request.user, status=TradeOffer.PENDING)
@@ -14588,7 +13817,7 @@ class TradeOffersView(View):
         context = {}
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -14597,7 +13826,6 @@ class TradeOffersView(View):
         current_user = self.request.user
 
         newprofile = TradeOffer.objects.filter(user=request.user, is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -14615,9 +13843,7 @@ class TradeOffersView(View):
         context.update({'pending_requests': pending_requests, 'outgoing_requests': outgoing_requests})
         return render(request, 'pendingtrades.html', context)
 
-
 from django.http import JsonResponse
-
 
 @method_decorator(login_required, name='dispatch')
 class DirectedTradeOfferView(View):
@@ -14626,7 +13852,7 @@ class DirectedTradeOfferView(View):
         return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
     def get(self, request, *args, **kwargs):
-        # Get all pending friend requests for the current user
+
         pending_requests = TradeOffer.objects.filter(user2=request.user, trade_status=TradeOffer.PENDING)
         outgoing_requests = TradeOffer.objects.filter(user=request.user, trade_status=TradeOffer.PENDING)
 
@@ -14644,17 +13870,16 @@ class DirectedTradeOfferView(View):
         })
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
-        context['request'] = request  # Pass the request object to the context
+        context['request'] = request
         current_user = request.user
 
         newprofile = TradeOffer.objects.filter(user=current_user.id, is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -14679,7 +13904,6 @@ class DirectedTradeOfferView(View):
         context.update({'pending_requests': pending_requests, 'outgoing_requests': outgoing_requests})
         return render(request, 'directedtradeoffers.html', context)
 
-
 @login_required
 def accept_trade(request, request_id):
     trade_offer = get_object_or_404(TradeOffer, id=request_id)
@@ -14691,7 +13915,6 @@ def accept_trade(request, request_id):
     messages.success(request, 'You have accepted the trade offer.')
     return redirect('showcase:mytrades')
 
-
 @login_required
 def decline_trade(request, request_id):
     trade_offer = get_object_or_404(TradeOffer, id=request_id)
@@ -14702,19 +13925,15 @@ def decline_trade(request, request_id):
     messages.success(request, 'You have declined the trade offer.')
     return redirect('showcase:mytrades')
 
-
 @login_required
 def accept_response_trade(request, request_id):
     trade_offer = get_object_or_404(RespondingTradeOffer, id=request_id)
 
-    # Check user permissions
     if request.user != trade_offer.user2 or not trade_offer.user2:
         raise PermissionDenied
 
-    # Update the responding trade offer status
     RespondingTradeOffer.objects.filter(id=request_id).update(trade_status=RespondingTradeOffer.ACCEPTED)
 
-    # Create a new Trade object and establish relationships if necessary
     wanted_trade_offer = trade_offer.wanted_trade_items
     if wanted_trade_offer and not Trade.objects.filter(trade_offers__in=[wanted_trade_offer]).exists():
         trade = Trade.objects.create()
@@ -14723,7 +13942,6 @@ def accept_response_trade(request, request_id):
 
     messages.success(request, 'You have accepted the trade offer.')
     return redirect('showcase:mytrades')
-
 
 @login_required
 def decline_response_trade(request, request_id):
@@ -14735,7 +13953,6 @@ def decline_response_trade(request, request_id):
     messages.success(request, 'You have declined the trade offer.')
     return redirect('showcase:mytrades')
 
-
 class TradeHistory(ListView):
     model = Trade
     template_name = "mytrades.html"
@@ -14743,7 +13960,7 @@ class TradeHistory(ListView):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             messages.warning(request, 'You must be signed in to access this feature!')
-            return redirect(reverse('showcase:account_login'))  # Ensure this name matches the name in your urls.py
+            return redirect(reverse('showcase:account_login'))
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -14752,7 +13969,7 @@ class TradeHistory(ListView):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -14767,37 +13984,34 @@ class TradeHistory(ListView):
         user_trades = Trade.objects.filter(users=current_user)
         context['user_trades'] = user_trades
         context['feedback'] = Feedback.objects.all()
-        # context['orders'] = OrderItem.objects.filter(user=self.request.user)
-        print(user)
 
+        print(user)
 
         items = TradeItem.objects.filter(is_active=1)
 
         context['Iteme'] = items
 
-        # Iterate over each item in 'Iteme'
         for items in context['Iteme']:
-            # Get the image of the item
+
             image = items.image
-            # Check if the user is authenticated
+
             if user.is_authenticated:
-                # Try to get the first profile detail of the current user
+
                 profile = ProfileDetails.objects.filter(user=user).first()
-                # If a profile detail exists
+
                 if profile:
-                    # Update the author's profile picture URL in the item
+
                     items.author_profile_picture_url = profile.avatar.url
-                    # Update the author's profile URL in the item
+
             else:
-                # Handle the case when the user is not authenticated
+
                 messages.warning(self.request, "You need to log in")
-                return redirect("accounts/login")  # replace "login" with your login route
+                return redirect("accounts/login")
 
         current_user = self.request.user
         user_trades = Trade.objects.filter(is_active=1, users=current_user)
         total_items = OrderItem.objects.filter(is_active=1).count()
 
-        # Get the paginate_by value from the form data or settings
         paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
 
         items_query = Trade.objects.filter(is_active=1)
@@ -14805,18 +14019,14 @@ class TradeHistory(ListView):
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
 
-        # context['items'] = paginated_items
-
-        # context['items'] = Item.objects.filter(is_active=1)
-
         context['orders'] = paginated_items
         for order_item in context['orders']:
-            # Process each order item individually
+
             user = self.request.user
-            profile = ProfileDetails.objects.filter(user=user).first()  # Fetch the profile for the current user
+            profile = ProfileDetails.objects.filter(user=user).first()
 
             order_item.author_profile_url = order_item.get_profile_url() if order_item.get_profile_url() else None
-            order_item.hyperlink = order_item.get_profile_url()  # Example, adjust this as needed
+            order_item.hyperlink = order_item.get_profile_url()
 
             if profile:
                 order_item.author_profile_picture_url = profile.avatar.url
@@ -14846,7 +14056,6 @@ class TradeHistory(ListView):
 
         return context
 
-
 class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
     """Only allow registered users to change their settings."""
     form_class = SettingsForm
@@ -14856,18 +14065,16 @@ class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Fetch the settings for the currently logged-in user
         try:
             user_settings = SettingsModel.objects.get(user=self.request.user, is_active=1)
         except SettingsModel.DoesNotExist:
             user_settings = None
 
-        # Pass the user settings to the context
         context['settings'] = user_settings
 
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -14875,7 +14082,6 @@ class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
-        # context['name'] = Showcase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         if self.request.user.is_authenticated:
@@ -14906,9 +14112,7 @@ class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
     def test_func(self):
         return self.request.user.is_superuser
 
-
 from django.contrib.messages.views import SuccessMessageMixin
-
 
 class SettingsBackgroundView(SuccessMessageMixin, FormView):
     model = SettingsBackgroundImage
@@ -14919,14 +14123,14 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             messages.warning(request, 'You must be signed in to access this feature!')
-            return redirect(reverse('showcase:account_login'))  # Ensure this name matches the name in your urls.py
+            return redirect(reverse('showcase:account_login'))
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -14965,9 +14169,6 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
 
         return context
 
-    # @RegularUserRequiredMixin
-    # @login_required
-
     from django.db import transaction
 
     @transaction.atomic
@@ -14975,13 +14176,11 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
         user = self.request.user
         settings_model, _ = SettingsModel.objects.get_or_create(user=user)
 
-        # Check if the new username conflicts with existing usernames
         new_username = form.cleaned_data['username']
         if User.objects.filter(username=new_username).exclude(pk=user.pk).exists():
             messages.error(self.request, 'Username already exists. Please choose a different username.')
             return self.form_invalid(form)
 
-        # Update the user's username and password based on the SettingsModel
         user.username = new_username
         user.set_password(form.cleaned_data['password'])
         new_email = form.cleaned_data['email']
@@ -14995,16 +14194,13 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
 
         return super().form_valid(form)
 
-
 from django.shortcuts import render
 from .models import AdministrationChangeLog
-
 
 def changelog_view(request):
     changelogs = AdministrationChangeLog.objects.all()
     context = {'changelogs': changelogs}
     return render(request, 'administrationchangelog.html', context)
-
 
 def get_changes(instance):
     if not instance.pk:
@@ -15022,13 +14218,10 @@ def get_changes(instance):
             }
     return changes
 
-
 class HomePageView(TemplateView):
     template_name = 'index.html'
 
-
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
 
 class EcommerceSearchResultsView(ListView):
     model = Item
@@ -15048,7 +14241,6 @@ class EcommerceSearchResultsView(ListView):
 
         return (all_list)
 
-
 class BlogSearchResultsView(ListView):
     template_name = 'blogsearch_results.html'
     paginate_by = 10
@@ -15056,9 +14248,8 @@ class BlogSearchResultsView(ListView):
 
     def get_queryset(self):
         query = self.request.GET.get('q')
-        filter_by = self.request.GET.get('filter')  # Get the filter parameter
+        filter_by = self.request.GET.get('filter')
 
-        # Define the lists to search based on the filter parameter
         search_lists = []
 
         if filter_by == 'blog':
@@ -15077,7 +14268,6 @@ class BlogSearchResultsView(ListView):
                             BlogFilter.objects.filter(Q(blog_filter__icontains=query)),
                             BlogHeader.objects.filter(Q(category__icontains=query))]
 
-        # Combine the search results from selected lists
         search_results = []
         for search_list in search_lists:
             for item in search_list:
@@ -15094,7 +14284,7 @@ class BlogSearchResultsView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -15102,9 +14292,6 @@ class BlogSearchResultsView(ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
-        # settings to alter the username & password
-
-        # Add type information for each item
         for result in context['all_list']:
             if isinstance(result.content_object, Blog):
                 result.type = 'Blog'
@@ -15144,7 +14331,6 @@ class BlogSearchResultsView(ListView):
 
         return context
 
-
 class GameCategorySearchResultsView(ListView):
     model = GameHub
     template_name = 'gamehubsearchresults.html'
@@ -15162,7 +14348,6 @@ class GameCategorySearchResultsView(ListView):
         print(all_list)
 
         return (all_list)
-
 
 class GameSearchResultsView(ListView):
     model = Game
@@ -15190,14 +14375,13 @@ class GameSearchResultsView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
 
         newprofile = Game.objects.filter(is_active=1)
         context['Profiles'] = newprofile
@@ -15234,11 +14418,9 @@ class GameSearchResultsView(ListView):
 
         return context
 
-
 from django.views.generic import ListView
 from django.db.models import Q
 from showcase.models import City, VoteQuery, UpdateProfile, Idea, PartnerApplication, SearchResult
-
 
 class SearchResultsView(ListView):
     template_name = 'search_results.html'
@@ -15247,9 +14429,8 @@ class SearchResultsView(ListView):
 
     def get_queryset(self):
         query = self.request.GET.get('q')
-        filter_by = self.request.GET.get('filter')  # Get the filter parameter
+        filter_by = self.request.GET.get('filter')
 
-        # Define the lists to search based on the filter parameter
         search_lists = []
 
         if filter_by == 'city':
@@ -15271,7 +14452,7 @@ class SearchResultsView(ListView):
             search_lists.append(NewsFeed.objects.filter(
                 Q(name__icontains=query) | Q(description__icontains=query) | Q(slug__icontains=query)))
         else:
-            # If no filter is specified, search all lists
+
             search_lists = [City.objects.filter(Q(name__icontains=query) | Q(state__icontains=query)),
                             VoteQuery.objects.filter(Q(name__icontains=query) | Q(category__icontains=query) | Q(
                                 description__icontains=query)),
@@ -15285,7 +14466,6 @@ class SearchResultsView(ListView):
                             NewsFeed.objects.filter(
                                 Q(name__icontains=query) | Q(description__icontains=query) | Q(slug__icontains=query))]
 
-        # Combine the search results from selected lists
         search_results = []
         for search_list in search_lists:
             for item in search_list:
@@ -15302,7 +14482,7 @@ class SearchResultsView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -15310,9 +14490,6 @@ class SearchResultsView(ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
-        # settings to alter the username & password
-
-        # Add type information for each item
         for result in context['all_list']:
             if isinstance(result.content_object, City):
                 result.type = 'City'
@@ -15361,7 +14538,6 @@ class SearchResultsView(ListView):
 
         return context
 
-
 class PageSearchResultsView(ListView):
     model = NavBar
     template_name = 'index.html'
@@ -15376,14 +14552,14 @@ class PageSearchResultsView(ListView):
                 Q(text__icontains=query))
         elif search_type == "url":
             if query.startswith(("http://", "https://")):
-                # Try to extract the path from the URL
+
                 url_path = urllib.parse.urlparse(query).path
                 nav_list = NavBar.objects.filter(url__icontains=url_path)
             else:
-                # Handle invalid URL format
-                nav_list = None  # Or display an error message
+
+                nav_list = None
         else:
-            # Handle invalid search type
+
             nav_list = None
 
         all_list = {
@@ -15399,39 +14575,38 @@ class PageSearchResultsView(ListView):
             nav_list = NavBar.objects.filter(
                 Q(text__icontains=search_query))
         elif search_type == "url":
-            # Handle URL search (you might need additional logic here)
+
             if query.startswith(("http://", "https://")):
-                # Try to extract the path from the URL
+
                 url_path = urllib.parse.urlparse(query).path
                 nav_list = NavBar.objects.filter(url__icontains=url_path)
             else:
-                # Handle invalid URL format (optional: display error message)
+
                 nav_list = None
         else:
-            # Handle invalid search type (optional: display error message)
+
             nav_list = None
 
-        if nav_list:  # If a matching navbar item is found
+        if nav_list:
             redirect_url = nav_list.first().url
-            return redirect(redirect_url)  # Redirect to the URL
+            return redirect(redirect_url)
         else:
-            # No matching results found (optional: display message)
+
             return render(request, 'search_results.html',
-                          {'message': 'No matching results found.'})  # Render search results template
+                          {'message': 'No matching results found.'})
 
     def get(self, request, *args, **kwargs):
-        # Handle GET requests (for initial search and potential redirection)
-        response = super().get(request, *args, **kwargs)  # Get search results
-        context = response.context  # Access the context data
 
-        if context['nav_list']:  # If a matching navbar item is found
-            # Get the URL from the first matching navbar item
+        response = super().get(request, *args, **kwargs)
+        context = response.context
+
+        if context['nav_list']:
+
             redirect_url = context['nav_list'].first().url
-            return redirect(redirect_url)  # Redirect to the URL
+            return redirect(redirect_url)
         else:
-            # Handle no matching results (display message or keep default behavior)
-            return response  # Return the original response (search results)
 
+            return response
 
 class CreateWithdrawView(LoginRequiredMixin, CreateView):
     model = Withdraw
@@ -15477,10 +14652,10 @@ class CreateWithdrawView(LoginRequiredMixin, CreateView):
 
     def my_cards(request):
         if request.user.is_authenticated:
-            # Filter Withdraws where the current user is included and fetch related cards
+
             withdraws = Withdraw.objects.filter(user=request.user).prefetch_related('cards')
         else:
-            withdraws = None  # Handle non-authenticated users (optional)
+            withdraws = None
 
         context = {'withdraws': withdraws}
         return render(request, 'my_cards.html', context)
@@ -15490,10 +14665,9 @@ class CreateWithdrawView(LoginRequiredMixin, CreateView):
             form = WithdrawForm(request.POST)
             if form.is_valid():
                 form.instance.user = request.user
-                # Assuming 'selected_cards' is a list of selected card IDs from your template
-                selected_cards = request.POST.getlist('selected_cards')  # Get selected card IDs from POST data
 
-                # Save the Withdraw instance first (without M2M)
+                selected_cards = request.POST.getlist('selected_cards')
+
                 withdraw = form.save()
 
                 withdraw.cards.set(selected_cards)
@@ -15501,14 +14675,13 @@ class CreateWithdrawView(LoginRequiredMixin, CreateView):
                 withdraw.save()
 
                 messages.success(request, 'Form submitted successfully.')
-                return redirect('showcase:withdraws')  # Redirect to your desired URL
+                return redirect('showcase:withdraws')
             else:
                 messages.error(request, "Form submission invalid")
                 return render(request, "create_withdraw.html", {'form': form})
         else:
             form = WithdrawForm()
             return render(request, "create_withdraw.html", {'form': form})
-
 
 class WithdrawView(LoginRequiredMixin, ListView):
     model = Withdraw
@@ -15523,7 +14696,6 @@ class WithdrawView(LoginRequiredMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
-
         completed_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state='C',
                                                       shipping_state='C')
         incomplete_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state='C').exclude(
@@ -15533,14 +14705,13 @@ class WithdrawView(LoginRequiredMixin, ListView):
         context['IncompleteWithdraws'] = incomplete_withdraws
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
 
-        # Add profile details to completed withdrawals
         for withdraw in context['CompletedWithdraws']:
             user = withdraw.user
             profile = ProfileDetails.objects.filter(user=user).first()
@@ -15548,7 +14719,6 @@ class WithdrawView(LoginRequiredMixin, ListView):
                 withdraw.newprofile_profile_picture_url = profile.avatar.url
                 withdraw.newprofile_profile_url = withdraw.get_profile_url()
 
-        # Add profile details to incomplete withdrawals
         for withdraw in context['IncompleteWithdraws']:
             user = withdraw.user
             profile = ProfileDetails.objects.filter(user=user).first()
@@ -15593,7 +14763,6 @@ class WithdrawView(LoginRequiredMixin, ListView):
                 messages.success(request, "Withdrawal marked complete successfully!")
         return redirect('showcase:withdraws')
 
-
 class WithdrawDetailView(LoginRequiredMixin, DetailView):
     model = Withdraw
     template_name = "withdraw_detail.html"
@@ -15613,7 +14782,7 @@ class WithdrawDetailView(LoginRequiredMixin, DetailView):
 
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -15626,13 +14795,11 @@ class WithdrawDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         withdraw = self.get_object()
 
-        # Add related profile details
         profile = ProfileDetails.objects.filter(user=withdraw.user).first()
         if profile:
             context['profile_picture_url'] = profile.avatar.url
             context['profile_url'] = reverse_lazy('showcase:profile', args=[str(profile.pk)])
 
-        # Add card images
         context['card_images'] = withdraw.get_card_images()
 
         if self.request.user.is_authenticated:
@@ -15660,7 +14827,6 @@ class WithdrawDetailView(LoginRequiredMixin, DetailView):
 
         return context
 
-
 class ProcessingWithdrawView(LoginRequiredMixin, ListView):
     model = Withdraw
     template_name = "processing_withdraws.html"
@@ -15674,7 +14840,6 @@ class ProcessingWithdrawView(LoginRequiredMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
-
         completed_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state='I',
                                                       shipping_state='Y')
         incomplete_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state='I').exclude(
@@ -15684,7 +14849,7 @@ class ProcessingWithdrawView(LoginRequiredMixin, ListView):
         context['IncompleteWithdraws'] = incomplete_withdraws
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -15741,33 +14906,29 @@ class ProcessingWithdrawView(LoginRequiredMixin, ListView):
                 messages.success(request, "Withdrawal marked complete successfully!")
         return redirect('showcase:withdraws')
 
-
 from django.contrib.auth.decorators import login_required
 from .models import InviteCode
 from .forms import InviteCodeForm
 from secrets import token_urlsafe
 
-
 def generate_unique_code(room_name):
     """Generates a unique alphanumeric code with the room name prefix"""
     while True:
-        # Generate a random 16-character alphanumeric string
+
         code_suffix = token_urlsafe(16)
-        # Combine room name (if provided) and code suffix with a separator (e.g., underscore)
+
         code = f"{room_name}_{code_suffix}" if room_name else code_suffix
 
-        # Check for uniqueness in the InviteCode model
         if not InviteCode.objects.filter(code=code).exists():
             return code
-
 
 @login_required
 def generate_invite_link(request):
     if request.method == 'POST':
         form = InviteCodeForm(request.POST)
         if form.is_valid():
-            # Generate unique code
-            code = generate_unique_code()  # Replace with your code generation function
+
+            code = generate_unique_code()
             invite_code, created = InviteCode.objects.get_or_create(user=request.user, code=code)
             invite_link = f"https://your_app.com/join/{invite_code.code}"
             return render(request, 'invite_link.html', {'invite_link': invite_link})
@@ -15775,28 +14936,7 @@ def generate_invite_link(request):
         form = InviteCodeForm()
     return render(request, 'generate_invite.html', {'form': form})
 
-
-# Function to generate a unique random alphanumeric code (replace with your implementation)
-
-
-# class ProductSearchResultsView(ListView):
-#    model = Item
-#    template_name = 'search_results.html'
-
-#    def get_queryset(self):
-#        query = self.request.GET.get('q')
-#        item_list = Item.objects.filter(
-#            Q(name__icontains=query) | Q(state__icontains=query)
-#        )
-
-#        all_list = {
-#           "item_list": item_list,
-#       }
-
-#        return (all_list)
-
 from .models import ProfileDetails
-
 
 class ProfileView(LoginRequiredMixin, UpdateView):
     model = ProfileDetails
@@ -15807,7 +14947,7 @@ class ProfileView(LoginRequiredMixin, UpdateView):
     context_object_name = 'profile'
 
     def get_object(self, queryset=None):
-        # Retrieve the ProfileDetails object based on the captured pk from the URL
+
         pk = self.kwargs.get('pk')
         return get_object_or_404(ProfileDetails, pk=pk)
 
@@ -15917,13 +15057,11 @@ class ProfileView(LoginRequiredMixin, UpdateView):
 
         return context
 
-
 @login_required
 def fetch_remaining_rubies(request, pk):
     profile = get_object_or_404(ProfileDetails, is_active=1, pk=pk)
     remaining = profile.level.experience - profile.rubies_spent
     return JsonResponse({'remaining_rubies': remaining})
-
 
 @login_required
 def profile_edit(request, pk):
@@ -15940,7 +15078,6 @@ def profile_edit(request, pk):
 
     return render(request, 'profile_edit.html', {'form': form, 'profile': profile})
 
-
 def edit_profile(request):
     if request.method == 'POST':
         form = EditProfileForm(request.POST, instance=request.user)
@@ -15954,7 +15091,6 @@ def edit_profile(request):
         args = {'form': form}
         return render(request, 'edit_profile.html', args)
 
-
 class MyLevelView(LoginRequiredMixin, ListView):
     model = Level
     template_name = 'mylevel.html'
@@ -15963,14 +15099,13 @@ class MyLevelView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        # Add static/contextual data
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -15981,7 +15116,6 @@ class MyLevelView(LoginRequiredMixin, ListView):
 
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
 
-        # Add Level objects and fields
         levels = Level.objects.filter(is_active=1).order_by("level")
         context['levels'] = [
             {
@@ -15991,7 +15125,6 @@ class MyLevelView(LoginRequiredMixin, ListView):
             for level in levels
         ]
 
-        # Add the ProfileDetails instance for the current user
         if user.is_authenticated:
             profile = ProfileDetails.objects.filter(user=user, is_active=1).first()
             if profile:
@@ -16028,7 +15161,6 @@ class MyLevelView(LoginRequiredMixin, ListView):
 
         return context
 
-
 class StaffJoine(ListView):
     paginate_by = 10
     template_name = 'staffapplication.html'
@@ -16036,8 +15168,6 @@ class StaffJoine(ListView):
     def get_queryset(self, *args, **kwargs):
         return StaffApplication.objects.all()
 
-
-# @RegularUserRequiredMixin
 class PunishAppsBackgroundView(FormMixin, ListView):
     model = PunishmentAppeal
     template_name = "punishapps.html"
@@ -16049,11 +15179,11 @@ class PunishAppsBackgroundView(FormMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -16106,7 +15236,6 @@ class PunishAppsBackgroundView(FormMixin, ListView):
             messages.error(request, form.errors)
             return render(request, "punishapps.html", {'form': form})
 
-
 class BanAppealBackgroundView(FormMixin, ListView):
     model = BanAppeal
     template_name = "banappeals.html"
@@ -16118,7 +15247,7 @@ class BanAppealBackgroundView(FormMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(
@@ -16172,7 +15301,6 @@ class BanAppealBackgroundView(FormMixin, ListView):
             messages.error(request, form.errors)
             return render(request, "banappeals.html", {'form': form})
 
-
 class CommerceExchangeView(CreateView):
     model = CommerceExchange
     template_name = "commerce.html"
@@ -16180,23 +15308,21 @@ class CommerceExchangeView(CreateView):
     success_url = reverse_lazy('showcase:commerce')
 
     def form_valid(self, form):
-        # Associate the currently logged-in user with the form instance
+
         form.instance.user = self.request.user
         return super().form_valid(form)
 
     def get_form(self):
-        # Pass the current user to the form
+
         return self.form_class(user=self.request.user, **self.get_form_kwargs())
 
     def get_context_data(self, **kwargs):
-        # Add additional context to the template
+
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        # Query TradeItem objects for the current user
         trade_items = TradeItem.objects.filter(user=user)
 
-        # Add additional context variables
         context['trade_items'] = trade_items
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
@@ -16209,7 +15335,6 @@ class CommerceExchangeView(CreateView):
         context['Prizes'] = ExchangePrize.objects.filter(
             is_active=1).order_by('value')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -16236,11 +15361,9 @@ class CommerceExchangeView(CreateView):
 
         return context
 
-
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from .models import TradeItem
-
 
 class InventoryTradeView(CreateView):
     model = CommerceExchange
@@ -16281,19 +15404,15 @@ class InventoryTradeView(CreateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        # Query TradeItem objects for the logged-in user and other users
         trade_items = TradeItem.objects.filter(user=user, is_active=1)
         other_trade_items = TradeItem.objects.exclude(user=user).filter(is_active=1)
 
-        # Find items in pending offers
         items_in_pending_offers = InventoryTradeOffer.objects.filter(
             (Q(initiator=user) | Q(receiver=user)) & Q(status='pending')
         ).values_list('offered_items', flat=True)
 
-        # Add disabled items to the context
         context['disabled_items'] = set(items_in_pending_offers)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
 
         context['other_trade_items'] = [
             {
@@ -16302,7 +15421,7 @@ class InventoryTradeView(CreateView):
                 'value': item.value,
                 'image_url': item.image.url if item.image and hasattr(item.image,
                                                                       'url') else '/path/to/placeholder/image.jpg',
-                # Fallback to placeholder if no image
+
                 'condition': item.get_condition_display(),
             }
             for item in other_trade_items
@@ -16343,7 +15462,6 @@ class InventoryTradeView(CreateView):
 
         return context
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 @method_decorator(login_required, name='dispatch')
 class UpdateTradeOfferStatusView(View):
@@ -16351,11 +15469,9 @@ class UpdateTradeOfferStatusView(View):
         trade_offer_id = kwargs.get('pk')
         trade_offer = get_object_or_404(InventoryTradeOffer, id=trade_offer_id)
 
-        # Ensure the logged-in user is the receiver
         if trade_offer.receiver != request.user:
             raise PermissionDenied("You are not authorized to update this trade offer.")
 
-        # Parse and update status
         new_status = request.POST.get('status')
         if new_status not in ['accepted', 'declined']:
             return JsonResponse({'error': 'Invalid status value.'}, status=400)
@@ -16365,9 +15481,8 @@ class UpdateTradeOfferStatusView(View):
 
         return JsonResponse({'message': 'Status updated successfully.', 'status': trade_offer.status})
 
-
 def trade_items_api(request, user_id):
-    # This view handles the API request to fetch trade items for a specific user
+
     trade_items = TradeItem.objects.filter(user_id=user_id, is_active=1)
     trade_items_data = [
         {
@@ -16376,13 +15491,12 @@ def trade_items_api(request, user_id):
             'value': item.value,
             'image_url': item.image.url if item.image and hasattr(item.image,
                                                                   'url') else '/path/to/placeholder/image.jpg',
-            # Fallback to placeholder if no image
+
             'condition': item.get_condition_display(),
         }
         for item in trade_items
     ]
     return JsonResponse({'trade_items': trade_items_data})
-
 
 class UserTradeOffersView(LoginRequiredMixin, View):
     def get(self, request):
@@ -16424,7 +15538,6 @@ class UserTradeOffersView(LoginRequiredMixin, View):
                 for category, offers in categories.items()
             }
 
-            # Add the user's currency amount to the response
             data['receiver_currency_amount'] = user.profiledetails.currency_amount
             return JsonResponse(data)
 
@@ -16435,50 +15548,44 @@ class UserTradeOffersView(LoginRequiredMixin, View):
         }
         return render(request, "inventorytradeofferstatuses.html", context)
 
-
 @login_required
 def get_trade_items(request, user_id):
     if request.method == "GET":
-        # Get the currently logged-in user
+
         current_user = request.user
         trade_user = User.objects.filter(id=user_id).first()
 
-        # Get trade items for the selected user
         trade_items = TradeItem.objects.filter(user_id=user_id, is_active=True).values(
             'id', 'title', 'condition', 'value', 'currency__name', 'image'
         )
 
-        # Get trade items for the current user
         my_trade_items = TradeItem.objects.filter(user_id=current_user.id, is_active=True).values(
             'id', 'title', 'condition', 'value', 'currency__name', 'image'
         )
 
-        # Prepare JSON response
         response = {
             'trade_user': trade_user.username if trade_user else "Unknown",
             'trade_items': list(trade_items),
-            'my_trade_items': list(my_trade_items),  # Include current user's items
+            'my_trade_items': list(my_trade_items),
         }
         return JsonResponse(response)
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-
 def fetch_trade_items(request, user_id):
     if request.method == "GET":
-        # Fetch trade items for the selected user
+
         trade_items = TradeItem.objects.filter(user_id=user_id, is_active=True).values(
             'id', 'title', 'condition', 'value', 'currency__name'
         )
         return JsonResponse({'trade_items': list(trade_items)})
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-
 def create_trade_offer(request):
     if request.method == 'POST':
         form = InventoryTradeForm(request.POST, user=request.user)
         if form.is_valid():
-            # Save the trade offer
+
             trade_offer = TradeOffer.objects.create(
                 initiator=request.user,
                 receiver=form.cleaned_data['trading_user'],
@@ -16487,14 +15594,12 @@ def create_trade_offer(request):
             trade_offer.requested_items.set(form.cleaned_data['exchangeprizes'])
             trade_offer.save()
 
-            # Redirect with a success message
             messages.success(request, "Trade offer sent successfully!")
-            return redirect('trade_offer_sent')  # Define the URL for this page
+            return redirect('trade_offer_sent')
     else:
         form = InventoryTradeForm(user=request.user)
 
     return render(request, 'trade_form.html', {'form': form})
-
 
 def respond_to_trade_offer(request, trade_offer_id):
     trade_offer = get_object_or_404(TradeOffer, id=trade_offer_id, receiver=request.user)
@@ -16503,17 +15608,15 @@ def respond_to_trade_offer(request, trade_offer_id):
         if form.is_valid():
             form.save()
 
-            # Notify the initiator via email, notification, etc.
             if trade_offer.status == 'accepted':
                 messages.success(request, "You accepted the trade offer!")
             else:
                 messages.info(request, "You declined the trade offer.")
-            return redirect('trade_dashboard')  # Redirect to the user's dashboard or another page
+            return redirect('trade_dashboard')
     else:
         form = InventoryTradeOfferResponseForm(instance=trade_offer)
 
     return render(request, 'trade_response_form.html', {'form': form, 'trade_offer': trade_offer})
-
 
 def create_notification(user, message, related_object=None):
     content_type = None
@@ -16530,22 +15633,18 @@ def create_notification(user, message, related_object=None):
         object_id=object_id
     )
 
-
 def notify(request, pk):
     notification = get_object_or_404(InventoryTradeOffer, pk=pk)
 
-    # Notify the user
     create_notification(
         user=InventoryTradeOffer.receiver,
         message=f"An update has been made to {InventoryTradeOffer.name}",
         related_object=notification
     )
 
-
 def dashboard_view(request):
     notifications = request.user.notifications.filter(is_read=False)
     return render(request, 'dashboard.html', {'notifications': notifications})
-
 
 class ExchangePrizesView(FormMixin, ListView):
     model = ExchangePrize
@@ -16559,13 +15658,11 @@ class ExchangePrizesView(FormMixin, ListView):
         return kwargs
 
     def form_valid(self, form):
-        # Assign the logged-in user to the form instance
+
         form.instance.user = self.request.user
 
-        # Save the form data
         exchange_prize = form.save(commit=False)
 
-        # Calculate total value of selected cards
         selected_inventory_objects = form.cleaned_data.get('usercard')
         total_usercard_value = (
                 selected_inventory_objects.aggregate(
@@ -16630,7 +15727,6 @@ class ExchangePrizesView(FormMixin, ListView):
             messages.error(request, "Form submission invalid")
             return self.render_to_response(self.get_context_data(form=form))
 
-
 class IssueBackgroundView(FormMixin, ListView):
     model = IssueBackgroundImage
     template_name = "issues.html"
@@ -16645,7 +15741,7 @@ class IssueBackgroundView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -16709,10 +15805,6 @@ class IssueBackgroundView(FormMixin, ListView):
             messages.error(request, form.errors)
             return render(request, "issues.html", {'form': form})
 
-
-# sendemail/views.py
-
-
 def contactView(request):
     if request.method == 'GET':
         form = ContactForm()
@@ -16730,13 +15822,11 @@ def contactView(request):
 
             return redirect('success')
     print('success')
-    # pdb.set_trace()
-    return render(request, "email.html", {'form': form})
 
+    return render(request, "email.html", {'form': form})
 
 def successView(request):
     return HttpResponse('Success! Thank you for your message.')
-
 
 class ContacteView(FormView):
     template_name = 'showcase/email.html'
@@ -16744,10 +15834,9 @@ class ContacteView(FormView):
     success_url = reverse_lazy('contact:success')
 
     def form_valid(self, form):
-        # Calls the custom send method
+
         form.send()
         return super().form_valid(form)
-
 
 class ContactSuccessView(TemplateView):
     template_name = 'showcase/email.html'
@@ -16780,7 +15869,6 @@ class ContactSuccessView(TemplateView):
 
         return context
 
-
 def businessemailcontactView(request):
     if request.method == 'GET':
         form = BusinessContactForm()
@@ -16799,9 +15887,8 @@ def businessemailcontactView(request):
 
             return redirect('businessemailsuccess')
     print('success')
-    # pdb.set_trace()
-    return render(request, "businessemail.html", {'form': form})
 
+    return render(request, "businessemail.html", {'form': form})
 
 class BusinessMailingView(FormView):
     template_name = 'businessemail.html'
@@ -16810,13 +15897,13 @@ class BusinessMailingView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -16826,7 +15913,7 @@ class BusinessMailingView(FormView):
 
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -16853,25 +15940,24 @@ class BusinessMailingView(FormView):
         return context
 
     def form_valid(self, form):
-        # Calls the custom send method
+
         form.send()
         form.save()
         return super().form_valid(form)
-
 
 class BusinessSuccessMailingView(TemplateView):
     template_name = 'businessmailingsuccess.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Contact'] = Contact.objects.all()[len(Contact.objects.all()) - 1]
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -16908,29 +15994,26 @@ class BusinessSuccessMailingView(TemplateView):
 
         return context
 
-
 class contact(TemplateView):
     paginate_by = 10
     template_name = 'email.html'
 
-
 class businessemailcontact(TemplateView):
     paginate_by = 10
     template_name = 'businessemail.html'
-
 
 class PostDetailView(View):
     template_name = 'post_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -16979,8 +16062,8 @@ class PostDetailView(View):
             'post': post,
             'comments': comments,
             'comment_form': comment_form,
-            'Header': header_data,  # Adding Header data to context
-            'DropDown': dropdown_data  # Adding DropDown data to context
+            'Header': header_data,
+            'DropDown': dropdown_data
         }
 
         return render(request, self.template_name, context)
@@ -17003,16 +16086,14 @@ class PostDetailView(View):
             'comments': comments,
             'new_comment': new_comment,
             'comment_form': comment_form,
-            'Header': header_data,  # Adding Header data to context
-            'DropDown': dropdown_data  # Adding DropDown data to context
+            'Header': header_data,
+            'DropDown': dropdown_data
         }
 
         return render(request, self.template_name, context)
 
-
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-
 
 @login_required
 @csrf_exempt
@@ -17026,7 +16107,6 @@ def subtract_currency(request):
             return JsonResponse({'status': 'success'})
         except ValueError:
             return JsonResponse({'status': 'error', 'message': 'Not enough currency'})
-
 
 class CurrencyProductView(DetailView):
     model = CurrencyMarket
@@ -17043,7 +16123,7 @@ class CurrencyProductView(DetailView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -17053,7 +16133,6 @@ class CurrencyProductView(DetailView):
             Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1
         )
 
-        # User profile context (existing code)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -17088,19 +16167,18 @@ class CurrencyProductView(DetailView):
 
         return context
 
-
 class CurrencyMarketView(EBaseView):
     model = CurrencyMarket
     template_name = "currencymarket.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -17142,21 +16220,20 @@ class CurrencyMarketView(EBaseView):
 
         return context
 
-
 class CurrencyCheckoutView(EBaseView):
     model = CheckoutBackgroundImage
     template_name = "currencycheckout.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         context['endowment_form'] = EndowmentForm(request=self.request)
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -17234,9 +16311,7 @@ class CurrencyCheckoutView(EBaseView):
 
         return redirect('showcase:currencycheckout')
 
-
 from paypalrestsdk import Payment as PayPalPayment
-
 
 class CurrencyPaymentView(EBaseView):
     template_name = "currencypayment.html"
@@ -17369,7 +16444,6 @@ class CurrencyPaymentView(EBaseView):
 
         return JsonResponse({"success": "Thanks for purchasing!"})
 
-
 class CurrencyPayPalExecuteView(View):
     def get(self, request, *args, **kwargs):
         payer_id = request.GET.get('PayerID')
@@ -17380,7 +16454,7 @@ class CurrencyPayPalExecuteView(View):
             paypal_payment = PayPalPayment.find(payment_id)
 
             if paypal_payment.execute({'payer_id': payer_id}):
-                # Payment successful
+
                 payment = Payment()
                 payment.paypal_payment_id = payment_id
                 payment.user = self.request.user
@@ -17388,7 +16462,6 @@ class CurrencyPayPalExecuteView(View):
                 payment.save()
                 print('your payment has been saved')
 
-                # Mark order items as ordered
                 order_items = order.items.all()
                 order_items.update(ordered=True)
                 print('your payment has been updated')
@@ -17409,7 +16482,6 @@ class CurrencyPayPalExecuteView(View):
             messages.error(self.request, 'Order not found')
             return redirect('/currencypayment')
 
-
 class CurrencyPaypalFormView(FormView):
     template_name = 'paypalpayment.html'
     form_class = CurrencyPaypalPaymentForm
@@ -17427,7 +16499,6 @@ class CurrencyPaypalFormView(FormView):
             'lc': 'EN',
             'no_shipping': '1',
         }
-
 
 @allow_guest_user
 def currency_add_to_cart(request, slug):
@@ -17469,10 +16540,9 @@ def currency_add_to_cart(request, slug):
 
     return redirect("showcase:currencycheckout")
 
-
 @login_required
 def currency_remove_from_cart(request, slug):
-    # Get the order item for the currency market item with the provided slug
+
     order_item = get_object_or_404(
         CurrencyOrder,
         items__slug=slug,
@@ -17494,7 +16564,6 @@ def currency_remove_from_cart(request, slug):
         messages.info(request, "You do not have an active cart.")
         return redirect("showcase:currencymarket")
 
-
 def currency_get_coupon(request, code):
     try:
         coupon = Coupon.objects.get(code=code)
@@ -17505,7 +16574,6 @@ def currency_get_coupon(request, code):
             "Sorry, this coupon seems to have either expired or does not exist. Do you want to try another one?"
         )
         return redirect("showcase:currencycheckout")
-
 
 class CurrencyAddCouponView(View):
     def post(self, *args, **kwargs):
@@ -17522,7 +16590,6 @@ class CurrencyAddCouponView(View):
             except ObjectDoesNotExist:
                 messages.info(self.request, "You do not have an active order")
                 return redirect("showcase:currencycheckout")
-
 
 class GiftCodeRedemptionView(LoginRequiredMixin, ListView, FormMixin):
     model = GiftCodeRedemption
@@ -17609,7 +16676,6 @@ class GiftCodeRedemptionView(LoginRequiredMixin, ListView, FormMixin):
 
         return self.get(request, *args, **kwargs)
 
-
 class GiftCodeClaimedView(ListView):
     model = Lottery
     template_name = "giftcodeclaimed.html"
@@ -17619,12 +16685,11 @@ class GiftCodeClaimedView(ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -17634,7 +16699,6 @@ class GiftCodeClaimedView(ListView):
         context['Profile'] = UpdateProfile.objects.all()
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
-
 
         context['Profiles'] = newprofile
 
@@ -17670,10 +16734,8 @@ class GiftCodeClaimedView(ListView):
 
         return context
 
-
 def index(request):
     return redirect('showcase')
-
 
 @login_required
 def currency_reduce_quantity_item(request, slug):
@@ -17696,22 +16758,19 @@ def currency_reduce_quantity_item(request, slug):
             messages.info(request, "This Item is not in your cart")
             return redirect("showcase:order-summary")
     else:
-        # add message doesnt have order
+
         messages.info(request, "You do not have an Order")
         return redirect("showcase:order-summary")
-
 
 class HomeView(ListView):
     model = Item
     paginate_by = 10
     template_name = "ehome.html"
 
-
 class Featured(ListView):
     model = Item
     paginate_by = 10
     template_name = "featuredproducts.html"
-
 
 class ProductView(DetailView):
     model = Item
@@ -17720,8 +16779,8 @@ class ProductView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        item = self.get_object()  # Get the current Item object
-        context['quick_items'] = item.images.all()  # `images` is the related name for QuickItem
+        item = self.get_object()
+        context['quick_items'] = item.images.all()
         context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
@@ -17729,14 +16788,13 @@ class ProductView(DetailView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -17763,16 +16821,14 @@ class ProductView(DetailView):
 
         return context
 
-
 def product_detail_view(request, item_id):
     item = get_object_or_404(Item, id=item_id)
-    quick_items = item.images.all()  # `images` is the related name for QuickItem
+    quick_items = item.images.all()
     context = {
         'item': item,
         'quick_items': quick_items,
     }
     return render(request, 'product.html', context)
-
 
 class OrderSummaryView(EBaseView):
     model = OrderBackgroundImage
@@ -17789,14 +16845,13 @@ class OrderSummaryView(EBaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
 
-        # Checking user profile existence
         user_profile_exists = UserProfile2.objects.filter(user=self.request.user, is_active=1).exists()
         context['user_profile_exists'] = user_profile_exists
 
@@ -17828,7 +16883,7 @@ class OrderSummaryView(EBaseView):
     def get(self, *args, **kwargs):
         if not self.request.user.is_authenticated:
             messages.warning(self.request, "Please log in to see your order history.")
-            return redirect("accounts/login")  # replace "login" with your login route
+            return redirect("accounts/login")
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
             context = self.get_context_data()
@@ -17838,18 +16893,16 @@ class OrderSummaryView(EBaseView):
             messages.warning(self.request, "You do not have an active order")
             return redirect("showcase:ehome")
 
-
 def check_and_deduct_currency(user, amount_required):
     try:
         profile = ProfileDetails.objects.get(user=user)
         if profile.currency_amount < amount_required:
-            return False, profile.currency_amount  # Insufficient funds
+            return False, profile.currency_amount
         profile.currency_amount -= amount_required
         profile.save()
-        return True, profile.currency_amount  # Sufficient funds and deduction successful
+        return True, profile.currency_amount
     except ProfileDetails.DoesNotExist:
         return False, 0
-
 
 class CheckoutView(EBaseView):
     model = CheckoutBackgroundImage
@@ -17859,7 +16912,7 @@ class CheckoutView(EBaseView):
         context = {}
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -17971,10 +17024,8 @@ class CheckoutView(EBaseView):
                         context['order'] = order
                         return redirect('showcase:currencymarket')
 
-                    # Deduct the currency amount from the order
                     order.deduct_currency_amount()
 
-                    # Set the order as ordered and save the instance
                     order.ordered = True
                     order.ordered_date = timezone.now()
                     order.save()
@@ -18111,9 +17162,7 @@ class CheckoutView(EBaseView):
                 valid = False
         return valid
 
-
 from paypalrestsdk import Payment as PayPalPayment
-
 
 class PaymentView(EBaseView):
     template_name = "payment.html"
@@ -18157,9 +17206,8 @@ class PaymentView(EBaseView):
             context['STRIPE_PUBLIC_KEY'] = settings.STRIPE_PUBLIC_KEY
             userprofile = User.objects.get(username=self.request.user.username)
 
-            # Check for one-click purchasing
             if hasattr(userprofile, "one_click_purchasing") and userprofile.one_click_purchasing:
-                # Fetch user's saved cards
+
                 cards = stripe.Customer.list_sources(
                     userprofile.stripe_customer_id,
                     limit=3,
@@ -18167,9 +17215,8 @@ class PaymentView(EBaseView):
                 )
                 card_list = cards['data']
                 if card_list:
-                    context['card'] = card_list[0]  # Use the first card as default
+                    context['card'] = card_list[0]
 
-            # Check if PayPal payment method is available
             if hasattr(userprofile, 'paypal_enabled') and userprofile.paypal_enabled:
                 context['PAYPAL_CLIENT_ID'] = settings.PAYPAL_CLIENT_ID
 
@@ -18189,7 +17236,7 @@ class PaymentView(EBaseView):
             token = data.get('token')
             payment_method = data.get('payment_method')
         else:
-            # Handle form data from request.POST
+
             token = self.request.POST.get('token')
             payment_method = self.request.POST.get('payment_method')
 
@@ -18207,7 +17254,6 @@ class PaymentView(EBaseView):
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
 
-
 class PayPalExecuteView(View):
     def get(self, request, *args, **kwargs):
         payer_id = request.GET.get('PayerID')
@@ -18224,11 +17270,9 @@ class PayPalExecuteView(View):
                 payment.amount = order.get_total_price()
                 payment.save()
 
-                # Mark order items as ordered
                 order_items = order.items.all()
                 order_items.update(ordered=True)
 
-                # Associate the payment with the order
                 order.ordered = True
                 order.payment = payment
                 order.ref_code = create_ref_code()
@@ -18237,14 +17281,12 @@ class PayPalExecuteView(View):
                 messages.success(self.request, 'Your order was successful!')
                 return redirect('showcase:ehome')
 
-            # Payment failed
             messages.error(self.request, 'Failed to process PayPal payment')
             return redirect('/payment')
 
         except Order.DoesNotExist:
             messages.error(self.request, 'Order not found')
             return redirect('/payment')
-
 
 class PaypalFormView(FormView):
     template_name = 'paypalpayment.html'
@@ -18264,7 +17306,6 @@ class PaypalFormView(FormView):
             'no_shipping': '1',
         }
 
-
 class OrderDoneView(ListView):
     model = CheckoutBackgroundImage
     template_name = "orderdone.html"
@@ -18273,7 +17314,7 @@ class OrderDoneView(ListView):
         context = {}
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -18283,7 +17324,6 @@ class OrderDoneView(ListView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
 
-        # Get the last completed order for the current user
         try:
             order = Order.objects.filter(user=self.request.user, ordered=True).order_by('-ordered_date').first()
             context['order'] = order
@@ -18316,44 +17356,40 @@ class OrderDoneView(ListView):
 
         return context
 
-
 @allow_guest_user
 def add_to_cart(request, slug):
     item = get_object_or_404(Item, slug=slug)
 
-    # Check if an existing order exists for the user
     order_qs = Order.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
 
-        # Check if an OrderItem already exists for the current order
         order_item = OrderItem.objects.filter(
             item=item, user=request.user, ordered=False
         ).first()
 
         if order_item:
-            # If the item already exists in the cart, increase the quantity
+
             order_item.quantity += 1
             order_item.save()
             messages.info(request, f"\"{order_item.item.title}\" was added to your cart.")
         else:
-            # Create a new OrderItem and add it to the order
+
             order_item = OrderItem(item=item, user=request.user, ordered=False, quantity=1)
-            order_item.save()  # Save the OrderItem before adding to the order
+            order_item.save()
             order.items.add(order_item)
             messages.info(request, "This item was added to your cart.")
 
-        # Optionally, assign shipping and billing address if available
         address = Address.objects.filter(user=request.user, is_active=1).first()
         if address:
             order.shipping_address = address
-            order.billing_address = address  # Get billing address from templates, if provided
+            order.billing_address = address
             order.save()
 
         return redirect("showcase:order-summary")
 
     else:
-        # If no active order exists, create a new one
+
         order = Order.objects.create(
             user=request.user,
             ordered=False,
@@ -18361,7 +17397,6 @@ def add_to_cart(request, slug):
         )
         print("Order created")
 
-        # Assign shipping and billing address to the order
         address = Address.objects.filter(user=request.user, is_active=1).first()
         if address:
             order.shipping_address = address
@@ -18374,7 +17409,6 @@ def add_to_cart(request, slug):
         order.items.add(order_item)
         messages.info(request, "This item was added to your cart.")
         return redirect("showcase:order-summary")
-
 
 @login_required
 def remove_from_cart(request, slug):
@@ -18395,14 +17429,12 @@ def remove_from_cart(request, slug):
             messages.info(request, "This item is no longer in your cart")
             return redirect("showcase:product", slug=slug)
     else:
-        # add message doesnt have order
+
         messages.info(request, "You do not seem to have an order currently")
         return redirect("showcase:product", slug=slug)
 
-
 def index(request):
     return redirect('showcase')
-
 
 @login_required
 def reduce_quantity_item(request, slug):
@@ -18425,10 +17457,9 @@ def reduce_quantity_item(request, slug):
             messages.info(request, "This Item is not in your cart")
             return redirect("showcase:order-summary")
     else:
-        # add message doesnt have order
+
         messages.info(request, "You do not have an Order")
         return redirect("showcase:order-summary")
-
 
 import random
 import string
@@ -18437,31 +17468,21 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .forms import CouponForm, RefundForm, PaymentForm
 
-
-# from .models import Address, Coupon, Refund, UserProfile
-
-# stripe.api_key = settings.STRIPE_SECRET_KEY
-
-
 def create_ref_code():
     return ''.join(random.choices(string.ascii_lowercase + string.digits,
                                   k=20))
 
-
 from django.db.models import Count, Avg
-
 
 def products(request):
     context = {'items': Item.objects.all()}
     return render(request, "products.html", context)
-
 
 def reviewproducts(request, pid):
     product = Item.objects.get(pid=pid)
 
     products = ProductReview.objects.filter(product=product).order_by("-date")
 
-    # getting the reviews
     reviews = ProductReview.objects.filter(Item=Item)
 
     average_rating = ProductReview.objects.filter(Item=Item).aggregate(rating=Avg('rating'))
@@ -18478,7 +17499,6 @@ def reviewproducts(request, pid):
 
     return render(request, "showcase:index.html", context)
 
-
 def is_valid_form(values):
     valid = True
     for field in values:
@@ -18486,12 +17506,10 @@ def is_valid_form(values):
             valid = False
     return valid
 
-
 class ItemDetailView(DetailView):
     model = Item
     paginate_by = 10
     template_name = "product.html"
-
 
 @login_required
 def remove_single_item_from_cart(request, slug):
@@ -18499,7 +17517,7 @@ def remove_single_item_from_cart(request, slug):
     order_qs = Order.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
-        # check if the order item is in the order
+
         if order.items.filter(item__slug=item.slug).exists():
             order_item = OrderItem.objects.filter(item=item,
                                                   user=request.user,
@@ -18518,7 +17536,6 @@ def remove_single_item_from_cart(request, slug):
         messages.info(request, "You do not have an active order")
         return redirect("showcase:product", slug=slug)
 
-
 def get_coupon(request, code):
     try:
         coupon = Coupon.objects.get(code=code)
@@ -18529,7 +17546,6 @@ def get_coupon(request, code):
             "Sorry, this coupon seems to have either expired or does not exist. Do you want to try another one?"
         )
         return redirect("showcase:checkout")
-
 
 class AddCouponView(View):
     def post(self, *args, **kwargs):
@@ -18552,7 +17568,6 @@ class AddCouponView(View):
                 messages.info(self.request, "You do not have an active order")
                 return redirect("showcase:checkout")
 
-
 class RequestRefundView(View):
     def get(self, *args, **kwargs):
         form = RefundForm()
@@ -18565,13 +17580,12 @@ class RequestRefundView(View):
             ref_code = form.cleaned_data.get('ref_code')
             message = form.cleaned_data.get('message')
             email = form.cleaned_data.get('email')
-            # edit the order
+
             try:
                 order = Order.objects.get(ref_code=ref_code)
                 order.refund_requested = True
                 order.save()
 
-                # store the refund
                 refund = Refund()
                 refund.order = order
                 refund.reason = message
@@ -18585,28 +17599,21 @@ class RequestRefundView(View):
                 messages.info(self.request, "This order does not exist.")
                 return redirect("showcase:request-refund")
 
-
-
-
 class UserRegisterView(generic.CreateView):
     form_class = SignUpForm
     template_name = 'showcase/profile.html'
     success_url = reverse_lazy('login')
-
 
 class UserEditView(generic.CreateView):
     form_class = UserChangeForm
     template_name = 'showcase:edit_profile.html'
     success_url = reverse_lazy('login')
 
-
 class SuccessView(TemplateView):
     template_name = 'success.html'
 
-
 class CancelView(TemplateView):
     template_name = 'cancel.html'
-
 
 def product_view(request, slug):
     item = get_object_or_404(Item, slug=slug)
@@ -18616,7 +17623,6 @@ def product_view(request, slug):
     }
     return render(request, 'product.html', context)
 
-
 @csrf_exempt
 @require_POST
 def create_checkout_session(request, slug):
@@ -18625,18 +17631,17 @@ def create_checkout_session(request, slug):
     if item.is_currency_based:
         return JsonResponse({'error': 'This item requires in-game currency and cannot be purchased here.'}, status=400)
 
-    # Handle regular priced items
     price = item.discount_price if item.discount_price else item.price
     if price is None:
         return JsonResponse({'error': 'Price not set for this item'}, status=400)
 
     currency = item.currency.code.lower() if item.currency else 'usd'
     print('the currency is ' + currency)
-    # Validate Stripe-supported currency
+
     if currency not in ['usd', 'eur']:
         return JsonResponse({'error': 'Currency not supported'}, status=400)
 
-    amount = int(price * 100)  # Convert to cents
+    amount = int(price * 100)
 
     try:
         checkout_session = stripe.checkout.Session.create(
@@ -18659,7 +17664,6 @@ def create_checkout_session(request, slug):
         print('there were errors with the submition of the one-click checkout ')
         print('the errors are ' + str(e))
         return JsonResponse({'errors here': str(e)}, status=400)
-
 
 @csrf_exempt
 @require_POST
@@ -18669,18 +17673,17 @@ def create_currency_checkout_session(request, slug):
     if item.is_currency_based:
         return JsonResponse({'error': 'This item requires in-game currency and cannot be purchased here.'}, status=400)
 
-    # Handle regular priced items
     price = item.discount_price if item.discount_price else item.price
     if price is None:
         return JsonResponse({'error': 'Price not set for this currency item'}, status=400)
 
     currency = item.currency.code.lower() if item.currency else 'usd'
     print('the currency is ' + currency)
-    # Validate Stripe-supported currency
+
     if currency not in ['usd', 'eur']:
         return JsonResponse({'error': 'Currency not supported'}, status=400)
 
-    amount = int(price * 100)  # Convert to cents
+    amount = int(price * 100)
 
     try:
         checkout_session = stripe.checkout.Session.create(
@@ -18704,111 +17707,19 @@ def create_currency_checkout_session(request, slug):
         print('the errors are ' + str(e))
         return JsonResponse({'errors here': str(e)}, status=400)
 
-
-# from .models import PublicProfile
-# from .forms import PublicForm
 from django.forms.models import inlineformset_factory
 from django.core.exceptions import PermissionDenied
-
-# def edit_user(request, pk):
-# querying the User object with pk from url
-# user = User.objects.get(pk=pk)
-
-# prepopulate UserProfileForm with retrieved user values from above.
-# user_form = PublicForm(instance=user)
-
-# The sorcery begins from here, see explanation below
-# ProfileInlineFormset = inlineformset_factory(User, PublicProfile, fields=('website', 'bio', 'phone', 'city', 'country', 'organization'))
-# formset = ProfileInlineFormset(instance=user)
-
-# if request.user.is_authenticated() and request.user.id == user.id:
-# if request.method == "POST":
-# user_form = PublicForm(request.POST, request.FILES, instance=user)
-# formset = ProfileInlineFormset(request.POST, request.FILES, instance=user)
-
-# if user_form.is_valid():
-# created_user = user_form.save(commit=False)
-# formset = ProfileInlineFormset(request.POST, request.FILES, instance=created_user)
-
-# if formset.is_valid():
-# created_user.save()
-# formset.save()
-# return HttpResponseRedirect('/accounts/profile/')
-
-# return render(request, "account/account_update.html", {
-# "noodle": pk,
-# "noodle_form": user_form,
-# "formset": formset,
-# })
-# else:
-# raise PermissionDenied
-
-# from .forms import NewUserForm, UserForm, ProfileForm
-
-# def userpage(request):
-# if request.method == "POST":
-# user_form = UserForm(request.POST, instance=request.user)
-# profile_form = ProfileForm(request.POST, instance=request.user.profile)
-# if user_form.is_valid():
-# user_form.save()
-# messages.success(request,('Your profile was successfully updated!'))
-# elif profile_form.is_valid():
-#    profile_form.save()
-#    messages.success(request,('Your wishlist was successfully updated!'))
-# else:
-#    messages.error(request,('Unable to complete request'))
-# return redirect ("showcase:userpage")
-# user_form = UserForm(instance=request.user)
-# profile_form = ProfileForm(instance=request.user.profile)
-# return render(request = request, template_name ="showcase/user.html", context = {"user":request.user,
-#  "user_form": user_form, "profile_form": profile_form })
-
-# @def products(request):
-#  if request.method == "POST":
-#     product_id = request.POST.get("product_pk")
-#     product = Product.objects.get(id = product_id)
-#     request.user.profiletwo.products.add(product)
-#     messages.success(request,(f'{product} added to wishlist.'))
-#     return redirect ('showcase:products')
-#  products = Product.objects.all()
-#  paginator = Paginator(products, 18)
-#  page_number = request.GET.get('page')
-#  page_obj = paginator.get_page(page_number)
-#  return render(request = request, template_name="showcase/products.html", context = { "page_obj":page_obj})
-
-# from .models import ExtendUser
-# Create your views here.
-
-# def phome(request):
-#    data = request.user
-#    return render(request,'showcase/profile.html',{'data':data})
 
 from .forms import (EditProfileForm)
 
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 
-
-# from django.contrib.auth.decorators import login_required
-
-# def index1(request):
-# return HttpResponse('Welcome to my Registration System')
-#    numbers = [1,2,3,4,5]
-#    name = 'apoorva'
-
-#    args ={'myname':name, 'mynums':numbers}
-#    return render(request,'showcase/index.html',args)
-
-
 def profile(request, user):
     args = {'user': user}
     return render(request, 'profile.html', args)
 
-
-# views.py
 def edit_profile(request, pk):
-    # Your view logic here
-    # The 'pk' parameter will now be passed from the URL
 
     if request.method == 'POST':
         form = EditProfileForm(request.POST, instance=request.user)
@@ -18822,8 +17733,6 @@ def edit_profile(request, pk):
         args = {'form': form}
         return render(request, 'edit_profile.html', args)
 
-
-
 class ProfileEditView(FormView):
     template_name = 'profile_edit.html'
     form_class = ProfileDetail
@@ -18836,13 +17745,13 @@ class ProfileEditView(FormView):
             "position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
@@ -18872,9 +17781,9 @@ class ProfileEditView(FormView):
         return context
 
     def form_valid(self, form):
-        profile = form.save(commit=False)  # Don't save to DB yet
-        profile.user = self.request.user  # Set the user
-        profile.save()  # Now save to DB
+        profile = form.save(commit=False)
+        profile.user = self.request.user
+        profile.save()
         return redirect('showcase:profile', pk=profile.pk)
 
     def post(self, request, pk=None):
@@ -18885,12 +17794,11 @@ class ProfileEditView(FormView):
             form = self.form_class(request.POST, request.FILES)
 
         if form.is_valid():
-            profile = form.save(commit=False)  # Don't save to DB yet
-            profile.user = request.user  # Set the user
-            profile.save()  # Now save to DB
+            profile = form.save(commit=False)
+            profile.user = request.user
+            profile.save()
             return redirect('showcase:profile', pk=profile.pk)
         return render(request, self.template_name, {'form': form})
-
 
 class SignupView(FormMixin, ListView):
     model = SignupBackgroundImage
@@ -18906,14 +17814,14 @@ class SignupView(FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         if self.request.user.is_authenticated:
@@ -18967,28 +17875,27 @@ class SignupView(FormMixin, ListView):
             form = SignUpForm()
         return render(request, 'cv-form.html', {'form': form})
 
-
 class ChangePasswordView(BaseView):
     model = ChangePasswordBackgroundImage
     template_name = "/accounts/change-password.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['Change'] = ChangePasswordBackgroundImage.objects.all()
+
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'),
                                                   is_active=1).order_by("section")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -19015,7 +17922,6 @@ class ChangePasswordView(BaseView):
 
         return context
 
-
 def change_password(request):
     if request.method == 'POST':
         form = PasswordChangeForm(data=request.POST, user=request.user)
@@ -19024,8 +17930,6 @@ def change_password(request):
             form.save()
             update_session_auth_hash(request, form.user)
             return redirect('/accounts/login')
-            # login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            # return HttpResponseRedirect('showcase:accounts/login')
 
         else:
             return redirect('showcase:accounts/change-password')
@@ -19035,10 +17939,8 @@ def change_password(request):
         args = {'form': form}
         return render(request, 'registration/change-password.html', args)
 
-
 from .forms import (
     RegistrationForm, )
-
 
 def register(request):
     if request.method == 'POST':
@@ -19051,17 +17953,14 @@ def register(request):
         args = {'form': form}
         return render(request, 'registration/regform.html', args)
 
-
 @allow_guest_user
 def my_view(request):
     assert request.user.is_authenticated
     return render(request, "showcase.html")
 
-
 from django.urls import reverse
 
 from django.views.decorators.csrf import csrf_exempt
-
 
 @csrf_exempt
 def stripe_webhook(request):
@@ -19074,13 +17973,12 @@ def stripe_webhook(request):
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
     except ValueError as e:
-        # Invalid payload
+
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
+
         return HttpResponse(status=400)
 
-    # Handle the checkout.session.completed event
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
 
@@ -19095,8 +17993,6 @@ def stripe_webhook(request):
             recipient_list=[customer_email],
             from_email="IntelleXCompany.com"
         )
-
-        # TODO - decide whether you want to send the file or the URL
 
     elif event["type"] == "payment_intent.succeeded":
         intent = event['data']['object']
@@ -19117,7 +18013,6 @@ def stripe_webhook(request):
         )
 
     return HttpResponse(status=200)
-
 
 class StripeIntentView(View):
     def post(self, request, *args, **kwargs):
@@ -19140,7 +18035,6 @@ class StripeIntentView(View):
         except Exception as e:
             return JsonResponse({'error': str(e)})
 
-
 class DonateView(ListView):
     model = DonorBackgroundImage
     template_name = "donate.html"
@@ -19148,14 +18042,13 @@ class DonateView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Add all context variables first
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'),
                                                   is_active=1).order_by("section")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -19165,22 +18058,19 @@ class DonateView(ListView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['donation'] = Donate.objects.filter(is_active=1)
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1)
-        context['stripe_public_key'] = settings.STRIPE_PUBLIC_KEY  # Add Stripe key here
+        context['stripe_public_key'] = settings.STRIPE_PUBLIC_KEY
 
-        # TextBase grouped by section
         texts = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
         context['TextBySection'] = {text.section: text for text in texts}
 
-        # Handle Donors
         donors = Donate.objects.filter(is_active=1)
         context['Donator'] = donors
         for donor in context['Donator']:
-            profile = ProfileDetails.objects.filter(user=donor.user).first()  # Use donor.user
+            profile = ProfileDetails.objects.filter(user=donor.user).first()
             if profile:
                 donor.donor_profile_picture_url = profile.avatar.url
                 donor.donor_profile_url = donor.get_profile_url()
 
-        # User Profile Handling
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -19206,7 +18096,6 @@ class DonateView(ListView):
 
         return context
 
-
 def charge(request):
     if request.method == 'POST':
         print('Data:', request.POST)
@@ -19219,13 +18108,13 @@ def charge(request):
             amount=amount,
             donor=request.user,
             nickname=nickname,
-            anonymous=anonymous,  # You can set this to True if needed based on the donation form
-            is_active=1,  # Set the donation as active
+            anonymous=anonymous,
+            is_active=1,
         )
         customer = stripe.Customer.create(email=request.POST['email'],
                                           name=request.POST['nickname'],
                                           source=request.POST['stripeToken']
-                                          # stripetoken not defined
+
                                           )
 
         charge = stripe.Charge.create(customer=customer,
@@ -19235,28 +18124,27 @@ def charge(request):
 
     return redirect(reverse('showcase:patreoned', args=[amount]))
 
-
 class PatreonedView(ListView):
     model = DonorBackgroundImage
     template_name = "patreoned.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['Change'] = ChangePasswordBackgroundImage.objects.all()
+
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'),
                                                   is_active=1).order_by("section")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -19287,28 +18175,27 @@ class PatreonedView(ListView):
         amount = args
         return render(request, 'patreoned.html', {'amount': amount})
 
-
 class DonateHistoryView(ListView):
     model = DonorBackgroundImage
     template_name = "mydonationhistory.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['Change'] = ChangePasswordBackgroundImage.objects.all()
+
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'),
                                                   is_active=1).order_by("section")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['donations'] = Donate.objects.filter(donor=self.request.user, is_active=1)
         if self.request.user.is_authenticated:
@@ -19336,32 +18223,28 @@ class DonateHistoryView(ListView):
 
         return context
 
-
 class DonationsView(ListView):
     model = DonorBackgroundImage
     template_name = "donors.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['Change'] = ChangePasswordBackgroundImage.objects.all()
+
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'),
                                                   is_active=1).order_by("section")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Favicons'] = FaviconBase.objects.filter(is_active=1)
-        # context['queryset'] = Blog.objects.filter(status=1).order_by('-created_on')
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
-
-        # Assuming the ProfileDetails model has a ForeignKey named 'user' that links to the User model to represent the user's profile details.
-
 
         donation = Donate.objects.filter(is_active=1).order_by('-timestamp')
 
@@ -19398,20 +18281,17 @@ class DonationsView(ListView):
 
         return context
 
-
 from django.http import JsonResponse
 from .models import UserProfile
-
 
 def get_user_currency(request):
     if request.user.is_authenticated:
         profile = UserProfile.objects.get(user=request.user)
         currency_amount = profile.currency_amount
-        currency_symbol = profile.currency.symbol  # Assuming 'Currency' has a 'symbol' field
+        currency_symbol = profile.currency.symbol
         return JsonResponse({"currency_amount": currency_amount, "currency_symbol": currency_symbol})
     else:
         return JsonResponse({"error": "User not authenticated"}, status=403)
-
 
 @allow_guest_user
 def hello_guest(request):
@@ -19423,20 +18303,16 @@ def hello_guest(request):
   """
     return HttpResponse("Hello, {request.user.username}!")
 
-
 from guest_user.decorators import guest_user_required
 
 from django.template.response import TemplateResponse
-
 
 @guest_user_required
 def why_convert(request):
     """Show reasons why to convert, only for guest users."""
     return TemplateResponse("reasons-to-convert.html")
 
-
 from django.dispatch import receiver
-
 
 class ContactViewe(CreateView):
     template_name = 'contact.html'
@@ -19445,7 +18321,7 @@ class ContactViewe(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -19453,7 +18329,7 @@ class ContactViewe(CreateView):
         context['Contact'] = Contact.objects.order_by('-id').first()
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -19463,7 +18339,7 @@ class ContactViewe(CreateView):
 
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         print(context["Contact"])
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -19490,24 +18366,23 @@ class ContactViewe(CreateView):
         return context
 
     def form_valid(self, form):
-        # Calls the custom send method
+
         form.send()
         return super().form_valid(form)
-
 
 class ContactSuccessView(BaseView):
     template_name = 'success.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Contact'] = Contact.objects.all()[len(Contact.objects.all()) - 1]
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -19517,7 +18392,7 @@ class ContactSuccessView(BaseView):
 
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         print(context["Contact"])
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -19543,7 +18418,6 @@ class ContactSuccessView(BaseView):
 
         return context
 
-
 from twilio.rest import Client
 from .forms import SellerApplicationForm
 
@@ -19560,7 +18434,6 @@ import base64
 from django.core.mail import send_mail
 import pyotp
 
-
 class SellerApplicationView(FormMixin, LoginRequiredMixin, ListView):
     model = SellerApplication
     template_name = "sellerapplication.html"
@@ -19572,11 +18445,11 @@ class SellerApplicationView(FormMixin, LoginRequiredMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -19613,7 +18486,6 @@ class SellerApplicationView(FormMixin, LoginRequiredMixin, ListView):
             return redirect("accounts/login")
         return super().get(*args, **kwargs)
 
-    # @login_required
     def post(self, request, *args, **kwargs):
         form = SellerApplicationForm(request.POST, request.FILES)
         if form.is_valid():
@@ -19623,14 +18495,11 @@ class SellerApplicationView(FormMixin, LoginRequiredMixin, ListView):
             messages.success(request, 'Form submitted successfully.')
             application = form.save()
 
-            # Create a TOTP device for the user
             device = TOTPDevice.objects.create(user=application.user)
             device.save()
 
-            # Base32-encode the binary key
             secret_key = base64.b32encode(device.bin_key).decode()
 
-            # Generate OTP
             totp = pyotp.TOTP(secret_key)
             otp = totp.now()
 
@@ -19641,7 +18510,6 @@ class SellerApplicationView(FormMixin, LoginRequiredMixin, ListView):
             recipent_list = [application.email, ]
             send_mail(subject, message, email_from, recipent_list)
 
-            # Save device id in session for later verification
             request.session['device_id'] = device.id
 
             return redirect('showcase:verify_otp')
@@ -19650,12 +18518,10 @@ class SellerApplicationView(FormMixin, LoginRequiredMixin, ListView):
 
         return render(request, 'submit_application.html', {'form': form})
 
-
 import base64
 from django.http import HttpResponse
 from PIL import Image
 import io
-
 
 def submit_seller_application(request):
     if request.method == 'POST':
@@ -19663,32 +18529,24 @@ def submit_seller_application(request):
         if form.is_valid():
             application = form.save()
 
-            # Create a TOTP device for the user
             device = TOTPDevice.objects.create(user=application.user)
             device.save()
 
-            # Generate a secret key for the user
             secret_key = device.bin_key
 
-            # Generate a provision URL for the OTP, this URL contains the secret key
             otp_provision_uri = pyotp.totp.TOTP(secret_key).provisioning_uri(name=request.user.email,
                                                                              issuer_name='YourApp')
 
-            # Generate a QR code from the provision URL
             qr_img = qrcode.make(otp_provision_uri)
 
-            # Save the QR code to a BytesIO object
             byte_arr = io.BytesIO()
             qr_img.save(byte_arr, format='PNG')
             byte_arr.seek(0)
 
-            # Convert the BytesIO object to a base64-encoded string
             base64_image = base64.b64encode(byte_arr.getvalue()).decode('utf-8')
 
-            # Save device id in session for later verification
             request.session['device_id'] = device.id
 
-            # Pass the base64-encoded string to the template
             return render(request, 'submit_application.html',
                           {'form': form, 'qr_code_data_url': f'data:image/png;base64,{base64_image}'})
     else:
@@ -19696,36 +18554,30 @@ def submit_seller_application(request):
 
     return render(request, 'submit_application.html', {'form': form})
 
-
 def verify_otp(request):
     if request.method == 'POST':
         user_entered_otp = request.POST.get('otp')
-        resend_request = request.POST.get('resend_otp')  # Check if the user clicked "Resend OTP"
+        resend_request = request.POST.get('resend_otp')
 
-        # Handle Resend OTP
         if resend_request:
             try:
-                # Retrieve the device using the device_id from the session
+
                 device_id = request.session.get('device_id')
                 device = TOTPDevice.objects.get(id=device_id)
 
-                # Generate a new OTP
                 secret_key = base64.b32encode(device.bin_key).decode()
                 totp = pyotp.TOTP(secret_key)
                 new_otp = totp.now()
 
-                # Send the new OTP via email
                 user = request.user
                 subject = "Your One-Time Password (Resent)"
                 message = f'Your new OTP is: {new_otp}'
                 email_from = settings.EMAIL_HOST_USER
-                recipient_list = [user.email]  # Send to the user's email
+                recipient_list = [user.email]
                 send_mail(subject, message, email_from, recipient_list)
 
-                # Optionally update the session timestamp (for security)
                 request.session['otp_timestamp'] = datetime.now().isoformat()
 
-                # Provide feedback to the user
                 messages.success(request, 'A new OTP has been sent to your registered email.')
             except TOTPDevice.DoesNotExist:
                 messages.error(request, 'Device not found. Please try again.')
@@ -19734,25 +18586,20 @@ def verify_otp(request):
 
             return render(request, 'verify_otp.html')
 
-        # Normal OTP Verification
         try:
             device_id = request.session.get('device_id')
             device = TOTPDevice.objects.get(id=device_id)
 
-            # Base32-encode the binary key
             secret_key = base64.b32encode(device.bin_key).decode()
 
-            # Generate OTP
             totp = pyotp.TOTP(secret_key)
 
-            # Verify the OTP
-            if totp.verify(int(user_entered_otp)):  # Convert user_entered_otp to int
+            if totp.verify(int(user_entered_otp)):
                 try:
                     application = SellerApplication.objects.get(user=request.user)
                     application.email_verified = True
                     application.save()
 
-                    # Update email_verified field for the user
                     user = request.user
                     user.email_verified = True
                     user.save()
@@ -19770,31 +18617,29 @@ def verify_otp(request):
 
     return render(request, 'verify_otp.html')
 
-
 class BusinessEmailViewe(CreateView):
     template_name = 'businessemail.html'
     form_class = BusinessContactForm
     success_url = reverse_lazy('showcase:businessmailingsuccess')
 
     def form_valid(self, form):
-        # Calls the custom send method
+
         form.send()
         return super().form_valid(form)
-
 
 class BusinessEmailSuccessView(BaseView):
     template_name = 'businessmailingsuccess.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ProductBackgroundImage'] = ProductBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['BusinessMailingContact'] = BusinessMailingContact.objects.all()[
             len(BusinessMailingContact.objects.all()) - 1]
         print(context["BusinessMailingContact"])
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -19820,7 +18665,6 @@ class BusinessEmailSuccessView(BaseView):
 
         return context
 
-
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -19839,7 +18683,6 @@ data = [
     [2007, 1030, 540]
 ]
 
-
 def detail(request, slug):
     try:
         item = Item.objects.get(slug=slug)
@@ -19852,7 +18695,6 @@ def detail(request, slug):
 
     }
     return render(request, 'review_detail.html', context)
-
 
 def review(request, slug):
     if request.POST:
@@ -19876,7 +18718,6 @@ def review(request, slug):
     }
     return render(request, 'reviews.html', context)
 
-
 def index(request):
     username = request.user.username
     is_employee = request.user.groups.filter(name='Employees').exists()
@@ -19894,7 +18735,7 @@ def index(request):
     elif request.user.is_staff:
 
         dataSource = {}
-        # setting chart cosmetics
+
         dataSource['chart'] = {
             "caption": "Graph for Companies versus their respective reviews",
             "borderAlpha": "20",
@@ -19913,7 +18754,7 @@ def index(request):
         }
 
         reviewsDataSource = {}
-        # setting chart cosmetics
+
         reviewsDataSource['chart'] = {
             "caption": "Number of reviews added",
             "subcaption": "Last Year",
@@ -19946,9 +18787,7 @@ def index(request):
             reviewsDataSource['data'].append(data)
 
         dataSource['data'] = []
-        # The data for the chart should be in an array wherein each element of the array is a JSON object as
-        # `label` and `value` keys.
-        # Iterate through the data in `Country` model and insert in to the `dataSource['data']` list.
+
         for key in Company.objects.all():
             data = {}
             data['label'] = key.name
@@ -19994,10 +18833,8 @@ def index(request):
 
         return render(request, 'customer_index.html', context)
 
-
 def thanks(request):
     return render(request, 'thank-you.html')
-
 
 """@login_required(login_url='/accounts/login/')
 def create_company(request):
@@ -20013,7 +18850,6 @@ def create_company(request):
    return render(request,'create_company.html',{'form':form })"""
 
 from django.template.loader import render_to_string
-
 
 def sendEmployeeEmailOnAddReview(Company, form):
     subject, from_email, to = "Tech Greatness.com : A customer has added a review", "IntelleXCompany1@gmail.com", \
@@ -20033,22 +18869,18 @@ def sendEmployeeEmailOnAddReview(Company, form):
 
     send_mail(subject, msg_plain, from_email, [to], fail_silently=False, html_message=msg_html)
 
-
 from .models import Item
-
 
 @login_required
 def my_orders(request):
-    # Retrieve orders for the current logged-in user
+
     orders = Order.objects.filter(user=request.user)
     return render(request, 'my_orders.html', {'orders': orders})
-
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from .models import Order, Feedback
 from .forms import FeedbackForm
-
 
 @login_required
 def create_feedback(request, order_id):
@@ -20064,7 +18896,6 @@ def create_feedback(request, order_id):
         form = FeedbackForm()
     return render(request, 'create_feedback.html', {'form': form})
 
-
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -20077,8 +18908,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import UpdateView
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Feedback  # Import your Feedback model here
-
+from .models import Feedback
 
 class FeedbackView(BaseView):
     model = Feedback
@@ -20095,7 +18925,7 @@ class FeedbackView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -20105,15 +18935,12 @@ class FeedbackView(BaseView):
         context['Items'] = Item.objects.filter(is_active=1)
         context['Image'] = ImageBase.objects.filter(is_active=1, page=self.template_name)
 
-
         slug = self.kwargs.get('slug')
 
-        # Check if a valid slug is provided
         if slug:
-            # Retrieve all feedback objects with the same slug
+
             feedback_objects = Feedback.objects.filter(slug=slug)
 
-            # Add the feedback_objects to the context
             context['Feed'] = feedback_objects
 
         for feedback_objects in context['Feed']:
@@ -20148,7 +18975,6 @@ class FeedbackView(BaseView):
 
         return context
 
-
 """@method_decorator(login_required, name='dispatch')
 class FeedbackView(UpdateView):
     model = Feedback
@@ -20166,7 +18992,7 @@ class FeedbackView(UpdateView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
- 
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -20175,15 +19001,12 @@ class FeedbackView(UpdateView):
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
         context['Items'] = Item.objects.filter(is_active=1)
 
-        # Get the slug from the URL
         slug = self.kwargs.get('slug')
 
-        # Check if a valid slug is provided
         if slug:
-            # Retrieve all feedback objects with the same slug
+
             feedback_objects = Feedback.objects.filter(slug=slug)
 
-            # Add the feedback_objects to the context
             context['feedback_objects'] = feedback_objects
 
         user = self.request.user
@@ -20194,8 +19017,6 @@ class FeedbackView(UpdateView):
                 context['profile_pk'] = profile.pk
                 context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
-        # settings to alter the username & password
-        # Dynamically generate the success URL
         context['success_url'] = reverse('feedbackfinish')
 
         if self.request.user.is_authenticated:
@@ -20237,20 +19058,19 @@ class FeedbackView(LoginRequiredMixin, FormView):
             context = super().get_context_data(**kwargs)
             context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
             context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-            
+
             if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
-            
+
             context['Feed'] = Feedback.objects.filter(is_active=1).order_by("slug")
             context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
             context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
             context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
 
-            # Retrieve the item
             product = Item.objects.filter(is_active=1)
 
             context['Products'] = product
@@ -20268,9 +19088,9 @@ class FeedbackView(LoginRequiredMixin, FormView):
             return context
 
     def form_valid(self, form):
-        # Save the feedback instance
+
         feedback = form.save(commit=False)
-        feedback.username = self.request.user.username  # Set the username to the current user
+        feedback.username = self.request.user.username  
         feedback.save()
         messages.success(self.request, 'Your feedback has been submitted successfully.')
         return super().form_valid(form)
@@ -20278,7 +19098,6 @@ class FeedbackView(LoginRequiredMixin, FormView):
     def post(self, request, *args, **kwargs):
         cleaned_data = self.form.cleaned_data
 
-        # Process the data (assuming Feedback is your model)
         feedback = Feedback()
         feedback.item = cleaned_data['item']
         feedback.order = cleaned_data['order']
@@ -20294,13 +19113,11 @@ class FeedbackView(LoginRequiredMixin, FormView):
         feedback.image_width = cleaned_data['image_width']
         feedback.timestamp = cleaned_data['timestamp']
         feedback.is_active = cleaned_data['is_active']
-        # ...
 
         feedback.save()
 
         messages.success(request, 'Your feedback has been submitted successfully.')
         return redirect('showcase:feedbackfinish')"""
-
 
 class ReviewView(BaseView):
     model = ShowcaseBackgroundImage
@@ -20308,12 +19125,10 @@ class ReviewView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['ShowcaseBackgroundImage'] = ShowcaseBackgroundImage.objects.all()
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        # context['Feed'] = Feedback.objects.filter(is_active=1).order_by("slug")
-        # Retrieve the item
 
         product = Item.objects.filter(is_active=1)
 
@@ -20367,12 +19182,11 @@ class ReviewView(BaseView):
 
         return context
 
-
 """
    def form_valid(self, form):
-       # Save the feedback instance
+
        feedback = form.save(commit=False)
-       feedback.username = self.request.user.username  # Set the username to the current user
+       feedback.username = self.request.user.username  
        feedback.save()
        form = FeedbackForm(request=request)
        messages.success(self.request, 'Your feedback has been submitted successfully.')
@@ -20381,10 +19195,10 @@ class ReviewView(BaseView):
    def get_queryset(self):
        queryset = super().get_queryset()
        if self.request.user.is_authenticated:
-           # Filter feedback objects based on the current user's orders
+
            queryset = queryset.filter(order__user=self.request.user)
        else:
-           # If user is not authenticated, return an empty queryset
+
            queryset = Feedback.objects.none()
        return queryset
 
@@ -20394,12 +19208,10 @@ class ReviewView(BaseView):
        return self.request.user == OrderItem.user
 
    def post(self, request, *args, **kwargs):
-       # Process the submitted feedback form data
+
        feedback = self.get_object()
        order = feedback.OrderItem
        if self.request.user == OrderItem.user:
-           # Process the submitted feedback form data
-           # ...
 
            messages.success(request, 'Your feedback has been submitted successfully.')
            return redirect('showcase:feedbackfinish')
@@ -20410,13 +19222,12 @@ class ReviewView(BaseView):
    @login_required
    def get_current_user(self, request, feedback):
        if request.method == 'POST':
-           # Process the form submission
+
            username = request.user.username
            post = form.save(commit=False)
            post.save()
-           # redirect user to staffdone
-           return redirect('showcase:feedbackfinish')
 
+           return redirect('showcase:feedbackfinish')
 
    def getobject(self, request, item):
        item = Item.objects.get(pk=item)
@@ -20449,22 +19260,21 @@ class ReviewView(BaseView):
        return render(request, 'create_review.html', context)
 """
 
-
 @login_required
 def post_detail(request, slug):
     template_name = 'post_detail.html'
     post = get_object_or_404(Blog, slug=slug)
     comments = post.comments.filter(active=True).order_by("-created_on")
     new_comment = None
-    # Comment posted
+
     if request.method == 'POST':
         comment_form = CommentForm(data=request.POST)
         if comment_form.is_valid():
-            # Create Comment object but don't save to database yet
+
             new_comment = comment_form.save(commit=False)
-            # Assign the current post to the comment
+
             new_comment.blog = post
-            # Save the comment to the database
+
             new_comment.save()
     else:
         comment_form = CommentForm()
@@ -20477,37 +19287,34 @@ def post_detail(request, slug):
             'comment_form': comment_form
         })
 
-
 @login_required
 def postpreference(request, post_name, like_or_dislike):
     if request.method == "POST":
         eachpost = get_object_or_404(Blog, slug=post_name)
 
         if int(like_or_dislike) == 1:
-            # If the user has already liked this post, remove the like.
+
             if request.user in eachpost.likes.iterator():
                 eachpost.likes.remove(request.user)
             else:
-                # Otherwise, add a like.
+
                 eachpost.likes.add(request.user)
-                # If the user has disliked this post, remove the dislike.
+
                 if request.user in eachpost.dislikes.iterator():
                     eachpost.dislikes.remove(request.user)
         else:
-            # If the user has already disliked this post, remove the dislike.
+
             if request.user in eachpost.dislikes.iterator():
                 eachpost.dislikes.remove(request.user)
             else:
-                # Otherwise, add a dislike.
+
                 eachpost.dislikes.add(request.user)
-                # If the user has liked this post, remove the like.
+
                 if request.user in eachpost.likes.iterator():
                     eachpost.likes.remove(request.user)
 
-        # Save the changes to the database
         eachpost.save()
 
-        # Return a JSON response with the new like and dislike counts
         return JsonResponse({'likes': eachpost.likes.count(), 'dislikes': eachpost.dislikes.count()})
 
     else:
@@ -20516,7 +19323,6 @@ def postpreference(request, post_name, like_or_dislike):
                    'post_name': post_name}
 
         return render(request, 'showcase:likes.html', context)
-
 
 from django.shortcuts import get_object_or_404, redirect, render
 from .forms import FeedbackForm
@@ -20541,12 +19347,12 @@ class SubmitFeedbackView(DetailView):
        context = super().get_context_data(**kwargs)
        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-       
+
        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
             "created_at")
        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 context['preferenceform'] = MyPreferencesForm(user=self.request.user)
-       
+
        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -20587,16 +19393,16 @@ from django.shortcuts import get_object_or_404
 def submit_feedback(request, item_id):
    item = get_object_or_404(Item, id=item_id)
    user = request.user
-   order_items = OrderItem.objects.filter(user=user, item=item).first()  # Filter order items by user and item
+   order_items = OrderItem.objects.filter(user=user, item=item).first()  
 
    if request.method == 'POST':
        form = FeedbackForm(request.POST, request=request)
        if form.is_valid():
            feedback = form.save(commit=False)
            feedback.username = user.username
-           feedback.slug = order_item.slug  # Consider changing this line to feedback.slug = order_item.first().slug
+           feedback.slug = order_item.slug  
            feedback.item = item
-           feedback.order = order_item.first()  # Use order_item.first() to get the first matching order item
+           feedback.order = order_item.first()  
            feedback.save()
            messages.success(request, 'Your feedback has been submitted successfully.')
            return redirect('showcase:feedbackfinish')
@@ -20605,7 +19411,6 @@ def submit_feedback(request, item_id):
    else:
        form = FeedbackForm(request=request)
 
-   # Add the form and order_items to the context
    context = {
        'form': form,
        'order_items': order_items,
@@ -20640,7 +19445,7 @@ def submit_feedback(request, item_id):
 
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import OrderItem, Feedback
-from .forms import FeedbackForm  # Assuming you have a feedback form defined
+from .forms import FeedbackForm
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -20671,7 +19476,6 @@ from .models import (
     BackgroundImageBase,
 )
 
-
 class CreateReviewView(LoginRequiredMixin, FormView):
     template_name = "create_review.html"
     form_class = FeedbackForm
@@ -20685,7 +19489,6 @@ class CreateReviewView(LoginRequiredMixin, FormView):
         except OrderItem.DoesNotExist:
             return HttpResponse('Sorry, this order does not exist.')
 
-        # Set the 'item' and 'slug' fields based on the order item
         if orderitem.item:
             initial = {
                 'item': orderitem.item,
@@ -20695,7 +19498,6 @@ class CreateReviewView(LoginRequiredMixin, FormView):
         else:
             initial = {'slug': orderitem.slug}
 
-        # Create an instance of the FeedbackForm and pass the initial data
         form = FeedbackForm(initial=initial, request=request)
 
         context = self.get_context_data(form=form)
@@ -20707,11 +19509,11 @@ class CreateReviewView(LoginRequiredMixin, FormView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
-        # context['TextFielde'] = TextBase.objects.filter(is_active=1,page=self.template_name).order_by("section")
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -20760,21 +19562,17 @@ class CreateReviewView(LoginRequiredMixin, FormView):
         except Feedback.DoesNotExist:
             existing_feedback = None
 
-        # Create or update the feedback instance
         form = FeedbackForm(request.POST, request.FILES, request=request, instance=existing_feedback)
 
         if form.is_valid():
             feedback = form.save(commit=False)
 
-            # Set the 'item' field based on the order item
-            feedback.item = orderitem.item  # Assuming 'item' is a ForeignKey in Feedback
+            feedback.item = orderitem.item
 
-            # Set other fields
             feedback.username = request.user if request.user.is_authenticated else None
             feedback.order = orderitem
             feedback.slug = orderitem.slug
 
-            # Automatically set the user, item, and order fields
             if request.user.is_authenticated:
                 feedback.username = request.user
             else:
@@ -20800,9 +19598,7 @@ class CreateReviewView(LoginRequiredMixin, FormView):
 
         return render(request, 'create_review.html', {'form': form})
 
-
 from .forms import FeedForm
-
 
 class FeedView(FormMixin, ListView):
     model = Feedback
@@ -20862,7 +19658,6 @@ class FeedView(FormMixin, ListView):
             messages.error(request, "Form submission invalid")
             return render(request, "create_review.html", {'form': form})
 
-
 @login_required(login_url='/accounts/login/')
 def submit_feedback(request):
     user = request.user
@@ -20873,22 +19668,19 @@ def submit_feedback(request):
             star_rating = form.cleaned_data['star_rating']
             comment = form.cleaned_data['comment']
 
-            # Update or create feedback
             feedback, created = Feedback.objects.update_or_create(
                 username=request.user,
-                # Use request.user.username to get the currently logged-in user's username
+
                 defaults={'star_rating': star_rating, 'comment': comment}
             )
 
-            # Redirect to a thank-you page or some other appropriate view
-            return redirect('showcase:feedbackfinish')  # Change this to your desired URL
+            return redirect('showcase:feedbackfinish')
 
     else:
-        # If the request method is GET, create a new feedback form
+
         form = FeedbackForm(request=request)
 
     return render(request, 'create_review.html', {'form': form})
-
 
 def edit_feedback(request, feedback_id):
     feedback = get_object_or_404(Feedback, id=feedback_id)
@@ -20902,7 +19694,6 @@ def edit_feedback(request, feedback_id):
         form = FeedbackForm(instance=feedback, request=request)
 
     return render(request, 'create_review.html', {'form': form})
-
 
 @login_required(login_url='/accounts/login/')
 def submit_feedback(request):
@@ -20914,22 +19705,19 @@ def submit_feedback(request):
             star_rating = form.cleaned_data['star_rating']
             comment = form.cleaned_data['comment']
 
-            # Update or create feedback
             feedback, created = Feedback.objects.update_or_create(
                 username=request.user,
-                # Use request.user.username to get the currently logged-in user's username
+
                 defaults={'star_rating': star_rating, 'comment': comment}
             )
 
-            # Redirect to a thank-you page or some other appropriate view
-            return redirect('showcase:feedbackfinish')  # Change this to your desired URL
+            return redirect('showcase:feedbackfinish')
 
     else:
-        # If the request method is GET, create a new feedback form
+
         form = FeedbackForm(request=request)
 
     return render(request, 'create_review.html', {'form': form})
-
 
 def edit_feedback(request, feedback_id):
     feedback = get_object_or_404(Feedback, id=feedback_id)
@@ -20944,16 +19732,12 @@ def edit_feedback(request, feedback_id):
 
     return render(request, 'create_review.html', {'form': form})
 
-
-
-
 @login_required
 def my_order_items(request):
     user = request.user
     order_items = OrderItem.objects.filter(user=user)
     context = {'order_items': order_items}
     return render(request, 'order_history.html', context)
-
 
 class OrderHistory(ListView):
     model = Order
@@ -20966,7 +19750,7 @@ class OrderHistory(ListView):
         context = super().get_context_data(**kwargs)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -20979,38 +19763,35 @@ class OrderHistory(ListView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['items'] = Item.objects.all()
         context['feedback'] = Feedback.objects.all()
-        # context['orders'] = OrderItem.objects.filter(user=self.request.user)
-        print(user)
 
+        print(user)
 
         items = Item.objects.filter(is_active=1)
 
         context['Iteme'] = items
 
-        # Iterate over each item in 'Iteme'
         for items in context['Iteme']:
-            # Get the image of the item
+
             image = items.image
-            # Check if the user is authenticated
+
             if user.is_authenticated:
-                # Try to get the first profile detail of the current user
+
                 profile = ProfileDetails.objects.filter(user=user).first()
-                # If a profile detail exists
+
                 if profile:
-                    # Update the author's profile picture URL in the item
+
                     items.author_profile_picture_url = profile.avatar.url
-                    # Update the author's profile URL in the item
+
                     items.author_profile_url = items.get_profile_url()
             else:
-                # Handle the case when the user is not authenticated
+
                 messages.warning(self.request, "You need to log in")
-                return redirect("accounts/login")  # replace "login" with your login route
+                return redirect("accounts/login")
 
         order = OrderItem.objects.filter(is_active=1, user=user)
         context['orders'] = order
         total_items = OrderItem.objects.filter(is_active=1).count()
 
-        # Get the paginate_by value from the form data or settings
         paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
 
         items_query = OrderItem.objects.filter(is_active=1)
@@ -21018,22 +19799,18 @@ class OrderHistory(ListView):
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
 
-        # context['items'] = paginated_items
-
-        # context['items'] = Item.objects.filter(is_active=1)
-
         context['orders'] = paginated_items
         for order_item in context['orders']:
-            # Process each order item individually
-            image = order_item.image  # Assuming OrderItem has an 'image' field
+
+            image = order_item.image
             user = self.request.user
-            profile = ProfileDetails.objects.filter(user=user).first()  # Fetch the profile for the current user
+            profile = ProfileDetails.objects.filter(user=user).first()
 
             if order_item.image:
                 order_item.image_url = order_item.image.url
 
             order_item.author_profile_url = order_item.get_profile_url() if order_item.get_profile_url() else None
-            order_item.hyperlink = order_item.get_profile_url()  # Example, adjust this as needed
+            order_item.hyperlink = order_item.get_profile_url()
 
             if profile:
                 order_item.author_profile_picture_url = profile.avatar.url
@@ -21064,51 +19841,46 @@ class OrderHistory(ListView):
 
         return context
 
-
 from django.forms import formset_factory
 from .models import Questionaire
 from .forms import QuestionCountForm, QuestionForm
-
 
 def get_num_questions(request, question_id):
     if request.method == 'POST':
         form = QuestionCountForm(request.POST)
         if form.is_valid():
             num_questions = form.cleaned_data['num_questions']
-            # Redirect to a view to create questions based on num_questions
+
             return HttpResponseRedirect(reverse('showcase:create_questions', args=[num_questions]))
     else:
         form = QuestionCountForm()
     return render(request, 'get_num_questions.html', {'form': form})
 
-
 from django.forms import formset_factory, modelformset_factory
 
-
-@login_required  # previous
+@login_required
 def create_questioned(request, num_questions):
     QuestionFormSet = formset_factory(QuestionForm, extra=num_questions)
 
     if request.method == 'POST':
         formset = QuestionFormSet(request.POST, prefix='question')
         if formset.is_valid():
-            user = request.user  # Get the currently logged-in user
+            user = request.user
             for form in formset:
                 text = form.cleaned_data['text']
-                Questionaire.objects.create(user=user, text=text)  # Associate the user with the question
+                Questionaire.objects.create(user=user, text=text)
             return HttpResponseRedirect(reverse('showcase:index'))
     else:
         formset = QuestionFormSet(prefix='question')
 
     return render(request, 'create_questions.html', {'formset': formset})
 
-
 @login_required
 def create_questions(request, num_questions):
     if request.method == 'POST':
         FormSet = modelformset_factory(
             Questionaire,
-            fields=('text', 'form_type', 'answer_choices'),  # Include answer_choices
+            fields=('text', 'form_type', 'answer_choices'),
             extra=num_questions,
         )
         formset = FormSet(request.POST, prefix='question')
@@ -21117,7 +19889,6 @@ def create_questions(request, num_questions):
             user = request.user
             instances = formset.save(commit=False)
 
-            # Process answer_choices for multiple-choice questions
             for form, instance in zip(formset, instances):
                 if instance.form_type == 'option1':
                     answer_choices = form.cleaned_data.get('answer_choices', '').split(',')
@@ -21129,13 +19900,12 @@ def create_questions(request, num_questions):
     else:
         FormSet = modelformset_factory(
             Questionaire,
-            fields=('text', 'form_type', 'answer_choices'),  # Include answer_choices
+            fields=('text', 'form_type', 'answer_choices'),
             extra=num_questions,
         )
         formset = FormSet(queryset=Questionaire.objects.none(), prefix='question')
 
     return render(request, 'create_questions.html', {'formset': formset})
-
 
 def add_question(request):
     QuestionAnswerFormSet = formset_factory(AnswerForm, extra=2, can_delete=True)
@@ -21145,10 +19915,6 @@ def add_question(request):
         formset = QuestionAnswerFormSet(request.POST, prefix='answer')
 
         if question_form.is_valid() and formset.is_valid():
-            # Handle saving question and answers here
-            # You can access question_form.cleaned_data['question']
-            # and iterate through formset.cleaned_data to get answer choices
-            # Save the question and its answer choices to the database
 
             return redirect('showcase:index')
     else:
@@ -21157,13 +19923,12 @@ def add_question(request):
 
     return render(request, 'add_question.html', {'question_form': question_form, 'formset': formset})
 
-
 """
 def create_questionaire(request, num_questions):
     if request.method == 'POST':
         form = QuestionForm(request.POST)
         if form.is_valid():
-            # Save the question with answer choices
+
             questionaire = form.save(commit=False)
             answer_choices = request.POST.getlist('answer_choices')
             questionaire.answer_choices = answer_choices
@@ -21173,7 +19938,6 @@ def create_questionaire(request, num_questions):
         form = QuestionForm()
     return render(request, 'create_questions.html', {'form': form})
 """
-
 
 def submit_answer(request, question_id):
     questionaire = get_object_or_404(Questionaire, pk=question_id)
@@ -21188,20 +19952,11 @@ def submit_answer(request, question_id):
                 correct_answer = getattr(questionaire, f'correct_answer_{question.form_type}')
                 is_correct = answer_text == correct_answer
 
-
             return HttpResponseRedirect(reverse('showcase:index'))
     else:
         form = AnswerForm(questions=questions)
 
     return render(request, 'showcase/answer_questions.html', {'form': form})
 
-
 def sociallogin(request):
     return render(request, 'registration/sociallogin.html')
-
-
-
-
-
-
-

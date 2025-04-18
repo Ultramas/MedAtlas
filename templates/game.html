@@ -1952,8 +1952,6 @@ $(document).ready(function() {
             document.querySelectorAll('.slider').forEach(scroller => {
                 scroller.style.animationPlayState = 'paused';
             });
-        }, quickSpinDuration);
-
 
             stopAtSelectedCard();
         },quickSpinDuration);
@@ -2065,47 +2063,33 @@ $(document).ready(function() {
 
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
-    </script>
-
-                        <script>
-                        const slug = document.getElementById('start').dataset.slug;
-
-    fetch(`/create_outcome/${slug}/`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken,
-    },
-    body: JSON.stringify({
-        game_id: gameId,
-        button_id: buttonId,
-    }),
+fetch(`/create_outcome/${slug}/`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRFToken': csrftoken,
+  },
+  body: JSON.stringify({ game_id: gameId, button_id: buttonId }),
 })
-.then(response => {
-    if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+  .then(response => response.json())
+  .then(data => {
+    if (data.status !== 'success') {
+      console.error('Server error:', data.message);
+      return;
     }
-    return response.json();
-})
-.then(data => {
-    if (data.status === 'success') {
-        const attributes = {};
-        attributes.color = data.choice_color;
 
-        const targetCardElement = document.createElement('div');
-        targetCardElement.classList.add('target-card');
-        targetCardElement.setAttribute('data-color', attributes.color);
-        console.log('set color to ' + attributes.color);
+    const color = data.choice_color;
 
-        document.querySelector('#card-container').appendChild(targetCardElement);
-    } else {
-        console.error('Error from server:', data.message);
-    }
-})
-.catch(error => {
-    console.error('Fetch error:', error);
-});
+    const card = document.createElement('div');
+    card.classList.add('target-card');
 
+    card.dataset.color = color;
+
+    console.log('Set color to', card.dataset.color);
+
+    document.querySelector('#card-container').appendChild(card);
+  })
+  .catch(err => console.error('Fetch error:', err));
 </script>
 
 

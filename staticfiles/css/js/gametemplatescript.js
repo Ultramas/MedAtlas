@@ -58,13 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.setItem("totalSpins", totalSpins);
     });
 
-
     $(".start").click(function (event) {
         const buttonId = event.target.id;
         console.log(`Button clicked: ${buttonId}`);
         sessionStorage.setItem("startAnimation", "true");
         sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
-
 
         let currentSpin = 0;
         console.log('current spin set to 0')
@@ -76,8 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
         selectedItems = [];
         console.log(`Initializing animation for button: ${buttonId}`);
-
-
 
 let requestInProgress = false;
 const requestQueue = [];
@@ -207,6 +203,7 @@ async function randomizeContents() {
         choice_value: data.choice_value,
         category: data.category,
         price: data.choice_value,
+        color: data.choice_color,
         condition: 'New',
         quantity: 1,
         buttonId: buttonId,
@@ -225,8 +222,6 @@ async function randomizeContents() {
 
     const inventoryData = await inventoryResponse.json();
     console.log("Response from /create_inventory_object/:", inventoryData);
-
-
 
                 if (inventoryData.status === 'success') {
                     console.log("successful start on " + inventoryData.button_id);
@@ -382,18 +377,14 @@ function alignCardWithSpinner() {
     const currentTranslateX = matrix.m41 || 0;
 
     slider.style.transform = `translateX(${currentTranslateX + offset}px)`;
-    //console.log(`Slider adjusted by offset: ${offset}px`);
+
 }
-
-
 
 $(".start").click(function (event) {
     const buttonId = event.target.id;
     console.log(`Button clicked: ${buttonId}`);
 
 });
-
-
 
 const casinoThump = new Audio('/static/css/sounds/thump.mp3');
 const casinoGreen = new Audio('/static/css/sounds/money.mp3');
@@ -476,8 +467,6 @@ function createTopHit(data, buttonId) {
     });
 }
 
-
-
 function getCSRFToken() {
     const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
@@ -498,51 +487,40 @@ function randomizedContents() {
     const slider = document.querySelector('.slider');
     const children = Array.from(slider.children);
 
-    // Find the target card
     const targetIndex = children.findIndex(child => child.classList.contains('target-card'));
     let targetCard = null;
     if (targetIndex !== -1) {
         targetCard = children[targetIndex];
     }
 
-    // Get all non-target cards
     const nonTargetCards = children.filter(child => !child.classList.contains('target-card'));
 
-    // Shuffle non-target cards
     for (let i = nonTargetCards.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [nonTargetCards[i], nonTargetCards[j]] = [nonTargetCards[j], nonTargetCards[i]];
     }
 
-    // Clear the slider
     slider.innerHTML = '';
 
-    // Calculate middle position
     const middlePosition = Math.floor(nonTargetCards.length / 2);
 
-    // Add cards to the slider with target card in the middle
     for (let i = 0; i < nonTargetCards.length; i++) {
         if (i === middlePosition && targetCard) {
-            // Insert target card in the middle position
+
             slider.appendChild(targetCard);
         }
         slider.appendChild(nonTargetCards[i]);
     }
 
-    // If we haven't added the target card yet (in case the middle position calculation was off)
     if (targetCard && !slider.querySelector('.target-card')) {
         const allCards = Array.from(slider.children);
         const middleIndex = Math.floor(allCards.length / 2);
 
-        // Insert target card in the exact middle
         slider.insertBefore(targetCard, allCards[middleIndex]);
     }
 
     console.log("Slider contents randomized with target card positioned in the middle.");
 }
-
-
-
 
 function spin(buttonId) {
     if (currentSpin === totalSpins || animationStopped) {
@@ -568,7 +546,6 @@ function spin(buttonId) {
         randomizedContents();
         addAnimation();
         }
-
 
     if (buttonId === "start") {
         console.log("Regular Spin triggered");
@@ -614,17 +591,14 @@ setTimeout(() => {
     document.querySelectorAll('.slider').forEach((scroller) => {
         scroller.style.animationPlayState = 'paused';
 
-
     const targetCard = document.querySelector('.target-card');
 
     const startButton = document.getElementById('start');
-
 
     if (targetCard) {
         let choiceColor = targetCard.getAttribute('data-color') || 'gray';
         let choiceId = targetCard.getAttribute('id');
         let gameId = startButton.getAttribute("data-game-id");
-
 
         console.log('The choice color is:', choiceColor);
         console.log('The choice id is:', choiceId);
@@ -705,7 +679,6 @@ setTimeout(() => {
         }
 
     });
-
 
 function randomizedContents() {
     const slider = document.querySelector('.slider');
@@ -795,7 +768,6 @@ spin(buttonId);
 
 }
 
-
     const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
     document.querySelectorAll('.sell-form').forEach(form => {
         form.addEventListener('submit', function(event) {
@@ -829,7 +801,6 @@ spin(buttonId);
 
  async function showPopup(buttonId) {
 
-
 if (buttonId === "start") {
   console.log("Show Regular Start");
   window.csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -845,8 +816,6 @@ $(document).ready(function() {
         var sellCards = cardContainer.querySelectorAll('.sellattribute');
 
         console.log("Sell cards before modification:");
-
-
 
     });
 
@@ -915,7 +884,6 @@ $(document).on("click", ".sell-button", function() {
 
 });
 
-
    function adjustCardsContainer() {
         const container = document.querySelector('.cards-container');
         const innerContainer = document.querySelector('.inner-container');
@@ -964,7 +932,6 @@ $(document).on("click", ".sell-button", function() {
 
     window.addEventListener('resize', adjustCardsContainer);
 
-
   } else if (buttonId === "start2") {
       console.log("Show Demo Start");
 
@@ -976,7 +943,6 @@ $(document).on("click", ".sell-button", function() {
             <button class="close">I see</button>
         `;
   }
-
 
      const cardsContainer = textContainer.querySelector('.cards-container');
      selectedItems.forEach((item, index) => {
@@ -997,13 +963,11 @@ $(document).on("click", ".sell-button", function() {
             <p>Upper Nonce: ${item.upperNonce}</p>-->
         `;
 
-
             if (cardsContainer) {
                 cardsContainer.appendChild(cardElement);
             } else {
                 console.error("cardsContainer not found in DOM");
             }
-
 
             if (index === 0) {
                 const fire = document.querySelector('.fire');
@@ -1020,9 +984,6 @@ $(document).on("click", ".sell-button", function() {
 
         const closeBtn = textContainer.querySelector('.close');
         closeBtn.addEventListener('click', () => {
-
-
-
 
         $(this).addClass("selected");
         totalSpins = parseInt($(this).data("value"));
@@ -1063,7 +1024,6 @@ sellBtn.addEventListener('click', () => {
     $(".spin-option").prop('disabled', false);
     $(".start").prop('disabled', false);
 
-
     setTimeout(() => {
         $.ajax({
             url: window.location.href,
@@ -1081,8 +1041,5 @@ sellBtn.addEventListener('click', () => {
     }, 0);
 });
 
-
-
     }
 });
-
