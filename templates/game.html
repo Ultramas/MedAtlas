@@ -2053,14 +2053,16 @@ $(document).ready(function() {
 
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
-fetch(`/create_outcome/${slug}/`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-CSRFToken': csrftoken,
-  },
-  body: JSON.stringify({ game_id: gameId, button_id: buttonId }),
-})
+    const outcomeUrl = `/battles/${battleId}/games/${gameId}/outcome/`;
+
+    fetch(outcomeUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken,
+      },
+      body: JSON.stringify({ button_id: buttonId }),
+    })
   .then(response => response.json())
   .then(data => {
     if (data.status !== 'success') {

@@ -2037,6 +2037,108 @@ def create_outcome(request, slug):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
+
+@csrf_exempt
+def battle_create_outcome(request, battle_id, game_id):
+    if request.method != 'POST':
+        return JsonResponse({'status':'error','message':'POST required'}, status=405)
+
+    battle = get_object_or_404(Battle, id=battle_id)
+    # 1) only when battle is open
+    if battle.status != BattleStatus.OPEN:   # or whatever your “open” code is
+        return JsonResponse({
+            'status':'error',
+            'message':'Cannot create outcome: battle is not open.'
+        }, status=400)
+
+    # 2) only once per game in this battle
+    bg = get_object_or_404(BattleGame, battle=battle, game_id=game_id)
+    if bg.outcome_created:
+        return JsonResponse({
+            'status':'error',
+            'message':'Outcome already generated for this game in this battle.'
+        }, status=400)
+
+    if request.method == 'POST':
+        try:
+            django.db.close_old_connections()
+
+            with transaction.atomic():
+                body = json.loads(request.body)
+                game_id = body.get('game_id')
+                button_id = body.get('button_id')
+                user = request.user
+
+                if not game_id:
+                    return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
+
+                game = Game.objects.get(id=game_id, slug=slug)
+                nonce = random.randint(1, 1000000)
+
+                game_choice_instance = GameChoice.objects.filter(
+                    game=game,
+                    lower_nonce__lte=nonce,
+                    upper_nonce__gte=nonce
+                ).first()
+
+                if game_choice_instance:
+                    choice = game_choice_instance.choice
+                else:
+                    choices = Choice.objects.filter(
+                        game=game,
+                        lower_nonce__lte=nonce,
+                        upper_nonce__gte=nonce
+                    )
+                    if not choices.exists():
+                        return JsonResponse(
+                            {'status': 'error', 'message': 'No valid choice found for the given nonce.'})
+                    choice = choices.order_by('?').first()
+
+                color = game.get_color(choice)
+                choice.color = color
+                choice.save()
+
+                demonstration_flag = True if button_id == "start2" else False
+
+                outcome_data = {
+                    'game': game,
+                    'choice': choice,
+                    'color': choice.color,
+                    'nonce': nonce,
+                    'value': choice.value,
+                    'ratio': random.randint(1, 10),
+                    'type': game.type,
+                    'demonstration': demonstration_flag
+                }
+                if user.is_authenticated:
+                    outcome_data['user'] = user
+
+                outcome = Outcome.objects.create(**outcome_data)
+
+            return JsonResponse({
+                'status': 'success',
+                'outcome': outcome.id,
+                'nonce': outcome.nonce,
+                'choice_id': choice.id,
+                'choice_value': choice.value,
+                'choice_text': choice.choice_text,
+                'choice_color': choice.color,
+                'choice_file': choice.file.url if choice.file else None,
+                'demonstration': outcome.demonstration
+            })
+
+        except Game.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Game not found.'})
+        except Exception as e:
+
+            django.db.close_old_connections()
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+
+
+
 def game_view(request, game_id):
     game = get_object_or_404(Game, id=game_id)
 
@@ -3111,398 +3213,180 @@ class SingleBattleListView(DetailView):
         return redirect('showcase:battle_detail', battle_id=battle.id)
 
 
+from django.shortcuts import get_object_or_404
+from django.views.generic import DetailView
+from django.core.paginator import Paginator
+import random
+
+from .models import (
+    Battle, Game, GameChoice, Choice,
+    ProfileDetails, SpinPreference, UserProfile,
+    BackgroundImageBase, BaseCopyrightTextField,
+    Titled, NavBarHeader, NavBar, LogoBase,
+    InventoryObject
+)
+from .forms import (
+    MyPreferencesForm, WagerForm,
+    SpinPreferenceForm
+)
+
 class ActualBattleView(DetailView):
     model = Battle
     template_name = "actualbattle.html"
     context_object_name = "battle"
 
     def get_object(self):
-        # Prefetch the battle’s games and each game's choices in two SQL queries
+        # Fetch the Battle by battle_id and prefetch its games + choices
         return get_object_or_404(
             Battle.objects.prefetch_related(
                 Prefetch(
-                    'chests',  # the M2M to Game through BattleGame
-                    queryset=Game.objects.prefetch_related('choices'),
+                    'chests',
+                    queryset=Game.objects.prefetch_related(
+                        Prefetch(
+                            'gamechoice_set',
+                            queryset=GameChoice.objects.select_related('choice'),
+                            to_attr='gamechoice_links'
+                        )
+                    ),
                     to_attr='games_with_choices'
                 )
             ),
             id=self.kwargs['battle_id']
         )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         battle = self.object
 
-        # 1) Flat list of User objects for sidebar or summary
-        participants = battle.participants.select_related('user').all()
-        context['users'] = [bp.user for bp in participants]
+        # 1) Grab all prefetched games
+        games = getattr(battle, 'games_with_choices', [])
+        if not games:
+            raise Http404("No games found for this battle.")
 
-        # 2) Prepare the grid windows
-        ordered_games = [bg.game for bg in battle.battle_games.order_by('order') if bg.game_id]
-        total_capacity = min(participants.count(), 10)
-        participant_windows = []
-        for bp in participants[:total_capacity]:
-            participant_windows.append({
-                'participant': bp,
-                'games': ordered_games,
-            })
-        context['participant_windows'] = participant_windows
-        context['grid_columns']     = max(1, min(5, participants.count()))
+        # 2) Build list of slugs and pass games themselves
+        context['games']       = games
+        context['game_slugs']  = [game.slug for game in games]
 
-        # 3) Build game → choices mapping
-        related_games = getattr(battle, 'games_with_choices', [])
-        game_choice_pairs = []
-        for game in related_games:
-            # thanks to prefetch_related, this won't hit the DB again
-            choices = list(game.choices.all())
-            game_choice_pairs.append({
-                'game':    game,
-                'choices': choices,
-            })
-        context['game_choice_pairs'] = game_choice_pairs
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        # 3) For backwards compatibility: pick a “primary” game for single‐game logic
+        primary_game          = games[0]
+        context['game']       = primary_game
 
+        # 4) User & profile info
         user = self.request.user
-
-        context['SentProfile'] = UserProfile.objects.filter(user=user).first() if user.is_authenticated else None
-        context['Money'] = Currency.objects.filter(is_active=1).first()
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-
-        if self.request.user.is_authenticated:
-            context['StockObject'] = InventoryObject.objects.filter(
-                is_active=1, user=self.request.user
-            ).order_by("created_at")
-            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
-        context['wager_form'] = WagerForm()
-
-        battle_games = battle.battle_games.all().order_by('order')
-        ordered_games = [bg.game for bg in battle_games]
-        context['bet_form'] = BetForm(battle=battle)
-        context['ordered_games'] = ordered_games
-        context['default_game'] = ordered_games[0] if ordered_games else None
-        related_games = Game.objects.filter(game_battles__battle=battle, is_active=True).distinct()
-        context['related_games'] = related_games
-        cost = sum(game.discount_cost or game.cost for game in related_games)
-        context.update({
-            'cost_threshold_80': cost * 0.8,
-            'cost_threshold_100': cost,
-            'cost_threshold_200': cost * 2,
-            'cost_threshold_500': cost * 5,
-            'cost_threshold_10000': cost * 100,
-        })
-
-        spinpreference = None
         if user.is_authenticated:
-            spinpreference, _ = SpinPreference.objects.get_or_create(
-                user=user, defaults={'quick_spin': False}
+            profile = ProfileDetails.objects.filter(user=user).first()
+            context['user_cash']  = profile.currency_amount if profile else 0
+            context['total_cost'] = primary_game.get_effective_cost()
+            # MyPreferences form
+            pref_inst = getattr(user, 'mypreferences', None)
+            context['preferenceform']     = (
+                MyPreferencesForm(instance=pref_inst, user=user)
+                if pref_inst else
+                MyPreferencesForm(user=user)
             )
-            random_amount = random.randint(500, 1000) if spinpreference.quick_spin else random.randint(150, 300)
+            # SpinPreference
+            spin_pref = SpinPreference.objects.get_or_create(user=user, defaults={'quick_spin': False})[0]
+            context['quick_spin']         = spin_pref.quick_spin
+            context['spinpreference']     = spin_pref
+            context['spin_preference_form']= SpinPreferenceForm(instance=spin_pref)
         else:
-            random_amount = random.randint(150, 300)
-        context['random_amount'] = random_amount
-        context['range_random_amount'] = range(random_amount)
-        context['random_nonces'] = [random.randint(0, 1000000) for _ in range(random_amount)]
+            context.update({
+                'user_cash': None,
+                'total_cost': None,
+                'quick_spin': False,
+                'spinpreference': None,
+                'spin_preference_form': SpinPreferenceForm(),
+                'preferenceform': MyPreferencesForm()
+            })
 
-        choices = Choice.objects.filter(game__in=related_games)
-        choices_with_nonce = [
-            {
-                'choice': choice,
-                'nonce': nonce,
-                'lower_nonce': choice.lower_nonce,
-                'upper_nonce': choice.upper_nonce,
-                'file_url': choice.file.url if choice.file else None,
+        # 5) Random nonces for your spinner logic
+        rand_amt = random.randint(500, 1000) if context.get('quick_spin') else random.randint(150, 300)
+        context['random_amount']      = rand_amt
+        context['range_random_amount']= range(rand_amt)
+        context['random_nonces']      = [random.randint(0, 1_000_000) for _ in range(rand_amt)]
+
+        # 6) Choice‐generation logic (unchanged)
+        inline_choices = primary_game.choice_fk_set.all()
+        m2m_choices    = primary_game.choices.all()
+        combined       = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
+
+        through_qs     = GameChoice.objects.filter(game=primary_game).select_related('choice')
+        through_data   = {}
+        for gc in through_qs:
+            c = gc.choice
+            through_data[c.pk] = {
+                'lower_nonce': gc.lower_nonce or c.lower_nonce,
+                'upper_nonce': gc.upper_nonce or c.upper_nonce,
+                'value':       gc.value or c.value,
+                'rarity':      gc.rarity or c.rarity,
+                'file_url':    c.file.url if c.file else '',
+                'category':    c.category or '',
                 'currency': {
-                    'symbol': choice.currency.name if choice.currency else '💎',
-                    'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                    'symbol':   c.currency.name if c.currency else '💎',
+                    'file_url': c.currency.file.url if c.currency and c.currency.file else None
                 }
             }
-            for nonce in context['random_nonces']
-            for choice in choices
-            if choice.lower_nonce <= nonce <= choice.upper_nonce
-        ]
-        context['choices_with_nonce'] = choices_with_nonce
 
-        user_profiles = ProfileDetails.objects.filter(user=user) if user.is_authenticated else None
-        context['Profiles'] = user_profiles or [
-            {'newprofile_profile_picture_url': 'static/css/images/a.jpg', 'newprofile_profile_url': None}
-        ]
-        context['spin_preference_form'] = SpinPreferenceForm(
-            instance=spinpreference) if spinpreference else SpinPreferenceForm()
-
-        user = self.request.user
-        if user.is_authenticated:
-            try:
-                context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
-            except UserProfile.DoesNotExist:
-                context['SentProfile'] = None
-        else:
-            context['SentProfile'] = None
-
-        if user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=user)
-        else:
-            userprofile = None
-
-        if userprofile:
-            context['NewsProfiles'] = userprofile
-        else:
-            context['NewsProfiles'] = None
-
-        if context['NewsProfiles'] is None:
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
-        else:
-            for userprofile in context['NewsProfiles']:
-                profile = ProfileDetails.objects.filter(user=userprofile.user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-            related_games = getattr(battle, 'games_with_choices', [])
-            context['related_games'] = related_games
-
-            # 2) for each game, grab its list of choices
-            game_choice_pairs = []
-            for game in related_games:
-                choices = list(game.choices.all())
-                game_choice_pairs.append({
-                    'game': game,
-                    'choices': choices,
-                })
-            context['game_choice_pairs'] = game_choice_pairs
-
-
-            user = self.request.user
-            if user.is_authenticated:
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    if related_games:
-                        game = related_games[0]
-                        effective_cost = game.get_effective_cost()
-                    else:
-                        effective_cost = 0
-
-                    spin_multiplier = 1
-                    total_cost = effective_cost * spin_multiplier
-                    context['user_cash'] = profile.currency_amount
-                    context['total_cost'] = total_cost
-                else:
-                    context['user_cash'] = None
-                    context['total_cost'] = None
-            else:
-                context['user_cash'] = None
-                context['total_cost'] = None
-
-            button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
-
-            if button_type == "start2":
-                cost = 0
-            else:
-                cost = game.discount_cost if game.discount_cost else game.cost
-
-            context.update({
-                'cost_threshold_80': cost * 0.8,
-                'cost_threshold_100': cost,
-                'cost_threshold_200': cost * 2,
-                'cost_threshold_500': cost * 5,
-                'cost_threshold_10000': cost * 100,
+        all_choices = []
+        for pk, choice in combined.items():
+            info = through_data.get(pk, {
+                **through_data.get(pk, {}),
+                'lower_nonce': choice.lower_nonce,
+                'upper_nonce': choice.upper_nonce,
+                'value':       choice.value,
+                'rarity':      choice.rarity,
+                'file_url':    choice.file.url if choice.file else '',
+                'category':    choice.category or '',
+                'currency': {
+                    'symbol':   choice.currency.name if choice.currency else '💎',
+                    'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                }
+            })
+            all_choices.append({
+                'choice':      choice,
+                'choice_text': choice.choice_text,
+                **info,
+                'image_width':  getattr(choice, 'image_width', None),
+                'image_length': getattr(choice, 'image_length',None),
+                'get_color_display': choice.get_color_display(),
+                'get_tier_display':  choice.get_tier_display(),
             })
 
-            newprofile = UpdateProfile.objects.filter(is_active=1)
-            context['Profiles'] = newprofile
+        context['choices'] = all_choices
 
-            for newprofile in context['Profiles']:
-                user = newprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    newprofile.newprofile_profile_picture_url = profile.avatar.url
-                    newprofile.newprofile_profile_url = newprofile.get_profile_url()
+        # 7) Matching nonces → choice objects
+        with_nonce = []
+        for nonce in context['random_nonces']:
+            for cd in all_choices:
+                if cd['lower_nonce'] <= nonce <= cd['upper_nonce']:
+                    with_nonce.append({
+                        'choice':     cd['choice'],
+                        'nonce':      nonce,
+                        'lower_nonce':cd['lower_nonce'],
+                        'upper_nonce':cd['upper_nonce'],
+                        'rarity':     cd['rarity'],
+                        'file_url':   cd['file_url'],
+                        'currency':   cd['currency']
+                    })
+                    break
+        context['choices_with_nonce'] = with_nonce
 
-            user_profile = None
-            if game.user:
-                user_profile, created = UserProfile.objects.get_or_create(user=game.user)
+        # 8) Static / theming context (unchanged)
+        context['Background']           = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles']               = Titled.objects.filter(is_active=1).order_by("page")
+        context['Header']               = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown']             = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo']                 = LogoBase.objects.filter(
+                                              Q(page=self.template_name) | Q(page='navtrove.html'),
+                                              is_active=1
+                                          )
+        if user.is_authenticated:
+            context['StockObject']     = InventoryObject.objects.filter(is_active=1, user=user).order_by("created_at")
 
-            context['SentProfile'] = user_profile
-            if game.user:
-                user_cash = user_profile.currency_amount
-
-                context = {
-                    'user_cash': user_cash,
-                }
-
-            context['Money'] = Currency.objects.filter(is_active=1).first()
-
-            spinpreference = None
-
-            if user.is_authenticated:
-                try:
-                    spinpreference = SpinPreference.objects.get(user=user)
-                except SpinPreference.DoesNotExist:
-                    spinpreference = SpinPreference(user=user, quick_spin=False)
-                    spinpreference.save()
-
-                context['quick_spin'] = spinpreference.quick_spin
-            else:
-                context['quick_spin'] = False
-
-            context['spinpreference'] = spinpreference
-
-            if self.request.user.is_authenticated:
-                userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-            else:
-                userprofile = None
-
-            if userprofile:
-                context['Profiles'] = userprofile
-            else:
-                context['Profiles'] = None
-
-            if context['Profiles'] == None:
-
-                userprofile = type('', (), {})()
-                userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-                userprofile.newprofile_profile_url = None
-            else:
-                for userprofile in context['Profiles']:
-                    user = userprofile.user
-                    profile = ProfileDetails.objects.filter(user=user).first()
-                    if profile:
-                        userprofile.newprofile_profile_picture_url = profile.avatar.url
-                        userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-            if spinpreference:
-                spinform = SpinPreferenceForm(instance=spinpreference)
-            else:
-                spinform = SpinPreferenceForm()
-            context['spin_preference_form'] = spinform
-
-            if user.is_authenticated:
-                if spinpreference.quick_spin:
-                    random_amount = random.randint(500, 1000)
-                else:
-                    random_amount = random.randint(150, 300)
-            else:
-                random_amount = random.randint(150, 300)
-
-            context['random_amount'] = random_amount
-            context['range_random_amount'] = range(random_amount)
-            print(str('the random amount is ') + str(random_amount))
-
-            random_amount = random.randint(150, 300)
-            random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
-            context['random_nonces'] = random_nonces
+        return context
 
 
-            inline_choices = game.choice_fk_set.all()
-            m2m_choices = game.choices.all()
-            combined_choices = {choice.pk: choice for choice in list(inline_choices) + list(m2m_choices)}
-
-            through_qs = GameChoice.objects.filter(game=game).select_related('choice')
-            through_data = {}
-            for gc in through_qs:
-                choice = gc.choice
-                through_data[choice.pk] = {
-                    'choice': choice,
-                    'lower_nonce': gc.lower_nonce if gc.lower_nonce is not None else choice.lower_nonce,
-                    'upper_nonce': gc.upper_nonce if gc.upper_nonce is not None else choice.upper_nonce,
-                    'value': gc.value if gc.value is not None else choice.value,
-                    'rarity': gc.rarity if gc.rarity is not None else choice.rarity,
-                    'file_url': choice.file.url if choice.file else '',
-                    'category': choice.category if choice.category else '',
-                    'currency': {
-                        'symbol': choice.currency.name if choice.currency else '💎',
-                        'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
-                    }
-                }
-
-            all_choices = []
-            for pk, choice in combined_choices.items():
-                nonce_info = through_data.get(pk, {
-                    'choice': choice,
-                    'lower_nonce': choice.lower_nonce,
-                    'upper_nonce': choice.upper_nonce,
-                    'value': choice.value,
-                    'rarity': choice.rarity,
-                    'file_url': choice.file.url if choice.file else '',
-                    'category': choice.category if choice.category else '',
-                    'currency': {
-                        'symbol': choice.currency.name if choice.currency else '💎',
-                        'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
-                    }
-                })
-
-                all_choices.append({
-                    'choice': choice,
-                    'choice_text': choice.choice_text,
-                    'lower_nonce': nonce_info['lower_nonce'],
-                    'upper_nonce': nonce_info['upper_nonce'],
-                    'value': nonce_info['value'],
-                    'rarity': nonce_info['rarity'],
-                    'file_url': nonce_info['file_url'],
-                    'category': nonce_info['category'],
-                    'currency': nonce_info['currency'],
-                    'image_width': getattr(choice, 'image_width', None),
-                    'image_length': getattr(choice, 'image_length', None),
-                    'get_color_display': getattr(choice, 'get_color_display', lambda: ''),
-                    'get_tier_display': getattr(choice, 'get_tier_display', lambda: ''),
-                })
-
-            context['choices'] = all_choices
-
-            choices_with_nonce = []
-            for nonce in random_nonces:
-                for choice_data in all_choices:
-                    lower = choice_data['lower_nonce']
-                    upper = choice_data['upper_nonce']
-                    if lower is not None and upper is not None and lower <= nonce <= upper:
-                        choices_with_nonce.append({
-                            'choice': choice_data['choice'],
-                            'nonce': nonce,
-                            'lower_nonce': lower,
-                            'upper_nonce': upper,
-                            'rarity': choice_data['rarity'],
-                            'file_url': choice_data['file_url'],
-                            'currency': choice_data['currency']
-                        })
-                        break
-
-            context['choices_with_nonce'] = choices_with_nonce
-
-            context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-            print(context['Background'])
-
-            context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-            context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-            context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-            context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-
-            context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
-
-            if self.request.user.is_authenticated:
-                userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-            else:
-                userprofile = None
-
-            if userprofile:
-                context['NewsProfiles'] = userprofile
-            else:
-                context['NewsProfiles'] = None
-
-            if context['NewsProfiles'] == None:
-                userprofile = type('', (), {})()
-                userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-                userprofile.newprofile_profile_url = None
-            else:
-                for userprofile in context['NewsProfiles']:
-                    user = userprofile.user
-                    profile = ProfileDetails.objects.filter(user=user).first()
-                    if profile:
-                        userprofile.newprofile_profile_picture_url = profile.avatar.url
-                        userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-            return context
 
 
 class BattleCreationView(CreateView):
@@ -12818,6 +12702,7 @@ class DirectChestView(BaseView):
                 return JsonResponse({'status': 'error', 'message': str(e)})
 
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
 
 class GameChestBackgroundView(BaseView):
     template_name = "game.html"

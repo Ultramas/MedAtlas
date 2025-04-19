@@ -21,7 +21,7 @@ from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, 
     currency_remove_from_cart, currency_add_to_cart, currency_reduce_quantity_item, submit_seller_application, \
     PlaceWagerView, update_wager, SendFriendRequestView, FriendSearchResultsView, GameCategorySearchResultsView, \
     GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView, changelog_view, InventoryTradeView, \
-    CustomPasswordResetView
+    CustomPasswordResetView, battle_create_outcome
 
 # remove this:
 # from . import settings
@@ -395,6 +395,7 @@ urlpatterns = [
     path('battle/<int:battle_id>/join/', views.join_battle, name='join_battle'),
     path('battle/<int:battle_id>/add_robot/', views.add_robot, name='add_robot'),
     path('actualbattle/<int:battle_id>/', views.ActualBattleView.as_view(), name='actualbattle'),
+    path('battles/<int:battle_id>/games/<int:game_id>/outcome/', views.battle_create_outcome, name='battle_create_outcome'),
     path('battlecreator/', views.BattleCreationView.as_view(), name='battlecreator'),
     path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
     path('inventory/', views.PlayerInventoryView.as_view(), name='inventory'),
