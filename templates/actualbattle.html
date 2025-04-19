@@ -1,40 +1,56 @@
+{% load static %}
+{% load random_nonce %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-<style>
+  <meta charset="UTF-8">
+  <title>Battle: {{ battle.battle_name }}</title>
+  <style>
     .battle-grid {
-        display: grid;
-        grid-template-columns: repeat({{ grid_columns }}, 1fr);
-        gap: 10px;
-        padding: 10px;
+      display: grid;
+      grid-template-columns: repeat({{ grid_columns }}, 1fr);
+      gap: 10px;
+      padding: 10px;
     }
     .battle-window {
-        border: 2px solid #ccc;
-        padding: 10px;
-        background: rgba(0, 0, 0, 0.1);
-        text-align: center;
+      border: 2px solid #ccc;
+      padding: 10px;
+      background: rgba(0,0,0,0.1);
+      text-align: center;
     }
     .game-box {
-        border: 1px solid #666;
-        margin-top: 5px;
-        padding: 5px;
+      border: 1px solid #666;
+      margin-top: 5px;
+      padding: 5px;
     }
-</style>
+  </style>
 </head>
 <body>
 
+  <h2>Battle: {{ battle.battle_name }}</h2>
 
-<div class="battle-grid">
+  <!-- Flat list of all participants -->
+  <h3>All participants in this battle:</h3>
+  <ul>
+    {% for user in users %}
+      <li>{{ user.username }}</li>
+    {% empty %}
+      <li>No one has joined yet.</li>
+    {% endfor %}
+  </ul>
+
+  <!-- Grid of participant windows with their game sliders -->
+  <div class="battle-grid">
     {% for window in participant_windows %}
-        <div class="battle-window">
-            <h3>{{ window.participant.user.username }}</h3>
-            {% for game in window.games %}
-                <div class="game-box">
-                    <strong>{{ game.name }}</strong>
- <div class="wrapper">
-        <div class="containerre"  style="">
+      <div class="battle-window">
+        <h3>{{ window.participant.user.username }}</h3>
+
+        {% for pair in game_choice_pairs %}
+          <div class="game-box">
+            <strong>{{ pair.game.name }}</strong>
+
+    <div class="wrapper">
+        <div class="containerre"  style="display: flex;">
             <div class="slider" id="slider">
 <!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
 {% for item in choices_with_nonce %}
@@ -49,7 +65,7 @@
                                 {% if choice.file.url %}
                                 <div class="sliderImg" style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
                                 {% endif %}
-                            <div class="sliderPrice">{{ choice.value }} 💎</div>
+                            <div class="sliderPrice"><b class="innerprice">{{ choice.value }}</b>💎</div>
                         </div>
                     {% endwith %}
                 </div>
@@ -92,12 +108,19 @@
 
             <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow" style="">
         </div>
+
+      <div class="labeltag" style="">
+        <h4 style="">{{game.name}}</h4>
+      </div>
     </div>
-                </div>
-            {% endfor %}
-        </div>
+                    </div></div></div></div></div></div></div>
+
+          </div>
+        {% endfor %}
+
+      </div>
     {% endfor %}
-</div>
+  </div>
 
 </body>
 </html>

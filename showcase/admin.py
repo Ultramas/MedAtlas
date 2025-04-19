@@ -2654,7 +2654,7 @@ class BattleAdmin(admin.ModelAdmin):
             'fields': ('battle_name', 'currency', 'price', 'creator', 'min_human_participants', 'game_values', 'status', 'slots', 'type', 'bets_allowed', 'time', 'is_active'),
         }),
     )
-    list_display = ('battle_name', 'creator', 'price', 'currency', 'status', 'is_active', 'time')
+    list_display = ('battle_name', 'creator', 'price', 'currency', 'status', 'is_active', 'time', 'bets_allowed')
     list_filter = ('status', 'is_active', 'currency', 'creator')
     search_fields = ('battle_name', 'creator__username')
     inlines = [BattleGameInline, BattleParticipantInline, RobotInline]

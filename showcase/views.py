@@ -222,6 +222,7 @@ from django.views.generic.edit import FormView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from django.views.decorators.http import require_POST
+from django.db.models import Prefetch
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -2905,6 +2906,7 @@ class OpenBattleListView(ListView):
             return redirect('showcase:battle_detail', battle_id=battle.id)
         return self.get(request, *args, **kwargs)
 
+
 class SingleBattleListView(DetailView):
     model = Battle
     template_name = "battle_detail.html"
@@ -2921,7 +2923,8 @@ class SingleBattleListView(DetailView):
                 battle.status = 'R'
                 battle.save(update_fields=['status'])
             print('battle is full, starting battle')
-            return redirect('showcase:actualbattle', battle_id=battle.id)
+            return redirect(reverse('showcase:actualbattle',
+                                    kwargs={'battle_id': battle.id}))
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -3052,7 +3055,9 @@ class SingleBattleListView(DetailView):
         return context
 
     def post(self, request, *args, **kwargs):
-        battle = self.get_object()
+        self.object = self.get_object()
+
+        battle = self.object
         if 'join_battle_submit' in request.POST:
             if battle.status != 'O':
                 messages.error(request, 'This battle is not currently open for participants.')
@@ -3064,7 +3069,9 @@ class SingleBattleListView(DetailView):
                 battle.status = 'R'
                 battle.save()
                 messages.error(request, 'This battle is now full and has started.')
-                return redirect('showcase:battle_detail', battle_id=battle.id)
+                console.log('reached a full battle')
+                return redirect(reverse('showcase:actualbattle',
+                                        kwargs={'battle_id': battle.id}))
 
             join_form = BattleJoinForm(request.POST, user=request.user, battle=battle)
             if join_form.is_valid():
@@ -3082,24 +3089,27 @@ class SingleBattleListView(DetailView):
                 return self.render_to_response(context)
 
         elif 'bet_form_submit' in request.POST:
+            is_creator = (request.user == battle.creator)
+            is_participant = battle.participants.filter(user=request.user).exists()
+
             if not battle.bets_allowed:
                 messages.error(request, 'Bets are not allowed in this battle.')
                 return redirect('showcase:battle_detail', battle_id=battle.id)
-            bet_form = BetForm(request.POST, user=request.user, battle=battle)
+
+            bet_form = BetForm(request.POST, is_creator==True or is_participant==True, battle=battle)
             if bet_form.is_valid():
                 bet_form.instance.battle = battle
-                bet_form.instance.user = request.user
+                bet_form.instance.user   = request.user
                 bet_form.save()
                 messages.success(request, 'Bet placed successfully.')
                 return redirect('showcase:battle_detail', battle_id=battle.id)
-            else:
-                messages.error(request, 'There was an error placing your bet. Please try again.')
-                context = self.get_context_data(bet_form=bet_form)
-                context['bet_form_errors'] = bet_form.errors
-                return self.render_to_response(context)
+
+            context = self.get_context_data(bet_form=bet_form)
+            return self.render_to_response(context)
 
         messages.error(request, 'Invalid form submission.')
         return redirect('showcase:battle_detail', battle_id=battle.id)
+
 
 class ActualBattleView(DetailView):
     model = Battle
@@ -3107,30 +3117,48 @@ class ActualBattleView(DetailView):
     context_object_name = "battle"
 
     def get_object(self):
-        battle_id = self.kwargs.get('battle_id')
-        return get_object_or_404(Battle.objects.prefetch_related('battle_games__game'), id=battle_id)
-
+        # Prefetch the battle’s games and each game's choices in two SQL queries
+        return get_object_or_404(
+            Battle.objects.prefetch_related(
+                Prefetch(
+                    'chests',  # the M2M to Game through BattleGame
+                    queryset=Game.objects.prefetch_related('choices'),
+                    to_attr='games_with_choices'
+                )
+            ),
+            id=self.kwargs['battle_id']
+        )
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        battle = self.get_object()
+        battle = self.object
 
-        battle_games = battle.battle_games.all().order_by('order')
+        # 1) Flat list of User objects for sidebar or summary
+        participants = battle.participants.select_related('user').all()
+        context['users'] = [bp.user for bp in participants]
 
-        ordered_games = [bg.game for bg in battle_games if bg.game_id and bg.game]
-        context['ordered_games'] = ordered_games
-
-        participants = list(battle.participants.all())
-        total_capacity = min(len(participants), 10)
-
+        # 2) Prepare the grid windows
+        ordered_games = [bg.game for bg in battle.battle_games.order_by('order') if bg.game_id]
+        total_capacity = min(participants.count(), 10)
         participant_windows = []
-        for participant in participants[:total_capacity]:
+        for bp in participants[:total_capacity]:
             participant_windows.append({
-                'participant': participant,
-                'games': ordered_games
+                'participant': bp,
+                'games': ordered_games,
             })
-
         context['participant_windows'] = participant_windows
-        context['grid_columns'] = max(1, min(5, len(participants)))
+        context['grid_columns']     = max(1, min(5, participants.count()))
+
+        # 3) Build game → choices mapping
+        related_games = getattr(battle, 'games_with_choices', [])
+        game_choice_pairs = []
+        for game in related_games:
+            # thanks to prefetch_related, this won't hit the DB again
+            choices = list(game.choices.all())
+            game_choice_pairs.append({
+                'game':    game,
+                'choices': choices,
+            })
+        context['game_choice_pairs'] = game_choice_pairs
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         user = self.request.user
@@ -3201,10 +3229,14 @@ class ActualBattleView(DetailView):
         context['spin_preference_form'] = SpinPreferenceForm(
             instance=spinpreference) if spinpreference else SpinPreferenceForm()
 
-        game_id = self.kwargs.get('game_id')
-        if game_id:
-            game = get_object_or_404(Game, id=game_id)
-            context['game'] = game
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+            except UserProfile.DoesNotExist:
+                context['SentProfile'] = None
+        else:
+            context['SentProfile'] = None
 
         if user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=user)
@@ -3227,33 +3259,30 @@ class ActualBattleView(DetailView):
                     userprofile.newprofile_profile_picture_url = profile.avatar.url
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
-            slug = self.kwargs.get('slug')
-            context['slug'] = slug
+            related_games = getattr(battle, 'games_with_choices', [])
+            context['related_games'] = related_games
 
-            game = get_object_or_404(Game, slug=slug)
-            context['game'] = game
+            # 2) for each game, grab its list of choices
+            game_choice_pairs = []
+            for game in related_games:
+                choices = list(game.choices.all())
+                game_choice_pairs.append({
+                    'game': game,
+                    'choices': choices,
+                })
+            context['game_choice_pairs'] = game_choice_pairs
 
-            user = self.request.user
-            if user.is_authenticated:
-                try:
-                    context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
-                except UserProfile.DoesNotExist:
-                    context['SentProfile'] = None
-            else:
-                context['SentProfile'] = None
-
-            context['Money'] = Currency.objects.filter(is_active=1).first()
-            context['wager_form'] = WagerForm()
-
-            choices = Choice.objects.filter(game=game)
-            spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
-            context['spinner_choice_renders'] = spinner_choice_renders
 
             user = self.request.user
             if user.is_authenticated:
                 profile = ProfileDetails.objects.filter(user=user).first()
                 if profile:
-                    effective_cost = game.get_effective_cost()
+                    if related_games:
+                        game = related_games[0]
+                        effective_cost = game.get_effective_cost()
+                    else:
+                        effective_cost = 0
+
                     spin_multiplier = 1
                     total_cost = effective_cost * spin_multiplier
                     context['user_cash'] = profile.currency_amount
@@ -3364,11 +3393,6 @@ class ActualBattleView(DetailView):
             random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
             context['random_nonces'] = random_nonces
 
-            game_id = self.kwargs.get('slug')
-
-            game = get_object_or_404(Game, slug=slug)
-
-            context['game'] = game
 
             inline_choices = game.choice_fk_set.all()
             m2m_choices = game.choices.all()
@@ -3479,6 +3503,7 @@ class ActualBattleView(DetailView):
                         userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
             return context
+
 
 class BattleCreationView(CreateView):
     model = Battle

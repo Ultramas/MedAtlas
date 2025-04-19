@@ -3048,6 +3048,7 @@ class Game(models.Model):
     def is_favorited(self, user):
         from django.db.models import Q
         return FavoriteChests.objects.filter(user=user, chest=self, is_active=1).exists()
+
     def save(self, *args, **kwargs):
         self.full_clean()
         if not self.type:

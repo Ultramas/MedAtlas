@@ -3742,7 +3742,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   <!-- Background particle effect -->
   <canvas id="particle-canvas"></canvas>
-
         {% for BackgroundImage in Background %}
     {% if BackgroundImage.page == "index.html" %}
         {% if BackgroundImage.position == 1 %}
@@ -3754,7 +3753,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 background-attachment: fixed;">
     </div>
 
-    <!-- The content container that remains fully opaque -->
+    <!-- The content container - remains fully opaque, causes chat issues -->
     <div class="containered">
         <div class="gameaddition" style="top: 300px;">
             {% if game %}
@@ -3768,7 +3767,6 @@ document.addEventListener('DOMContentLoaded', function() {
         {% endif %}
     {% endif %}
 {% endfor %}
-
   <!-- Main container -->
 <div class="container" style="background: linear-gradient(transparent 0%, rgb(139 9 202 / 50%) 5%, rgba(0, 255, 255, 0.2) 100%);">
 

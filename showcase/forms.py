@@ -552,28 +552,28 @@ class BetForm(forms.ModelForm):
         fields = ('amount',)
 
     def __init__(self, *args, **kwargs):
+        # pop battle if passed
         battle = kwargs.pop('battle', None)
         super().__init__(*args, **kwargs)
 
         if not battle:
-            battle_id = getattr(self.instance, 'battle_id', None)
-            if battle_id:
-                battle = self.instance.battle
-            elif 'battle' in self.initial:
-                try:
-                    battle = Battle.objects.get(pk=self.initial['battle'])
-                except Battle.DoesNotExist:
-                    battle = None
+            battle = getattr(self.instance, 'battle', None) or \
+                     Battle.objects.filter(pk=self.initial.get('battle')).first()
 
-        if battle and (battle.type == 'teams' or battle.type == 'team_fight'):
+        if battle:
+            participant_user_ids = battle.participants.values_list('user_id', flat=True)
+        else:
+            participant_user_ids = User.objects.none().values_list('id', flat=True)
+
+        if battle and battle.type in ('teams', 'team_fight'):
             self.fields['winning_team'] = forms.ModelChoiceField(
-                queryset=User.objects.all(),
+                queryset=User.objects.filter(id__in=participant_user_ids),
                 label="Winning Team",
                 required=True
             )
         else:
             self.fields['winning_user'] = forms.ModelChoiceField(
-                queryset=User.objects.all(),
+                queryset=User.objects.filter(id__in=participant_user_ids),
                 label="Winning User",
                 required=True
             )
@@ -584,6 +584,7 @@ class BetForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
 
 
 BattleGameFormSet = inlineformset_factory(

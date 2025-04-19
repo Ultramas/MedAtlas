@@ -1,0 +1,187 @@
+
+        {% if battle.bets_allowed %}
+         <div class="battle-bets">
+    <h2><i class="fas fa-sword"></i> Battle Bets <i class="fas fa-trophy"></i></h2>
+<form method="POST" class="bet-form">
+    {% csrf_token %}
+
+    {% if bet_form.fields.winning_user %}
+    <div class="form-group">
+        <label for="player-select">Select Player To Win</label>
+        <div class="select-wrapper" style="color: black;">
+           <label style="color: black;"> {{ bet_form.winning_user }}</label>
+        </div>
+    </div>
+
+    {% elif bet_form.fields.winning_team %}
+
+    <div class="form-group">
+        <label for="team-select">Select Team To Win</label>
+        <div class="select-wrapper" style="color: black;">
+            <label style="color: black;"> {{ bet_form.winning_team }}</label>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+        <label for="bet-amount">Bet Amount</label>
+        <div class="currency-input" style="display: flex; flex-direction: row; align-items: center;">
+            <span class="currency-symbol">💎</span>
+            {{ bet_form.amount }}
+        </div>
+    </div>
+
+    <button type="submit" name="bet_form_submit" class="place-bet-btn">
+        Place Bet
+    </button>
+
+    <div class="bet-limits">
+        Min bet: 1 💎 • Max bet: Battle Cost x1,000 💎
+    </div>
+</form>
+         </div>
+<style>
+    .battle-bets {
+        background: linear-gradient(to bottom, #1a1f2e, #151922);
+        border-radius: 12px;
+        padding: 2rem;
+        color: #fff;
+        max-width: 480px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        margin: auto;
+    }
+
+    .battle-bets h2 {
+        color: #ffc107;
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #e0e0e0;
+        font-size: 1rem;
+    }
+
+    .select-wrapper {
+        position: relative;
+    }
+
+    .select-wrapper:after {
+        content: '';
+        position: absolute;
+        right: 12px;
+        transform: translateY(-700%);
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 5px solid #fff;
+        pointer-events: none;
+    }
+
+    .bet-form select {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: black;
+        font-size: 1rem;
+        appearance: none;
+        cursor: pointer;
+    }
+
+    .currency-input {
+        position: relative;
+    }
+
+    .currency-symbol {
+        position: absolute;
+        left: 10px;
+        transform: translateY(-33%);
+        color: #888;
+    }
+
+    .bet-form input[type="number"] {
+        width: 100%;
+        padding: 12px 16px 12px 32px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 1rem;
+    }
+
+    .place-bet-btn {
+        width: 100%;
+        padding: 14px;
+        background: #ffc107;
+        border: none;
+        border-radius: 8px;
+        color: #000;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 1rem;
+    }
+
+    .place-bet-btn:hover {
+        background: #ffcd38;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+    }
+
+    .bet-limits {
+        text-align: center;
+        color: #ffffff;
+        font-size: 0.875rem;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+</style>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+    // Validate bet amount
+    document.querySelector('.bet-form').addEventListener('submit', function(e) {
+        const amount = parseFloat(document.querySelector('input[type="number"]').value);
+        if (amount < 1.00 || amount > 1000.00) {
+            e.preventDefault();
+            alert('Bet amount must be between $1.00 and $1,000.00');
+        }
+    });
+
+
+    document.querySelector('input[type="number"]').addEventListener('blur', function(e) {
+        if (this.value) {
+            this.value = parseFloat(this.value).toFixed(2);
+        }
+    });
+</script>
+        {% else %}
+
+                        <div class="battle-info">
+                            <strong style="color: red;">Bets Not Allowed</strong>
+                        </div>
+        {% endif %}

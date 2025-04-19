@@ -264,15 +264,12 @@ function clearCards() {
     const cardContainer = document.querySelector('.slider');
     const targetCards = cardContainer.querySelectorAll('.target-card');
 
-    targetCards.forEach(card => {
+    targetCards.forEach(card => cardContainer.removeChild(card));
 
-        card.querySelectorAll('*').forEach(child => {
-            child.style.display = 'none';
-        });
-    });
-
-    console.log("All target cards modified (class removed, child elements hidden, but kept 'sellattribute').");
+    console.log("All target cards removed.");
 }
+
+function centerCard(cardElement) {
 
         function addAnimation() {
             document.querySelectorAll('.slider').forEach(scroller => {
