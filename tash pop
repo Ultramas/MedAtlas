@@ -1,0 +1,257 @@
+[33mcommit ccf598f2a81823236a87e6bbe0c0dac6d2c7992d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Fri Apr 18 01:24:33 2025 -0700
+
+    tophit interface visibility fixes
+
+[33mcommit 098fedaf5dc413145a99a2cdf2bcfc6790c86965[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Fri Apr 18 00:57:18 2025 -0700
+
+    updated clickless index ruby purchases, data-color from card now properly passed in
+
+[33mcommit b5326da856c5559e9ca0753feddb2313d0fcbb18[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Fri Apr 18 00:33:03 2025 -0700
+
+    updated clickless index ruby purchases, data-color from card not properly passed in II
+
+[33mcommit 790147840ee02f056a99224ef502e7a46a591cd4[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Thu Apr 17 20:23:24 2025 -0700
+
+    updated clickless index ruby purchases, data-color from card not properly passed in
+
+[33mcommit fb2c0e9593c643a79353039cdf47810bc0f27a75[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Thu Apr 17 18:25:51 2025 -0700
+
+    fixed savespinboost, data-color from card not properly passed in
+
+[33mcommit a846cc385491bab639a8908246b8d3cb7e0eb5e2[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Thu Apr 17 17:37:17 2025 -0700
+
+    tryingeditbroken
+
+[33mcommit 7ed46d7f76913f86346dba1d96848e17cd9345b2[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Wed Apr 16 22:42:37 2025 -0700
+
+    fixed automatic spin preference
+
+[33mcommit d3844fe930e3d9ce45808156172bfeb093099319[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Wed Apr 16 22:05:30 2025 -0700
+
+    presave automatic update spin preference after spin collection II - not working update without breaking showpopup
+
+[33mcommit 566e88addd03b8d1faf1d98c826f080af408f1dd[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Wed Apr 16 21:16:09 2025 -0700
+
+    postsave automatic set game cost after spin collection II - broken showpopup from fix
+
+[33mcommit 75f9c90efbd09233f28500ff1052d43de5f75c9a[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Wed Apr 16 19:58:36 2025 -0700
+
+    broken automatic set game cost after spin collection - temporary holdings
+
+[33mcommit f39b42d24018de47c41a84e91857961d1930b338[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Wed Apr 16 14:17:41 2025 -0700
+
+    combined start index
+
+[33mcommit e87b8712ac3b6c1ad5935b6d82950eb455ef79c7[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Wed Apr 16 14:11:34 2025 -0700
+
+    combined start index
+
+[33mcommit 11d1798a4241329ecb435e0b7ab41162b2e87284[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Tue Apr 15 10:00:10 2025 -0700
+
+    combined start index
+
+[33mcommit 7d1637d69910a4194643c65b4985f8586a5ece2d[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Mon Apr 14 14:15:43 2025 -0700
+
+    start change index
+
+[33mcommit e873ea779aace8ae063eb6a5d6d41e49de7f4ea6[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Mon Apr 14 12:06:32 2025 -0700
+
+    temporary index (production purposes)
+
+[33mcommit 14de727347b56ba90f208781474cd056d49a9450[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Mon Apr 14 10:28:27 2025 -0700
+
+    temporary index (production purposes)
+
+[33mcommit f4d5d53bd58f87d6e9f3b5a805da66647d4f5bcb[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Mon Apr 14 09:54:44 2025 -0700
+
+    fixed game sell II
+
+[33mcommit 02cf8c1413587d9c31a70c34ff6a347cf01d9e6e[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Sun Apr 13 09:06:03 2025 -0700
+
+    fixed game sell
+
+[33mcommit fa854d951fc541643db52640680a24e398478cbb[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Sun Apr 13 09:06:03 2025 -0700
+
+    fixed game sell
+
+[33mcommit b63f71de53a38a984aaa3d48b6695abb2c38fd2f[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Sun Apr 13 08:46:28 2025 -0700
+
+    fixed game sell - database is locked issues
+
+[33mcommit 0c04c4869e9f1c3192daea15dc1f1d7ce396d736[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Sat Apr 12 19:05:54 2025 -0700
+
+    presave - game sell issues
+
+[33mcommit c6fc728f242af47fa227e18b31c215b693082c59[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Sat Apr 12 19:05:41 2025 -0700
+
+    presave - in-house sell issues
+
+[33mcommit fc97b7cf652dacbe900fae955640b9e6172e7f5a[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Sat Apr 12 11:27:38 2025 -0700
+
+    updates - miscellaneous changes
+
+[33mcommit 141b51a3f865985afb041b3883d17b9fa355158d[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Sat Apr 12 11:19:26 2025 -0700
+
+    updates - miscellaneous changes
+
+[33mcommit 961dd737bb12583022f4f2391f0d4d7264fe849e[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Sat Apr 12 01:11:16 2025 -0700
+
+    savepoint - miscellaneous changes
+
+[33mcommit 69aefaf982d15cd67b1ac4f9708fb8339ded5350[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Sat Apr 12 00:28:56 2025 -0700
+
+    savepoint - miscellaneous changes
+
+[33mcommit 5c1f48fb94c7e8ed966b82662fb4f516e6b74e9c[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Fri Apr 11 19:55:05 2025 -0700
+
+    savepoint - broken sell inventory
+
+[33mcommit 7c56a77f1ddff3f88d257d8a045bb3258d0d308b[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Fri Apr 11 10:02:46 2025 -0700
+
+    saveto
+
+[33mcommit c1fb0321c730f9a2c0a9d5844a7f9d7d2dc013a1[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Fri Apr 11 10:02:38 2025 -0700
+
+    saveto
+
+[33mcommit 6bb006461d4b68aab769c5abf8e19cafd148ceb0[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Fri Apr 11 09:58:29 2025 -0700
+
+    saveto
+
+[33mcommit 1ec996243eed00d92ae0103135be7a59f927cb5e[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Tue Apr 8 13:33:49 2025 -0700
+
+    media elements II
+
+[33mcommit e73c0dee916ae61acc2872dbfcc483121328be1f[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Tue Apr 8 13:08:49 2025 -0700
+
+    media elements
+
+[33mcommit fd7719f8b8f9a0b59d5b35c4289acc5a0fd5f9a6[m
+Author: Ande Other Account <Ubermaster123456@gmail.com>
+Date:   Tue Apr 8 12:42:24 2025 -0700
+
+    media elements
+
+[33mcommit 2d3d7099f963282a0b80960a08cc2c28979dd724[m
+Author: Ultramas <Ultramaster123456@gmail.com>
+Date:   Sat Apr 5 15:55:22 2025 -0700
+
+    presave II - trying to get instant spin to work
+
+[33mcommit 3024f641cfe6e2dd3467a8b15b04df598db82107[m
+Author: Ultramas <Ultramaster123456@gmail.com>
+Date:   Sat Apr 5 15:00:32 2025 -0700
+
+    presave - trying to get instant spin to work
+
+[33mcommit 9c414622e005083f1297c475c8c9ba26e5fdab1e[m
+Author: Ultramas <Ultramaster123456@gmail.com>
+Date:   Thu Apr 3 03:20:20 2025 -0700
+
+    temporary save
+
+[33mcommit a920be483c90fb4edd637e1ff2b78ec9c09c9d71[m
+Author: Ultramas <Ultramaster123456@gmail.com>
+Date:   Wed Apr 2 23:32:46 2025 -0700
+
+    extended updates
+
+[33mcommit 798e9c315b4b3a0aca40f9b4d3920f396e05038b[m
+Author: Ultramas <Ultramaster123456@gmail.com>
+Date:   Wed Apr 2 01:03:00 2025 -0700
+
+    ui updates
+
+[33mcommit 5407e374f5aec64f5200ea47f3c0fa101257b9a9[m
+Author: Ultramas <Ultramaster123456@gmail.com>
+Date:   Wed Apr 2 00:47:13 2025 -0700
+
+    ui updates
+
+[33mcommit 50f4833c7c5e46b8ec85c65b7f7aec5bc7eabbf7[m
+Author: Ultramas <Ultramaster123456@gmail.com>
+Date:   Tue Apr 1 22:58:11 2025 -0700
+
+    updated items
+
+[33mcommit 2e20744e9c991304944c41c76aa0aedf097adfd3[m
+Author: Ultramas <Ultramaster123456@gmail.com>
+Date:   Sun Mar 30 11:30:31 2025 -0700
+
+    fixed payment II
+
+[33mcommit 8ddfdb6a5fad9d9b3c5d4468bec0f5deee3380e2[m
+Author: Ultramas <Ultramaster123456@gmail.com>
+Date:   Sun Mar 30 10:55:54 2025 -0700
+
+    fixed payment
+
+[33mcommit 5a75ee1c4e86854dfed1993a2aedda6cc40dc394[m
+Author: Ultramas <Ultramaster123456@gmail.com>
+Date:   Sat Mar 29 22:27:54 2025 -0700
+
+    battle
