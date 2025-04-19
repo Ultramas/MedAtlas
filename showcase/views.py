@@ -3236,7 +3236,6 @@ class ActualBattleView(DetailView):
     context_object_name = "battle"
 
     def get_object(self):
-        # Fetch the Battle by battle_id and prefetch its games + choices
         return get_object_or_404(
             Battle.objects.prefetch_related(
                 Prefetch(
@@ -3257,6 +3256,9 @@ class ActualBattleView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         battle = self.object
+        humans = list(battle.participants.all())
+        bots = list(battle.robots.all())
+        context['players'] = [('human',  h) for h in humans] + [('robot',  r) for r in bots]
 
         # 1) Grab all prefetched games
         games = getattr(battle, 'games_with_choices', [])

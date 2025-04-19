@@ -1985,6 +1985,15 @@ $(document).ready(function() {
     </div>
 <!--check mypreference of user, should one exist; default is classic-->
 
+
+{% for role, p in players %}
+  <li>
+    {% if role == 'human' %}
+      {{ p.user.username }}
+    {% else %}
+      {{ p.name }} (bot)
+    {% endif %}
+  </li>
     <div class="wrapper">
         <div class="containerre"  style="display: flex;">
             <div class="slider" id="slider">
@@ -2050,6 +2059,7 @@ $(document).ready(function() {
       </div>
     </div>
                     </div></div></div></div></div></div></div>
+{% endfor %}
 
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
