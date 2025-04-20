@@ -287,7 +287,7 @@ urlpatterns = [
     path('memberbase/', TemplateView.as_view(template_name='memberbase.html'), name='memberbase'),
     # path('billets/', TemplateView.as_view(template_name='billets.html'), name = 'billets'),
     path('ad/', TemplateView.as_view(template_name='ad.html'), name='ad'),
-    path("update_currency/", update_currency, name="update_currency"),
+    path("update_currency/", views.update_currency, name="update_currency"),
     path('giveaways/', TemplateView.as_view(template_name='giveaways.html'), name='giveaways'),
     path('hostgiveaway/', TemplateView.as_view(template_name='hostgiveaway.html'), name='hostgiveaway'),
     # path('changelog/', ChangelogView.as_view(), name='changelog'),

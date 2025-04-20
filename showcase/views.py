@@ -236,6 +236,23 @@ class SignupView(FormMixin, ListView):
         context['signup'] = SignupBackgroundImage.objects.all()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -308,6 +325,23 @@ class TotalView(ListView):
     def _context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -501,6 +535,23 @@ class BaseView(ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         print(f'User: {user.username}, is_authenticated: {user.is_authenticated}, is_staff: {user.is_staff}')
@@ -616,6 +667,23 @@ class BlogBaseView(ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
@@ -709,6 +777,23 @@ class AdminRolesView(BaseView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Roles'] = AdminRoles.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -752,6 +837,23 @@ class AdminTasksView(ListView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
@@ -797,6 +899,23 @@ class AdminPagesView(ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -841,6 +960,23 @@ class AdministrationView(ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
@@ -884,6 +1020,23 @@ class DonateBaseView(ListView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         user = self.request.user
         if user.is_authenticated:
@@ -933,6 +1086,23 @@ class MemberBaseView(ListView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         user = self.request.user
         if user.is_authenticated:
@@ -1449,6 +1619,23 @@ class ShowcaseBackgroundView(BaseView):
         context['UpdateProfile'] = UpdateProfile.objects.all()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         newprofile = UpdateProfile.objects.filter(is_active=1)
 
         context['Profiles'] = newprofile
@@ -1567,6 +1754,23 @@ class ChatBackgroundView(BaseView):
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -1693,6 +1897,23 @@ class SupportChatBackgroundView(BaseView):
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -2481,6 +2702,23 @@ class PreferencesDoneView(ListView):
 
         user = self.request.user
         if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
+        user = self.request.user
+        if user.is_authenticated:
             try:
                 context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user)
             except ObjectDoesNotExist:
@@ -2777,6 +3015,23 @@ class DailyChestView(BaseView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['next_5pm'] = get_next_5pm_pst()
         context['is_daily'] = game.daily
         if self.request.user.is_authenticated:
@@ -2952,6 +3207,23 @@ class OpenBattleListView(ListView):
         context['game_values'] = self.request.session.pop('game_values', '')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -3041,6 +3313,23 @@ class SingleBattleListView(DetailView):
         related_games = Game.objects.filter(game_battles__battle=battle).distinct()
         context['related_games'] = related_games
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         user = self.request.user
         context['is_participant'] = battle.battle_joined.filter(user=user).exists()
@@ -3429,6 +3718,23 @@ class BattleCreationView(CreateView):
         games = Game.objects.filter(daily=False)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -3637,6 +3943,23 @@ class EarningAchievement(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         if self.request.user.is_authenticated:
@@ -4124,6 +4447,23 @@ class AchievementsView(TemplateView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -4341,6 +4681,23 @@ class BilletBackgroundView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -4386,6 +4743,23 @@ class RuleBackgroundView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -4429,6 +4803,23 @@ class PolicyBackgroundView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -4465,6 +4856,23 @@ class ServersView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -4510,6 +4918,23 @@ class FaqBackgroundView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -4552,6 +4977,23 @@ class StaffBackgroundView(BaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -4603,6 +5045,23 @@ class StaffApplyBackgroundView(FormMixin, ListView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -4705,6 +5164,23 @@ class TagBackgroundView(BaseView):
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -4747,6 +5223,23 @@ class UserBackgroundView(BaseView):
         context['UserBackgroundImage'] = UserBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         if self.request.user.is_authenticated:
@@ -5017,6 +5510,23 @@ class SingleNewsView(DetailView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['News'] = NewsFeed.objects.all()
         context['Money'] = Currency.objects.filter(is_active=1)
@@ -5500,6 +6010,23 @@ class AddMonstrosityView(FormMixin, LoginRequiredMixin, ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -5605,6 +6132,23 @@ class RoomView(TemplateView):
         room_details = Room.objects.get(name=roomed)
         profile_details = ProfileDetails.objects.filter(user__username=username).first()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -6316,6 +6860,23 @@ class CustomLoginView(LoginView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         print('the login context is ' + context)
         return context
 
@@ -6328,6 +6889,23 @@ class SignupView(FormMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['signup'] = SignupBackgroundImage.objects.all()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -6400,6 +6978,23 @@ class TotalView(ListView):
     def _context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -6594,6 +7189,23 @@ class BaseView(ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
         current_user = self.request.user
         if current_user.is_authenticated:
             context['preferenceform'] = MyPreferencesForm(user=current_user)
@@ -6697,6 +7309,23 @@ class BlogBaseView(ListView):
         context['FeaturedNavigation'] = FeaturedNavigationBar.objects.filter(is_active=1).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
@@ -6785,7 +7414,8 @@ class NavView(ListView):
             user_clickables = UserClickable.objects.filter(user=user)
             for user_clickable in user_clickables:
                 if user_clickable.clickable.chance_per_second > 0:
-                    user_clickable.precomputed_chance = 1.0 / user_clickable.clickable.chance_per_second
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
                 else:
                     user_clickable.precomputed_chance = 0
 
@@ -6825,6 +7455,53 @@ class NavView(ListView):
                     context['Clickables'] = user_clickables
 
         return context
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.db.models import F
+
+from .models import UserClickable, ProfileDetails
+
+@login_required
+@require_POST
+def update_currency(request):
+    data = json.loads(request.body)
+    name       = data.get("clickable_name")
+    base_val   = data.get("actual_value", 0)
+    multiplier = data.get("exponential_multiplier", 1)
+
+    # Validate the clickable
+    try:
+        uc = UserClickable.objects.get(
+            user=request.user,
+            clickable__name=name,
+            is_active=1
+        )
+    except UserClickable.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Invalid clickable"}, status=400)
+
+    # Compute increment
+    try:
+        increment = float(base_val) * float(multiplier)
+    except (TypeError, ValueError):
+        increment = uc.actual_value * uc.exponential_level_multiplier
+
+    # Option A: do the addition in Python so we never get a CombinedExpression
+    with transaction.atomic():
+        profile = ProfileDetails.objects.select_for_update().get(user=request.user)
+        new_amount = profile.currency_amount + increment
+        profile.currency_amount = new_amount
+        profile.save()
+
+    return JsonResponse({
+        "success":    True,
+        "new_amount": profile.currency_amount
+    })
+
+
 
 def detail_post_view(request, id=None):
     eachpost = get_object_or_404(Post, id=id)
@@ -6883,6 +7560,23 @@ class AdminRolesView(BaseView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Roles'] = AdminRoles.objects.filter(is_active=1)
 
         if self.request.user.is_authenticated:
@@ -6929,6 +7623,23 @@ class AdminTasksView(BaseView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -6973,6 +7684,23 @@ class AdminPagesView(BaseView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         AdminPage = AdminPages.objects.filter(is_active=1)
@@ -7020,6 +7748,23 @@ class AdministrationView(ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Pages'] = AdminPages.objects.filter(is_active=1)
         context['Tasks'] = AdminTasks.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
@@ -7064,6 +7809,23 @@ class DonateBaseView(ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         user = self.request.user
         if user.is_authenticated:
@@ -7107,6 +7869,23 @@ class ShippingBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         context['form'] = ShippingForm(user=self.request.user)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -7178,6 +7957,23 @@ class ShippingProfileView(ListView):
         newprofile = UserProfile2.objects.filter(is_active=1, user=current_user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
 
@@ -7230,6 +8026,23 @@ class PrintShippingLabelView(LoginRequiredMixin, ListView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
 
@@ -7277,6 +8090,23 @@ class MembershipView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -7333,6 +8163,23 @@ class MemberBaseView(ListView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1)
         user = self.request.user
@@ -7413,6 +8260,23 @@ class PostList(BaseView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by("image_position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1).order_by('image_position')
 
@@ -8147,6 +9011,23 @@ class eventview(ListView):
         room_details = Room.objects.get(name=room)
         profile_details = ProfileDetails.objects.filter(user__username=username).first()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+    
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -8210,6 +9091,23 @@ class SupportRoomView(TemplateView):
 
         profile_details = ProfileDetails.objects.filter(user__username=signed_in_user).first()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -8309,6 +9207,23 @@ class SupportLineView(TemplateView):
         room_details = SupportInterface.objects.get(name=room)
         profile_details = ProfileDetails.objects.filter(user__username=username).first()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
@@ -8498,6 +9413,23 @@ class BusinessMessageBackgroundView(ListView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -9154,6 +10086,23 @@ class BackgroundView(FormMixin, BaseView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
@@ -9188,6 +10137,23 @@ class BackgroundView(FormMixin, BaseView):
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['Email'] = EmailField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['About'] = Event.objects.filter(page=self.template_name, is_active=1)
         context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
@@ -9968,6 +10934,23 @@ class SupportLineBackgroundView(BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -10734,6 +11717,23 @@ class NewsBackgroundView(ListView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1)
         context['Email'] = EmailField.objects.filter(is_active=1)
@@ -11886,6 +12886,23 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         try:
             context['SentProfile'] = ProfileDetails.objects.get(
                 user=self.request.user)
@@ -12140,30 +13157,6 @@ def withdraw_cost(request):
 
     return JsonResponse({"success": False, "error": "Invalid request method."})
 
-@csrf_exempt
-def update_currency(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            clickable_name = data.get("clickable_name")
-
-            clickable = Clickable.objects.get(name=clickable_name, is_active=1)
-
-            user_profile = request.user.userprofile
-            user_profile.currency_amount += clickable.value
-            user_profile.save()
-
-            return JsonResponse({"success": True, "new_amount": user_profile.currency_amount})
-        except Clickable.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Invalid clickable."}, status=400)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-    return JsonResponse({"success": False, "error": "Invalid request."}, status=400)
-
-def clickable_view(request):
-    clickables = Clickable.objects.filter(is_active=1).values("name", "image", "value", "chance_per_thousand")
-    return render(request, "navtrove.html", {"clickables": clickables})
 
 @method_decorator(login_required, name='dispatch')
 class SellAllInventoryObjectsView(View):
@@ -12711,6 +13704,23 @@ class DirectChestView(BaseView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -13150,6 +14160,23 @@ class GameChestBackgroundView(BaseView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -13425,6 +14452,23 @@ class TradeInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -13587,6 +14631,23 @@ class DailyLotteryView(FormMixin, ListView):
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -13665,6 +14726,23 @@ class DailyLotteryClaimedView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -14013,6 +15091,23 @@ class TradeHistory(ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -14118,6 +15213,23 @@ class SettingsView(RegularUserRequiredMixin, UserPassesTestMixin, FormView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         if self.request.user.is_authenticated:
@@ -14177,6 +15289,23 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         print(FaviconBase.objects.all())
         context['SettingsBackgroundView'] = self.model.objects.all()
@@ -14328,6 +15457,23 @@ class BlogSearchResultsView(ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         for result in context['all_list']:
             if isinstance(result.content_object, Blog):
                 result.type = 'Blog'
@@ -14418,6 +15564,23 @@ class GameSearchResultsView(ListView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         newprofile = Game.objects.filter(is_active=1)
         context['Profiles'] = newprofile
@@ -14525,6 +15688,23 @@ class SearchResultsView(ListView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         for result in context['all_list']:
             if isinstance(result.content_object, City):
@@ -14732,6 +15912,23 @@ class WithdrawView(LoginRequiredMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         completed_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state='C',
                                                       shipping_state='C')
         incomplete_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state='C').exclude(
@@ -14816,6 +16013,23 @@ class WithdrawDetailView(LoginRequiredMixin, DetailView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
 
@@ -14875,6 +16089,23 @@ class ProcessingWithdrawView(LoginRequiredMixin, ListView):
             "position")
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         completed_withdraws = Withdraw.objects.filter(user=self.request.user, is_active=1, withdraw_state='I',
                                                       shipping_state='Y')
@@ -15025,6 +16256,23 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
+        user = self.request.user
         total_achievements = Achievements.objects.filter(is_active=1)
 
         earned_achievements = Achievements.objects.filter(
@@ -15149,6 +16397,23 @@ class MyLevelView(LoginRequiredMixin, ListView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['SettingsModel'] = SettingsModel.objects.filter(is_active=1)
 
@@ -15372,6 +16637,23 @@ class CommerceExchangeView(CreateView):
             is_active=1).order_by('value')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -15449,6 +16731,23 @@ class InventoryTradeView(CreateView):
 
         context['disabled_items'] = set(items_in_pending_offers)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['other_trade_items'] = [
             {
@@ -15729,6 +17028,23 @@ class ExchangePrizesView(FormMixin, ListView):
         context['BanAppeal'] = BanAppeal.objects.all()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -15947,6 +17263,23 @@ class BusinessMailingView(FormView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
 
@@ -16000,6 +17333,23 @@ class BusinessSuccessMailingView(TemplateView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
@@ -16056,6 +17406,23 @@ class PostDetailView(View):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         if self.request.user.is_authenticated:
@@ -16229,6 +17596,23 @@ class CurrencyMarketView(EBaseView):
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['Currency'] = CurrencyMarket.objects.filter(is_active=1).order_by(
             'price')
         if self.request.user.is_authenticated:
@@ -16267,6 +17651,23 @@ class CurrencyCheckoutView(EBaseView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['endowment_form'] = EndowmentForm(request=self.request)
 
@@ -16359,6 +17760,23 @@ class CurrencyPaymentView(EBaseView):
             is_active=True, page=self.template_name
         ).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -16679,6 +18097,23 @@ class GiftCodeRedemptionView(LoginRequiredMixin, ListView, FormMixin):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
         if 'form' not in context:
             context['form'] = self.get_form()
         return context
@@ -16726,6 +18161,23 @@ class GiftCodeClaimedView(ListView):
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -16832,6 +18284,23 @@ class ProductView(DetailView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -16877,6 +18346,23 @@ class OrderSummaryView(EBaseView):
         context['Background'] = BackgroundImageBase.objects.filter(
             is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
@@ -16958,6 +18444,23 @@ class CheckoutView(EBaseView):
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['address'] = Address.objects.filter(is_active=1, user=self.request.user).first()
         context.update(kwargs)
@@ -17791,6 +19294,23 @@ class ProfileEditView(FormView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -17845,6 +19365,23 @@ class SignupView(FormMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['signup'] = SignupBackgroundImage.objects.all()
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
@@ -18373,6 +19910,23 @@ class ContactViewe(CreateView):
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         print(context["Contact"])
 
@@ -18425,6 +19979,23 @@ class ContactSuccessView(BaseView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         print(context["Contact"])
@@ -19100,6 +20671,23 @@ class FeedbackView(LoginRequiredMixin, FormView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+                        
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
 
             context['Feed'] = Feedback.objects.filter(is_active=1).order_by("slug")
@@ -19387,6 +20975,23 @@ class SubmitFeedbackView(DetailView):
        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by(
             "created_at")
        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+ 
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 context['preferenceform'] = MyPreferencesForm(user=self.request.user)
 
        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
@@ -19793,6 +21398,23 @@ class OrderHistory(ListView):
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)

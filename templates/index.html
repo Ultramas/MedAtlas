@@ -237,7 +237,7 @@ body {
 
 
 #particle-canvas {
-  position: fixed;
+  display: none;
   top: 0;
   left: 0;
   width: 100%;
@@ -3917,7 +3917,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
              <div class="top-hits-container">
 
-    <div class="top-hits-row">
+    <div class="top-hits-row" style="overflow: hidden;">
         {% for TopHits in tophit %}
         <a href="{% url 'showcase:game' TopHits.game.slug %}" class="top-hit-link">
             <div class="top-hit-card">
@@ -5245,8 +5245,7 @@ Bounce
 .avenue2-messenger {
   opacity: 1;
   border-radius: 20px;
-  height: calc(100% - 60px) !important;
-  max-height: 460px !important;
+  max-height: 760px !important;
   min-height: 220px !important;
   width: 320px;
   /*  transform: translateY(0);
@@ -5545,7 +5544,7 @@ Bounce
 		.gridCardLink {
   display: block;
   text-decoration: none;
-  color: inherit;
+  color: white;
 }
 
 .gridCardLink .gridCardItem {
@@ -5561,6 +5560,9 @@ Bounce
   pointer-events: auto; /* Ensures inner elements remain interactive */
 }
 
+.gridCardTitle::before{
+color:white;
+}
 
 	.chat-button {
             position: fixed;

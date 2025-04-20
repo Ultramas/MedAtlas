@@ -1363,12 +1363,17 @@ class Clickable(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if self.rarity == 0:
+            self.rarity = (1/self.chance_per_second) * 1000
+
+        super().save(*args, **kwargs)
 
 
 class UserClickable(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     clickable = models.ForeignKey(Clickable, on_delete=models.CASCADE)
-    exponential_level_multiplier = models.FloatField(default=1.0)
+    exponential_level_multiplier = models.FloatField(default=1.00)
     actual_value = models.FloatField(default=0)
     currency = models.ForeignKey('Currency', on_delete=models.CASCADE, blank=True, null=True)
     is_active = models.IntegerField(
@@ -1384,12 +1389,12 @@ class UserClickable(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         self.currency = Currency.objects.filter(is_active=1).first()
 
-        if profile and profile.level >= 1:
+        if profile and profile.level.level >= 1:
             level_value = profile.level.level
             self.exponential_level_multiplier = 1.02 ** level_value
-            self.actual_value = self.clickable.base_value * self.exponential_level_multiplier
+            self.actual_value = self.clickable.base_value
         else:
-            self.exponential_level_multiplier = 1.0
+            self.exponential_level_multiplier = 1.00
             self.actual_value = self.clickable.base_value
 
         super().save(*args, **kwargs)
