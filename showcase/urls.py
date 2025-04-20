@@ -197,11 +197,7 @@ urlpatterns = [
     path('ehome/', views.EBackgroundView.as_view(), name='ehome'),
     path('item_category/', views.EBackgroundView.as_view(), name='item_category'),
     path('storeviewtypesnippet/', views.StoreView.as_view(), name='storeviewtypesnippet'),
-path(
-    'gameroomviewtypesnippet/<slug:slug>/',
-    views.GameRoomTypeView.as_view(),
-    name='gameroomviewtypesnippet'
-),
+    path('gameroomviewtypesnippet/<slug:slug>/', views.GameRoomTypeView.as_view(), name='gameroomviewtypesnippet'),
     #path('ehome/<int:page>/', views.EBackgroundView.as_view(), name='ehome'),
     path('home/', views.ChatBackgroundView.as_view(), name='home'),
     path('dynamic_css/', views.dynamic_css, name='dynamic_css'),
