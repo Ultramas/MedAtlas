@@ -8736,7 +8736,7 @@ from .models import Message, Room, ProfileDetails
 import logging
 
 def getGeneralMessages(request):
-    messages = GeneralMessage.objects.all().order_by('-date')[:30]
+    messages = GeneralMessage.objects.all().order_by('date')[30:]
     messages_data = []
 
     default_avatar = DefaultAvatar.objects.first()
@@ -8847,10 +8847,12 @@ def filter_games(request):
     context = get_games_context(request)
     return render(request, 'partial_game.html', context)
 
+
 @login_required
 def filter_games_count(request):
     context = get_games_context(request)
     return render(request, 'partial_game_count.html', context)
+
 
 class BackgroundView(FormMixin, BaseView):
     model = BackgroundImage

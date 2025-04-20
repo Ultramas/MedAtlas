@@ -5696,9 +5696,9 @@ Bounce
     var popup = document.getElementById("chatwidget2");
     if (popup.style.display === "none" || popup.style.display === "") {
         popup.style.display = "block";
-        popup.style.opacity = "1";
+        popup.style.opacity = "1"; // Ensures full visibility
     } else {
-        popup.style.opacity = "0";
+        popup.style.opacity = "0"; // Smooth transition before hiding
         setTimeout(() => {
             popup.style.display = "none";
         }, 300); // Delay to allow opacity transition
