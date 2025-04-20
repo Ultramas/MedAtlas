@@ -20,12 +20,14 @@
 <br>
 <br>
 <br>
-<form id="store-view-type-form" method="post" action="{% url 'showcase:inventory_view_type_url' %}">
+
+<form id="store-view-type-form" method="post" action="{% url 'showcase:storeviewtypesnippet' %}">
   {% csrf_token %}
   {{ store_view_form.type.label_tag }}
   {{ store_view_form.type }}
   {{ store_view_form.errors }}
 </form>
+
 {% if store_view == "stream" %}
 <!--streamlined view-->
 

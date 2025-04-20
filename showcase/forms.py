@@ -58,10 +58,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.forms.widgets import CheckboxSelectMultiple
 
-# from .models import ProfileTwo
-# from .models import PublicProfile
 users = User.objects.filter()
-
 
 class SignUpForm(UserCreationForm):
     username = forms.CharField(
@@ -89,13 +86,11 @@ class SignUpForm(UserCreationForm):
             raise ValidationError("This email is already in use. Please use a different email address.")
         return email
 
-
 CONTACT_PREFERENCE = [
     ('email', 'Email'),
     ('chat', 'Chat'),
     ('call', 'Call'),
 ]
-
 
 class ContactForm(forms.ModelForm):
     prefered_contact = forms.MultipleChoiceField(choices=CONTACT_PREFERENCE, widget=forms.CheckboxSelectMultiple())
@@ -104,14 +99,12 @@ class ContactForm(forms.ModelForm):
         model = Contact
         fields = '__all__'
 
-
 class BusinessContactForm(forms.ModelForm):
     prefered_contact = forms.MultipleChoiceField(choices=CONTACT_PREFERENCE, widget=forms.CheckboxSelectMultiple())
 
     class Meta:
         model = BusinessMailingContact
         fields = '__all__'
-
 
 class PostForm(forms.ModelForm):
     name = forms.CharField(
@@ -122,11 +115,6 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = UpdateProfile
         fields = ('name', 'description', 'image')
-        # name = forms.CharField(widget = forms.TextInput(attrs={'placeholder':'Enter your first name'}))
-
-        # description = forms.CharField(widget = forms.EmailInput
-        # (attrs={'placeholder':'Enter your email'}))
-
 
 class Postit(forms.ModelForm):
     name = forms.CharField(
@@ -139,7 +127,6 @@ class Postit(forms.ModelForm):
     class Meta:
         model = Idea
         fields = ('name', 'category', 'description', 'image')
-
 
 class VoteQueryForm(forms.ModelForm):
     class Meta:
@@ -154,7 +141,6 @@ VoteOptionFormSet = inlineformset_factory(
     can_delete=False
 )
 
-# Profile Form
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = User
@@ -165,14 +151,12 @@ class ProfileForm(forms.ModelForm):
             'email',
         ]
 
-
 """class ReviewForm(forms.ModelForm):
     review = forms.CharField(widget=forms.Textarea(attrs={'placeholder': "Write Your Review Here"}))
 
     class Meta:
         model = ProductReview
         fields = '__all__'"""
-
 
 class ShippingForm(forms.ModelForm):
     class Meta:
@@ -200,7 +184,6 @@ class ShippingForm(forms.ModelForm):
                 user_profile.save()
         return user_profile
 
-
 class StaffJoin(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Lemon Sauce'}))
     role = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'What role are you applying for?'}))
@@ -227,14 +210,12 @@ class StaffJoin(forms.ModelForm):
                   'How_do_you_think_you_can_make_PokeTrove_better',
                   'I_confirm_that_I_have_read_all_the_staff_requirements_and_meet_all_of_them')
 
-
 class Server_Partner(forms.ModelForm):
     class Meta:
         model = PartnerApplication
         fields = (
             'user', 'name', 'category', 'multi_category', 'description', 'resume', 'requirement_check', 'policy_check',
             'voucher',)
-
 
 class SupportForm(forms.ModelForm):
     name = forms.CharField(
@@ -250,24 +231,20 @@ class SupportForm(forms.ModelForm):
         model = Support
         fields = ('name', 'category', 'issue', 'Additional_comments', 'image',)
 
-
 class PunishAppeale(forms.ModelForm):
     class Meta:
         model = PunishmentAppeal
         fields = ('name', 'Rule_broken', 'Why_I_should_have_my_punishment_revoked', 'Additional_comments',)
-
 
 class BanAppeale(forms.ModelForm):
     class Meta:
         model = BanAppeal
         fields = ('name', 'Rule_broken', 'Why_I_should_have_my_ban_revoked', 'Additional_comments',)
 
-
 class ReportIssues(forms.ModelForm):
     class Meta:
         model = ReportIssue
         fields = ('name', 'category', 'issue', 'Additional_comments', 'image',)
-
 
 class News_Feed(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
@@ -279,7 +256,6 @@ class News_Feed(forms.ModelForm):
     class Meta:
         model = NewsFeed
         fields = '__all__'
-
 
 class Staffprofile(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
@@ -296,7 +272,6 @@ class Staffprofile(forms.ModelForm):
         model = StaffProfile
         fields = '__all__'
 
-
 class Eventform(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'The event name goes here'}))
     category = forms.CharField(widget=forms.TextInput(
@@ -311,19 +286,15 @@ class Eventform(forms.ModelForm):
         model = Event
         fields = '__all__'
 
-
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = 'post', 'name', 'email', 'body', 'active'
 
-
 from django import forms
 from django.forms import inlineformset_factory
 from .models import Game, Choice
 
-
-# used when the user wants to use their own cards; PokeTrove gets commission
 class PlayerInventoryGameForm(forms.ModelForm):
     items = forms.ModelMultipleChoiceField(
         queryset=PrizePool.objects.filter(is_active=1),
@@ -349,9 +320,6 @@ class PlayerInventoryGameForm(forms.ModelForm):
         model = Game
         fields = ['name', 'cost', 'discount_cost', 'type', 'category', 'image', 'power_meter', 'items']
 
-
-# used when the user wants to use cards owned by PokeTrove; user gets commission
-
 class InventoryGameForm(forms.ModelForm):
     choices = forms.ModelMultipleChoiceField(
         queryset=Choice.objects.all(),
@@ -364,7 +332,6 @@ class InventoryGameForm(forms.ModelForm):
         fields = [
             'name', 'cost', 'discount_cost', 'type', 'category', 'image',
         ]
-
 
 class ChoiceForm(forms.ModelForm):
     class Meta:
@@ -380,7 +347,6 @@ ChoiceFormSet = modelformset_factory(
     extra=0,
 )
 
-
 from django.utils.safestring import mark_safe
 
 class TypeaheadSelectWidget(forms.Select):
@@ -394,9 +360,9 @@ class TypeaheadSelectWidget(forms.Select):
         )
 
     def render(self, name, value, attrs=None, renderer=None):
-        # Render the default select widget.
+
         output = super().render(name, value, attrs, renderer)
-        # Use the element's id to initialize Select2.
+
         element_id = attrs.get('id', 'id_%s' % name)
         js = f'''
         <script type="text/javascript">
@@ -413,7 +379,6 @@ class TypeaheadSelectWidget(forms.Select):
         '''
         return mark_safe(output + js)
 
-
 class GameChoiceForm(forms.ModelForm):
     choice = forms.ModelChoiceField(
         queryset=Choice.objects.all(),
@@ -427,7 +392,6 @@ class GameChoiceForm(forms.ModelForm):
 
 class ToggleFavoriteForm(forms.Form):
     game_id = forms.IntegerField(widget=forms.HiddenInput())
-
 
 class MyPreferencesForm(forms.ModelForm):
     class Meta:
@@ -443,7 +407,6 @@ class AscensionCreateForm(forms.ModelForm):
         model = Ascension
         fields = []
 
-
 class CardUploading(forms.ModelForm):
     class Meta:
         model = Choice
@@ -453,9 +416,7 @@ class CardUploading(forms.ModelForm):
         user = kwargs.pop('user', None)
         super(CardUploading, self).__init__(*args, **kwargs)
 
-
 ChoiceFormSet = inlineformset_factory(Game, Choice, form=CardUploading, extra=1)
-
 
 class GameAdminForm(forms.ModelForm):
     class Meta:
@@ -472,7 +433,6 @@ class GameAdminForm(forms.ModelForm):
 
         return cleaned_data
 
-
 class BattleCreationForm(forms.ModelForm):
     game_values = forms.CharField(
         widget=forms.Textarea(attrs={'readonly': 'readonly'}),
@@ -485,13 +445,13 @@ class BattleCreationForm(forms.ModelForm):
         label="Total Value"
     )
     slots = forms.ChoiceField(
-        choices=Battle.BATTLE_SLOTS,  # Use the model's defined choices
+        choices=Battle.BATTLE_SLOTS,
         widget=forms.RadioSelect,
         label="Battle Slots",
-        initial='2'  # Default option
+        initial='2'
     )
     type = forms.ChoiceField(
-        choices=Battle.BATTLE_TYPE,  # Use the model's defined choices
+        choices=Battle.BATTLE_TYPE,
         widget=forms.RadioSelect,
         label="Battle Type",
         initial='Free For All'
@@ -517,30 +477,27 @@ class BattleCreationForm(forms.ModelForm):
 
         for game in chests:
             quantity_key = f'quantity-{game.id}'
-            quantity = self.data.get(quantity_key, 1)  # Default to 1 if not provided
+            quantity = self.data.get(quantity_key, 1)
             if not quantity.isdigit() or int(quantity) < 1:
                 raise forms.ValidationError(f"Invalid quantity for {game.name}.")
             quantities[game.id] = int(quantity)
 
-        # Store quantities for use in save()
         self.cleaned_data['quantities'] = quantities
         return cleaned_data
 
     def save(self, commit=True):
-        # Save the Battle instance first
+
         battle = super().save(commit=commit)
         quantities = self.cleaned_data.get('quantities', {})
 
-        # Update or create BattleGame instances with the provided quantities
         for game in self.cleaned_data.get('chests'):
             qty = quantities.get(game.id, 1)
-            # Use get_or_create to ensure that a BattleGame instance exists for this game/battle pair
+
             battle_game, created = BattleGame.objects.get_or_create(battle=battle, game=game)
             if battle_game.quantity != qty:
                 battle_game.quantity = qty
                 battle_game.save()
 
-        # Optionally, recalc the total price (if using total_game_values in the template)
         battle.price = battle.total_game_values
         battle.save()
 
@@ -552,7 +509,7 @@ class BetForm(forms.ModelForm):
         fields = ('amount',)
 
     def __init__(self, *args, **kwargs):
-        # pop battle if passed
+
         battle = kwargs.pop('battle', None)
         super().__init__(*args, **kwargs)
 
@@ -585,8 +542,6 @@ class BetForm(forms.ModelForm):
             instance.save()
         return instance
 
-
-
 BattleGameFormSet = inlineformset_factory(
     parent_model=Battle,
     model=BattleGame,
@@ -598,8 +553,6 @@ BattleGameFormSet = inlineformset_factory(
         'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
     }
 )
-
-
 
 class BattleJoinForm(forms.ModelForm):
     class Meta:
@@ -614,25 +567,23 @@ class BattleJoinForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        # Ensure the user isn't already a participant in the battle
         if BattleParticipant.objects.filter(user=self.user, battle=self.battle).exists():
             raise forms.ValidationError("You are already a participant in this battle.")
 
         return cleaned_data
 
     def save(self, commit=True):
-        # Create or retrieve the participant instance
+
         participant = super().save(commit=False)
         participant.user = self.user
         participant.battle = self.battle
 
         if commit:
             participant.save()
-            # Add the participant to the battle's participants ManyToMany field
+
             self.battle.participants.add(participant)
 
         return participant
-
 
 class MoveToTradeForm(forms.Form):
     title = forms.CharField(max_length=100, required=False)
@@ -654,7 +605,6 @@ class MoveToTradeForm(forms.Form):
         model = TradeItem
         fields = '__all__'
 
-
 class AddTradeForm(forms.ModelForm):
     class Meta:
         model = InventoryObject
@@ -666,18 +616,10 @@ class AddTradeForm(forms.ModelForm):
         if user:
             self.fields['add_trade_item'].queryset = InventoryObject.objects.filter(user=user)
 
-
 class Trade_In_Form(forms.ModelForm):
     class Meta:
         model = Trade_In_Cards
         fields = ('card_name', 'card_image', 'card_condition',)
-
-
-# class EditProfileForm(forms.Form):
-# username = forms.CharField()
-# about_me = forms.CharField(widget=forms.Textarea())
-# image = forms.ImageField(required=False)
-
 
 class SettingsForm(forms.ModelForm):
     class Meta:
@@ -691,183 +633,124 @@ class SettingsForm(forms.ModelForm):
             instance.save()
         return instance
 
-
 class BaseCopyrightTextFielde(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = BaseCopyrightTextField
         fields = '__all__'
 
-
 class BackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = BackgroundImage
         fields = '__all__'
 
-
 class BackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = BackgroundImage
         fields = '__all__'
-
 
 class EBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = EBackgroundImage
         fields = '__all__'
 
-
 class ChatBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = ChatBackgroundImage
         fields = '__all__'
 
-
 class ShowcaseBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = ShowcaseBackgroundImage
         fields = '__all__'
 
-
 class BlogBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = BlogBackgroundImage
         fields = '__all__'
 
-
 class PostBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = PostBackgroundImage
         fields = '__all__'
 
-
 class RuleBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = RuleBackgroundImage
         fields = '__all__'
 
-
 class AboutBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = AboutBackgroundImage
         fields = '__all__'
 
-
 class FaqBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = FaqBackgroundImage
         fields = '__all__'
 
-
 class StaffBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = StaffBackgroundImage
         fields = '__all__'
 
-
 class InformationBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = InformationBackgroundImage
         fields = '__all__'
 
-
 class TagBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = TagBackgroundImage
         fields = '__all__'
 
-
 class UserBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = UserBackgroundImage
         fields = '__all__'
 
-
 class StaffRanksBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = StaffRanksBackgroundImage
         fields = '__all__'
 
-
 class MegaBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = MegaBackgroundImage
         fields = '__all__'
 
-
 class EventBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = EventBackgroundImage
         fields = '__all__'
 
-
 class NewsBackgroundImagery(forms.ModelForm):
-    #    image = forms.ImageField(widget=forms.TextInput(
-    #        attrs={'placeholder': 'Link an image for your post.'}))
 
     class Meta:
         model = NewsBackgroundImage
         fields = '__all__'
 
-
 class RoomSettings(forms.ModelForm):
     class Meta:
         model = Room
         fields = ['public', 'logo']
-
 
 class UploadCardsForm(forms.ModelForm):
     name = forms.CharField(
@@ -881,19 +764,17 @@ class UploadCardsForm(forms.ModelForm):
         model = UploadACard
         fields = ('name', 'image', 'public',)
 
-
 class InviteCodeForm(forms.ModelForm):
     class Meta:
         model = InviteCode
-        fields = ['code', 'user', 'expire_time', 'permalink']  # Assuming these are your fields
+        fields = ['code', 'user', 'expire_time', 'permalink']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Get the current user if logged in
+
         user = self.request.user
         if user.is_authenticated:
             self.initial['user'] = user
-
 
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
@@ -903,7 +784,6 @@ PAYMENT_CHOICES = (
     ('P', 'PayPal'),
     ('C', 'Card')
 )
-
 
 class CheckoutForm(forms.Form):
     shipping_address = forms.CharField(required=False)
@@ -935,7 +815,6 @@ class CheckoutForm(forms.Form):
             self.fields['payment_option'].required = False
             self.fields['payment_option'].widget = forms.HiddenInput()
 
-
 class CouponForm(forms.Form):
     code = forms.CharField(widget=forms.TextInput(attrs={
         'class': 'form-control',
@@ -943,8 +822,6 @@ class CouponForm(forms.Form):
         'aria-label': 'Recipient\'s username',
         'aria-describedby': 'basic-addon2'
     }))
-
-
 
 class GiftCodeForm(forms.Form):
     code = forms.CharField(max_length=64)
@@ -981,7 +858,6 @@ class RefundForm(forms.Form):
     message = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}))
     email = forms.EmailField()
 
-
 class PaymentForm(forms.Form):
     number = forms.IntegerField(required=False)
     exp_month = forms.IntegerField(required=False)
@@ -991,9 +867,8 @@ class PaymentForm(forms.Form):
     save = forms.BooleanField(required=False)
     use_default = forms.BooleanField(required=False)
 
-
 class PaypalPaymentForm(forms.Form):
-    # number = forms.IntegerField(required=True)
+
     number = forms.CharField(required=True)
     exp_month = forms.IntegerField(required=True)
     expiry = forms.CharField(required=True)
@@ -1002,11 +877,9 @@ class PaypalPaymentForm(forms.Form):
     save = forms.BooleanField(required=False)
     use_default = forms.BooleanField(required=False)
 
-
 class CurrencyCheckoutForm(forms.Form):
     payment_option = forms.ChoiceField(
         widget=forms.RadioSelect, choices=PAYMENT_CHOICES)
-
 
 class CurrencyPaymentForm(forms.Form):
     number = forms.IntegerField(required=False)
@@ -1017,9 +890,8 @@ class CurrencyPaymentForm(forms.Form):
     save = forms.BooleanField(required=False)
     use_default = forms.BooleanField(required=False)
 
-
 class CurrencyPaypalPaymentForm(forms.Form):
-    # number = forms.IntegerField(required=True)
+
     number = forms.CharField(required=True)
     exp_month = forms.IntegerField(required=True)
     expiry = forms.CharField(required=True)
@@ -1028,12 +900,10 @@ class CurrencyPaypalPaymentForm(forms.Form):
     save = forms.BooleanField(required=False)
     use_default = forms.BooleanField(required=False)
 
-
 from .models import Withdraw
 
 from django import forms
 from .models import Withdraw, InventoryObject
-
 
 class WithdrawForm(forms.ModelForm):
     selected_cards = forms.ModelMultipleChoiceField(
@@ -1052,7 +922,6 @@ class WithdrawForm(forms.ModelForm):
         if user:
             self.fields['selected_cards'].queryset = InventoryObject.objects.filter(user=user)
 
-
 class DegeneratePlaylistForm(forms.ModelForm):
     class Meta:
         model = DegeneratePlaylist
@@ -1063,7 +932,6 @@ class DegeneratePlaylistForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['song'].queryset = DegeneratePlaylistLibrary.objects.filter(user=user)
-
 
 class TradeProposalForm(forms.ModelForm):
     class Meta:
@@ -1076,7 +944,6 @@ class TradeProposalForm(forms.ModelForm):
         if user:
             self.fields['trade_items'].queryset = TradeItem.objects.filter(user=user)
 
-
 class InventoryTradeOfferResponseForm(forms.ModelForm):
     class Meta:
         model = InventoryTradeOffer
@@ -1084,7 +951,6 @@ class InventoryTradeOfferResponseForm(forms.ModelForm):
         widgets = {
             'status': forms.RadioSelect(choices=[('accepted', 'Accept'), ('declined', 'Decline')]),
         }
-
 
 class ExchangePrizesForm(forms.ModelForm):
     usercard = forms.ModelMultipleChoiceField(
@@ -1094,23 +960,22 @@ class ExchangePrizesForm(forms.ModelForm):
         label="Select Items to Trade"
     )
     exchangeprizes = forms.ModelMultipleChoiceField(
-        queryset=ExchangePrize.objects.filter(is_active=1),  # Only active prizes
+        queryset=ExchangePrize.objects.filter(is_active=1),
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label="Select Prizes"
     )
 
     class Meta:
-        model = CommerceExchange  # Ensure this is the correct model
+        model = CommerceExchange
         fields = ['usercard', 'exchangeprizes']
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Extract the user from kwargs
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         if user:
             self.fields['usercard'].queryset = InventoryObject.objects.filter(user=user)
 
-        # Customize the label display for the usercard and exchangeprizes fields
         self.fields['usercard'].label_from_instance = self.get_usercard_label
         self.fields['exchangeprizes'].label_from_instance = self.get_exchangeprize_label
 
@@ -1132,45 +997,38 @@ class ExchangePrizesForm(forms.ModelForm):
         selected_usercards = self.cleaned_data.get('usercard', [])
         selected_exchangeprizes = self.cleaned_data.get('exchangeprizes', [])
 
-        # Calculate total value of usercards and exchangeprizes
         total_usercard_value = sum([card.price for card in selected_usercards])
         total_exchangeprize_value = sum([prize.value for prize in selected_exchangeprizes])
 
-        # Calculate the difference
         difference = total_usercard_value - total_exchangeprize_value
 
-        # Get the user's ProfileDetails instance
         profile = ProfileDetails.objects.get(user=self.instance.user)
 
-        # If the difference is positive, update the currency_amount
         if difference > 0:
             profile.currency_amount += difference
             profile.save()
 
-        # Delete usercards from the inventory
         for usercard in selected_usercards:
             usercard.delete()
 
-        # Add the selected prizes to the user's inventory
         for exchangeprize in selected_exchangeprizes:
             InventoryObject.objects.create(
-                user=self.instance.user,  # Ensure the user is set
-                choice=exchangeprize.prize,  # Assuming the ExchangePrize has a related prize Choice
+                user=self.instance.user,
+                choice=exchangeprize.prize,
                 choice_text=exchangeprize.name,
-                category=exchangeprize.prize.category,  # Assuming prize has a category field
+                category=exchangeprize.prize.category,
                 currency=exchangeprize.currency,
                 price=exchangeprize.value,
                 condition=exchangeprize.condition,
                 image=exchangeprize.image,
                 image_length=exchangeprize.image_length,
                 image_width=exchangeprize.image_width,
-                is_active=1,  # Set active by default
+                is_active=1,
             )
 
         if commit:
-            self.instance.save()  # Save the CommerceExchange instance
+            self.instance.save()
         return self.instance
-
 
 class InventoryTradeForm(forms.ModelForm):
     trading_user = forms.ModelChoiceField(
@@ -1199,17 +1057,13 @@ class InventoryTradeForm(forms.ModelForm):
         current_user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
-        # Populate trading_user field with users who have active trade items
         self.fields['trading_user'].queryset = User.objects.filter(
             tradeitem__is_active=True
         ).distinct().exclude(id=current_user.id)
 
-        # Populate usercard with current user's active trade items
         self.fields['usercard'].queryset = TradeItem.objects.filter(user=current_user, is_active=True)
 
-        # Populate exchangeprizes with all active trade items
         self.fields['exchangeprizes'].queryset = TradeItem.objects.filter(is_active=True)
-
 
 class AddMonstrosityForm(forms.ModelForm):
     class Meta:
@@ -1218,12 +1072,11 @@ class AddMonstrosityForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Set a custom widget for displaying monstrositysprite options
+
         self.fields['monstrositysprite'].queryset = MonstrositySprite.objects.filter(is_active=1)
         self.fields['monstrositysprite'].widget = forms.RadioSelect(
             choices=[(sprite.id, sprite) for sprite in self.fields['monstrositysprite'].queryset],
         )
-
 
 class FeedMonstrosityForm(forms.ModelForm):
     class Meta:
@@ -1236,23 +1089,20 @@ class FeedMonstrosityForm(forms.ModelForm):
             raise forms.ValidationError("Currency amount must be positive.")
         return currency_amount
 
-
 from .models import Endowment
 
-
 class EndowmentForm(forms.Form):
-    user = forms.CharField(widget=forms.HiddenInput())  # or use forms.ModelChoiceField if needed
+    user = forms.CharField(widget=forms.HiddenInput())
     target = forms.CharField(widget=forms.TextInput(
         attrs={'placeholder': 'Name of Endowed Individual'}))
-    order = forms.IntegerField(widget=forms.HiddenInput())  # Adjust widget/field type as needed
+    order = forms.IntegerField(widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         if self.request:
-            self.fields['user'].initial = self.request.user.username  # if using a CharField for username
+            self.fields['user'].initial = self.request.user.username
             self.fields['target'].initial = User.objects.exclude(pk=self.request.user.pk).first().username
-            # You can set an initial value for order if available
 
     def clean_user(self):
         username = self.cleaned_data.get('user')
@@ -1263,9 +1113,9 @@ class EndowmentForm(forms.Form):
             raise forms.ValidationError('Invalid username. Please enter a valid user.')
 
     def save(self, commit=True):
-        # Convert the 'user' field value to an actual user instance using clean_user.
+
         user = self.clean_user()
-        # You might need to adjust target if it's a username or process it accordingly.
+
         instance = Endowment(
             user=user,
             target=self.cleaned_data['target'],
@@ -1275,10 +1125,8 @@ class EndowmentForm(forms.Form):
             instance.save()
         return instance
 
-
 class HitStandForm(forms.Form):
     action = forms.ChoiceField(choices=[('hit', 'Hit'), ('stand', 'Stand')], label='Action')
-
 
 class CreateChest(forms.ModelForm):
     class Meta:
@@ -1287,9 +1135,7 @@ class CreateChest(forms.ModelForm):
                   'total_number_of_choice', 'cost',)
         readonly_fields = ('mfg_date',)
 
-
 from .models import SellerApplication
-
 
 class SellerApplicationForm(forms.ModelForm):
     class Meta:
@@ -1303,20 +1149,20 @@ class SellerApplicationForm(forms.ModelForm):
             raise ValidationError('You need to be 18 or older to apply to sell!')
         return dob
 
-
 class ProfileDetail(forms.ModelForm):
     class Meta:
         model = ProfileDetails
         fields = ('email', 'avatar', 'alternate', 'about_me')
 
+
 class StoreViewTypeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        # Ensure the type field reflects the instance's value
+
         if self.instance and self.instance.pk and self.instance.type:
             self.fields['type'].initial = self.instance.type
-        # Add onchange event to auto-submit the form
+
         self.fields['type'].widget.attrs.update({'onchange': 'this.form.submit();'})
 
     class Meta:
@@ -1337,26 +1183,37 @@ class StoreViewTypeForm(forms.ModelForm):
             storeviewtype.save()
         return storeviewtype
 
-# class PublicForm(forms.ModelForm):
-# class Meta:
-# model = PublicProfile
-# fields = ['username']
 
+class GameRoomViewTypeForm(forms.ModelForm):
+    slug = forms.CharField(widget=forms.HiddenInput())
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
 
-# class NewUserForm(UserCreationForm):
-# ...
+        if self.instance and self.instance.pk and self.instance.type:
+            self.fields['type'].initial = self.instance.type
 
-# class UserForm(forms.ModelForm):
-# ...
+        self.fields['type'].widget.attrs.update({'onchange': 'this.form.submit();'})
 
-# class ProfileForm(forms.ModelForm):
-# class Meta:
-# model = ProfileTwo
-# fields = ('products',)
+    class Meta:
+        model = StoreViewType
+        fields = ('type', 'slug')
+        widgets = {
+            'type': forms.Select(choices=StoreViewType.VIEW_TYPE_CHOICES),
+        }
 
+    def save(self, commit=True):
+        user = self.request.user if self.request.user.is_authenticated else None
+        storeviewtype = super().save(commit=False)
+        if user and isinstance(user, User):
+            storeviewtype.user = user
+        else:
+            storeviewtype.user = None
+        if commit:
+            storeviewtype.save()
+        return storeviewtype
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-
 
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -1377,12 +1234,10 @@ class RegistrationForm(UserCreationForm):
 
         return user
 
-
 class EditProfileForm(UserChangeForm):
     class Meta:
         model = User
         fields = ('email', 'first_name', 'last_name', 'password',)
-
 
 class BilletBackgroundImagery(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(
@@ -1398,7 +1253,6 @@ class BilletBackgroundImagery(forms.ModelForm):
         model = BilletBackgroundImage
         fields = '__all__'
 
-
 class TagBackgroundImagery(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(
         attrs={'placeholder': 'e.g. Liam Mannara'}))
@@ -1413,7 +1267,6 @@ class TagBackgroundImagery(forms.ModelForm):
         model = TagBackgroundImage
         fields = '__all__'
 
-
 class StaffRanksBackgroundImagery(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
     category = forms.CharField(
@@ -1423,7 +1276,6 @@ class StaffRanksBackgroundImagery(forms.ModelForm):
     class Meta:
         model = StaffRanksBackgroundImage
         fields = '__all__'
-
 
 class MegaBackgroundImagery(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
@@ -1435,50 +1287,44 @@ class MegaBackgroundImagery(forms.ModelForm):
         model = MegaBackgroundImage
         fields = '__all__'
 
-
 from django.contrib.auth import get_user_model
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import Group
 
 User = get_user_model()
 
-
-# Create ModelForm based on the Group model.
 class GroupAdminForm(forms.ModelForm):
     class Meta:
         model = Group
         exclude = []
 
-    # Add the users field.
     users = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
         required=False,
-        # Use the pretty 'filter_horizontal widget'.
+
         widget=FilteredSelectMultiple('users', False)
     )
 
     def __init__(self, *args, **kwargs):
-        # Do the normal form initialisation.
+
         super(GroupAdminForm, self).__init__(*args, **kwargs)
-        # If it is an existing group (saved objects have a pk).
+
         if self.instance.pk:
-            # Populate the users field with the current Group users.
+
             self.fields['users'].initial = self.instance.user_set.all()
 
     def save_m2m(self):
-        # Add the users to the Group.
+
         self.instance.user_set.set(self.cleaned_data['users'])
 
     def save(self, *args, **kwargs):
-        # Default save
+
         instance = super(GroupAdminForm, self).save()
-        # Save many-to-many data
+
         self.save_m2m()
         return instance
 
-
 from django.core.mail import send_mail
-
 
 class ContactForme(forms.ModelForm):
     class Meta:
@@ -1497,7 +1343,7 @@ class ContactForme(forms.ModelForm):
         Method that returns formatted information
         :return: subject, msg
         """
-        # Cleaned data
+
         cl_data = super().clean()
 
         name = cl_data.get('name').strip()
@@ -1520,7 +1366,6 @@ class ContactForme(forms.ModelForm):
             recipient_list=[settings.EMAIL_HOST_USER]
         )
 
-
 class BusinessMailingForm(forms.ModelForm):
     class Meta:
         model = BusinessMailingContact
@@ -1528,7 +1373,7 @@ class BusinessMailingForm(forms.ModelForm):
 
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'e.g. Liam Mannara'}),
-            # get this instead of Contact.name in views
+
             "email": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'e.g. Intellex@gmail.com'}),
             "inquiry": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'Your inquiry goes here.'}),
             "message": forms.TextInput(attrs={"class": "form-control", 'placeholder': 'Your message goes here.'})
@@ -1539,7 +1384,7 @@ class BusinessMailingForm(forms.ModelForm):
         Method that returns formatted information
         :return: subject, msg
         """
-        # Cleaned data
+
         cl_data = super().clean()
 
         name = cl_data.get('name').strip()
@@ -1562,32 +1407,26 @@ class BusinessMailingForm(forms.ModelForm):
             recipient_list=[to_email]
         )
 
-
 from .models import Feedback
 
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-
 class OrderItemForm(forms.ModelForm):
     class Meta:
         model = OrderItem
         fields = ('user', 'item', 'quantity', 'slug')
-        # might want to replace item with order (check models)
-        widgets = {
-            # 'slug': forms.TextInput(attrs={'readonly': 'readonly'})
-        }
 
+        widgets = {
+
+        }
 
 class OrderItemAdmin(admin.ModelAdmin):
     form = OrderItemForm
-    # readonly_fields = ('user', 'slug', 'item', 'quantity')
-
 
 admin.site.register(OrderItem, OrderItemAdmin)
 
 from .models import Wager
-
 
 class WagerForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -1604,11 +1443,10 @@ class WagerForm(forms.ModelForm):
             raise forms.ValidationError("Insufficient funds for this bet.")
         return amount
 
-
 class DirectedTradeOfferForm(forms.ModelForm):
     class Meta:
         model = TradeOffer
-        fields = ['trade_status']  # or any other fields you want in the form
+        fields = ['trade_status']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1618,15 +1456,12 @@ class DirectedTradeOfferForm(forms.ModelForm):
         user = self.instance.user
         return user
 
-
 class TradeOfferAcceptanceForm(forms.ModelForm):
     class Meta:
         model = TradeOffer
         fields = ['user', 'user2']
 
-
 from django.core.exceptions import ValidationError
-
 
 class ItemForm(forms.ModelForm):
     class Meta:
@@ -1634,7 +1469,7 @@ class ItemForm(forms.ModelForm):
         fields = (
             'title', 'price', 'discount_price', 'specialty', 'label', 'slug', 'description', 'image')
         widgets = {
-            # 'slug': forms.TextInput(attrs={'readonly': 'readonly'})
+
         }
 
     def clean_title(self):
@@ -1658,17 +1493,14 @@ class ItemForm(forms.ModelForm):
 
         return cleaned_data
 
-
 class QuickItemForm(forms.ModelForm):
     class Meta:
         model = QuickItem
         fields = ['image', 'image_length', 'image_width']
 
-
 from .models import TradeItem
 
 from .models import TradeOffer
-
 
 class TradeItemForm(forms.ModelForm):
     class Meta:
@@ -1679,7 +1511,6 @@ class TradeItemForm(forms.ModelForm):
         inventory_object = kwargs.pop('inventory_object', None)
         super().__init__(*args, **kwargs)
 
-        # Pre-fill fields based on the provided InventoryObject
         if inventory_object:
             self.fields['title'].initial = inventory_object.title
             self.fields['category'].initial = inventory_object.category
@@ -1687,7 +1518,6 @@ class TradeItemForm(forms.ModelForm):
             self.fields['condition'].initial = inventory_object.condition
             self.fields['description'].initial = inventory_object.description
             self.fields['image'].initial = inventory_object.image
-
 
 class TradeProposalForm(forms.ModelForm):
     class Meta:
@@ -1700,14 +1530,13 @@ class TradeProposalForm(forms.ModelForm):
         if user:
             self.fields['trade_items'].queryset = TradeItem.objects.filter(user=user)
 
-
 class FriendRequestForm(forms.ModelForm):
     receiver = forms.CharField(widget=forms.TextInput(
         attrs={'placeholder': 'You can add friends with their username.'}))
 
     class Meta:
         model = FriendRequest
-        fields = ['receiver']  # or any other fields you want in the form
+        fields = ['receiver']
 
     def clean_receiver(self):
         receiver_username = self.cleaned_data['receiver']
@@ -1717,24 +1546,20 @@ class FriendRequestForm(forms.ModelForm):
             raise ValidationError("User with this username does not exist.")
         return receiver
 
-
 class FriendRequestAcceptanceForm(forms.ModelForm):
     class Meta:
         model = FriendRequest
         fields = ['sender', 'receiver']
-
 
 from django import forms
 from .models import RespondingTradeOffer, TradeOffer
 
 from django.contrib.auth.decorators import login_required
 
-# forms.py
 from django import forms
 from .models import TradeItem, RespondingTradeOffer
 
 from .fields import UserRestrictedModelMultipleChoiceField
-
 
 class RespondingTradeOfferForm(forms.ModelForm):
     offered_trade_items = UserRestrictedModelMultipleChoiceField(user=None, required=False)
@@ -1749,9 +1574,7 @@ class RespondingTradeOfferForm(forms.ModelForm):
         model = RespondingTradeOffer
         fields = ['estimated_trading_value', 'offered_trade_items', 'wanted_trade_items', 'message']
 
-
 from django.utils import timezone
-
 
 class TicketRequestForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -1762,13 +1585,11 @@ class TicketRequestForm(forms.ModelForm):
         cleaned_data = super().clean()
         user = self.user
 
-        # Get the current time and the time at 5pm of the previous day
-        now = timezone.now()  # Use timezone.now() instead of datetime.timezone.now()
+        now = timezone.now()
         reset_time = now.replace(hour=17, minute=0, second=0)
         if now.hour < 17:
             reset_time -= timedelta(days=1)
 
-        # Check if the user has already submitted a form since the reset time
         if LotteryTickets.objects.filter(user=user, mfg_date__gte=reset_time).exists():
             raise forms.ValidationError("You have already collected your daily ticket. Please try again after 5pm.")
 
@@ -1777,7 +1598,6 @@ class TicketRequestForm(forms.ModelForm):
     class Meta:
         model = LotteryTickets
         fields = ('name',)
-
 
 from django.contrib.auth import get_user_model
 from django import forms
@@ -1819,7 +1639,6 @@ from .models import Feedback
 from django import forms
 from .models import Feedback
 
-
 class FeedbackForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -1830,10 +1649,9 @@ class FeedbackForm(forms.ModelForm):
         fields = ('order', 'star_rating', 'comment', 'slug', 'image')
 
     def save(self, commit=True):
-        # Get the user who created the feedback
+
         user = self.request.user if self.request.user.is_authenticated else None
 
-        # Create an instance of the Feedback model
         feedback = super().save(commit=False)
 
         if feedback.order and feedback.order.item:
@@ -1841,18 +1659,16 @@ class FeedbackForm(forms.ModelForm):
         if feedback.order:
             feedback.slug = feedback.order.slug
 
-        # Set the user, star rating, and slug if available
-        if user and isinstance(user, User):  # Check if user is a User instance
+        if user and isinstance(user, User):
             feedback.username = user
         else:
-            feedback.username = None  # Set to None if user is not a valid User instance
+            feedback.username = None
 
         if 'star_rating' in self.cleaned_data:
             feedback.star_rating = self.cleaned_data['star_rating']
         if 'slug' in self.cleaned_data:
             feedback.slug = self.cleaned_data['slug']
 
-        # Set the 'image' field if an image file is provided
         if 'image' in self.cleaned_data:
             feedback.image = self.cleaned_data['image']
 
@@ -1860,12 +1676,10 @@ class FeedbackForm(forms.ModelForm):
             feedback.save()
         return feedback
 
-
 class FeedForm(forms.ModelForm):
     class Meta:
         model = Feedback
         fields = ('order', 'star_rating', 'comment', 'slug', 'image')
-
 
 class EmailForm(forms.ModelForm):
     email = forms.CharField(widget=forms.TextInput(
@@ -1880,17 +1694,11 @@ class EmailForm(forms.ModelForm):
         if not confirmation:
             raise forms.ValidationError("You must agree to the terms to continue.")
         return confirmation
-        # name = forms.CharField(widget = forms.TextInput(attrs={'placeholder':'Enter your first name'}))
-
-        # description = forms.CharField(widget = forms.EmailInput
-        # (attrs={'placeholder':'Enter your email'}))
-
 
 class SpinPreferenceForm(forms.ModelForm):
     class Meta:
         model = SpinPreference
         fields = ['quick_spin']
-
 
 class QuestionForm(forms.Form):
     text = forms.CharField(max_length=255)
@@ -1903,14 +1711,13 @@ class QuestionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Add a field for answer choices when the question type is 'Multiple Choice'
+
         if self.instance.form_type == 'option1':
             self.fields['answer_choices'] = forms.CharField(
                 label='Answer Choices (comma-separated)',
                 required=True,
                 widget=forms.TextInput(attrs={'placeholder': 'Choice 1, Choice 2, ...'}),
             )
-
 
 class QuestionCountForm(forms.Form):
     num_questions = forms.IntegerField(label="Number of Questions", )
@@ -1920,9 +1727,7 @@ class QuestionCountForm(forms.Form):
         model = Questionaire
         fields = {"form_name", "form_text", "text"}
 
-
 from .models import Answer
-
 
 class AnswerForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -1936,7 +1741,6 @@ class AnswerForm(forms.Form):
                 required=True,
                 widget=forms.TextInput(attrs={'class': 'form-control'})
             )
-
 
 class MemeForm(forms.ModelForm):
     class Meta:

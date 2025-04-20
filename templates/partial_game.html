@@ -13,37 +13,37 @@
 {% endif %}
 {% endif %}
 <br>
-  {% for game in Games %}
+  {% for newprofile in Profiles %}
     <div class="inventory-item">
       <!-- Game details in a clickable anchor -->
-      <a href="{{ game.get_profile_url2 }}" class="game-link">
+      <a href="{{ newprofile.get_profile_url2 }}" class="game-link">
 
         <div class="item-image">
-          <img src="{{ game.image.url }}" alt="{{ game.title }} Image">
+          <img src="{{ newprofile.image.url }}" alt="{{ newprofile.title }} Image">
         </div>
         <div class="item-details">
           <div class="item-header">
-            <h3 class="item-name">{{ game.name }}</h3>
+            <h3 class="item-name">{{ newprofile.name }}</h3>
             <div class="item-price">
-              {% if game.cost %}
-                {% if game.discount_cost %}
-                  <span class="original-price">💎{{ game.cost }}</span>
-                  <span class="discount-price">💎{{ game.discount_cost }}</span>
+              {% if newprofile.cost %}
+                {% if newprofile.discount_cost %}
+                  <span class="original-price">💎{{ newprofile.cost }}</span>
+                  <span class="discount-price">💎{{ newprofile.discount_cost }}</span>
                 {% else %}
-                  <span class="current-price">💎{{ game.cost }}</span>
+                  <span class="current-price">💎{{ newprofile.cost }}</span>
                 {% endif %}
               {% endif %}
             </div>
           </div>
-          <h3 class="item-title">{{ game.category }}</h3>
+          <h3 class="item-title">{{ newprofile.category }}</h3>
           <div class="heat_level">
                     <h5 style="color: white;">Heat:
 
-                        {% if game.heat == 'M' %}🌶️
-                        {% elif game.heat == 'S' %}🌶️🌶️ (2)
-                        {% elif game.heat == 'F' %}🌶️🌶️🌶️ (3)
-                        {% elif game.heat == 'W' %}🌶️🌶️🌶️🌶️ (4)
-                        {% elif game.heat == 'E' %}🌶️🌶️🌶️🌶️🌶️ (5)
+                        {% if newprofile.heat == 'M' %}🌶️
+                        {% elif newprofile.heat == 'S' %}🌶️🌶️ (2)
+                        {% elif newprofile.heat == 'F' %}🌶️🌶️🌶️ (3)
+                        {% elif newprofile.heat == 'W' %}🌶️🌶️🌶️🌶️ (4)
+                        {% elif newprofile.heat == 'E' %}🌶️🌶️🌶️🌶️🌶️ (5)
                         {% else %}🌶️(*)️
                         {% endif %}
                     </h5>
@@ -54,10 +54,10 @@
 
       <!-- Toggle Favorite Form separated from the clickable area -->
       <div class="legendary-badge" onclick="event.stopPropagation();">
-        <form class="toggle-favorite-form" action="{% url 'showcase:toggle_favorite' game.id %}" method="post">
+        <form class="toggle-favorite-form" action="{% url 'showcase:toggle_favorite' newprofile.id %}" method="post">
           {% csrf_token %}
           <button type="submit" style="background: none; border: none;" onclick="event.stopPropagation();">
-            {% if request.user.is_authenticated and fav_dict|get_item:game.id %}
+            {% if request.user.is_authenticated and fav_dict|get_item:newprofile.id %}
               <svg viewBox="0 0 24 24" width="24" height="24">
                 <path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/>
               </svg>

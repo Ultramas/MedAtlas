@@ -3802,6 +3802,21 @@ class GameHubView(BaseView):
 class GameRoomView(BaseView):
     model = GameHub
     template_name = "gameroom.html"
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+
+        # fetch the GameHub so you can re‑use it in the template
+        gameroom = get_object_or_404(GameHub, slug=kwargs['slug'])
+        context['gameroom'] = gameroom
+
+        try:
+            instance = StoreViewType.objects.get(user=request.user, is_active=1)
+        except StoreViewType.DoesNotExist:
+            instance = None
+
+        context['store_view_form'] = StoreViewTypeForm(instance=instance, request=request)
+        return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         form = EmailForm(request.POST)
@@ -3829,6 +3844,25 @@ class GameRoomView(BaseView):
                 context['SentProfile'] = None
         else:
             context['SentProfile'] = None
+        current_user = self.request.user
+        if isinstance(current_user, AnonymousUser):
+            context['store_view'] = 'stream'
+            context['streamfilter_string'] = 'stream filter set by anonymous user'
+            print('store view does not exist, setting to stream for anonymous user')
+        else:
+            try:
+                user_store_view_type = StoreViewType.objects.get(user=current_user, is_active=1)
+                context['store_view'] = user_store_view_type.type
+                context['store_view_type_str'] = str(user_store_view_type)
+                context['streamfilter_string'] = f'stream filter set by {self.request.user.username}'
+                print('store view exists')
+                print(str(user_store_view_type))
+            except StoreViewType.DoesNotExist:
+                context['store_view'] = 'stream'
+                context['store_view_type_str'] = 'stream'
+                context['streamfilter_string'] = f'stream filter set by {self.request.user.username}'
+                print('store view does not exist, setting to stream for signed-in user')
+
         context['Money'] = Currency.objects.filter(is_active=1).first()
         context['Game'] = GameHub.objects.filter(is_active=1).first()
         context['GameRoom'] = Game.objects.filter(is_active=1, daily=False).first()
@@ -3837,9 +3871,13 @@ class GameRoomView(BaseView):
         context['FeaturedGame'] = Game.objects.filter(is_active=1, filter='F')
         context['NewGame'] = Game.objects.filter(is_active=1, filter='N')
         context['PopularGame'] = Game.objects.filter(is_active=1, filter='P')
-
         if self.request.user.is_authenticated:
 
+            try:
+                instance = StoreViewType.objects.get(user=self.request.user, is_active=1)
+            except StoreViewType.DoesNotExist:
+                instance = None
+            context['store_view_form'] = StoreViewTypeForm(instance=instance)
             user_favs = FavoriteChests.objects.filter(user=self.request.user, is_active=1)
             fav_dict = {fav.chest.id: fav for fav in user_favs}
 
@@ -3847,6 +3885,7 @@ class GameRoomView(BaseView):
         else:
             fav_dict = {}
             context["FavoriteGames"] = []
+            context['store_view_form'] = StoreViewTypeForm()
         context['fav_dict'] = fav_dict
 
         newprofile = Game.objects.filter(is_active=1, daily=False)
@@ -9441,6 +9480,7 @@ class EBackgroundView(BaseView, FormView):
     template_name = "ehome.html"
     form_class = EmailForm
 
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -9667,7 +9707,8 @@ class StoreView(BaseView, FormView, ListView):
             return redirect('showcase:ehome')
         else:
             print('the errors with the ehomeviewtype form are ' + str(eform.errors))
-        return render(request, 'ehomeviewtypesnippet.html', {'eform': eform})
+        return render(request, 'storeviewtypesnippet.html', {'eform': eform})
+
 
 class InventoreView(BaseView, FormView, ListView):
     model = StoreViewType
@@ -9740,6 +9781,87 @@ class InventoreView(BaseView, FormView, ListView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
+
+
+class GameRoomTypeView(BaseView, FormView, ListView):
+    model = StoreViewType
+    template_name = "gameroomviewtypesnippet.html"
+    form_class = StoreViewTypeForm
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+
+        # fetch the GameHub so you can re‑use it in the template
+        gameroom = get_object_or_404(GameHub, slug=kwargs['slug'])
+        context['gameroom'] = gameroom
+
+        try:
+            instance = StoreViewType.objects.get(user=request.user, is_active=1)
+        except StoreViewType.DoesNotExist:
+            instance = None
+
+        context['store_view_form'] = StoreViewTypeForm(instance=instance, request=request)
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        eform = StoreViewTypeForm(request.POST, request=request)
+        slug = request.POST.get('slug')
+        try:
+            gameroom = GameHub.objects.get(slug=slug)
+            if eform.is_valid():
+                post = eform.save(commit=False)
+                post.save()
+                return redirect('showcase:gameroom', slug=gameroom.slug)
+            else:
+                print('the errors with the gameviewtypesnippet form are ' + str(eform.errors))
+
+        except GameHub.DoesNotExist:
+            raise Http404("Game Room does not exist")
+        return render(request, 'gameroomviewtypesnippet.html', {'eform': eform})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'BaseCopyrightTextFielded': BaseCopyrightTextField.objects.filter(is_active=1),
+            'Background': BackgroundImageBase.objects.filter(page=self.template_name).order_by("position"),
+            'TextFielde': TextBase.objects.filter(page=self.template_name).order_by("section"),
+            'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+            'Favicon': FaviconBase.objects.filter(is_active=1),
+            'Image': ImageBase.objects.filter(is_active=1, page=self.template_name),
+            'Social': SocialMedia.objects.filter(page=self.template_name, is_active=1),
+            'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
+            'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
+        })
+
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] is None:
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
 
 class ECreatePostView(CreateView):
     model = EBackgroundImage
