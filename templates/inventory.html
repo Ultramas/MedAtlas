@@ -10,6 +10,7 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
 
    </head>
+  {% include 'navtrove.html' %}
 <br>
 <br>
 <br>
@@ -1490,7 +1491,6 @@ export const GlobalStyles = createGlobalStyle`
   </style>
 </head>
 <body>
-  {% include 'navtrove.html' %}
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -2745,27 +2745,8 @@ function initEventListeners() {
 
 
 {% else %}
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeTrove - My Inventory</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-
-  <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/inventory2.css' %}">
     <style>
+    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
     .copyright-section {
         background: linear-gradient(
             to right,
@@ -2934,6 +2915,35 @@ function initEventListeners() {
             flex-shrink: 0;
         }
 
+        .user-profile {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-profile::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .user-info {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
 
         .username {
             font-family: 'Cinzel', serif;
@@ -2943,6 +2953,26 @@ function initEventListeners() {
             text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
         }
 
+        .user-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 1rem;
+        }
+
+        .user-stat {
+            background: rgba(191, 151, 255, 0.1);
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid var(--primary);
+        }
+
+        .user-stat-icon {
+            font-size: 1.5rem;
+        }
 
         .filters {
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
@@ -3048,9 +3078,6 @@ function initEventListeners() {
             color: var(--accent);
         }
 
-        .main-content {
-            width: 100%;
-        }
         .main-content h1 {
             color: var(--primary);
             font-size: 3rem;
@@ -3072,6 +3099,15 @@ function initEventListeners() {
             background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
+        .nav-links h1::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
 
         .pokemon-grid {
             display: grid;
@@ -3107,6 +3143,7 @@ function initEventListeners() {
         }
 
         .pokemon-image {
+            width: 100%;
             aspect-ratio: 1;
             background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
             display: flex;
@@ -3119,6 +3156,8 @@ function initEventListeners() {
         .pokemon-image::after {
             content: '';
             position: absolute;
+            width: 150%;
+            height: 150%;
             background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
             animation: rotate 20s linear infinite;
         }
@@ -3135,17 +3174,11 @@ function initEventListeners() {
         }
 
         .pokemon-name {
-            font-size: 1.00rem;
+            font-size: 1.75rem;
             margin-bottom: 0.75rem;
             font-family: 'Cinzel', serif;
             color: var(--primary);
-            position:fixed;
             text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
-            background: rgba(0, 0, 0, 0.3);
-            width: 100%;
-            color: white;
-            padding-left: 5px;
-            padding-right: 5px;
         }
 
         .pokemon-type {
@@ -3156,6 +3189,46 @@ function initEventListeners() {
             margin-bottom: 1rem;
         }
 
+        .add-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .add-button:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .add-button:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
 
         .legendary-icon {
             position: absolute;
@@ -3186,9 +3259,6 @@ function initEventListeners() {
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         @media (max-width: 1200px) {
@@ -3203,29 +3273,9 @@ function initEventListeners() {
             }
         }
 
-  .inventory-items-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        @media (max-width: 1200px) {
-            .inventory-items-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .inventory-items-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .gridCardItem {
+        .inventory-item {
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
             overflow: hidden;
             position: relative;
             border: 2px solid var(--primary);
@@ -3233,7 +3283,7 @@ function initEventListeners() {
             transform-style: preserve-3d;
         }
 
-        .gridCardItem:hover {
+        .inventory-item:hover {
             transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
             box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
             border-color: var(--accent);
@@ -3269,7 +3319,7 @@ function initEventListeners() {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-.inventory-grid.compact-view .gridCardItem {
+.inventory-grid.compact-view .inventory-item {
     font-size: 0.9em;
 }
 
@@ -3310,471 +3360,116 @@ nav.main-menu ul li a {
     display: block;
     padding: 15px;
 }
-
-/* Hide the default checkbox */
-.item-select-checkbox {
-    display: none;
-}
-
-.outerContainer {
-    position: relative;
-    cursor: pointer;
-}
-
-.item-select-checkbox:checked + .gridCardItem {
-    background-color: rgba(0, 128, 0, 0.1); /* Example: light green background */
-}
-
-.item-select-checkbox:checked + .gridCardItem::before {
-    content: '✔'; /* Checkmark symbol */
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    font-size: 20px;
-    color: green;
-    z-index: 100;
-}
-
-          .withdraw-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #fff;
-    border: 1px solid #ccc;
-    padding: 20px;
-    z-index: 1000;
-    display: none; /* Hidden by default */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  }
-  .popup-content {
-    text-align: center;
-  }
-
-    .popup-content::before {
-      content: '';
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 4px;
-      background: linear-gradient(90deg, #d4af37, #f9f095, #d4af37);
-      border-radius: 2px;
-    }
-            h2 {
-      color: #1a1a1a;
-      font-size: 24px;
-      font-weight: 600;
-      margin-top: 10px;
-      margin-bottom: 20px;
-      letter-spacing: 0.5px;
-    }
-
-    p {
-      color: #555;
-      font-size: 16px;
-      line-height: 1.6;
-      margin-bottom: 25px;
-    }
-
-    p strong {
-      color: #d4af37;
-      font-weight: 600;
-      font-size: 18px;
-    }
-
-    .popup-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    button {
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      outline: none;
-      letter-spacing: 0.5px;
-    }
-
-    #confirm-withdraw {
-      background: linear-gradient(135deg, #d4af37, #e5c760);
-      color: #000;
-      border: none;
-      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-    }
-
-    #confirm-withdraw:hover {
-      background: linear-gradient(135deg, #c9a431, #d4af37);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
-    }
-
-    #cancel-withdraw {
-      background-color: transparent;
-      color: #555;
-      border: 1px solid #d1d1d1;
-    }
-
-    #cancel-withdraw:hover {
-      background-color: #f5f5f5;
-      color: #333;
-      border-color: #bbb;
-    }
-
-    /* Demo button */
-    #show-popup {
-      background: linear-gradient(135deg, #d4af37, #e5c760);
-      color: #000;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-      margin: 20px;
-    }
-
-    #show-popup:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
-    }
     </style>
 </head>
 <body>
-<div id="withdraw-popup" class="withdraw-popup">
-  <div class="popup-content">
-    <h2>Confirm Withdrawal</h2>
-    <p>The shipping fee is <strong>599 rubies</strong>. Do you wish to proceed?</p>
-    <div class="popup-buttons">
-      <button id="confirm-withdraw">Yes, proceed</button>
-      <button id="cancel-withdraw">No, cancel</button>
-    </div>
-  </div>
-</div>
-
 
 <script>
+    // Load audio files
     const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
     const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
     const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
 
+    // Add event listeners to sell forms
     document.querySelectorAll('.sell-form').forEach(form => {
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
-            sellAudio.play();
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            sellAudio.play(); // Play the sell sound
             console.log('')
-            handleAjaxFormSubmission(form);
+            handleAjaxFormSubmission(form); // Handle the AJAX request
         });
     });
 
-document.querySelectorAll(".withdraw-form").forEach(form => {
-  form.addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevent immediate submission
-
-    // Capture the form that triggered the submission
-    const currentForm = form;
-    const withdrawPopup = document.getElementById("withdraw-popup");
-    withdrawPopup.style.display = "block"; // Show confirmation popup
-
-    const confirmButton = document.getElementById("confirm-withdraw");
-    const cancelButton = document.getElementById("cancel-withdraw");
-
-    // Remove any previous onclick handlers to avoid duplicate submissions
-    confirmButton.onclick = null;
-    cancelButton.onclick = null;
-
-    confirmButton.onclick = () => {
-      // Create new FormData from the current form
-      const confirmFormData = new FormData(currentForm);
-      // Append confirmation flag so the server knows to create a new withdraw
-      confirmFormData.append("confirm_withdraw", "true");
-
-      const actionUrl = currentForm.getAttribute("action");
-
-      fetch(actionUrl, {
-        method: "POST",
-        body: confirmFormData,
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "X-CSRFToken": confirmFormData.get("csrfmiddlewaretoken"),
-        },
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP status ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.success) {
-            alert("Withdraw successful!");
-
-            const inventoryItem = currentForm.closest(".gridCardItem");
-            if (inventoryItem) inventoryItem.remove();
-
-            // Update stock count
-            const stockCountElement = document.getElementById("stock-count");
-            if (stockCountElement) {
-              stockCountElement.textContent = data.stock_count;
-            }
-          } else {
-            alert("Withdraw failed! " + (data.error || ""));
-          }
-          withdrawPopup.style.display = "none"; // Hide popup after processing
-        })
-        .catch(error => {
-          console.error("Error:", error);
-          withdrawPopup.style.display = "none";
+    // Add event listeners to withdraw forms
+    document.querySelectorAll('.withdraw-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            withdrawAudio.play(); // Play the withdraw sound
+            handleAjaxFormSubmission(form); // Handle the AJAX request
         });
-    };
+    });
 
-    cancelButton.onclick = () => {
-      withdrawPopup.style.display = "none";
-    };
-  });
-});
+	document.querySelectorAll('.trade-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            tradeAudio.play(); // Play the withdraw sound
+        });
+    });
 
+    // Generic AJAX form submission handler
+    function handleAjaxFormSubmission(form) {
+        const formData = new FormData(form);
+        const actionUrl = form.getAttribute('action');
 
-
-</script>
-
-{% include 'navtrove.html' %}
-
-<div class="container">
-
-
-    <main class="main-content">
-        <h1>My Inventory - (<span id="stock-count">{{ stock_count }}</span>)</h1>
-
-            {% if stock_count > 0 %}
-    <div style="margin-top: 20px;">
-        <button id="sell-everything-button" class="card-button add-button sell-button" style="width: 120px; position: fixed; right: 50px; top: 175px;">Sell All</button>
-    </div>
-{% endif %}
-
-<script>
-document.getElementById('sell-everything-button').addEventListener('click', function() {
-    if (confirm('Are you sure you want to sell all inventory items?')) {
-        fetch("{% url 'showcase:sell_everything_inventory_objects' %}", {
+        fetch(actionUrl, {
             method: 'POST',
+            body: formData,
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
             },
-            credentials: 'same-origin',
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                document.getElementById('inventory-items-container').innerHTML = data.inventory_html;
-                document.getElementById('stock-count').textContent = data.stock_count;
-                const sellButton = document.getElementById('sell-everything-button');
-                if (sellButton) {
-                    sellButton.style.display = data.stock_count > 0 ? 'block' : 'none';
-                }
-                if (data.currency_amount) {
-                    const currencyElement = document.getElementById('sellupdate');
-                    if (currencyElement) {
-                        currencyElement.textContent = data.currency_amount;
-                    }
-                }
-                const totalValueElement = document.getElementById('total-value');
-                if (totalValueElement) {
-                    totalValueElement.textContent = data.total_value || 0;
-                }
+                document.getElementById('stock-count').textContent = data.number_of_cards;
+                document.getElementById('stock-count2').textContent = data.number_of_cards;
             } else {
-                console.log('Error:', data.error);
-                alert('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-            alert('An error occurred while processing your request.');
-        });
-    }
-});
-</script>
-        <section id="inventoryGrid" class="inventory-grid comfortable-view">
-            <!-- Sell All Form (hidden by default) -->
-          <!-- Bulk Sell Form -->
-<form id="sell-all-form" class="sell-all-form" action="{% url 'showcase:sell_all_inventory_objects' %}" method="post"
-      style="display: none; position: fixed; top: 210px; right: 50px; z-index: 50;">
-    {% csrf_token %}
-    <input type="hidden" name="selected_ids" id="sell-all-selected-ids">
-    <button type="submit" class="sell-all-button" style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">Sell Selected</button>
-</form>
-
-
-<!-- Inventory Items -->
-<div id="inventory-items-container" style="display: grid; grid-template-columns: repeat(3, 1fr); space-between: 10px;">
-    {% include "inventory_items.html" with StockObject=StockObject %}
-</div>
-
-
-<script>
-$(document).ready(function() {
-  const $checkboxes = $('.item-select-checkbox');
-  const $sellAllForm = $('#sell-all-form');
-  const $sellAllSelectedIds = $('#sell-all-selected-ids');
-
-  function updateSellAllButton() {
-      let selectedIds = [];
-      $checkboxes.each(function() {
-          if ($(this).prop('checked')) {
-              selectedIds.push($(this).data('id'));
-          }
-      });
-      if (selectedIds.length > 0) {
-          $sellAllForm.show();
-          $sellAllSelectedIds.val(selectedIds.join(','));
-      } else {
-          $sellAllForm.hide();
-      }
-  }
-
-  $checkboxes.on('change', updateSellAllButton);
-
-  $sellAllForm.on('submit', function(event) {
-      event.preventDefault();
-      console.log('called the method to sell selected inventory objects');
-
-      const sellselectedAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
-      sellselectedAudio.play();
-
-      $.ajax({
-    url: "{% url 'showcase:sell_all_inventory_objects' %}",
-    type: 'POST',
-    data: $sellAllForm.serialize(),
-    dataType: 'json',  // expect JSON response
-    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-    success: function(response) {
-        $('#stock-count').html(response.stock_count);
-        $('#inventory-items-container').html(response.inventory_html);
-        $('#sellupdate').html(response.currency_amount);
-        console.log('Successfully sold selected inventory objects');
-    },
-    error: function(xhr, status, error) {
-        console.error("Error: ", error);
-    }
-});
-
-
-
-
-
-  });
-});
-
-    $(document).ready(function() {
-    const $checkboxes = $('.item-select-checkbox');
-    const $sellAllForm = $('#sell-all-form');
-    const $sellAllSelectedIds = $('#sell-all-selected-ids');
-
-    function updateSellAllButton() {
-        let selectedIds = [];
-        $checkboxes.each(function() {
-            if ($(this).prop('checked')) {
-                selectedIds.push($(this).data('id'));
-            }
-        });
-
-        if (selectedIds.length > 0) {
-            $sellAllForm.show();
-            $sellAllSelectedIds.val(selectedIds.join(','));
-        } else {
-            $sellAllForm.hide();
-        }
-    }
-
-    $checkboxes.on('change', updateSellAllButton);
-
-    function handleInventoryAction(event, $form) {
-        event.preventDefault();
-        console.log('Processing action:', $form.find('input[name="action"]').val());
-
-        $.ajax({
-            url: $form.attr('action'),
-            type: 'POST',
-            data: $form.serialize(),
-            dataType: 'json',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-            success: function(response) {
-                $('#stock-count').html(response.stock_count);
-                $('#inventory-items-container').html(response.inventory_html);
-                $('#sellupdate').html(response.currency_amount);
-
-                // Uncheck the checkbox associated with the affected item
-                const pk = $form.find('input[name="pk"]').val();
-                $('#checkbox-' + pk).prop('checked', false);
-                updateSellAllButton();
-
-                console.log('Action successful:', response);
-            },
-            error: function(xhr, status, error) {
-                console.error("Error:", error);
+                console.error(data.error);
             }
         });
     }
-
-    // Handle Sell Button Click
-    $(document).on('submit', '.sell-form', function(event) {
-        handleInventoryAction(event, $(this));
-    });
-
-    // Handle Withdraw Button Click
-    $(document).on('submit', '.withdraw-form', function(event) {
-        handleInventoryAction(event, $(this));
-    });
-
-    // Handle Set Tradable Button Click
-    $(document).on('submit', '.trade-form', function(event) {
-        handleInventoryAction(event, $(this));
-    });
-
-    // Handle Sell All Form Submission
-    $sellAllForm.on('submit', function(event) {
-        event.preventDefault();
-        console.log('Selling all selected items.');
-
-        const sellselectedAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
-        sellselectedAudio.play();
-
-        $.ajax({
-            url: "{% url 'showcase:sell_all_inventory_objects' %}",
-            type: 'POST',
-            data: $sellAllForm.serialize(),
-            dataType: 'json',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-            success: function(response) {
-                $('#stock-count').html(response.stock_count);
-                $('#inventory-items-container').html(response.inventory_html);
-                $('#sellupdate').html(response.currency_amount);
-
-                // Uncheck all selected checkboxes after selling
-                $checkboxes.prop('checked', false);
-                updateSellAllButton();
-
-                console.log('Successfully sold selected inventory objects');
-            },
-            error: function(xhr, status, error) {
-                console.error("Error:", error);
-            }
-        });
-    });
-});
-
 </script>
 
-        </section>
-    </main>
+    <div class="container">
+
+
+  <main class="main-content">
+            <h1>My Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)</h1>
+
+            <section id="inventoryGrid" class="inventory-grid comfortable-view">
+
+                {% for Inventory in StockObject %}
+                    <div class="inventory-item">
+                        <div class="legendary-icon">🐉</div>
+                        <div class="pokemon-image">
+                            <img src="{{ Inventory.image.url }}" alt="{{Inventory.choice_text}} Image">
+                        </div>
+                        <div class="pokemon-info">
+                            <h3 class="pokemon-name">{{ Inventory.choice.choice_text }}</h3>
+                            <p class="pokemon-type">{{ Inventory.price }} 💎</p>
+                            <p class="product-condition" style="color: rgba(255, 255, 255, 0.8);">Card Condition: {{ Inventory.condition }}</p>
+                            <p class="product-description">{{ Inventory.description }}</p>
+                            <div class="action-buttons">
+                                <form id="sell-form-{{ Inventory.pk }}" action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post" class="ajax-form sell-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="sell">
+                                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
+                                    <button type="submit" class="add-button sell-button">Sell</button>
+                                </form>
+
+                                <form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' Inventory.pk %}" method="post" class="ajax-form withdraw-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="withdraw">
+                                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
+                                    <button type="submit" class="add-button withdraw-button">Withdraw</button>
+                                </form>
+
+                                <form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post" class="trade-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="move">
+                                    <button type="submit" class="add-button trade-button" class="cart-btn">Set Tradable</button>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="empty-inventory">
+                        <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy">
+                        <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
+                    </div>
+                {% endfor %}
+            </section>
+        </main>
     </div>
 
 
@@ -3810,8 +3505,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (data.success) {
                     // Update stock count
                     const stockCountElement = document.querySelector("#stock-count");
+                    const stockCountElement2 = document.querySelector("#stock-count2");
                     if (stockCountElement) {
                         stockCountElement.textContent = data.stock_count;
+                        stockCountElement2.textContent = data.stock_count2;
                     }
 
                     // Update currency amount
@@ -3820,7 +3517,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         currencyAmountElement.textContent = data.currency_amount;
                     }
 
-                    this.closest(".gridCardItem").remove();
+                    // Example: Remove the item from the UI
+                    this.closest(".inventory-item").remove();
                 } else {
                     console.error("Action failed.");
                 }
@@ -3839,96 +3537,51 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
     const withdrawButtons = document.querySelectorAll(".withdraw-button");
 
-    // Helper function to submit form via fetch
-    function submitWithdrawForm(form, confirmWithdraw = false) {
-        const formData = new FormData(form);
-        if (confirmWithdraw) {
-            formData.append("confirm_withdraw", "true");
-        }
-        const actionUrl = form.getAttribute("action") || window.location.href;
-
-        console.log("Submitting form to:", actionUrl);
-        console.log("Form Data:", [...formData.entries()]);
-
-        fetch(actionUrl, {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-            },
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`HTTP status ${response.status}`);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                if (data.success) {
-
-                    if (data.new_withdraw) {
-                        console.log('Shipping fee charged 599');
-                    }
-
-                    const inventoryItem = form.closest(".gridCardItem");
-                    if (inventoryItem) inventoryItem.remove();
-
-                    const stockCountElement = document.getElementById("stock-count");
-                    if (stockCountElement) {
-                        stockCountElement.textContent = data.stock_count;
-                    }
-                } else if (data.confirmation_required) {
-                    // Display confirmation popup if confirmation is needed.
-                    showConfirmationPopup(form);
-                } else {
-                    console.error("Server error:", data.error);
-                    alert(data.error || "An error occurred.");
-                }
-            })
-            .catch((error) => {
-                console.error("Fetch error:", error);
-                alert("An unexpected error occurred. Please try again.");
-            });
-    }
-
-    // Show the confirmation popup and set up the confirm/cancel handlers.
-    function showConfirmationPopup(form) {
-        const popup = document.getElementById("withdraw-popup");
-        popup.style.display = "block";
-
-        const confirmButton = document.getElementById("confirm-withdraw");
-        const cancelButton = document.getElementById("cancel-withdraw");
-
-        // Define handlers so they can be removed after use.
-        function proceedWithWithdraw() {
-            popup.style.display = "none";
-            // Re-submit the form with confirmation flag.
-            submitWithdrawForm(form, true);
-            cleanup();
-        }
-
-        function cancelWithdraw() {
-            popup.style.display = "none";
-            cleanup();
-        }
-
-        function cleanup() {
-            confirmButton.removeEventListener("click", proceedWithWithdraw);
-            cancelButton.removeEventListener("click", cancelWithdraw);
-        }
-
-        confirmButton.addEventListener("click", proceedWithWithdraw);
-        cancelButton.addEventListener("click", cancelWithdraw);
-    }
-
-    // Attach event listeners to all withdraw buttons.
     withdrawButtons.forEach((button) => {
         button.addEventListener("click", function (event) {
             event.preventDefault();
+
             const form = button.closest("form");
-            // Initial submission without confirmation flag.
-            submitWithdrawForm(form, false);
+            const formData = new FormData(form);
+            const actionUrl = form.getAttribute("action") || window.location.href;
+
+            console.log("Submitting form to:", actionUrl); // Debug URL
+            console.log("Form Data:", [...formData.entries()]); // Debug form data
+
+            fetch(actionUrl, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP status ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        const inventoryItem = form.closest(".inventory-item");
+                        if (inventoryItem) inventoryItem.remove();
+
+                        const stockCountElement = document.getElementById("stock-count");
+                        const stockCountElement2 = document.getElementById("stock-count");
+                        if (stockCountElement) {
+                            stockCountElement.textContent = data.stock_count;
+                            stockCountElement2.textContent = data.stock_count2;
+                        }
+                    } else {
+                        console.error("Server error:", data.error);
+                        alert(data.error || "An error occurred.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error);
+                    alert("An unexpected error occurred. Please try again.");
+                });
         });
     });
 });
@@ -3968,6 +3621,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
 
 
 

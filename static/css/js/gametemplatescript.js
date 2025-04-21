@@ -804,6 +804,7 @@ spin(buttonId);
         .then(data => {
             if (data.success) {
                 document.getElementById('stock-count').textContent = data.number_of_cards;
+                document.getElementById('stock-count2').textContent = data.number_of_cards;
             } else {
                 console.error(data.error);
             }

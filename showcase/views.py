@@ -2509,10 +2509,12 @@ def bulk_sell_view(request):
         user_profile.save()
 
     stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+    stock_count2 = InventoryObject.objects.filter(is_active=1, user=request.user).count()
     return JsonResponse({
         "success": True,
         "sold_count": sold_count,
         "stock_count": stock_count,
+        "stock_count2": stock_count2,
         "currency_amount": user_profile.currency_amount
     })
 
@@ -2559,10 +2561,12 @@ def sell_game_inventory_object(request, pk):
             print('sold an item directly using outside sell_game_inventory_object method')
 
         stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+        stock_count2 = InventoryObject.objects.filter(is_active=1, user=request.user).count()
 
         return JsonResponse({
             'success': True,
             'stock_count': stock_count,
+            'stock_count2': stock_count2,
             'currency_amount': user_profile.currency_amount,
             'message': f"Sold {len(items)} items for {total_sale_value} currency."
         })
@@ -12850,6 +12854,7 @@ def sse_total_value(request):
 
     return StreamingHttpResponse(event_stream(), content_type="text/event-stream")
 
+
 class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
     model = InventoryObject
     template_name = "inventory.html"
@@ -12857,75 +12862,20 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
-            "position")
+        context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['PostBackgroundImage'] = PostBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['store_view_form'] = StoreViewTypeForm()
-
-        if self.request.user.is_authenticated:
-            stock_objects = InventoryObject.objects.filter(
-                is_active=1,
-                user=self.request.user
-            ).order_by("created_at")
-            context['StockObject'] = stock_objects
-
-            # ① compute total value
-            context['total_value'] = stock_objects.aggregate(total=Sum('price'))['total'] or 0
-
-            # ② compute and inject the stock count
-            context['stock_count'] = stock_objects.count()
-
-        current_user = self.request.user
-        if current_user.is_authenticated:
-            try:
-                store_view_instance = StoreViewType.objects.get(user=current_user, is_active=1)
-                context['store_view'] = store_view_instance.type
-                context['store_view_type_str'] = str(store_view_instance)
-                context['streamfilter_string'] = f'stream filter set by {current_user.username}'
-            except StoreViewType.DoesNotExist:
-                store_view_instance = None
-                context['store_view'] = 'stream'
-                context['store_view_type_str'] = 'stream'
-                context['streamfilter_string'] = f'stream filter set by {current_user.username}'
-        else:
-            store_view_instance = None
-            context['store_view'] = 'stream'
-            context['streamfilter_string'] = 'stream filter set by anonymous user'
-
-        store_view_form = StoreViewTypeForm(instance=store_view_instance, request=self.request)
-        context['store_view_form'] = store_view_form
-
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
-        user = self.request.user
-        if user.is_authenticated:
-            user_clickables = UserClickable.objects.filter(user=user)
-            for user_clickable in user_clickables:
-                if user_clickable.clickable.chance_per_second > 0:
-                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
-                    print('chance exists' + str(user_clickable.precomputed_chance))
-                else:
-                    user_clickable.precomputed_chance = 0
-
-            context["Clickables"] = user_clickables
-            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                context['profile_pk'] = profile.pk
-                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
-
         try:
-            context['SentProfile'] = ProfileDetails.objects.get(
-                user=self.request.user)
+            context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user) #specifically used to get ruby amount
         except UserProfile.DoesNotExist:
             context['SentProfile'] = None
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
+        # Retrieve the author's profile avatar
 
         context['NewsProfiles'] = newprofile
 
@@ -12947,6 +12897,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             context['Profiles'] = None
 
         if context['Profiles'] == None:
+            # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -12959,7 +12910,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         context['Money'] = Currency.objects.filter(is_active=1)
-
+        context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user)
         context['TradeItems'] = TradeItem.objects.filter(is_active=1, user=self.request.user)
         context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
         if self.request.user.is_authenticated:
@@ -12973,6 +12924,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
+            # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -12991,87 +12943,64 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         action = request.POST.get('action')
         pk = kwargs.get('pk')
 
-        # 1) Look up and authorize
-        inventory_object = get_object_or_404(InventoryObject, pk=pk, user=request.user)
+        try:
+            inventory_object = InventoryObject.objects.get(pk=pk, user=request.user)
+        except InventoryObject.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Inventory object not found'}, status=404)
 
         if action == 'sell':
             response = self.sell_inventory_object(request, pk)
         elif action == 'withdraw':
             response = self.withdraw_inventory_object(request, pk)
         elif action == 'move':
-            print("Move action triggered")
+            print("Move action triggered")  # Debugging line
             response = self.move_to_trade(request, pk)
         else:
             return JsonResponse({'success': False, 'error': 'Invalid action'}, status=400)
 
+        # Update inventory count after performing the action
         inventory_object.inventory.update_inventory_count()
         updated_count = inventory_object.inventory.number_of_cards
 
         return response
 
     def withdraw_inventory_object(self, request, pk):
-        if request.method != "POST" or request.headers.get("X-Requested-With") != "XMLHttpRequest":
-            return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
-
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
+
         if inventory_object.user != request.user:
-            return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # AJAX check
+                return JsonResponse({'success': False}, status=403)
+            return redirect('showcase:inventory')
+
+        inventory_object.user = None
+        inventory_object.inventory = None
+        inventory_object.save()
 
         user = request.user
-
-        user_profile = get_object_or_404(ProfileDetails, user=user)
-        new_withdraw = False
-        confirm_withdraw = request.POST.get("confirm_withdraw", "false").lower() == "true"
-        withdraw = Withdraw.objects.filter(
-            user=user, is_active=1, shipping_state='S', number_of_cards__lt=25
-        ).first()
-        withdraw_fee = 599
-
         with transaction.atomic():
             withdraw = Withdraw.objects.filter(
                 user=user, is_active=1, shipping_state='S', number_of_cards__lt=25
             ).first()
 
             if withdraw:
-                inventory_object.user = None
-                inventory_object.inventory = None
-                inventory_object.save()
                 withdraw.cards.add(inventory_object)
             else:
-                print('withdraw created here ')
-                if not confirm_withdraw:
-                    return JsonResponse({
-                        'success': False,
-                        'confirmation_required': True,
-                        'message': 'Please confirm withdrawal to proceed.'
-                    })
-                if user_profile.currency_amount >= withdraw_fee:
-                    user_profile.currency_amount -= withdraw_fee
-                    user_profile.save()
-                    print('User profile deducted withdraw fee')
-                    inventory_object.user = None
-                    inventory_object.inventory = None
-                    inventory_object.save()
-                    withdraw = Withdraw.objects.create(user=user, is_active=1, shipping_state='S')
-                    withdraw.cards.add(inventory_object)
-                    new_withdraw = True
-                else:
-                    print('Not enough rubies')
-                    return JsonResponse({
-                        'success': False,
-                        'error': 'Not enough rubies.'
-                    }, status=400)
+                withdraw = Withdraw.objects.create(user=user, is_active=1, shipping_state='S')
+                withdraw.save()  # Save the object to generate an ID
+                withdraw.cards.add(inventory_object)  # Add the InventoryObject
 
             withdraw.number_of_cards = withdraw.cards.count()
-            withdraw.save()
+            withdraw.save()  # Update the number of cards
 
-        stock_count = InventoryObject.objects.filter(is_active=1, user=user).count()
-        return JsonResponse({
-            'success': True,
-            'stock_count': stock_count,
-            'new_withdraw': new_withdraw,
-            'currency_amount': user_profile.currency_amount
-        })
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+            stock_count2 = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+            return JsonResponse({
+                'success': True,
+                'stock_count': stock_count,
+                'stock_count2': stock_count2
+            })
+        return redirect('showcase:inventory')
 
     def sell_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
@@ -13091,32 +13020,38 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             )
             inventory_object.save()
 
-            user_profile = get_object_or_404(ProfileDetails, user=request.user)
+            user_profile = get_object_or_404(ProfileDetails, user=request.user) #was UserProfile, also has a currency_amount attribute
             user_profile.currency_amount += inventory_object.price
             user_profile.save()
 
+        # Include updated values in the response
         stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+        stock_count2 = InventoryObject.objects.filter(is_active=1, user=request.user).count()
         return JsonResponse({
             'success': True,
             'stock_count': stock_count,
+            'stock_count2': stock_count2,
             'currency_amount': user_profile.currency_amount
         })
 
     def move_to_trade(self, request, pk):
+        # Fetch the InventoryObject instance by primary key
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
+        # Check if the user owns the inventory object
         if inventory_object.user != request.user:
             messages.error(request, 'You cannot trade items you do not own!')
             return redirect('showcase:inventory')
 
         user = request.user
 
+        # Use a transaction to ensure atomicity
         with transaction.atomic():
-
+            # Create a new TradeItem instance
             tradeitem = TradeItem.objects.create(
                 user=user,
-                title=inventory_object.choice_text or inventory_object.choice.text,
-                inventoryobject=inventory_object,
+                title=inventory_object.choice_text or inventory_object.choice.text,  # Use choice_text if set
+                inventoryobject=inventory_object,  # Save reference to the InventoryObject
                 category=inventory_object.category,
                 is_active=1,
                 currency=inventory_object.currency,
@@ -13127,11 +13062,13 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
                 image_width=inventory_object.image_width,
                 length_for_resize=inventory_object.length_for_resize,
                 width_for_resize=inventory_object.width_for_resize,
-                description=f"Automatically moved to trade by {user.username}"
+                description=f"Automatically moved to trade by {user.username}"  # Example description
             )
 
+            # Delete the inventory object after creating the trade item
             inventory_object.delete()
 
+            # Redirect to the trade inventory page
             return redirect('showcase:tradeinventory')
 
 @csrf_exempt
@@ -13195,6 +13132,7 @@ class SellAllInventoryObjectsView(View):
             return JsonResponse({
                 'success': True,
                 'stock_count': 0,
+                'stock_count2': 0,
                 'currency_amount': get_object_or_404(ProfileDetails, user=request.user).currency_amount,
                 'inventory_html': updated_inventory_html
             })
@@ -13218,6 +13156,7 @@ class SellAllInventoryObjectsView(View):
             user_profile.save()
 
         stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+        stock_count2 = InventoryObject.objects.filter(is_active=1, user=request.user).count()
         updated_inventory_html = render_to_string(
             "inventory_items.html",
             {"StockObject": InventoryObject.objects.filter(is_active=1, user=request.user)},
@@ -13226,6 +13165,7 @@ class SellAllInventoryObjectsView(View):
         return JsonResponse({
             'success': True,
             'stock_count': stock_count,
+            'stock_count2': stock_count2,
             'currency_amount': user_profile.currency_amount,
             'inventory_html': updated_inventory_html
         })
@@ -13267,6 +13207,7 @@ class SellEverythingInventoryObjectsView(View):
 
         stock_objects = InventoryObject.objects.filter(is_active=True, user=request.user)
         stock_count = stock_objects.count()
+        stock_count2 = stock_objects.count()
         updated_inventory_html = render_to_string(
             "inventory_items.html",
             {"StockObject": stock_objects},
@@ -13276,6 +13217,7 @@ class SellEverythingInventoryObjectsView(View):
         return JsonResponse({
             'success': True,
             'stock_count': stock_count,
+            'stock_count2': stock_count2,
             'currency_amount': user_profile.currency_amount,
             'total_value': total_price,
             'inventory_html': updated_inventory_html
@@ -13915,10 +13857,12 @@ class GameChestBackgroundView(BaseView):
                 user_profile.save()
 
             stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
+            stock_count2 = InventoryObject.objects.filter(is_active=1, user=request.user).count()
 
             return JsonResponse({
                 'success': True,
                 'stock_count': stock_count,
+                'stock_count2': stock_count2,
                 'currency_amount': user_profile.currency_amount,
                 'message': f"Sold {len(items)} items for {total_sale_value} currency."
             })
