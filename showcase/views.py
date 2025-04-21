@@ -12867,17 +12867,11 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['store_view_form'] = StoreViewTypeForm()
 
         if self.request.user.is_authenticated:
-            stock_objects = InventoryObject.objects.filter(
-                is_active=1,
-                user=self.request.user
-            ).order_by("created_at")
+            stock_objects = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by("created_at")
             context['StockObject'] = stock_objects
 
-            # ① compute total value
-            context['total_value'] = stock_objects.aggregate(total=Sum('price'))['total'] or 0
-
-            # ② compute and inject the stock count
-            context['stock_count'] = stock_objects.count()
+            total_value = stock_objects.aggregate(total=Sum('price'))['total'] or 0
+            context['total_value'] = total_value
 
         current_user = self.request.user
         if current_user.is_authenticated:
@@ -12901,23 +12895,6 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-
-        user = self.request.user
-        if user.is_authenticated:
-            user_clickables = UserClickable.objects.filter(user=user)
-            for user_clickable in user_clickables:
-                if user_clickable.clickable.chance_per_second > 0:
-                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
-                    print('chance exists' + str(user_clickable.precomputed_chance))
-                else:
-                    user_clickable.precomputed_chance = 0
-
-            context["Clickables"] = user_clickables
-            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                context['profile_pk'] = profile.pk
-                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         try:
             context['SentProfile'] = ProfileDetails.objects.get(
@@ -12986,44 +12963,30 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
         return context
 
-    from django.http import JsonResponse
-
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action')
         pk = kwargs.get('pk')
 
-        # 1) Look up and authorize
-        inventory_object = get_object_or_404(InventoryObject, pk=pk, user=request.user)
+        try:
+            inventory_object = InventoryObject.objects.get(pk=pk, user=request.user)
+        except InventoryObject.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Inventory object not found'}, status=404)
 
-        # 2) Perform the requested action
         if action == 'sell':
-            result = self.sell_inventory_object(request, pk)
+            response = self.sell_inventory_object(request, pk)
         elif action == 'withdraw':
-            result = self.withdraw_inventory_object(request, pk)
+            response = self.withdraw_inventory_object(request, pk)
         elif action == 'move':
-            result = self.move_to_trade(request, pk)
+            print("Move action triggered")
+            response = self.move_to_trade(request, pk)
         else:
             return JsonResponse({'success': False, 'error': 'Invalid action'}, status=400)
 
-        # 3) Update any related counts on the Inventory model
         inventory_object.inventory.update_inventory_count()
+        updated_count = inventory_object.inventory.number_of_cards
 
-        # 4) Recompute the up‑to‑the‑moment stock count
-        new_count = InventoryObject.objects.filter(
-            is_active=1,
-            user=request.user
-        ).count()  # efficient COUNT(*) query :contentReference[oaicite:2]{index=2}
-
-        # 5) Merge into the final JSON payload
-        payload = {
-            'success': True,
-            'stock_count': new_count,
-            # you can also include other fields from `result` if needed
-            **(result if isinstance(result, dict) else {})
-        }
-
-        return JsonResponse(payload)  # uses Django’s JsonResponse helper :contentReference[oaicite:3]{index=3}
+        return response
 
     def withdraw_inventory_object(self, request, pk):
         if request.method != "POST" or request.headers.get("X-Requested-With") != "XMLHttpRequest":
