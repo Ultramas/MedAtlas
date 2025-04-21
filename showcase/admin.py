@@ -1880,7 +1880,7 @@ admin.site.register(Clickable, ClickableAdmin)
 class UserClickableAdmin(admin.ModelAdmin):
     fieldsets = (
         (' User Clickable Information - Categorial Description', {
-            'fields': ('user', 'clickable', 'exponential_level_multiplier', 'actual_value', 'is_active',),
+            'fields': ('user', 'clickable', 'exponential_level_multiplier', 'actual_value', 'count', 'is_active',),
             'classes': ('open',),
         }),
     )
@@ -2379,12 +2379,12 @@ admin.site.register(GiftCode, GiftCodeAdmin)
 class GiftCodeRedemptionAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Gift Code Information', {
-            'fields': ('user', 'gift_code', 'is_active',)
+            'fields': ('user', 'gift_code', 'amount', 'is_active',)
         }),
     )
     readonly_fields = ('redeemed_at',)
 
-    list_display = ('user', 'gift_code',)
+    list_display = ('user', 'gift_code', 'amount', 'redeemed_at',)
 
 admin.site.register(GiftCodeRedemption, GiftCodeRedemptionAdmin)
 

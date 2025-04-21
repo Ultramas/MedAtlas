@@ -5,12 +5,13 @@ from datetime import timedelta, time, datetime
 import requests
 from django.utils import timezone
 from uuid import uuid4
+from decimal import Decimal, getcontext, ROUND_DOWN
 
 from PIL import Image
 from decimal import Decimal
 from colorfield.fields import ColorField
 import logging
-
+import math
 from autoslug import AutoSlugField
 from autoslug.utils import generate_unique_slug
 from django.db.models.signals import post_save, post_delete, pre_delete
@@ -30,7 +31,6 @@ from decimal import ROUND_UP
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.files.base import ContentFile
-# from image.utils import render
 
 CATEGORY_CHOICES = (
     ('G', 'Gold'),
@@ -187,10 +187,6 @@ POWER = (
     ('1000', 'x1000'),
 )
 
-
-# consider having the power level shift up the hit cards & remove some of the original floor cards
-
-# relative level, based on chest cost
 COLOR = (
     ('gray',   'Gray'),
     ('green',  'Green'),
@@ -206,7 +202,6 @@ PRIVACY = (
     ('PRI', 'Private'),
 )
 
-# absolute level, regardless of chest
 LEVEL = (
     ('C', 'Common'),
     ('U', 'Uncommon'),
@@ -270,7 +265,6 @@ GAMEHUB_CHOICES = (
     ('N', 'New'),
 )
 
-
 class Idea(models.Model):
     """Model for sharing ideas and getting user feedback"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -303,12 +297,10 @@ class Idea(models.Model):
             max_message_number = Idea.objects.aggregate(max_message_number=models.Max('profile_number'))[
                                      'max_message_number'] or 0
 
-            # Increment the maximum message number to get the new message number
             self.profile_number = max_message_number + 1
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.user).first()
 
-            # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
 
@@ -321,7 +313,6 @@ class Idea(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
-
 
 class UpdateProfile(models.Model):
     """Update user profiles"""
@@ -355,12 +346,10 @@ class UpdateProfile(models.Model):
             max_message_number = UpdateProfile.objects.aggregate(max_message_number=models.Max('profile_number'))[
                                      'max_message_number'] or 0
 
-            # Increment the maximum message number to get the new message number
             self.profile_number = max_message_number + 1
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.user).first()
 
-            # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
 
@@ -373,7 +362,6 @@ class UpdateProfile(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
-
 
 class Affiliation(models.Model):
     type = models.CharField(max_length=200)
@@ -392,7 +380,6 @@ class Affiliation(models.Model):
     def __str__(self):
         return f"{self.type}" + " " + self.flavor_text
 
-
 class Level(models.Model):
     COLOR_PALETTE = [
         ("#FFFFFF", "white", ),
@@ -407,7 +394,7 @@ class Level(models.Model):
     color_wheel = ColorField(samples=COLOR_PALETTE, blank=True, null=True)
     color = models.CharField(max_length=500, blank=True, null=True, help_text="Comma-separated hex colors for gradient")
     games = models.ManyToManyField(
-        'Game',  # Refer to Game using a string
+        'Game',
         blank=True,
         limit_choices_to={'daily': True},
         related_name='levels',
@@ -425,17 +412,28 @@ class Level(models.Model):
     def __str__(self):
         return f"{self.level_name} (Level {self.level})"
 
+    @property
+    def actual_level(self) -> str:
+
+        getcontext().prec = max(self.level, 28)
+        raw = Decimal("1.02") ** self.level
+
+        truncated = raw.quantize(Decimal("0.00"), rounding=ROUND_DOWN)
+        s = f"{truncated:.2f}"
+        if raw != truncated:
+            s += "…"
+        return s + "x"
+
     def save(self, *args, **kwargs):
-        # Ensure the current instance is saved first to generate a primary key
+
         if not self.pk:
             super().save(*args, **kwargs)
 
         if self.full_row:
-            # Get the last level to calculate the new level
+
             last_level = Level.objects.all().order_by('-level').first()
             self.level = (last_level.level + 1) if last_level else 1
 
-            # Prepare new level instances for bulk creation
             level_instances = []
             for i in range(10):
                 new_level = Level(
@@ -447,29 +445,23 @@ class Level(models.Model):
                 )
                 level_instances.append(new_level)
 
-            # Perform bulk creation asynchronously or in a transaction
             self._bulk_create_level_instances(level_instances)
 
-            # Early exit to prevent saving the original instance again
             return
 
-        # Update experience based on the level
         formulaic_experience = self.level * 2
         self.experience = formulaic_experience ** 2
 
-        # Avoid unnecessary updates to level_name
         if self.pk:
             existing_instance = Level.objects.filter(pk=self.pk).first()
             if existing_instance and existing_instance.level_name != self.level_name:
                 Level.objects.filter(level_name=existing_instance.level_name).exclude(pk=self.pk).update(
                     level_name=self.level_name)
 
-        super().save(*args, **kwargs)  # Save the instance
+        super().save(*args, **kwargs)
 
-        # Correct level gaps if necessary
         self._correct_level_gaps()
 
-        # Adjust related levels for the same level_name
         self._adjust_related_levels()
 
     def _bulk_create_level_instances(self, level_instances):
@@ -477,17 +469,17 @@ class Level(models.Model):
             with transaction.atomic():
                 Level.objects.bulk_create(level_instances)
         except Exception as e:
-            # Log or handle the error as needed
+
             print(f"Error during bulk creation: {e}")
 
     def delete(self, *args, **kwargs):
-        super().delete(*args, **kwargs)  # Delete the instance
-        self._correct_level_gaps()  # Correct gaps after deletion
+        super().delete(*args, **kwargs)
+        self._correct_level_gaps()
 
     def _correct_level_gaps(self):
         try:
             with transaction.atomic():
-                levels = Level.objects.order_by('level')  # Fetch ordered levels
+                levels = Level.objects.order_by('level')
                 new_levels = []
                 current_level = 1
 
@@ -498,14 +490,14 @@ class Level(models.Model):
                     current_level += 1
 
                 if new_levels:
-                    Level.objects.bulk_update(new_levels, ['level'])  # Apply updates
+                    Level.objects.bulk_update(new_levels, ['level'])
         except Exception as e:
             print(f"Error correcting level gaps: {e}")
 
     def _adjust_related_levels(self):
         try:
             with transaction.atomic():
-                # Step 1: Fetch all levels grouped by level_name and ordered by their appearance
+
                 all_levels = Level.objects.order_by('level', 'id')
                 level_groups = {}
 
@@ -514,20 +506,16 @@ class Level(models.Model):
                         level_groups[level_obj.level_name] = []
                     level_groups[level_obj.level_name].append(level_obj)
 
-                # Step 2: Rebuild levels in order, ensuring:
-                #   - Groups with the first appearance come first
-                #   - Levels within each group are sequential
                 new_levels = []
-                current_level = 1  # Start levels from 1
+                current_level = 1
 
                 for group_name, level_group in level_groups.items():
                     for i, level_obj in enumerate(level_group):
-                        # Prevent duplicate levels by adjusting later instances
+
                         level_obj.level = current_level
                         current_level += 1
                         new_levels.append(level_obj)
 
-                # Step 3: Perform a bulk update to apply the changes
                 Level.objects.bulk_update(new_levels, ['level'])
 
         except Exception as e:
@@ -539,21 +527,20 @@ class Level(models.Model):
         """
         if not self.color:
             return {"style": "background: none;", "is_gradient": False}
-        colors = self.color.split(",")  # Split comma-separated values
+        colors = self.color.split(",")
         if len(colors) > 1:
-            # Linear gradient for multiple colors
+
             return {
                 "style": f"background: linear-gradient(30deg, {', '.join(colors)});",
                 "is_gradient": True,
             }
-        # Single color
+
         return f"{colors[0]}"
 
     class Meta:
         verbose_name = "Level"
         verbose_name_plural = "Levels"
         ordering = ['level']
-
 
 class MonstrositySprite(models.Model):
     name = models.CharField(max_length=200, blank=True, null=True)
@@ -576,7 +563,6 @@ class MonstrositySprite(models.Model):
         verbose_name = "Monstrosity Sprite"
         verbose_name_plural = "Monstrosity Sprites"
 
-
 class Monstrosity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     monstrositysprite = models.ForeignKey(MonstrositySprite, on_delete=models.CASCADE,
@@ -585,7 +571,7 @@ class Monstrosity(models.Model):
                                          unique=True)
     experience = models.IntegerField(default=0)
     level = models.IntegerField(default=1)
-    currency = models.ForeignKey('Currency', on_delete=models.CASCADE) #Monster Fuel
+    currency = models.ForeignKey('Currency', on_delete=models.CASCADE)
     currency_amount = models.IntegerField(default=0)
     feed_amount = models.IntegerField(default=0)
     is_active = models.IntegerField(default=1,
@@ -598,18 +584,18 @@ class Monstrosity(models.Model):
         return str(self.user) + "'s " + str(self.monstrositys_name)
 
     def save(self, *args, **kwargs):
-        if not self.monstrositys_name:  # Ensure a default name is set
+        if not self.monstrositys_name:
             self.monstrositys_name = str(self.user) + "'s " + str(self.monstrositysprite)
 
-        if not self.currency:  # Set default currency if not specified
+        if not self.currency:
             try:
-                self.currency = Currency.objects.all().order_by('id')[2]  # Retrieves the third object
+                self.currency = Currency.objects.all().order_by('id')[2]
             except IndexError:
-                self.currency = None  # Or provide a fallback value
+                self.currency = None
         super().save(*args, **kwargs)
 
     def get_sprite_images(self):
-        # Retrieve images from related InventoryObjects
+
         return [self.monstrositysprite.image.url]
 
     @property
@@ -619,7 +605,6 @@ class Monstrosity(models.Model):
     class Meta:
         verbose_name = "Monstrosity"
         verbose_name_plural = "Monstrosities"
-
 
 class Membership(models.Model):
     name = models.CharField(default='Rubies', max_length=200)
@@ -650,7 +635,6 @@ class Membership(models.Model):
         verbose_name = "Membership Tier"
         verbose_name_plural = "Membership Tiers"
 
-
 class Subscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     membership_tier = models.ForeignKey(Membership, on_delete=models.CASCADE)
@@ -667,7 +651,6 @@ class Subscription(models.Model):
     class Meta:
         verbose_name = "Subscription"
         verbose_name_plural = "Subscriptions"
-
 
 class Currency(models.Model):
     name = models.CharField(default='Rubies', max_length=200)
@@ -694,7 +677,6 @@ class Currency(models.Model):
         verbose_name = "PokeTrove Currency"
         verbose_name_plural = "PokeTrove Currencies"
 
-
 class CurrencyMarket(models.Model):
     name = models.CharField(max_length=200)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
@@ -705,7 +687,7 @@ class CurrencyMarket(models.Model):
     unit_ratio = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     deal = models.BooleanField(default=False)
     label = models.CharField(choices=LABEL_CHOICES, max_length=1000, blank=True,
-                             null=True)  # can use for cataloging products
+                             null=True)
     flavor_text = models.CharField(max_length=200)
     file = models.FileField(null=True, verbose_name='Sprite')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -741,14 +723,13 @@ class CurrencyMarket(models.Model):
             print("Name:", self.name)
             self.slug = slugify(self.name)
             print("Slug after slugify:", self.slug)
-        if self.amount != 0:  # Avoid division by zero
+        if self.amount != 0:
             self.unit_ratio = self.price / self.amount
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Currency Market"
         verbose_name_plural = "Currency Markets"
-
 
 def generate_unique_code(length=16):
     while True:
@@ -765,7 +746,6 @@ def generate_unique_serial():
 def default_expiration():
     return timezone.now() + timedelta(days=7)
 
-
 class GiftCode(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     code = models.CharField(
@@ -778,7 +758,7 @@ class GiftCode(models.Model):
     serial = models.BigIntegerField(blank=True, null=True, unique=True)
     created_date = models.DateTimeField(auto_now_add=True)
     expiration_date = models.DateTimeField(default=default_expiration)
-    value = models.IntegerField(default=100)
+    value = models.IntegerField(default=1000)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     uses = models.IntegerField(default=1)
     total_uses = models.IntegerField(default=1)
@@ -794,7 +774,6 @@ class GiftCode(models.Model):
 
     def __str__(self):
         return f"{self.code} (Serial: {self.serial})"
-
 
     def save(self, *args, **kwargs):
         if not self.code:
@@ -816,10 +795,10 @@ class GiftCode(models.Model):
         verbose_name = "Gift Code"
         verbose_name_plural = "Gift Codes"
 
-
 class GiftCodeRedemption(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     gift_code = models.ForeignKey(GiftCode, on_delete=models.CASCADE)
+    amount = models.IntegerField(default=0, blank=True, null=True)
     redeemed_at = models.DateTimeField(auto_now_add=True)
     is_active = models.IntegerField(
         default=1,
@@ -830,6 +809,12 @@ class GiftCodeRedemption(models.Model):
         verbose_name="Set active?"
     )
 
+    def save(self, *args, **kwargs):
+
+        if not self.amount:
+            self.amount = self.gift_code.value
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return str(self.user)
 
@@ -837,7 +822,6 @@ class GiftCodeRedemption(models.Model):
         unique_together = ('user', 'gift_code')
         verbose_name = "Gift Code Redemption"
         verbose_name_plural = "Gift Codes Redemptions"
-
 
 class LevelIcon(models.Model):
     name = models.CharField(max_length=200, blank=True, null=True)
@@ -855,11 +839,10 @@ class LevelIcon(models.Model):
         verbose_name = "Level Icon"
         verbose_name_plural = "Level Icons"
 
-
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(blank=True, null=True)
-    # username = models.OneToOneField(User, on_delete=models.CASCADE)
+
     shipping_address = models.CharField(blank=True, null=True, max_length=250)
     billing_address = models.CharField(blank=True, null=True, max_length=250)
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True, verbose_name="Profile picture")
@@ -872,9 +855,9 @@ class ProfileDetails(models.Model):
     currency_amount = models.IntegerField(default=0)
     total_currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_currency_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    rubies_spent = models.IntegerField(blank=True, null=True, default=0)  # linked to experience
+    rubies_spent = models.IntegerField(blank=True, null=True, default=0)
     other_currencies_amount = models.ManyToManyField(Currency, through='ProfileCurrency',
-                                                     related_name="profile_currencies")  # get the integer fieds of all the other currencies besides the first (Rubies)
+                                                     related_name="profile_currencies")
     green_cards_hit = models.IntegerField(blank=True, null=True, default=0)
     yellow_cards_hit = models.IntegerField(blank=True, null=True, default=0)
     orange_cards_hit = models.IntegerField(blank=True, null=True, default=0)
@@ -898,8 +881,7 @@ class ProfileDetails(models.Model):
         unique=True,
         help_text="Position for sorting",
     )
-    # link_to_profile = models.URLField(default=1, blank=True, null=True, verbose_name="Link to profile") #possibly consider making this automatically fill with the link to the user's profile
-    # consider making a randomized pk that is assigned to each invididual user and can be attached to the end of the default profile url like in this schema: "http://127.0.0.1:8000/profile/pk/
+
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -938,18 +920,17 @@ class ProfileDetails(models.Model):
         for currency in currencies:
             profile_currency, created = ProfileCurrency.objects.get_or_create(profile=profile, currency=currency)
             if created:
-                profile_currency.quantity = 0  # Default quantity; adjust as needed
+                profile_currency.quantity = 0
                 profile_currency.save()
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
         if created:
-            # Set default level and currency or customize as needed
-            default_level = Level.objects.first()  # You can specify a default level
-            default_currency = Currency.objects.first()  # You can specify a default currency
+
+            default_level = Level.objects.first()
+            default_currency = Currency.objects.first()
             profile_image = '/bed.jpg'
 
-            # Create ProfileDetails instance
             ProfileDetails.objects.create(
                 user=instance,
                 currency=default_currency,
@@ -957,29 +938,26 @@ class ProfileDetails(models.Model):
                 avatar=profile_image
             )
 
-            # Create Inventory instance
             Inventory.objects.create(
                 user=instance,
-                name=f"{instance.username}'s Inventory",  # Or customize this
-                image='a.jpg',  # Set to a default image path or leave blank
+                name=f"{instance.username}'s Inventory",
+                image='a.jpg',
                 image_length=100,
                 image_width=100,
-                is_active=1,  # Set as active by default
+                is_active=1,
             )
 
     post_save.connect(create_user_profile, sender=User)
 
     def save(self, *args, **kwargs):
-        # Set the first active currency if not already set
+
         if not self.currency:
             self.currency = Currency.objects.filter(is_active=1).first()
 
-        # Set a default avatar if not provided
         if not self.avatar:
             self.avatar = os.path.join('a.jpg')
             print('saved the profile avatar to default image')
 
-        # Check if rubies_spent has changed
         if self.pk:
             previous_instance = ProfileDetails.objects.get(pk=self.pk)
             if previous_instance.currency_amount > self.currency_amount:
@@ -988,19 +966,16 @@ class ProfileDetails(models.Model):
                 if first_currency and self.currency == first_currency:
                     self.rubies_spent = (self.rubies_spent or 0) + spent_amount
 
-            # Update the level field if rubies_spent has changed
             if self.rubies_spent != previous_instance.rubies_spent:
                 new_level = Level.objects.filter(experience__lte=self.rubies_spent).order_by('-level').first()
                 if new_level:
                     self.level = new_level
 
-        # Call the parent class's save method to trigger signals
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Account Profile"
         verbose_name_plural = "Account Profiles"
-
 
 class ProfileCurrency(models.Model):
     profile = models.ForeignKey('ProfileDetails', on_delete=models.CASCADE)
@@ -1009,7 +984,6 @@ class ProfileCurrency(models.Model):
 
     def __str__(self):
         return f"{self.profile.user}'s {self.currency.name} ({self.quantity})"
-
 
 class IndividualChestStatistics(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -1025,7 +999,6 @@ class IndividualChestStatistics(models.Model):
     class Meta:
         verbose_name = "Individual Chest Statistic"
 
-#if a totalcheststatistics instance exists with a specified chest, update it
 class TotalChestStatistics(models.Model):
     ranking = models.IntegerField(default=0)
     plays = models.IntegerField(default=0)
@@ -1142,7 +1115,6 @@ class CurrencyOrder(models.Model):
         verbose_name = "Individiual Currency Order"
         verbose_name_plural = "Individiual Currency Orders"
 
-
 class CurrencyFullOrder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ref_code = models.CharField(max_length=20, blank=True, null=True)
@@ -1190,11 +1162,10 @@ class CurrencyFullOrder(models.Model):
     def get_amount_saved(self):
         return self.round_decimal(self.get_total_item_price() - self.get_discount_item_price())
 
-
     def get_total_price(self):
-        total = Decimal('0.00')  # Initialize as Decimal
+        total = Decimal('0.00')
         for order_item in self.items.all():
-            total += Decimal(order_item.get_final_price())  # Ensure conversion to Decimal
+            total += Decimal(order_item.get_final_price())
 
         if self.coupon:
             if self.coupon.percentDollars:
@@ -1203,7 +1174,7 @@ class CurrencyFullOrder(models.Model):
             else:
                 total -= Decimal(self.coupon.amount)
 
-        return self.round_decimal(total)  # Ensure rounding before returning
+        return self.round_decimal(total)
 
     def round_decimal(self, value):
         """Ensures the decimal always has two places and rounds up."""
@@ -1218,7 +1189,6 @@ class CurrencyFullOrder(models.Model):
     class Meta:
         verbose_name = "Total Currency Order"
         verbose_name_plural = "Total Currency Orders"
-
 
 class Experience(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -1238,20 +1208,17 @@ class Experience(models.Model):
         return f"{self.user}: {self.amount} EXP"
 
     def save(self, *args, **kwargs):
-        # Assign profile if not already set
+
         if self.user and not self.profile:
             self.profile = ProfileDetails.objects.filter(user=self.user).first()
 
-        # Set amount based on profile rubies spent if not already set
         if self.profile:
             self.amount = self.profile.rubies_spent or 0
 
-        super().save(*args, **kwargs)  # Save the instance first to ensure it has a primary key
+        super().save(*args, **kwargs)
 
-        # Iterate through all Level instances and add eligible levels to the ManyToMany field
         eligible_levels = Level.objects.filter(experience__lte=self.amount)
 
-        # Set the levels after the instance is saved
         print(f"Eligible levels: {eligible_levels}")
         self.level.set(eligible_levels)
         print(f"Set levels: {self.level.all()}")
@@ -1259,7 +1226,6 @@ class Experience(models.Model):
     class Meta:
         verbose_name = "Experience"
         verbose_name_plural = "Experiences"
-
 
 class Ascension(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -1284,46 +1250,39 @@ class Ascension(models.Model):
         return str(self.ascension)
 
     def save(self, *args, **kwargs):
-        with transaction.atomic():  # Start a database transaction
-            # Automatically set the `ascension_number` for the user
+        with transaction.atomic():
+
             if not self.ascension_number:
                 last_ascension = Ascension.objects.filter(user=self.user).order_by('-ascension_number').first()
                 self.ascension_number = (last_ascension.ascension_number + 1) if last_ascension else 1
 
-            # Ensure the final_level is set to the lowest level if not already assigned
             if not self.final_level_id:
                 lowest_level = Level.objects.filter(level=1).first()
                 if lowest_level:
                     self.final_level = lowest_level
 
-            # Automatically set the `ascension` field if not already set
             if not self.ascension:
                 ordinal_suffix = self._get_ordinal_suffix(self.ascension_number)
                 self.ascension = f"{self.user}'s {self.ascension_number}{ordinal_suffix} Ascension"
 
-            # Randomly assign a flavor_text if not provided
             if not self.flavor_text:
                 self.flavor_text = random.choice([choice[0] for choice in ASCENSIONFLAVORTEXT])
 
-            # Save the Ascension instance
             super().save(*args, **kwargs)
 
-            # Handle rubies_spent and reset logic
             profile = ProfileDetails.objects.filter(user=self.user).first()
             if profile and profile.level.level >= 100:
                 print('ascending through the rubies')
-                # Increase rubies_spent by 10% before resetting
+
                 if profile.rubies_spent > 0:
                     print('rubies gained: ' + str(profile.rubies_spent))
-                    profile.currency_amount += int(profile.rubies_spent * 0.1)  # Add 10%
+                    profile.currency_amount += int(profile.rubies_spent * 0.1)
 
-                    # Reset rubies_spent to 0
                     profile.rubies_spent = 0
                 else:
                     print(
                         'Somehow you gained levels without playing the game properly. Either you are a developer (you are clear) or you hacked the system. Hacking will not be tolerated and your account has been reported.')
 
-                # Optionally adjust other fields
                 profile.level = Level.objects.filter(level=1).first()
                 profile.save(update_fields=['rubies_spent', 'level', 'currency_amount'])
 
@@ -1343,13 +1302,12 @@ class Ascension(models.Model):
         verbose_name = "Ascension"
         verbose_name_plural = "Ascensions"
 
-
 class Clickable(models.Model):
     name = models.CharField(max_length=200)
     image = models.ImageField(upload_to='images/', verbose_name="Clickable Image")
     base_value = models.IntegerField(default=0)
-    rarity = models.IntegerField(default=0)  # Set rarity to the odds of appearing per second
-    chance_per_second = models.IntegerField(default=1000)  # Chance to appear, formula is 1/chance_per_thousand per second
+    rarity = models.IntegerField(default=0)
+    chance_per_second = models.IntegerField(default=1000)
     sound = models.FileField()
     is_active = models.IntegerField(
         default=1,
@@ -1369,13 +1327,13 @@ class Clickable(models.Model):
 
         super().save(*args, **kwargs)
 
-
 class UserClickable(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     clickable = models.ForeignKey(Clickable, on_delete=models.CASCADE)
     exponential_level_multiplier = models.FloatField(default=1.00)
     actual_value = models.FloatField(default=0)
     currency = models.ForeignKey('Currency', on_delete=models.CASCADE, blank=True, null=True)
+    count = models.IntegerField(default=0)
     is_active = models.IntegerField(
         default=1,
         blank=True,
@@ -1391,7 +1349,7 @@ class UserClickable(models.Model):
 
         if profile and profile.level.level >= 1:
             level_value = profile.level.level
-            self.exponential_level_multiplier = 1.02 ** level_value
+            self.exponential_level_multiplier = math.floor(1.02 ** level_value)
             self.actual_value = self.clickable.base_value
         else:
             self.exponential_level_multiplier = 1.00
@@ -1405,7 +1363,6 @@ class UserClickable(models.Model):
     class Meta:
         verbose_name = "User Clickable"
         verbose_name_plural = "User Clickables"
-
 
 class SecretRoom(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -1422,8 +1379,6 @@ class SecretRoom(models.Model):
     class Meta:
         verbose_name = "Secret Room"
         verbose_name_plural = "Secret Room"
-        # there can be only one...
-
 
 class Endowment(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -1454,7 +1409,6 @@ class Endowment(models.Model):
         verbose_name = "Endowment"
         verbose_name_plural = "Endowments"
 
-
 class EndowmentCurrency(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sender")
@@ -1470,7 +1424,6 @@ class EndowmentCurrency(models.Model):
     class Meta:
         verbose_name = "Endowment"
         verbose_name_plural = "Endowments"
-
 
 class PrizePool(models.Model):
     prize_name = models.CharField(max_length=500, verbose_name="Prize Name")
@@ -1498,7 +1451,6 @@ class PrizePool(models.Model):
         verbose_name = "Inventory"
         verbose_name_plural = "Inventory"
 
-
 class PollQuestion(models.Model):
     question_text = models.CharField(max_length=500, verbose_name="Question")
     choice = models.ForeignKey('showcase.Choice', on_delete=models.CASCADE)
@@ -1515,7 +1467,6 @@ class PollQuestion(models.Model):
     class Meta:
         verbose_name = "Poll Question"
         verbose_name_plural = "Poll Questions"
-
 
 class Shuffler(models.Model):
     """Used for voting on different new ideas"""
@@ -1548,7 +1499,6 @@ class Shuffler(models.Model):
     def __str__(self):
         return str(self.question)
 
-    # Signal receiver function
     @receiver(post_save, sender='showcase.Choice')
     def update_shuffler(sender, instance, **kwargs):
         shufflers = Shuffler.objects.filter(choices=instance)
@@ -1562,7 +1512,6 @@ class Shuffler(models.Model):
     class Meta:
         verbose_name = "Shuffle Choice"
         verbose_name_plural = "Shuffle Choices"
-
 
 class Inventory(models.Model):
     """Model for sharing ideas and getting user feedback"""
@@ -1592,13 +1541,13 @@ class Inventory(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # Check if it's a new object being saved
+        if not self.pk:
             try:
                 existing_inventory = Inventory.objects.get(user=self.user)
-                # Handle the case where an Inventory already exists for the user
-                raise ValueError("A user can only have one Inventory")  # Example error handling
+
+                raise ValueError("A user can only have one Inventory")
             except Inventory.DoesNotExist:
-                pass  # No existing Inventory, proceed with saving
+                pass
 
         if not self.name:
             self.name = f"{self.user}'s Inventory"
@@ -1607,7 +1556,6 @@ class Inventory(models.Model):
     class Meta:
         verbose_name = "Player Inventory"
         verbose_name_plural = "Player Inventories"
-
 
 class InventoryObject(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
@@ -1648,55 +1596,52 @@ class InventoryObject(models.Model):
             self.image_width = self.choice.image_width
             self.price = self.choice.value
 
-            # Set currency to the first currency if creating a new object and currency is not set
             if self.pk is None and self.currency is None:
                 try:
                     self.currency = Currency.objects.first()
                 except Currency.DoesNotExist:
-                    # Handle the case where there are no currencies defined
+
                     pass
             if self.user and not self.inventory:
                 try:
-                    # Try to get the Inventory associated with the user
+
                     self.inventory = Inventory.objects.get(user=self.user)
                 except Inventory.DoesNotExist:
-                    # Handle the case where no Inventory exists for the user
+
                     raise ValueError(f"No inventory found for user {self.user}")
 
         if self.pk is None and self.user:
             self.inventory = Inventory.objects.get(user=self.user)
 
-        # After saving the InventoryObject, create a related TradeItem if trade_locked is True
         if self.trade_locked:
             trade_item, created = TradeItem.objects.get_or_create(
                 user=self.user,
                 title=self.choice_text,
                 defaults={
                     'fees': self.price,
-                    'category': self.choice.category,  # Assuming choice has category
-                    'specialty': self.choice.specialty,  # Assuming choice has specialty
+                    'category': self.choice.category,
+                    'specialty': self.choice.specialty,
                     'condition': self.condition,
-                    'label': self.choice.label,  # Assuming choice has label
+                    'label': self.choice.label,
                     'slug': slugify(self.choice_text),
-                    'status': 1,  # Default to publish
+                    'status': 1,
                     'description': self.choice_text,
                     'image': self.image,
                     'image_length': self.image_length,
                     'image_width': self.image_width,
                     'length_for_resize': self.length_for_resize,
                     'width_for_resize': self.width_for_resize,
-                    'is_active': 1,  # Default to active
+                    'is_active': 1,
                 }
             )
         super().save(*args, **kwargs)
 
     def move_to_trading(self, title, fees, category, specialty, condition, label, slug, description, image,
                         image_length, image_width, length_for_resize, width_for_resize):
-        # Ensure the item exists in the inventory
+
         if not self.pk:
             raise ValidationError("Inventory item does not exist.")
 
-        # Create a TradeItem
         trade_item = TradeItem.objects.create(
             user=self.user,
             currency=self.currency,
@@ -1707,10 +1652,9 @@ class InventoryObject(models.Model):
             image_width=image_width,
             length_for_resize=length_for_resize,
             width_for_resize=width_for_resize,
-            is_active=1  # Set the status as active
+            is_active=1
         )
 
-        # Optionally, you can also remove the item from the inventory
         self.delete()
 
         return trade_item
@@ -1718,7 +1662,6 @@ class InventoryObject(models.Model):
     class Meta:
         verbose_name = "Player Inventory Object"
         verbose_name_plural = "Player Inventory Objects"
-
 
 class Trade_In_Cards(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -1734,7 +1677,6 @@ class Trade_In_Cards(models.Model):
     class Meta:
         verbose_name = "Trade-In Card"
         verbose_name_plural = "Trade-In Cards"
-
 
 class ExchangePrize(models.Model):
     prize = models.ForeignKey('Choice', on_delete=models.CASCADE)
@@ -1768,7 +1710,6 @@ class ExchangePrize(models.Model):
             if self.prize.condition:
                 self.condition = self.prize.condition
 
-        # Set the default currency to the first instance of Currency if not already set
         if not self.currency:
             first_currency = Currency.objects.first()
             if first_currency:
@@ -1781,7 +1722,6 @@ class ExchangePrize(models.Model):
         verbose_name = "Exchange Prize"
         verbose_name_plural = "Exchange Prizes"
 
-
 class TradeItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=100)
@@ -1790,8 +1730,8 @@ class TradeItem(models.Model):
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
     condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2)
-    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default="N")  # can use for cataloging products
-    slug = models.SlugField(blank=True, null=True)  # might change to automatically get the slug
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default="N")
+    slug = models.SlugField(blank=True, null=True)
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
     certified = models.BooleanField(default=False,
                                     help_text="If you are applying to become a partner in more than 1 category, talk to Trove.")
@@ -1807,7 +1747,7 @@ class TradeItem(models.Model):
                                               verbose_name="image width")
     length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length", blank=True, null=True)
     width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width", blank=True, null=True)
-    # hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
+
     relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -1834,19 +1774,18 @@ class TradeItem(models.Model):
     def save(self, *args, **kwargs):
         with transaction.atomic():
             if not self.currency_id:
-                # Assign the first available currency if none is set
+
                 self.currency = Currency.objects.first()
             if not self.value and self.inventoryobject:
                 self.value = self.inventoryobject.value
             if not self.slug:
-                # Generate a unique slug for the TradeItem
+
                 base_slug = self.title
                 self.slug = self.generate_unique_slug(base_slug, TradeItem)
             super().save(*args, **kwargs)
 
-            # Create a TradeOffer only if it doesn't exist
             if not TradeOffer.objects.filter(trade_items=self).exists():
-                # Generate a unique slug for TradeOffer
+
                 trade_offer_slug = self.generate_unique_slug(self.slug, TradeOffer)
                 trade_offer = TradeOffer.objects.create(
                     title=self.title,
@@ -1875,7 +1814,6 @@ class TradeItem(models.Model):
         verbose_name = "Trade Item"
         verbose_name_plural = "Trade Items"
 
-
 class InventoryTradeOffer(models.Model):
     initiator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="initiated_trades")
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_trades")
@@ -1887,7 +1825,7 @@ class InventoryTradeOffer(models.Model):
         default='pending'
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    final_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Calculated in templates
+    final_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     is_active = models.IntegerField(
         default=1,
         blank=True,
@@ -1912,15 +1850,15 @@ class InventoryTradeOffer(models.Model):
 
     def clean(self):
         if self.status == 'pending':
-            # Check for existing trades with the same initiator, receiver, and status
+
             existing_trades = InventoryTradeOffer.objects.filter(
                 initiator=self.initiator,
                 receiver=self.receiver,
                 status='pending'
-            ).exclude(pk=self.pk)  # Exclude current instance
+            ).exclude(pk=self.pk)
 
             for trade in existing_trades:
-                # Compare offered_items and requested_items
+
                 existing_offered_items = list(trade.offered_items.all())
                 existing_requested_items = list(trade.requested_items.all())
 
@@ -1934,31 +1872,27 @@ class InventoryTradeOffer(models.Model):
                     )
 
     def save(self, *args, **kwargs):
-        is_new_instance = self.pk is None  # Check if the instance is being created
+        is_new_instance = self.pk is None
         old_status = None
 
-        # If the instance already exists, fetch the old status
         if not is_new_instance:
             old_instance = InventoryTradeOffer.objects.filter(pk=self.pk).first()
             old_status = old_instance.status if old_instance else None
 
-        super().save(*args, **kwargs)  # Save the instance normally to generate a primary key
+        super().save(*args, **kwargs)
 
-        # Handle status changes and ownership swapping after the initial save
         if old_status != self.status and self.status == 'accepted':
             self.handle_trade_offer_acceptance()
             with transaction.atomic():
-                # Reassign the offered items to the receiver
+
                 for item in self.offered_items.all():
                     item.user = self.receiver
                     item.save()
 
-                # Reassign the requested items to the initiator
                 for item in self.requested_items.all():
                     item.user = self.initiator
                     item.save()
 
-        # If it's a new instance, create a notification for the receiver
         if is_new_instance:
             content_type = ContentType.objects.get_for_model(self)
             notification_message = f"You have received a trade offer from {self.initiator.username}."
@@ -1967,9 +1901,8 @@ class InventoryTradeOffer(models.Model):
                 content_type=content_type,
                 object_id=self.id
             )
-            notification.user.add(self.receiver)  # Associate the receiver with the notification
+            notification.user.add(self.receiver)
 
-        # If the status has changed, create a notification for the initiator
         elif old_status and old_status != self.status:
             content_type = ContentType.objects.get_for_model(self)
             notification_message = (
@@ -1980,32 +1913,30 @@ class InventoryTradeOffer(models.Model):
                 content_type=content_type,
                 object_id=self.id
             )
-            notification.user.add(self.initiator)  # Associate the initiator with the notification
+            notification.user.add(self.initiator)
 
         @receiver(m2m_changed, sender=InventoryTradeOffer.offered_items.through)
         @receiver(m2m_changed, sender=InventoryTradeOffer.requested_items.through)
         def calculate_final_cost(sender, instance, action, **kwargs):
-            # Only calculate when items are added
+
             if action == "post_add":
-                # Calculate the total value of offered and requested items
+
                 offered_total = sum(item.value for item in instance.offered_items.all() if item.value is not None)
                 requested_total = sum(item.value for item in instance.requested_items.all() if item.value is not None)
                 instance.final_cost = offered_total - requested_total
 
-                # Save the instance with the updated final_cost
                 instance.save(update_fields=['final_cost'])
 
     @transaction.atomic
     def handle_trade_offer_acceptance(self):
         if self.final_cost is not None and self.initiator.profiledetails.currency_amount >= self.final_cost:
-            # Decrease the initiator's currency amount
+
             self.initiator.profiledetails.currency_amount += self.final_cost
             self.initiator.profiledetails.save()
             self.receiver.profiledetails.currency_amount -= self.final_cost
             self.receiver.profiledetails.save()
         else:
             raise ValueError("Insufficient funds for the trade.")
-
 
 class TradeOfferManager(models.Manager):
     def get_queryset(self, user=None):
@@ -2015,7 +1946,6 @@ class TradeOfferManager(models.Manager):
                 Q(initiator=user) | Q(receiver=user)
             ).select_related('initiator', 'receiver')
         return queryset
-
 
 class CommerceExchange(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -2033,18 +1963,16 @@ class CommerceExchange(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     def __str__(self):
-        # Get the usercards as a comma-separated string of values
+
         usercards_list = ", ".join([str(item) for item in self.usercard.all()])
 
-        # Get the prizes as a comma-separated string of values
         prizes_list = ", ".join([str(item) for item in self.prizes.all()])
 
-        # Return the formatted string
         return f"{self.user} exchanged [{usercards_list}] for [{prizes_list}]"
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        # Set the default currency to the first instance of Currency if not already set
+
         if not self.currency:
             first_currency = Currency.objects.first()
             if first_currency:
@@ -2054,17 +1982,15 @@ class CommerceExchange(models.Model):
         if not self.value_descrepancy:
             self.value_descrepancy = self.total_usercard_value - self.total_prize_value
             if self.value_descrepancy < 0:
-                # Prevent save and raise error
+
                 raise ValidationError(
                     "The value of your exchange cards needs to be at least the value of the selected prizes.")
 
-            # Add the value of the discrepancy to the user's profile if it's greater than 0
             if self.value_descrepancy > 0:
                 profile = ProfileDetails.objects.get(user=self.user)
                 profile.currency_amount += self.value_descrepancy
                 profile.save()
 
-            # Save the instance again with updated fields
             super().save(*args, **kwargs)
 
         super().save(*args, **kwargs)
@@ -2072,7 +1998,6 @@ class CommerceExchange(models.Model):
     class Meta:
         verbose_name = "Commerce Exchange"
         verbose_name_plural = "Commerce Exchanges"
-
 
 class Notification(models.Model):
     user = models.ManyToManyField(User, related_name="notifications")
@@ -2091,7 +2016,6 @@ class Notification(models.Model):
             created = UserNotification.objects.get_or_create(user=user, notification=self)
             print(f"Created UserNotification for {user.username}: {created}")
 
-
 class UserNotification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_notifications")
     notification = models.ForeignKey(Notification, on_delete=models.CASCADE, related_name="user_notifications")
@@ -2107,7 +2031,6 @@ class UserNotification(models.Model):
 
     class Meta:
         verbose_name = "User Notification"
-
 
 class VoteQuery(models.Model):
     """Used for voting on different new ideas"""
@@ -2128,10 +2051,9 @@ class VoteQuery(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.user).first()
 
-            # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
 
@@ -2155,7 +2077,6 @@ class Ballot(models.Model):
     class Meta:
         unique_together = ('user', 'vote_query')
 
-
 class EmailField(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     email = models.EmailField(
@@ -2175,12 +2096,11 @@ class EmailField(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        # Check if a user is associated with this instance
+
         if self.user:
-            # Delete all previous EmailField instances for this user
+
             EmailField.objects.filter(user=self.user).exclude(pk=self.pk).delete()
 
-        # Call the original save method to save the new instance
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -2192,7 +2112,6 @@ class EmailField(models.Model):
         verbose_name = "Email"
         verbose_name_plural = "Emails"
 
-
 class Product(models.Model):
     """A product in the storefront"""
     name = models.CharField(max_length=200)
@@ -2202,7 +2121,7 @@ class Product(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
     description = models.TextField()
-    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default='N')  # can use for cataloging products
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default='N')
     mfg_date = models.DateTimeField(auto_now_add=True)
     rating = models.CharField(max_length=1, choices=[('b', 'Bad'), ('a', 'Average'), ('e', 'Excellent')])
 
@@ -2211,7 +2130,6 @@ class Product(models.Model):
 
     def show_desc(self):
         return self.description[:50]
-
 
 class City(models.Model):
     """Not currently used. NEEDS TO BE DELETED"""
@@ -2224,10 +2142,8 @@ class City(models.Model):
     def __str__(self):
         return self.name
 
-
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-
 
 class SearchResult(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -2236,7 +2152,6 @@ class SearchResult(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     url = models.URLField()
-
 
 class StaffApplication(models.Model):
     """For applying for staff"""
@@ -2284,7 +2199,6 @@ class StaffApplication(models.Model):
         verbose_name = "Staff Application"
         verbose_name_plural = "Staff Applications"
 
-
 class CardCategory(models.Model):
     category = models.CharField(max_length=200)
     is_active = models.IntegerField(default=1,
@@ -2299,7 +2213,6 @@ class CardCategory(models.Model):
     class Meta:
         verbose_name = "Card Category"
         verbose_name_plural = "Card Categories"
-
 
 class PartnerApplication(models.Model):
     """Application to partner with PokeTrove"""
@@ -2333,7 +2246,6 @@ class PartnerApplication(models.Model):
     def __str__(self):
         return self.user + "applicaton for " + self.category
 
-
 class PunishmentAppeal(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text='Your name and tag go here.')
@@ -2358,7 +2270,6 @@ class PunishmentAppeal(models.Model):
         verbose_name = "Punishment Appeal"
         verbose_name_plural = "Punishment Appeals"
 
-
 class BanAppeal(models.Model):
     name = models.CharField(max_length=100, help_text='Your name and tag go here.')
     Rule_broken = models.CharField(max_length=200,
@@ -2380,7 +2291,6 @@ class BanAppeal(models.Model):
     class Meta:
         verbose_name = "Ban Appeal"
         verbose_name_plural = "Ban Appeals"
-
 
 class ReportIssue(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -2413,10 +2323,9 @@ class ReportIssue(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.user).first()
 
-            # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
 
@@ -2427,9 +2336,7 @@ class ReportIssue(models.Model):
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
 
-
-from django.contrib.auth import get_user_model  # Add this import
-
+from django.contrib.auth import get_user_model
 
 class AdministrationChangeLog(models.Model):
     ACTION_CHOICES = [
@@ -2451,7 +2358,6 @@ class AdministrationChangeLog(models.Model):
     class Meta:
         verbose_name = "Administration Changelog"
         verbose_name_plural = "Administration Changelogs"
-
 
 class Support(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -2478,7 +2384,6 @@ class Support(models.Model):
     class Meta:
         verbose_name = "Customer Support"
         verbose_name_plural = "Customer Support"
-
 
 class NewsFeed(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -2513,24 +2418,16 @@ class NewsFeed(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            print("Name:", self.name)  # Print the title
+            print("Name:", self.name)
             self.slug = slugify(self.name)
-            print("Slug after slugify:", self.slug)  # Print the slug after slugify
+            print("Slug after slugify:", self.slug)
 
         if not self.pk:
-            # Get the associated ProfileDetails for the user
-            profile = ProfileDetails.objects.filter(user=self.user).first()
 
-            # Set the position to the position value from the associated ProfileDetails
-            # if profile:
-            # self.position = profile.position
+            profile = ProfileDetails.objects.filter(user=self.user).first()
 
         print("Position before save:", self.position)
         super().save(*args, **kwargs)
-
-    # def get_absolute_url(self):
-
-    # return reverse("showcase:news", kwargs={"slug": str(self.slug)})
 
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.user).first()
@@ -2541,7 +2438,6 @@ class NewsFeed(models.Model):
         news = NewsFeed.objects.filter(user=self.user, slug=self.slug).first()
         if news:
             return reverse('showcase:singlenews', args=[str(news.slug)])
-
 
 class StaffProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -2575,19 +2471,17 @@ class StaffProfile(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.user).first()
 
-            # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
 
-        # If a profile already exists for this user, update it
         try:
             existing = StaffProfile.objects.get(user=self.user)
-            self.pk = existing.pk  # set this instance's pk to the existing profile's pk
+            self.pk = existing.pk
         except StaffProfile.DoesNotExist:
-            pass  # No existing profile, so we're creating a new one
+            pass
 
         super().save(*args, **kwargs)
 
@@ -2595,7 +2489,6 @@ class StaffProfile(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
-
 
 class SocialMedia(models.Model):
     social = models.TextField(verbose_name="Social Media Platform", help_text="Follow format 'logo-{platform name}'",
@@ -2627,16 +2520,15 @@ class SocialMedia(models.Model):
     def save(self, *args, **kwargs):
         if not self.page.endswith('.html'):
             self.page += '.html'
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.image_position = SocialMedia.objects.filter(page=self.page).count() + 1
-        if self.icon and not self.alternate:  # Check if an image exists and alternate text is not set
-            self.alternate = str(self.icon)  # Set the alternate text to the string version of the image name
+        if self.icon and not self.alternate:
+            self.alternate = str(self.icon)
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Social Media"
         verbose_name_plural = "Social Media"
-
 
 class FrequentlyAskedQuestions(models.Model):
     question = models.TextField()
@@ -2654,7 +2546,6 @@ class FrequentlyAskedQuestions(models.Model):
     class Meta:
         verbose_name = "Frequently-Asked Question"
         verbose_name_plural = "Frequently-Asked Questions"
-
 
 class Event(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -2689,11 +2580,10 @@ class Event(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.user).first()
             self.section = Event.objects.filter(page=self.page).count() + 1
 
-            # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
         super().save(*args, **kwargs)
@@ -2706,7 +2596,6 @@ class Event(models.Model):
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
 
-
 class BusinessMessageBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -2717,7 +2606,6 @@ class BusinessMessageBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Business Message Background Image"
         verbose_name_plural = "Business Message Background Images"
-
 
 class MemberHomeBackgroundImage(models.Model):
     title = models.TextField()
@@ -2730,7 +2618,6 @@ class MemberHomeBackgroundImage(models.Model):
         verbose_name = "Member Home Background Image"
         verbose_name_plural = "Member Home Background Images"
 
-
 class PatreonBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -2741,7 +2628,6 @@ class PatreonBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Patreon Background Image"
         verbose_name_plural = "Patreon Background Images"
-
 
 class Partner(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -2757,10 +2643,9 @@ class Partner(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.user).first()
 
-            # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
 
@@ -2771,7 +2656,6 @@ class Partner(models.Model):
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
 
-
 class Patreon(models.Model):
     patreon_username = models.CharField(max_length=100, verbose_name='Patreon`s Username',
                                         help_text='The patreon`s username goes here.')
@@ -2780,13 +2664,9 @@ class Patreon(models.Model):
         help_text=
         'The patreon`s avatar goes here.')
 
-    # change rest to either imagefields or urlfields (has to be uniform throughout the form)
-
-    # widget=form.TextInput, help_text='Your name goes here.'
     class Meta:
         verbose_name = "Patreon"
         verbose_name_plural = "Patreons"
-
 
 class BlogHeader(models.Model):
     category = models.CharField(max_length=200, verbose_name="Category")
@@ -2805,9 +2685,7 @@ class BlogHeader(models.Model):
     def __str__(self):
         return self.category
 
-
 from django.template.defaultfilters import slugify, random, date, register
-
 
 class BlogFilter(models.Model):
     blog_filter = models.CharField(verbose_name="Hashtag filters", max_length=200, blank=True, null=True)
@@ -2825,7 +2703,6 @@ class BlogFilter(models.Model):
     class Meta:
         verbose_name = "Blog Filter"
         verbose_name_plural = "Blog Filters"
-
 
 class Blog(models.Model):
     """Each blog post"""
@@ -2851,10 +2728,9 @@ class Blog(models.Model):
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
     likes = models.ManyToManyField(User, blank=True, verbose_name='post likes')
-    # likes = models.IntegerField(default=0)
+
     dislikes = models.ManyToManyField(User, blank=True, verbose_name='post dislikes', related_name="post_dislikes")
-    # url = models.SlugField(max_length=200, unique=True, blank=True)
-    # blogbackgroundimage
+
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -2866,22 +2742,17 @@ class Blog(models.Model):
         verbose_name_plural = "Blog Entries"
         ordering = ['-created_on']
 
-    #    def save(self, *args, **kwargs):
-    #        self.url = slugify(self.title)
-    #        super(Blog, self).save(*args, **kwargs)
-
     def save(self, *args, **kwargs):
         self.url = slugify(self.title)
 
         if not self.pk:
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.author_id).first()
 
-            # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
             max_position = Blog.objects.all().aggregate(Max('position'))['position__max']
-            if max_position is None:  # if there are no other blog posts
+            if max_position is None:
                 self.position = 1
             else:
                 self.position = max_position + 1
@@ -2906,20 +2777,15 @@ class Blog(models.Model):
     def view_count(self):
         return Blog.objects.filter(post=self).count()
 
-    # def number_of_likes(self):
-    #    return self.likes.count()
     def delete(self, *args, **kwargs):
-        # Get all Blog objects with a position greater than the one being deleted
+
         blogs_to_update = Blog.objects.filter(position__gt=self.position)
 
-        # Delete the object
         super().delete(*args, **kwargs)
 
-        # Decrement the position of each remaining object
         for i, blog in enumerate(blogs_to_update.order_by('position')):
             blog.position = self.position + i
             blog.save()
-
 
 class BlogTips(models.Model):
     tip = models.TextField(unique=True)
@@ -2928,7 +2794,7 @@ class BlogTips(models.Model):
     position = models.IntegerField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # If the object is being created (not updated)
+        if not self.pk:
             max_position = BlogTips.objects.filter(author=self.author).aggregate(models.Max('position'))[
                 'position__max']
             self.position = (max_position or 0) + 1
@@ -2942,11 +2808,10 @@ class BlogTips(models.Model):
         verbose_name = "Blog Tip"
         verbose_name_plural = "Blog Tips"
 
-
 class ShuffleType(models.Model):
     name = models.CharField(default="Pack Opening", max_length=200)
     type = models.CharField(choices=SHUFFLE_CHOICES, default='L',
-                            max_length=1)  # skill-based are usually reserved for tournament-type scenarios
+                            max_length=1)
     circumstance = models.CharField(choices=AVALIABLE_CHOICES, default='OP', max_length=3)
     game_mode = models.CharField(choices=GAME_MODE, default="STP", max_length=3)
     is_active = models.IntegerField(default=1,
@@ -2962,17 +2827,15 @@ class ShuffleType(models.Model):
         verbose_name = "Shuffle Type"
         verbose_name_plural = "Shuffle Types"
 
-
 class DailySpin(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="daily_spins")
     cooldown = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        unique_together = ('user', 'cooldown')  # Ensure no duplicate cooldowns for a user
+        unique_together = ('user', 'cooldown')
 
     def __str__(self):
         return f"{self.user.username} - {self.cooldown}"
-
 
 class GameHub(models.Model):
     name = models.CharField(max_length=200, verbose_name="Game Hub Name")
@@ -2999,7 +2862,6 @@ class GameHub(models.Model):
     class Meta:
         verbose_name = "Game Hub"
         verbose_name_plural = "Game Hub"
-
 
 class Game(models.Model):
     name = models.CharField(max_length=200, verbose_name="Game Name")
@@ -3110,7 +2972,6 @@ class Game(models.Model):
             self.cost = int(total_cost * 1.12)
             print('the cost was edited')
 
-
         pst = pytz.timezone('US/Pacific')
         current_time_pst = now().astimezone(pst)
         today = current_time_pst.date()
@@ -3136,7 +2997,6 @@ class Game(models.Model):
         today = current_time_pst.date()
         today_5pm_pst = make_aware(datetime.combine(today, time(17, 0)), pst)
 
-        # If before 5 PM PST, the window started yesterday
         if current_time_pst < today_5pm_pst:
             cycle_start = today_5pm_pst - timedelta(days=1)
         else:
@@ -3151,22 +3011,17 @@ class Game(models.Model):
         if not self.daily:
             raise ValueError("This game is not configured as daily.")
 
-        # Get the current cycle start and time
         cycle_start, current_time_pst = self._get_pst_time()
 
-        # Check if the user has already spun during the current cycle
         existing_spin = DailySpin.objects.filter(user=user, cooldown=cycle_start).first()
 
         if existing_spin:
             raise ValueError("You have already spun the chest for today. Come back after 5:00 PM PST!")
 
-        # Create a new DailySpin record to lock the user for this cycle
         DailySpin.objects.create(user=user, cooldown=cycle_start)
 
-        # Perform spin logic here (e.g., awarding a prize)
         print(f"{user.username} spun the daily chest successfully!")
 
-        # Set game-level cooldown if needed
         self.cooldown = cycle_start + timedelta(days=1)
         self.locked = True
         self.save()
@@ -3180,7 +3035,7 @@ class Game(models.Model):
 
     def check_locked_status(self, user):
         if self.daily and self.unlocking_level:
-            # Check if user's level meets or exceeds unlocking_level
+
             if user.level.level >= self.unlocking_level.level:
                 self.locked = False
             else:
@@ -3193,19 +3048,15 @@ class Game(models.Model):
         Only activates if locked is True.
         """
         if not self.locked:
-            return timedelta(seconds=0)  # No remaining time if not locked
+            return timedelta(seconds=0)
 
-        # Get the current time (timezone-aware)
         current_time = now()
 
-        # Define 5:00 PM today
         today_5pm = current_time.replace(hour=17, minute=0, second=0, microsecond=0)
 
-        # If 5:00 PM has already passed today, move to tomorrow
         if current_time >= today_5pm:
             today_5pm += timedelta(days=1)
 
-        # Calculate the remaining time
         remaining_time = today_5pm - current_time
         return remaining_time
 
@@ -3250,7 +3101,6 @@ class Game(models.Model):
     class Meta:
         verbose_name = "Game"
         verbose_name_plural = "Games"
-
 
 class GameChoice(models.Model):
     game = models.ForeignKey('Game', on_delete=models.CASCADE)
@@ -3323,7 +3173,6 @@ class GameChoice(models.Model):
         print('save committed of gamechoice')
         super().save(*args, **kwargs)
 
-
 class Choice(models.Model):
     """Used for voting on different new ideas"""
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
@@ -3393,7 +3242,7 @@ class Choice(models.Model):
         help_text="Position ordered by value (from highest to lowest)",
         blank=True, null=True, default=1
     )
-    # Card attributes (direct from Pokemon API)
+
     card_id = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100, null=True, blank=True)
     supertype = models.CharField(max_length=50, null=True, blank=True)
@@ -3498,9 +3347,9 @@ class Choice(models.Model):
 
     def asave(self):
         if self.value:
-            self.value = self.value * Decimal('1.05')  # 5% increase on market
+            self.value = self.value * Decimal('1.05')
         elif self.price:
-            self.value = self.price * Decimal('1.05')  # 5% increase on market
+            self.value = self.price * Decimal('1.05')
         self.save()
 
     def formatted_rarity(self):
@@ -3523,7 +3372,6 @@ class Choice(models.Model):
         verbose_name = "Choice"
         verbose_name_plural = "Choices"
 
-
 class Card(models.Model):
     card_id = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100)
@@ -3545,7 +3393,6 @@ class Card(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class TopHits(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
@@ -3575,7 +3422,6 @@ class TopHits(models.Model):
     class Meta:
         verbose_name = "Top Hit"
 
-
 class SpinPreference(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="spinpreferer")
     game = models.ForeignKey(Game, on_delete=models.CASCADE, blank=True, null=True)
@@ -3589,7 +3435,6 @@ class SpinPreference(models.Model):
     class Meta:
         verbose_name = "Spin Preference"
         verbose_name_plural = "Spin Preferences"
-
 
 class Outcome(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="player")
@@ -3685,7 +3530,6 @@ class Outcome(models.Model):
         else:
             return 'gray'
 
-
 class Achievements(models.Model):
     user = models.ManyToManyField(User, related_name="achiever", blank=True)
     title = models.TextField(verbose_name="Achievement Title")
@@ -3695,11 +3539,11 @@ class Achievements(models.Model):
     value = models.IntegerField(blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
     rubies_spent = models.IntegerField(blank=True,
-                                       null=True)  # make sure it does not show unless the selected category is RS
+                                       null=True)
     rubies_collected = models.IntegerField(blank=True,
-                                           null=True)  # make sure it does not show unless the selected category is CRS
+                                           null=True)
     total_rubies_earned = models.IntegerField(blank=True,
-                                              null=True)  # make sure it does not show unless the selected category is TRS
+                                              null=True)
     type = models.ForeignKey(GameHub, on_delete=models.CASCADE)
     category = models.CharField(choices=AchievementCategory, max_length=4, blank=True, null=True)
     earned = models.BooleanField(default=False)
@@ -3735,14 +3579,14 @@ class Achievements(models.Model):
         """
         Check if the user fulfills the requirements for this achievement and add them to the user field.
         """
-        # Define the logic for fulfillment of the achievement
+
         if self.requirement_fulfilled(user):
             self.user.add(user)
             self.earned = True
             self.save()
 
     def save(self, *args, **kwargs):
-        # Set the default currency to the first instance of Currency if not already set
+
         if not self.currency:
             first_currency = Currency.objects.first()
             if first_currency:
@@ -3758,20 +3602,20 @@ class Achievements(models.Model):
 
     def calculate_rubies_spent(self):
         if self.AchievementCategory == 'RS':
-            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            profile = self.user.profiledetails
             rubies_spent = profile.total_currency_spent
             self.rubies = rubies_spent
             self.description = f"Spend {rubies_spent} Rubies"
             self.save()
 
         elif self.AchievementCategory == 'TRE':
-            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            profile = self.user.profiledetails
             rubies_collected = profile.total_currency_amount
             self.description = f"Spend {rubies_collected} Rubies"
             self.save()
 
         elif self.AchievementCategory == 'RC':
-            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            profile = self.user.profiledetails
             rubies_spent = profile.currency_spent
             rubies_collected = profile.total_currency_amount
             self.rubies = rubies_spent
@@ -3779,7 +3623,7 @@ class Achievements(models.Model):
             self.save()
 
         elif self.AchievementCategory == 'WS':
-            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            profile = self.user.profiledetails
             rubies_spent = profile.currency_spent
             rubies_collected = profile.total_currency_amount
             self.rubies = rubies_spent
@@ -3787,7 +3631,7 @@ class Achievements(models.Model):
             self.save()
 
         elif self.AchievementCategory == 'GCH':
-            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            profile = self.user.profiledetails
             rubies_spent = profile.currency_spent
             rubies_collected = profile.total_currency_amount
             self.rubies = rubies_spent
@@ -3795,7 +3639,7 @@ class Achievements(models.Model):
             self.save()
 
         elif self.AchievementCategory == 'YCH':
-            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            profile = self.user.profiledetails
             rubies_spent = profile.currency_spent
             rubies_collected = profile.total_currency_amount
             self.rubies = rubies_spent
@@ -3803,7 +3647,7 @@ class Achievements(models.Model):
             self.save()
 
         elif self.AchievementCategory == 'OCH':
-            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            profile = self.user.profiledetails
             rubies_spent = profile.currency_spent
             rubies_collected = profile.total_currency_amount
             self.rubies = rubies_spent
@@ -3811,7 +3655,7 @@ class Achievements(models.Model):
             self.save()
 
         elif self.AchievementCategory == 'RCH':
-            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            profile = self.user.profiledetails
             rubies_spent = profile.currency_spent
             rubies_collected = profile.total_currency_amount
             self.rubies = rubies_spent
@@ -3819,7 +3663,7 @@ class Achievements(models.Model):
             self.save()
 
         elif self.AchievementCategory == 'BCH':
-            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            profile = self.user.profiledetails
             rubies_spent = profile.currency_spent
             rubies_collected = profile.total_currency_amount
             self.rubies = rubies_spent
@@ -3827,7 +3671,7 @@ class Achievements(models.Model):
             self.save()
 
         elif self.AchievementCategory == 'GCH':
-            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            profile = self.user.profiledetails
             rubies_spent = profile.currency_spent
             rubies_collected = profile.total_currency_amount
             self.rubies = rubies_spent
@@ -3835,7 +3679,7 @@ class Achievements(models.Model):
             self.save()
 
         elif self.AchievementCategory == 'RGCH':
-            profile = self.user.profiledetails  # Assuming there's a relationship between Achievement and ProfileDetails
+            profile = self.user.profiledetails
             rubies_spent = profile.currency_spent
             rubies_collected = profile.total_currency_amount
             self.rubies = rubies_spent
@@ -3845,7 +3689,6 @@ class Achievements(models.Model):
     class Meta:
         verbose_name = "Achievement"
         verbose_name_plural = "Achievements"
-
 
 class SpinnerChoiceRenders(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="game_player")
@@ -3933,7 +3776,6 @@ class SpinnerChoiceRenders(models.Model):
         instance.save()
         return instance
 
-
 class Robot(models.Model):
     name = models.CharField(max_length=200)
     is_bot = models.BooleanField(default=True)
@@ -3950,7 +3792,6 @@ class Robot(models.Model):
     def __str__(self):
         return self.name
 
-
 class BattleParticipant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     is_bot = models.BooleanField(default=False)
@@ -3963,23 +3804,22 @@ class BattleParticipant(models.Model):
         else:
             return "Robot: " +  str(self.robot.name) + " " + str(self.battle)
 
-
     class Meta:
         verbose_name = "Battle Participant"
         verbose_name_plural = "Battle Participants"
-
 
 class BattleGame(models.Model):
     battle = models.ForeignKey('Battle', on_delete=models.CASCADE, related_name='battle_games')
     game = models.ForeignKey('Game', on_delete=models.CASCADE, related_name='game_battles')
     quantity = models.PositiveIntegerField(default=1)
+    outcome_created = models.BooleanField(blank=True, null=True, default=0)
     order = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.game.name} x{self.quantity} in {self.battle.battle_name}"
 
     class Meta:
-        unique_together = ('battle', 'game')  # Ensure no duplicate game-battle pairs
+        unique_together = ('battle', 'game')
         verbose_name = "Battle Game"
         verbose_name_plural = "Battle Games"
         ordering = ['order']
@@ -3987,13 +3827,12 @@ class BattleGame(models.Model):
     def game_cost(self):
         return self.game.cost
 
-    game_cost.short_description = "Game Cost"  # Label in the admin interface
+    game_cost.short_description = "Game Cost"
 
     def game_discount_cost(self):
         return self.game.discount_cost
 
-    game_discount_cost.short_description = "Discounted Cost"  # Label in the admin interface
-
+    game_discount_cost.short_description = "Discounted Cost"
 
 class Battle(models.Model):
     BATTLE_SLOTS = (
@@ -4066,7 +3905,6 @@ class Battle(models.Model):
     def get_total_participants(self):
         return self.battle_joined.count()
 
-
     def __str__(self):
         return f"{self.battle_name} submitted by {self.creator}"
 
@@ -4123,7 +3961,6 @@ class Battle(models.Model):
         verbose_name = "Battle"
         verbose_name_plural = "Battles"
 
-
 class Bet(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     profile = models.ForeignKey(ProfileDetails, blank=True, null=True, on_delete=models.CASCADE)
@@ -4159,7 +3996,6 @@ class Bet(models.Model):
             except ProfileDetails.DoesNotExist:
                 raise ValidationError("User profile does not exist.")
 
-
             if self.profile.currency_amount:
                 print('currency amount: ' + str(self.profile.currency_amount))
             else:
@@ -4179,7 +4015,6 @@ class Bet(models.Model):
     class Meta:
         unique_together = ("user", "battle")
 
-
 class Hits(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
@@ -4191,12 +4026,11 @@ class Hits(models.Model):
         super().save(*args, **kwargs)
         if self.choice:
             self.user = self.choice.user
-        self.save()  # Save again to update the price field
+        self.save()
 
     class Meta:
         verbose_name = "Hit"
         verbose_name_plural = "Hits"
-
 
 class SelectRelatedConstraint(object):
     def __init__(self, limit_value):
@@ -4205,7 +4039,6 @@ class SelectRelatedConstraint(object):
     def compile(self, compiler, connection):
         qs = compiler.expression_compiler.compile(self.limit_value)
         return {'limit_choices_to': qs}
-
 
 class BlackJack(models.Model):
     name = models.CharField(max_length=200, verbose_name="BlackJack Game Name")
@@ -4221,7 +4054,6 @@ class BlackJack(models.Model):
     class Meta:
         verbose_name = "BlackJack Game"
         verbose_name_plural = "BlackJack Games"
-
 
 from django.core.mail import send_mail
 from django.conf import settings
@@ -4239,18 +4071,18 @@ class SellerApplication(models.Model):
     accepted = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        # Check if the object already exists in the database
+
         if self.pk:
             previous_instance = SellerApplication.objects.get(pk=self.pk)
-            if previous_instance.accepted != self.accepted:  # Check if 'accepted' status changed
+            if previous_instance.accepted != self.accepted:
                 if self.accepted:
-                    # Accepted changed from False to True
+
                     self.send_email(
                         subject="Your Seller Application Was Accepted",
                         message=f"Dear {self.first_name},\n\nCongratulations! Your seller application has been reviewed & you have been accepted. \n\nBest regards,\n Monstrosity?",
                     )
                 else:
-                    # Accepted changed from True to False
+
                     self.send_email(
                         subject="Your Seller Application Was Revoked",
                         message=f"Dear {self.first_name},\n\nWe regret to inform you that your seller application status has been revoked. For further details, please contact our support team.\nIf you believe this was a mistake, please reach out to us at poketrovecompany@gmail.com. \n\nBest regards,\n Monstrosity?",
@@ -4276,9 +4108,8 @@ class SellerApplication(models.Model):
         verbose_name = "Seller Application"
         verbose_name_plural = "Seller Applications"
 
-
 class Preference(models.Model):
-    DoesNotExist = None  # added outside tutorial
+    DoesNotExist = None
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='blog_posts')
     value = models.IntegerField(help_text="1->Like, 2->Dislike")
@@ -4291,7 +4122,6 @@ class Preference(models.Model):
         unique_together = ("user", "post", "value")
         verbose_name = "Blog Like"
         verbose_name_plural = "Blog Likes"
-
 
 class Comment(models.Model):
     commentator = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -4318,10 +4148,9 @@ class Comment(models.Model):
         self.url = slugify(self.name)
 
         if not self.pk:
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.commentator).first()
 
-            # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
         super().save(*args, **kwargs)
@@ -4333,7 +4162,6 @@ class Comment(models.Model):
 
         return reverse("showcase:post_detail", kwargs={"slug": self.post.slug})
 
-
 class PostLikes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, )
     post = models.ForeignKey(Idea, on_delete=models.CASCADE, )
@@ -4342,7 +4170,6 @@ class PostLikes(models.Model):
     class Meta:
         verbose_name = "Post Like"
         verbose_name_plural = "Post Likes"
-
 
 class Profile(models.Model):
     about_me = models.TextField()
@@ -4356,7 +4183,6 @@ class Profile(models.Model):
 
     def __str__(self):
         return str(self.user)
-
 
 class FaviconBase(models.Model):
     favicontitle = models.TextField(verbose_name="Favicon Title")
@@ -4388,7 +4214,6 @@ class FaviconBase(models.Model):
         verbose_name = "Favicon"
         verbose_name_plural = "Favicons"
 
-
 class LogoBase(models.Model):
     title = models.TextField(verbose_name="Background Title")
     logocover = models.ImageField(upload_to='images/', verbose_name="Logo")
@@ -4414,7 +4239,7 @@ class LogoBase(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.section = LogoBase.objects.filter(page=self.page).count() + 1
         if not self.page.endswith('.html'):
             self.page += '.html'
@@ -4423,7 +4248,6 @@ class LogoBase(models.Model):
     class Meta:
         verbose_name = "Logo"
         verbose_name_plural = "Logos"
-
 
 class HyperlinkBase(models.Model):
     display_text = models.TextField(verbose_name="Text Display", blank=True, null=True, help_text="Display text")
@@ -4459,14 +4283,13 @@ class HyperlinkBase(models.Model):
         return self.hyperlink
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.section = HyperlinkBase.objects.filter(page=self.page).count() + 1
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Hyperlink Base"
         verbose_name_plural = "Hyperlink Base"
-
 
 class BackgroundImageBase(models.Model):
     backgroundtitle = models.TextField(verbose_name="Background Title", blank=True, null=True)
@@ -4502,11 +4325,11 @@ class BackgroundImageBase(models.Model):
             self.url = f'http://127.0.0.1:8000/{self.url}'
         if not self.page.endswith('.html'):
             self.page += '.html'
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.position = BackgroundImageBase.objects.filter(page=self.page).count() + 1
-            self.backgroundtitle = f'background {self.position}'  # Set the title here
-        if self.cover and not self.alternate:  # Check if an image exists and alternate text is not set
-            self.alternate = str(self.cover)  # Set the alternate text to the string version of the image name
+            self.backgroundtitle = f'background {self.position}'
+        if self.cover and not self.alternate:
+            self.alternate = str(self.cover)
         elif self.file and not self.alternate:
             self.alternate = str(self.file)
         super().save(*args, **kwargs)
@@ -4516,7 +4339,7 @@ class BackgroundImageBase(models.Model):
         verbose_name_plural = "Background Image Base"
 
     def set_image_position(image_id, xposition, yposition):
-        # Retrieve the Image object from the database
+
         image = ImageBase.objects.get(id=image_id)
         print("Current coordinates: x={image.x}, y={image.y}")
 
@@ -4524,7 +4347,6 @@ class BackgroundImageBase(models.Model):
         image.y = yposition
 
         image.save()
-
 
 class StoreViewType(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
@@ -4557,7 +4379,6 @@ class StoreViewType(models.Model):
     class Meta:
         verbose_name = "Store View Type"
         verbose_name_plural = "Store View Types"
-
 
 class TextBase(models.Model):
     TEXT_MEASUREMENT_CHOICES = (
@@ -4606,14 +4427,13 @@ class TextBase(models.Model):
             self.page += '.html'
         elif not self.url.startswith('http://127.0.0.1:8000/'):
             self.url = f'http://127.0.0.1:8000/{self.url}'
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.section = TextBase.objects.filter(page=self.page).count() + 1
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Text Base"
         verbose_name_plural = "Text Base"
-
 
 class BackgroundImage(models.Model):
     title = models.TextField()
@@ -4644,7 +4464,6 @@ class BackgroundImage(models.Model):
         verbose_name = "Background Image"
         verbose_name_plural = "Background Images"
 
-
 class ContentBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -4655,7 +4474,6 @@ class ContentBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Content Background Image"
         verbose_name_plural = "Content Background Images"
-
 
 class SupportBackgroundImage(models.Model):
     title = models.TextField()
@@ -4668,7 +4486,6 @@ class SupportBackgroundImage(models.Model):
         verbose_name = "Support Background Image"
         verbose_name_plural = "Support Background Images"
 
-
 class ProductBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -4679,7 +4496,6 @@ class ProductBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Product Background Image"
         verbose_name_plural = "Product Background Images"
-
 
 class NavBar(models.Model):
     text = models.TextField()
@@ -4700,14 +4516,13 @@ class NavBar(models.Model):
     def save(self, *args, **kwargs):
         if not self.url.startswith('http'):
             self.url = f'http://127.0.0.1:8000/{self.url}'
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.position = NavBar.objects.filter(row=self.row).count() + 1
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Navigational Bar Dropdown"
         verbose_name_plural = "Navigational Bar Dropdowns"
-
 
 class NavBarHeader(models.Model):
     text = models.TextField(help_text='This is a header.')
@@ -4726,14 +4541,13 @@ class NavBarHeader(models.Model):
         return self.text
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.row = NavBarHeader.objects.count() + 1
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Navigational Bar Header"
         verbose_name_plural = "Navigational Bar Headers"
-
 
 class FeaturedNavigationBar(models.Model):
     default_header = models.TextField(help_text="Only set if occupying 1'st position", blank=True, null=True,
@@ -4765,14 +4579,13 @@ class FeaturedNavigationBar(models.Model):
             return self.default_header
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.position = FeaturedNavigationBar.objects.count() + 1
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Featured Navigation Bar"
         verbose_name_plural = "Featured Navigation Bar"
-
 
 class SettingsModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='settings')
@@ -4784,7 +4597,7 @@ class SettingsModel(models.Model):
                                   choices=((True, 'Yes'), (False, 'No')))
     news = models.BooleanField(verbose_name="Keep me in the loop", default=False, blank=True, null=True,
                                choices=((True, 'Yes'), (False, 'No')))
-    # connects to email
+
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -4797,7 +4610,6 @@ class SettingsModel(models.Model):
     class Meta:
         verbose_name = "Setting"
         verbose_name_plural = "Settings"
-
 
 class MyPreferences(models.Model):
     SPIN_TYPE = (
@@ -4824,7 +4636,7 @@ class MyPreferences(models.Model):
         return f"{self.user.username}'s Preferences - {self.get_spintype_display()}"
 
 class FavoriteChests(models.Model):
-    # Change from OneToOneField to ForeignKey so multiple favorite records per user are allowed.
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     chest = models.ForeignKey(Game, on_delete=models.CASCADE)
     precedence = models.IntegerField(default=1)
@@ -4848,11 +4660,8 @@ class FavoriteChests(models.Model):
     class Meta:
         verbose_name = "Favorite Chest"
         verbose_name_plural = "Favorite Chests"
-        # Optionally, if you want to prevent a user from favoriting the same chest multiple times,
-        # you can enforce a unique constraint on the combination of user and chest:
+
         unique_together = ('user', 'chest')
-
-
 
 class Donate(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -4861,11 +4670,7 @@ class Donate(models.Model):
 
     donor = models.ForeignKey(User, on_delete=models.CASCADE)
     anonymous = models.BooleanField(default=False, help_text="Donate anonymously?")
-    # position = models.IntegerField(
-    #    default=0,
-    #    help_text="Position for sorting",
-    #    editable=False,  # This makes the field non-editable in forms
-    # )
+
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -4877,10 +4682,9 @@ class Donate(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.donor).first()
 
-            # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
 
@@ -4895,7 +4699,6 @@ class Donate(models.Model):
         verbose_name = "Donation"
         verbose_name_plural = "Donations"
 
-
 class DonorBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -4908,7 +4711,6 @@ class DonorBackgroundImage(models.Model):
         verbose_name = "Donors Background Image"
         verbose_name_plural = "Donors Background Images"
 
-
 class ContributorBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -4919,7 +4721,6 @@ class ContributorBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Contributors Background Image"
         verbose_name_plural = "Contributors Background Images"
-
 
 class UserProfile2(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='ship_profile')
@@ -4958,7 +4759,7 @@ class UserProfile2(models.Model):
 
     def save(self, *args, **kwargs):
         with transaction.atomic():
-            # Check if the user already has a UserProfile2 instance
+
             try:
                 existing_profile = UserProfile2.objects.get(user=self.user)
                 if existing_profile and existing_profile != self:
@@ -4966,36 +4767,30 @@ class UserProfile2(models.Model):
             except UserProfile2.DoesNotExist:
                 pass
 
-            # Save the profile
             super().save(*args, **kwargs)
 
-            # Deactivate any existing active address for the user
             Address.objects.filter(user=self.user, is_active=1).update(is_active=0)
 
-            # Prepare the defaults dictionary
             defaults = {
                 'street_address': self.address or '',
                 'zip': self.zip_code,
-                'country': self.country,  # Replace 'US' with a relevant country code or self.country
-                'address_type': 'shipping',  # Adjust as necessary
+                'country': self.country,
+                'address_type': 'shipping',
                 'default': True,
             }
 
-            # Include apartment_address only if self.address2 has a value
             if self.address2:
                 defaults['apartment_address'] = self.address2
             else:
                 defaults['apartment_address'] = 'None'
 
-            # Create or update the active address
             address, created = Address.objects.update_or_create(
                 user=self.user,
-                is_active=1,  # Ensure the query respects the unique constraint
+                is_active=1,
                 defaults=defaults,
             )
 
             print(f"{'Created' if created else 'Updated'} address for user {self.user.username}.")
-
 
 class SettingsBackgroundImage(models.Model):
     title = models.TextField()
@@ -5008,7 +4803,6 @@ class SettingsBackgroundImage(models.Model):
         verbose_name = "Settings Background Image"
         verbose_name_plural = "Settings Background Images"
 
-
 class DonateIcon(models.Model):
     row = models.IntegerField()
     cover = models.ImageField(upload_to='images/')
@@ -5019,7 +4813,6 @@ class DonateIcon(models.Model):
     class Meta:
         verbose_name = "Donation Icon"
         verbose_name_plural = "Donation Icons"
-
 
 class Titled(models.Model):
     overtitle = models.TextField(verbose_name="Title")
@@ -5051,7 +4844,6 @@ class Titled(models.Model):
         if not self.page.endswith('.html'):
             self.page += '.html'
         super().save(*args, **kwargs)
-
 
 class Meme(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
@@ -5085,7 +4877,6 @@ class Meme(models.Model):
         verbose_name = "Meme Text"
         verbose_name_plural = "Meme Texts"
 
-
 class MemeTextField(models.Model):
     meme = models.ForeignKey(Meme, on_delete=models.CASCADE, related_name='text_fields')
     text = models.TextField(null=True)
@@ -5106,7 +4897,6 @@ class MemeTextField(models.Model):
     class Meta:
         verbose_name = "Meme Text Field"
         verbose_name_plural = "Meme Texts Fields"
-
 
 class BaseCopyrightTextField(models.Model):
     copyright = models.TextField(verbose_name="Copyright Field", help_text="Copyright And Year")
@@ -5130,7 +4920,6 @@ class BaseCopyrightTextField(models.Model):
         verbose_name = "Base Text Field Copyright"
         verbose_name_plural = "Base Text Field Copyright"
 
-
 class ShowcaseBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5141,7 +4930,6 @@ class ShowcaseBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Showcase Background Image"
         verbose_name_plural = "Showcase Background Images"
-
 
 class BilletBackgroundImage(models.Model):
     title = models.TextField()
@@ -5154,7 +4942,6 @@ class BilletBackgroundImage(models.Model):
         verbose_name = "Billet Background Image"
         verbose_name_plural = "Billet Background Images"
 
-
 class BlogBackgroundImage(models.Model):
     title = models.TextField(verbose_name="Title")
     cover = models.ImageField(upload_to='images/', verbose_name="Cover")
@@ -5166,14 +4953,9 @@ class BlogBackgroundImage(models.Model):
         verbose_name = "Blog Background Image"
         verbose_name_plural = "Blog Background Images"
 
-
 class PostBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
-
-    # name = models.CharField(max_length=100, help_text='Your name goes here.')
-    # description = models.TextField(help_text='Idea your profile here.')
-    # image = models.ImageField(help_text='Link a URL for your profile (scales to your picture`s dimensions.)')
 
     def __str__(self):
         return self.title
@@ -5181,16 +4963,11 @@ class PostBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Idea Background Image"
         verbose_name_plural = "Idea Background Images"
-
 
 class PosteBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
 
-    # name = models.CharField(max_length=100, help_text='Your name goes here.')
-    # description = models.TextField(help_text='Idea your profile here.')
-    # image = models.ImageField(help_text='Link a URL for your profile (scales to your picture`s dimensions.)')
-
     def __str__(self):
         return self.title
 
@@ -5198,14 +4975,9 @@ class PosteBackgroundImage(models.Model):
         verbose_name = "Idea Background Image"
         verbose_name_plural = "Idea Background Images"
 
-
 class VoteBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
-
-    # name = models.CharField(max_length=100, help_text='Your name goes here.')
-    # description = models.TextField(help_text='Idea your profile here.')
-    # image = models.ImageField(help_text='Link a URL for your profile (scales to your picture`s dimensions.)')
 
     def __str__(self):
         return self.title
@@ -5213,7 +4985,6 @@ class VoteBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Vote Background Image"
         verbose_name_plural = "Vote Background Images"
-
 
 class RuleBackgroundImage(models.Model):
     title = models.TextField()
@@ -5226,7 +4997,6 @@ class RuleBackgroundImage(models.Model):
         verbose_name = "Rule Background Image"
         verbose_name_plural = "Rule Background Images"
 
-
 class AboutBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5237,7 +5007,6 @@ class AboutBackgroundImage(models.Model):
     class Meta:
         verbose_name = "About Background Image"
         verbose_name_plural = "About Background Images"
-
 
 class FaqBackgroundImage(models.Model):
     title = models.TextField()
@@ -5250,7 +5019,6 @@ class FaqBackgroundImage(models.Model):
         verbose_name = "FAQ Background Image"
         verbose_name_plural = "FAQ Background Images"
 
-
 class StaffBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5261,7 +5029,6 @@ class StaffBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Staff Background Image"
         verbose_name_plural = "Staff Background Images"
-
 
 class StaffApplyBackgroundImage(models.Model):
     title = models.TextField()
@@ -5274,7 +5041,6 @@ class StaffApplyBackgroundImage(models.Model):
         verbose_name = "Staff Application Background Image"
         verbose_name_plural = "Staff Application Background Images"
 
-
 class InformationBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5285,7 +5051,6 @@ class InformationBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Information Background Image"
         verbose_name_plural = "Information Background Images"
-
 
 class TagBackgroundImage(models.Model):
     title = models.TextField()
@@ -5298,7 +5063,6 @@ class TagBackgroundImage(models.Model):
         verbose_name = "Tag Background Image"
         verbose_name_plural = "Tag Background Images"
 
-
 class UserBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5309,7 +5073,6 @@ class UserBackgroundImage(models.Model):
     class Meta:
         verbose_name = "User Background Image"
         verbose_name_plural = "Users Background Images"
-
 
 class StaffRanksBackgroundImage(models.Model):
     title = models.TextField()
@@ -5322,7 +5085,6 @@ class StaffRanksBackgroundImage(models.Model):
         verbose_name = "Staff Ranks Background Image"
         verbose_name_plural = "Staff Ranks Background Images"
 
-
 class MegaBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5333,10 +5095,6 @@ class MegaBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Mega Background Image"
         verbose_name_plural = "Mega Background Images"
-
-
-# megacoins.html
-
 
 class EventBackgroundImage(models.Model):
     title = models.TextField()
@@ -5349,7 +5107,6 @@ class EventBackgroundImage(models.Model):
         verbose_name = "Event Background Image"
         verbose_name_plural = "Event Background Images"
 
-
 class NewsBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5360,7 +5117,6 @@ class NewsBackgroundImage(models.Model):
     class Meta:
         verbose_name = "News Background Image"
         verbose_name_plural = "News Background Images"
-
 
 class ShareBackgroundImage(models.Model):
     title = models.TextField()
@@ -5378,7 +5134,6 @@ class ShareBackgroundImage(models.Model):
         verbose_name = "Share Background Image"
         verbose_name_plural = "Share Background Images"
 
-
 class WhyBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5389,7 +5144,6 @@ class WhyBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Why Background Image"
         verbose_name_plural = "Why Background Images"
-
 
 class WebsiteBackgroundImage(models.Model):
     title = models.TextField()
@@ -5407,7 +5161,6 @@ class WebsiteBackgroundImage(models.Model):
         verbose_name = "Website Background Image"
         verbose_name_plural = "Website Background Images"
 
-
 class PerksBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5423,7 +5176,6 @@ class PerksBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Perks Background Image"
         verbose_name_plural = "Perks Background Images"
-
 
 class CommitmentBackgroundImage(models.Model):
     title = models.TextField()
@@ -5441,7 +5193,6 @@ class CommitmentBackgroundImage(models.Model):
         verbose_name = "Commitment Background Image"
         verbose_name_plural = "Commitment Background Images"
 
-
 class PriceBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5458,7 +5209,6 @@ class PriceBackgroundImage(models.Model):
         verbose_name = "Price Background Image"
         verbose_name_plural = "Price Background Images"
 
-
 class ServerBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5469,7 +5219,6 @@ class ServerBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Server Background Image"
         verbose_name_plural = "Server Background Images"
-
 
 class ContactBackgroundImage(models.Model):
     title = models.TextField()
@@ -5487,7 +5236,6 @@ class ContactBackgroundImage(models.Model):
         verbose_name = "Contact Background Image"
         verbose_name_plural = "Contact Background Images"
 
-
 class MantenienceBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5503,7 +5251,6 @@ class MantenienceBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Mantenience Background Image"
         verbose_name_plural = "Mantenience Background Images"
-
 
 class CostBackgroundImage(models.Model):
     title = models.TextField()
@@ -5521,7 +5268,6 @@ class CostBackgroundImage(models.Model):
         verbose_name = "Cost Background Image"
         verbose_name_plural = "Cost Background Images"
 
-
 class TiersBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5537,7 +5283,6 @@ class TiersBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Tiers Background Image"
         verbose_name_plural = "Tiers Background Images"
-
 
 class AccountBackgroundImage(models.Model):
     title = models.TextField()
@@ -5555,7 +5300,6 @@ class AccountBackgroundImage(models.Model):
         verbose_name = "Account Background Image"
         verbose_name_plural = "Account Background Images"
 
-
 class AddonsBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5572,7 +5316,6 @@ class AddonsBackgroundImage(models.Model):
         verbose_name = "Addons Background Image"
         verbose_name_plural = "Addons Background Images"
 
-
 class PunishAppsBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -5583,7 +5326,6 @@ class PunishAppsBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Punishment Applications Background Image"
         verbose_name_plural = "Punishment Applications Background Images"
-
 
 class BanAppealBackgroundImage(models.Model):
     title = models.TextField()
@@ -5596,55 +5338,10 @@ class BanAppealBackgroundImage(models.Model):
         verbose_name = "Ban Appliciations Background Image"
         verbose_name_plural = "Ban Applications Background Images"
 
-
-# class Background2aImage(models.Model):
-#  image = models.URLField(help_text='Upload a background image for the Introduction Section (section 2a).')
-
-#  def get_absolute_url(self):
-#    return self.image
-
-#  class Meta:
-#    verbose_name = "Background Image"
-#    verbose_name_plural = "Background Images"
-
-# class Background2aImage(models.Model):
-#  image = models.URLField(help_text='Upload a background image for the Introduction Section (section 2a).')
-
-#  def get_absolute_url(self):
-#    return self.image
-
-#  class Meta:
-#    verbose_name = "Background Image"
-#    verbose_name_plural = "Background Images"
-
-
-# class PublicProfile(models.Model):
-# user = models.OneToOneField(User, related_name='user', on_delete=models.CASCADE)
-# photo = models.ImageField(verbose_name=("Profile Picture"),
-#                  upload_to = 'profiles', #"main.PublicProfile.photo"
-#                  format="Image", max_length=255, null=True, blank=True)
-# website = models.URLField(default='', blank=True)
-# username = models.CharField(max_length=100)
-# bio = models.TextField(default='', blank=True)
-# phone = models.CharField(max_length=20, blank=True, default='')
-# city = models.CharField(max_length=100, default='', blank=True)
-# country = models.CharField(max_length=100, default='', blank=True)
-# organization = models.CharField(max_length=100, default='', blank=True)
-
-# def create_profile(sender, **kwargs):
-# user = kwargs["instance"]
-# if kwargs["created"]:
-# user_profile = UserProfile(user=user, bio='my bio') #website='http://poketrove.com')
-# user_profile.save()
-# post_save.connect(create_profile, sender=User)
-
-
-# link the profiledetails page to settings
 from django.db.models import Q
 
-
 def get_friends(self):
-    from .models import FriendRequest  # Import here to avoid circular import
+    from .models import FriendRequest
     accepted_friend_requests = FriendRequest.objects.filter(
         Q(sender=self, status=FriendRequest.ACCEPTED) | Q(receiver=self, status=FriendRequest.ACCEPTED))
     friends = set()
@@ -5656,10 +5353,7 @@ def get_friends(self):
     print('friends here')
     return friends
 
-
-# Add the get_friends method to the User model
 User.add_to_class('get_friends', get_friends)
-
 
 class FriendRequest(models.Model):
     PENDING = 0
@@ -5685,13 +5379,10 @@ class FriendRequest(models.Model):
             if profile:
                 return reverse('showcase:profile', args=[str(profile.pk)])
 
-    # Handle the case where the current user is neither the sender nor the receiver
-
     class Meta:
         verbose_name = "Friend Request"
         verbose_name_plural = "Friend Requests"
         unique_together = ('sender', 'receiver')
-
 
 class Room(models.Model):
     name = models.CharField(max_length=1000)
@@ -5719,13 +5410,12 @@ class Room(models.Model):
             return True
         else:
             print('private server')
-            # Only allow signed-in users to join if the room is not public
+
             if user.is_authenticated:
-                # Allow the room creator to join the room
+
                 if self.signed_in_user == user:
                     return True
 
-                # Check if there's an accepted friend request between the user and the room creator
                 return FriendRequest.objects.filter(
                     Q(sender=self.signed_in_user, receiver=user, status=FriendRequest.ACCEPTED) |
                     Q(sender=user, receiver=self.signed_in_user, status=FriendRequest.ACCEPTED)
@@ -5734,20 +5424,17 @@ class Room(models.Model):
                 return False
 
     def get_absolute_url(self):
-        # Construct the URL for the room detail page
+
         if self.name == '':
             return reverse("showcase:room", kwargs={'room': ''})
 
         room_url = reverse("showcase:room", kwargs={'room': self.name})
 
-        # Construct the query parameters with the username
         final_url = f"{room_url}?username={self.name}"
 
         return final_url
 
-
 from django.contrib.auth.models import User
-
 
 class Message(models.Model):
     value = models.CharField(max_length=1000000)
@@ -5775,30 +5462,26 @@ class Message(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Get the current maximum message number
+
             max_message_number = Message.objects.aggregate(max_message_number=Max('message_number'))[
                                      'max_message_number'] or 0
-            # Increment the maximum message number to get the new message number
+
             self.message_number = max_message_number + 1
 
-            # Get the associated ProfileDetails for the donor
             profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
 
-            # Set the position to the position value from the associated ProfileDetails if it exists
             if profile and hasattr(self, 'position'):
                 self.position = profile.position
 
         super().save(*args, **kwargs)
 
-        # Update the Friend instances associated with the signed_in_user and friend fields
         if self.signed_in_user and self.room:
-            # Get the Friend instances associated with the signed_in_user and friend fields
+
             friends = Friend.objects.filter(
                 (Q(user=self.signed_in_user) & Q(friend__username=self.room)) |
                 (Q(user__username=self.room) & Q(friend=self.signed_in_user))
             )
 
-            # Update the Friend instances with the latest message and the date
             for friend in friends:
                 friend.latest_messages = self
                 friend.last_messaged = self.date
@@ -5810,24 +5493,21 @@ class Message(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
     def get_absolute_url(self):
-        # Construct the URL for the room detail page
+
         room_url = reverse("showcase:room", kwargs={'room': str(self.room)})
-        # Construct the query parameters
+
         final_url = f"{room_url}?username={self.signed_in_user.username}"
         return final_url
 
         """
    def _get_current_user(self):
-       # Logic to retrieve the currently signed-in user
-       # You can modify this according to your authentication mechanism
+
        return User.objects.get(username='example_user')
 
    def get_profile_url(self):
        return reverse('showcase:profile', args=[str(self.signed_in_user_id)])
-   #def get_profile_url(self):
-   #    return f"http://127.0.0.1:8000/profile/{self.signed_in_user_id}/"
-"""
 
+"""
 
 class GeneralMessage(models.Model):
     value = models.CharField(max_length=1000000)
@@ -5852,18 +5532,15 @@ class GeneralMessage(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Get the current maximum message number
+
             max_message_number = GeneralMessage.objects.aggregate(max_message_number=Max('message_number'))[
                                      'max_message_number'] or 0
             self.message_number = max_message_number + 1
 
-            # Get the associated ProfileDetails for the signed-in user
             profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
             if profile:
-                # If `position` is a field in ProfileDetails and needs to be set in GeneralMessage,
-                # it should be added to this model.
-                # self.position = profile.position
-                pass  # Remove this if `position` field is added to GeneralMessage
+
+                pass
 
         super().save(*args, **kwargs)
 
@@ -5875,7 +5552,6 @@ class GeneralMessage(models.Model):
     class Meta:
         verbose_name = "General Message"
         verbose_name_plural = "General Messages"
-
 
 class DegeneratePlaylistLibrary(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -5895,7 +5571,6 @@ class DegeneratePlaylistLibrary(models.Model):
         verbose_name = "Degenerate Playist Library"
         verbose_name_plural = "Degenerate Playist Libraries"
 
-
 class DegeneratePlaylist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     song = models.ManyToManyField(DegeneratePlaylistLibrary)
@@ -5912,7 +5587,6 @@ class DegeneratePlaylist(models.Model):
         verbose_name = "Degenerate Playist"
         verbose_name_plural = "Degenerate Playists"
 
-
 class InviteCode(models.Model):
     code = models.CharField(max_length=50, unique=True)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -5926,23 +5600,18 @@ class InviteCode(models.Model):
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
-    # Optional: Add permalink field (boolean) as defined previously
-
     def __str__(self):
         return f"{self.code} - {self.user.username}"
 
     def is_valid(self):
         """Checks if the invite code is not expired"""
         if self.expire_time is None:
-            return True  # No expiry set, so it's valid
+            return True
         return self.expire_time > timezone.now()
 
     class Meta:
         verbose_name = "Invite Code"
         verbose_name_plural = "Invite Codes"
-
-
-# is_active is new
 
 class Friend(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -5950,7 +5619,7 @@ class Friend(models.Model):
     friend_username = models.CharField(max_length=500, blank=True, null=True)
     latest_messages = models.ForeignKey(Message, blank=True, null=True, on_delete=models.CASCADE)
     last_messaged = models.DateTimeField(blank=True, null=True)
-    currently_active = models.BooleanField(default=False)  # are you currently on the person's chat profile
+    currently_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     online = models.BooleanField(default=False)
     is_active = models.IntegerField(default=1,
@@ -5963,9 +5632,9 @@ class Friend(models.Model):
         return str(self.user) + " is friends with " + str(self.friend) + "!"
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # Call the original save method first
+        super().save(*args, **kwargs)
         if self.currently_active:
-            # Update the currently_active field for all instances with the same user field, except for this instance
+
             Friend.objects.exclude(pk=self.pk).filter(user=self.user).update(currently_active=False)
         self.friend_username = self.friend.username
         latest_message_queryset = Message.objects.filter(Q(signed_in_user=self.user) | Q(signed_in_user=self.friend))
@@ -5974,7 +5643,7 @@ class Friend(models.Model):
         if latest_message:
             self.latest_messages = latest_message
             self.last_messaged = latest_message.date
-        super().save(*args, **kwargs)  # Save the model again with the updated field (optional)
+        super().save(*args, **kwargs)
 
     def get_profile_url(self):
         profile = ProfileDetails.objects.filter(user=self.friend).first()
@@ -5982,13 +5651,12 @@ class Friend(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
     def get_profile_url2(self):
-        # Construct the URL for the room detail page
+
         if self.friend_username == None:
             return reverse("showcase:room", kwargs={'room': ''})
 
         room_url = reverse("showcase:room", kwargs={'room': self.friend_username})
 
-        # Construct the query parameters with the username
         final_url = f"{room_url}?username={self.user.username}"
 
         return final_url
@@ -6008,37 +5676,31 @@ class Friend(models.Model):
     class Meta:
         unique_together = ('user', 'friend')
 
-
 def update_friend_username(sender, instance, created, **kwargs):
-    if created:  # Check if a new object is created
+    if created:
         instance.friend_username = instance.friend.username
-        instance.save()  # Save the model again with the updated field
-
+        instance.save()
 
 post_save.connect(update_friend_username, sender=Friend)
-
 
 class SupportChat(models.Model):
     name = models.CharField(max_length=1000)
     signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
-                                       verbose_name="User")  # room should be based on the signed-in user
+                                       verbose_name="User")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
                                     help_text='1->Active, 0->Inactive',
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
-    # datetime.now()
-    # api_time = models.DateTimeField()
-
     def __str__(self):
         return str(self.signed_in_user)
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
-            # Set the position to the position value from the associated ProfileDetails
+
             if profile:
                 self.position = profile.position
 
@@ -6050,7 +5712,7 @@ class SupportChat(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
     def get_absolute_url(self):
-        # Construct the URL for the room detail page
+
         room_url = reverse('showcase:supportroom', args=[str(self.signed_in_user)])
         return room_url
 
@@ -6058,16 +5720,15 @@ class SupportChat(models.Model):
         verbose_name = "Support Chat"
         verbose_name_plural = "Support Chat"
 
-
 class SupportMessage(models.Model):
     value = models.CharField(max_length=1000000)
-    # now = datetime.datetime.now()
+
     date = models.DateTimeField(default=timezone.now, blank=True)
     user = models.CharField(max_length=1000000)
     signed_in_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,
                                        related_name='support_messages',
                                        verbose_name="User")
-    room = models.CharField(max_length=1000000)  # newly added unique=True
+    room = models.CharField(max_length=1000000)
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -6087,9 +5748,9 @@ class SupportMessage(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
-            # Set the position to the position value from the associated ProfileDetails
+
             if profile:
                 self.position = profile.position
 
@@ -6101,16 +5762,13 @@ class SupportMessage(models.Model):
             return reverse('showcase:profile', args=[str(profile.pk)])
 
     def get_absolute_url(self):
-        # Construct the URL for the room detail page
+
         room_url = reverse('showcase:supportroom', args=[str(self.signed_in_user)])
         return room_url
 
     class Meta:
         verbose_name = "Support Message"
         verbose_name_plural = "Support Messages"
-
-
-# support live chat below, support thread above (requires refresh)
 
 class SupportInterface(models.Model):
     name = models.CharField(max_length=1000, null=True)
@@ -6130,13 +5788,12 @@ class SupportInterface(models.Model):
             return str('Guest')
 
     def get_absolute_url(self):
-        # Construct the URL for the room detail page
+
         if self.name == '':
             return reverse("showcase:supportline", kwargs={'room': ''})
 
         room_url = reverse("showcase:supportline", kwargs={'room': self.name})
 
-        # Construct the query parameters with the username
         final_url = f"{room_url}?username={self.name}"
 
         return final_url
@@ -6144,7 +5801,6 @@ class SupportInterface(models.Model):
     class Meta:
         verbose_name = "Administration Chat Thread"
         verbose_name_plural = "Administration Chat Thread"
-
 
 class SupportLine(models.Model):
     value = models.CharField(max_length=1000000)
@@ -6173,16 +5829,14 @@ class SupportLine(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Get the current maximum message number
+
             max_message_number = SupportLine.objects.aggregate(max_message_number=models.Max('message_number'))[
                                      'max_message_number'] or 0
 
-            # Increment the maximum message number to get the new message number
             self.message_number = max_message_number + 1
-            # Get the associated ProfileDetails for the donor
+
             profile = ProfileDetails.objects.filter(user=self.signed_in_user).first()
 
-            # Set the position to the position value from the associated ProfileDetails
             if profile:
                 self.position = profile.position
 
@@ -6195,10 +5849,8 @@ class SupportLine(models.Model):
 
     def get_absolute_url(self):
 
-        # Construct the URL for the room detail page
         room_url = reverse("showcase:room", kwargs={'room': str(self.room)})
 
-        # Construct the query parameters
         final_url = f"{room_url}?username={self.signed_in_user.username}"
 
         return final_url
@@ -6207,13 +5859,12 @@ class SupportLine(models.Model):
         verbose_name = "Administration Thread Message"
         verbose_name_plural = "Administration Thread Messages"
 
-
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_profile')
     stripe_customer_id = models.CharField(max_length=50, blank=True, null=True)
-    # related name could be a possible solution
+
     one_click_purchasing = models.BooleanField(default=False)
-    currency = models.ForeignKey('Currency', on_delete=models.SET_NULL, null=True)  # Adjust model name if needed
+    currency = models.ForeignKey('Currency', on_delete=models.SET_NULL, null=True)
     level = models.ForeignKey('Level', on_delete=models.CASCADE, default=1)
     currency_amount = models.IntegerField(default=0, verbose_name='Currency Amount')
     is_active = models.IntegerField(default=1,
@@ -6229,10 +5880,8 @@ class UserProfile(models.Model):
         verbose_name = "User Profile"
         verbose_name_plural = "User Profiles"
 
-
 from django.db.models import signals
 from django.db.transaction import atomic
-
 
 class Wager(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
@@ -6244,7 +5893,7 @@ class Wager(models.Model):
         print('bet: ' + str(self.amount))
         print('currency: ' + str(self.user_profile.currency_amount))
         with atomic():
-            # Check for negative bets and insufficient funds
+
             if self.amount <= 0:
                 print('put a positive amount')
                 raise ValidationError("Bet amount must be positive.")
@@ -6253,34 +5902,29 @@ class Wager(models.Model):
                 raise ValidationError("Insufficient funds for this bet. You have {}, but the bet is {}.".format(
                     self.user_profile.currency_amount, self.amount))
 
-            # Deduct amount from user currency (within atomic block)
             self.user_profile.currency_amount -= self.amount
-            self.user_profile.save()  # Save user profile first for potential integrity checks
+            self.user_profile.save()
 
-            # Save wager after user profile (for cleaner error handling)
             super().save(*args, **kwargs)
 
     def resolve(self, outcome):
         self.outcome = outcome
-        win_multiplier = 1.5 if outcome == 'B' else 1.0  # Handle Blackjack bonus
-        if outcome in ('W', 'B'):  # Update currency only on wins (including Blackjack)
+        win_multiplier = 1.5 if outcome == 'B' else 1.0
+        if outcome in ('W', 'B'):
             self.user_profile.currency_amount += self.amount * win_multiplier
-        elif outcome == 'D':  # Refund on ties
+        elif outcome == 'D':
             self.user_profile.currency_amount += self.amount
         self.user_profile.save()
         self.save()
 
-
-# Connect pre-save signal to print `self.amount` before atomic block
 def print_amount_before_save(sender, instance, **kwargs):
     print("Wager amount before atomic block:", instance.amount)
-
 
 signals.pre_save.connect(print_amount_before_save, sender=Wager)
 
 """class Settings(models.Model):
  username = models.OneToOneField(User, on_delete=models.CASCADE)
- #password =
+
  full_name = models.CharField(max_length=200, blank=True, null=True)
 
  class Meta:
@@ -6291,7 +5935,6 @@ from django.db.models.signals import pre_save
 
 from django.http import JsonResponse
 from django.core import serializers
-
 
 class ItemFilter(models.Model):
     product_filter = models.CharField(verbose_name="Hashtag filters", max_length=200, blank=True, null=True)
@@ -6313,13 +5956,12 @@ class ItemFilter(models.Model):
         verbose_name = "Item Filter"
         verbose_name_plural = "Item Filters"
 
-
 class Item(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=16, decimal_places=2, blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True,
-                                 blank=True)  # generally set it to the first one avaliable
+                                 blank=True)
     currency_price = models.IntegerField(blank=True, null=True)
     is_currency_based = models.BooleanField(default=False)
     fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -6331,8 +5973,8 @@ class Item(models.Model):
 
     type = models.ForeignKey(ItemFilter, on_delete=models.CASCADE, blank=True, null=True)
     specialty = models.CharField(blank=True, null=True, choices=SPECIAL_CHOICES, max_length=2)
-    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default='N')  # can use for cataloging products
-    slug = models.SlugField(unique=True, blank=True, null=True)  # might change to automatically get the slug
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1000, default='N')
+    slug = models.SlugField(unique=True, blank=True, null=True)
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
     description = models.TextField()
     image = models.FileField()
@@ -6347,7 +5989,7 @@ class Item(models.Model):
     image = models.ImageField()
     multi_listing = models.BooleanField(default=False)
     quantity = models.IntegerField(default=1)
-    # hyperlink = models.TextField(verbose_name = "Hyperlink", blank=True, null=True, help_text="Feedbacks will use this hyperlink as a link to this product.") #might change to automatically get the hyperlink by means of item filtering
+
     relateditems = models.ManyToManyField("self", blank=True, verbose_name="Related Items:")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -6380,10 +6022,9 @@ class Item(models.Model):
             if first_currency:
                 self.currency = first_currency
 
-        # Ensure that slug is set
         if not self.slug:
             self.slug = slugify(self.title)
-            print('selugified')  # This should now appear in the console if the condition is met
+            print('selugified')
 
         if self.price is None and self.discount_price is None:
             self.is_currency_based = True
@@ -6393,12 +6034,10 @@ class Item(models.Model):
     def get_profile_url(self):
         return reverse('showcase:product', args=[str(self.slug)])
 
-    # used to get the user;s profile url
     def get_profile_url2(self):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
-
 
 class GameHistory(models.Model):
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
@@ -6434,13 +6073,11 @@ class GameHistory(models.Model):
 
     def save(self, *args, **kwargs):
 
-        # Set the default currency to the first instance of Currency if not already set
         if not self.creator:
             self.creator = self.game.user
         if not self.image:
             self.file = self.game.image
         super().save(*args, **kwargs)
-
 
 class QuickItem(models.Model):
     title = models.CharField(max_length=100, blank=True, null=True)
@@ -6486,7 +6123,6 @@ class QuickItem(models.Model):
         verbose_name = "Quick Item"
         verbose_name_plural = "Quick Items"
 
-
 class EBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -6500,16 +6136,11 @@ class EBackgroundImage(models.Model):
     def __str__(self):
         return self.title
 
-    # def __str__(self):
-    #    return self.__annotations__title
-
     class Meta:
         verbose_name = "Ecommerce Background Image"
         verbose_name_plural = "Ecommerce Background Images"
 
-
 from django.utils.crypto import get_random_string
-
 
 class Transaction(models.Model):
     inventory_object = models.ForeignKey(InventoryObject, on_delete=models.CASCADE)
@@ -6533,9 +6164,7 @@ class Transaction(models.Model):
         verbose_name = "Transaction"
         verbose_name_plural = "Transactions"
 
-
 from django.utils.text import slugify
-
 
 class TradeOffer(models.Model):
     PENDING = 0
@@ -6587,38 +6216,32 @@ class TradeOffer(models.Model):
         return reverse('showcase:directedtradeoffers', args=[str(self.slug)])
 
     def save(self, *args, **kwargs):
-        # if not self.trade_agreement:
-        #    raise ValidationError("Trade agreement must be true to create a trade offer.")
+
         if not self.slug:
-            print("Title:", self.title)  # Print the title
+            print("Title:", self.title)
             self.slug = slugify(self.title)
-            print("Slug after slugify:", self.slug)  # Print the slug after slugify
+            print("Slug after slugify:", self.slug)
 
             while TradeOffer.objects.filter(slug=self.slug).exists():
                 print("Slug already exists. Regenerating...")
                 self.slug = f"{self.slug}-{get_random_string(length=32)}"
-                print("Slug after regeneration:", self.slug)  # Print the slug after regeneration
+                print("Slug after regeneration:", self.slug)
 
-        # Check if the trade_status has been set to ACCEPTED
         if self.trade_status == self.ACCEPTED and self.pk is not None:
-            # Create a new Trade object
-            trade = Trade.objects.create()  # Create a new Trade instance
 
-            # Add this TradeOffer instance to the trade's trade_offers
+            trade = Trade.objects.create()
+
             trade.trade_offers.add(self)
 
-            # Add the users involved in this TradeOffer to the trade's users
             trade.users.add(self.user)
             if self.user2:
                 trade.users.add(self.user2)
 
-            # Access the related tradeoffer and set user2
             if self.offered_trade_items:
                 trade_offer = self.offered_trade_items
                 user = trade_offer.user
                 self.user2 = user
 
-            # If it's a new instance, set the wanted_trade_items based on the related offer's items
             if self.pk is None:
                 print('new trade offer')
                 related_offer = self.offered_trade_items
@@ -6648,10 +6271,9 @@ class TradeOffer(models.Model):
         verbose_name = "Trade Offer"
         verbose_name_plural = "Trade Offers"
 
-
 class TradeShippingLabel(models.Model):
     trade_offer = models.ForeignKey(TradeOffer, on_delete=models.CASCADE)
-    # responding_trade_offer = models.OneToOneField(RespondingTradeOffer, on_delete=models.CASCADE)
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     shipping_profile = models.ForeignKey(UserProfile2, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100, default='')
@@ -6692,22 +6314,20 @@ class TradeShippingLabel(models.Model):
 
     unique_together = ('user', 'id',)
 
-
 """
     def save(self, *args, **kwargs):
        try:
-            # Check if existing profile exists for the current user
+
             existing_profile = TradeShippingLabel.objects.get(responding_trade_offer=self.responding_trade_offer)
-            # If found, delete it before saving the new data
+
             if existing_profile:
                 existing_profile.delete()
                 print("Previous shipping profile deleted successfully.")
         except UserProfile2.DoesNotExist:
-            # No existing profile found, proceed with normal save
+
             pass
 
         super().save(*args, **kwargs)"""
-
 
 class RespondingTradeOffer(models.Model):
     PENDING = 0
@@ -6758,7 +6378,7 @@ class RespondingTradeOffer(models.Model):
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # Save the instance first
+        super().save(*args, **kwargs)
 
         if self.offered_trade_items.all():
             first_trade_item = self.offered_trade_items.first()
@@ -6776,16 +6396,16 @@ class RespondingTradeOffer(models.Model):
                 related_trade.responding_trade_offers.add(self)
 
             if responding_related_trade is not None:
-                # Clear the existing many-to-many relationship
+
                 responding_related_trade.responding_trade_offers.clear()
-                # Add the RespondingTradeOffer instance to the many-to-many relationship
+
                 responding_related_trade.responding_trade_offers.add(self)
 
         if self.pk is not None and self.trade_status == self.ACCEPTED and self.trade_shipping_label is None:
-            # Create a new TradeShippingLabel instance
+
             userprofile = self.user2.ship_profile if self.user2 else None
             self.trade_shipping_label = TradeShippingLabel.objects.create(
-                trade_offer=self.wanted_trade_items,  # Pass the wanted_trade_items foreign key
+                trade_offer=self.wanted_trade_items,
                 user=self.user2,
                 first_name=userprofile.first_name if userprofile else '',
                 last_name=userprofile.last_name if userprofile else '',
@@ -6796,18 +6416,17 @@ class RespondingTradeOffer(models.Model):
                 zip_code=userprofile.zip_code if userprofile else '',
                 phone_number=userprofile.phone_number if userprofile else '',
 
-                # Set other fields as needed
             )
         if self.pk is not None and self.trade_status == self.ACCEPTED:
-            # Create a new Trade instance
+
             trade_offers = TradeOffer.objects.filter(
                 id__in=[self.wanted_trade_items.id, self.offered_trade_items.first().id])
             trade = Trade.objects.create(
-                # Set other fields as needed
+
             )
-            # Add the related TradeOffer instances to the many-to-many relationship
+
             trade.trade_offers.set(trade_offers)
-            # Add the users to the many-to-many relationship
+
             trade.users.set([self.user, self.user2])
 
         super().save(*args, **kwargs)
@@ -6830,7 +6449,6 @@ class RespondingTradeOffer(models.Model):
     class Meta:
         verbose_name = "Trade Offer Response"
         verbose_name_plural = "Trade Offer Responses"
-
 
 class Trade(models.Model):
     trade_offers = models.ManyToManyField(TradeOffer)
@@ -6858,9 +6476,9 @@ class Trade(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            # Generate a random UUID
+
             random_uuid = uuid.uuid4()
-            # Create a slug from the UUID and assign it to the slug field
+
             self.slug = slugify(random_uuid)
         super().save(*args, **kwargs)
 
@@ -6870,7 +6488,6 @@ class Trade(models.Model):
     class Meta:
         verbose_name = "Trade"
         verbose_name_plural = "Trades"
-
 
 class TradeContract(models.Model):
     commission = models.FloatField(default=10, help_text="(%)")
@@ -6887,7 +6504,6 @@ class TradeContract(models.Model):
     class Meta:
         verbose_name = "Trade Contract"
         verbose_name_plural = "Trade Contracts"
-
 
 class TradeConfirmation(models.Model):
     trade = models.ForeignKey(Trade, on_delete=models.CASCADE, related_name='tradeconfirm')
@@ -6909,12 +6525,9 @@ class TradeConfirmation(models.Model):
         verbose_name = "Trade Confirmation"
         verbose_name_plural = "Trade Confirmations"
 
-
 class ChatBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
-
-    # items = Item.objects.all()
 
     def __str__(self):
         return self.title
@@ -6923,12 +6536,9 @@ class ChatBackgroundImage(models.Model):
         verbose_name = "Chat Background Image"
         verbose_name_plural = "Chat Background Images"
 
-
 class SupportChatBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
-
-    # items = Item.objects.all()
 
     def __str__(self):
         return self.title
@@ -6936,7 +6546,6 @@ class SupportChatBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Support Chat Background Image"
         verbose_name_plural = "Support Chat Background Images"
-
 
 class UploadACard(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -6957,7 +6566,6 @@ class UploadACard(models.Model):
         verbose_name = "Upload A Card"
         verbose_name_plural = "Upload Cards"
 
-
 class PartnerBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -6968,7 +6576,6 @@ class PartnerBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Partner Background Image"
         verbose_name_plural = "Partner Background Images"
-
 
 class ConvertBackgroundImage(models.Model):
     title = models.TextField()
@@ -6981,7 +6588,6 @@ class ConvertBackgroundImage(models.Model):
         verbose_name = "Convert Background Image"
         verbose_name_plural = "Convert Background Images"
 
-
 class ReasonsBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -6992,7 +6598,6 @@ class ReasonsBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Reasons Background Image"
         verbose_name_plural = "Reasons Background Images"
-
 
 class OrderBackgroundImage(models.Model):
     title = models.TextField()
@@ -7005,7 +6610,6 @@ class OrderBackgroundImage(models.Model):
         verbose_name = "Order Background Image"
         verbose_name_plural = "Order Background Images"
 
-
 class CheckoutBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -7016,7 +6620,6 @@ class CheckoutBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Checkout Background Image"
         verbose_name_plural = "Checkout Background Images"
-
 
 class SignupBackgroundImage(models.Model):
     title = models.TextField()
@@ -7029,7 +6632,6 @@ class SignupBackgroundImage(models.Model):
         verbose_name = "Signup Background Image"
         verbose_name_plural = "SignupBackground Images"
 
-
 class ChangePasswordBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -7040,7 +6642,6 @@ class ChangePasswordBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Change Password Background Image"
         verbose_name_plural = "Change Password Background Images"
-
 
 class FeedbackBackgroundImage(models.Model):
     title = models.TextField()
@@ -7053,7 +6654,6 @@ class FeedbackBackgroundImage(models.Model):
         verbose_name = "Feedback Background Image"
         verbose_name_plural = "Feedback Background Images"
 
-
 class IssueBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -7065,18 +6665,15 @@ class IssueBackgroundImage(models.Model):
         verbose_name = "Issue Background Image"
         verbose_name_plural = "Issue Background Images"
 
-
 import uuid
-
 
 class OrderItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ordered = models.BooleanField(default=False)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    # order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    # order_number = models.IntegerField()
+
     slug = models.SlugField(max_length=200, blank=True, null=True,
-                            help_text="Leave blank to use corresponding product slug.")  # apply unique=True parameter after slugs are actually implemented
+                            help_text="Leave blank to use corresponding product slug.")
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     image = models.ImageField()
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -7114,7 +6711,6 @@ class OrderItem(models.Model):
             return self.quantity * self.item.currency_price
         return 0
 
-
     def get_item_price(self):
         return self.quantity * self.item.price
 
@@ -7148,7 +6744,6 @@ class OrderItem(models.Model):
         if order:
             return reverse('showcase:product', args=[str(self.slug)])
 
-    # used to get the user;s profile url
     def get_profile_url2(self):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
@@ -7167,7 +6762,7 @@ class OrderItem(models.Model):
         OrderItemField.objects.create(
             user=self.user,
             ordered=self.ordered,
-            # order_number=self.order_number,
+
             slug=self.slug,
             item=self.item,
             image=self.image,
@@ -7186,17 +6781,15 @@ class OrderItem(models.Model):
     class Meta:
         verbose_name_plural = 'Order Items'
 
-
 """ def save(self, *args, **kwargs):
        if not self.slug:
            self.slug = slugify(self.item.slug)
        super().save(*args, **kwargs)"""
 
-
 class OrderItemField(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ordered = models.BooleanField(default=False)
-    # order_number = models.IntegerField()
+
     slug = models.SlugField(max_length=200, blank=True, null=True,
                             help_text="Leave blank to use corresponding product slug.")
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -7219,12 +6812,10 @@ class OrderItemField(models.Model):
     class Meta:
         verbose_name_plural = 'Order Item Fields'
 
-
 class AdminRoles(models.Model):
     role = models.CharField(max_length=30, verbose_name="Administration role")
     role_description = models.TextField(verbose_name="Role Overview", blank='True', null='True')
-    # role_hyperlink = models.CharField(max_length=100, verbose_name="Role hyperlink", help_text='Only add if necessary',
-    #                             blank='True', null='True')
+
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -7237,7 +6828,6 @@ class AdminRoles(models.Model):
 
     class Meta:
         verbose_name_plural = 'Administrative Roles'
-
 
 class AdminTasks(models.Model):
     task = models.CharField(max_length=30, verbose_name="Administration tasks")
@@ -7269,13 +6859,12 @@ class AdminTasks(models.Model):
         return self.task
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.section = AdminTasks.objects.filter(page_name=self.page_name).count() + 1
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Administrative Tasks'
-
 
 class AdminPages(models.Model):
     pages = models.CharField(max_length=30, verbose_name="Administration pages")
@@ -7297,13 +6886,12 @@ class AdminPages(models.Model):
         return self.pages
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.section = AdminPages.objects.filter(page_name=self.page_name).count() + 1
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Administrative Pages'
-
 
 class Questionaire(models.Model):
     RADIO_CHOICES = (
@@ -7322,10 +6910,8 @@ class Questionaire(models.Model):
     text = models.TextField(verbose_name="Question")
     image = models.TextField(verbose_name="Image", blank=True, null=True)
 
-    # answer_choices = models.JSONField(default=list, blank=True)
     answer_choices = models.CharField(max_length=255, blank=True, null=True)
 
-    # Add fields to store correct answers for different question types
     correct_answer_multiple_choice = models.CharField(max_length=255, blank=True, null=True)
     correct_answer_short_answer = models.CharField(max_length=255, blank=True, null=True)
     correct_answer_true_false = models.BooleanField(blank=True, null=True)
@@ -7347,12 +6933,10 @@ class Questionaire(models.Model):
     class Meta:
         verbose_name_plural = 'Question Form Base'
 
-
 class Answer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Questionaire, on_delete=models.CASCADE)
 
-    # Fields for different response types
     multiple_choice_response = models.CharField(max_length=100, null=True, blank=True)
     short_answer_response = models.TextField(null=True, blank=True)
     true_or_false_response = models.BooleanField(null=True, blank=True)
@@ -7369,7 +6953,6 @@ class Answer(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s answer to '{self.question.text}'"
-
 
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -7451,7 +7034,6 @@ class Order(models.Model):
     def get_profile_url2(self):
         return reverse('showcase:products', args=[str(self.slug)])
 
-
 class Address(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     street_address = models.CharField(max_length=100)
@@ -7470,11 +7052,10 @@ class Address(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        # If this address is marked as active, deactivate any other active address for the user
+
         if self.is_active == 1:
             Address.objects.filter(user=self.user, is_active=1).exclude(pk=self.pk).update(is_active=0)
 
-        # Save the current address
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -7483,7 +7064,6 @@ class Address(models.Model):
     class Meta:
         verbose_name_plural = 'Saved Address'
         verbose_name_plural = 'Saved Addresses'
-
 
 class Payment(models.Model):
     stripe_charge_id = models.CharField(max_length=50)
@@ -7498,7 +7078,6 @@ class Payment(models.Model):
 
     def __str__(self):
         return self.user.username
-
 
 class Coupon(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
@@ -7538,13 +7117,11 @@ class Refund(models.Model):
     def __str__(self):
         return f"{self.pk}"
 
-
 from django.db.models.signals import m2m_changed
 
 from django.db import models
 from django.urls import reverse
 from django.core.exceptions import ValidationError
-
 
 class Withdraw(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -7552,7 +7129,7 @@ class Withdraw(models.Model):
     number_of_cards = models.IntegerField(blank=True, null=True, verbose_name='Quantity')
     shipping_state = models.CharField(choices=SHIPPINGSTATUS, max_length=1, default='P')
     fees = models.IntegerField(null=True, blank=True, default=599)
-    #slug = models.CharField(max_length=16, blank=True, null=True)
+
     slag = models.SlugField(unique=True, max_length=16, blank=True, null=True, verbose_name='Slug')
     date_and_time = models.DateTimeField(null=True, verbose_name="time and date", auto_now_add=True)
     condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2, blank=True, null=True)
@@ -7627,7 +7204,7 @@ class Withdraw(models.Model):
                 )
                 withdraw_class.withdraw.add(self)
         else:
-            # Handle updates if not new
+
             self.number_of_cards = self.cards.count()
             super().save(*args, **kwargs)
 
@@ -7647,7 +7224,6 @@ class Withdraw(models.Model):
     class Meta:
         verbose_name = 'Withdrawal Card'
         verbose_name_plural = 'Withdrawal Cards'
-
 
 @receiver(m2m_changed, sender=Withdraw.cards.through)
 def update_number_of_cards(sender, instance, action, **kwargs):
@@ -7683,7 +7259,6 @@ def handle_withdraw_class_logic(sender, instance, created, **kwargs):
             )
             withdraw_class.withdraw.add(instance)
 
-
 class WithdrawClass(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     withdraw = models.ManyToManyField(Withdraw)
@@ -7714,12 +7289,12 @@ class WithdrawClass(models.Model):
 
     def save(self, *args, **kwargs):
         self.currency = Currency.objects.filter(is_active=1).first()
-        # Update the number_of_cards based on related Withdraw instances
+
         if self.pk:
-            # If the instance already exists, use the existing pk to get related Withdraw instances
+
             self.number_of_cards = self.withdraw.count()
         else:
-            # For new instances, set number_of_cards to the count of related Withdraw instances after creation
+
             super().save(*args, **kwargs)
             self.number_of_cards = self.withdraw.count()
         super().save(update_fields=['number_of_cards'])
@@ -7760,14 +7335,11 @@ class OfficialShipping(models.Model):
     class Meta:
         verbose_name_plural = 'Official Shipping'
 
-
 def userprofile_receiver(sender, instance, created, *args, **kwargs):
     if created:
         userprofile = UserProfile.objects.create(user=instance)
 
-
 post_save.connect(userprofile_receiver, sender=settings.AUTH_USER_MODEL)
-
 
 class Contact(models.Model):
     name = models.TextField()
@@ -7778,7 +7350,6 @@ class Contact(models.Model):
     class Meta:
         verbose_name = "Contact Message"
         verbose_name_plural = "Contact Messages"
-
 
 class BusinessMailingContact(models.Model):
     name = models.TextField()
@@ -7792,7 +7363,6 @@ class BusinessMailingContact(models.Model):
     class Meta:
         verbose_name = "Business Mailing Message"
         verbose_name_plural = "Business Mailing Messages"
-
 
 class CheckoutAddress(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -7812,9 +7382,7 @@ class CheckoutAddress(models.Model):
     class Meta:
         verbose_name_plural = 'Checkout Addresses'
 
-
 from django.db import IntegrityError
-
 
 class ImageCarousel(models.Model):
     carouseltitle = models.CharField(max_length=100, help_text='Title of the image.', verbose_name="title", blank=True,
@@ -7859,30 +7427,28 @@ class ImageCarousel(models.Model):
 
         if not self.carouselpage.endswith('.html'):
             self.carouselpage += '.html'
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.carouselposition = ImageCarousel.objects.filter(carouselpage=self.carouselpage,
                                                                  carouselnumber=self.carouselnumber).count() + 1
-            self.carouseltitle = f'background {self.carouselposition}'  # Set the title here
-        if self.carouselimage and not self.alternate:  # Check if an image exists and alternate text is not set
-            self.alternate = str(self.carouselimage)  # Set the alternate text to the string version of the image name
-        # Set the specialty based on the associated product
+            self.carouseltitle = f'background {self.carouselposition}'
+        if self.carouselimage and not self.alternate:
+            self.alternate = str(self.carouselimage)
+
         if self.associated_product and self.associated_product.specialty:
             self.specialty = self.associated_product.specialty
         try:
             super().save(*args, **kwargs)
         except IntegrityError as e:
-            # Handle any IntegrityError exceptions that may occur during save
-            # Print or log the error for debugging
+
             print(f"IntegrityError during save: {e}")
         super().save(*args, **kwargs)
-
 
 class AdvertisementBase(models.Model):
     advertisementtitle = models.CharField(max_length=100, help_text='Advertisement title.',
                                           verbose_name="advertisement title")
     advertisement = models.ImageField(help_text='Image of the advertisement.', upload_to='images/',
                                       height_field="advertisement_width",
-                                      width_field="advertisement_length")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
+                                      width_field="advertisement_length")
     advertisement_file = models.FileField(blank=True, null=True, upload_to='images/', verbose_name="Non-image File")
     advertisement_length = models.PositiveIntegerField(blank=True, null=True, default="100",
                                                        help_text='Original length of the advertisement (use for original ratio).',
@@ -7914,25 +7480,23 @@ class AdvertisementBase(models.Model):
             return self.advertisementtitle
 
     def save(self, *args, **kwargs):
-        if not self.id:  # object is being created for the first time
+        if not self.id:
             super().save(*args, **kwargs)
             img = Image.open(self.advertisement.path)
             img = img.resize((self.width_for_resize, self.length_for_resize), Image.LANCZOS)
             self.advertisement_length, self.advertisement_width = img.size
             super().save(*args, **kwargs)
-        else:  # object already exists and is being updated
+        else:
             img = Image.open(self.advertisement.path)
             img = img.resize((self.width_for_resize, self.length_for_resize), Image.LANCZOS)
             self.advertisement_width, self.advertisement_length = img.size
             super().save(*args, **kwargs)
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.advertisement_position = AdvertisementBase.objects.filter(page=self.page).count() + 1
         super().save(*args, **kwargs)
 
-
 class Advertising(AdvertisementBase):
     pass
-
 
 class ImageBase(models.Model):
     IMAGE_MEASUREMENT_CHOICES = (
@@ -7948,7 +7512,7 @@ class ImageBase(models.Model):
                              verbose_name="title")
     image = models.ImageField(blank=True, null=True, help_text='Image of the advertisement.', upload_to='images/',
                               height_field="image_length",
-                              width_field="image_width")  # the variable usage of advertisement_width & advertisement_height prevent those fields from being edited
+                              width_field="image_width")
     image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
                                               help_text='Width of the image (in percent relative).',
                                               verbose_name="image width")
@@ -7970,7 +7534,7 @@ class ImageBase(models.Model):
     yposition = models.IntegerField(help_text='x-position.', verbose_name="y-position", default="0")
     relevance = models.TextField(help_text='Relevance of image')
     correlating_product = models.OneToOneField(Item, blank=True, null=True, on_delete=models.CASCADE)
-    # try incorporating other models in addition to Item
+
     type = models.CharField(max_length=200, help_text='Type of image.')
     hyperlink = models.TextField(verbose_name="Hyperlink", blank=True, null=True)
     is_active = models.IntegerField(default=1,
@@ -7980,7 +7544,7 @@ class ImageBase(models.Model):
                                     choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
 
     class Meta:
-        # Add verbose name
+
         verbose_name = 'Image Base'
         verbose_name_plural = 'Image Base'
 
@@ -7988,16 +7552,14 @@ class ImageBase(models.Model):
         return self.title + " in " + self.page + " at Image Position " + str(self.image_position)
 
     def image_save(self, *args, **kwargs):
-        if not self.id:  # Object is being created for the first time
+        if not self.id:
             super().save(*args, **kwargs)
-        else:  # Object already exists and is being updated
-            # Retrieve the image
+        else:
+
             img = Image.open(self.image.path)
 
-            # Resize the image
             img = img.resize((self.width_for_resize, self.height_for_resize), Image.ANTIALIAS)
 
-            # Update image dimensions and ratio
             self.image_length, self.image_width = img.size
             if self.image_width and self.image_length:
                 self.image_ratio = self.image_length / self.image_width
@@ -8006,29 +7568,26 @@ class ImageBase(models.Model):
             super().save(*args, **kwargs)
 
     def set_image_position(image_id, xposition, yposition):
-        # Retrieve the Image object from the database
+
         image = ImageBase.objects.get(id=image_id)
         print("Current coordinates: x={image.x}, y={image.y}")
 
-        # Set the x and y positions to the desired values
         image.x = xposition
         image.y = yposition
 
-        # Save the updated Image object back to the database
         image.save()
 
     def save(self, *args, **kwargs):
         if not self.page.endswith('.html'):
             self.page += '.html'
-        if not self.pk:  # Check if this is a new object
+        if not self.pk:
             self.image_position = ImageBase.objects.filter(page=self.page).count() + 1
-            self.title = f'background {self.image_position}'  # Set the title here
-        if self.image and not self.alternate:  # Check if an image exists and alternate text is not set
-            self.alternate = str(self.image)  # Set the alternate text to the string version of the image name
+            self.title = f'background {self.image_position}'
+        if self.image and not self.alternate:
+            self.alternate = str(self.image)
         elif self.file and not self.alternate:
             self.alternate = str(self.file)
         super().save(*args, **kwargs)
-
 
 class State(models.Model):
     name = models.CharField(max_length=50)
@@ -8044,38 +7603,32 @@ class State(models.Model):
 
     class Meta:
         db_table = 'state'
-        # Add verbose name
-        verbose_name = 'Website'
 
+        verbose_name = 'Website'
 
 class FileBase(models.Model):
     file_field = models.FileField(blank=True, null=True, verbose_name="File Field")
-
 
 def create_profile(sender, **kwargs):
     if kwargs['created']:
         user_profile = UserProfile2.objects.create(user=kwargs['instance'])
 
-
 post_save.connect(create_profile, sender=User)
-
 
 class Feedback(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True,
-                             null=True)  # might want to replace item with order
-    """orderitem = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)"""  # might want to replace item with order
+                             null=True)
+    """orderitem = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)"""
     order = models.OneToOneField(OrderItem, on_delete=models.CASCADE)
-    # order = models.ForeignKey(OrderItem, on_delete=models.CASCADE)
+
     """order = models.OneToOneField(OrderItem, on_delete=models.CASCADE, related_name='feedback', null=True)"""
     username = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    # hyperlink = models.CharField(max_length=200,
-    #                            help_text="Leave field blank, hyperlink will automatically fill with the link to the associated product.")
 
     comment = models.TextField()
     feedbackpage = models.TextField(verbose_name="Page Name", blank=True, null=True)
     slug = models.SlugField(max_length=200, blank=True, null=True,
-                            help_text="Leave blank to use corresponding product slug.")  # get the actual item slug
-    # unique=True prevents saving, but does not prevent the IntegrityError at /create_review/1/ UNIQUE constraint failed: showcase_feedback.slug
+                            help_text="Leave blank to use corresponding product slug.")
+
     star_rating = models.IntegerField(verbose_name='Star Rating',
                                       validators=[MinValueValidator(1), MaxValueValidator(5)])
     showcase = models.IntegerField(default=0, blank=True,
@@ -8123,7 +7676,6 @@ class Feedback(models.Model):
             return self.order.item.name
         return ""
 
-    # Define a property to get the related item's slug
     @property
     def item_slug(self):
         if self.item:
@@ -8132,13 +7684,11 @@ class Feedback(models.Model):
             return self.order.item.slug
         return ""
 
-
 @receiver(pre_save, sender=Feedback)
 def set_slug(sender, instance, *args, **kwargs):
-    # Check if instance.slug is not already set before updating it
+
     if not instance.slug and instance.item:
         instance.slug = instance.item.slug
-
 
 class PlayerVersusPlayer(models.Model):
     name = models.CharField(default="Pack Opening", max_length=200)
@@ -8160,13 +7710,10 @@ class PlayerVersusPlayer(models.Model):
         verbose_name = "Player Versus Player"
         verbose_name_plural = "Player Versus Players"
 
-
 import random
-
 
 def create_unique_lottery_number():
     return str(random.randint(1000000000, 9999999999))
-
 
 class Lottery(models.Model):
     name = models.CharField(default='Daily Lotto', max_length=200)
@@ -8208,20 +7755,18 @@ class Lottery(models.Model):
         if not self.currency:
             self.currency = Currency.objects.first()
 
-        super().save(*args, **kwargs)  # Call the "real" save() method.
+        super().save(*args, **kwargs)
 
     def select_winner(self):
-        # Get all tickets associated with this lottery
+
         tickets = list(self.tickets.all())
 
-        # Count the number of tickets
         count = len(tickets)
 
         if count == 0:
-            # No tickets sold for this lottery
+
             return None
 
-        # Select a random ticket
         random_index = random.randint(0, count - 1)
         winner_ticket = tickets[random_index]
 
@@ -8230,7 +7775,6 @@ class Lottery(models.Model):
     class Meta:
         verbose_name = "Lottery"
         verbose_name_plural = "Lotteries"
-
 
 class LotteryTickets(models.Model):
     name = models.CharField(default='Daily Lotto', max_length=200)
@@ -8262,7 +7806,6 @@ class LotteryTickets(models.Model):
     class Meta:
         verbose_name = "Lottery Ticket"
         verbose_name_plural = "Lottery Tickets"
-
 
 class DefaultAvatar(models.Model):
     default_avatar_name = models.CharField(max_length=300, blank=True, null=True)

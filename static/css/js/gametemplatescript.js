@@ -62,18 +62,20 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('the value of totalspins at step 1 is ' + totalSpins)
     });
 
-    $(".start").click(function (event) {
-        const buttonId = event.target.id;
-        console.log(`Button clicked: ${buttonId}`);
+    $(".start, #start2").on("click", function(event) {
+      // Using a function expression so `this === event.currentTarget`
+      const buttonId = event.currentTarget.id;  // safest way to get the clicked element’s ID :contentReference[oaicite:1]{index=1}
+      console.log("Clicked button:", buttonId);
         sessionStorage.setItem("startAnimation", "true");
         sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
 
         let currentSpin = 0;
         console.log('current spin set to 0')
         initializeAnimation(buttonId);
-    });
 
-observer.observe(document.querySelector('#card-container'), { childList: true });
+        handleInventory(buttonId, data);
+    });
+    observer.observe(document.querySelector('#card-container'), { childList: true });
 
     function initializeAnimation(buttonId) {
         $(".start").prop('disabled', true);
@@ -206,30 +208,38 @@ async function randomizeContents() {
             }
         });
 
-        try {
-            const buttonId = startButton.id;
-            const inventoryPayload = {
-                choice_id:    data.choice_id,
-                choice_value: data.choice_value,
-                category:     data.category,
-                price:        data.choice_value,
-                condition:    data.condition,
-                quantity:     1,
-                buttonId:     buttonId,
-            };
+        async function handleInventory(buttonId, data) {
+          const inventoryPayload = {
+            choice_id:    data.choice_id,
+            choice_value: data.choice_value,
+            category:     data.category,
+            price:        data.choice_value,
+            condition:    data.condition,
+            quantity:     1,
+            buttonId:     buttonId,
+          };
+          console.log("Payload:", inventoryPayload);
 
-            console.log("Payload being sent:", inventoryPayload);
-
-            const inventoryResponse = await fetch('/create_inventory_object/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: JSON.stringify(inventoryPayload),
+          if (buttonId !== "start2") {
+            const response = await fetch("/create_inventory_object/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+                "X-Requested-With": "XMLHttpRequest"
+              },
+              body: JSON.stringify(inventoryPayload),
             });
+            return response.json();  // return the parsed JSON
+          } else {
+            console.log(`Skipping fetch for "${buttonId}"`);
+            return null;
+          }
+        }
 
-            const inventoryData = await inventoryResponse.json();
+        try {
+            const inventoryData = await handleInventory(buttonId, data)
+
             console.log("Response from /create_inventory_object/:", inventoryData);
 
             if (inventoryData.status === 'success') {

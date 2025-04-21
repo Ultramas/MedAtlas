@@ -722,7 +722,7 @@ p.blog-meta span {
 
 {% include 'navtrove.html' %}
 
-    <main class="main-content">
+    <main class="main-content" style="margin-bottom: 10%;">
         <div class="profile-container">
             {% if Profile %}
                 <h1>My Level - <span id="stock-count">{{ Profile.level }}</span></h1>
@@ -739,6 +739,7 @@ p.blog-meta span {
                     <h2>Level {{ level_data.level.level }}</h2>
                     <p>Level Name: {% if level_data.level.level <= Profile.level.level %}{{ level_data.level.level_name }}{% else %}Locked{% endif %}</p>
                     <p>Experience Required: {{ level_data.level.experience }}</p>
+                    <p>Ruby Boost: {{ level_data.actual_level }}</p>
                     <p>Games with Daily Mode:</p>
                     <ul>
                         {% for game in level_data.level.games.all %}

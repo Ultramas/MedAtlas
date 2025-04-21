@@ -1492,38 +1492,6 @@ export const GlobalStyles = createGlobalStyle`
 <body>
   {% include 'navtrove.html' %}
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('store-view-type-form');
-    // Remove the native form submission triggered by onchange if you want to handle it via JavaScript.
-    form.addEventListener('submit', function(e) {
-      e.preventDefault(); // Prevent the default form submission
-
-      const formData = new FormData(form);
-      fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'  // This header can help you detect an AJAX request in your view.
-        }
-      })
-      .then(response => {
-        if (response.ok) {
-          return response.json();  // Expecting JSON response (customize as needed)
-        }
-        throw new Error("Network response was not ok.");
-      })
-      .then(data => {
-        console.log("Store view type updated successfully", data);
-        // Optionally, update parts of your UI based on the response.
-      })
-      .catch(error => {
-        console.error('There was an error submitting the form:', error);
-      });
-    });
-  });
-</script>
-
 
   <!-- Loading overlay -->
 
@@ -1785,10 +1753,1263 @@ export const GlobalStyles = createGlobalStyle`
     </div>
   </div>
 
+  <!-- jQuery -->
+</body>
+</html>
+
+
+
+
+
+{% else %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeTrove - My Inventory</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+
+  <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/inventory2.css' %}">
+    <style>
+    .copyright-section {
+        background: linear-gradient(
+            to right,
+            rgba(191, 151, 255, 0.1),
+            rgba(255, 255, 255, 0.05),
+            rgba(191, 151, 255, 0.1)
+        );
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        text-align: center;
+        position: relative;
+        z-index: 100;
+    }
+
+    .copyright-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .copyright-section p {
+        color: var(--text);
+        font-family: 'Cinzel', serif;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        margin: 0;
+    }
+</style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
+
+        :root {
+            --primary: #bf97ff;
+            --primary-dark: #9a6bff;
+            --background: #0a0a13;
+            --text: #ffffff;
+            --accent: #4db2ea;
+            --accent2: #ffd700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            font-family: 'Cormorant Garamond', serif;
+            background-image:
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+
+        .main-menu {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(
+                to right,
+                rgba(191, 151, 255, 0.1),
+                rgba(255, 255, 255, 0.05),
+                rgba(191, 151, 255, 0.1)
+            );
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+            position: relative;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 3rem;
+        }
+
+        .nav-links a {
+
+    color: var(--primary);
+            text-decoration: none;
+            position: relative;
+            padding: 0.5rem 0;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            /*font-size: 1rem;*/
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+    .logo-icon h1::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+    }
+        .container {
+            display: flex;
+            gap: 3rem;
+            padding: 3rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+
+        .username {
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
+        }
+
+
+        .filters {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters h2, .collection-title {
+            color: var(--primary);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .filters h2::after, .collection-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .type-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .view-collection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-collection::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .view-collection:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .view-collection:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .main-content {
+            width: 100%;
+        }
+        .main-content h1 {
+            color: var(--primary);
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+        }
+
+        .main-content h1::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .pokemon-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+        .pokemon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
+            z-index: 1;
+        }
+
+        .pokemon-image {
+            aspect-ratio: 1;
+            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pokemon-image::after {
+            content: '';
+            position: absolute;
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pokemon-info {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .pokemon-name {
+            font-size: 1.00rem;
+            margin-bottom: 0.75rem;
+            font-family: 'Cinzel', serif;
+            color: var(--primary);
+            position:fixed;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            width: 100%;
+            color: white;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .pokemon-type {
+            color: white;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+
+        .legendary-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: var(--accent);
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.75rem;
+            border-radius: 50%;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--accent2);
+            font-size: 1.5rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+        }
+
+                .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @media (max-width: 1200px) {
+            .inventory-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+  .inventory-items-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1200px) {
+            .inventory-items-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .inventory-items-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .gridCardItem {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .gridCardItem:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+
+
+.view-toggle {
+    text-align: right;
+    margin-bottom: 1rem;
+}
+
+.toggle-btn {
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+    border: 2px solid var(--primary);
+    color: var(--text);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
+}
+
+.inventory-grid.compact-view {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.inventory-grid.compact-view .gridCardItem {
+    font-size: 0.9em;
+}
+
+.inventory-grid.compact-view .pokemon-image {
+    aspect-ratio: 16/9;
+}
+
+.inventory-grid.compact-view .product-description {
+    display: none;
+}
+
+.inventory-grid.compact-view .action-buttons {
+    flex-direction: column;
+}
+
+.inventory-grid.compact-view .action-buttons form {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.legendary-icon {
+    font-size: 2em;
+    margin-bottom: 0.5rem;
+}
+
+.empty-inventory {
+    text-align: center;
+}
+
+.empty-inventory img {
+    max-width: 50%;
+    margin: 2rem auto;
+}
+
+nav.main-menu ul li a {
+    color: #fff;
+    font-weight: 700;
+    display: block;
+    padding: 15px;
+}
+
+/* Hide the default checkbox */
+.item-select-checkbox {
+    display: none;
+}
+
+.outerContainer {
+    position: relative;
+    cursor: pointer;
+}
+
+.item-select-checkbox:checked + .gridCardItem {
+    background-color: rgba(0, 128, 0, 0.1); /* Example: light green background */
+}
+
+.item-select-checkbox:checked + .gridCardItem::before {
+    content: '✔'; /* Checkmark symbol */
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 20px;
+    color: green;
+    z-index: 100;
+}
+
+          .withdraw-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+  .popup-content {
+    text-align: center;
+  }
+
+    .popup-content::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #d4af37, #f9f095, #d4af37);
+      border-radius: 2px;
+    }
+            h2 {
+      color: #1a1a1a;
+      font-size: 24px;
+      font-weight: 600;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    p {
+      color: #555;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    p strong {
+      color: #d4af37;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      outline: none;
+      letter-spacing: 0.5px;
+    }
+
+    #confirm-withdraw {
+      background: linear-gradient(135deg, #d4af37, #e5c760);
+      color: #000;
+      border: none;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+    }
+
+    #confirm-withdraw:hover {
+      background: linear-gradient(135deg, #c9a431, #d4af37);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+    }
+
+    #cancel-withdraw {
+      background-color: transparent;
+      color: #555;
+      border: 1px solid #d1d1d1;
+    }
+
+    #cancel-withdraw:hover {
+      background-color: #f5f5f5;
+      color: #333;
+      border-color: #bbb;
+    }
+
+    /* Demo button */
+    #show-popup {
+      background: linear-gradient(135deg, #d4af37, #e5c760);
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+      margin: 20px;
+    }
+
+    #show-popup:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+    }
+    </style>
+</head>
+<body>
+<div id="withdraw-popup" class="withdraw-popup">
+  <div class="popup-content">
+    <h2>Confirm Withdrawal</h2>
+    <p>The shipping fee is <strong>599 rubies</strong>. Do you wish to proceed?</p>
+    <div class="popup-buttons">
+      <button id="confirm-withdraw">Yes, proceed</button>
+      <button id="cancel-withdraw">No, cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
+    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
+    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
+
+    document.querySelectorAll('.sell-form').forEach(form => {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            sellAudio.play();
+            console.log('')
+            handleAjaxFormSubmission(form);
+        });
+    });
+
+document.querySelectorAll(".withdraw-form").forEach(form => {
+  form.addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent immediate submission
+
+    // Capture the form that triggered the submission
+    const currentForm = form;
+    const withdrawPopup = document.getElementById("withdraw-popup");
+    withdrawPopup.style.display = "block"; // Show confirmation popup
+
+    const confirmButton = document.getElementById("confirm-withdraw");
+    const cancelButton = document.getElementById("cancel-withdraw");
+
+    // Remove any previous onclick handlers to avoid duplicate submissions
+    confirmButton.onclick = null;
+    cancelButton.onclick = null;
+
+    confirmButton.onclick = () => {
+      // Create new FormData from the current form
+      const confirmFormData = new FormData(currentForm);
+      // Append confirmation flag so the server knows to create a new withdraw
+      confirmFormData.append("confirm_withdraw", "true");
+
+      const actionUrl = currentForm.getAttribute("action");
+
+      fetch(actionUrl, {
+        method: "POST",
+        body: confirmFormData,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": confirmFormData.get("csrfmiddlewaretoken"),
+        },
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP status ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            alert("Withdraw successful!");
+
+            const inventoryItem = currentForm.closest(".gridCardItem");
+            if (inventoryItem) inventoryItem.remove();
+
+            // Update stock count
+            const stockCountElement = document.getElementById("stock-count");
+            if (stockCountElement) {
+              stockCountElement.textContent = data.stock_count;
+            }
+          } else {
+            alert("Withdraw failed! " + (data.error || ""));
+          }
+          withdrawPopup.style.display = "none"; // Hide popup after processing
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          withdrawPopup.style.display = "none";
+        });
+    };
+
+    cancelButton.onclick = () => {
+      withdrawPopup.style.display = "none";
+    };
+  });
+});
+
+
+
+</script>
+
+{% include 'navtrove.html' %}
+
+<div class="container">
+
+
+    <main class="main-content">
+        <h1>My Inventory - (<span id="stock-count">{{ stock_count }}</span>)</h1>
+
+            {% if stock_count > 0 %}
+    <div style="margin-top: 20px;">
+        <button id="sell-everything-button" class="card-button add-button sell-button" style="width: 120px; position: fixed; right: 50px; top: 175px;">Sell All</button>
+    </div>
+{% endif %}
+
+<script>
+document.getElementById('sell-everything-button').addEventListener('click', function() {
+    if (confirm('Are you sure you want to sell all inventory items?')) {
+        fetch("{% url 'showcase:sell_everything_inventory_objects' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('inventory-items-container').innerHTML = data.inventory_html;
+                document.getElementById('stock-count').textContent = data.stock_count;
+                const sellButton = document.getElementById('sell-everything-button');
+                if (sellButton) {
+                    sellButton.style.display = data.stock_count > 0 ? 'block' : 'none';
+                }
+                if (data.currency_amount) {
+                    const currencyElement = document.getElementById('sellupdate');
+                    if (currencyElement) {
+                        currencyElement.textContent = data.currency_amount;
+                    }
+                }
+                const totalValueElement = document.getElementById('total-value');
+                if (totalValueElement) {
+                    totalValueElement.textContent = data.total_value || 0;
+                }
+            } else {
+                console.log('Error:', data.error);
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            alert('An error occurred while processing your request.');
+        });
+    }
+});
+</script>
+        <section id="inventoryGrid" class="inventory-grid comfortable-view">
+            <!-- Sell All Form (hidden by default) -->
+          <!-- Bulk Sell Form -->
+<form id="sell-all-form" class="sell-all-form" action="{% url 'showcase:sell_all_inventory_objects' %}" method="post"
+      style="display: none; position: fixed; top: 210px; right: 50px; z-index: 50;">
+    {% csrf_token %}
+    <input type="hidden" name="selected_ids" id="sell-all-selected-ids">
+    <button type="submit" class="sell-all-button" style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">Sell Selected</button>
+</form>
+
+
+<!-- Inventory Items -->
+<div id="inventory-items-container" style="display: grid; grid-template-columns: repeat(3, 1fr); space-between: 10px;">
+    {% include "inventory_items.html" with StockObject=StockObject %}
+</div>
+
+
+{% endif %}
+
+<script>
+$(document).ready(function() {
+  const $checkboxes = $('.item-select-checkbox');
+  const $sellAllForm = $('#sell-all-form');
+  const $sellAllSelectedIds = $('#sell-all-selected-ids');
+
+  function updateSellAllButton() {
+      let selectedIds = [];
+      $checkboxes.each(function() {
+          if ($(this).prop('checked')) {
+              selectedIds.push($(this).data('id'));
+          }
+      });
+      if (selectedIds.length > 0) {
+          $sellAllForm.show();
+          $sellAllSelectedIds.val(selectedIds.join(','));
+      } else {
+          $sellAllForm.hide();
+      }
+  }
+
+  $checkboxes.on('change', updateSellAllButton);
+
+  $sellAllForm.on('submit', function(event) {
+      event.preventDefault();
+      console.log('called the method to sell selected inventory objects');
+
+      const sellselectedAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
+      sellselectedAudio.play();
+
+      $.ajax({
+    url: "{% url 'showcase:sell_all_inventory_objects' %}",
+    type: 'POST',
+    data: $sellAllForm.serialize(),
+    dataType: 'json',  // expect JSON response
+    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+    success: function(response) {
+        $('#stock-count').html(response.stock_count);
+        $('#inventory-items-container').html(response.inventory_html);
+        $('#sellupdate').html(response.currency_amount);
+        console.log('Successfully sold selected inventory objects');
+    },
+    error: function(xhr, status, error) {
+        console.error("Error: ", error);
+    }
+});
+
+
+
+
+
+  });
+});
+
+    $(document).ready(function() {
+    const $checkboxes = $('.item-select-checkbox');
+    const $sellAllForm = $('#sell-all-form');
+    const $sellAllSelectedIds = $('#sell-all-selected-ids');
+
+    function updateSellAllButton() {
+        let selectedIds = [];
+        $checkboxes.each(function() {
+            if ($(this).prop('checked')) {
+                selectedIds.push($(this).data('id'));
+            }
+        });
+
+        if (selectedIds.length > 0) {
+            $sellAllForm.show();
+            $sellAllSelectedIds.val(selectedIds.join(','));
+        } else {
+            $sellAllForm.hide();
+        }
+    }
+
+    $checkboxes.on('change', updateSellAllButton);
+
+    function handleInventoryAction(event, $form) {
+        event.preventDefault();
+        console.log('Processing action:', $form.find('input[name="action"]').val());
+
+        $.ajax({
+            url: $form.attr('action'),
+            type: 'POST',
+            data: $form.serialize(),
+            dataType: 'json',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            success: function(response) {
+                $('#stock-count').html(response.stock_count);
+                $('#inventory-items-container').html(response.inventory_html);
+                $('#sellupdate').html(response.currency_amount);
+
+                // Uncheck the checkbox associated with the affected item
+                const pk = $form.find('input[name="pk"]').val();
+                $('#checkbox-' + pk).prop('checked', false);
+                updateSellAllButton();
+
+                console.log('Action successful:', response);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+    // Handle Sell Button Click
+    $(document).on('submit', '.sell-form', function(event) {
+        handleInventoryAction(event, $(this));
+    });
+
+    // Handle Withdraw Button Click
+    $(document).on('submit', '.withdraw-form', function(event) {
+        handleInventoryAction(event, $(this));
+    });
+
+    // Handle Set Tradable Button Click
+    $(document).on('submit', '.trade-form', function(event) {
+        handleInventoryAction(event, $(this));
+    });
+
+    // Handle Sell All Form Submission
+    $sellAllForm.on('submit', function(event) {
+        event.preventDefault();
+        console.log('Selling all selected items.');
+
+        const sellselectedAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
+        sellselectedAudio.play();
+
+        $.ajax({
+            url: "{% url 'showcase:sell_all_inventory_objects' %}",
+            type: 'POST',
+            data: $sellAllForm.serialize(),
+            dataType: 'json',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            success: function(response) {
+                $('#stock-count').html(response.stock_count);
+                $('#inventory-items-container').html(response.inventory_html);
+                $('#sellupdate').html(response.currency_amount);
+
+                // Uncheck all selected checkboxes after selling
+                $checkboxes.prop('checked', false);
+                updateSellAllButton();
+
+                console.log('Successfully sold selected inventory objects');
+            },
+            error: function(xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    });
+});
+
+</script>
+
+        </section>
+    </main>
+    </div>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const forms = document.querySelectorAll(".ajax-form");
+
+    forms.forEach(form => {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const url = this.getAttribute("action");
+            const csrfToken = formData.get("csrfmiddlewaretoken");
+
+            fetch(url, {
+                method: "POST",
+				headers: {
+					"X-Requested-With": "XMLHttpRequest",
+					"X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+				},
+
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Update stock count
+                    const stockCountElement = document.querySelector("#stock-count");
+                    if (stockCountElement) {
+                        stockCountElement.textContent = data.stock_count;
+                    }
+
+                    // Update currency amount
+                    const currencyAmountElement = document.querySelector("#currency-amount");
+                    if (currencyAmountElement) {
+                        currencyAmountElement.textContent = data.currency_amount;
+                    }
+
+                    this.closest(".gridCardItem").remove();
+                } else {
+                    console.error("Action failed.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    });
+});
+
+
+
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const withdrawButtons = document.querySelectorAll(".withdraw-button");
+
+    // Helper function to submit form via fetch
+    function submitWithdrawForm(form, confirmWithdraw = false) {
+        const formData = new FormData(form);
+        if (confirmWithdraw) {
+            formData.append("confirm_withdraw", "true");
+        }
+        const actionUrl = form.getAttribute("action") || window.location.href;
+
+        console.log("Submitting form to:", actionUrl);
+        console.log("Form Data:", [...formData.entries()]);
+
+        fetch(actionUrl, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP status ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if (data.success) {
+
+                    if (data.new_withdraw) {
+                        console.log('Shipping fee charged 599');
+                    }
+
+                    const inventoryItem = form.closest(".gridCardItem");
+                    if (inventoryItem) inventoryItem.remove();
+
+                    const stockCountElement = document.getElementById("stock-count");
+                    if (stockCountElement) {
+                        stockCountElement.textContent = data.stock_count;
+                    }
+                } else if (data.confirmation_required) {
+                    // Display confirmation popup if confirmation is needed.
+                    showConfirmationPopup(form);
+                } else {
+                    console.error("Server error:", data.error);
+                    alert(data.error || "An error occurred.");
+                }
+            })
+            .catch((error) => {
+                console.error("Fetch error:", error);
+                alert("An unexpected error occurred. Please try again.");
+            });
+    }
+
+    // Show the confirmation popup and set up the confirm/cancel handlers.
+    function showConfirmationPopup(form) {
+        const popup = document.getElementById("withdraw-popup");
+        popup.style.display = "block";
+
+        const confirmButton = document.getElementById("confirm-withdraw");
+        const cancelButton = document.getElementById("cancel-withdraw");
+
+        // Define handlers so they can be removed after use.
+        function proceedWithWithdraw() {
+            popup.style.display = "none";
+            // Re-submit the form with confirmation flag.
+            submitWithdrawForm(form, true);
+            cleanup();
+        }
+
+        function cancelWithdraw() {
+            popup.style.display = "none";
+            cleanup();
+        }
+
+        function cleanup() {
+            confirmButton.removeEventListener("click", proceedWithWithdraw);
+            cancelButton.removeEventListener("click", cancelWithdraw);
+        }
+
+        confirmButton.addEventListener("click", proceedWithWithdraw);
+        cancelButton.addEventListener("click", cancelWithdraw);
+    }
+
+    // Attach event listeners to all withdraw buttons.
+    withdrawButtons.forEach((button) => {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            const form = button.closest("form");
+            // Initial submission without confirmation flag.
+            submitWithdrawForm(form, false);
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    const toggleBtn = document.getElementById("toggleViewBtn");
+    const inventoryGrid = document.getElementById("inventoryGrid");
+
+    toggleBtn.addEventListener("click", function() {
+        inventoryGrid.classList.toggle("compact-view");
+        inventoryGrid.classList.toggle("comfortable-view");
+
+        // Save the current view preference to localStorage
+        const isCompact = inventoryGrid.classList.contains("compact-view");
+        localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
+    });
+
+    // Load the saved view preference on page load
+    const savedViewPreference = localStorage.getItem("inventoryViewPreference");
+    if (savedViewPreference === "compact") {
+        inventoryGrid.classList.remove("comfortable-view");
+        inventoryGrid.classList.add("compact-view");
+    }
+});
+</script>
+
+
   <!-- Copyright Section -->
   <div class="copyright-section">
     <p>© 2023 PokeTrove. All rights reserved.</p>
   </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('store-view-type-form');
+    // Remove the native form submission triggered by onchange if you want to handle it via JavaScript.
+    form.addEventListener('submit', function(e) {
+      e.preventDefault(); // Prevent the default form submission
+
+      const formData = new FormData(form);
+      fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'  // This header can help you detect an AJAX request in your view.
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json();  // Expecting JSON response (customize as needed)
+        }
+        throw new Error("Network response was not ok.");
+      })
+      .then(data => {
+        console.log("Store view type updated successfully", data);
+        // Optionally, update parts of your UI based on the response.
+      })
+      .catch(error => {
+        console.error('There was an error submitting the form:', error);
+      });
+    });
+  });
+</script>
 
   <script>
     // Audio elements
@@ -2733,1227 +3954,35 @@ function initEventListeners() {
 }
 
   </script>
-
-  <!-- jQuery -->
-  <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-  <script src="{% static 'css/js/main.js' %}"></script>
-</body>
-</html>
-
-
-
-
-
-{% else %}
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokeTrove - My Inventory</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
-
-  <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/inventory2.css' %}">
-    <style>
-    .copyright-section {
-        background: linear-gradient(
-            to right,
-            rgba(191, 151, 255, 0.1),
-            rgba(255, 255, 255, 0.05),
-            rgba(191, 151, 255, 0.1)
-        );
-        backdrop-filter: blur(10px);
-        padding: 1rem 0;
-        text-align: center;
-        position: relative;
-        z-index: 100;
-    }
-
-    .copyright-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--primary), transparent);
-    }
-
-    .copyright-section p {
-        color: var(--text);
-        font-family: 'Cinzel', serif;
-        font-size: 0.9rem;
-        letter-spacing: 1px;
-        margin: 0;
-    }
-</style>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
-
-        :root {
-            --primary: #bf97ff;
-            --primary-dark: #9a6bff;
-            --background: #0a0a13;
-            --text: #ffffff;
-            --accent: #4db2ea;
-            --accent2: #ffd700;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: var(--background);
-            color: var(--text);
-            font-family: 'Cormorant Garamond', serif;
-            background-image:
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
-            min-height: 100vh;
-        }
-
-        .main-menu {
-            display: flex;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(
-                to right,
-                rgba(191, 151, 255, 0.1),
-                rgba(255, 255, 255, 0.05),
-                rgba(191, 151, 255, 0.1)
-            );
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
-            position: relative;
-        }
-
-        .logo::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .logo-icon {
-            color: var(--accent);
-            font-size: 2rem;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
-        }
-
-        .nav-links {
-            margin-left: auto;
-            display: flex;
-            gap: 3rem;
-        }
-
-        .nav-links a {
-
-    color: var(--primary);
-            text-decoration: none;
-            position: relative;
-            padding: 0.5rem 0;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            /*font-size: 1rem;*/
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-    .logo-icon h1::after {
-        content: '';
-        position: absolute;
-        bottom: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 200px;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-    }
-        .container {
-            display: flex;
-            gap: 3rem;
-            padding: 3rem;
-            max-width: 1800px;
-            margin: 0 auto;
-        }
-
-        .sidebar {
-            width: 320px;
-            flex-shrink: 0;
-        }
-
-
-        .username {
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            color: var(--primary);
-            margin-bottom: 0.75rem;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
-        }
-
-
-        .filters {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .filters h2, .collection-title {
-            color: var(--primary);
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-            font-family: 'Cinzel', serif;
-            text-align: center;
-            position: relative;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
-        }
-
-        .filters h2::after, .collection-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .search-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 100%;
-            color: var(--text);
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-        }
-
-        .type-select {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 100%;
-            color: var(--text);
-            margin-bottom: 2rem;
-            cursor: pointer;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-        }
-
-        .view-collection {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-            border: 2px solid var(--primary);
-            color: var(--text);
-            padding: 1rem;
-            border-radius: 8px;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 1.1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .view-collection::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
-            transition: transform 0.5s ease;
-        }
-
-        .view-collection:hover::before {
-            transform: translate(25%, 25%);
-        }
-
-        .view-collection:hover {
-            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-            border-color: var(--accent);
-            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
-            transform: translateY(-2px);
-            color: var(--accent);
-        }
-
-        .main-content {
-            width: 100%;
-        }
-        .main-content h1 {
-            color: var(--primary);
-            font-size: 3rem;
-            margin-bottom: 3rem;
-            font-family: 'Cinzel', serif;
-            text-align: center;
-            position: relative;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
-        }
-
-        .main-content h1::after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-
-        .pokemon-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
-        }
-
-        .pokemon-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            overflow: hidden;
-            position: relative;
-            border: 2px solid var(--primary);
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
-        }
-
-        .pokemon-card:hover {
-            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
-            border-color: var(--accent);
-        }
-
-        .pokemon-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
-            z-index: 1;
-        }
-
-        .pokemon-image {
-            aspect-ratio: 1;
-            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .pokemon-image::after {
-            content: '';
-            position: absolute;
-            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
-            animation: rotate 20s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .pokemon-info {
-            padding: 1.5rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        .pokemon-name {
-            font-size: 1.00rem;
-            margin-bottom: 0.75rem;
-            font-family: 'Cinzel', serif;
-            color: var(--primary);
-            position:fixed;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
-            background: rgba(0, 0, 0, 0.3);
-            width: 100%;
-            color: white;
-            padding-left: 5px;
-            padding-right: 5px;
-        }
-
-        .pokemon-type {
-            color: white;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 1rem;
-        }
-
-
-        .legendary-icon {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            color: var(--accent);
-            background: rgba(255, 215, 0, 0.1);
-            padding: 0.75rem;
-            border-radius: 50%;
-            z-index: 2;
-            backdrop-filter: blur(5px);
-            border: 2px solid var(--accent2);
-            font-size: 1.5rem;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
-            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-        }
-
-                .inventory-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        @media (max-width: 1200px) {
-            .inventory-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .inventory-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-  .inventory-items-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        @media (max-width: 1200px) {
-            .inventory-items-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .inventory-items-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .gridCardItem {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            overflow: hidden;
-            position: relative;
-            border: 2px solid var(--primary);
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
-        }
-
-        .gridCardItem:hover {
-            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
-            border-color: var(--accent);
-        }
-
-
-
-.view-toggle {
-    text-align: right;
-    margin-bottom: 1rem;
-}
-
-.toggle-btn {
-    background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
-    border: 2px solid var(--primary);
-    color: var(--text);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-}
-
-.toggle-btn:hover {
-    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
-    border-color: var(--accent);
-    box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
-}
-
-.inventory-grid.compact-view {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-}
-
-.inventory-grid.compact-view .gridCardItem {
-    font-size: 0.9em;
-}
-
-.inventory-grid.compact-view .pokemon-image {
-    aspect-ratio: 16/9;
-}
-
-.inventory-grid.compact-view .product-description {
-    display: none;
-}
-
-.inventory-grid.compact-view .action-buttons {
-    flex-direction: column;
-}
-
-.inventory-grid.compact-view .action-buttons form {
-    width: 100%;
-    margin-bottom: 0.5rem;
-}
-
-.legendary-icon {
-    font-size: 2em;
-    margin-bottom: 0.5rem;
-}
-
-.empty-inventory {
-    text-align: center;
-}
-
-.empty-inventory img {
-    max-width: 50%;
-    margin: 2rem auto;
-}
-
-nav.main-menu ul li a {
-    color: #fff;
-    font-weight: 700;
-    display: block;
-    padding: 15px;
-}
-
-/* Hide the default checkbox */
-.item-select-checkbox {
-    display: none;
-}
-
-.outerContainer {
-    position: relative;
-    cursor: pointer;
-}
-
-.item-select-checkbox:checked + .gridCardItem {
-    background-color: rgba(0, 128, 0, 0.1); /* Example: light green background */
-}
-
-.item-select-checkbox:checked + .gridCardItem::before {
-    content: '✔'; /* Checkmark symbol */
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    font-size: 20px;
-    color: green;
-    z-index: 100;
-}
-
-          .withdraw-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #fff;
-    border: 1px solid #ccc;
-    padding: 20px;
-    z-index: 1000;
-    display: none; /* Hidden by default */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  }
-  .popup-content {
-    text-align: center;
-  }
-
-    .popup-content::before {
-      content: '';
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 4px;
-      background: linear-gradient(90deg, #d4af37, #f9f095, #d4af37);
-      border-radius: 2px;
-    }
-            h2 {
-      color: #1a1a1a;
-      font-size: 24px;
-      font-weight: 600;
-      margin-top: 10px;
-      margin-bottom: 20px;
-      letter-spacing: 0.5px;
-    }
-
-    p {
-      color: #555;
-      font-size: 16px;
-      line-height: 1.6;
-      margin-bottom: 25px;
-    }
-
-    p strong {
-      color: #d4af37;
-      font-weight: 600;
-      font-size: 18px;
-    }
-
-    .popup-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    button {
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      outline: none;
-      letter-spacing: 0.5px;
-    }
-
-    #confirm-withdraw {
-      background: linear-gradient(135deg, #d4af37, #e5c760);
-      color: #000;
-      border: none;
-      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-    }
-
-    #confirm-withdraw:hover {
-      background: linear-gradient(135deg, #c9a431, #d4af37);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
-    }
-
-    #cancel-withdraw {
-      background-color: transparent;
-      color: #555;
-      border: 1px solid #d1d1d1;
-    }
-
-    #cancel-withdraw:hover {
-      background-color: #f5f5f5;
-      color: #333;
-      border-color: #bbb;
-    }
-
-    /* Demo button */
-    #show-popup {
-      background: linear-gradient(135deg, #d4af37, #e5c760);
-      color: #000;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-      margin: 20px;
-    }
-
-    #show-popup:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
-    }
-    </style>
-</head>
-<body>
-<div id="withdraw-popup" class="withdraw-popup">
-  <div class="popup-content">
-    <h2>Confirm Withdrawal</h2>
-    <p>The shipping fee is <strong>599 rubies</strong>. Do you wish to proceed?</p>
-    <div class="popup-buttons">
-      <button id="confirm-withdraw">Yes, proceed</button>
-      <button id="cancel-withdraw">No, cancel</button>
-    </div>
-  </div>
-</div>
-
-
 <script>
-    const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
-    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
-    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
-
-    document.querySelectorAll('.sell-form').forEach(form => {
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
-            sellAudio.play();
-            console.log('')
-            handleAjaxFormSubmission(form);
-        });
+  async function performInventoryAction(action, pk) {
+    const response = await fetch(window.location.href, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken'),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ action })
     });
 
-document.querySelectorAll(".withdraw-form").forEach(form => {
-  form.addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevent immediate submission
+    const data = await response.json();
+    if (data.success) {
+      // Update the badge immediately
+      document.getElementById('stock-count').textContent = data.stock_count;
+    } else {
+      console.error(data.error);
+    }
+  }
 
-    // Capture the form that triggered the submission
-    const currentForm = form;
-    const withdrawPopup = document.getElementById("withdraw-popup");
-    withdrawPopup.style.display = "block"; // Show confirmation popup
-
-    const confirmButton = document.getElementById("confirm-withdraw");
-    const cancelButton = document.getElementById("cancel-withdraw");
-
-    // Remove any previous onclick handlers to avoid duplicate submissions
-    confirmButton.onclick = null;
-    cancelButton.onclick = null;
-
-    confirmButton.onclick = () => {
-      // Create new FormData from the current form
-      const confirmFormData = new FormData(currentForm);
-      // Append confirmation flag so the server knows to create a new withdraw
-      confirmFormData.append("confirm_withdraw", "true");
-
-      const actionUrl = currentForm.getAttribute("action");
-
-      fetch(actionUrl, {
-        method: "POST",
-        body: confirmFormData,
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "X-CSRFToken": confirmFormData.get("csrfmiddlewaretoken"),
-        },
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP status ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.success) {
-            alert("Withdraw successful!");
-
-            const inventoryItem = currentForm.closest(".gridCardItem");
-            if (inventoryItem) inventoryItem.remove();
-
-            // Update stock count
-            const stockCountElement = document.getElementById("stock-count");
-            if (stockCountElement) {
-              stockCountElement.textContent = data.stock_count;
-            }
-          } else {
-            alert("Withdraw failed! " + (data.error || ""));
-          }
-          withdrawPopup.style.display = "none"; // Hide popup after processing
-        })
-        .catch(error => {
-          console.error("Error:", error);
-          withdrawPopup.style.display = "none";
-        });
-    };
-
-    cancelButton.onclick = () => {
-      withdrawPopup.style.display = "none";
-    };
+  // Example binding for your sell buttons:
+  document.querySelectorAll('.sell-button').forEach(btn => {
+    btn.addEventListener('click', () =>
+      performInventoryAction('sell', btn.dataset.pk)
+    );
   });
-});
-
-
-
 </script>
 
-{% include 'navtrove.html' %}
-
-<div class="container">
-
-
-    <main class="main-content">
-        <h1>My Inventory - (<span id="stock-count">{{ stock_count }}</span>)</h1>
-
-            {% if stock_count > 0 %}
-    <div style="margin-top: 20px;">
-        <button id="sell-everything-button" class="card-button add-button sell-button" style="width: 120px; position: fixed; right: 50px; top: 175px;">Sell All</button>
-    </div>
-{% endif %}
-
-<script>
-document.getElementById('sell-everything-button').addEventListener('click', function() {
-    if (confirm('Are you sure you want to sell all inventory items?')) {
-        fetch("{% url 'showcase:sell_everything_inventory_objects' %}", {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json',
-            },
-            credentials: 'same-origin',
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('inventory-items-container').innerHTML = data.inventory_html;
-                document.getElementById('stock-count').textContent = data.stock_count;
-                const sellButton = document.getElementById('sell-everything-button');
-                if (sellButton) {
-                    sellButton.style.display = data.stock_count > 0 ? 'block' : 'none';
-                }
-                if (data.currency_amount) {
-                    const currencyElement = document.getElementById('sellupdate');
-                    if (currencyElement) {
-                        currencyElement.textContent = data.currency_amount;
-                    }
-                }
-                const totalValueElement = document.getElementById('total-value');
-                if (totalValueElement) {
-                    totalValueElement.textContent = data.total_value || 0;
-                }
-            } else {
-                console.log('Error:', data.error);
-                alert('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-            alert('An error occurred while processing your request.');
-        });
-    }
-});
-</script>
-        <section id="inventoryGrid" class="inventory-grid comfortable-view">
-            <!-- Sell All Form (hidden by default) -->
-          <!-- Bulk Sell Form -->
-<form id="sell-all-form" class="sell-all-form" action="{% url 'showcase:sell_all_inventory_objects' %}" method="post"
-      style="display: none; position: fixed; top: 210px; right: 50px; z-index: 50;">
-    {% csrf_token %}
-    <input type="hidden" name="selected_ids" id="sell-all-selected-ids">
-    <button type="submit" class="sell-all-button" style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">Sell Selected</button>
-</form>
-
-
-<!-- Inventory Items -->
-<div id="inventory-items-container" style="display: grid; grid-template-columns: repeat(3, 1fr); space-between: 10px;">
-    {% include "inventory_items.html" with StockObject=StockObject %}
-</div>
-
-
-<script>
-$(document).ready(function() {
-  const $checkboxes = $('.item-select-checkbox');
-  const $sellAllForm = $('#sell-all-form');
-  const $sellAllSelectedIds = $('#sell-all-selected-ids');
-
-  function updateSellAllButton() {
-      let selectedIds = [];
-      $checkboxes.each(function() {
-          if ($(this).prop('checked')) {
-              selectedIds.push($(this).data('id'));
-          }
-      });
-      if (selectedIds.length > 0) {
-          $sellAllForm.show();
-          $sellAllSelectedIds.val(selectedIds.join(','));
-      } else {
-          $sellAllForm.hide();
-      }
-  }
-
-  $checkboxes.on('change', updateSellAllButton);
-
-  $sellAllForm.on('submit', function(event) {
-      event.preventDefault();
-      console.log('called the method to sell selected inventory objects');
-
-      const sellselectedAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
-      sellselectedAudio.play();
-
-      $.ajax({
-    url: "{% url 'showcase:sell_all_inventory_objects' %}",
-    type: 'POST',
-    data: $sellAllForm.serialize(),
-    dataType: 'json',  // expect JSON response
-    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-    success: function(response) {
-        $('#stock-count').html(response.stock_count);
-        $('#inventory-items-container').html(response.inventory_html);
-        $('#sellupdate').html(response.currency_amount);
-        console.log('Successfully sold selected inventory objects');
-    },
-    error: function(xhr, status, error) {
-        console.error("Error: ", error);
-    }
-});
-
-
-
-
-
-  });
-});
-
-    $(document).ready(function() {
-    const $checkboxes = $('.item-select-checkbox');
-    const $sellAllForm = $('#sell-all-form');
-    const $sellAllSelectedIds = $('#sell-all-selected-ids');
-
-    function updateSellAllButton() {
-        let selectedIds = [];
-        $checkboxes.each(function() {
-            if ($(this).prop('checked')) {
-                selectedIds.push($(this).data('id'));
-            }
-        });
-
-        if (selectedIds.length > 0) {
-            $sellAllForm.show();
-            $sellAllSelectedIds.val(selectedIds.join(','));
-        } else {
-            $sellAllForm.hide();
-        }
-    }
-
-    $checkboxes.on('change', updateSellAllButton);
-
-    function handleInventoryAction(event, $form) {
-        event.preventDefault();
-        console.log('Processing action:', $form.find('input[name="action"]').val());
-
-        $.ajax({
-            url: $form.attr('action'),
-            type: 'POST',
-            data: $form.serialize(),
-            dataType: 'json',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-            success: function(response) {
-                $('#stock-count').html(response.stock_count);
-                $('#inventory-items-container').html(response.inventory_html);
-                $('#sellupdate').html(response.currency_amount);
-
-                // Uncheck the checkbox associated with the affected item
-                const pk = $form.find('input[name="pk"]').val();
-                $('#checkbox-' + pk).prop('checked', false);
-                updateSellAllButton();
-
-                console.log('Action successful:', response);
-            },
-            error: function(xhr, status, error) {
-                console.error("Error:", error);
-            }
-        });
-    }
-
-    // Handle Sell Button Click
-    $(document).on('submit', '.sell-form', function(event) {
-        handleInventoryAction(event, $(this));
-    });
-
-    // Handle Withdraw Button Click
-    $(document).on('submit', '.withdraw-form', function(event) {
-        handleInventoryAction(event, $(this));
-    });
-
-    // Handle Set Tradable Button Click
-    $(document).on('submit', '.trade-form', function(event) {
-        handleInventoryAction(event, $(this));
-    });
-
-    // Handle Sell All Form Submission
-    $sellAllForm.on('submit', function(event) {
-        event.preventDefault();
-        console.log('Selling all selected items.');
-
-        const sellselectedAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
-        sellselectedAudio.play();
-
-        $.ajax({
-            url: "{% url 'showcase:sell_all_inventory_objects' %}",
-            type: 'POST',
-            data: $sellAllForm.serialize(),
-            dataType: 'json',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-            success: function(response) {
-                $('#stock-count').html(response.stock_count);
-                $('#inventory-items-container').html(response.inventory_html);
-                $('#sellupdate').html(response.currency_amount);
-
-                // Uncheck all selected checkboxes after selling
-                $checkboxes.prop('checked', false);
-                updateSellAllButton();
-
-                console.log('Successfully sold selected inventory objects');
-            },
-            error: function(xhr, status, error) {
-                console.error("Error:", error);
-            }
-        });
-    });
-});
-
-</script>
-
-        </section>
-    </main>
-    </div>
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const forms = document.querySelectorAll(".ajax-form");
-
-    forms.forEach(form => {
-        form.addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            const formData = new FormData(this);
-            const url = this.getAttribute("action");
-            const csrfToken = formData.get("csrfmiddlewaretoken");
-
-            fetch(url, {
-                method: "POST",
-				headers: {
-					"X-Requested-With": "XMLHttpRequest",
-					"X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-				},
-
-                body: formData,
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Update stock count
-                    const stockCountElement = document.querySelector("#stock-count");
-                    if (stockCountElement) {
-                        stockCountElement.textContent = data.stock_count;
-                    }
-
-                    // Update currency amount
-                    const currencyAmountElement = document.querySelector("#currency-amount");
-                    if (currencyAmountElement) {
-                        currencyAmountElement.textContent = data.currency_amount;
-                    }
-
-                    this.closest(".gridCardItem").remove();
-                } else {
-                    console.error("Action failed.");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-        });
-    });
-});
-
-
-
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const withdrawButtons = document.querySelectorAll(".withdraw-button");
-
-    // Helper function to submit form via fetch
-    function submitWithdrawForm(form, confirmWithdraw = false) {
-        const formData = new FormData(form);
-        if (confirmWithdraw) {
-            formData.append("confirm_withdraw", "true");
-        }
-        const actionUrl = form.getAttribute("action") || window.location.href;
-
-        console.log("Submitting form to:", actionUrl);
-        console.log("Form Data:", [...formData.entries()]);
-
-        fetch(actionUrl, {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-            },
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`HTTP status ${response.status}`);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                if (data.success) {
-
-                    if (data.new_withdraw) {
-                        console.log('Shipping fee charged 599');
-                    }
-
-                    const inventoryItem = form.closest(".gridCardItem");
-                    if (inventoryItem) inventoryItem.remove();
-
-                    const stockCountElement = document.getElementById("stock-count");
-                    if (stockCountElement) {
-                        stockCountElement.textContent = data.stock_count;
-                    }
-                } else if (data.confirmation_required) {
-                    // Display confirmation popup if confirmation is needed.
-                    showConfirmationPopup(form);
-                } else {
-                    console.error("Server error:", data.error);
-                    alert(data.error || "An error occurred.");
-                }
-            })
-            .catch((error) => {
-                console.error("Fetch error:", error);
-                alert("An unexpected error occurred. Please try again.");
-            });
-    }
-
-    // Show the confirmation popup and set up the confirm/cancel handlers.
-    function showConfirmationPopup(form) {
-        const popup = document.getElementById("withdraw-popup");
-        popup.style.display = "block";
-
-        const confirmButton = document.getElementById("confirm-withdraw");
-        const cancelButton = document.getElementById("cancel-withdraw");
-
-        // Define handlers so they can be removed after use.
-        function proceedWithWithdraw() {
-            popup.style.display = "none";
-            // Re-submit the form with confirmation flag.
-            submitWithdrawForm(form, true);
-            cleanup();
-        }
-
-        function cancelWithdraw() {
-            popup.style.display = "none";
-            cleanup();
-        }
-
-        function cleanup() {
-            confirmButton.removeEventListener("click", proceedWithWithdraw);
-            cancelButton.removeEventListener("click", cancelWithdraw);
-        }
-
-        confirmButton.addEventListener("click", proceedWithWithdraw);
-        cancelButton.addEventListener("click", cancelWithdraw);
-    }
-
-    // Attach event listeners to all withdraw buttons.
-    withdrawButtons.forEach((button) => {
-        button.addEventListener("click", function (event) {
-            event.preventDefault();
-            const form = button.closest("form");
-            // Initial submission without confirmation flag.
-            submitWithdrawForm(form, false);
-        });
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    const toggleBtn = document.getElementById("toggleViewBtn");
-    const inventoryGrid = document.getElementById("inventoryGrid");
-
-    toggleBtn.addEventListener("click", function() {
-        inventoryGrid.classList.toggle("compact-view");
-        inventoryGrid.classList.toggle("comfortable-view");
-
-        // Save the current view preference to localStorage
-        const isCompact = inventoryGrid.classList.contains("compact-view");
-        localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
-    });
-
-    // Load the saved view preference on page load
-    const savedViewPreference = localStorage.getItem("inventoryViewPreference");
-    if (savedViewPreference === "compact") {
-        inventoryGrid.classList.remove("comfortable-view");
-        inventoryGrid.classList.add("compact-view");
-    }
-});
-</script>
 	<!-- jquery -->
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
      <script src="{% static 'css/js/main.js' %}"></script>
@@ -3966,9 +3995,9 @@ document.addEventListener("DOMContentLoaded", function() {
      <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
      <script src="{% static 'css/js/sticker.js' %}"></script>
 
+  <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+  <script src="{% static 'css/js/main.js' %}"></script>
 </body>
 </html>
 
 
-
-{% endif %}

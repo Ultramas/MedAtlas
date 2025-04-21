@@ -21,6 +21,7 @@ from django.utils.text import slugify
 from urllib.parse import quote, urlparse
 from django.db import close_old_connections
 from django.contrib.auth.forms import UserChangeForm, AuthenticationForm
+import math
 
 from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
@@ -2232,8 +2233,11 @@ def create_outcome(request, slug):
                     'type': game.type,
                     'demonstration': demonstration_flag
                 }
-                if user.is_authenticated:
+                if user.is_authenticated and button_id == "start":
                     outcome_data['user'] = user
+                else:
+                    outcome_data['user'] = None
+
 
                 outcome = Outcome.objects.create(**outcome_data)
 
@@ -7468,37 +7472,43 @@ from .models import UserClickable, ProfileDetails
 @login_required
 @require_POST
 def update_currency(request):
-    data = json.loads(request.body)
+    data       = json.loads(request.body)
     name       = data.get("clickable_name")
     base_val   = data.get("actual_value", 0)
     multiplier = data.get("exponential_multiplier", 1)
 
-    # Validate the clickable
     try:
-        uc = UserClickable.objects.get(
-            user=request.user,
-            clickable__name=name,
-            is_active=1
-        )
+        with transaction.atomic():
+            # 1) Lock the UserClickable row
+            uc = UserClickable.objects.select_for_update().get(
+                user=request.user,
+                clickable__name=name,
+                is_active=1
+            )
+
+            # 2) Compute how much currency to add
+            try:
+                increment = float(base_val) * float(multiplier)
+            except (TypeError, ValueError):
+                increment = uc.actual_value * uc.exponential_level_multiplier
+
+            # 3) Increment the click count in Python
+            uc.count = uc.count + 1
+            uc.save()
+
+            # 4) Lock and update the user's currency
+            profile = ProfileDetails.objects.select_for_update().get(user=request.user)
+            profile.currency_amount = profile.currency_amount + increment
+            profile.save()
+
     except UserClickable.DoesNotExist:
         return JsonResponse({"success": False, "error": "Invalid clickable"}, status=400)
 
-    # Compute increment
-    try:
-        increment = float(base_val) * float(multiplier)
-    except (TypeError, ValueError):
-        increment = uc.actual_value * uc.exponential_level_multiplier
-
-    # Option A: do the addition in Python so we never get a CombinedExpression
-    with transaction.atomic():
-        profile = ProfileDetails.objects.select_for_update().get(user=request.user)
-        new_amount = profile.currency_amount + increment
-        profile.currency_amount = new_amount
-        profile.save()
-
+    # 5) Return both new totals
     return JsonResponse({
         "success":    True,
-        "new_amount": profile.currency_amount
+        "new_amount": profile.currency_amount,
+        "new_count":  uc.count
     })
 
 
@@ -12857,11 +12867,17 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['store_view_form'] = StoreViewTypeForm()
 
         if self.request.user.is_authenticated:
-            stock_objects = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by("created_at")
+            stock_objects = InventoryObject.objects.filter(
+                is_active=1,
+                user=self.request.user
+            ).order_by("created_at")
             context['StockObject'] = stock_objects
 
-            total_value = stock_objects.aggregate(total=Sum('price'))['total'] or 0
-            context['total_value'] = total_value
+            # ① compute total value
+            context['total_value'] = stock_objects.aggregate(total=Sum('price'))['total'] or 0
+
+            # ② compute and inject the stock count
+            context['stock_count'] = stock_objects.count()
 
         current_user = self.request.user
         if current_user.is_authenticated:
@@ -12970,30 +12986,44 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
         return context
 
+    from django.http import JsonResponse
+
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
         action = request.POST.get('action')
         pk = kwargs.get('pk')
 
-        try:
-            inventory_object = InventoryObject.objects.get(pk=pk, user=request.user)
-        except InventoryObject.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Inventory object not found'}, status=404)
+        # 1) Look up and authorize
+        inventory_object = get_object_or_404(InventoryObject, pk=pk, user=request.user)
 
+        # 2) Perform the requested action
         if action == 'sell':
-            response = self.sell_inventory_object(request, pk)
+            result = self.sell_inventory_object(request, pk)
         elif action == 'withdraw':
-            response = self.withdraw_inventory_object(request, pk)
+            result = self.withdraw_inventory_object(request, pk)
         elif action == 'move':
-            print("Move action triggered")
-            response = self.move_to_trade(request, pk)
+            result = self.move_to_trade(request, pk)
         else:
             return JsonResponse({'success': False, 'error': 'Invalid action'}, status=400)
 
+        # 3) Update any related counts on the Inventory model
         inventory_object.inventory.update_inventory_count()
-        updated_count = inventory_object.inventory.number_of_cards
 
-        return response
+        # 4) Recompute the up‑to‑the‑moment stock count
+        new_count = InventoryObject.objects.filter(
+            is_active=1,
+            user=request.user
+        ).count()  # efficient COUNT(*) query :contentReference[oaicite:2]{index=2}
+
+        # 5) Merge into the final JSON payload
+        payload = {
+            'success': True,
+            'stock_count': new_count,
+            # you can also include other fields from `result` if needed
+            **(result if isinstance(result, dict) else {})
+        }
+
+        return JsonResponse(payload)  # uses Django’s JsonResponse helper :contentReference[oaicite:3]{index=3}
 
     def withdraw_inventory_object(self, request, pk):
         if request.method != "POST" or request.headers.get("X-Requested-With") != "XMLHttpRequest":
@@ -16389,7 +16419,9 @@ class MyLevelView(LoginRequiredMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-
+        profile = ProfileDetails.objects.filter(user=user).first()
+        mylevel = math.floor(1.02 ** profile.level.level)
+        context['created_level'] = mylevel
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -16421,7 +16453,9 @@ class MyLevelView(LoginRequiredMixin, ListView):
         context['levels'] = [
             {
                 "level": level,
-                "background": level.get_background_style()
+                "background": level.get_background_style(),
+                "given_level": level.level,
+                "actual_level": level.actual_level,
             }
             for level in levels
         ]

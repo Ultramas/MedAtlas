@@ -624,6 +624,57 @@
             font-weight: bold;
         }
 
+        /* Make the title look clickable */
+        .nav-section .section-title {
+          cursor: pointer;
+          user-select: none;
+          display: flex;
+          align-items: center;
+        }
+
+        /* Default: content is visible */
+        .nav-section .section-content {
+          max-height: 100vh;
+          overflow: hidden;
+          transition: max-height 0.3s ease;
+        }
+
+        /* When collapsed, clamp height to zero */
+        .nav-section.collapsed .section-content {
+          max-height: 0;
+        }
+
+        /* 2.1 Section header styling */
+        .nav-section .section-title {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          cursor: pointer;
+          user-select: none;
+        }
+
+        /* 2.2 Content expand/collapse */
+        .nav-section .section-content {
+          max-height: 100vh;              /* open by default */
+          overflow: hidden;
+          transition: max-height 0.4s ease; /* smooth height transition :contentReference[oaicite:1]{index=1} */
+        }
+
+        /* 2.3 Collapsed state: clamp height */
+        .nav-section.collapsed .section-content {
+          max-height: 0;
+        }
+
+        /* 2.4 Icon transition & rotation */
+        .toggle-icon {
+          transition: transform 0.3s ease; /* animate rotation smoothly :contentReference[oaicite:2]{index=2} */
+        }
+
+        /* 2.5 When collapsed, rotate 90° to point sideways */
+        .nav-section.collapsed .toggle-icon {
+          transform: rotate(-90deg);      /* chevron pointing right/sideways :contentReference[oaicite:3]{index=3} */
+        }
+
         /* Collection Section */
         .collection {
             padding: 0 20px 20px;
@@ -1129,18 +1180,14 @@
 
             <div class="sidebar-nav">
                 <div class="nav-section">
-                    <h3 class="section-title"><i class="fas fa-compass"></i> Navigation</h3>
+                    <h3 class="section-title"><i class="fas fa-compass"></i>Home<i class="fas fa-chevron-down toggle-icon"></i></h3>
+
+                    <div class="section-content">
                     <ul>
                         <li class="nav-item">
                             <a href="{% url 'showcase:index' %}" class="nav-link active">
                                 <i class="fas fa-home"></i>
                                 <span class="nav-text">Home</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'showcase:currencymarket' %}" class="nav-link">
-                                <i class="fas fa-diamond"></i>
-                                <span class="nav-text" style="color: rgba(255, 50, 0, 1);">Rubies</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -1156,25 +1203,18 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{% url 'showcase:gamehub' slug='123'  %}" class="nav-link">
-                                <i class="fas fa-box"></i>
-                                <span class="nav-text">Chests</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a href="{% url 'showcase:achievements' %}" class="nav-link">
                                 <i class="fas fa-trophy"></i>
                                 <span class="nav-text">Achievements</span>
                             </a>
                         </li>
-                        <!--
                         <li class="nav-item">
                             <a href="#" class="nav-link">
                                 <i class="fas fa-exchange-alt"></i>
                                 <span class="nav-text">Trades</span>a
                                 <span class="nav-badge">3</span>
                             </a>
-                        </li>-->
+                        </li>
                         <li class="nav-item">
                             <a href="{% url 'showcase:home' %}" class="nav-link">
                                 <i class="fas fa-users"></i>
@@ -1182,11 +1222,39 @@
                             </a>
                         </li>
                     </ul>
+                    </div>
+                </div>
+
+                 <div class="nav-section">
+                    <h3 class="section-title"><i class="fas fa-compass"></i> Rubies<i class="fas fa-chevron-down toggle-icon"></i></h3>
+                     <div class="section-content">
+                    <ul>
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:currencymarket' %}" class="nav-link">
+                                <i class="fas fa-diamond"></i>
+                                <span class="nav-text" style="color: rgba(255, 50, 0, 1);">Rubies</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:ehome' %}" class="nav-link">
+                                <i class="fas fa-store"></i>
+                                <span class="nav-text">Marketplace</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:gamehub' slug='123'  %}" class="nav-link">
+                                <i class="fas fa-box"></i>
+                                <span class="nav-text">Chests</span>
+                            </a>
+                        </li>
+                    </ul>
+                    </div>
                 </div>
 
                 <!-- Collection Navigation -->
                 <div class="nav-section">
-                    <h3 class="section-title"><i class="fas fa-layer-group"></i> Collections</h3>
+                    <h3 class="section-title"><i class="fas fa-layer-group"></i> Collections<i class="fas fa-chevron-down toggle-icon"></i></h3>
+                    <div class="section-content">
                     <ul>
                         <li class="nav-item">
                             <a href="{% url 'showcase:inventory' %}" class="nav-link">
@@ -1200,7 +1268,7 @@
                                 <span class="nav-text">Exchange</span>
                             </a>
                         </li>
-                        <!--<li class="nav-item">
+                        <li class="nav-item">
                             <a href="#" class="nav-link">
                                 <i class="fas fa-star"></i>
                                 <span class="nav-text">Favorites</span>
@@ -1211,13 +1279,47 @@
                                 <i class="fas fa-history"></i>
                                 <span class="nav-text">Recent</span>
                             </a>
-                        </li>-->
+                        </li>
                     </ul>
+                    </div>
+                </div>
+                <!-- Daily Navigation -->
+                <div class="nav-section">
+                    <h3 class="section-title"><i class="fas fa-layer-group"></i> Levels<i class="fas fa-chevron-down toggle-icon"></i></h3>
+                    <div class="section-content">
+                    <ul>
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:mylevel' %}" class="nav-link">
+                                <i class="fas fa-fire"></i>
+                                <span class="nav-text">Levels</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:commerce' %}" class="nav-link">
+                                <i class="fa-solid fa-money-bill-trend-up"></i>
+                                <span class="nav-text">Daily Lotto</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-star"></i>
+                                <span class="nav-text">Favorites</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-history"></i>
+                                <span class="nav-text">Recent</span>
+                            </a>
+                        </li>
+                    </ul>
+                    </div>
                 </div>
 
                 <!-- Settings Navigation -->
                 <div class="nav-section">
-                    <h3 class="section-title"><i class="fas fa-cog"></i> Settings</h3>
+                    <h3 class="section-title"><i class="fas fa-cog"></i> Settings<i class="fas fa-chevron-down toggle-icon"></i></h3>
+                    <div class="section-content">
                     <ul>
                         <li class="nav-item">
                {% for userprofile in NewsProfiles %}
@@ -1237,15 +1339,21 @@
 
 
                 {% endfor %}
-                        </li><!--
+                        </li>
                         <li class="nav-item">
                             <a href="#" class="nav-link">
                                 <i class="fas fa-bell"></i>
                                 <span class="nav-text">Notifications</span>
                             </a>
-                        </li>-->
+                        </li>
                         <li class="nav-item">
-                            <a href="{% url 'showcase:policy' %} " class="nav-link">
+                            <a href="{% url 'showcase:policy' %}" class="nav-link">
+                                <i class="fas fa-shield-alt"></i>
+                                <span class="nav-text">Changelog</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:policy' %}" class="nav-link">
                                 <i class="fas fa-shield-alt"></i>
                                 <span class="nav-text">Privacy Policy</span>
                             </a>
@@ -1282,12 +1390,17 @@
 
 
                     </ul>
-                </div>
+                    </div>
+
+
             </div>
 
             <!-- Progress Section -->
             <div class="progress-section">
-                <h3 class="section-title"><i class="fas fa-chart-line"></i> Progress</h3>
+                <h3 class="section-title"><i class="fas fa-chart-line"></i> Progress<i class="fas fa-chevron-down toggle-icon"></i></h3>
+                    <div class="section-content">
+                        <ul>
+                            <li class="nav-item">
                 <div class="progress-title">
                     <span>Level Progress</span>
                     {% if user.is_authenticated %}
@@ -1300,7 +1413,7 @@
 </span>
 
                     {% endfor %}
-                </div>
+
                 <div class="progress-bar">
                     <div class="progress-bar" style="width: 100%; height: 20px; background: #ddd; border-radius: 4px; overflow: hidden;">
                         <div class="progress-fill" style="width: {% widthratio userprofile.rubies_spent userprofile.level.experience 100 %}%;">
@@ -1320,6 +1433,10 @@
                 </div>
                 </a>
                 {% endif %}
+</div>
+                            </li>
+                        </ul>
+            </div>
             </div>
             <style>
 .volume {
@@ -1659,6 +1776,14 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log("🔹 forced spawn for testing");
     }
 });
+</script>
+<script>
+  document.querySelectorAll('.nav-section').forEach(section => {
+    const title = section.querySelector('.section-title');
+    title.addEventListener('click', () => {
+      section.classList.toggle('collapsed');
+    });
+  });
 </script>
 
 
