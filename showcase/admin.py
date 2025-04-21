@@ -1807,6 +1807,17 @@ class InventoryObjectAdmin(admin.ModelAdmin):
         }),
     )
 
+    list_display = (
+        'user',
+        'inventory',
+        'choice',
+        'choice_text',
+        'currency',
+        'price',
+        'condition',
+        'created_at',
+        'is_active',
+    )
 
 admin.site.register(InventoryObject, InventoryObjectAdmin)
 
@@ -2537,7 +2548,7 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
     readonly_fields = ('position',)
     inlines = [ProfileCurrencyInline]
 
-    list_display = ('display_user_with_tag', 'trader', 'currency_amount', 'rubies_spent', 'get_selling_status', 'get_membership')
+    list_display = ('display_user_with_tag', 'level', 'trader', 'currency_amount', 'rubies_spent', 'get_selling_status', 'get_membership')
     list_filter = [UserTypeFilter, 'trader', 'membership', 'is_active']
 
     def display_user_with_tag(self, obj):
