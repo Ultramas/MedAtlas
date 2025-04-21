@@ -12867,11 +12867,17 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['store_view_form'] = StoreViewTypeForm()
 
         if self.request.user.is_authenticated:
-            stock_objects = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by("created_at")
+            stock_objects = InventoryObject.objects.filter(
+                is_active=1,
+                user=self.request.user
+            ).order_by("created_at")
             context['StockObject'] = stock_objects
 
-            total_value = stock_objects.aggregate(total=Sum('price'))['total'] or 0
-            context['total_value'] = total_value
+            # ① compute total value
+            context['total_value'] = stock_objects.aggregate(total=Sum('price'))['total'] or 0
+
+            # ② compute and inject the stock count
+            context['stock_count'] = stock_objects.count()
 
         current_user = self.request.user
         if current_user.is_authenticated:
@@ -12895,6 +12901,23 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
 
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         try:
             context['SentProfile'] = ProfileDetails.objects.get(
@@ -12968,10 +12991,8 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         action = request.POST.get('action')
         pk = kwargs.get('pk')
 
-        try:
-            inventory_object = InventoryObject.objects.get(pk=pk, user=request.user)
-        except InventoryObject.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Inventory object not found'}, status=404)
+        # 1) Look up and authorize
+        inventory_object = get_object_or_404(InventoryObject, pk=pk, user=request.user)
 
         if action == 'sell':
             response = self.sell_inventory_object(request, pk)
