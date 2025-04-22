@@ -12868,14 +12868,54 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['store_view_form'] = StoreViewTypeForm()
+
+        current_user = self.request.user
+        if current_user.is_authenticated:
+            try:
+                store_view_instance = StoreViewType.objects.get(user=current_user, is_active=1)
+                context['store_view'] = store_view_instance.type
+                context['store_view_type_str'] = str(store_view_instance)
+                context['streamfilter_string'] = f'stream filter set by {current_user.username}'
+            except StoreViewType.DoesNotExist:
+                store_view_instance = None
+                context['store_view'] = 'stream'
+                context['store_view_type_str'] = 'stream'
+                context['streamfilter_string'] = f'stream filter set by {current_user.username}'
+        else:
+            store_view_instance = None
+            context['store_view'] = 'stream'
+            context['streamfilter_string'] = 'stream filter set by anonymous user'
+
+        store_view_form = StoreViewTypeForm(instance=store_view_instance, request=self.request)
+        context['store_view_form'] = store_view_form
+
         context['Stockpile'] = Inventory.objects.filter(is_active=1, user=self.request.user)
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
         try:
             context['SentProfile'] = ProfileDetails.objects.get(user=self.request.user) #specifically used to get ruby amount
         except UserProfile.DoesNotExist:
             context['SentProfile'] = None
 
         newprofile = UpdateProfile.objects.filter(is_active=1)
-        # Retrieve the author's profile avatar
 
         context['NewsProfiles'] = newprofile
 
@@ -12897,7 +12937,6 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             context['Profiles'] = None
 
         if context['Profiles'] == None:
-            # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -12924,7 +12963,6 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-            # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
