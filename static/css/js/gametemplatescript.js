@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const buttons = popup.querySelectorAll('.close, .sell-button');
     const fire = popup.querySelector('.fire');
     const textContainer = popup.querySelector('.text');
+    const isAuth    = window.USER?.isAuthenticated;  // optional chaining :contentReference[oaicite:2]{index=2}
+    const csrfToken = window.CSRF_TOKEN;            // injected Django CSRF token :contentReference[oaicite:3]{index=3}
 
     let animationStopped = false;
     let selectedItems = [];
@@ -62,17 +64,17 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('the value of totalspins at step 1 is ' + totalSpins)
     });
 
-
-    // Start animation on button click
-    $(".start").click(function (event) {
-        const buttonId = event.target.id; // Extract the ID of the clicked button
-        console.log(`Button clicked: ${buttonId}`); // Debug: Log the button's ID
+    $(".start, #start2").on("click", function(event) {
+      // Using a function expression so `this === event.currentTarget`
+      const buttonId = event.currentTarget.id;  // safest way to get the clicked element’s ID :contentReference[oaicite:1]{index=1}
+      console.log("Clicked button:", buttonId);
         sessionStorage.setItem("startAnimation", "true");
         sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
 
         let currentSpin = 0;
         console.log('current spin set to 0')
         initializeAnimation(buttonId);
+
     });
     observer.observe(document.querySelector('#card-container'), { childList: true });
 
@@ -110,13 +112,13 @@ async function randomizeContents() {
     const nonce = startButton.getAttribute("data-nonce");
     const slug = startButton.getAttribute("data-slug");
 
-    console.log("Game ID:", gameId);
-    console.log("Nonce:", nonce);
-    console.log("Slug:", slug);
+    const executeRequest = async () => {
+        const payload = {
+            game_id: gameId,
+            color: choiceColor
+        };
 
-    try {
-        const payload = { game_id: gameId };
-        console.log("Payload sent to server:", payload);
+        await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
 
         const response = await fetch(`/create_outcome/${slug}/`, {
             method: 'POST',
@@ -135,115 +137,121 @@ async function randomizeContents() {
         }
 
         const data = await response.json();
-        console.log("Response from server:", data);
 
-        if (data.status === 'success') {
-            startButton.setAttribute('data-nonce', data.nonce);
-            console.log(`Nonce updated: ${data.nonce}`);
+        if (data.status !== 'success') {
+            if (data.message && data.message.includes("database is locked")) {
+                throw new Error("database_locked");
+            }
+            throw new Error(data.message || "Unknown error");
+        }
 
-            // Clear existing cards
-            clearCards();
+        startButton.setAttribute('data-nonce', data.nonce);
+        clearCards();
 
-            const attributes = {
-                id: data.choice_id || 'N/A',
-                nonce: data.nonce || 'N/A',
-                text: data.choice_text || 'Unknown',
-                color: data.choice_color || '#FFFFFF',
-                file: data.choice_file || null,
-                value: data.choice_value || 0,
-                lowerNonce: data.lower_nonce || 'N/A',
-                upperNonce: data.upper_nonce || 'N/A',
-            };
+        const attributes = {
+            id:          data.choice_id || 'N/A',
+            nonce:       data.nonce || 'N/A',
+            text:        data.choice_text || 'Unknown',
+            color:       data.choice_color || '#FFFFFF',
+            file:        data.choice_file || null,
+            value:       data.choice_value || 0,
+            lowerNonce:  data.lower_nonce || 'N/A',
+            upperNonce:  data.upper_nonce || 'N/A',
+        };
 
-            const targetCardElement = document.createElement('div');
-            targetCardElement.classList.add('card', 'target-card');
-            targetCardElement.setAttribute('id', `card-${attributes.id}`);
-            targetCardElement.setAttribute('data-nonce', attributes.nonce);
-            targetCardElement.setAttribute('data-color', attributes.color);
-            targetCardElement.setAttribute('data-choice_value', attributes.value);
-            targetCardElement.setAttribute('data-lower_nonce', attributes.lowerNonce);
-            targetCardElement.setAttribute('data-upper_nonce', attributes.upperNonce);
+        const targetCardElement = document.createElement('div');
+        targetCardElement.classList.add('card', 'target-card', 'sellattribute');
+        targetCardElement.id = `card-${attributes.id}`;
+        targetCardElement.dataset.nonce = attributes.nonce;
+        targetCardElement.setAttribute('data-color', attributes.color);
+        targetCardElement.dataset.choiceValue = attributes.value;
+        targetCardElement.dataset.lowerNonce = attributes.lowerNonce;
+        targetCardElement.dataset.upperNonce = attributes.upperNonce;
 
-            targetCardElement.innerHTML = `
-    <div class="cards" style="background: url(/static/css/images/${attributes.color}.png);">
-            <div class="lootelement"
-     data-price="${attributes.value || ''}"
-     data-currency-file="${attributes.currencyFile || ''}"
-     data-currency-symbol="${attributes.currencySymbol || ''}"
-     style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border: 0.1em solid grey; border-top: none; width: 10em;">
-    ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-    <div class="sliderPrice">${attributes.value} 💎</div>
-</div>
-</div>
-`;
+        targetCardElement.innerHTML = `
+            <div class="cards" style="background: url(/static/css/images/${attributes.color}.png);">
+                <div class="lootelement"
+                    data-price="${attributes.value}"
+                    style="display: flex; flex-direction: column; align-items: center; height: 100%; width: 10em; border-top: none;">
+                    ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
+                    <div class="sliderPrice" style="color: white;"><b class="innerprice">${attributes.value}</b> 💎 targetcard</div>
+                </div>
+            </div>
+        `;
 
-            selectedItems.push({
-                id: attributes.id,
-                nonce: attributes.nonce,
-                text: attributes.text,
-                color: attributes.color,
-                src: attributes.file,
-                value: attributes.value,
-                lowerNonce: attributes.lowerNonce,
-                upperNonce: attributes.upperNonce
-            });
+        selectedItems.push({
+            id:         attributes.id,
+            nonce:      attributes.nonce,
+            text:       attributes.text,
+            color:      attributes.color,
+            src:        attributes.file,
+            value:      attributes.value,
+            lowerNonce: attributes.lowerNonce,
+            upperNonce: attributes.upperNonce
+        });
 
-            const cardContainer = document.querySelector('.slider'); // Adjust selector if necessary
+        const cardContainer = document.querySelector('.slider');
+        const middleIndex = Math.floor(cardContainer.children.length / 1.3275);
+        const insertIndex = Math.min(cardContainer.children.length, middleIndex);
 
-            // Calculate the position to insert: 4 cards to the right of the middle
-            const middleIndex = Math.floor(cardContainer.children.length / 2);
-            const targetIndex = Math.min(
-                cardContainer.children.length,
-                middleIndex + 4
-            );
+        if (cardContainer.children[insertIndex]) {
+            cardContainer.insertBefore(targetCardElement, cardContainer.children[insertIndex]);
+        } else {
+            cardContainer.appendChild(targetCardElement);
+        }
 
-            if (cardContainer.children[targetIndex]) {
-                cardContainer.insertBefore(targetCardElement, cardContainer.children[targetIndex]);
+        window.addEventListener('resize', () => {
+            const idx = Math.floor(cardContainer.children.length / 1.3275);
+            if (cardContainer.children[idx]) {
+                cardContainer.insertBefore(targetCardElement, cardContainer.children[idx]);
             } else {
                 cardContainer.appendChild(targetCardElement);
             }
+        });
 
-            console.log("Target card inserted 4 cards to the right of the middle.");
+        async function handleInventory(buttonId, data) {
+          const inventoryPayload = {
+            choice_id:    data.choice_id,
+            choice_value: data.choice_value,
+            category:     data.category,
+            price:        data.choice_value,
+            condition:    data.condition,
+            quantity:     1,
+            buttonId:     buttonId,
+          };
+          console.log("Payload:", inventoryPayload);
 
-            // Call create_inventory_object after the card is created
-            const inventoryPayload = {
-                choice_id: data.choice_id, // Use choice_id from outcome response
-                choice_value: data.choice_value, // Use choice_value
-                category: data.category, // Additional data as needed
-                price: 100,
-                condition: 'New',
-                quantity: 1,
-                buttonId: buttonId,
-            };
-            console.log("Calling /create_inventory_object/ with payload:", inventoryPayload);
-
-            const inventoryResponse = await fetch('/create_inventory_object/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is correctly passed
-                },
-                body: JSON.stringify(inventoryPayload),
+          if (buttonId !== "start2") {
+            const response = await fetch("/create_inventory_object/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+                "X-Requested-With": "XMLHttpRequest"
+              },
+              body: JSON.stringify(inventoryPayload),
             });
+            return response.json();  // return the parsed JSON
+          } else {
+            console.log(`Skipping fetch for "${buttonId}"`);
+            return null;
+          }
+        }
 
-            const inventoryData = await inventoryResponse.json();
+        try {
+            const inventoryData = await handleInventory(buttonId, data)
+
             console.log("Response from /create_inventory_object/:", inventoryData);
 
             if (inventoryData.status === 'success') {
                 if (inventoryData.button_id === "start") {
-                    console.log("Inventory object created successfully with user.");
-                     let inventory_pk = inventoryData.inventory_object_id;
-                        console.log("inventory_pk:", inventory_pk);
-                        inventory_pk = inventory_pk;
-                        targetCardElement.setAttribute('data-inventory_pk', window.inventory_pk);
-
-                        window.sellUrl = `/inventory/${inventory_pk}/sell/`;
-                        const sellForm = document.getElementById(`sell-form-${window.inventory_pk}`);
-                        console.log('sellform: ' + sellForm);
-                        if (sellForm) {
-                          console.log("Sell form found:", sellForm);
-
-                          sellForm.addEventListener('submit', function(event) {
+                    const inventory_pk = inventoryData.inventory_object_id;
+                    window.inventory_pk = inventory_pk;
+                    targetCardElement.dataset.inventoryPk = inventory_pk;
+                    window.sellUrl = `/inventory/${inventory_pk}/sell/`;
+                    const sellForm = document.getElementById(`sell-form-${inventory_pk}`);
+                    if (sellForm) {
+                        sellForm.addEventListener('submit', function(event) {
                             event.preventDefault();
                             const pk = this.querySelector('[name="pk"]').value;
                             console.log("Sell form submitted. pk =", pk);
@@ -253,11 +261,8 @@ async function randomizeContents() {
                             totalSpins = parseInt($(this).data("value"));
                             sessionStorage.setItem("totalSpins", totalSpins);
                             sellInventory(pk);
-                          });
-                        } else {
-                          console.error("Sell form not found for inventory_pk:", window.inventory_pk);
-                        }
-
+                        });
+                    }
                 } else if (inventoryData.button_id === "start2") {
                     console.log("Temporary inventory object created without user. ID:", inventoryData.inventory_object_id);
                 }
@@ -266,16 +271,45 @@ async function randomizeContents() {
             }
 
             return data;
-        } else {
-            console.error(`Error: ${data.message}`);
+        } catch (inventoryError) {
+            console.error(`Inventory creation error: ${inventoryError}`);
             return null;
         }
-    } catch (error) {
-        console.error(`Request failed: ${error}`);
-        return null;
-    }
-}
+    };
 
+    const executeWithRetry = async () => {
+        const maxRetries = 3;
+        let retryCount = 0;
+        while (retryCount < maxRetries) {
+            try {
+                return await executeRequest();
+            } catch (error) {
+                retryCount++;
+                if (error.message === "database_locked" && retryCount < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, 500 * retryCount));
+                    continue;
+                }
+                throw error;
+            }
+        }
+    };
+
+    return new Promise((resolve, reject) => {
+        requestQueue.push(async () => {
+            try {
+                const result = await executeWithRetry();
+                resolve(result);
+                return result;
+            } catch (error) {
+                reject(error);
+                throw error;
+            }
+        });
+        if (!requestInProgress) {
+            processQueue();
+        }
+    });
+}
 
 function clearCards() {
     const cardContainer = document.querySelector('.slider');
@@ -302,15 +336,40 @@ function centerCard(cardElement) {
 
 
 
-        function addAnimation() {
-            document.querySelectorAll('.slider').forEach(scroller => {
-                scroller.style.animation = 'none';
-                scroller.offsetHeight;  // Trigger reflow
-                let animationDuration = isQuickSpin ? '9s' : '18s';
-                scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
-                scroller.style.animationPlayState = 'running';
-            });
+function addAnimation() {
+
+    document.querySelectorAll('.slider').forEach(scroller => {
+        scroller.style.animation = 'none';
+        scroller.offsetHeight;
+        let animationDuration;
+
+        if (!window.USER?.isAuthenticated) {
+          currentSpintype = "C";
+          console.log('updated currentspintype using guest')
+        } else {
+          if (typeof currentSpintype === "undefined" || currentSpintype === null) {
+            console.error("currentSpintype is not set");
+            return;
+          }
         }
+        switch (currentSpintype) {
+          case "I":
+            animationDuration = isQuickSpin ? 500  : 1000;
+            break;
+          case "S":
+            animationDuration = isQuickSpin ? 4000 : 8000;
+            break;
+          case "C":
+          default:
+            animationDuration = isQuickSpin ? 4500 : 9000;
+            break;
+        }
+
+
+        scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
+        scroller.style.animationPlayState = 'running';
+    });
+}
 
 function alignCardWithSpinner() {
     const spinnerTick = document.getElementById('selector');
@@ -489,8 +548,21 @@ function spin(buttonId) {
     $(".spin-option").prop('disabled', true);
 
     randomizeContents();
-    randomizedContents();
-    addAnimation();
+    if (
+        !userContext.isSignedIn ||
+        !userContext.hasPreference ||
+        userContext.preferenceValue !== "I"
+    )
+    {   console.log('not an instant spin')
+        randomizedContents();
+        addAnimation();
+        }
+
+        else{
+         console.log('actually instant spin')
+        randomizedContents();
+        addAnimation();
+        }
 
     if (buttonId === "start") {
         console.log("Regular Spin triggered");
@@ -498,7 +570,26 @@ function spin(buttonId) {
         console.log("Demo Spin triggered");
     }
 
-    const animationDuration = isQuickSpin ? 4500 : 9000;
+        let animationDuration;
+        if (!window.USER?.isAuthenticated) {
+          currentSpintype = "C";
+          console.log('updated currentspintype using guest')
+        } else {
+          if (typeof currentSpintype === "undefined" || currentSpintype === null) {
+            console.error("currentSpintype is not set");
+            return;
+          }
+        }
+    if (currentSpintype === 'I') {
+                animationDuration = isQuickSpin ? 500 : 1000;
+            } else if (currentSpintype === 'S') {
+                animationDuration = isQuickSpin ? 4000 : 8000;
+            } else if (currentSpintype === 'C') {
+                animationDuration = isQuickSpin ? 4500 : 9000;
+            } else {
+                animationDuration = isQuickSpin ? 4500 : 9000;
+            }
+
     const buffer = 150;
     const audiobuffer = 100;
     const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
@@ -530,7 +621,6 @@ setTimeout(() => {
         let choiceColor = targetCard.getAttribute('data-color') || 'gray';
         let choiceId = targetCard.getAttribute('id');
         let gameId = startButton.getAttribute("data-game-id");
-
 
         console.log('The choice color is:', choiceColor);
         console.log('The choice id is:', choiceId);

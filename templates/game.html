@@ -1649,6 +1649,13 @@ document.addEventListener("DOMContentLoaded", function () {
 </button>
 {% endif %}
 </div>
+<script>
+  window.USER = {
+    isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }}
+  };
+
+  window.CSRF_TOKEN = "{{ csrf_token }}";
+</script>
 
 <script>
     function getCSRFToken() {
@@ -1690,69 +1697,99 @@ document.addEventListener("DOMContentLoaded", function () {
     const costDisplayElement = document.getElementById("cost-display");
     const startButton = document.getElementById("start");
     const baseCost = parseFloat(baseCostElement.textContent) || 0;
+ const isAuth = window.USER?.isAuthenticated;
+  let userCashProxy;
 
-    // Initialize user cash as a proxy
+  if (isAuth) {
+    // Authenticated: real cash tracking
     let userCash = parseFloat({{ user_cash|safe }});
-    const userCashProxy = new Proxy({ value: userCash }, {
-        set(target, key, newValue) {
-            if (key === "value") {
-                target[key] = newValue;
-                updateStartButton(); // Re-run the logic on change
-            }
-            return true;
+    userCashProxy = new Proxy({ value: userCash }, {
+      set(target, key, newValue) {
+        if (key === "value") {
+          target[key] = newValue;
+          updateStartButton();
         }
+        return true;
+      }
     });
-
-    function updateStartButton() {
-        const spinMultiplier = parseInt(
-            document.querySelector(".spin-option.active")?.dataset.value || 1,
-            10
-        );
-        const totalCost = baseCost * spinMultiplier;
-
-        costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`;
-
-        if (userCashProxy.value < totalCost) {
-            if (!startButton.parentElement.matches("a")) {
-                const link = document.createElement("a");
-                link.href = "currencymarket.html";
-                link.style.textDecoration = "none";
-                startButton.parentNode.replaceChild(link, startButton);
-                link.appendChild(startButton);
-            }
-            startButton.disabled = true;
-        } else {
-            if (startButton.parentElement.matches("a")) {
-                const parent = startButton.parentElement;
-                const container = parent.parentNode;
-                parent.replaceWith(startButton);
-                container.appendChild(startButton);
-            }
-        }
-    }
-
-    spinButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            spinButtons.forEach(btn => btn.classList.remove("active"));
-            this.classList.add("active");
-            updateStartButton();
-        });
-    });
-
-    // Periodically fetch the updated user cash from the API
-    function fetchUserCash() {
-        fetch('/api/get-user-cash/')
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.user_cash !== undefined) {
-                    userCashProxy.value = data.user_cash; // Update proxy value
-                }
-            })
-            .catch(error => console.error('Error fetching user cash:', error));
-    }
-
     setInterval(fetchUserCash, 500);
+  } else {
+    // Guest: unlimited pseudo‑cash
+    userCashProxy = { value: Infinity };
+  }
+document.addEventListener("DOMContentLoaded", () => {
+  const isAuth = window.USER?.isAuthenticated;
+  let userCashProxy;
+
+  if (isAuth) {
+    // Authenticated: real cash tracking
+    let userCash = parseFloat({{ user_cash|safe }});
+    userCashProxy = new Proxy({ value: userCash }, {
+      set(target, key, newValue) {
+        if (key === "value") {
+          target[key] = newValue;
+          updateStartButton();
+        }
+        return true;
+      }
+    });
+    setInterval(fetchUserCash, 500);
+  } else {
+    // Guest: unlimited pseudo‑cash
+    userCashProxy = { value: Infinity };
+  }
+
+  // Common logic for both auth and guests
+  function updateStartButton() {
+    const spinMultiplier = parseInt(
+      document.querySelector(".spin-option.active")?.dataset.value || 1,
+      10
+    );
+    const totalCost = baseCost * spinMultiplier;
+    costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`;
+
+    if (userCashProxy.value < totalCost) {
+      // Not enough cash (auth only): disable & link to market
+      if (!startButton.parentElement.matches("a")) {
+        const link = document.createElement("a");
+        link.href = "currencymarket.html";
+        link.style.textDecoration = "none";
+        startButton.parentNode.replaceChild(link, startButton);
+        link.appendChild(startButton);
+      }
+      startButton.disabled = true;
+    } else {
+      // Sufficient cash or guest: ensure button is enabled
+      if (startButton.parentElement.matches("a")) {
+        const parent = startButton.parentElement;
+        const container = parent.parentNode;
+        parent.replaceWith(startButton);
+        container.appendChild(startButton);
+      }
+      startButton.disabled = false;
+    }
+  }
+
+  spinButtons.forEach(button => {
+    button.addEventListener("click", function () {
+      spinButtons.forEach(btn => btn.classList.remove("active"));
+      this.classList.add("active");
+      updateStartButton();
+    });
+  });
+
+  function fetchUserCash() {
+    fetch('/api/get-user-cash/')
+      .then(r => r.json())
+      .then(data => {
+        if (data.user_cash !== undefined) {
+          userCashProxy.value = data.user_cash;
+        }
+      })
+      .catch(err => console.error('Error fetching user cash:', err));
+  }
 });
+
 
 </script>
 
@@ -1773,8 +1810,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Add event listener to the spin button
+
     document.getElementById("start").addEventListener("click", function () {
         console.log("Spin button clicked!"); // Debug log
+
 
         const button = this;
         const gameId = button.getAttribute("data-game-id");
