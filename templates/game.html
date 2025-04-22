@@ -1124,7 +1124,11 @@ p.blog-meta span {
         {% endfor %}
     </div>
 </div>
-
+<script>
+  window.USER = {
+    isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }}
+  };
+</script>
 <style>
 .top-hits-container {
     /*background: linear-gradient(to bottom,
@@ -1438,6 +1442,7 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
 
                     <span>Chest Value: {{ game.cost }}</span> 💎
              <script>
+            // Disable the cost calculation JavaScript
             document.addEventListener("DOMContentLoaded", function () {
                 const costDisplayElement = document.getElementById("cost-display");
                 if (costDisplayElement) {
@@ -1506,7 +1511,7 @@ document.addEventListener("DOMContentLoaded", function () {
         data-game-id="{{ game.id }}"
         data-nonce="{{ nonce }}"
         data-slug="{{ game.slug }}"
-        data-daily="false"
+        data-daily="true"
          style="position: absolute; bottom: 5px; left: 5px;">
 
 {% if preference and preference.spintype == 'I' %}
@@ -1566,31 +1571,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
         </script>
 {% else %}
-    {% if user.is_authenticated %}
-<button class="start gamer-button begin-button"
+<button class="start"
         id="start"
         data-game-id="{{ game.id }}"
         data-nonce="{{ nonce }}"
         data-slug="{{ game.slug }}"
         data-daily="false"
          style="position: absolute; bottom: 5px; left: 5px;">
-{% if preference and preference.spintype == 'I' %}
-⚡Spin!
-    {% elif preference and preference.spintype == 'S' %}
-🔥Spin!
-    {% else %}
     Spin!
-    {% endif %}
 </button>
-    {% else %}
-    <a href="{% url 'login' %}?next={{ request.path }}">
-    <button class="start gamer-button"
-        id="login"
-         style="position: absolute; bottom: 5px; left: 5px;">
-    Login
-</button>
-    </a>
-    {% endif %}
 {% endif %}
 
         {% if game.daily %}
@@ -1603,14 +1592,7 @@ document.addEventListener("DOMContentLoaded", function () {
         data-next-5pm="{{ next_5pm.timestamp }}"
          style="position: absolute; bottom: 5px; right: 5px;"
         disabled>
-
-{% if preference and preference.spintype == 'I' %}
-⚡Demo
-    {% elif preference and preference.spintype == 'S' %}
-🔥Demo
-    {% else %}
-    Demo
-    {% endif %}
+   Demo
 </button>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
