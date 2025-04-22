@@ -12937,6 +12937,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             context['Profiles'] = None
 
         if context['Profiles'] == None:
+            # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -12963,6 +12964,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
+            # Create a new object with the necessary attributes
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -13046,6 +13048,12 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         if inventory_object.user != request.user:
             return JsonResponse({'success': False}, status=403)
 
+        total_value = 0
+        with transaction.atomic():
+            for inventory_object in inventory_objects:
+                total_value += inventory_object.price
+        sold_value = total_value - inventory_object.price
+
         inventory_object.user = None
         inventory_object.inventory = None
 
@@ -13069,7 +13077,8 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             'success': True,
             'stock_count': stock_count,
             'stock_count2': stock_count2,
-            'currency_amount': user_profile.currency_amount
+            'currency_amount': user_profile.currency_amount,
+            'sold_value': sold_value,
         })
 
     def move_to_trade(self, request, pk):
@@ -13175,10 +13184,10 @@ class SellAllInventoryObjectsView(View):
                 'inventory_html': updated_inventory_html
             })
 
-        total_price = 0
+        total_value = 0
         with transaction.atomic():
             for inventory_object in inventory_objects:
-                total_price += inventory_object.price
+                total_value += inventory_object.price
                 inventory_object.user = None
                 inventory_object.inventory = None
                 Transaction.objects.create(
@@ -13190,7 +13199,7 @@ class SellAllInventoryObjectsView(View):
                 inventory_object.save()
 
             user_profile = get_object_or_404(ProfileDetails, user=request.user)
-            user_profile.currency_amount += total_price
+            user_profile.currency_amount += total_value
             user_profile.save()
 
         stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
@@ -13220,46 +13229,48 @@ from .models import InventoryObject, Transaction, ProfileDetails
 @method_decorator(login_required, name='dispatch')
 class SellEverythingInventoryObjectsView(View):
     def post(self, request, *args, **kwargs):
-        inventory_objects = InventoryObject.objects.filter(is_active=True, user=request.user)
+        try:
+            inventory_objects = InventoryObject.objects.filter(is_active=True, user=request.user)
+            if not inventory_objects.exists():
+                return JsonResponse({'success': False, 'error': 'No inventory objects available to sell'}, status=400)
 
-        if not inventory_objects.exists():
-            return JsonResponse({'success': False, 'error': 'No inventory objects available to sell'}, status=400)
-
-        total_price = sum(item.price for item in inventory_objects)
-
-        with transaction.atomic():
-            for inventory_object in inventory_objects:
-                inventory_object.is_active = False
-                inventory_object.save()
-
-                Transaction.objects.create(
-                    inventory_object=inventory_object,
-                    user=request.user,
-                    currency=inventory_object.currency,
-                    amount=inventory_object.price
-                )
+            total_value = sum(item.price for item in inventory_objects)
 
             user_profile = get_object_or_404(ProfileDetails, user=request.user)
-            user_profile.currency_amount += total_price
-            user_profile.save()
 
-        stock_objects = InventoryObject.objects.filter(is_active=True, user=request.user)
-        stock_count = stock_objects.count()
-        stock_count2 = stock_objects.count()
-        updated_inventory_html = render_to_string(
-            "inventory_items.html",
-            {"StockObject": stock_objects},
-            request=request
-        )
+            with transaction.atomic():
+                for inventory_object in inventory_objects:
+                    inventory_object.is_active = False
+                    inventory_object.save()
+                    Transaction.objects.create(
+                        inventory_object=inventory_object,
+                        user=request.user,
+                        currency=inventory_object.currency,
+                        amount=inventory_object.price
+                    )
+                user_profile.currency_amount += total_value
+                user_profile.save()
 
-        return JsonResponse({
-            'success': True,
-            'stock_count': stock_count,
-            'stock_count2': stock_count2,
-            'currency_amount': user_profile.currency_amount,
-            'total_value': total_price,
-            'inventory_html': updated_inventory_html
-        })
+            stock_objects = InventoryObject.objects.filter(is_active=True, user=request.user)
+            stock_count = stock_objects.count()
+            inventory_html = render_to_string(
+                "inventory_items.html",
+                {"StockObject": stock_objects},
+                request=request
+            )
+
+            return JsonResponse({
+                'success': True,
+                'stock_count': stock_count,
+                'currency_amount': user_profile.currency_amount,
+                'total_value': total_value,
+                'inventory_html': inventory_html,
+            })
+        except Http404:
+            return JsonResponse({'success': False, 'error': 'User profile not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
 
 @csrf_exempt
 def create_inventory_object(request):

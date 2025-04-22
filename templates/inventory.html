@@ -1658,27 +1658,12 @@ export const GlobalStyles = createGlobalStyle`
             <div class="flex justify-between items-center mb-5">
               <div>
                 <strong>Total Value:</strong>
-                <span id="total_value_element">{{ total_value }}</span>
-              </div>
-                  <p>Total Value: <span id="total-value">{{ total_value|default:0 }}</span></p>
+                <span id="total_value">0</span>
 
-    {% if stock_count > 0 %}
-    <div style="margin-top: 20px;">
-        <button id="sell-everything-button" class="card-button add-button sell-button" style="width: 120px; position: fixed; right: 50px; top: 175px;">Sell All</button>
-    </div>
-    {% endif %}
+            <div id="inventory-items-container">
+                {% include "inventory_items.html" with StockObject=StockObject %}
             </div>
 
-            <!-- Bulk Sell Form -->
-            <form id="sell-all-form" class="sell-all-form" action="{% url 'showcase:sell_all_inventory_objects' %}" method="post" style="display: none; margin-bottom: 20px;">
-              {% csrf_token %}
-              <input type="hidden" name="selected_ids" id="sell-all-selected-ids">
-              <button type="submit" class="card-button sell-button">Sell Selected</button>
-            </form>
-
-            <!-- Inventory Items -->
-            <div id="inventory-items-container">
-              {% include "inventory_items.html" with StockObject=StockObject %}
             </div>
           </div>
         </div>
@@ -1784,7 +1769,11 @@ export const GlobalStyles = createGlobalStyle`
       </div>
     </div>
   </div>
-
+</div>
+</div>
+</div>
+</div>
+</div>
   <!-- Copyright Section -->
   <div class="copyright-section">
     <p>© 2023 PokeTrove. All rights reserved.</p>
@@ -1874,11 +1863,19 @@ export const GlobalStyles = createGlobalStyle`
                   stockCountElement.textContent = data.stock_count;
                 }
 
-                // Update total value
-                const totalValueElement = document.getElementById("total_value_element");
-                if (totalValueElement && data.total_value) {
-                  totalValueElement.textContent = data.total_value;
+              console.log('the data inventory contains: ' + data.inventory_html);
+                const container = document.getElementById('inventory-items-container');
+                console.log('container would contain: ' + container);
+                if (data.inventory_html) {
+                  container.innerHTML = data.inventory_html;
                 }
+
+                      const soldEl = document.getElementById('sold-value');
+                      if (soldEl) soldEl.textContent = data.sold_value;
+                        else{
+                        console.log('error when updating total value')
+                        }
+
               } else {
                 alert("Withdraw failed! " + (data.error || ""));
               }
@@ -1922,8 +1919,12 @@ export const GlobalStyles = createGlobalStyle`
           .then(data => {
             if (data.success) {
               document.getElementById('stock-count').textContent = data.stock_count;
-              document.getElementById('inventory-items-container').innerHTML = data.inventory_html;
-
+              console.log('data inventory contains: ' + data.inventory_html);
+                const container = document.getElementById('inventory-items-container');
+                console.log('the container contains: ' + container);
+                if (data.inventory_html) {
+                  container.innerHTML = data.inventory_html;
+                }
               if (data.currency_amount) {
                 const currencyElement = document.getElementById('sellupdate');
                 if (currencyElement) {
@@ -1932,10 +1933,9 @@ export const GlobalStyles = createGlobalStyle`
               }
 
               if (data.total_value) {
-                document.getElementById('total_value_element').textContent = data.total_value;
+                document.getElementById('total_value').textContent = data.total_value;
               }
 
-              // Hide the sell all form after selling
               sellAllForm.style.display = 'none';
             } else {
               alert('Error: ' + (data.error || 'An unknown error occurred'));
@@ -2007,7 +2007,7 @@ export const GlobalStyles = createGlobalStyle`
 
             // Update total value if available
             if (data.total_value) {
-              document.getElementById('total_value_element').textContent = data.total_value;
+              document.getElementById('total_value').textContent = data.total_value;
             }
 
             // If the item was removed, remove it from the UI
@@ -2245,7 +2245,7 @@ export const GlobalStyles = createGlobalStyle`
       var source = new EventSource("{% url 'showcase:sse_total_value' %}");
 
       source.onmessage = function(event) {
-        document.getElementById("total_value_element").innerText = event.data;
+        document.getElementById("total_value").innerText = event.data;
       };
 
       source.onerror = function(error) {
@@ -2341,10 +2341,15 @@ document.addEventListener("DOMContentLoaded", () => {
               }
 
               // Update total value
-              const totalValueElement = document.getElementById("total_value_element")
-              if (totalValueElement && data.total_value) {
-                totalValueElement.textContent = data.total_value
-              }
+                    const valueEl = document.getElementById('total_value');
+                    if (valueEl) {
+                      valueEl.textContent = data.total_value;
+                      console.log('total_value updated to', data.total_value);
+                    }
+                    else{
+                    console.log('error when updating total value')
+                    }
+
             } else {
               alert("Withdraw failed! " + (data.error || ""))
             }
@@ -2385,7 +2390,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         if (data.total_value) {
-            document.getElementById('total_value_element').textContent = data.total_value;
+            document.getElementById('total_value').textContent = data.total_value;
         }
     } else {
         console.log('Error:', data.error);
@@ -2428,7 +2433,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         if (data.total_value) {
-            document.getElementById('total_value_element').textContent = data.total_value;
+            document.getElementById('total_value').textContent = data.total_value;
         }
     } else {
         console.log('Error:', data.error);
@@ -2501,7 +2506,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           // Update total value if available
           if (data.total_value) {
-            document.getElementById("total_value_element").textContent = data.total_value
+            document.getElementById("total_value").textContent = data.total_value
           }
 
           if (!data.inventory_html) {
@@ -2746,7 +2751,6 @@ function initEventListeners() {
 
 {% else %}
     <style>
-    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
     .copyright-section {
         background: linear-gradient(
             to right,
@@ -2915,35 +2919,6 @@ function initEventListeners() {
             flex-shrink: 0;
         }
 
-        .user-profile {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .user-profile::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-
-        .user-info {
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
 
         .username {
             font-family: 'Cinzel', serif;
@@ -2953,26 +2928,6 @@ function initEventListeners() {
             text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
         }
 
-        .user-stats {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            font-size: 1rem;
-        }
-
-        .user-stat {
-            background: rgba(191, 151, 255, 0.1);
-            padding: 0.75rem 1.25rem;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid var(--primary);
-        }
-
-        .user-stat-icon {
-            font-size: 1.5rem;
-        }
 
         .filters {
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
@@ -3078,6 +3033,9 @@ function initEventListeners() {
             color: var(--accent);
         }
 
+        .main-content {
+            width: 100%;
+        }
         .main-content h1 {
             color: var(--primary);
             font-size: 3rem;
@@ -3099,15 +3057,6 @@ function initEventListeners() {
             background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
-        .nav-links h1::after {
-            content: '';
-            position: absolute;
-            left: 10%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
 
         .pokemon-grid {
             display: grid;
@@ -3156,8 +3105,6 @@ function initEventListeners() {
         .pokemon-image::after {
             content: '';
             position: absolute;
-            width: 150%;
-            height: 150%;
             background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
             animation: rotate 20s linear infinite;
         }
@@ -3174,7 +3121,7 @@ function initEventListeners() {
         }
 
         .pokemon-name {
-            font-size: 1.75rem;
+            font-size: 1.00rem;
             margin-bottom: 0.75rem;
             font-family: 'Cinzel', serif;
             color: var(--primary);
@@ -3319,7 +3266,7 @@ function initEventListeners() {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-.inventory-grid.compact-view .inventory-item {
+.inventory-grid.compact-view .gridCardItem {
     font-size: 0.9em;
 }
 
@@ -3360,9 +3307,156 @@ nav.main-menu ul li a {
     display: block;
     padding: 15px;
 }
+
+/* Hide the default checkbox */
+.item-select-checkbox {
+    display: none;
+}
+
+.outerContainer {
+    position: relative;
+    cursor: pointer;
+}
+
+.item-select-checkbox:checked + .gridCardItem {
+    background-color: rgba(0, 128, 0, 0.1); /* Example: light green background */
+}
+
+.item-select-checkbox:checked + .gridCardItem::before {
+    content: '✔'; /* Checkmark symbol */
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 20px;
+    color: green;
+    z-index: 100;
+}
+
+          .withdraw-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+  .popup-content {
+    text-align: center;
+  }
+
+    .popup-content::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #d4af37, #f9f095, #d4af37);
+      border-radius: 2px;
+    }
+            h2 {
+      color: #1a1a1a;
+      font-size: 24px;
+      font-weight: 600;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    p {
+      color: #555;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    p strong {
+      color: #d4af37;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      outline: none;
+      letter-spacing: 0.5px;
+    }
+
+    #confirm-withdraw {
+      background: linear-gradient(135deg, #d4af37, #e5c760);
+      color: #000;
+      border: none;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+    }
+
+    #confirm-withdraw:hover {
+      background: linear-gradient(135deg, #c9a431, #d4af37);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+    }
+
+    #cancel-withdraw {
+      background-color: transparent;
+      color: #555;
+      border: 1px solid #d1d1d1;
+    }
+
+    #cancel-withdraw:hover {
+      background-color: #f5f5f5;
+      color: #333;
+      border-color: #bbb;
+    }
+
+    /* Demo button */
+    #show-popup {
+      background: linear-gradient(135deg, #d4af37, #e5c760);
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+      margin: 20px;
+    }
+
+    #show-popup:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+    }
     </style>
 </head>
 <body>
+<div id="withdraw-popup" class="withdraw-popup">
+  <div class="popup-content">
+    <h2>Confirm Withdrawal</h2>
+    <p>The shipping fee is <strong>599 rubies</strong>. Do you wish to proceed?</p>
+    <div class="popup-buttons">
+      <button id="confirm-withdraw">Yes, proceed</button>
+      <button id="cancel-withdraw">No, cancel</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
     // Load audio files
@@ -3425,7 +3519,25 @@ nav.main-menu ul li a {
   <main class="main-content">
             <h1>My Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)</h1>
 
-            <section id="inventoryGrid" class="inventory-grid comfortable-view">
+            {% if StockObject %}
+    <div style="margin-top: 20px;">
+        <button id="sell-everything-button" class="card-button add-button sell-button" style="width: 120px; position: fixed; right: 50px; top: 175px;">Sell All</button>
+    </div>
+{% endif %}
+
+            <!-- Bulk Sell Form -->
+            <form id="sell-all-form" class="sell-all-form" action="{% url 'showcase:sell_all_inventory_objects' %}" method="post" style="display: none; margin-bottom: 20px;">
+              {% csrf_token %}
+              <input type="hidden" name="selected_ids" id="sell-all-selected-ids">
+              <button type="submit" class="card-button sell-button">Sell Selected</button>
+            </form>
+
+            <!-- Inventory Items -->
+                <strong>Total Value:</strong>
+                <span id="total_value">0</span>
+                <strong>Sold Value:</strong>
+                <span id="sold-value">0</span>
+            <section id="inventory-items-container" class="inventory-grid comfortable-view">
 
                 {% for Inventory in StockObject %}
                     <div class="inventory-item">
@@ -3473,6 +3585,8 @@ nav.main-menu ul li a {
     </div>
 
 
+
+{% endif %}
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -3621,10 +3735,70 @@ document.addEventListener("DOMContentLoaded", function() {
 
   <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
   <script src="{% static 'css/js/main.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('sell-everything-button');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    if (!confirm('Are you sure you want to sell all inventory items?')) return;
+
+    fetch("{% url 'showcase:sell_everything_inventory_objects' %}", {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/json',
+      },
+      credentials: 'same-origin',
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) {
+        return alert('Error: ' + data.error);
+      }
+
+      const stockEl = document.getElementById("stock-count");
+      if (stockEl) stockEl.textContent = data.stock_count;
+
+      const currEl = document.getElementById("currency-amount");
+      if (currEl) currEl.textContent = data.currency_amount;
+
+      const valueEl = document.getElementById('total_value');
+        if (valueEl) {
+          valueEl.textContent = data.total_value;
+          console.log('total_value updated to', data.total_value);
+        }
+        else{
+        console.log('error when updating total value')
+        }
+
+
+      console.log('reached selling point, trying selling')
+      const container = document.getElementById('inventory-items-container');
+      if (container !== undefined) {
+      console.log('first step to sell')
+      if (data.inventory_html !== undefined) {
+        container.innerHTML = data.inventory_html;
+        console.log('items sold!')
+      }
+      }
+      else {
+              alert('Error: ' + (data.error || 'the items did not sell'));
+      }
+
+      alert('All items have been sold successfully.');
+    })
+    .catch(err => {
+      console.error('Error:', err);
+      alert('An error occurred while processing your request.');
+    });
+  });
+});
+
+</script>
 </body>
 </html>
 
 
 
 
-{% endif %}
