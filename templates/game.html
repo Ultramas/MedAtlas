@@ -1757,18 +1757,19 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    /*function fetchUserCash() {
+    // Periodically fetch the updated user cash from the API
+    function fetchUserCash() {
         fetch('/api/get-user-cash/')
             .then(response => response.json())
             .then(data => {
                 if (data && data.user_cash !== undefined) {
-                    userCashProxy.value = data.user_cash;
+                    userCashProxy.value = data.user_cash; // Update proxy value
                 }
             })
             .catch(error => console.error('Error fetching user cash:', error));
     }
 
-    setInterval(fetchUserCash, 5000);*/
+    setInterval(fetchUserCash, 500);
 });
 
 </script>
@@ -1983,8 +1984,6 @@ $(document).ready(function() {
 </div>
 
     </div>
-<!--check mypreference of user, should one exist; default is classic-->
-
     <div class="wrapper">
         <div class="containerre"  style="display: flex;">
             <div class="slider" id="slider">
