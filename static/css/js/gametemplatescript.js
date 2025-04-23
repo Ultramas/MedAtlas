@@ -354,10 +354,10 @@ function addAnimation() {
         }
         switch (currentSpintype) {
           case "I":
-            animationDuration = isQuickSpin ? 500  : 1000;
+            animationDuration = isQuickSpin ? 1000 : 2000;
             break;
           case "S":
-            animationDuration = isQuickSpin ? 4000 : 8000;
+            animationDuration = isQuickSpin ? 8000 : 16000;
             break;
           case "C":
           default:
