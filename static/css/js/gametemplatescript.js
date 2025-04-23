@@ -1,3 +1,4 @@
+//both randomizecontents & randomizedcontents
 document.addEventListener('DOMContentLoaded', () => {
     const slider = document.getElementById('slider');
     const popup = document.getElementById('popup');
@@ -62,20 +63,18 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('the value of totalspins at step 1 is ' + totalSpins)
     });
 
-    $(".start, #start2").on("click", function(event) {
-      // Using a function expression so `this === event.currentTarget`
-      const buttonId = event.currentTarget.id;  // safest way to get the clicked element’s ID :contentReference[oaicite:1]{index=1}
-      console.log("Clicked button:", buttonId);
+    $(".start").click(function (event) {
+        const buttonId = event.target.id;
+        console.log(`Button clicked: ${buttonId}`);
         sessionStorage.setItem("startAnimation", "true");
         sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
 
         let currentSpin = 0;
         console.log('current spin set to 0')
         initializeAnimation(buttonId);
-
-        handleInventory(buttonId, data);
     });
-    observer.observe(document.querySelector('#card-container'), { childList: true });
+
+observer.observe(document.querySelector('#card-container'), { childList: true });
 
     function initializeAnimation(buttonId) {
         $(".start").prop('disabled', true);
@@ -136,7 +135,6 @@ async function randomizeContents() {
         }
 
         const data = await response.json();
-        console.log("Response from server:", data);
 
         if (data.status !== 'success') {
             if (data.message && data.message.includes("database is locked")) {
@@ -148,16 +146,16 @@ async function randomizeContents() {
         startButton.setAttribute('data-nonce', data.nonce);
         clearCards();
 
-            const attributes = {
-                id: data.choice_id || 'N/A',
-                nonce: data.nonce || 'N/A',
-                text: data.choice_text || 'Unknown',
-                color: data.choice_color || '#FFFFFF',
-                file: data.choice_file || null,
-                value: data.choice_value || 0,
-                lowerNonce: data.lower_nonce || 'N/A',
-                upperNonce: data.upper_nonce || 'N/A',
-            };
+        const attributes = {
+            id:          data.choice_id || 'N/A',
+            nonce:       data.nonce || 'N/A',
+            text:        data.choice_text || 'Unknown',
+            color:       data.choice_color || '#FFFFFF',
+            file:        data.choice_file || null,
+            value:       data.choice_value || 0,
+            lowerNonce:  data.lower_nonce || 'N/A',
+            upperNonce:  data.upper_nonce || 'N/A',
+        };
 
         const targetCardElement = document.createElement('div');
         targetCardElement.classList.add('card', 'target-card', 'sellattribute');
@@ -179,16 +177,16 @@ async function randomizeContents() {
             </div>
         `;
 
-            selectedItems.push({
-                id: attributes.id,
-                nonce: attributes.nonce,
-                text: attributes.text,
-                color: attributes.color,
-                src: attributes.file,
-                value: attributes.value,
-                lowerNonce: attributes.lowerNonce,
-                upperNonce: attributes.upperNonce
-            });
+        selectedItems.push({
+            id:         attributes.id,
+            nonce:      attributes.nonce,
+            text:       attributes.text,
+            color:      attributes.color,
+            src:        attributes.file,
+            value:      attributes.value,
+            lowerNonce: attributes.lowerNonce,
+            upperNonce: attributes.upperNonce
+        });
 
         const cardContainer = document.querySelector('.slider');
         const middleIndex = Math.floor(cardContainer.children.length / 1.3275);
@@ -209,38 +207,30 @@ async function randomizeContents() {
             }
         });
 
-        async function handleInventory(buttonId, data) {
-          const inventoryPayload = {
-            choice_id:    data.choice_id,
-            choice_value: data.choice_value,
-            category:     data.category,
-            price:        data.choice_value,
-            condition:    data.condition,
-            quantity:     1,
-            buttonId:     buttonId,
-          };
-          console.log("Payload:", inventoryPayload);
-
-          if (buttonId !== "start2") {
-            const response = await fetch("/create_inventory_object/", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken"),
-                "X-Requested-With": "XMLHttpRequest"
-              },
-              body: JSON.stringify(inventoryPayload),
-            });
-            return response.json();  // return the parsed JSON
-          } else {
-            console.log(`Skipping fetch for "${buttonId}"`);
-            return null;
-          }
-        }
-
         try {
-            const inventoryData = await handleInventory(buttonId, data)
+            const buttonId = startButton.id;
+            const inventoryPayload = {
+                choice_id:    data.choice_id,
+                choice_value: data.choice_value,
+                category:     data.category,
+                price:        data.choice_value,
+                condition:    data.condition,
+                quantity:     1,
+                buttonId:     buttonId,
+            };
 
+            console.log("Payload being sent:", inventoryPayload);
+
+            const inventoryResponse = await fetch('/create_inventory_object/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify(inventoryPayload),
+            });
+
+            const inventoryData = await inventoryResponse.json();
             console.log("Response from /create_inventory_object/:", inventoryData);
 
             if (inventoryData.status === 'success') {
@@ -254,8 +244,6 @@ async function randomizeContents() {
                         sellForm.addEventListener('submit', function(event) {
                             event.preventDefault();
                             const pk = this.querySelector('[name="pk"]').value;
-                            console.log("Sell form submitted. pk =", pk);
-
                             $(".spin-option").removeClass("selected");
                             $(this).addClass("selected");
                             totalSpins = parseInt($(this).data("value"));
@@ -311,18 +299,39 @@ async function randomizeContents() {
     });
 }
 
+let removedCards = [];
+
+// Modified clearCards function to store removed cards
 function clearCards() {
+    removedCards = []; // Clear previous removed cards
     const cardContainer = document.querySelector('.slider');
+    if (!cardContainer) {
+        console.error('Slider container not found.');
+        return;
+    }
+
     const targetCards = cardContainer.querySelectorAll('.target-card');
-
     targetCards.forEach(card => {
-
-        card.querySelectorAll('*').forEach(child => {
-            child.style.display = 'none';
-        });
+        removedCards.push(card);
+        cardContainer.removeChild(card);
     });
 
-    console.log("All target cards modified (class removed, child elements hidden, but kept 'sellattribute').");
+    console.log("All target cards removed.");
+}
+
+function restoreCards() {
+    const cardContainer = document.querySelector('.slider');
+    if (!cardContainer) {
+        console.error('Slider container not found.');
+        return;
+    }
+
+    removedCards.forEach(card => {
+        cardContainer.appendChild(card);
+    });
+
+    removedCards = []; // Clear after restoring
+    console.log("All target cards restored.");
 }
 
 function addAnimation() {
@@ -736,6 +745,7 @@ function randomizedContents() {
         animationStopped = true;
         console.log(`The spins have ended.`);
         setTimeout(() => {
+        restoreCards();
         showPopup(buttonId);
     }, 250);
 
@@ -805,7 +815,6 @@ spin(buttonId);
         .then(data => {
             if (data.success) {
                 document.getElementById('stock-count').textContent = data.number_of_cards;
-                document.getElementById('stock-count2').textContent = data.number_of_cards;
             } else {
                 console.error(data.error);
             }
