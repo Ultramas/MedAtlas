@@ -1289,7 +1289,11 @@ p.blog-meta span {
     </style>
 </head>
 <body>
-
+<script>
+  window.USER = {
+    isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }}
+  };
+</script>
 <script>
 
   const csrfToken = "{{ csrf_token }}";
@@ -1307,6 +1311,7 @@ p.blog-meta span {
 <div class="total" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;
     position: relative;">
 	<!-- header -->
+{% include 'navtrove.html' %}
 	<!-- end header -->
 
 

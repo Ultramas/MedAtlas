@@ -9860,6 +9860,16 @@ class BackgroundView(FormMixin, BaseView):
         spinpreference = None
         user = self.request.user
         if user.is_authenticated:
+            preference_instance = MyPreferences.objects.filter(user=user).first()
+            if preference_instance:
+                context['preferenceform'] = MyPreferencesForm(instance=preference_instance, user=user)
+                context['preference_instance'] = preference_instance
+                context['is_signed_in'] = user.is_authenticated
+                context['has_preference'] = preference_instance is not None
+                context['preference_value'] = preference_instance.spintype if preference_instance else None
+            else:
+                context['preferenceform'] = MyPreferencesForm(user=user)
+                context['preference_instance'] = None
             try:
                 spinpreference = SpinPreference.objects.get(user=user)
             except SpinPreference.DoesNotExist:
