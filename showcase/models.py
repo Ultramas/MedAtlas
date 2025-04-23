@@ -2908,6 +2908,7 @@ class Game(models.Model):
 
     def get_absolute_url(self):
         return reverse("showcase:game", kwargs={'slug': self.slug})
+
     def increase_on_card(self):
         if self.cost:
             self.cost = self.cost * 1.05

@@ -112,7 +112,7 @@ class UserProfile2Admin(admin.ModelAdmin):
             'fields': ('user', 'first_name', 'last_name')
         }),
         ('Edit Profile Image Information - Attributes', {
-            'fields': ('description','address', 'address2', 'city', 'state', 'phone_number', 'profile_picture', 'is_active',)
+            'fields': ('description','address', 'address2', 'city', 'state', 'country',  'zip_code', 'phone_number', 'profile_picture', 'is_active',)
         }),
     )
     pass
