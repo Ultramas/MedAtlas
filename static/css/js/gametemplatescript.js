@@ -315,26 +315,15 @@ function clearCards() {
     const cardContainer = document.querySelector('.slider');
     const targetCards = cardContainer.querySelectorAll('.target-card');
 
-    targetCards.forEach(card => cardContainer.removeChild(card));
+    targetCards.forEach(card => {
 
-    console.log("All target cards removed.");
-}
-
-// Function to center the card in the slider
-function centerCard(cardElement) {
-    const slider = document.getElementById('slider');
-    const cardOffset = cardElement.offsetLeft;
-    const sliderWidth = slider.offsetWidth;
-    const cardWidth = cardElement.offsetWidth;
-
-    // Adjust margin-left to center the card
-    slider.scrollTo({
-        left: cardOffset - sliderWidth / 2 + cardWidth / 2,
-        behavior: 'smooth',
+        card.querySelectorAll('*').forEach(child => {
+            child.style.display = 'none';
+        });
     });
+
+    console.log("All target cards modified (class removed, child elements hidden, but kept 'sellattribute').");
 }
-
-
 
 function addAnimation() {
 
@@ -854,7 +843,7 @@ $(document).on("click", ".sell-button", function() {
 
     let itemsToSell = [];
     sellCards.forEach(card => {
-        const inventory_pk = card.getAttribute("data-inventory_pk");
+        const inventory_pk = card.getAttribute("data-inventory-pk");
         if (!inventory_pk) {
             console.error("Card missing inventory_pk:", card);
             return;
@@ -888,7 +877,7 @@ $(document).on("click", ".sell-button", function() {
             if (response.success) {
                 sellCards.forEach(card => {
                     console.log("Removing sold item:", {
-                        inventory_pk: card.getAttribute("data-inventory_pk"),
+                        inventory_pk: card.getAttribute("data-inventory-pk"),
                         price: card.getAttribute("data-price"),
                         currencySymbol: card.getAttribute("data-currency-symbol")
                     });
@@ -941,7 +930,7 @@ $(document).on("click", ".sell-button", function() {
         <input type="hidden" name="action" value="sell">
         <input type="hidden" name="pk" value="${window.inventory_pk}">
         <div class="finish-buttons" style="display: flex; flex-direction: row; gap: 15px; justify-content: center;">
-        <button type="submit" class="action-button sell-button" data-inventory_pk="${window.inventory_pk}"
+        <button type="submit" class="action-button sell-button" data-inventory-pk="${window.inventory_pk}"
           style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
             Sell
         </button>
