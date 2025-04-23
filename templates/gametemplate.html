@@ -1242,6 +1242,16 @@ document.addEventListener("DOMContentLoaded", function () {
     Spin!
     {% endif %}
 </button>
+    {% else %}
+    <button class="start gamer-button begin-button" style="display: none;"
+        id="start"
+        data-game-id="{{ game.id }}"
+        data-nonce="{{ nonce }}"
+        data-slug="{{ game.slug }}"
+        data-daily="false"
+         style="position: absolute; bottom: 5px; left: 5px;">
+        Spin!
+    </button>
     {% endif %}
 {% endif %}
 
@@ -1741,6 +1751,7 @@ $(document).ready(function() {
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 
+
 <script>
 $(".start").click(function () {
     const button = $(this);
@@ -1870,6 +1881,7 @@ $(".start").click(function () {
 
 
 </script>
+
 
     <!--sell item(s) after spins-->
 

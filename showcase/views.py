@@ -9857,6 +9857,21 @@ class BackgroundView(FormMixin, BaseView):
         context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by(
             "carouselposition")
 
+        spinpreference = None
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                spinpreference = SpinPreference.objects.get(user=user)
+            except SpinPreference.DoesNotExist:
+                spinpreference = SpinPreference(user=user, quick_spin=False)
+                spinpreference.save()
+
+            context['quick_spin'] = spinpreference.quick_spin
+        else:
+            context['quick_spin'] = False
+
+        context['spinpreference'] = spinpreference
+
         active_games = Game.objects.filter(is_active=1, filter='F')
 
         if active_games.exists():
