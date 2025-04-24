@@ -78,6 +78,7 @@ async function randomizeContents() {
     try {
         const payload = {
             game_id: gameId,
+            color: choiceColor,
             button_id: buttonId
         };
 
@@ -134,9 +135,9 @@ async function randomizeContents() {
      data-price="${attributes.value || ''}"
      data-currency-file="${attributes.currencyFile || ''}"
      data-currency-symbol="${attributes.currencySymbol || ''}"
-     style="display: flex; flex-direction: column; align-items: center; height: 100%; align-self: flex-start; border-top: none; width: 10em;">
-    ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-    <div class="sliderPrice">${attributes.value} 💎 </div>
+     style="display: flex; flex-direction: column; align-items: center; height: 100%; width: 10em; border-top: none;">
+                    ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
+                    <div class="sliderPrice" style="color: white;"><b class="innerprice">${attributes.value}</b> 💎 targetcard</div>
 </div>
 </div>
 `;
@@ -152,36 +153,24 @@ async function randomizeContents() {
                 upperNonce: attributes.upperNonce
             });
 
-            const cardContainer = document.querySelector('.slider');
+        const cardContainer = document.querySelector('.slider');
+        const middleIndex = Math.floor(cardContainer.children.length / 1.3275);
+        const insertIndex = Math.min(cardContainer.children.length, middleIndex);
 
+        if (cardContainer.children[insertIndex]) {
+            cardContainer.insertBefore(targetCardElement, cardContainer.children[insertIndex]);
+        } else {
+            cardContainer.appendChild(targetCardElement);
+        }
 
-            function updateCardPosition() {
-                const windowWidth = window.innerWidth;
-
-
-                function getRandomDecimal(min, max) {
-                    const randomDecimal = Math.random() * (max - min) + min;
-                    return Math.round(randomDecimal * 10000) / 10000;
-                }
-
-                const randomDivisor = getRandomDecimal(1.3265, 1.3375);
-
-                const cardContainer = document.querySelector('.slider');
-                const middleIndex = Math.floor(cardContainer.children.length / 1.327);
-
-                console.log(randomDivisor);
-                const targetIndex = Math.min(cardContainer.children.length, middleIndex);
-
-                if (cardContainer.children[targetIndex]) {
-                    cardContainer.insertBefore(targetCardElement, cardContainer.children[targetIndex]);
-                } else {
-                    cardContainer.appendChild(targetCardElement);
-                }
-
-                console.log(`Window Width: ${windowWidth}, Divisor: ${randomDivisor}, Target Index: ${targetIndex}`);
+        window.addEventListener('resize', () => {
+            const idx = Math.floor(cardContainer.children.length / 1.3275);
+            if (cardContainer.children[idx]) {
+                cardContainer.insertBefore(targetCardElement, cardContainer.children[idx]);
+            } else {
+                cardContainer.appendChild(targetCardElement);
             }
-
-            window.addEventListener('resize', updateCardPosition);
+        });
 
             updateCardPosition();
 
@@ -259,16 +248,34 @@ async function randomizeContents() {
     }
 }
 
+let removedCards = [];
 
 function clearCards() {
+    removedCards = []; // Clear previous removed cards
     const cardContainer = document.querySelector('.slider');
+    if (!cardContainer) {
+        console.error('Slider container not found.');
+        return;
+    }
+
     const targetCards = cardContainer.querySelectorAll('.target-card');
-
     targetCards.forEach(card => {
+        removedCards.push(card);
+        cardContainer.removeChild(card);
+    });
 
-        card.querySelectorAll('*').forEach(child => {
-            child.style.display = 'none';
-        });
+    console.log("All target cards removed.");
+}
+
+function restoreCards() {
+    const cardContainer = document.querySelector('.slider');
+    if (!cardContainer) {
+        console.error('Slider container not found.');
+        return;
+    }
+
+    removedCards.forEach(card => {
+        cardContainer.appendChild(card);
     });
 
     console.log("All target cards modified (class removed, child elements hidden, but kept 'sellattribute').");
@@ -331,10 +338,8 @@ function alignCardWithSpinner() {
     const currentTranslateX = matrix.m41 || 0;
 
     slider.style.transform = `translateX(${currentTranslateX + offset}px)`;
-    //console.log(`Slider adjusted by offset: ${offset}px`);
+
 }
-
-
 
 $(".start").click(function (event) {
     const buttonId = event.target.id;
