@@ -1,4 +1,3 @@
-//both randomizecontents & randomizedcontents
 document.addEventListener('DOMContentLoaded', () => {
     const slider = document.getElementById('slider');
     const popup = document.getElementById('popup');
@@ -72,9 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentSpin = 0;
         console.log('current spin set to 0')
         initializeAnimation(buttonId);
-    });
 
-observer.observe(document.querySelector('#card-container'), { childList: true });
+        handleInventory(buttonId, data);
+    });
+    observer.observe(document.querySelector('#card-container'), { childList: true });
 
     function initializeAnimation(buttonId) {
         $(".start").prop('disabled', true);
@@ -113,8 +113,7 @@ async function randomizeContents() {
     const executeRequest = async () => {
         const payload = {
             game_id: gameId,
-            color: choiceColor,
-            button_id: buttonId
+            color: choiceColor
         };
 
         await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
@@ -208,30 +207,38 @@ async function randomizeContents() {
             }
         });
 
-        try {
-            const buttonId = startButton.id;
-            const inventoryPayload = {
-                choice_id:    data.choice_id,
-                choice_value: data.choice_value,
-                category:     data.category,
-                price:        data.choice_value,
-                condition:    data.condition,
-                quantity:     1,
-                buttonId:     buttonId,
-            };
+        async function handleInventory(buttonId, data) {
+          const inventoryPayload = {
+            choice_id:    data.choice_id,
+            choice_value: data.choice_value,
+            category:     data.category,
+            price:        data.choice_value,
+            condition:    data.condition,
+            quantity:     1,
+            buttonId:     buttonId,
+          };
+          console.log("Payload:", inventoryPayload);
 
-            console.log("Payload being sent:", inventoryPayload);
-
-            const inventoryResponse = await fetch('/create_inventory_object/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: JSON.stringify(inventoryPayload),
+          if (buttonId !== "start2") {
+            const response = await fetch("/create_inventory_object/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+                "X-Requested-With": "XMLHttpRequest"
+              },
+              body: JSON.stringify(inventoryPayload),
             });
+            return response.json();  // return the parsed JSON
+          } else {
+            console.log(`Skipping fetch for "${buttonId}"`);
+            return null;
+          }
+        }
 
-            const inventoryData = await inventoryResponse.json();
+        try {
+            const inventoryData = await handleInventory(buttonId, data)
+
             console.log("Response from /create_inventory_object/:", inventoryData);
 
             if (inventoryData.status === 'success') {
@@ -245,6 +252,8 @@ async function randomizeContents() {
                         sellForm.addEventListener('submit', function(event) {
                             event.preventDefault();
                             const pk = this.querySelector('[name="pk"]').value;
+                            console.log("Sell form submitted. pk =", pk);
+
                             $(".spin-option").removeClass("selected");
                             $(this).addClass("selected");
                             totalSpins = parseInt($(this).data("value"));
@@ -996,18 +1005,9 @@ styleElement.textContent = `
         text-align: center;
     }
 
+
     .cards-container {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        overflow-y: hidden;
-        padding: 1.5rem 0.5rem;
-        justify-content: flex-start;
-        gap: 1.5rem;
-        width: 100%;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-        mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+        height: 50vh;
     }
 
     .cards-container::-webkit-scrollbar {
