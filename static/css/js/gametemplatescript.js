@@ -113,7 +113,8 @@ async function randomizeContents() {
     const executeRequest = async () => {
         const payload = {
             game_id: gameId,
-            color: choiceColor
+            color: choiceColor,
+            button_id: buttonId
         };
 
         await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
@@ -841,7 +842,7 @@ $(document).ready(function() {
 
     });
 
-$(document).on("click", ".sell-button", function() {
+$(document).on("click", ".sell-button, .close", function() {
     const cardContainer = document.querySelector('.slider');
     const sellCards = cardContainer.querySelectorAll('.sellattribute');
 
@@ -927,9 +928,8 @@ $(document).on("click", ".sell-button", function() {
         }
     }
 
-    textContainer.classList.add('scrollablecontainer');
     textContainer.innerHTML = `
-      <h2 class='congratulations'>Congratulations!</h2>
+      <h2 class='treasure-subtitle'>Congratulations!</h2>
       <p>You got:</p>
       <div class="cards-container">
         <div class="inner-container"></div>
@@ -938,7 +938,7 @@ $(document).on("click", ".sell-button", function() {
         <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
         <input type="hidden" name="action" value="sell">
         <input type="hidden" name="pk" value="${window.inventory_pk}">
-        <div class="finish-buttons" style="display: flex; flex-direction: row; gap: 15px; justify-content: center;">
+        <div class="popup-actions" style="display: flex; flex-direction: row; justify-content: center;">
         <button type="submit" class="action-button sell-button" data-inventory-pk="${window.inventory_pk}"
           style="background-color: #c2fbd7; border-radius: 100px; box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px; color: green; cursor: pointer; display: inline-block; font-family: CerebriSans-Regular,-apple-system,system-ui,Roboto,sans-serif; padding: 7px 20px; text-align: center; text-decoration: none; transition: all 250ms; border: 0; font-size: 16px; user-select: none; -webkit-user-select: none; touch-action: manipulation;">
             Sell
@@ -966,7 +966,539 @@ $(document).on("click", ".sell-button", function() {
         `;
   }
 
+const styleElement = document.createElement('style');
+styleElement.textContent = `
+    .treasure-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .treasure-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        text-align: center;
+        margin: 1rem 0;
+        text-shadow: 0 0 10px rgba(123, 97, 255, 0.7);
+        background: linear-gradient(to right, #c084fc, #f472b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: pulse 2s infinite;
+    }
+
+    .treasure-subtitle {
+        font-size: 1.25rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .cards-container {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 1.5rem 0.5rem;
+        justify-content: flex-start;
+        gap: 1.5rem;
+        width: 100%;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    }
+
+    .cards-container::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .cards-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+
+    .cards-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+    }
+
+    .cards-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    .fire {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        margin-bottom: -20px;
+        transform: scale(0);
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .fire.active {
+        transform: scale(1);
+    }
+
+    .flames {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .flame {
+        position: absolute;
+        bottom: 0;
+        width: 30px;
+        height: 60px;
+        background: linear-gradient(to top, var(--flame-color, #f472b6), transparent);
+        border-radius: 50% 50% 20% 20%;
+        animation: flicker 1.5s infinite alternate;
+    }
+
+    .flame:nth-child(1) {
+        left: 25px;
+        height: 60px;
+        width: 30px;
+        opacity: 1;
+        animation-delay: 0.1s;
+    }
+
+    .flame:nth-child(2) {
+        left: 15px;
+        height: 45px;
+        width: 20px;
+        opacity: 0.8;
+        animation-delay: 0.3s;
+    }
+
+    .flame:nth-child(3) {
+        left: 45px;
+        height: 45px;
+        width: 20px;
+        opacity: 0.8;
+        animation-delay: 0.5s;
+    }
+
+    .fire[data-color="#6366f1"] .flame {
+        --flame-color: #6366f1;
+    }
+
+    .fire[data-color="#8b5cf6"] .flame {
+        --flame-color: #8b5cf6;
+    }
+
+    .fire[data-color="#ec4899"] .flame {
+        --flame-color: #ec4899;
+    }
+
+    .popup-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: -0.1rem;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .popup-button {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        min-width: 120px;
+        cursor: pointer;
+    }
+
+    .popup-button.primary {
+        background: linear-gradient(to right, #6366f1, #8b5cf6);
+        color: white;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.5);
+        border: none;
+    }
+
+    .popup-button.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(99, 102, 241, 0.6);
+    }
+
+    .popup-button.secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .popup-button.secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    @keyframes flicker {
+        0%, 100% {
+            transform: scaleY(1) scaleX(1);
+        }
+        50% {
+            transform: scaleY(1.1) scaleX(0.9);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.8;
+        }
+    }
+
+    @keyframes sparkle {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.2);
+            opacity: 0.8;
+        }
+    }
+
+    @keyframes cardAppear {
+        from {
+            transform: translateY(30px) scale(0.8);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+    }
+`;
+document.head.appendChild(styleElement);
+
      const cardsContainer = textContainer.querySelector('.cards-container');
+
+     const fireBackground = document.createElement('div');
+    fireBackground.className = 'majestic-fire-background';
+    fireBackground.innerHTML = `
+        <div class="fire-layer fire-layer-1"></div>
+        <div class="fire-layer fire-layer-2"></div>
+        <div class="fire-layer fire-layer-3"></div>
+        <div class="fire-layer fire-layer-4"></div>
+        <div class="fire-particles"></div>
+        <div class="fire-crown"></div>
+    `;
+
+popup.insertBefore(fireBackground, popup.firstChild);
+
+const closeButton = document.createElement('button');
+closeButton.classList.add('popup-x-btn', 'closer');
+closeButton.innerHTML = '✕';
+closeButton.addEventListener('click', () => {
+    closePopupAndReenableDemo();
+});
+popup.appendChild(closeButton);
+
+function closePopupAndReenableDemo() {
+    const fire = document.querySelector('.fire');
+    if (fire) {
+        fire.style.opacity = '0';
+    }
+
+    document.querySelectorAll('.card-fire').forEach(fire => {
+        fire.style.opacity = '0';
+    });
+
+    const audio = new Audio('/static/css/sounds/collect.mp3');
+    audio.play();
+
+    setTimeout(() => {
+        popup.style.display = 'none';
+    }, 200);
+
+    $(".spin-option").prop('disabled', false);
+    $(".start").prop('disabled', false);
+}
+
+
+const fireStyles = document.createElement('style');
+fireStyles.textContent = `
+    .majestic-fire-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        z-index: -1;
+        border-radius: 16px;
+        opacity: 0;
+        transition: opacity 0.5s ease-in;
+    }
+
+    .fire-layer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-position: bottom center;
+        background-size: 100% 100%;
+        mix-blend-mode: screen;
+    }
+
+    .fire-layer-1 {
+        height: 100%;
+        background: linear-gradient(0deg, var(--flame-color, #ff4500) 0%, transparent 80%);
+        animation: fire-wave 8s ease-in-out infinite alternate;
+        opacity: 0.7;
+    }
+
+    .fire-layer-2 {
+        height: 90%;
+        background: linear-gradient(0deg, var(--flame-color, #ff7800) 0%, transparent 80%);
+        animation: fire-wave 12s ease-in-out infinite alternate-reverse;
+        opacity: 0.6;
+    }
+
+    .fire-layer-3 {
+        height: 80%;
+        background: radial-gradient(ellipse at center bottom, var(--flame-color, #ffcc00) 0%, transparent 70%);
+        animation: fire-pulse 6s ease-in-out infinite;
+        opacity: 0.5;
+    }
+
+    .fire-layer-4 {
+        height: 100%;
+        background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.8) 100%);
+        opacity: 0.7;
+        mix-blend-mode: multiply;
+    }
+
+    .fire-particles {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        background-image:
+            radial-gradient(circle at 20% 80%, var(--flame-color, #ffcc00) 1px, transparent 2px),
+            radial-gradient(circle at 40% 70%, var(--flame-color, #ffcc00) 1px, transparent 2px),
+            radial-gradient(circle at 60% 90%, var(--flame-color, #ffcc00) 1px, transparent 2px),
+            radial-gradient(circle at 80% 75%, var(--flame-color, #ffcc00) 1px, transparent 2px),
+            radial-gradient(circle at 30% 85%, var(--flame-color, #ffcc00) 1px, transparent 2px),
+            radial-gradient(circle at 70% 80%, var(--flame-color, #ffcc00) 1px, transparent 2px),
+            radial-gradient(circle at 90% 90%, var(--flame-color, #ffcc00) 1px, transparent 2px),
+            radial-gradient(circle at 10% 30%, var(--flame-color, #ffcc00) 2px, transparent 3px),
+            radial-gradient(circle at 30% 40%, var(--flame-color, #ffcc00) 2px, transparent 3px),
+            radial-gradient(circle at 50% 20%, var(--flame-color, #ffcc00) 2px, transparent 3px),
+            radial-gradient(circle at 70% 30%, var(--flame-color, #ffcc00) 2px, transparent 3px),
+            radial-gradient(circle at 90% 40%, var(--flame-color, #ffcc00) 2px, transparent 3px);
+        background-size: 20% 20%;
+        animation: fire-particles 15s linear infinite;
+        opacity: 0.7;
+    }
+
+    .fire-crown {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 40%;
+        background: radial-gradient(ellipse at center top, var(--flame-color, #ffcc00) 0%, transparent 70%);
+        animation: crown-pulse 8s ease-in-out infinite;
+        opacity: 0.3;
+    }
+
+    .popup-x-btn {
+        position: absolute;
+        top: 2rem;
+        right: 15px;
+        width: 36px !important;
+        height: 36px !important;
+        background: rgba(0, 0, 0, 0.4);
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-radius: 50%;
+        color: white;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 100;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3), 0 0 5px var(--flame-color, #ff4500);
+    }
+
+    .popup-x-btn:hover {
+        background: rgba(0, 0, 0, 0.6);
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 0 10px var(--flame-color, #ff4500);
+    }
+
+    @keyframes fire-wave {
+        0% {
+            transform: scaleX(1.0) scaleY(1.0);
+        }
+        50% {
+            transform: scaleX(1.05) scaleY(1.1);
+        }
+        100% {
+            transform: scaleX(0.95) scaleY(1.05);
+        }
+    }
+
+    @keyframes fire-pulse {
+        0%, 100% {
+            opacity: 0.3;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.5;
+            transform: scale(1.1);
+        }
+    }
+
+    @keyframes crown-pulse {
+        0%, 100% {
+            opacity: 0.3;
+            transform: scaleY(1);
+        }
+        50% {
+            opacity: 0.5;
+            transform: scaleY(1.2);
+        }
+    }
+
+    @keyframes fire-particles {
+        0% {
+            background-position: 0% 0%;
+        }
+        100% {
+            background-position: 0% 100%;
+        }
+    }
+
+    /* Make the popup content stand out against the fire background */
+    .popup-content {
+        position: relative;
+        z-index: 1;
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 12px;
+        padding: 20px;
+        backdrop-filter: blur(3px);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+        margin: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Enhance the treasure title */
+    .treasure-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        text-shadow: 0 0 15px var(--flame-color, #ff4500),
+                     0 0 30px var(--flame-color, #ff4500);
+        animation: title-glow 3s infinite alternate;
+        background: linear-gradient(to right, #ffd700, #ffcc00, #ffd700);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Imperial crown effect for title */
+    .treasure-title:before {
+        content: '👑';
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 2rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes title-glow {
+        0% {
+            text-shadow: 0 0 15px var(--flame-color, #ff4500),
+                         0 0 30px var(--flame-color, #ff4500);
+        }
+        100% {
+            text-shadow: 0 0 25px var(--flame-color, #ff4500),
+                         0 0 50px var(--flame-color, #ff4500),
+                         0 0 75px var(--flame-color, #ff4500);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateX(-50%) translateY(0);
+        }
+        50% {
+            transform: translateX(-50%) translateY(-10px);
+        }
+    }
+
+    /* Enhanced button styles */
+    .popup-button {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        min-width: 120px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        border: none;
+    }
+
+    .popup-button:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
+
+    .popup-button:hover:before {
+        left: 100%;
+    }
+
+    .popup-button.primary {
+        background: linear-gradient(to right, #ffd700, #ff9900);
+        color: #000;
+        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);
+        text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+    }
+
+    .popup-button.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255, 215, 0, 0.6);
+    }
+
+    .popup-button.secondary {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .popup-button.secondary:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+`;
+
+document.head.appendChild(fireStyles);
+
      selectedItems.forEach((item, index) => {
          const cardElement = document.createElement('div');
          cardElement.innerHTML = `
@@ -999,10 +1531,19 @@ $(document).on("click", ".sell-button", function() {
 
         popup.style.display = 'block';
 
-        setTimeout(() => {
-            const fire = document.querySelector('.fire');
-            fire.classList.add('active');
-        }, 100);
+// Trigger the fire animation
+setTimeout(() => {
+    const fire = document.querySelector('.fire');
+    if (fire) {
+        fire.classList.add('active');
+    }
+
+    // Add a dramatic entrance for the fire background
+    const fireBackground = document.querySelector('.majestic-fire-background');
+    if (fireBackground) {
+        fireBackground.style.opacity = '1';
+    }
+}, 100);
 
         const closeBtn = textContainer.querySelector('.close');
         closeBtn.addEventListener('click', () => {

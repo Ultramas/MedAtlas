@@ -334,30 +334,45 @@
         50% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.8); }
         100% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.5); }
     }
+      #preferencesForm {
+    display: flex;
+    align-items: center;
+    gap: 10px;            /* space between controls */
+    margin: 0;            /* remove extra form margins if any */
+    padding: 0;
+  }
+  /* prevent the label from wrapping or adding extra bottom margin */
+  #preferencesForm label {
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+  /* tighten up the form-group’s spacing */
+  #preferencesForm .form-group {
+    margin: 0;
+  }
 </style>
 </head>
 
-<body>{% if user.is_authenticated %}
-    <div id="preferencescontainer" class="preference-content" style="display: block;">
-        <h3>Spin Preferences</h3>
-       <form id="preferencesForm" method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <!--<p>Current preference: <span id="preferenceValueDisplay">{{ preference_value }}</span></p>-->
-
-            <label for="id_spintype">Spin Type:</label>
-            <select name="spintype" id="id_spintype" class="form-control">
-                <option value="C">Classic</option>
-                <option value="S">Simultaneous</option>
-                <option value="I">Instant</option>
-            </select>
-        </div>
-
-        <!-- Close button -->
-        <button type="button" class="btn btn-secondary" onclick="togglePreferences();">Close</button>
-    </form>
-
+<body>
+{% if user.is_authenticated %}
+<div id="preferencescontainer" class="preference-content">
+  <h3 style="color:white;">Spin Preferences</h3>
+  <form id="preferencesForm" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <select name="spintype" id="id_spintype" class="form-control">
+        <option value="C">Classic</option>
+        <option value="S">Simultaneous</option>
+        <option value="I">Instant</option>
+      </select>
     </div>
+
+    <!-- Close button sits inline now -->
+    <button type="button" class="btn btn-secondary" onclick="togglePreferences();">
+      Close
+    </button>
+  </form>
+</div>
 
     <script>
 

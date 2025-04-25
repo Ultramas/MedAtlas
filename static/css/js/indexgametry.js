@@ -137,7 +137,7 @@ async function randomizeContents() {
      data-currency-symbol="${attributes.currencySymbol || ''}"
      style="display: flex; flex-direction: column; align-items: center; height: 100%; width: 10em; border-top: none;">
                     ${attributes.file ? `<div class="sliderImg" style="background-image: url(${attributes.file}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>` : ''}
-                    <div class="sliderPrice" style="color: white;"><b class="innerprice">${attributes.value}</b> 💎 targetcard</div>
+                    <div class="sliderPrice" style="color: white;"><b class="innerprice">${attributes.value}</b> 💎 </div>
 </div>
 </div>
 `;
@@ -685,7 +685,7 @@ function randomizedContents() {
         setTimeout(() => spin(buttonId), buffer);
          setTimeout(() => {
         randomizedContents();
-    }, 500);
+    }, 150);
     } else {
         animationStopped = true;
         console.log(`The spins have ended.`);
@@ -874,11 +874,34 @@ $(document).on("click", ".sell-button, .closer", function() {
 });
 
 
+   function adjustCardsContainer() {
+        const container = document.querySelector('.cards-container');
+        const innerContainer = document.querySelector('.inner-container');
+        if (!container || !innerContainer) return;
+
+        innerContainer.style.display = "flex";
+        innerContainer.style.width = `${innerContainer.scrollWidth}px`;
+
+        const maxLimit = 600;
+
+        console.log(`Checked the size of the inner container (Width: ${innerContainer.scrollWidth}px, Max Width: ${maxLimit}px)`);
+
+        if (innerContainer.scrollWidth > maxLimit) {
+            container.style.justifyContent = 'flex-start';
+            console.log(`Inner-container exceeds 600px → Align Left`);
+        } else {
+            container.style.justifyContent = 'center';
+            console.log(`Inner-container within 600px → Centering`);
+        }
+    }
+
 
    textContainer.innerHTML = `
     <h2>Congratulations!</h2>
     <p>You got:</p>
-    <div class="cards-container"></div>
+      <div class="cards-container">
+        <div class="inner-container"></div>
+      </div>
     <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
       <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
       <input type="hidden" name="action" value="sell">
@@ -899,8 +922,10 @@ $(document).on("click", ".sell-button, .closer", function() {
 
     textContainer.innerHTML = `
         <h4 class="treasure-subtitle">You could hit:</p>
-        <div class="cards-container"></div>
-        <div class="popup-actions">
+        <div class="cards-container">
+          <div class="inner-container"></div>
+        </div>
+        <div class="popup-actions" style="display: flex; flex-direction: row;">
             <a href="/gamehub/123/">
                 <button class="popup-button secondary closer">More!</button>
             </a>
@@ -1045,7 +1070,7 @@ styleElement.textContent = `
     .popup-actions {
         display: flex;
         gap: 1rem;
-        margin-top: 2rem;
+        margin-top: -0.1rem;
         justify-content: center;
         width: 100%;
     }
@@ -1261,7 +1286,7 @@ fireStyles.textContent = `
 
     .popup-x-btn {
         position: absolute;
-        top: 15px;
+        top: 2rem;
         right: 15px;
         width: 36px;
         height: 36px;
@@ -1444,72 +1469,111 @@ fireStyles.textContent = `
 
 document.head.appendChild(fireStyles);
 
+const colorPrecedence = [
+  'redgold',
+  'redblack',
+  'black',
+  'red',
+  'orange',
+  'yellow',
+  'green',
+  'gray'
+];
+
+// 2) Gather all colors actually present:
+const allColors = selectedItems.map(item => item.color);
+
+// 3) Pick the first match in your list, or fall back:
+const selectedColor =
+  colorPrecedence.find(col => allColors.includes(col)) ||
+  allColors[0] ||
+  'gray';
+
+// 4) Build each popup card exactly as before:
 selectedItems.forEach((item, index) => {
-    const cardElement = document.createElement('div');
-    cardElement.className = 'popup-card';
-    cardElement.style.animation = `cardAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards ${0.1 * index}s`;
-    cardElement.style.position = 'relative';
-    cardElement.style.display = 'flex';
-    cardElement.style.flexDirection = 'column';
-    cardElement.style.alignItems = 'center';
-    cardElement.style.flexShrink = '0';
-    cardElement.style.transition = 'transform 0.3s ease';
-    cardElement.style.transformOrigin = 'center bottom';
+  const cardElement = document.createElement('div');
+  cardElement.className = 'popup-card';
+  cardElement.style.animation = `cardAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards ${0.1 * index}s`;
+  cardElement.style.position = 'relative';
+  cardElement.style.display = 'flex';
+  cardElement.style.flexDirection = 'column';
+  cardElement.style.alignItems = 'center';
+  cardElement.style.flexShrink = '0';
+  cardElement.style.transition = 'transform 0.3s ease';
+  cardElement.style.transformOrigin = 'center bottom';
 
-    // Add hover effect
-    cardElement.addEventListener('mouseenter', () => {
-        cardElement.style.transform = 'translateY(-10px) scale(1.05)';
-        cardElement.style.zIndex = '10';
-    });
+  // hover effects
+  cardElement.addEventListener('mouseenter', () => {
+    cardElement.style.transform = 'translateY(-10px) scale(1.05)';
+    cardElement.style.zIndex = '10';
+    const cf = cardElement.querySelector('.card-fire');
+    if (cf) cf.style.opacity = '1';
+  });
+  cardElement.addEventListener('mouseleave', () => {
+    cardElement.style.transform = '';
+    cardElement.style.zIndex = '';
+    const cf = cardElement.querySelector('.card-fire');
+    if (cf) cf.style.opacity = '0';
+  });
 
-    cardElement.addEventListener('mouseleave', () => {
-        cardElement.style.transform = '';
-        cardElement.style.zIndex = '';
-    });
+  cardElement.innerHTML = `
+    <div class="card-fire" data-color="${item.color}"
+         style="background-color: ${item.color};
+                position: absolute; top: -30px; left: 50%;
+                transform: translateX(-50%) scale(0.6);
+                width: 40px; height: 40px;
+                opacity: 0; transition: opacity 0.3s ease;">
+      <div class="card-flames" style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px;">
+        <div class="card-flame"
+             style="position: absolute; bottom: 0; left: 15px;
+                    width: 10px; height: 30px;
+                    background: linear-gradient(to top, ${item.color}, transparent);
+                    border-radius: 50% 50% 20% 20%;
+                    animation: flicker 1.5s infinite alternate;"></div>
+      </div>
+    </div>
+    <div class="card-background"
+         style="background-color: ${item.color};
+                padding: 10px; border-radius: 12px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3),
+                            0 0 20px ${item.color}80;
+                overflow: hidden; position: relative;
+                display: flex; justify-content: center; align-items: center;">
+      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                  background: linear-gradient(135deg,
+                                             rgba(255, 255, 255, 0.2),
+                                             transparent 80%);
+                  z-index: 1;"></div>
+      <img src="${item.src||''}" alt="${item.id}"
+           width="150" height="225"
+           style="position: relative; z-index: 2;
+                  border-radius: 8px; object-fit: cover;">
+    </div>
+    <div class="card-value"
+         style="display: flex; align-items: center;
+                justify-content: center; gap: 0.5rem;
+                margin-top: 1rem; font-size: 1.5rem;
+                font-weight: bold; color: white;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);">
+      <span>${item.value}</span>
+      <span class="diamond"
+            style="display: inline-block;
+                   animation: sparkle 2s infinite;">
+        💎
+      </span>
+    </div>
+  `;
 
-    cardElement.innerHTML = `
-        <div class="card-fire" data-color="${item.color}" style="background-color: ${item.color}; position: absolute; top: -30px; left: 50%; transform: translateX(-50%) scale(0.6); width: 40px; height: 40px; opacity: 0; transition: opacity 0.3s ease;">
-            <div class="card-flames" style="position: absolute; bottom: 0; left: 0; right: 0; height: 40px;">
-                <div class="card-flame" style="position: absolute; bottom: 0; left: 15px; width: 10px; height: 30px; background: linear-gradient(to top, ${item.color}, transparent); border-radius: 50% 50% 20% 20%; animation: flicker 1.5s infinite alternate;"></div>
-            </div>
-        </div>
-        <div class="card-background" style="background-color: ${item.color}; padding: 10px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 0 20px ${item.color}80; overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center;">
-            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 80%); z-index: 1;"></div>
-            <img src="${item.src || ''}" alt="${item.id}" width="150" height="225" style="position: relative; z-index: 2; border-radius: 8px; object-fit: cover;">
-        </div>
-        <div class="card-value" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 1rem; font-size: 1.5rem; font-weight: bold; color: white; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);">
-            <span>${item.value}</span>
-            <span class="diamond" style="display: inline-block; animation: sparkle 2s infinite;">💎</span>
-        </div>
-    `;
-
-    cardsContainer.appendChild(cardElement);
-
-    // Show fire effect on hover
-    cardElement.addEventListener('mouseenter', () => {
-        const cardFire = cardElement.querySelector('.card-fire');
-        if (cardFire) {
-            cardFire.style.opacity = '1';
-        }
-    });
-
-    cardElement.addEventListener('mouseleave', () => {
-        const cardFire = cardElement.querySelector('.card-fire');
-        if (cardFire) {
-            cardFire.style.opacity = '0';
-        }
-    });
-
-    if (index === 0) {
-        const fire = document.querySelector('.fire');
-        if (fire) {
-            fire.setAttribute('data-color', item.color);
-        }
-
-        // Set the fire background color based on the first item
-        document.documentElement.style.setProperty('--flame-color', item.color);
-    }
+  cardsContainer.appendChild(cardElement);
 });
+
+// 5) Finally, apply the “winning” color once:
+const fireEl = document.querySelector('.fire');
+if (fireEl) {
+  fireEl.setAttribute('data-color', selectedColor);
+}
+document.documentElement.style.setProperty('--flame-color', selectedColor);
+
 
 popup.style.display = 'block';
 
