@@ -3941,6 +3941,51 @@ def create_ascension(request):
     form = AscensionCreateForm()
     return render(request, 'ascend.html', {'form': form})
 
+
+class LoricorfView(BaseView):
+    model = Currency
+    template_name = "loricorfs.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['currency'] = Currency.objects.get(is_active=1, name="Loricorf")
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] is None:
+            # Fake an anonymous userprofile for consistency
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+            context['NewsProfiles'] = [userprofile]
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        currency = context.get('currency')
+        context['weight_thresholds'] = currency.weight_thresholds
+
+        return context
+
+
+
 class EarningAchievement(BaseView):
     model = Achievements
     template_name = "achievements.html"
@@ -17628,6 +17673,13 @@ class CurrencyMarketView(EBaseView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+
+        try:
+            instance = StoreViewType.objects.get(user=self.request.user, is_active=1)
+        except StoreViewType.DoesNotExist:
+            instance = None
+
+        context['store_view_form'] = StoreViewTypeForm(instance=instance, request=request)
 
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)

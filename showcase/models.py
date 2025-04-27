@@ -6,7 +6,7 @@ import requests
 from django.utils import timezone
 from uuid import uuid4
 from decimal import Decimal, getcontext, ROUND_DOWN
-
+import json
 from PIL import Image
 from decimal import Decimal
 from colorfield.fields import ColorField
@@ -664,6 +664,7 @@ class Currency(models.Model):
                                               help_text='Original width of the advertisement (use for original ratio).',
                                               verbose_name="image width")
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    weight_thresholds_json = models.TextField(blank=True, null=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -673,9 +674,28 @@ class Currency(models.Model):
     def __str__(self):
         return str(self.name)
 
+    def save(self, *args, **kwargs):
+        if self.name == "Loricorf" and not self.weight_thresholds_json:
+            weight_thresholds = []
+            current_threshold = 10
+            for i in range(500):
+                weight_thresholds.append(current_threshold)
+                current_threshold *= 1.03
+
+            self.weight_thresholds_json = json.dumps(weight_thresholds)
+
+        super().save(*args, **kwargs)
+
+    @property
+    def weight_thresholds(self):
+        if self.weight_thresholds_json:
+            return json.loads(self.weight_thresholds_json)
+        return []
+
     class Meta:
         verbose_name = "PokeTrove Currency"
         verbose_name_plural = "PokeTrove Currencies"
+
 
 class CurrencyMarket(models.Model):
     name = models.CharField(max_length=200)

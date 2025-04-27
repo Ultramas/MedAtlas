@@ -412,6 +412,7 @@ urlpatterns = [
     path('update_wager/<int:wager_id>/', update_wager, name='update_wager'),
     path('place_wager/', PlaceWagerView.as_view(), name='place_wager'),
     path('ascension/create/', views.create_ascension, name='ascend'),
+    path('loricorfs/', views.LoricorfView.as_view(), name='loricorfs'),
     path('lotteries/', views.LotteryBackgroundView.as_view(), name='lotteries'),
     path('dailylotto/', views.DailyLotteryView.as_view(), name='dailylotto'), #special variant of Lottery, the daily lottery
     path('dailylottoclaimed/', views.DailyLotteryClaimedView.as_view(), name='dailylottoclaimed'),
