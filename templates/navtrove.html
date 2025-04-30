@@ -1149,7 +1149,7 @@
         </div>
         <div class="user-info">
             <h2 class="username">Guest</h2>
-            <a href="{% url 'login' %}?next={{ request.path }}" style="text-decoration: none;">
+            <a href="{% url 'login' %}?next={% url 'showcase:currencymarket' %}" style="text-decoration: none;">
             <div class="user-stats">
                 <div class="user-stat">
                     <i class="fas fa-gem user-stat-icon" style="color: #ED2221;"></i>
@@ -1192,22 +1192,30 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{% url 'showcase:ehome' %}" class="nav-link">
-                                <i class="fas fa-store"></i>
-                                <span class="nav-text">Marketplace</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
+                            {% if user.is_authenticated %}
                             <a href="{% url 'showcase:order-summary' %}" class="nav-link">
-                                <i class="fas fa-trophy"></i>
+                                <i class="fas fa-shopping-cart"></i>
                                 <span class="nav-text">My Cart</span>
                             </a>
+                            {% else %}
+                            <a href="{% url 'login' %}?next={% url 'showcase:order-summary' %}" class="nav-link">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="nav-text">My Cart</span>
+                           </a>
+                            {% endif %}
                         </li>
                         <li class="nav-item">
+                   {% if user.is_authenticated %}
                             <a href="{% url 'showcase:achievements' %}" class="nav-link">
                                 <i class="fas fa-trophy"></i>
                                 <span class="nav-text">Achievements</span>
                             </a>
+                            {% else %}
+                            <a href="{% url 'login' %}?next={% url 'showcase:achievements' %}" class="nav-link">
+                                <i class="fas fa-trophy"></i>
+                                <span class="nav-text">Achievements</span>
+                           </a>
+                            {% endif %}
                         </li>
                         <li class="nav-item">
                             <a href="#" class="nav-link">
@@ -1231,10 +1239,17 @@
                      <div class="section-content">
                     <ul>
                         <li class="nav-item">
+                            {% if user.is_authenticated %}
                             <a href="{% url 'showcase:currencymarket' %}" class="nav-link">
                                 <i class="fas fa-diamond"></i>
                                 <span class="nav-text" style="color: rgba(255, 50, 0, 1);">Rubies</span>
                             </a>
+                            {% else %}
+                            <a href="{% url 'login' %}?next={% url 'showcase:currencymarket' %}" class="nav-link">
+                                <i class="fas fa-diamond"></i>
+                                <span class="nav-text" style="color: rgba(255, 50, 0, 1);">Rubies</span>
+                            </a>
+                            {% endif %}
                         </li>
                         <li class="nav-item">
                             <a href="{% url 'showcase:ehome' %}" class="nav-link">
@@ -1264,10 +1279,17 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            {% if user.is_authenticated %}
                             <a href="{% url 'showcase:commerce' %}" class="nav-link">
                                 <i class="fa-solid fa-money-bill-trend-up"></i>
                                 <span class="nav-text">Exchange</span>
                             </a>
+                            {% else %}
+                            <a href="{% url 'login' %}?next={% url 'showcase:commerce' %}" class="nav-link">
+                                <i class="fa-solid fa-money-bill-trend-up"></i>
+                                <span class="nav-text">Exchange</span>
+                            </a>
+                            {% endif %}
                         </li>
                         <li class="nav-item">
                             <a href="#" class="nav-link">
@@ -1364,7 +1386,7 @@
                        <li class="nav-item">
                                 {% csrf_token %}
                                 <i class="fas fa-sign-out-alt"></i>
-                                <span class="nav-text" onclick="document.getElementById('logout-form').submit();" style="cursor: pointer;">Logout</span>
+                                <span class="nav-text" onclick="document.getElementById('logout-form').submit();" style="cursor: pointer; margin-left: 10px;">Logout</span>
                         </li>
                             </form>
                         {% endif %}
