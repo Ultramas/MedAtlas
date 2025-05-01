@@ -18,7 +18,21 @@
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap">
 </head>
+  {% include 'navtrove.html' %}
+<br>
+<br>
+<br>
+<br>
+<br>
+<form id="store-view-type-form" method="post" action="{% url 'showcase:inventory_view_type_url' %}">
+    {% csrf_token %}
+    {{ store_view_form.as_p }}
+</form>
+
 <body>
+{% if store_view == "detail" %}
+<!--detailed view-->
+
   <!-- Loading overlay -->
   <div id="loading-overlay">
     <div class="loading-container">
@@ -3186,5 +3200,1060 @@ function initEventListeners() {
   document.head.appendChild(style);
 }
 </script>
+
+
+
+
+{% else %}
+    <style>
+    .copyright-section {
+        background: linear-gradient(
+            to right,
+            rgba(191, 151, 255, 0.1),
+            rgba(255, 255, 255, 0.05),
+            rgba(191, 151, 255, 0.1)
+        );
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        text-align: center;
+        position: relative;
+        z-index: 100;
+    }
+
+    .copyright-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .copyright-section p {
+        color: var(--text);
+        font-family: 'Cinzel', serif;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        margin: 0;
+    }
+</style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
+
+        :root {
+            --primary: #bf97ff;
+            --primary-dark: #9a6bff;
+            --background: #0a0a13;
+            --text: #ffffff;
+            --accent: #4db2ea;
+            --accent2: #ffd700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            font-family: 'Cormorant Garamond', serif;
+            background-image:
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23bf97ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+                radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+
+        .main-menu {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(
+                to right,
+                rgba(191, 151, 255, 0.1),
+                rgba(255, 255, 255, 0.05),
+                rgba(191, 151, 255, 0.1)
+            );
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+            position: relative;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 3rem;
+        }
+
+        .nav-links a {
+
+    color: var(--primary);
+            text-decoration: none;
+            position: relative;
+            padding: 0.5rem 0;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            /*font-size: 1rem;*/
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+    .logo-icon h1::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+    }
+        .container {
+            display: flex;
+            gap: 3rem;
+            padding: 3rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+
+        .username {
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
+        }
+
+
+        .filters {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters h2, .collection-title {
+            color: var(--primary);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .filters h2::after, .collection-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .type-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .view-collection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-collection::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .view-collection:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .view-collection:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .main-content {
+            width: 100%;
+        }
+        .main-content h1 {
+            color: var(--primary);
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+        }
+
+        .main-content h1::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .pokemon-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+        .pokemon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05));
+            z-index: 1;
+        }
+
+        .pokemon-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: radial-gradient(circle at center, rgba(191, 151, 255, 0.2), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pokemon-image::after {
+            content: '';
+            position: absolute;
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pokemon-info {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .pokemon-name {
+            font-size: 1.00rem;
+            margin-bottom: 0.75rem;
+            font-family: 'Cinzel', serif;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .pokemon-type {
+            color: white;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .add-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .add-button:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .add-button:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        .legendary-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: var(--accent);
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.75rem;
+            border-radius: 50%;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--accent2);
+            font-size: 1.5rem;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+        }
+
+                .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1200px) {
+            .inventory-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .inventory-item {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .inventory-item:hover {
+            transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 10px 30px rgba(191, 151, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+
+
+.view-toggle {
+    text-align: right;
+    margin-bottom: 1rem;
+}
+
+.toggle-btn {
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+    border: 2px solid var(--primary);
+    color: var(--text);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+    background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(191, 151, 255, 0.3);
+}
+
+.inventory-grid.compact-view {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.inventory-grid.compact-view .gridCardItem {
+    font-size: 0.9em;
+}
+
+.inventory-grid.compact-view .pokemon-image {
+    aspect-ratio: 16/9;
+}
+
+.inventory-grid.compact-view .product-description {
+    display: none;
+}
+
+.inventory-grid.compact-view .action-buttons {
+    flex-direction: column;
+}
+
+.inventory-grid.compact-view .action-buttons form {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.legendary-icon {
+    font-size: 2em;
+    margin-bottom: 0.5rem;
+}
+
+.empty-inventory {
+    text-align: center;
+}
+
+.empty-inventory img {
+    max-width: 50%;
+    margin: 2rem auto;
+}
+
+nav.main-menu ul li a {
+    color: #fff;
+    font-weight: 700;
+    display: block;
+    padding: 15px;
+}
+
+/* Hide the default checkbox */
+.item-select-checkbox {
+    display: none;
+}
+
+.outerContainer {
+    position: relative;
+    cursor: pointer;
+}
+
+.item-select-checkbox:checked + .gridCardItem {
+    background-color: rgba(0, 128, 0, 0.1); /* Example: light green background */
+}
+
+.item-select-checkbox:checked + .gridCardItem::before {
+    content: '✔'; /* Checkmark symbol */
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 20px;
+    color: green;
+    z-index: 100;
+}
+
+          .withdraw-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+  .popup-content {
+    text-align: center;
+  }
+
+    .popup-content::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #d4af37, #f9f095, #d4af37);
+      border-radius: 2px;
+    }
+            h2 {
+      color: #1a1a1a;
+      font-size: 24px;
+      font-weight: 600;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    p {
+      color: #555;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    p strong {
+      color: #d4af37;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      outline: none;
+      letter-spacing: 0.5px;
+    }
+
+    #confirm-withdraw {
+      background: linear-gradient(135deg, #d4af37, #e5c760);
+      color: #000;
+      border: none;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+    }
+
+    #confirm-withdraw:hover {
+      background: linear-gradient(135deg, #c9a431, #d4af37);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+    }
+
+    #cancel-withdraw {
+      background-color: transparent;
+      color: #555;
+      border: 1px solid #d1d1d1;
+    }
+
+    #cancel-withdraw:hover {
+      background-color: #f5f5f5;
+      color: #333;
+      border-color: #bbb;
+    }
+
+    /* Demo button */
+    #show-popup {
+      background: linear-gradient(135deg, #d4af37, #e5c760);
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+      margin: 20px;
+    }
+
+    #show-popup:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+    }
+    </style>
+</head>
+<body>
+<div id="withdraw-popup" class="withdraw-popup">
+  <div class="popup-content">
+    <h2>Confirm Withdrawal</h2>
+    <p>The shipping fee is <strong>599 rubies</strong>. Do you wish to proceed?</p>
+    <div class="popup-buttons">
+      <button id="confirm-withdraw">Yes, proceed</button>
+      <button id="cancel-withdraw">No, cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    // Load audio files
+    const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
+    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
+    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
+
+    // Add event listeners to sell forms
+    document.querySelectorAll('.sell-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            sellAudio.play(); // Play the sell sound
+            console.log('')
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
+
+    // Add event listeners to withdraw forms
+    document.querySelectorAll('.withdraw-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            withdrawAudio.play(); // Play the withdraw sound
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
+
+	document.querySelectorAll('.trade-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            tradeAudio.play(); // Play the withdraw sound
+        });
+    });
+
+    // Generic AJAX form submission handler
+    function handleAjaxFormSubmission(form) {
+        const formData = new FormData(form);
+        const actionUrl = form.getAttribute('action');
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('stock-count').textContent = data.number_of_cards;
+                document.getElementById('stock-count2').textContent = data.number_of_cards;
+            } else {
+                console.error(data.error);
+            }
+        });
+    }
+</script>
+
+    <div class="container">
+
+
+  <main class="main-content">
+            <h1>My Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)</h1>
+
+            {% if StockObject %}
+    <div style="margin-top: 20px;">
+        <button id="sell-everything-button" class="card-button add-button sell-button" style="width: 120px; position: fixed; right: 50px; top: 175px;">Sell All</button>
+    </div>
+{% endif %}
+
+            <!-- Bulk Sell Form -->
+            <form id="sell-all-form" class="sell-all-form" action="{% url 'showcase:sell_all_inventory_objects' %}" method="post" style="display: none; margin-bottom: 20px;">
+              {% csrf_token %}
+              <input type="hidden" name="selected_ids" id="sell-all-selected-ids">
+              <button type="submit" class="card-button sell-button">Sell Selected</button>
+            </form>
+
+            <!-- Inventory Items -->
+                <strong>Total Value:</strong>
+                <span id="total_value">0</span>
+                <strong>Sold Value:</strong>
+                <span id="sold-value">0</span>
+            <section id="inventory-items-container" class="inventory-grid comfortable-view">
+
+                {% for Inventory in StockObject %}
+                    <div class="inventory-item">
+                        <div class="legendary-icon">🐉</div>
+                        <div class="pokemon-image">
+                            <img src="{{ Inventory.image.url }}" alt="{{Inventory.choice_text}} Image">
+                        </div>
+                        <div class="pokemon-info">
+                            <h3 class="pokemon-name">{{ Inventory.choice.choice_text }}</h3>
+                            <p class="pokemon-type">{{ Inventory.price }} 💎</p>
+                            <p class="product-condition" style="color: rgba(255, 255, 255, 0.8);">Card Condition: {{ Inventory.condition }}</p>
+                            <p class="product-description">{{ Inventory.description }}</p>
+                            <div class="action-buttons">
+                                <form id="sell-form-{{ Inventory.pk }}" action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post" class="ajax-form sell-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="sell">
+                                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
+                                    <button type="submit" class="add-button sell-button">Sell</button>
+                                </form>
+
+                                <form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' Inventory.pk %}" method="post" class="ajax-form withdraw-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="withdraw">
+                                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
+                                    <button type="submit" class="add-button withdraw-button">Withdraw</button>
+                                </form>
+
+                                <form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post" class="trade-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="move">
+                                    <button type="submit" class="add-button trade-button" class="cart-btn">Set Tradable</button>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="empty-inventory">
+                        <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy">
+                        <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
+                    </div>
+                {% endfor %}
+            </section>
+        </main>
+    </div>
+
+
+
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const forms = document.querySelectorAll(".ajax-form");
+
+    forms.forEach(form => {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const url = this.getAttribute("action");
+            const csrfToken = formData.get("csrfmiddlewaretoken");
+
+            fetch(url, {
+                method: "POST",
+				headers: {
+					"X-Requested-With": "XMLHttpRequest",
+					"X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+				},
+
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Update stock count
+                    const stockCountElement = document.querySelector("#stock-count");
+                    const stockCountElement2 = document.querySelector("#stock-count2");
+                    if (stockCountElement) {
+                        stockCountElement.textContent = data.stock_count;
+                        stockCountElement2.textContent = data.stock_count2;
+                    }
+
+                    // Update currency amount
+                    const currencyAmountElement = document.querySelector("#currency-amount");
+                    if (currencyAmountElement) {
+                        currencyAmountElement.textContent = data.currency_amount;
+                    }
+
+                    // Example: Remove the item from the UI
+                    this.closest(".inventory-item").remove();
+                } else {
+                    console.error("Action failed.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    });
+});
+
+
+
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const withdrawButtons = document.querySelectorAll(".withdraw-button");
+
+    withdrawButtons.forEach((button) => {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            const form = button.closest("form");
+            const formData = new FormData(form);
+            const actionUrl = form.getAttribute("action") || window.location.href;
+
+            console.log("Submitting form to:", actionUrl); // Debug URL
+            console.log("Form Data:", [...formData.entries()]); // Debug form data
+
+            fetch(actionUrl, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP status ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        const inventoryItem = form.closest(".inventory-item");
+                        if (inventoryItem) inventoryItem.remove();
+
+                        const stockCountElement = document.getElementById("stock-count");
+                        const stockCountElement2 = document.getElementById("stock-count");
+                        if (stockCountElement) {
+                            stockCountElement.textContent = data.stock_count;
+                            stockCountElement2.textContent = data.stock_count2;
+                        }
+                    } else {
+                        console.error("Server error:", data.error);
+                        alert(data.error || "An error occurred.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Fetch error:", error);
+                    alert("An unexpected error occurred. Please try again.");
+                });
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    const toggleBtn = document.getElementById("toggleViewBtn");
+    const inventoryGrid = document.getElementById("inventoryGrid");
+
+    toggleBtn.addEventListener("click", function() {
+        inventoryGrid.classList.toggle("compact-view");
+        inventoryGrid.classList.toggle("comfortable-view");
+
+        // Save the current view preference to localStorage
+        const isCompact = inventoryGrid.classList.contains("compact-view");
+        localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
+    });
+
+    // Load the saved view preference on page load
+    const savedViewPreference = localStorage.getItem("inventoryViewPreference");
+    if (savedViewPreference === "compact") {
+        inventoryGrid.classList.remove("comfortable-view");
+        inventoryGrid.classList.add("compact-view");
+    }
+});
+</script>
+	<!-- jquery -->
+     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+     <script src="{% static 'css/js/main.js' %}"></script>
+     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+     <script src="{% static 'css/js/waypoints.js' %}"></script>
+	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+     <script src="{% static 'css/js/sticker.js' %}"></script>
+
+  <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+  <script src="{% static 'css/js/main.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('sell-everything-button');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    if (!confirm('Are you sure you want to sell all inventory items?')) return;
+
+    fetch("{% url 'showcase:sell_everything_inventory_objects' %}", {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/json',
+      },
+      credentials: 'same-origin',
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) {
+        return alert('Error: ' + data.error);
+      }
+
+      const stockEl = document.getElementById("stock-count");
+      if (stockEl) stockEl.textContent = data.stock_count;
+
+      const currEl = document.getElementById("currency-amount");
+      if (currEl) currEl.textContent = data.currency_amount;
+
+      const valueEl = document.getElementById('total_value');
+        if (valueEl) {
+          valueEl.textContent = data.total_value;
+          console.log('total_value updated to', data.total_value);
+        }
+        else{
+        console.log('error when updating total value')
+        }
+
+
+      console.log('reached selling point, trying selling')
+      const container = document.getElementById('inventory-items-container');
+      if (container !== undefined) {
+      console.log('first step to sell')
+      if (data.inventory_html !== undefined) {
+        container.innerHTML = data.inventory_html;
+        console.log('items sold!')
+      }
+      }
+      else {
+              alert('Error: ' + (data.error || 'the items did not sell'));
+      }
+
+      alert('All items have been sold successfully.');
+    })
+    .catch(err => {
+      console.error('Error:', err);
+      alert('An error occurred while processing your request.');
+    });
+  });
+});
+
+</script>
 </body>
 </html>
+
+
+
+

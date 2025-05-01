@@ -13118,11 +13118,8 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
         if inventory_object.user != request.user:
             return JsonResponse({'success': False}, status=403)
 
-        total_value = 0
-        with transaction.atomic():
-            for inventory_object in inventory_objects:
-                total_value += inventory_object.price
-        sold_value = total_value - inventory_object.price
+        total_value = inventory_object.price
+        sold_value = 0  # Since only one item is being sold
 
         inventory_object.user = None
         inventory_object.inventory = None
@@ -13136,11 +13133,10 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             )
             inventory_object.save()
 
-            user_profile = get_object_or_404(ProfileDetails, user=request.user) #was UserProfile, also has a currency_amount attribute
+            user_profile = get_object_or_404(ProfileDetails, user=request.user)
             user_profile.currency_amount += inventory_object.price
             user_profile.save()
 
-        # Include updated values in the response
         stock_count = InventoryObject.objects.filter(is_active=1, user=request.user).count()
         stock_count2 = InventoryObject.objects.filter(is_active=1, user=request.user).count()
         return JsonResponse({
