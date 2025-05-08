@@ -17,7 +17,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
     TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences, GiftCode, \
-    GiftCodeRedemption, FavoriteChests, IndividualChestStatistics, TotalChestStatistics
+    GiftCodeRedemption, FavoriteChests, IndividualChestStatistics, TotalChestStatistics, RubyDrop
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -2142,6 +2142,20 @@ class BanAppealAdmin(admin.ModelAdmin):
 
 
 admin.site.register(BanAppeal, BanAppealAdmin)
+
+
+class RubyDropAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Ruby Drop Information - Categorial Descriptions', {
+            'fields': ('amount', 'timeframe', 'currency', 'rarity', 'opentime',)
+        }),
+        ('Ruby Drop Information - Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+
+
+admin.site.register(RubyDrop, RubyDropAdmin)
 
 
 class MyPreferencesAdmin(admin.ModelAdmin):

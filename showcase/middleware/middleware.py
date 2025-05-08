@@ -1,6 +1,6 @@
 import threading
 import logging
-
+from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
 
 # Thread-local storage for the current user
@@ -79,3 +79,12 @@ class NotificationStatusMiddleware:
     def process_exception(self, request, exception):
         """Optionally handle exceptions."""
         return None
+
+
+class ActiveUserMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request.session['last_activity'] = timezone.now().isoformat()
+        return self.get_response(request)

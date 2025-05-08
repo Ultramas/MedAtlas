@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'sslserver',
     'showcase.apps.ShowcaseConfig',
     'user_management.apps.UserManagementConfig',
+    'django_apscheduler',
     # 'django.chatbot',
     # 'chat',
 ]
@@ -110,6 +111,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'showcase.middleware.middleware.CurrentUserMiddleware',
     'showcase.middleware.middleware.NotificationStatusMiddleware',
+    'showcase.middleware.middleware.ActiveUserMiddleware',
     'django.middleware.locale.LocaleMiddleware'
 ]
 
@@ -144,7 +146,7 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'db.postgresql'),
         'OPTIONS': {
             'timeout': 20,
         },

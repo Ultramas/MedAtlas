@@ -15,13 +15,14 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.contrib.auth.decorators import login_required
+from django.urls import path, include, re_path, reverse_lazy
 from django.views.generic.base import TemplateView
 from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, BlogSearchResultsView, \
     currency_remove_from_cart, currency_add_to_cart, currency_reduce_quantity_item, submit_seller_application, \
     PlaceWagerView, update_wager, SendFriendRequestView, FriendSearchResultsView, GameCategorySearchResultsView, \
     GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView, changelog_view, InventoryTradeView, \
-    CustomPasswordResetView, battle_create_outcome
+    CustomPasswordResetView, battle_create_outcome, BattleCreationView
 
 # remove this:
 # from . import settings
@@ -314,6 +315,7 @@ urlpatterns = [
     path('i2/', TemplateView.as_view(template_name='i2.html'), name='i2'),
     path('store_view_type_url/', views.StoreView.as_view(), name='store_view_type_url'),
     path('inventory_view_type_url/', views.InventoreView.as_view(), name='inventory_view_type_url'),
+    path('profile_view_type_url/<int:pk>/', views.ProfileTypeView.as_view(), name='profile_view_type_url'),
 
     # might try to switch to using slug filter format like the below comment rather than primary key filter format
     # path('product/<slug>/', views.ProductView.as_view(), name='product'),
@@ -397,11 +399,20 @@ urlpatterns = [
     path('battle/<int:battle_id>/add_robot/', views.add_robot, name='add_robot'),
     path('actualbattle/<int:battle_id>/', views.ActualBattleView.as_view(), name='actualbattle'),
     path('battles/<int:battle_id>/games/<int:game_id>/outcome/', views.battle_create_outcome, name='battle_create_outcome'),
-    path('battlecreator/', views.BattleCreationView.as_view(), name='battlecreator'),
+
+    path(
+        'battlecreator/',
+        login_required(
+            BattleCreationView.as_view(),
+            login_url=reverse_lazy('login')
+        ),
+        name='battlecreator'
+    ),
+    path('active-users/', views.active_users_count, name='active_users_count'),
     path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
     path('inventory/', views.PlayerInventoryView.as_view(), name='inventory'),
     path('inventory2/', TemplateView.as_view(template_name='inventory2.html'), name='inventory2'),
-    path('sse/total-value/', views.sse_total_value, name='sse_total_value'),# urls.py
+    path('sse/total-value/', views.sse_total_value, name='sse_total_value'),
     path('profile/<int:pk>/fetch_remaining_rubies/', views.fetch_remaining_rubies, name='fetch_remaining_rubies'),
     path('navtrove/', views.NavView.as_view(), name='navtrove'),
     path('inventory/<int:pk>/sell/',  views.PlayerInventoryView.as_view(), name='sell_inventory_object'),

@@ -24,30 +24,13 @@
 <br>
 <br>
 <br>
-<form id="store-view-type-form" method="post" action="{% url 'showcase:inventory_view_type_url' %}">
+<form id="store-view-type-form" method="post" action="{% url 'showcase:profile_view_type_url' pk=profile.pk %}">
     {% csrf_token %}
     {{ store_view_form.as_p }}
 </form>
 
 <body>
 {% if store_view == "detail" %}
-<!--detailed view-->
-
-  <!-- Loading overlay -->
-  <div id="loading-overlay">
-    <div class="loading-container">
-      <div class="loading-spinner">
-        <div class="spinner-ring outer"></div>
-        <div class="spinner-ring middle"></div>
-        <div class="spinner-ring inner"></div>
-      </div>
-      <div class="loading-text">LOADING BANGERS</div>
-      <div class="loading-progress">
-        <div class="progress-bar"></div>
-      </div>
-    </div>
-  </div>
-
 <style>
 * {
   margin: 0;
@@ -1711,7 +1694,7 @@ input:checked + .slider:before {
     border: none !important;
 </style>
  {% include 'navtrove.html' %}
-  <canvas id="particle-canvas"></canvas>
+  <canvas id="particle-canvas" style="z-index:-5"></canvas>
 
   <!-- Main container -->
   <div class="container">
@@ -3203,9 +3186,10 @@ function initEventListeners() {
 
 
 
-
 {% else %}
+
     <style>
+    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
     .copyright-section {
         background: linear-gradient(
             to right,
@@ -3283,7 +3267,11 @@ function initEventListeners() {
             top: 0;
             z-index: 100;
         }
-
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            background-color: transparent;
+        }
         .logo {
             display: flex;
             align-items: center;
@@ -3333,7 +3321,6 @@ function initEventListeners() {
         }
 
         .nav-links a:hover {
-            color: var(--accent);
         }
 
         .nav-links a::after {
@@ -3343,7 +3330,6 @@ function initEventListeners() {
             left: 0;
             width: 0;
             height: 2px;
-            background: var(--accent);
             transition: width 0.3s ease;
         }
 
@@ -3366,7 +3352,6 @@ function initEventListeners() {
             gap: 3rem;
             padding: 3rem;
             max-width: 1800px;
-            margin: 0 auto;
         }
 
         .sidebar {
@@ -3374,6 +3359,52 @@ function initEventListeners() {
             flex-shrink: 0;
         }
 
+        .user-profile {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-profile::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .profile-picture {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--accent2);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
 
         .username {
             font-family: 'Cinzel', serif;
@@ -3383,6 +3414,26 @@ function initEventListeners() {
             text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
         }
 
+        .user-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 1rem;
+        }
+
+        .user-stat {
+            background: rgba(191, 151, 255, 0.1);
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid var(--primary);
+        }
+
+        .user-stat-icon {
+            font-size: 1.5rem;
+        }
 
         .filters {
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
@@ -3488,9 +3539,6 @@ function initEventListeners() {
             color: var(--accent);
         }
 
-        .main-content {
-            width: 100%;
-        }
         .main-content h1 {
             color: var(--primary);
             font-size: 3rem;
@@ -3512,6 +3560,15 @@ function initEventListeners() {
             background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
 
+        .nav-links h1::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
 
         .pokemon-grid {
             display: grid;
@@ -3560,6 +3617,8 @@ function initEventListeners() {
         .pokemon-image::after {
             content: '';
             position: absolute;
+            width: 150%;
+            height: 150%;
             background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
             animation: rotate 20s linear infinite;
         }
@@ -3576,7 +3635,7 @@ function initEventListeners() {
         }
 
         .pokemon-name {
-            font-size: 1.00rem;
+            font-size: 1.75rem;
             margin-bottom: 0.75rem;
             font-family: 'Cinzel', serif;
             color: var(--primary);
@@ -3584,7 +3643,7 @@ function initEventListeners() {
         }
 
         .pokemon-type {
-            color: white;
+            color: rgba(255, 255, 255, 0.8);
             font-size: 1.1rem;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -3655,12 +3714,14 @@ function initEventListeners() {
         }
 
                 .inventory-grid {
-            display: grid;
+            display: flex;
+            align-items: center;
             grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
             width: 100%;
             max-width: 1200px;
-            margin: 0 auto;
+            margin: auto;
+
         }
 
         @media (max-width: 1200px) {
@@ -3721,12 +3782,12 @@ function initEventListeners() {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-.inventory-grid.compact-view .gridCardItem {
+.inventory-grid.compact-view .inventory-item {
     font-size: 0.9em;
 }
 
 .inventory-grid.compact-view .pokemon-image {
-    aspect-ratio: 16/9;
+    aspect-ratio: 13/9;
 }
 
 .inventory-grid.compact-view .product-description {
@@ -3763,286 +3824,163 @@ nav.main-menu ul li a {
     padding: 15px;
 }
 
-/* Hide the default checkbox */
-.item-select-checkbox {
-    display: none;
+p.blog-meta span {
+    margin-right: 15px;
+    opacity: 0.6;
+    color: rgba(255, 255, 255, 1);
+    font-size: 0.85em;
 }
 
-.outerContainer {
+.badge-container {
     position: relative;
-    cursor: pointer;
+    display: inline-block;
 }
 
-.item-select-checkbox:checked + .gridCardItem {
-    background-color: rgba(0, 128, 0, 0.1); /* Example: light green background */
-}
-
-.item-select-checkbox:checked + .gridCardItem::before {
-    content: '✔'; /* Checkmark symbol */
+.hover-text {
+    display: none;
     position: absolute;
-    top: 8px;
-    left: 8px;
-    font-size: 20px;
-    color: green;
-    z-index: 100;
+    top: 70px; /* Adjust based on badge position */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    white-space: nowrap; /* Prevent text wrapping */
+    z-index: 10;
 }
 
-          .withdraw-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #fff;
-    border: 1px solid #ccc;
-    padding: 20px;
-    z-index: 1000;
-    display: none; /* Hidden by default */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  }
-  .popup-content {
-    text-align: center;
-  }
+.badge-container:hover .hover-text {
+    display: block;
+}
 
-    .popup-content::before {
-      content: '';
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 4px;
-      background: linear-gradient(90deg, #d4af37, #f9f095, #d4af37);
-      border-radius: 2px;
-    }
-            h2 {
-      color: #1a1a1a;
-      font-size: 24px;
-      font-weight: 600;
-      margin-top: 10px;
-      margin-bottom: 20px;
-      letter-spacing: 0.5px;
-    }
 
-    p {
-      color: #555;
-      font-size: 16px;
-      line-height: 1.6;
-      margin-bottom: 25px;
-    }
+.hover-text-moderator {
+    display: none;
+    position: absolute;
+    top: 20px; /* Adjust based on badge position */
+    left: 20%; /* Center horizontally */
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    white-space: nowrap; /* Prevent text wrapping */
+    z-index: 10;
+}
 
-    p strong {
-      color: #d4af37;
-      font-weight: 600;
-      font-size: 18px;
-    }
+.staff:hover .hover-text {
+    display: block;
+}
 
-    .popup-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    button {
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      outline: none;
-      letter-spacing: 0.5px;
-    }
-
-    #confirm-withdraw {
-      background: linear-gradient(135deg, #d4af37, #e5c760);
-      color: #000;
-      border: none;
-      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-    }
-
-    #confirm-withdraw:hover {
-      background: linear-gradient(135deg, #c9a431, #d4af37);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
-    }
-
-    #cancel-withdraw {
-      background-color: transparent;
-      color: #555;
-      border: 1px solid #d1d1d1;
-    }
-
-    #cancel-withdraw:hover {
-      background-color: #f5f5f5;
-      color: #333;
-      border-color: #bbb;
-    }
-
-    /* Demo button */
-    #show-popup {
-      background: linear-gradient(135deg, #d4af37, #e5c760);
-      color: #000;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-      margin: 20px;
-    }
-
-    #show-popup:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
-    }
     </style>
 </head>
 <body>
-<div id="withdraw-popup" class="withdraw-popup">
-  <div class="popup-content">
-    <h2>Confirm Withdrawal</h2>
-    <p>The shipping fee is <strong>599 rubies</strong>. Do you wish to proceed?</p>
-    <div class="popup-buttons">
-      <button id="confirm-withdraw">Yes, proceed</button>
-      <button id="cancel-withdraw">No, cancel</button>
-    </div>
-  </div>
-</div>
-
 
 <script>
-    // Load audio files
-    const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
-    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
-    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
 
-    // Add event listeners to sell forms
-    document.querySelectorAll('.sell-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            sellAudio.play(); // Play the sell sound
-            console.log('')
-            handleAjaxFormSubmission(form); // Handle the AJAX request
-        });
-    });
-
-    // Add event listeners to withdraw forms
-    document.querySelectorAll('.withdraw-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            withdrawAudio.play(); // Play the withdraw sound
-            handleAjaxFormSubmission(form); // Handle the AJAX request
-        });
-    });
-
-	document.querySelectorAll('.trade-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            tradeAudio.play(); // Play the withdraw sound
-        });
-    });
-
-    // Generic AJAX form submission handler
-    function handleAjaxFormSubmission(form) {
-        const formData = new FormData(form);
-        const actionUrl = form.getAttribute('action');
-
-        fetch(actionUrl, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('stock-count').textContent = data.number_of_cards;
-                document.getElementById('stock-count2').textContent = data.number_of_cards;
-            } else {
-                console.error(data.error);
-            }
-        });
-    }
 </script>
 
-    <div class="container">
 
+{% include 'navtrove.html' %}
 
-  <main class="main-content">
-            <h1>My Inventory - (<span id="stock-count">{{ StockObject|length }}</span>)</h1>
+  <main class="main-content" style="">
+                                            {% if profile %}
+                    {% if profile.user == current_user %}
+            <h1>My Profile - (<span id="stock-count">{{ user.username }}</span>)</h1>
+            {% else %}
+            <h1>{{ profile.user.username }}'s Profile </h1>
+            {% endif %}
+            {% endif %}
 
-            {% if StockObject %}
-    <div style="margin-top: 20px;">
-        <button id="sell-everything-button" class="card-button add-button sell-button" style="width: 120px; position: fixed; right: 50px; top: 175px;">Sell All</button>
-    </div>
-{% endif %}
+            <section id="inventoryGrid" class="inventory-grid comfortable-view">
 
-            <!-- Bulk Sell Form -->
-            <form id="sell-all-form" class="sell-all-form" action="{% url 'showcase:sell_all_inventory_objects' %}" method="post" style="display: none; margin-bottom: 20px;">
-              {% csrf_token %}
-              <input type="hidden" name="selected_ids" id="sell-all-selected-ids">
-              <button type="submit" class="card-button sell-button">Sell Selected</button>
-            </form>
-
-            <!-- Inventory Items -->
-                <strong>Total Value:</strong>
-                <span id="total_value">0</span>
-                <strong>Sold Value:</strong>
-                <span id="sold-value">0</span>
-            <section id="inventory-items-container" class="inventory-grid comfortable-view">
-
-                {% for Inventory in StockObject %}
+                {% if profile %}
+                    {% if profile.avatar %}
                     <div class="inventory-item">
                         <div class="legendary-icon">🐉</div>
                         <div class="pokemon-image">
-                            <img src="{{ Inventory.image.url }}" alt="{{Inventory.choice_text}} Image">
+                            <img src="{{profile.avatar.url}}" alt="{{profile.choice_text}} Image">
                         </div>
                         <div class="pokemon-info">
-                            <h3 class="pokemon-name">{{ Inventory.choice.choice_text }}</h3>
-                            <p class="pokemon-type">{{ Inventory.price }} 💎</p>
-                            <p class="product-condition" style="color: rgba(255, 255, 255, 0.8);">Card Condition: {{ Inventory.condition }}</p>
-                            <p class="product-description">{{ Inventory.description }}</p>
-                            <div class="action-buttons">
-                                <form id="sell-form-{{ Inventory.pk }}" action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post" class="ajax-form sell-form">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="sell">
-                                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
-                                    <button type="submit" class="add-button sell-button">Sell</button>
-                                </form>
+							<h3 class="pokemon-name">{{profile.user}}</h3>
+                            {% if newprofile.about_me %}
+                            <h5 class="excerpt" style=" color: rgba(255, 255, 255, 0.8);">About Me: {{ profile.about_me }}</h5>
+                            {% else %}
+                            <h5 class="excerpt" style=" color: rgba(255, 255, 255, 0.8);">About me coming soon!</h5>
+                            {% endif %}
+							<h5 class="excerpt" style=" color: rgba(255, 255, 255, 0.8);">Email: {{ profile.email }}</h5>
+							<h5 class="excerpt" style=" color: rgba(255, 255, 255, 0.8);">Level: {{ profile.level }}</h5>
+						<ul style="width: 100%;">
+								<span class="author" style="display: flex; align-items: center;">
+                                {% if profile.seller %}
+                                <div class="badge-container">
+                                    <!-- Seller Badge -->
+                                    <img src="{% static 'css/images/seller.png' %}" alt="Default Avatar" width="55" height="65" style="border-radius: 50px; margin-right: 15px;">
+                                    <h4 class="hover-text">Verified Seller</h4>
+                                </div>
+                                {% endif %}
 
-                                <form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' Inventory.pk %}" method="post" class="ajax-form withdraw-form">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="withdraw">
-                                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
-                                    <button type="submit" class="add-button withdraw-button">Withdraw</button>
-                                </form>
+									{% if profile.trader %}
+                                <div class="badge-container">
+									<!-- Placeholder image or default avatar -->
+									<img src="{% static 'css/images/trades.png' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px; margin-right: 15px;">
+									<h4 class="hover-text">Verified Trader</h4>
+                                </div>
+                                    {% endif %}
 
-                                <form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post" class="trade-form">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="move">
-                                    <button type="submit" class="add-button trade-button" class="cart-btn">Set Tradable</button>
-                                </form>
+									{% if profile.partner %}
+                                <div class="badge-container">
+									<!-- Placeholder image or default avatar -->
+									<img src="{% static 'css/images/trades.png' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px; margin-right: 15px;">
+									<h4 class="hover-text">Verified Partner</h4>
+                                </div>
+                                    {% endif %}
 
-                            </div>
+									{% if profile.membership %}
+                                <div class="badge-container">
+									<!-- Placeholder image or default avatar -->
+									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px; margin-right: 15px;">
+                                </div>
+                                    {% endif %}
+
+									{% if profile.user.is_staff %}
+                                    <div class="badge-container" style="right: 0px; display: flex; align-items: center; ">
+                                    {% if profile.user.groups.first.name.lower == 'moderator' %}
+									<!-- Staff -->
+									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px; margin-right: 15px;">
+                                    <h4 class="hover-text">{{ profile.user.groups.first.name }}</h4>
+
+                                    {% endif %}
+                                        </div>
+									{% endif %}
+									<h5 style="margin-left: 15px; color: var(--primary);">{{ profile.name }}</h5>
+								</span>
+						</ul>
+
                         </div>
                     </div>
-                {% empty %}
-                    <div class="empty-inventory">
-                        <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy">
-                        <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
-                    </div>
-                {% endfor %}
+                {% else %}
+        <h1 style="color: white;">No Profile Image Found</h1>
+                {% endif %}
+                {% endif %}
             </section>
         </main>
     </div>
 
+<footer class="copyright-section">
+    <div class="container">
+        <p>{% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
 
+        {{BaseCopyrightTextField.copyright}}
 
+            {% endfor %}
+        </p>
+    </div>
+</footer>
 {% endif %}
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const forms = document.querySelectorAll(".ajax-form");
@@ -4074,10 +4012,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (data.success) {
                     // Update stock count
                     const stockCountElement = document.querySelector("#stock-count");
-                    const stockCountElement2 = document.querySelector("#stock-count2");
                     if (stockCountElement) {
                         stockCountElement.textContent = data.stock_count;
-                        stockCountElement2.textContent = data.stock_count2;
                     }
 
                     // Update currency amount
@@ -4137,10 +4073,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (inventoryItem) inventoryItem.remove();
 
                         const stockCountElement = document.getElementById("stock-count");
-                        const stockCountElement2 = document.getElementById("stock-count");
                         if (stockCountElement) {
                             stockCountElement.textContent = data.stock_count;
-                            stockCountElement2.textContent = data.stock_count2;
                         }
                     } else {
                         console.error("Server error:", data.error);
@@ -4175,81 +4109,6 @@ document.addEventListener("DOMContentLoaded", function() {
         inventoryGrid.classList.add("compact-view");
     }
 });
-</script>
-	<!-- jquery -->
-     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-     <script src="{% static 'css/js/main.js' %}"></script>
-     <script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.countdown.js' %}"></script>
-     <script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
-     <script src="{% static 'css/js/waypoints.js' %}"></script>
-	 <script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
-     <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
-     <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
-     <script src="{% static 'css/js/sticker.js' %}"></script>
-
-  <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
-  <script src="{% static 'css/js/main.js' %}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('sell-everything-button');
-  if (!btn) return;
-
-  btn.addEventListener('click', () => {
-    if (!confirm('Are you sure you want to sell all inventory items?')) return;
-
-    fetch("{% url 'showcase:sell_everything_inventory_objects' %}", {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': '{{ csrf_token }}',
-        'Content-Type': 'application/json',
-      },
-      credentials: 'same-origin',
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (!data.success) {
-        return alert('Error: ' + data.error);
-      }
-
-      const stockEl = document.getElementById("stock-count");
-      if (stockEl) stockEl.textContent = data.stock_count;
-
-      const currEl = document.getElementById("currency-amount");
-      if (currEl) currEl.textContent = data.currency_amount;
-
-      const valueEl = document.getElementById('total_value');
-        if (valueEl) {
-          valueEl.textContent = data.total_value;
-          console.log('total_value updated to', data.total_value);
-        }
-        else{
-        console.log('error when updating total value')
-        }
-
-
-      console.log('reached selling point, trying selling')
-      const container = document.getElementById('inventory-items-container');
-      if (container !== undefined) {
-      console.log('first step to sell')
-      if (data.inventory_html !== undefined) {
-        container.innerHTML = data.inventory_html;
-        console.log('items sold!')
-      }
-      }
-      else {
-              alert('Error: ' + (data.error || 'the items did not sell'));
-      }
-
-      alert('All items have been sold successfully.');
-    })
-    .catch(err => {
-      console.error('Error:', err);
-      alert('An error occurred while processing your request.');
-    });
-  });
-});
-
 </script>
 </body>
 </html>

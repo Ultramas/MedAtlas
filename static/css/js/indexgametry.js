@@ -900,7 +900,6 @@ $(document).on("click", ".sell-button, .closer", function() {
     <h2>Congratulations!</h2>
     <p>You got:</p>
       <div class="cards-container">
-        <div class="inner-container"></div>
       </div>
     <form id="sell-form-${window.inventory_pk}" action="${window.sellUrl}" method="post" class="ajax-form">
       <input type="hidden" name="csrfmiddlewaretoken" value="${window.csrfToken}">
@@ -923,7 +922,6 @@ $(document).on("click", ".sell-button, .closer", function() {
     textContainer.innerHTML = `
         <h4 class="treasure-subtitle">You could hit:</p>
         <div class="cards-container">
-          <div class="inner-container"></div>
         </div>
         <div class="popup-actions" style="display: flex; flex-direction: row;">
             <a href="/gamehub/123/">

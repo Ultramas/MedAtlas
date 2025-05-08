@@ -1,0 +1,21 @@
+<div>
+  Users online: <span id="online-count">–</span>
+</div>
+
+<script>
+  const url = "{% url 'active_users_count' %}";
+  async function refreshOnlineCount() {
+    try {
+      let res = await fetch(url);
+      let data = await res.json();
+      document.getElementById('online-count').textContent = data.count;
+    } catch (err) {
+      console.error('Failed to fetch online count', err);
+    }
+  }
+
+  // Update right away…
+  document.addEventListener('DOMContentLoaded', refreshOnlineCount);
+  // …and then every 5 seconds
+  setInterval(refreshOnlineCount, 5000);
+</script>

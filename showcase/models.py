@@ -212,6 +212,7 @@ LEVEL = (
     ('P', 'Primordial'),
     ('L', 'Legendary'),
     ('U', 'Ultimate'),
+    ('F', 'Final'),
 )
 
 AchievementCategory = (
@@ -635,6 +636,17 @@ class Membership(models.Model):
         verbose_name = "Membership Tier"
         verbose_name_plural = "Membership Tiers"
 
+
+class ActiveUserMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Stamp session on every request
+        request.session['last_activity'] = timezone.now().isoformat()
+        return self.get_response(request)
+
+
 class Subscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     membership_tier = models.ForeignKey(Membership, on_delete=models.CASCADE)
@@ -651,6 +663,7 @@ class Subscription(models.Model):
     class Meta:
         verbose_name = "Subscription"
         verbose_name_plural = "Subscriptions"
+
 
 class Currency(models.Model):
     name = models.CharField(default='Rubies', max_length=200)
@@ -699,7 +712,7 @@ class Currency(models.Model):
 
 class CurrencyMarket(models.Model):
     name = models.CharField(max_length=200)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     amount = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_price = models.FloatField(blank=True, null=True)
@@ -751,11 +764,13 @@ class CurrencyMarket(models.Model):
         verbose_name = "Currency Market"
         verbose_name_plural = "Currency Markets"
 
+
 def generate_unique_code(length=16):
     while True:
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
         if not GiftCode.objects.filter(code=code).exists():
             return code
+
 
 def generate_unique_serial():
     while True:
@@ -763,8 +778,10 @@ def generate_unique_serial():
         if not GiftCode.objects.filter(serial=serial).exists():
             return serial
 
+
 def default_expiration():
     return timezone.now() + timedelta(days=7)
+
 
 class GiftCode(models.Model):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
@@ -815,6 +832,7 @@ class GiftCode(models.Model):
         verbose_name = "Gift Code"
         verbose_name_plural = "Gift Codes"
 
+
 class GiftCodeRedemption(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     gift_code = models.ForeignKey(GiftCode, on_delete=models.CASCADE)
@@ -843,6 +861,63 @@ class GiftCodeRedemption(models.Model):
         verbose_name = "Gift Code Redemption"
         verbose_name_plural = "Gift Codes Redemptions"
 
+
+class RubyDrop(models.Model):
+    amount = models.IntegerField()
+    timeframe = models.IntegerField(default=3600)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
+    rarity = models.CharField(choices=LEVEL, max_length=1)
+    opentime = models.IntegerField(default=300)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    def __str__(self):
+        return str(self.amount)
+
+    def save(self, *args, **kwargs):
+        self.currency = Currency.objects.filter(is_active=1).first()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Ruby Drop"
+        verbose_name_plural = "Ruby Drops"
+
+
+class RubyDropInstance(models.Model):
+    rubydrop = models.ForeignKey(RubyDrop, blank=True, null=True, on_delete=models.CASCADE)
+    amount = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
+    rarity = models.CharField(choices=LEVEL, max_length=1)
+    opentime = models.IntegerField(default=300)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    def __str__(self):
+        return str(self.amount)
+
+    def save(self, *args, **kwargs):
+        self.currency = Currency.objects.filter(is_active=1).first()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Ruby Drop"
+        verbose_name_plural = "Ruby Drops"
+
+
+
 class LevelIcon(models.Model):
     name = models.CharField(max_length=200, blank=True, null=True)
     level_icon = models.ImageField(blank=True, null=True)
@@ -858,6 +933,7 @@ class LevelIcon(models.Model):
     class Meta:
         verbose_name = "Level Icon"
         verbose_name_plural = "Level Icons"
+
 
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -999,11 +1075,12 @@ class ProfileDetails(models.Model):
 
 class ProfileCurrency(models.Model):
     profile = models.ForeignKey('ProfileDetails', on_delete=models.CASCADE)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     quantity = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.profile.user}'s {self.currency.name} ({self.quantity})"
+
 
 class IndividualChestStatistics(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -1031,7 +1108,7 @@ class TotalChestStatistics(models.Model):
 
     class Meta:
         verbose_name = "Total Chest Statistic"
-
+\
 class CurrencyOrder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -1404,7 +1481,7 @@ class Endowment(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="target_user")
     order = models.ForeignKey(CurrencyOrder, on_delete=models.CASCADE)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     experience = models.ForeignKey(Experience, on_delete=models.CASCADE)
     experience_increase = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
@@ -1433,7 +1510,7 @@ class EndowmentCurrency(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sender")
     endowment = models.ForeignKey(Endowment, on_delete=models.CASCADE, related_name="endowment")
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     @receiver(post_save, sender=Endowment)
@@ -1450,7 +1527,7 @@ class PrizePool(models.Model):
     image = models.FileField(upload_to='images/', verbose_name="Prize Image")
     number = models.IntegerField(default=1, verbose_name="Quantity of Card")
     price = models.IntegerField(default=1)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -1507,7 +1584,7 @@ class Shuffler(models.Model):
                                     verbose_name="Shuffle Type")
     mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
     demonstration = models.CharField(choices=PRACTICE, max_length=2, blank=True, null=True)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     total_number_of_choice = models.IntegerField()
     cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, default=0.0)
     is_active = models.IntegerField(default=1,
@@ -1757,7 +1834,7 @@ class TradeItem(models.Model):
                                     help_text="If you are applying to become a partner in more than 1 category, talk to Trove.")
     description = models.TextField()
     value = models.IntegerField(blank=True, null=True)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     image = models.ImageField(upload_to='images/')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
@@ -3558,7 +3635,7 @@ class Achievements(models.Model):
     difficulty = models.CharField(choices=HEAT, default='M', max_length=1)
     slug = AutoSlugField(populate_from='title', unique=True)
     value = models.IntegerField(blank=True, null=True)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     rubies_spent = models.IntegerField(blank=True,
                                        null=True)
     rubies_collected = models.IntegerField(blank=True,
@@ -6166,7 +6243,7 @@ from django.utils.crypto import get_random_string
 class Transaction(models.Model):
     inventory_object = models.ForeignKey(InventoryObject, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date_and_time = models.DateTimeField(null=True, verbose_name="time and date", auto_now_add=True)
     is_active = models.IntegerField(default=1,
@@ -7280,6 +7357,7 @@ def handle_withdraw_class_logic(sender, instance, created, **kwargs):
             )
             withdraw_class.withdraw.add(instance)
 
+
 class WithdrawClass(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     withdraw = models.ManyToManyField(Withdraw)
@@ -7287,7 +7365,7 @@ class WithdrawClass(models.Model):
     shipping_state = models.CharField(choices=SHIPPINGSTATUS, max_length=1, default='S')
     fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     open = models.BooleanField(default=True)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     date_and_time = models.DateTimeField(null=True, verbose_name="time and date", auto_now_add=True)
     status = models.CharField(choices=SHIPPINGSTATUS, max_length=1, default='P')
     is_active = models.IntegerField(default=1,

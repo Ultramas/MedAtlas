@@ -126,7 +126,7 @@ from .forms import VoteQueryForm, EmailForm, AnswerForm, ItemForm, TradeItemForm
     RoomSettings, WithdrawForm, ExchangePrizesForm, AddTradeForm, InventoryGameForm, PlayerInventoryGameForm, \
     CardUploading, MoveToTradeForm, \
     SpinPreferenceForm, BattleCreationForm, BattleJoinForm, AddMonstrosityForm, AscensionCreateForm, InventoryTradeForm, \
-    InventoryTradeOfferResponseForm, BetForm, MyPreferencesForm
+    InventoryTradeOfferResponseForm, BetForm, MyPreferencesForm, ProfileViewTypeForm
 from .forms import PostForm
 from .forms import Postit
 from .forms import StaffJoin
@@ -3670,25 +3670,44 @@ class ActualBattleView(DetailView):
                     break
         context['choices_with_nonce'] = with_nonce
 
-        # 8) Static / theming context (unchanged)
-        context['Background']           = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles']               = Titled.objects.filter(is_active=1).order_by("page")
-        context['Header']               = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown']             = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo']                 = LogoBase.objects.filter(
-                                              Q(page=self.template_name) | Q(page='navtrove.html'),
-                                              is_active=1
-                                          )
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'),
+        is_active=1)
         if user.is_authenticated:
-            context['StockObject']     = InventoryObject.objects.filter(is_active=1, user=user).order_by("created_at")
+            context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=user).order_by("created_at")
 
         return context
 
 
+from django.contrib.sessions.models import Session
+from django.http import JsonResponse
+from django.utils import timezone
+from datetime import timedelta
+
+def active_users_count(request):
+    now = timezone.now()
+    window = now - timedelta(seconds=10)  
+    sessions = Session.objects.filter(expire_date__gt=now)
+    count = 0
+
+    for session in sessions:
+        data = session.get_decoded()
+        ts = data.get('last_activity')
+        if not ts:
+            continue
+        last_seen = timezone.datetime.fromisoformat(ts)
+        if last_seen > window:
+            count += 1
+
+    return JsonResponse({'count': count})
 
 
 class BattleCreationView(CreateView):
+    login_url = reverse_lazy('login')
     model = Battle
     form_class = BattleCreationForm
     template_name = "battlecreator.html"
@@ -10835,6 +10854,87 @@ class InventoreView(BaseView, FormView, ListView):
         return context
 
 
+class ProfileTypeView(BaseView, FormView, ListView):
+    model = StoreViewType
+    template_name = "profileviewtypesnippet.html"
+    form_class = ProfileViewTypeForm
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+
+        try:
+            instance = StoreViewType.objects.get(user=request.user, is_active=1)
+        except StoreViewType.DoesNotExist:
+            instance = None
+
+        store_view_form = ProfileViewTypeForm(instance=instance, request=request)
+        context['store_view_form'] = store_view_form
+
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        eform = StoreViewTypeForm(request.POST, request=request)
+        slug = request.POST.get('slug')
+        try:
+            profile = ProfileDetails.objects.get(pk=pk)
+            if eform.is_valid():
+                post = eform.save(commit=False)
+                post.save()
+                return redirect('showcase:profile', pk=profile.pk)
+            else:
+                print('the errors with the profileviewtypesnippet form are ' + str(eform.errors))
+
+        except ProfileDetails.DoesNotExist:
+            raise Http404("Game Room does not exist")
+        return render(request, 'profileviewtypesnippet.html', {'eform': eform})
+
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'BaseCopyrightTextFielded': BaseCopyrightTextField.objects.filter(is_active=1),
+            'Background': BackgroundImageBase.objects.filter(page=self.template_name).order_by("position"),
+            'TextFielde': TextBase.objects.filter(page=self.template_name).order_by("section"),
+            'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+            'Favicon': FaviconBase.objects.filter(is_active=1),
+            'Image': ImageBase.objects.filter(is_active=1, page=self.template_name),
+            'Social': SocialMedia.objects.filter(page=self.template_name, is_active=1),
+            'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
+            'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
+        })
+
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] is None:
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
+
 class GameRoomTypeView(BaseView, FormView, ListView):
     model = StoreViewType
     template_name = "gameroomviewtypesnippet.html"
@@ -16304,6 +16404,28 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         games = Game.objects.filter(user=self.request.user)
         popular_chests = []
         favorites = []
+
+        context['store_view_form'] = ProfileViewTypeForm()
+
+        current_user = self.request.user
+        if current_user.is_authenticated:
+            try:
+                store_view_instance = StoreViewType.objects.get(user=current_user, is_active=1)
+                context['store_view'] = store_view_instance.type
+                context['store_view_type_str'] = str(store_view_instance)
+                context['streamfilter_string'] = f'stream filter set by {current_user.username}'
+            except StoreViewType.DoesNotExist:
+                store_view_instance = None
+                context['store_view'] = 'stream'
+                context['store_view_type_str'] = 'stream'
+                context['streamfilter_string'] = f'stream filter set by {current_user.username}'
+        else:
+            store_view_instance = None
+            context['store_view'] = 'stream'
+            context['streamfilter_string'] = 'stream filter set by anonymous user'
+
+        store_view_form = ProfileViewTypeForm(instance=store_view_instance, request=self.request)
+        context['store_view_form'] = store_view_form
 
         for game in games:
             chest_stat = IndividualChestStatistics.objects.filter(user=self.request.user, chest=game).order_by(

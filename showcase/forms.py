@@ -1149,6 +1149,7 @@ class SellerApplicationForm(forms.ModelForm):
             raise ValidationError('You need to be 18 or older to apply to sell!')
         return dob
 
+
 class ProfileDetail(forms.ModelForm):
     class Meta:
         model = ProfileDetails
@@ -1213,7 +1214,39 @@ class GameRoomViewTypeForm(forms.ModelForm):
             storeviewtype.save()
         return storeviewtype
 
+
+class ProfileViewTypeForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.pk and self.instance.type:
+            self.fields['type'].initial = self.instance.type
+
+        self.fields['type'].widget.attrs.update({'onchange': 'this.form.submit();'})
+
+    class Meta:
+        model = StoreViewType
+        fields = ('type',)
+        widgets = {
+            'type': forms.Select(choices=StoreViewType.VIEW_TYPE_CHOICES),
+        }
+
+    def save(self, commit=True):
+        user = self.request.user if self.request.user.is_authenticated else None
+        storeviewtype = super().save(commit=False)
+        if user and isinstance(user, User):
+            storeviewtype.user = user
+        else:
+            storeviewtype.user = None
+        if commit:
+            storeviewtype.save()
+        return storeviewtype
+
+
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+
 
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)

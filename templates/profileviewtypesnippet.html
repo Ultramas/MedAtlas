@@ -1,0 +1,50 @@
+{% extends 'ebase.html' %}
+
+{% load static %}
+
+
+{% block content %}
+
+<br>
+<br>
+<br>
+<br>
+<h1 style="padding: 10px;">Profile View Settings</h1>
+<form method="post" style="padding: 10px;">
+    {% csrf_token %}
+    {{ eform.as_p }}
+    <button class="button-85"  role="button" style="padding: 0.6em 2em;
+  border: none;
+  outline: none;
+  color: rgb(255, 255, 255);
+  background: #111;
+  cursor: pointer;
+  position: relative;
+  z-index: 0;
+  border-radius: 10px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;" type="submit">Set New Settings</button>
+</form>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>
+
+{% endblock content %}
