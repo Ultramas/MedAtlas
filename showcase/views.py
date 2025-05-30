@@ -1,6 +1,10 @@
 import pprint
 from urllib import request
 from venv import logger
+import random
+import string
+
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 import pytz
 from celery import shared_task
@@ -22,6 +26,8 @@ from urllib.parse import quote, urlparse
 from django.db import close_old_connections
 from django.contrib.auth.forms import UserChangeForm, AuthenticationForm
 import math
+from django.contrib.auth.models import AnonymousUser
+from paypalrestsdk import Payment as PayPalPayment
 
 from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
@@ -30,8 +36,9 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     Game, UploadACard, Withdraw, ExchangePrize, CommerceExchange, SecretRoom, Transaction, Outcome, GeneralMessage, \
     SpinnerChoiceRenders, DefaultAvatar, Achievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
-    UserNotification, TopHits, Card, Clickable, GameChoice, Robot, MyPreferences, UserClickable, GiftCodeRedemption, GiftCode, \
-    IndividualChestStatistics, FavoriteChests
+    UserNotification, TopHits, Card, Clickable, GameChoice, Robot, MyPreferences, UserClickable, GiftCodeRedemption, \
+    GiftCode, \
+    IndividualChestStatistics, FavoriteChests, Season, Tier
 from .models import Idea
 from .models import VoteQuery
 from .models import StaffApplication
@@ -118,6 +125,8 @@ from .models import AdminPages
 from .models import Ascension
 from .models import (Item, OrderItem, Order, Address, Payment, Coupon, Refund,
                      UserProfile)
+
+from .forms import CouponForm, RefundForm, PaymentForm, CurrencyViewTypeForm
 
 from .forms import VoteQueryForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, \
     SellerApplicationForm, \
@@ -319,6 +328,7 @@ class SignupView(FormMixin, ListView):
         else:
             form = SignUpForm()
         return render(request, 'cv-form.html', {'form': form})
+
 
 class TotalView(ListView):
     model = BackgroundImageBase
@@ -3117,45 +3127,69 @@ class DailyChestView(BaseView):
             return JsonResponse({'success': True})
         return JsonResponse({'success': False}, status=400)
 
+
+
 @csrf_exempt
 def spin_game(request):
-    if request.method == "POST":
-        try:
+    if request.method != "POST":
+        return JsonResponse(
+            {"success": False, "error": "Invalid request method."},
+            status=405
+        )
 
-            data = json.loads(request.body)
-            game_id = data.get("game_id")
-            spin_multiplier = int(data.get("spin_multiplier", 1))
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {"success": False, "error": "Invalid JSON."},
+            status=400
+        )
 
-            game = get_object_or_404(Game, id=game_id)
+    game_id = data.get("game_id")
+    spin_multiplier = int(data.get("spin_multiplier", 1))
+    game = get_object_or_404(Game, id=game_id)
 
-            profile = ProfileDetails.objects.filter(user=request.user).first()
-            if not profile:
-                return JsonResponse({"success": False, "error": "User profile not found."})
+    profile = ProfileDetails.objects.filter(user=request.user).first()
+    if not profile:
+        return JsonResponse(
+            {"success": False, "error": "User profile not found."},
+            status=404
+        )
 
-            effective_cost = game.get_effective_cost()
-            total_cost = effective_cost * spin_multiplier
+    effective_cost = game.get_effective_cost()
+    total_cost = effective_cost * spin_multiplier
 
-            if game.daily:
-                print('daily game spin initiated, do not charge')
-            else:
-                if profile.currency_amount < total_cost:
-                    return JsonResponse({"success": False, "error": "Insufficient currency."})
+    if game.daily:
+        # daily spin: no charge, no contribution
+        message = "Daily spin—no charge."
+    else:
+        # charge the user
+        if profile.currency_amount < total_cost:
+            return JsonResponse(
+                {"success": False, "error": "Insufficient currency."},
+                status=400
+            )
+        profile.currency_amount -= total_cost
+        profile.save()
 
-                profile.currency_amount -= total_cost
-                profile.save()
+        lotto = get_object_or_404(Lottery, name="Daily Lotto")
+        increment = int(total_cost / 250)
+        lotto.prize += increment
+        lotto.save()
 
-            return JsonResponse({
-                "success": True,
-                "message": f"Spin charged {total_cost} {profile.currency.name}",
-                "updated_currency_amount": profile.currency_amount,
-                "currency_name": profile.currency.name,
-                "daily": game.daily
-            })
+        message = f"Spin charged {total_cost} {profile.currency.name}"
 
-        except json.JSONDecodeError:
-            return JsonResponse({"success": False, "error": "Invalid JSON."})
+    lotto = get_object_or_404(Lottery, name="Daily Lotto")
+    return JsonResponse({
+        "success": True,
+        "message": message,
+        "updated_currency_amount": profile.currency_amount,
+        "currency_name": profile.currency.name,
+        "daily": game.daily,
+        "lottery_prize": lotto.prize,
+    })
 
-    return JsonResponse({"success": False, "error": "Invalid request method."})
+
 
 def game_detail(request, game_id):
     game = get_object_or_404(Game, id=game_id)
@@ -3513,7 +3547,6 @@ class SingleBattleListView(DetailView):
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.core.paginator import Paginator
-import random
 
 from .models import (
     Battle, Game, GameChoice, Choice,
@@ -4250,7 +4283,7 @@ class GameRoomView(BaseView):
                 context['store_view'] = user_store_view_type.type
                 context['store_view_type_str'] = str(user_store_view_type)
                 context['streamfilter_string'] = f'stream filter set by {self.request.user.username}'
-                print('store view exists')
+                print('store view exists, game')
                 print(str(user_store_view_type))
             except StoreViewType.DoesNotExist:
                 context['store_view'] = 'stream'
@@ -7431,6 +7464,19 @@ class BlogBaseView(ListView):
 
         return context
 
+
+def ajax_update_amount(request):
+    profile      = request.user.profiledetails
+    rd_benefit   = profile.tier.benefits \
+                         .filter(benefit='RD', is_active=1) \
+                         .first()
+    rd_multiplier = rd_benefit.multiplier if rd_benefit else 1
+
+    return JsonResponse({
+        'rd_multiplier': rd_multiplier,
+    })
+
+
 class NavView(ListView):
     template_name = "navtrove.html"
     model = LogoBase
@@ -7526,6 +7572,19 @@ class NavView(ListView):
 
                     context['Clickables'] = user_clickables
 
+        if self.request.user.is_authenticated:
+            profile = (
+                ProfileDetails.objects
+                .filter(user=self.request.user, is_active=1)
+                .select_related('tier')
+                .first()
+            )
+        else:
+            profile = None
+        context['profiledetails'] = profile
+        context['user_tier_code']  = (
+            profile.tier.tier if profile and profile.tier else ''
+        )
         return context
 
 import json
@@ -9538,6 +9597,7 @@ class BusinessMessageBackgroundView(ListView):
 
         return context
 
+
 class PatreonBackgroundView(ListView):
     model = Patreon
     template_name = "patreon.html"
@@ -9644,6 +9704,7 @@ class FaviconBaseView(ListView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
+
 
 class BackgroundBaseView(ListView):
     model = BackgroundImageBase
@@ -9921,6 +9982,7 @@ class BackgroundView(FormMixin, BaseView):
         context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by(
             "carouselposition")
 
+
         spinpreference = None
         user = self.request.user
         if user.is_authenticated:
@@ -9995,10 +10057,14 @@ class BackgroundView(FormMixin, BaseView):
 
         button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
 
-        if button_type == "start2":
-            cost = 0
+        if game:
+            button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
+            if button_type == "start2":
+                cost = 0
+            else:
+                cost = game.discount_cost if game.discount_cost else game.cost
         else:
-            cost = game.discount_cost if game.discount_cost else game.cost
+            cost = 0
 
         context.update({
             'cost_threshold_80': cost * 0.8,
@@ -10019,16 +10085,17 @@ class BackgroundView(FormMixin, BaseView):
                 newprofile.newprofile_profile_url = newprofile.get_profile_url()
 
         user_profile = None
-        if game.user:
-            user_profile, created = UserProfile.objects.get_or_create(user=game.user)
+        slug = game.slug if game else None
+        if game:
+            if game.user:
+                user_profile, created = UserProfile.objects.get_or_create(user=game.user)
 
-        context['SentProfile'] = user_profile
-        if game.user:
-            user_cash = user_profile.currency_amount
+                context['SentProfile'] = user_profile
+                user_cash = user_profile.currency_amount
 
-            context = {
-                'user_cash': user_cash,
-            }
+                context = {
+                    'user_cash': user_cash,
+                }
 
         context['Money'] = Currency.objects.filter(is_active=1).first()
 
@@ -10437,6 +10504,19 @@ class BackgroundView(FormMixin, BaseView):
                     userprofile.newprofile_profile_picture_url = profile.avatar.url
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
+        if self.request.user.is_authenticated:
+            profile = (
+                ProfileDetails.objects
+                .filter(user=self.request.user, is_active=1)
+                .select_related('tier')
+                .first()
+            )
+        else:
+            profile = None
+        context['profiledetails'] = profile
+        context['user_tier_code']  = (
+            profile.tier.tier if profile and profile.tier else ''
+        )
         return context
 
 from django.shortcuts import render, redirect
@@ -10544,7 +10624,6 @@ def get_items_by_category(category):
 
     return items
 
-from django.contrib.auth.models import AnonymousUser
 
 class EBackgroundView(BaseView, FormView):
     model = EBackgroundImage
@@ -10597,7 +10676,7 @@ class EBackgroundView(BaseView, FormView):
                 context['store_view'] = user_store_view_type.type
                 context['store_view_type_str'] = str(user_store_view_type)
                 context['streamfilter_string'] = f'stream filter set by {self.request.user.username}'
-                print('store view exists')
+                print('store view exists, ehome')
                 print(str(user_store_view_type))
             except StoreViewType.DoesNotExist:
                 context['store_view'] = 'stream'
@@ -10647,6 +10726,14 @@ class EBackgroundView(BaseView, FormView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
+
+    def season_list(request):
+        context = {
+            'Season': Season.objects.filter(active=True),
+        }
+        return render(request, 'seasons.html', context)
+
+    
 
     def get_items_by_category(self, category):
         if category == 'all':
@@ -10713,6 +10800,7 @@ class EBackgroundView(BaseView, FormView):
             print("There was an error in registering the email")
 
         return render(request, self.template_name, self.get_context_data(form=form))
+
 
 class StoreView(BaseView, FormView, ListView):
     model = StoreViewType
@@ -10890,8 +10978,6 @@ class ProfileTypeView(BaseView, FormView, ListView):
             raise Http404("Game Room does not exist")
         return render(request, 'profileviewtypesnippet.html', {'eform': eform})
 
-
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
@@ -10944,16 +11030,14 @@ class GameRoomTypeView(BaseView, FormView, ListView):
         self.object_list = self.get_queryset()
         context = self.get_context_data()
 
-        # fetch the GameHub so you can re‑use it in the template
-        gameroom = get_object_or_404(GameHub, slug=kwargs['slug'])
-        context['gameroom'] = gameroom
-
         try:
             instance = StoreViewType.objects.get(user=request.user, is_active=1)
         except StoreViewType.DoesNotExist:
             instance = None
 
-        context['store_view_form'] = StoreViewTypeForm(instance=instance, request=request)
+        store_view_form = ProfileViewTypeForm(instance=instance, request=request)
+        context['store_view_form'] = store_view_form
+
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -11015,11 +11099,115 @@ class GameRoomTypeView(BaseView, FormView, ListView):
         return context
 
 
+class CurrencyTypeView(BaseView, FormView, ListView):
+    model = StoreViewType
+    template_name = "currencyviewtypesnippet.html"
+    form_class = StoreViewTypeForm
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+
+        try:
+            instance = StoreViewType.objects.get(user=request.user, is_active=1)
+        except StoreViewType.DoesNotExist:
+            instance = None
+
+        context['store_view_form'] = StoreViewTypeForm(instance=instance, request=request)
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        form = StoreViewTypeForm(request.POST, request=request)
+        if form.is_valid():
+            form.save()
+            return redirect('showcase:currencymarket')
+
+        # on error, rebuild the full context and swap in the bound form
+        context = self.get_context_data()
+        context['store_view_form'] = form
+        return render(request, self.template_name, context)
+
+    def save(self, commit=True):
+        user = self.request.user if self.request.user.is_authenticated else None
+        storeviewtype = super().save(commit=False)
+        if user and isinstance(user, User):
+            storeviewtype.user = user
+        else:
+            storeviewtype.user = None
+        if commit:
+            storeviewtype.save()
+        return storeviewtype
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'BaseCopyrightTextFielded': BaseCopyrightTextField.objects.filter(is_active=1),
+            'Background': BackgroundImageBase.objects.filter(page=self.template_name).order_by("position"),
+            'TextFielde': TextBase.objects.filter(page=self.template_name).order_by("section"),
+            'Titles': Titled.objects.filter(is_active=1, page=self.template_name).order_by("position"),
+            'Favicon': FaviconBase.objects.filter(is_active=1),
+            'Image': ImageBase.objects.filter(is_active=1, page=self.template_name),
+            'Social': SocialMedia.objects.filter(page=self.template_name, is_active=1),
+            'Header': NavBarHeader.objects.filter(is_active=1).order_by("row"),
+            'DropDown': NavBar.objects.filter(is_active=1).order_by('position'),
+        })
+
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] is None:
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+        context['store_view_form'] = StoreViewTypeForm()
+
+        current_user = self.request.user
+        if current_user.is_authenticated:
+            try:
+                store_view_instance = StoreViewType.objects.get(user=current_user, is_active=1)
+                context['store_view'] = store_view_instance.type
+                context['store_view_type_str'] = str(store_view_instance)
+                context['streamfilter_string'] = f'stream filter set by {current_user.username}'
+            except StoreViewType.DoesNotExist:
+                store_view_instance = None
+                context['store_view'] = 'stream'
+                context['store_view_type_str'] = 'stream'
+                context['streamfilter_string'] = f'stream filter set by {current_user.username}'
+        else:
+            store_view_instance = None
+            context['store_view'] = 'stream'
+            context['streamfilter_string'] = 'stream filter set by anonymous user'
+
+        store_view_form = StoreViewTypeForm(instance=store_view_instance, request=self.request)
+        context['store_view_form'] = store_view_form
+
+        return context
+
+
 class ECreatePostView(CreateView):
     model = EBackgroundImage
     form_class = EBackgroundImagery
     template_name = "ebackgroundimagechange.html"
     success_url = reverse_lazy("ehome")
+
 
 class ShowcaseBackgroundView(BaseView):
     model = ShowcaseBackgroundImage
@@ -14788,6 +14976,7 @@ class LotteryBackgroundView(BaseView):
 
         return context
 
+
 class DailyLotteryView(FormMixin, ListView):
     model = Lottery
     template_name = "dailylotto.html"
@@ -14861,6 +15050,8 @@ class DailyLotteryView(FormMixin, ListView):
                 if profile:
                     userprofile.newprofile_profile_picture_url = profile.avatar.url
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        context["lottery_prize"] = Lottery.objects.get(name="Daily Lotto").prize
 
         return context
 
@@ -14959,6 +15150,37 @@ class DailyLotteryClaimedView(ListView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
+
+
+@require_POST
+@login_required
+def claim_ruby(request):
+    try:
+        payload     = json.loads(request.body)
+        drop_amount = int(payload.get("dropAmount", 0))
+    except (ValueError, TypeError, json.JSONDecodeError):
+        return JsonResponse({"error": "Invalid payload"}, status=400)
+
+    profile = ProfileDetails.objects.select_related('tier') \
+                .get(user=request.user)
+
+    rd_benefit = (
+        profile.tier
+               .benefits
+               .filter(benefit='RD', is_active=1)
+               .first()
+    )
+    multiplier = rd_benefit.multiplier if rd_benefit else 1
+
+    applied_amount = drop_amount * multiplier
+    profile.currency_amount += applied_amount
+    profile.save(update_fields=["currency_amount"])
+
+    return JsonResponse({
+        "newAmount":    profile.currency_amount,
+        "rd_multiplier": multiplier,
+        "added":         applied_amount,
+    })
 
 def login_view(request):
     next_url = request.GET.get('next', '/')
@@ -17710,6 +17932,7 @@ def subtract_currency(request):
         except ValueError:
             return JsonResponse({'status': 'error', 'message': 'Not enough currency'})
 
+
 class CurrencyProductView(DetailView):
     model = CurrencyMarket
     paginate_by = 10
@@ -17769,14 +17992,25 @@ class CurrencyProductView(DetailView):
 
         return context
 
-class CurrencyMarketView(EBaseView):
+
+class CurrencyMarketView(EBaseView, FormView, ListView):
     model = CurrencyMarket
     template_name = "currencymarket.html"
+    form_class = CurrencyViewTypeForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        active_order = (
+            Order.objects
+            .filter(user=self.request.user, ordered=False)
+            .prefetch_related('items')
+            .first()
+        )
+        context['order'] = active_order
+
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -17791,13 +18025,22 @@ class CurrencyMarketView(EBaseView):
                 is_active=1, user=self.request.user
             ).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
-
         try:
-            instance = StoreViewType.objects.get(user=self.request.user, is_active=1)
+            active = StoreViewType.objects.get(
+                user=self.request.user,
+                is_active=1
+            )
         except StoreViewType.DoesNotExist:
-            instance = None
+            active = None
 
-        context['store_view_form'] = StoreViewTypeForm(instance=instance, request=request)
+        # 2) set the “store_view” string (fallback to 'stream')
+        context['store_view'] = active.type if active else 'stream'
+
+        # 3) build the same form you had in CurrencyTypeView
+        context['store_view_form'] = StoreViewTypeForm(
+            instance=active,
+            request=self.request
+        )
 
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
@@ -17845,6 +18088,7 @@ class CurrencyMarketView(EBaseView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
+
 
 class CurrencyCheckoutView(EBaseView):
     model = CheckoutBackgroundImage
@@ -17954,7 +18198,6 @@ class CurrencyCheckoutView(EBaseView):
 
         return redirect('showcase:currencycheckout')
 
-from paypalrestsdk import Payment as PayPalPayment
 
 class CurrencyPaymentView(EBaseView):
     template_name = "currencypayment.html"
@@ -18081,28 +18324,42 @@ class CurrencyPaymentView(EBaseView):
                 source=token,
                 description=f"Order(s) for user {order_user.id}",
             )
+            ruby_profile.currency_amount += total_currency_amount
+            ruby_profile.total_currency_spent_30 += total_amount
+            ruby_profile.total_currency_spent += total_amount
+            ruby_profile.save()
+            new_spent = ruby_profile.total_currency_spent_30
+            new_tier = (
+                Tier.objects
+                    .filter(lower_bound__lte=new_spent)
+                    .filter(
+                        Q(upper_bound__gte=new_spent) |
+                        Q(upper_bound__isnull=True)
+                    )
+                    .order_by('-lower_bound')
+                    .first()
+            )
+            if new_tier and ruby_profile.tier != new_tier:
+                ruby_profile.tier = new_tier
+                ruby_profile.save()
+            full_order = CurrencyFullOrder.objects.create(
+                user=order_user,
+                ordered=True,
+                ordered_date=timezone.now(),
+                stripe_transaction_id=charge.id,
+                is_active=1
+            )
+            full_order.items.set(orders)
+            full_order.save()
+
+            for order in orders:
+                order.ordered = True
+                order.ordered_date = timezone.now()
+                order.save()
+            return JsonResponse({"success": "Thanks for purchasing!"})
         except stripe.error.StripeError as e:
             return JsonResponse({"error": str(e)}, status=400)
 
-        ruby_profile.currency_amount += total_currency_amount
-        ruby_profile.save()
-
-        full_order = CurrencyFullOrder.objects.create(
-            user=order_user,
-            ordered=True,
-            ordered_date=timezone.now(),
-            stripe_transaction_id=charge.id,
-            is_active=1
-        )
-        full_order.items.set(orders)
-        full_order.save()
-
-        for order in orders:
-            order.ordered = True
-            order.ordered_date = timezone.now()
-            order.save()
-
-        return JsonResponse({"success": "Thanks for purchasing!"})
 
 class CurrencyPayPalExecuteView(View):
     def get(self, request, *args, **kwargs):
@@ -18141,6 +18398,7 @@ class CurrencyPayPalExecuteView(View):
         except CurrencyOrder.DoesNotExist:
             messages.error(self.request, 'Order not found')
             return redirect('/currencypayment')
+
 
 class CurrencyPaypalFormView(FormView):
     template_name = 'paypalpayment.html'
@@ -18907,7 +19165,6 @@ class CheckoutView(EBaseView):
                 valid = False
         return valid
 
-from paypalrestsdk import Payment as PayPalPayment
 
 class PaymentView(EBaseView):
     template_name = "payment.html"
@@ -18981,9 +19238,18 @@ class PaymentView(EBaseView):
             token = data.get('token')
             payment_method = data.get('payment_method')
         else:
-
             token = self.request.POST.get('token')
             payment_method = self.request.POST.get('payment_method')
+
+        order_user = request.user
+        order = Order.objects.filter(user=order_user, ordered=False)
+        if not order.exists():
+            messages.warning(request, "No active orders found.")
+            return redirect("/checkout/")
+        ruby_profile = get_object_or_404(ProfileDetails, user=order_user)
+
+        total_amount = sum(order.get_total_price() for order in orders)
+        total_currency_amount = sum(order.items.amount for order in orders)
 
         if token:
             try:
@@ -18993,11 +19259,15 @@ class PaymentView(EBaseView):
                     source=token,
                     description=f"Order {order.id}",
                 )
+                ruby_profile.total_currency_amount += total_amount
+                ruby_profile.save()
+
                 return JsonResponse({"success": "Thanks for purchasing!"})
             except stripe.error.StripeError as e:
                 return JsonResponse({"error": str(e)}, status=400)
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
+
 
 class PayPalExecuteView(View):
     def get(self, request, *args, **kwargs):
@@ -19032,6 +19302,7 @@ class PayPalExecuteView(View):
         except Order.DoesNotExist:
             messages.error(self.request, 'Order not found')
             return redirect('/payment')
+
 
 class PaypalFormView(FormView):
     template_name = 'paypalpayment.html'
@@ -19206,12 +19477,6 @@ def reduce_quantity_item(request, slug):
         messages.info(request, "You do not have an Order")
         return redirect("showcase:order-summary")
 
-import random
-import string
-
-from django.contrib.auth.mixins import LoginRequiredMixin
-
-from .forms import CouponForm, RefundForm, PaymentForm
 
 def create_ref_code():
     return ''.join(random.choices(string.ascii_lowercase + string.digits,
@@ -20495,6 +20760,7 @@ data = [
     [2006, 660, 1120],
     [2007, 1030, 540]
 ]
+
 
 def detail(request, slug):
     try:
@@ -21803,6 +22069,7 @@ def create_questionaire(request, num_questions):
     return render(request, 'create_questions.html', {'form': form})
 """
 
+
 def submit_answer(request, question_id):
     questionaire = get_object_or_404(Questionaire, pk=question_id)
     questions = questionaire.question_set.all()
@@ -21821,6 +22088,7 @@ def submit_answer(request, question_id):
         form = AnswerForm(questions=questions)
 
     return render(request, 'showcase/answer_questions.html', {'form': form})
+
 
 def sociallogin(request):
     return render(request, 'registration/sociallogin.html')

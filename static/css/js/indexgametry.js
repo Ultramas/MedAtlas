@@ -13,12 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
 
-    // Set the checkbox state based on localStorage value
     if (persistSpin) {
         $('#persist-spin-checkbox').prop('checked', true);
     }
 
-    // Handle the checkbox state change
     $('#persist-spin-checkbox').change(function () {
         localStorage.setItem('persistSpinChecked', $(this).prop('checked').toString());
     });
@@ -27,11 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('quickSpinChecked', $(this).prop('checked').toString());
     });
 
-    // Update total spins when a spin option is clicked
     $(".spin-option").click(function () {
         $(".spin-option").removeClass("selected");
 
-        // Play sound bubble_selection.mp3
         let audio = new Audio("/static/css/sounds/bubble_selection.mp3");
         audio.play();
 
@@ -40,16 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.setItem("totalSpins", totalSpins);
     });
 
-
-    // Start animation on button click
     $(".start").click(function (event) {
-        const buttonId = event.target.id; // Extract the ID of the clicked button
-        console.log(`Button clicked: ${buttonId}`); // Debug: Log the button's ID
+        const buttonId = event.target.id;
+        console.log(`Button clicked: ${buttonId}`);
         sessionStorage.setItem("startAnimation", "true");
         sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
-
-        // Reset current spin count and initialize the animation
-
 
         let currentSpin = 0;
         console.log('current spin set to 0')
@@ -60,9 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         $(".start").prop('disabled', true);
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
         selectedItems = [];
-        console.log(`Initializing animation for button: ${buttonId}`); // Debug log for button ID
-
-
+        console.log(`Initializing animation for button: ${buttonId}`);
 
 async function randomizeContents() {
     const startButton = document.getElementById("start");
@@ -73,7 +62,6 @@ async function randomizeContents() {
     console.log("Game ID:", gameId);
     console.log("Nonce:", nonce);
     console.log("Slug:", slug);
-
 
     try {
         const payload = {
@@ -220,7 +208,6 @@ async function randomizeContents() {
 
                             $(".spin-option").removeClass("selected");
 
-
                             $(this).addClass("selected");
                             totalSpins = parseInt($(this).data("value"));
                             sessionStorage.setItem("totalSpins", totalSpins);
@@ -251,7 +238,7 @@ async function randomizeContents() {
 let removedCards = [];
 
 function clearCards() {
-    removedCards = []; // Clear previous removed cards
+    removedCards = [];
     const cardContainer = document.querySelector('.slider');
     if (!cardContainer) {
         console.error('Slider container not found.');
@@ -347,7 +334,6 @@ $(".start").click(function (event) {
 
 });
 
-
 const casinoThump = new Audio('/static/css/sounds/thump.mp3');
 const casinoGreen = new Audio('/static/css/sounds/money.mp3');
 const casinoYellow = new Audio('/static/css/sounds/retro_video_game_col.mp3');
@@ -426,7 +412,6 @@ function createTopHit(data) {
     });
 }
 
-
 function getCSRFToken() {
     const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
@@ -474,8 +459,6 @@ function randomizedContents() {
 
     console.log("Slider contents randomized without affecting target card position.");
 }
-
-
 
 function spin(buttonId) {
     if (currentSpin === totalSpins || animationStopped) {
@@ -533,8 +516,8 @@ function spin(buttonId) {
     const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
 
     audio.addEventListener('loadedmetadata', () => {
-        // Calculate the adjusted duration
-        const adjustedDuration = (animationDuration + audiobuffer) / 1000; // Convert ms to seconds
+
+        const adjustedDuration = (animationDuration + audiobuffer) / 1000;
         const originalDuration = audio.duration;
 
         if (originalDuration) {
@@ -552,17 +535,14 @@ setTimeout(() => {
     document.querySelectorAll('.slider').forEach((scroller) => {
         scroller.style.animationPlayState = 'paused';
 
-
     const targetCard = document.querySelector('.target-card');
 
     const startButton = document.getElementById('start');
-
 
     if (targetCard) {
         let choiceColor = targetCard.getAttribute('data-color') || 'gray';
         let choiceId = targetCard.getAttribute('id');
         let gameId = startButton.getAttribute("data-game-id");
-
 
         console.log('The choice color is:', choiceColor);
         console.log('The choice id is:', choiceId);
@@ -603,7 +583,7 @@ setTimeout(() => {
                     color: choiceColor,
                     game_id: gameId,
                 };
-                // Create the Top Hit
+
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
                 console.log('processed the top hit')
@@ -637,7 +617,7 @@ setTimeout(() => {
                     color: choiceColor,
                     game_id: gameId,
                 };
-                // Create the Top Hit
+
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
                 console.log('processed the top hit')
@@ -725,7 +705,6 @@ function randomizedContents() {
 spin(buttonId);
 
 }
-
 
     const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
     document.querySelectorAll('.sell-form').forEach(form => {
@@ -837,7 +816,6 @@ $(document).on("click", ".sell-button, .closer", function() {
         return;
     }
 
-    // Use a generic endpoint for bulk selling rather than one based on a single item's pk.
     let sellUrl = `/sell/`;
     console.log("Sell URL:", sellUrl);
 
@@ -873,7 +851,6 @@ $(document).on("click", ".sell-button, .closer", function() {
 
 });
 
-
    function adjustCardsContainer() {
         const container = document.querySelector('.cards-container');
         const innerContainer = document.querySelector('.inner-container');
@@ -894,7 +871,6 @@ $(document).on("click", ".sell-button, .closer", function() {
             console.log(`Inner-container within 600px → Centering`);
         }
     }
-
 
    textContainer.innerHTML = `
     <h2>Congratulations!</h2>
@@ -1193,7 +1169,6 @@ function closePopupAndReenableDemo() {
     $(".start").prop('disabled', false);
 }
 
-
 const fireStyles = document.createElement('style');
 fireStyles.textContent = `
     .majestic-fire-background {
@@ -1351,7 +1326,6 @@ fireStyles.textContent = `
         }
     }
 
-    /* Make the popup content stand out against the fire background */
     .popup-content {
         position: relative;
         z-index: 1;
@@ -1364,7 +1338,6 @@ fireStyles.textContent = `
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Enhance the treasure title */
     .treasure-title {
         font-size: 2.8rem;
         font-weight: 800;
@@ -1377,7 +1350,6 @@ fireStyles.textContent = `
         margin-bottom: 0.5rem;
     }
 
-    /* Imperial crown effect for title */
     .treasure-title:before {
         content: '👑';
         position: absolute;
@@ -1409,7 +1381,6 @@ fireStyles.textContent = `
         }
     }
 
-    /* Enhanced button styles */
     .popup-button {
         padding: 0.75rem 1.5rem;
         border-radius: 8px;
@@ -1478,16 +1449,13 @@ const colorPrecedence = [
   'gray'
 ];
 
-// 2) Gather all colors actually present:
 const allColors = selectedItems.map(item => item.color);
 
-// 3) Pick the first match in your list, or fall back:
 const selectedColor =
   colorPrecedence.find(col => allColors.includes(col)) ||
   allColors[0] ||
   'gray';
 
-// 4) Build each popup card exactly as before:
 selectedItems.forEach((item, index) => {
   const cardElement = document.createElement('div');
   cardElement.className = 'popup-card';
@@ -1500,7 +1468,6 @@ selectedItems.forEach((item, index) => {
   cardElement.style.transition = 'transform 0.3s ease';
   cardElement.style.transformOrigin = 'center bottom';
 
-  // hover effects
   cardElement.addEventListener('mouseenter', () => {
     cardElement.style.transform = 'translateY(-10px) scale(1.05)';
     cardElement.style.zIndex = '10';
@@ -1565,24 +1532,20 @@ selectedItems.forEach((item, index) => {
   cardsContainer.appendChild(cardElement);
 });
 
-// 5) Finally, apply the “winning” color once:
 const fireEl = document.querySelector('.fire');
 if (fireEl) {
   fireEl.setAttribute('data-color', selectedColor);
 }
 document.documentElement.style.setProperty('--flame-color', selectedColor);
 
-
 popup.style.display = 'block';
 
-// Trigger the fire animation
 setTimeout(() => {
     const fire = document.querySelector('.fire');
     if (fire) {
         fire.classList.add('active');
     }
 
-    // Add a dramatic entrance for the fire background
     const fireBackground = document.querySelector('.majestic-fire-background');
     if (fireBackground) {
         fireBackground.style.opacity = '1';
@@ -1667,8 +1630,5 @@ sellBtn.addEventListener('click', () => {
     }, 0);
 });
 
-
-
     }
 });
-

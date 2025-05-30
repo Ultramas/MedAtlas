@@ -31,6 +31,8 @@ from decimal import ROUND_UP
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.files.base import ContentFile
+import random
+from random import randint
 
 CATEGORY_CHOICES = (
     ('G', 'Gold'),
@@ -246,6 +248,24 @@ MEMBERSHIP_TIER = (
     ('E', 'Emerald'),
     ('D', 'Diamond'),
     ('?', '???'),
+)
+
+BENEFIT = (
+    ('RD', 'Ruby Drop'),
+    ('DC', 'Daily Chests'),
+    ('RR', 'Referal Rubies'),
+)
+
+TIER = (
+    ('B', 'Basic'),
+    ('F', 'Free'),
+    ('G', 'Gambler'),
+    ('S', 'Shark'),
+    ('D', 'Degen'),
+    ('W', 'Whale'),
+    ('BA', 'Baller'),
+    ('GT', 'GOAT'),
+    ('M', 'Monstrosity'),
 )
 
 BLACKJACK_OUTCOME = (
@@ -607,6 +627,7 @@ class Monstrosity(models.Model):
         verbose_name = "Monstrosity"
         verbose_name_plural = "Monstrosities"
 
+
 class Membership(models.Model):
     name = models.CharField(default='Rubies', max_length=200)
     tier = models.CharField(choices=MEMBERSHIP_TIER, max_length=2, blank=True, null=True)
@@ -635,6 +656,61 @@ class Membership(models.Model):
     class Meta:
         verbose_name = "Membership Tier"
         verbose_name_plural = "Membership Tiers"
+
+
+class Benefits(models.Model):
+    benefit = models.CharField(max_length=2, choices=BENEFIT)
+    multiplier = models.IntegerField(default=1)
+    tier = models.ForeignKey(
+        'Tier',
+        on_delete=models.CASCADE,
+        related_name='benefits'
+    )
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    class Meta:
+        verbose_name = "Benefit"
+        verbose_name_plural = "Benefits"
+
+
+class Tier(models.Model):
+    tier = models.CharField(choices=TIER, max_length=2, blank=True, null=True, default='B')
+    file = models.FileField(null=True, verbose_name='Sprite')
+    description = models.TextField(blank=True, null=True)
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                               help_text='Original length of the image (use for original ratio).',
+                                               verbose_name="image length")
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                              help_text='Original width of the image (use for original ratio).',
+                                              verbose_name="image width")
+    lower_bound = models.IntegerField(default=0)
+    upper_bound = models.IntegerField(blank=True, null=True)
+    timeframe = models.DurationField(
+        default=timedelta(days=30),
+        help_text="How far back to include (defaults to 30 days)",
+        blank=True, null=True
+    )
+    mfg_date = models.DateTimeField(auto_now_add=True, verbose_name="date")
+    is_active = models.IntegerField(default=1,
+                                    blank=True,
+                                    null=True,
+                                    help_text='1->Active, 0->Inactive',
+                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Set active?")
+
+    def get_recent_data(self):
+        cutoff = timezone.now() - self.timeframe
+        return Tier.objects.filter(mfg_date__gte=cutoff)
+
+    def __str__(self):
+        return str(self.tier)
+
+    class Meta:
+        verbose_name = "Tier"
+        verbose_name_plural = "Tiers"
 
 
 class ActiveUserMiddleware:
@@ -938,7 +1014,6 @@ class LevelIcon(models.Model):
 class ProfileDetails(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(blank=True, null=True)
-
     shipping_address = models.CharField(blank=True, null=True, max_length=250)
     billing_address = models.CharField(blank=True, null=True, max_length=250)
     avatar = models.ImageField(upload_to='profile_image', null=True, blank=True, verbose_name="Profile picture")
@@ -950,7 +1025,9 @@ class ProfileDetails(models.Model):
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     currency_amount = models.IntegerField(default=0)
     total_currency_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    total_currency_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_currency_spent_30 = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='30-Day Money Spent On Rubies (USD)')
+    total_currency_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Total Money Spent On Rubies (USD)')
+    total_card_money_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Money Spent On Cards (USD)')
     rubies_spent = models.IntegerField(blank=True, null=True, default=0)
     other_currencies_amount = models.ManyToManyField(Currency, through='ProfileCurrency',
                                                      related_name="profile_currencies")
@@ -970,6 +1047,8 @@ class ProfileDetails(models.Model):
     trader = models.BooleanField(default=False, null=True)
     partner = models.BooleanField(default=False, null=True)
     membership = models.ForeignKey(Membership, blank=True, null=True, on_delete=models.CASCADE)
+    tier = models.ForeignKey('Tier', blank=True, null=True, on_delete=models.CASCADE)
+    free = models.BooleanField(default=True)
     favorite_chests = models.ManyToManyField('FavoriteChests', blank=True)
     position = models.UUIDField(
         default=uuid.uuid4,
@@ -977,7 +1056,7 @@ class ProfileDetails(models.Model):
         unique=True,
         help_text="Position for sorting",
     )
-
+    created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -986,6 +1065,15 @@ class ProfileDetails(models.Model):
 
     def __str__(self):
         return str(self.user) + " Selling Status: " + str(self.seller) + " Membership: " + str(self.membership)
+    @property
+    def rd_multiplier(self):
+        benefit = (
+            self.tier
+                .benefits
+                .filter(benefit='RD', is_active=1)
+                .first()
+        )
+        return benefit.multiplier if benefit else 1
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -1046,13 +1134,37 @@ class ProfileDetails(models.Model):
     post_save.connect(create_user_profile, sender=User)
 
     def save(self, *args, **kwargs):
+        is_new = self._state.adding
 
         if not self.currency:
+            from .models import Currency
             self.currency = Currency.objects.filter(is_active=1).first()
 
         if not self.avatar:
             self.avatar = os.path.join('a.jpg')
             print('saved the profile avatar to default image')
+        if self.total_currency_spent_30 < 25 and self.free:
+            code = 'F'
+        elif self.total_currency_spent_30 >= 0 and self.total_currency_spent_30 < 25:
+            code = 'B'
+        elif self.total_currency_spent_30 >= 25 and self.total_currency_spent_30 < 100:
+            code = 'G'
+        elif self.total_currency_spent_30 >= 100 and self.total_currency_spent_30 < 250:
+            code = 'S'
+        elif self.total_currency_spent_30 >= 250 and self.total_currency_spent_30 < 500:
+            code = 'D'
+        elif self.total_currency_spent_30 >= 500 and self.total_currency_spent_30 < 1000:
+            code = 'W'
+        elif self.total_currency_spent_30 >= 1000 and self.total_currency_spent_30 < 2000:
+            code = 'BA'
+        elif self.total_currency_spent_30 >= 2000 and self.total_currency_spent_30 < 5000:
+            code = 'GT'
+        elif self.total_currency_spent_30 >= 5000:
+            code = 'M'
+        else:
+            code = 'B'
+
+        self.tier = Tier.objects.filter(tier=code).first()
 
         if self.pk:
             previous_instance = ProfileDetails.objects.get(pk=self.pk)
@@ -1066,12 +1178,17 @@ class ProfileDetails(models.Model):
                 new_level = Level.objects.filter(experience__lte=self.rubies_spent).order_by('-level').first()
                 if new_level:
                     self.level = new_level
+            if self.free and timezone.now() >= self.created_at + timedelta(hours=168):
+                self.free = False
 
         super().save(*args, **kwargs)
+        if is_new:
+            expire_free_for.apply_async((self.pk,), countdown=168 * 3600)
 
     class Meta:
         verbose_name = "Account Profile"
         verbose_name_plural = "Account Profiles"
+
 
 class ProfileCurrency(models.Model):
     profile = models.ForeignKey('ProfileDetails', on_delete=models.CASCADE)
@@ -1096,6 +1213,7 @@ class IndividualChestStatistics(models.Model):
     class Meta:
         verbose_name = "Individual Chest Statistic"
 
+
 class TotalChestStatistics(models.Model):
     ranking = models.IntegerField(default=0)
     plays = models.IntegerField(default=0)
@@ -1108,7 +1226,8 @@ class TotalChestStatistics(models.Model):
 
     class Meta:
         verbose_name = "Total Chest Statistic"
-\
+
+
 class CurrencyOrder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -1477,6 +1596,7 @@ class SecretRoom(models.Model):
         verbose_name = "Secret Room"
         verbose_name_plural = "Secret Room"
 
+
 class Endowment(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="target_user")
@@ -1609,6 +1729,7 @@ class Shuffler(models.Model):
     class Meta:
         verbose_name = "Shuffle Choice"
         verbose_name_plural = "Shuffle Choices"
+
 
 class Inventory(models.Model):
     """Model for sharing ideas and getting user feedback"""
@@ -2644,6 +2765,7 @@ class FrequentlyAskedQuestions(models.Model):
         verbose_name = "Frequently-Asked Question"
         verbose_name_plural = "Frequently-Asked Questions"
 
+
 class Event(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text='Event name goes here.')
@@ -2693,6 +2815,64 @@ class Event(models.Model):
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
 
+
+class Season(models.Model):
+    name = models.CharField(max_length=100, help_text='Season name goes here.')
+    season_length = models.PositiveIntegerField(help_text='In days')
+    description = models.TextField(help_text='Give a brief description of the event.')
+    date = models.DateField(null=True, blank=True, help_text='Season date (day, date, and month)')
+    time = models.TimeField(null=True, blank=True, help_text='Season time (hour/minute)')
+    date_and_time = models.DateTimeField(auto_now_add=True,
+                                           verbose_name="Creation time")
+    slug = models.SlugField(blank=True)
+    image = models.ImageField(upload_to='images/', help_text='Cover image')
+    image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                                  help_text='Original length for ratio')
+    image_width = models.PositiveIntegerField(blank=True, null=True, default=100,
+                                                  help_text='Original width for ratio')
+    date_and_time = models.DateTimeField(auto_now_add=True)
+    season_length = models.PositiveIntegerField(help_text='In days')
+
+    # new, real DB field
+    active = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+
+        super().save(*args, **kwargs)
+
+        now     = timezone.now()
+        ends_at = self.date_and_time + timedelta(days=self.season_length)
+        should  = (self.date_and_time <= now < ends_at)
+
+        if should != self.active:
+            Season.objects.filter(pk=self.pk).update(active=should)
+        if should:
+            Season.objects.exclude(pk=self.pk).filter(active=True).update(active=False)
+
+    @property
+    def end_datetime(self):
+        if not self.date_and_time:
+            return None
+        return self.date_and_time + datetime.timedelta(days=self.season_length)
+
+    @property
+    def is_active(self):
+        if not self.date_and_time:
+            return False
+        now = timezone.now()
+        return self.date_and_time <= now < self.end_datetime
+
+    def get_profile_url(self):
+        return reverse('showcase:eventmore', args=[self.slug])
+
+    def get_profile_url2(self):
+        profile = ProfileDetails.objects.filter(user=self.user).first()
+        if profile:
+            return reverse('showcase:profile', args=[str(profile.pk)])
+
+
 class BusinessMessageBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -2703,6 +2883,7 @@ class BusinessMessageBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Business Message Background Image"
         verbose_name_plural = "Business Message Background Images"
+
 
 class MemberHomeBackgroundImage(models.Model):
     title = models.TextField()
@@ -2884,6 +3065,7 @@ class Blog(models.Model):
             blog.position = self.position + i
             blog.save()
 
+
 class BlogTips(models.Model):
     tip = models.TextField(unique=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_tips', blank=True, null=True)
@@ -2934,6 +3116,7 @@ class DailySpin(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.cooldown}"
 
+
 class GameHub(models.Model):
     name = models.CharField(max_length=200, verbose_name="Game Hub Name")
     type = models.CharField(choices=GAMETYPE, max_length=1, blank=True, null=True)
@@ -2959,6 +3142,7 @@ class GameHub(models.Model):
     class Meta:
         verbose_name = "Game Hub"
         verbose_name_plural = "Game Hub"
+
 
 class Game(models.Model):
     name = models.CharField(max_length=200, verbose_name="Game Name")
@@ -4260,6 +4444,7 @@ class Comment(models.Model):
 
         return reverse("showcase:post_detail", kwargs={"slug": self.post.slug})
 
+
 class PostLikes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, )
     post = models.ForeignKey(Idea, on_delete=models.CASCADE, )
@@ -4268,6 +4453,7 @@ class PostLikes(models.Model):
     class Meta:
         verbose_name = "Post Like"
         verbose_name_plural = "Post Likes"
+
 
 class Profile(models.Model):
     about_me = models.TextField()
@@ -4281,6 +4467,7 @@ class Profile(models.Model):
 
     def __str__(self):
         return str(self.user)
+
 
 class FaviconBase(models.Model):
     favicontitle = models.TextField(verbose_name="Favicon Title")
@@ -4819,6 +5006,7 @@ class ContributorBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Contributors Background Image"
         verbose_name_plural = "Contributors Background Images"
+
 
 class UserProfile2(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='ship_profile')
@@ -5365,6 +5553,7 @@ class CostBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Cost Background Image"
         verbose_name_plural = "Cost Background Images"
+
 
 class TiersBackgroundImage(models.Model):
     title = models.TextField()
@@ -6765,6 +6954,7 @@ class IssueBackgroundImage(models.Model):
 
 import uuid
 
+
 class OrderItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ordered = models.BooleanField(default=False)
@@ -7809,10 +7999,10 @@ class PlayerVersusPlayer(models.Model):
         verbose_name = "Player Versus Player"
         verbose_name_plural = "Player Versus Players"
 
-import random
 
 def create_unique_lottery_number():
-    return str(random.randint(1000000000, 9999999999))
+    return str(randint(1_000_000_000, 9_999_999_999))
+
 
 class Lottery(models.Model):
     name = models.CharField(default='Daily Lotto', max_length=200)
@@ -7822,6 +8012,7 @@ class Lottery(models.Model):
     profile_number = models.PositiveIntegerField(default=0, editable=False)
     maximum_tickets = models.PositiveIntegerField(blank=True, null=True)
     price = models.PositiveIntegerField(default=0)
+    prize = models.PositiveIntegerField(default=0)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     file = models.FileField(null=True, verbose_name='Sprite')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -7875,6 +8066,7 @@ class Lottery(models.Model):
         verbose_name = "Lottery"
         verbose_name_plural = "Lotteries"
 
+
 class LotteryTickets(models.Model):
     name = models.CharField(default='Daily Lotto', max_length=200)
     flavor_text = models.CharField(max_length=200, blank=True, null=True)
@@ -7905,6 +8097,7 @@ class LotteryTickets(models.Model):
     class Meta:
         verbose_name = "Lottery Ticket"
         verbose_name_plural = "Lottery Tickets"
+
 
 class DefaultAvatar(models.Model):
     default_avatar_name = models.CharField(max_length=300, blank=True, null=True)

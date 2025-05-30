@@ -19,7 +19,6 @@
     <title>PokeTrove</title>
     <meta name="description" content="Unboxing like never before. Because it <i>hits different</i>.">
 
-    <title>PokeTrove</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -52,7 +51,7 @@
 
         body {
             background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
-            /*background-image: var(--radial-light);*/
+
             transition: background 0.5s ease-in-out;
         }
 
@@ -243,7 +242,6 @@
             z-index: 100;
         }
 
-
         .main-menu {
             align-items: center;
             padding: 1rem 2rem;
@@ -331,7 +329,6 @@
             border-radius: 10px;
         }
 
-        /* Sidebar Toggle Button */
         .sidebar-toggle {
             position: fixed;
             top: 20px;
@@ -368,10 +365,8 @@
             left: calc(var(--sidebar-collapsed-width) - 60px);
         }
 
-        /* User Profile Section */
         .user-profile {
             position: relative;
-            padding: 25px 20px;
             margin-bottom: 10px;
             display: flex;
             flex-direction: column;
@@ -379,6 +374,7 @@
             background: linear-gradient(135deg, rgba(191, 151, 255, 0.1), rgba(10, 10, 19, 0.9));
             border-bottom: 1px solid rgba(191, 151, 255, 0.2);
             overflow: hidden;
+            padding-bottom: 0px;
         }
 
         .user-profile::before {
@@ -527,7 +523,6 @@
             font-size: 1.2rem;
         }
 
-        /* Navigation Section */
         .sidebar-nav {
             padding: 0;
             margin-bottom: 20px;
@@ -625,7 +620,6 @@
             font-weight: bold;
         }
 
-        /* Make the title look clickable */
         .nav-section .section-title {
           cursor: pointer;
           user-select: none;
@@ -633,19 +627,16 @@
           align-items: center;
         }
 
-        /* Default: content is visible */
         .nav-section .section-content {
           max-height: 100vh;
           overflow: hidden;
           transition: max-height 0.3s ease;
         }
 
-        /* When collapsed, clamp height to zero */
         .nav-section.collapsed .section-content {
           max-height: 0;
         }
 
-        /* 2.1 Section header styling */
         .nav-section .section-title {
           display: flex;
           align-items: center;
@@ -654,29 +645,24 @@
           user-select: none;
         }
 
-        /* 2.2 Content expand/collapse */
         .nav-section .section-content {
-          max-height: 100vh;              /* open by default */
+          max-height: 100vh;
           overflow: hidden;
-          transition: max-height 0.4s ease; /* smooth height transition :contentReference[oaicite:1]{index=1} */
+          transition: max-height 0.4s ease;
         }
 
-        /* 2.3 Collapsed state: clamp height */
         .nav-section.collapsed .section-content {
           max-height: 0;
         }
 
-        /* 2.4 Icon transition & rotation */
         .toggle-icon {
-          transition: transform 0.3s ease; /* animate rotation smoothly :contentReference[oaicite:2]{index=2} */
+          transition: transform 0.3s ease;
         }
 
-        /* 2.5 When collapsed, rotate 90° to point sideways */
         .nav-section.collapsed .toggle-icon {
-          transform: rotate(-90deg);      /* chevron pointing right/sideways :contentReference[oaicite:3]{index=3} */
+          transform: rotate(-90deg);
         }
 
-        /* Collection Section */
         .collection {
             padding: 0 20px 20px;
         }
@@ -750,7 +736,6 @@
             color: var(--accent);
         }
 
-        /* Progress Bar */
         .progress-section {
             padding: 0 20px 20px;
         }
@@ -839,10 +824,9 @@
         }
 
         .sidebar-collapsed .view-collection span {
-            /* display: none; */
+
         }
 
-        /* Animations */
         @keyframes pulse {
             0% {
                 opacity: 0.6;
@@ -879,31 +863,6 @@
             margin-left: var(--sidebar-collapsed-width);
         }
 
-        /* @media (max-width: 768px) {
-            .sidebar-container {
-                width: 100%;
-                max-width: 300px;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .sidebar-toggle.active {
-                left: calc(300px - 60px);
-            }
-
-            .sidebar-collapsed {
-                width: 70px;
-            }
-
-            .main-content-expanded {
-                margin-left: 0;
-            }
-        } */
-
-
-
         .main-menu {
 			position: fixed;
             align-items: center;
@@ -921,7 +880,6 @@
         display: block;
         padding: 15px;
     }
-
 
     .button-85 {
       padding: 0.6em 2em;
@@ -1023,10 +981,646 @@
     .form-content {
         animation: fadeIn 0.8s ease-out;
     }
-    </style>
+        .container {
+            width: 80%;
+            max-width: 800px;
+            padding: 20px;
+            background-color: #2a2a40;
+            border-radius: 10px;
+        }
+
+        .notification-bar {
+            border-radius: 8px;
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-bottom: 2px solid #2d3748;
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            position: relative;
+            overflow: hidden;
+            min-height: 120px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .notification-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+        }
+
+        .inner-section {
+            display: flex;
+            flex-direction: row;
+            padding: 5px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .left-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #38b2f8;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #a0aec0;
+            margin-top: 4px;
+        }
+
+        .right-section {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+            gap: 15px;
+        }
+
+        .ruby-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #2d3748;
+            padding: 8px 15px;
+            border-radius: 6px;
+        }
+
+        .ruby-icon {
+            color: #38b2f8;
+            font-size: 20px;
+        }
+
+        .count {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .info-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #2d3748;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tooltip {
+            position: absolute;
+            top: 30px;
+            right: 0;
+            width: 150px;
+            background-color: #2d3748;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .info-icon:hover .tooltip {
+            display: block;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .bubble::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 30%;
+            height: 30%;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            filter: blur(2px);
+        }
+
+        .bubble.small {
+            width: 15px;
+            height: 15px;
+        }
+
+        .bubble.medium {
+            width: 25px;
+            height: 25px;
+        }
+
+        .bubble.large {
+            width: 35px;
+            height: 35px;
+        }
+
+          #ruby-drop-btn.clicked {
+    background-color: #718096;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+    .volume {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.volume input[type=range] {
+  display: none;
+}
+.volume .icon-size {
+  font-size: 2rem;
+}
+.volume .bar-hoverbox {
+  padding: 10px 15px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.volume .bar-hoverbox:hover {
+  opacity: 1;
+  cursor: pointer;
+}
+.volume .bar {
+  background: #999;
+  height: 7px;
+  width: 120px;
+  border-radius: 15px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.volume .bar .bar-fill {
+  background: #FFF;
+  width: 0%;
+  height: 100%;
+  background-clip: border-box;
+  pointer-events: none;
+}
+    .volume-value {
+  display: inline-block;
+  width: 2ch;
+  text-align: center;
+  font-weight: bold;
+}
+</style>
+
 </head>
 <body>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  function getCookie(name) {
+    let cookie = null;
+    if (document.cookie && document.cookie !== '') {
+      document.cookie.split(';').forEach(c => {
+        const [k, v] = c.trim().split('=');
+        if (k === name) cookie = decodeURIComponent(v);
+      });
+    }
+    return cookie;
+  }
+  const csrftoken = getCookie('csrftoken');
+  console.log('CSRF token is:', csrftoken);
+
+  const rubyBtn   = document.getElementById('ruby-drop-btn');
+  const timerEl   = document.getElementById('hourly-timer');
+  const rubySound = document.getElementById('ruby-sound');
+  console.log('Button found?', !!rubyBtn);
+
+  const INTERVAL_MS = 30 * 1000;
+
+  function getIntervalStart() {
+    return Math.floor(Date.now() / INTERVAL_MS) * INTERVAL_MS;
+  }
+  let currentIntervalStart = getIntervalStart();
+  let dropFired            = false;
+  window.dropAmount        = 0;
+
+function handleIntervalRollover(prevStart) {
+  const clickKey    = 'rubyClicks_' + prevStart;
+  const totalClicks = parseInt(localStorage.getItem(clickKey), 10) || 0;
+
+  console.log(`handleIntervalRollover – window start ${prevStart}: totalClicks = ${totalClicks}`);
+
+  let reward;
+  if (totalClicks < 100) {
+    reward = Math.floor(Math.random() * (25 - 10 + 1)) + 10;
+  } else {
+
+    reward = Math.round(2500 / totalClicks);
+  }
+
+  window.dropAmount = reward;
+  console.log(`Calculated reward from ${totalClicks} clicks → dropAmount = ${reward}`);
+
+  localStorage.removeItem(clickKey);
+  return reward;
+}
+
+  function updateCountdown() {
+  const now   = Date.now();
+  const start = getIntervalStart();
+
+  if (start !== currentIntervalStart) {
+    const prevStart = currentIntervalStart;
+
+    console.log(`🔄 Interval rolled over. Previous window started at ${new Date(prevStart).toISOString()}`);
+    const clicked = localStorage.getItem('rubyClickedInterval') === String(prevStart);
+    console.log(`👤 User ${clicked ? 'did' : 'did NOT'} click in that window.`);
+
+    const drop = handleIntervalRollover(prevStart);
+    console.log(`💎 handleIntervalRollover returned: ${drop}`);
+
+    localStorage.removeItem('rubyClickedInterval');
+    rubyBtn.classList.remove('clicked');
+    rubyBtn.disabled = false;
+    rubyBtn.textContent = 'Ruby Drop';
+
+    currentIntervalStart = start;
+    dropFired = false;
+  }
+
+  const elapsed     = now - start;
+  const remainingMs = INTERVAL_MS - elapsed;
+  const totalSec    = Math.max(0, Math.ceil(remainingMs / 1000));
+  const mins = Math.floor(totalSec / 60);
+  const secs = totalSec % 60;
+  timerEl.textContent = `${pad(mins)}:${pad(secs)}`;
+
+  rubyBtn.style.display = (totalSec > 0 && totalSec < 120)
+    ? 'inline-block'
+    : 'none';
+
+    if (!dropFired && totalSec === 0) {
+      const prevStart = start - INTERVAL_MS;
+      const drop = handleIntervalRollover(prevStart);
+      handleIntervalRollover(prevStart);
+      dropFired = true;
+      const clicked = localStorage.getItem('rubyClickedInterval') === prevStart.toString();
+      console.log(`💎 Drop: ${drop}. User ${clicked ? 'did' : 'did NOT'} click.`);
+    }
+  }
+
+  function pad(n) {
+    return n.toString().padStart(2, '0');
+}
+
+  rubyBtn.addEventListener('click', () => {
+    const RD_MULTIPLIER = {{ user.profiledetails.rd_multiplier|default:1 }};
+    console.log('🔘 Click handler start');
+    console.log('window.dropAmount =', window.dropAmount);
+
+    const start = getIntervalStart().toString();
+    if (localStorage.getItem('rubyClickedInterval') === start) {
+      console.log('Already clicked this interval, ignoring.');
+      return;
+    }
+
+    localStorage.setItem('rubyClickedInterval', start);
+    const clickKey = 'rubyClicks_' + start;
+    const prev     = parseInt(localStorage.getItem(clickKey), 10) || 0;
+    localStorage.setItem(clickKey, prev + 1);
+
+    rubyBtn.classList.add('clicked');
+    rubyBtn.disabled = true;
+    rubyBtn.textContent = 'Claimed!';
+    rubySound.currentTime = 0;
+    rubySound.play().catch(() => {});
+
+    const url = "{% url 'showcase:claim-ruby' %}";
+    console.log('Will POST to:', url);
+    console.log('About to call fetch…');
+    fetch(url, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken,
+      },
+      body: JSON.stringify({ dropAmount: window.dropAmount })
+    })
+    .then(resp => {
+      console.log('↪️ fetch resolved, status:', resp.status);
+      return resp.json();
+    })
+    .then(data => {
+      console.log('📬 Response JSON:', data);
+      if (data.newAmount !== undefined) {
+        const multiplier = RD_MULTIPLIER;
+        const newAmount  = (data.newAmount || 0) * multiplier;
+        console.log('the multiplier is: ' + multiplier)
+        document.getElementById('currency-amount').textContent = data.newAmount;
+        console.log('Final increase is ', (window.dropAmount) * (multiplier));
+      }
+    })
+    .catch(err => console.error('❌ fetch error:', err));
+
+    console.log('🔚 Click handler end');
+  });
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+});
+
+        class BubbleAnimation {
+            constructor(container) {
+                this.container = container;
+                this.bubbles = [];
+                this.isRunning = false;
+                this.init();
+            }
+
+            init() {
+                this.startAnimation();
+            }
+
+            createBubble() {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+
+                const sizes = ['small', 'medium', 'large'];
+                const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
+                bubble.classList.add(randomSize);
+
+                const containerWidth = this.container.offsetWidth;
+                const bubbleSize = randomSize === 'small' ? 20 : randomSize === 'medium' ? 35 : 50;
+                const maxLeft = containerWidth - bubbleSize;
+                const randomLeft = Math.random() * maxLeft;
+
+                bubble.style.left = randomLeft + 'px';
+                bubble.style.bottom = '-50px';
+
+                const drift = (Math.random() - 0.5) * 100;
+                bubble.style.setProperty('--drift', drift + 'px');
+
+                const driftKeyframes = `
+                    @keyframes rise-${Date.now()} {
+                        0% {
+                            transform: translateY(0) translateX(0) rotate(0deg);
+                            opacity: 0;
+                        }
+                        10% {
+                            opacity: 1;
+                        }
+                        50% {
+                            transform: translateY(-50vh) translateX(${drift/2}px) rotate(180deg);
+                        }
+                        90% {
+                            opacity: 1;
+                        }
+                        100% {
+                            transform: translateY(-100vh) translateX(${drift}px) rotate(360deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+
+                const style = document.createElement('style');
+                style.textContent = driftKeyframes;
+                document.head.appendChild(style);
+
+                bubble.style.animationName = `rise-${Date.now()}`;
+
+                this.container.appendChild(bubble);
+                this.bubbles.push(bubble);
+
+                const animationDuration = randomSize === 'small' ? 8000 : randomSize === 'medium' ? 12000 : 15000;
+                setTimeout(() => {
+                    if (bubble.parentNode) {
+                        bubble.parentNode.removeChild(bubble);
+                        document.head.removeChild(style);
+                    }
+                    this.bubbles = this.bubbles.filter(b => b !== bubble);
+                }, animationDuration);
+            }
+
+            startAnimation() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+
+                this.createBubble();
+
+                this.intervalId = setInterval(() => {
+                    this.createBubble();
+                }, Math.random() * 2000 + 1000);
+            }
+
+            stopAnimation() {
+                this.isRunning = false;
+                if (this.intervalId) {
+                    clearInterval(this.intervalId);
+                }
+            }
+
+            destroy() {
+                this.stopAnimation();
+                this.bubbles.forEach(bubble => {
+                    if (bubble.parentNode) {
+                        bubble.parentNode.removeChild(bubble);
+                    }
+                });
+                this.bubbles = [];
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationBar = document.getElementById('notificationBar');
+            const bubbleAnimation = new BubbleAnimation(notificationBar);
+
+            notificationBar.addEventListener('click', function() {
+                if (bubbleAnimation.isRunning) {
+                    bubbleAnimation.stopAnimation();
+                    console.log('Bubble animation stopped');
+                } else {
+                    bubbleAnimation.startAnimation();
+                    console.log('Bubble animation started');
+                }
+            });
+        });
+    </script>
+    <script>
+        class BubbleAnimation {
+            constructor(container) {
+                this.container = container;
+                this.bubbles = [];
+                this.isRunning = false;
+                this.animationCounter = 0;
+                this.init();
+            }
+
+            init() {
+                this.startAnimation();
+            }
+
+            createBubble() {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+
+                const sizes = ['small', 'medium', 'large'];
+                const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
+                bubble.classList.add(randomSize);
+
+                const bubbleSize = randomSize === 'small' ? 15 : randomSize === 'medium' ? 25 : 35;
+
+                const containerRect = this.container.getBoundingClientRect();
+                const containerWidth = this.container.offsetWidth;
+                const maxLeft = containerWidth - bubbleSize;
+                const randomLeft = Math.random() * Math.max(0, maxLeft);
+
+                bubble.style.left = randomLeft + 'px';
+                bubble.style.bottom = '-50px';
+
+                const animationId = `rise-${this.animationCounter++}-${Date.now()}`;
+
+                const drift = (Math.random() - 0.5) * 80;
+                const containerHeight = this.container.offsetHeight;
+                const totalDistance = containerHeight + 100;
+
+                const keyframes = `
+                    @keyframes ${animationId} {
+                        0% {
+                            transform: translateY(0) translateX(0) rotate(0deg);
+                            opacity: 0;
+                        }
+                        10% {
+                            opacity: 0.8;
+                        }
+                        50% {
+                            transform: translateY(-${totalDistance/2}px) translateX(${drift/2}px) rotate(180deg);
+                            opacity: 0.6;
+                        }
+                        90% {
+                            opacity: 0.3;
+                        }
+                        100% {
+                            transform: translateY(-${totalDistance}px) translateX(${drift}px) rotate(360deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+
+                const style = document.createElement('style');
+                style.textContent = keyframes;
+                document.head.appendChild(style);
+
+                const animationDuration = randomSize === 'small' ? 6 : randomSize === 'medium' ? 8 : 10;
+                bubble.style.animation = `${animationId} ${animationDuration}s linear forwards`;
+
+                this.container.appendChild(bubble);
+                this.bubbles.push({ element: bubble, style: style });
+
+                setTimeout(() => {
+                    this.removeBubble(bubble, style);
+                }, animationDuration * 1000);
+            }
+
+            removeBubble(bubbleElement, styleElement) {
+
+                if (bubbleElement && bubbleElement.parentNode) {
+                    bubbleElement.parentNode.removeChild(bubbleElement);
+                }
+
+                if (styleElement && styleElement.parentNode) {
+                    styleElement.parentNode.removeChild(styleElement);
+                }
+
+                this.bubbles = this.bubbles.filter(b => b.element !== bubbleElement);
+            }
+
+            startAnimation() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+
+                this.createBubble();
+
+                this.intervalId = setInterval(() => {
+                    if (this.isRunning) {
+                        this.createBubble();
+                    }
+                }, Math.random() * 1500 + 800);
+            }
+
+            stopAnimation() {
+                this.isRunning = false;
+                if (this.intervalId) {
+                    clearInterval(this.intervalId);
+                    this.intervalId = null;
+                }
+            }
+
+            destroy() {
+                this.stopAnimation();
+
+                this.bubbles.forEach(bubble => {
+                    this.removeBubble(bubble.element, bubble.style);
+                });
+                this.bubbles = [];
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationBar = document.getElementById('notificationBar');
+
+            if (notificationBar) {
+                const bubbleAnimation = new BubbleAnimation(notificationBar);
+
+                notificationBar.addEventListener('click', function() {
+                    if (bubbleAnimation.isRunning) {
+                        bubbleAnimation.stopAnimation();
+                        console.log('Bubble animation stopped');
+                    } else {
+                        bubbleAnimation.startAnimation();
+                        console.log('Bubble animation started');
+                    }
+                });
+
+                window.addEventListener('beforeunload', function() {
+                    bubbleAnimation.destroy();
+                });
+            } else {
+                console.error('Notification bar element not found!');
+            }
+        });
+    </script>
     <!-- Main Navigation -->
+<!-- somewhere in <head> or just before </body> -->
 
 <nav class="main-menu" style="z-index: 100;">
         <div class="nav-links">
@@ -1043,7 +1637,6 @@
 {% endfor %}
 
 </h1>
-
 
             <ul id="fullNavbar" style="display: flex; flex-direction: row; align-items: center;">
                 {% for column in Header %}
@@ -1098,7 +1691,9 @@
         <aside class="sidebar">
             <!-- User Profile Section -->
              {% for userprofile in NewsProfiles %}
+
     <div class="user-profile">
+    <br>
         <div class="profile-picture" style="--profile-bg-image: url('{{ userprofile.newprofile_profile_picture_url|default:'/static/css/images/a.jpg' }}');">
             <a href="{{ userprofile.newprofile_profile_url }}">
                 <img src="{{ userprofile.newprofile_profile_picture_url|default:'/static/css/images/a.jpg' }}" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;" onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
@@ -1114,7 +1709,7 @@
             <div class="user-stats">
                 <a href="{% url 'showcase:currencymarket' %}">
                     <div class="user-stat">
-                        <i class="fas fa-gem user-stat-icon" style="color: #ED2221;"></i>
+                        <img src="/static/css/images/rubeye.png" style="width: 20px; height: 20px; transform: translate(0%, 15%); display: flex;">
                         <div class="sellupdate" id="sellupdate">
                             <span id="currency-amount">{{ userprofile.currency_amount }}</span>
                         </div>
@@ -1128,7 +1723,8 @@
                 </a>
             </div>
         </div>
-            <button class="buttonets" onclick="toggleMode()" style="margin-left: auto; margin-right: auto; margin-top: 10px;">
+
+        <button class="buttonets" onclick="toggleMode()" style="margin-left: auto; margin-right: auto; margin-top: 10px;">
               <strong><h6 id="visual-mode-text">Visual Mode</h6></strong>
               <div id="containerteed-stars">
                 <div id="stars"></div>
@@ -1139,6 +1735,291 @@
                 <div class="circle"></div>
               </div>
             </button>
+        <br>
+        <style>.notification-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+.sparks {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.sparks .spark {
+  position: absolute;
+  bottom: 0;
+  left: var(--left);
+
+  width: 1px;
+  height: 12px;
+
+  box-shadow:
+    -1px 0 3px var(--color),
+     1px 0 3px var(--color);
+
+  filter: blur(1px);
+  opacity: 0;
+  animation: rise var(--duration) ease-out infinite var(--delay);
+}
+
+@keyframes rise {
+  0% {
+    transform: translate(0, 0) scaleX(1);
+    opacity: 1;
+  }
+  50% {
+
+    transform: translate(var(--drift-x-mid, 0), -30px) scaleX(0.7);
+    opacity: 0.8;
+  }
+  100% {
+
+    transform: translate(var(--drift-x), -90px) scaleX(0.5);
+    opacity: 0;
+  }
+}
+
+        .info-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #2d3748;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .info-icon span {
+            font-size: 14px;
+            font-weight: bold;
+            color: #a0aec0;
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 30px;
+            right: 0;
+            width: 150px;
+            background-color: #2d3748;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease, display 0.3s ease;
+        }
+
+        .info-icon:hover .tooltip {
+            display: block;
+            opacity: 1;
+        }
+
+        .ruby-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #2d3748;
+            padding: 8px 15px;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ruby-count.tier-B { border: none; }
+        .ruby-count.tier-F { border: 2px solid white; }
+        .ruby-count.tier-G { border: 2px solid green; }
+        .ruby-count.tier-P { border: 2px solid yellow; }
+        .ruby-count.tier-D { border: 2px solid orange; }
+        .ruby-count.tier-W { border: 2px solid red; }
+        .ruby-count.tier-BA { border: 2px solid black; }
+        .ruby-count.tier-GT {
+            border: 2px solid transparent;
+            border-image: linear-gradient(to right, red, black) 1;
+        }
+        .ruby-count.tier-M {
+            border: 2px solid transparent;
+            border-image: linear-gradient(to right, red, gold) 1;
+        }
+
+        .ruby-count:not(.tier-B)::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.8),
+                transparent
+            );
+            border-radius: 8px;
+            opacity: 0;
+            animation: shine 2s infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .ruby-count:not(.tier-B)::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #2d3748;
+            border-radius: 4px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .ruby-count > * {
+            position: relative;
+            z-index: 3;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .ruby-icon {
+            color: #38b2f8;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .ruby-icon img {
+            width: 25px;
+            height: 25px;
+            transform: translateY(15%);
+        }
+
+        .count {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+        </style>
+                  {% if user.is_authenticated %}
+  <div class="containerents" style="font-family: 'Arial', sans-serif; background-image: linear-gradient(#12121f 0%, #1a1a2e 100%); display: flex; flex-direction: row; justify-content: center; align-items: center; margin: 0;">
+    <div class="notification-bar" style="border-radius: 8px; padding: 15px 30px; color: white; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border-bottom: 2px solid #2d3748;" id="notificationBar">
+        <div class="notification-content">
+      <div class="inner-section" style="display: flex; flex-direction: row; padding: 5px;">
+        <div class="left-section" style="display: flex; flex-direction: column;">
+          <div class="title-container" style="display: flex; align-items: center; gap: 10px;">
+            <div class="title" style="font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">INCOMING</div>
+
+            <div class="dot"></div>
+          </div>
+          <div class="subtitle" style="font-size: 16px; color: #a0aec0; margin-top: 4px;">Ruby Drop</div>
+        </div>
+
+        <div class="right-section" style="display: flex; align-items: center; margin-left: 10px; gap: 15px;">
+<div
+  class="ruby-count tier-{{ user_tier_code }}"
+  style="display: flex;
+         align-items: center;
+         gap: 8px;
+         background-color: #2d3748;
+         padding: 8px 15px;
+         border-radius: 6px;">
+  <div class="ruby-icon" style="color: #38b2f8; font-size: 20px;">
+    <img src="/static/css/images/rubeye.png" style="width: 25px; height: 25px; transform: translate(0%, 15%); display: flex;">
+  </div>
+  <div class="count" id="ruby-count" style="font-size: 18px; font-weight: bold;">
+    2,000
+  </div>
+</div>
+
+    <div class="demo-section">
+        <div class="info-icon">
+            <div class="tooltip">
+                Ruby Multiplier:
+                {{ user.profiledetails.rd_multiplier|default:1 }}x
+            </div>
+            <span>i</span>
+        </div>
+    </div>
+        </div>
+          <div class="sparks">
+  <div class="spark" style="--left: 5%;  --drift-x: -30px; --color: #fef68a; --duration: 2.5s; --delay: 0s;"></div>
+  <div class="spark" style="--left: 15%; --drift-x:  25px; --color: #a0e9ff; --duration: 1.8s; --delay: 0.3s;"></div>
+  <div class="spark" style="--left: 25%; --drift-x: -20px; --color: #ff9ae0; --duration: 2.2s; --delay: 0.6s;"></div>
+  <div class="spark" style="--left: 35%; --drift-x:  40px; --color: #c3ff88; --duration: 3s;   --delay: 0.2s;"></div>
+  <div class="spark" style="--left: 45%; --drift-x: -15px; --color: #ffd47e; --duration: 2.7s; --delay: 0.8s;"></div>
+  <div class="spark" style="--left: 55%; --drift-x:  30px; --color: #ff6b6b; --duration: 1.9s; --delay: 0.4s;"></div>
+  <div class="spark" style="--left: 65%; --drift-x: -35px; --color: #8bd3ff; --duration: 2.4s; --delay: 1s;"></div>
+  <div class="spark" style="--left: 75%; --drift-x:  20px; --color: #d4b0ff; --duration: 2.1s; --delay: 0.5s;"></div>
+  <div class="spark" style="--left: 85%; --drift-x: -25px; --color: #ffee93; --duration: 2.8s; --delay: 0.9s;"></div>
+  <div class="spark" style="--left: 95%; --drift-x:  15px; --color: #ffecb3; --duration: 2s;   --delay: 0.7s;"></div>
+</div>
+
+      </div><!-- INSIDE your notification-bar, at the end: -->
+
+      </div>
+
+      <!-- TIMER & BUTTON -->
+      <div style="margin-top: 12px; display: flex; align-items: center;">
+        <div
+          id="hourly-timer"
+          style="
+            font-family: Arial, sans-serif;
+            background-color: #2d3748;
+            color: #38b2f8;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            display: inline-block;
+          "
+        >30:00</div>
+
+        <button
+          id="ruby-drop-btn"
+          style="
+            display: none;
+            margin-left: 10px;
+            padding: 8px 15px;
+            border-radius: 6px;
+            background-color: #e53e3e;
+            color: white;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 100;
+          "
+        >Ruby Drop</button>
+
+        <audio id="ruby-sound" src="{% static 'css/sounds/dropcollect.mp3' %}" preload="auto"></audio>
+      </div>
+    </div>
+  </div>
+
+{% endif %}
+
     </div>
 {% empty %}
     <div class="user-profile">
@@ -1152,7 +2033,7 @@
             <a href="{% url 'login' %}?next={% url 'showcase:currencymarket' %}" style="text-decoration: none;">
             <div class="user-stats">
                 <div class="user-stat">
-                    <i class="fas fa-gem user-stat-icon" style="color: #ED2221;"></i>
+                     <img src="/static/css/images/rubeye.png" style="width: 20px; height: 20px; transform: translate(0%, 15%); display: flex;">
                     <div class="sellupdate" id="sellupdate">
                         <span id="currency-amount">Login To Earn Rubies!</span>
                     </div>
@@ -1165,9 +2046,226 @@
                 </a>
         </div>
     </div>
+            <br>
+                                    {% if user.is_authenticated %}
+            <div class="containerents" style="font-family: 'Arial', sans-serif; background-image: linear-gradient(#12121f 0%, #1a1a2e 100%); display: flex; flex-direction: row; justify-content: center; align-items: center; margin: 0;">
+        <div class="notification-bar" style="border-radius: 8px; padding: 15px 20px; color: white; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border-bottom: 2px solid #2d3748;">
+        <div class="inner-section" style="display: flex; flex-direction: row; padding: 5px;">
+            <div class="left-section" style="display: flex; flex-direction: column;">
+                <div class="title-container" style="display: flex; align-items: center; gap: 10px;">
+                    <div class="title" style="font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">INCOMING</div>
+                    <div class="dot" style="width: 12px; height: 12px; background-color: #38b2f8; border-radius: 50%;"></div>
+                </div>
+                <div class="subtitle" style="font-size: 16px; color: #a0aec0; margin-top: 4px;">Ruby Drop</div>
+            </div>
+            <div class="right-section" style="display: flex; align-items: center; margin-left: 10px; gap: 15px;">
+                <div class="ruby-count" style="display: flex; align-items: center; gap: 8px; background-color: #2d3748; padding: 8px 15px; border-radius: 6px;">
+                    <div class="ruby-icon" style="color: #38b2f8; font-size: 20px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#38b2f8"/>
+                            <path d="M2 17L12 22L22 17" stroke="#38b2f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="#38b2f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="count" id="ruby-count" style="font-size: 18px; font-weight: bold;">2,000</div>
+                </div>
+                <div class="info-icon" style="width: 24px; height: 24px; background-color: #2d3748; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative;">
+                    <span style="font-size: 14px; font-weight: bold; color: #a0aec0;">i</span>
+                    <div class="tooltip" style="position: absolute; top: 30px; right: 0; width: 150px; background-color: #2d3748; color: white; padding: 10px; border-radius: 6px; font-size: 14px; display: none; z-index: 10; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);">Collect ruby drops to upgrade your items and unlock special features.</div>
+                </div>
+            </div>
+            </div>
+
+<div
+  id="halfhour-timer"
+  style="
+    font-family: Arial, sans-serif;
+    background-color: #2d3748;
+    color: #38b2f8;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: bold;
+    margin-left: 15px;
+    display: inline-block;
+  "
+>30:00</div>
+
+<button
+  id="ruby-drop-btn"
+  style="
+    display: none;
+    margin-left: 10px;
+    padding: 8px 15px;
+    border-radius: 6px;
+    background-color: #e53e3e;
+    color: white;
+    border: none;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+  "
+>Ruby Drop</button>
+
+<!-- replace 'drop-sound.mp3' with your actual audio file -->
+<audio id="ruby-sound" src="drop-sound.mp3" preload="auto"></audio>
+
+<script>
+const INTERVAL_MS = 30 * 1 * 1000;
+const timerEl    = document.getElementById('timer');
+const rubyBtn    = document.getElementById('rubyBtn');
+const rubySound  = document.getElementById('rubySound');
+
+let currentIntervalStart = getIntervalStart();
+window.dropAmount = 0;
+
+function getIntervalStart() {
+
+  return Math.floor(Date.now() / INTERVAL_MS) * INTERVAL_MS;
+}
+
+function handleIntervalRollover(prevStart) {
+  const clickKey    = 'rubyClicks_' + prevStart;
+  const totalClicks = parseInt(localStorage.getItem(clickKey), 10) || 0;
+  let reward;
+
+  if (totalClicks < 100) {
+
+    reward = Math.floor(Math.random() * (25 - 10 + 1)) + 10;
+  } else {
+
+    reward = Math.round(2500 / totalClicks);
+  }
+
+  window.dropAmount = reward;
+
+  localStorage.removeItem(clickKey);
+  return reward;
+}
+
+function updateCountdown() {
+  const now   = Date.now();
+  const start = getIntervalStart();
+
+  if (start !== currentIntervalStart) {
+    const prevStart = currentIntervalStart;
+
+    const drop    = handleIntervalRollover(prevStart);
+    const clicked = localStorage.getItem('rubyClickedInterval') === String(prevStart);
+
+    console.log(
+      `💎 Drop calculated: ${drop}. ` +
+      `User ${clicked ? 'did' : 'did NOT'} click during that window.`
+    );
+
+    currentIntervalStart = start;
+    dropFired = false;
+    localStorage.removeItem('rubyClickedInterval');
+    rubyBtn.classList.remove('clicked');
+    rubyBtn.disabled   = false;
+    rubyBtn.textContent = 'Ruby Drop';
+  }
+
+  const elapsed     = now - start;
+  const remainingMs = INTERVAL_MS - elapsed;
+  const totalSec    = Math.max(0, Math.ceil(remainingMs / 1000));
+
+  const mins = Math.floor(totalSec / 60);
+  const secs = totalSec % 60;
+  timerEl.textContent = `${pad(mins)}:${pad(secs)}`;
+
+  if (totalSec > 0 && totalSec < 120) {
+    rubyBtn.style.display = 'inline-block';
+  } else {
+    rubyBtn.style.display = 'none';
+  }
+}
+
+</script>
+
+<script>
+  function pad(n) {
+    return n.toString().padStart(2, '0');
+  }
+
+  function updateHourlyCountdown() {
+    const now = new Date();
+    const nextHour = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      now.getHours() + 1,
+      0, 0, 0
+    );
+
+    const diffMs   = nextHour - now;
+    const totalSec = Math.ceil(diffMs / 1000);
+    const minutes  = Math.floor(totalSec / 120);
+    const seconds  = totalSec % 60;
+
+    timer.textContent = `${pad(minutes)}:${pad(seconds)}`;
+
+    if (totalSec > 0 && totalSec < 120) {
+      timer.style.backgroundColor = '#48bb78';
+      timer.style.color = '#fff';
+      rubyBtn.style.display = 'inline-block';
+    } else {
+      timer.style.backgroundColor = '#2d3748';
+      timer.style.color = '#38b2f8';
+      rubyBtn.style.display = 'none';
+    }
+  }
+
+  const timer   = document.getElementById('hourly-timer');
+  const rubyBtn = document.getElementById('ruby-drop-btn');
+
+  updateHourlyCountdown();
+  setInterval(updateHourlyCountdown, 1000);
+</script>
+
+        </div>
+    </div>
+
+    <script>
+
+        const infoIcon = document.querySelector('.info-icon');
+        infoIcon.addEventListener('mouseover', () => {
+            const tooltip = infoIcon.querySelector('.tooltip');
+            tooltip.style.display = 'block';
+        });
+
+        infoIcon.addEventListener('mouseout', () => {
+            const tooltip = infoIcon.querySelector('.tooltip');
+            tooltip.style.display = 'none';
+        });
+
+        function updateRubyCount(count) {
+            document.getElementById('ruby-count').textContent = count.toLocaleString();
+        }
+
+        setTimeout(() => {
+            updateRubyCount(2500);
+        }, 3000);
+    </script>
+
+    <script>
+
+        function updateRubyCount(count) {
+            document.getElementById('ruby-count').textContent = count.toLocaleString();
+        }
+
+        setTimeout(() => {
+            updateRubyCount(2500);
+        }, 3000);
+
+        const infoIcon = document.querySelector('.info-icon');
+        infoIcon.addEventListener('click', () => {
+            const tooltip = infoIcon.querySelector('.tooltip');
+            tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
+        });
+    </script>
+        {% endif %}
 {% endfor %}
-
-
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -1360,7 +2458,6 @@
 
                     {% endif %}
 
-
                 {% endfor %}
                         </li>
                         <li class="nav-item">
@@ -1411,10 +2508,8 @@
                         </script>
                         {% endif %}
 
-
                     </ul>
                     </div>
-
 
             </div>
 
@@ -1461,143 +2556,102 @@
                         </ul>
             </div>
             </div>
-            <style>
-.volume {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.volume input[type=range] {
-  display: none;
-}
-.volume .icon-size {
-  font-size: 2rem;
-}
-.volume .bar-hoverbox {
-  padding: 10px 15px;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-.volume .bar-hoverbox:hover {
-  opacity: 1;
-  cursor: pointer;
-}
-.volume .bar {
-  background: #999;
-  height: 7px;
-  width: 120px;
-  border-radius: 15px;
-  overflow: hidden;
-  pointer-events: none;
-}
-.volume .bar .bar-fill {
-  background: #FFF;
-  width: 0%;
-  height: 100%;
-  background-clip: border-box;
-  pointer-events: none;
-}
-            </style>
-<div class="volume">
-  <input type="range" min="0" max="100" value="50" class="volume-range">
+
+                <div class="volume" style="display: flex; align-items: center; gap: 10px; justify-content: center;">
   <div class="icon">
     <i class="fa fa-volume-up icon-size" aria-hidden="true"></i>
   </div>
+
+  <input
+    type="range"
+    min="0"
+    max="100"
+    value="50"
+    id="volume-slider"
+    step="1"
+    class="volume-range"
+    aria-label="Volume slider"
+  >
+  <span class="volume-value">50</span>
+
   <div class="bar-hoverbox">
     <div class="bar">
-      <div class="bar-fill"></div>
+      <div class="bar-fill" style="width:50%"></div>
     </div>
   </div>
 </div>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-  const range = document.querySelector(".volume input[type=range]");
+document.addEventListener('DOMContentLoaded', () => {
+  const slider    = document.getElementById('volume-slider');
+  const fill      = document.querySelector('.bar-fill');
+  const ticker    = document.querySelector('.volume-value');
+  const icon      = document.querySelector('.volume .icon i');
+  const mediaEls  = () => document.querySelectorAll('audio, video');
 
-  const barHoverBox = document.querySelector(".volume .bar-hoverbox");
-  const fill = document.querySelector(".volume .bar .bar-fill");
+  // helper: update all UI + media based on a percentage [0‐100]
+  function applyVolumePercent(pct) {
+    // 1) clamp
+    pct = Math.max(0, Math.min(pct, 100));
+    // 2) slider, fill, ticker
+    slider.value = pct;
+    fill.style.width    = pct + '%';
+    ticker.textContent  = pct;
+    // 3) icon logic
+    icon.style.color = '';
+    if (pct === 0) {
+      icon.className = 'fa fa-volume-off';
+    } else if (pct <= 25) {
+      icon.className = 'fa fa-volume-down';
+    } else if (pct <= 50) {
+      icon.className = 'fa fa-volume';
+    } else if (pct <= 75) {
+      icon.className = 'fa fa-volume-up';
+    } else {
+      icon.className = 'fa fa-volume-up';
+      icon.style.color = 'red';
+    }
+    // 4) set actual media.volume (0.0–1.0)
+    const frac = pct / 100;
+    mediaEls().forEach(m => m.volume = frac);
+  }
 
-  range.addEventListener("change", e => {
-    console.log("value", e.target.value);
+  // --- 1) On load, read saved volume and apply ---
+  let saved = localStorage.getItem('volume');
+  let initialPct = saved !== null
+                 ? Math.round(parseFloat(saved) * 100)
+                 : 100;
+  applyVolumePercent(initialPct);
+
+  // --- 2) On slider input, update + persist ---
+  slider.addEventListener('input', e => {
+    const pct = parseInt(e.target.value, 10);
+    applyVolumePercent(pct);
+    // save fraction [0.0–1.0]
+    localStorage.setItem('volume', (pct/100).toString());
   });
 
-  const setValue = value => {
-    fill.style.width = value + "%";
-    range.setAttribute("value", value);
-    range.dispatchEvent(new Event("change"));
-  };
-
-  // Дефолт
-  setValue(range.value);
-
-  const calculateFill = e => {
-    // Отнимаем ширину двух 15-пиксельных паддингов из css
-    let offsetX = e.offsetX;
-
-    if (e.type === "touchmove") {
-      offsetX = e.touches[0].pageX - e.touches[0].target.offsetLeft;
-    }
-
-    const width = e.target.offsetWidth - 30;
-
-    setValue(
-    Math.max(
-    Math.min(
-    // Отнимаем левый паддинг
-    (offsetX - 15) / width * 100.0,
-    100.0),
-
-    0));
-
-
-  };
-
-  let barStillDown = false;
-
-  barHoverBox.addEventListener("touchstart", e => {
-    barStillDown = true;
-
-    calculateFill(e);
-  }, true);
-
-  barHoverBox.addEventListener("touchmove", e => {
-    if (barStillDown) {
-      calculateFill(e);
-    }
-  }, true);
-
-  barHoverBox.addEventListener("mousedown", e => {
-    barStillDown = true;
-
-    calculateFill(e);
-  }, true);
-
-  barHoverBox.addEventListener("mousemove", e => {
-    if (barStillDown) {
-      calculateFill(e);
+  // --- 3) Listen for storage events (other tabs) ---
+  window.addEventListener('storage', e => {
+    if (e.key === 'volume') {
+      const newFrac = parseFloat(e.newValue);
+      const newPct  = Math.round(newFrac * 100);
+      applyVolumePercent(newPct);
     }
   });
 
-  barHoverBox.addEventListener("wheel", e => {
-    const newValue = +range.value + e.deltaY * 0.5;
-
-    setValue(Math.max(
-    Math.min(
-    newValue,
-    100.0),
-
-    0));
-
-  });
-
-  document.addEventListener("mouseup", e => {
-    barStillDown = false;
-  }, true);
-
-  document.addEventListener("touchend", e => {
-    barStillDown = false;
+  // --- 4) If media elements get added later (e.g. via AJAX), make sure
+  //     they pick up the current volume ---
+  document.addEventListener('play', ev => {
+    if (ev.target instanceof HTMLMediaElement) {
+      const currentFrac = parseFloat(localStorage.getItem('volume') ?? '1');
+      ev.target.volume = currentFrac;
+    }
   }, true);
 });
 </script>
+
+
+
             <div class="collection">
                 <h2 class="collection-title">My Collection</h2>
                 <button class="view-collection">
@@ -1628,7 +2682,6 @@
         const navbar = document.querySelector(".main-menu");
         let isCollapsed = false;
 
-        // Function to update navbar position
         function updateNavbarPosition() {
             if (sidebar.classList.contains("sidebar-hidden")) {
                 navbar.style.left = "0";
@@ -1639,7 +2692,6 @@
             }
         }
 
-        // Function to handle sidebar state changes
         function setSidebarState(state) {
             sidebar.style.display = "block";
             sidebar.classList.remove("sidebar-hidden", "sidebar-collapsed");
@@ -1671,19 +2723,18 @@
             updateNavbarPosition();
         }
 
-        // Handle click events
         let lastClickTime = 0;
-        const doubleClickDelay = 300; // milliseconds
+        const doubleClickDelay = 300;
 
         sidebarToggle.addEventListener("click", (e) => {
             const currentTime = new Date().getTime();
             const timeDiff = currentTime - lastClickTime;
 
             if (timeDiff < doubleClickDelay) {
-                // Double click detected
+
                 setSidebarState("hidden");
             } else {
-                // Single click handling
+
                 if (sidebar.classList.contains("sidebar-hidden")) {
                     setSidebarState("expanded");
                 } else if (isCollapsed) {
@@ -1696,10 +2747,8 @@
             lastClickTime = currentTime;
         });
 
-        // Initialize sidebar state
         setSidebarState("hidden");
 
-        // Handle window resize
         let resizeTimer;
         window.addEventListener("resize", () => {
             clearTimeout(resizeTimer);
@@ -1751,7 +2800,6 @@ document.addEventListener("DOMContentLoaded", function() {
             img.remove();
             c.sound.play();
 
-            // Send both actual_value and multiplier
             fetch("{% url 'showcase:update_currency' %}", {
                 method: "POST",
                 headers: {
@@ -1773,7 +2821,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             });
 
-            // Cooldown of (1 / spawnProb / 100) seconds
             const msCd = (1 / c.spawnProb / 100) * 1000;
             setTimeout(() => { cooldown = false; }, msCd);
         });
@@ -1781,7 +2828,6 @@ document.addEventListener("DOMContentLoaded", function() {
         document.body.appendChild(img);
     }
 
-    // Spawn check every second
     setInterval(() => {
         if (clickableActive || cooldown) return;
         for (let c of clickables) {
@@ -1793,7 +2839,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }, 1000);
 
-    // Sanity‑check spawn
     if (clickables.length) {
         spawnClickable(clickables[0]);
         console.log("🔹 forced spawn for testing");
@@ -1809,13 +2854,11 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 </script>
 
-
 {% if user.is_authenticated %}
 <div id="preferencescontainer" style="display: none;  position: fixed; z-index: 30; top: 40%; background: rgba(0, 0, 0, 0.5); padding: 20px; border-radius: 15px;" class="preference-popup">
     {% include 'mypreferences.html' %}
 </div>
 
 {% endif %}
-
 
 </body>

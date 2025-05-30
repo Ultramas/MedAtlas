@@ -1693,7 +1693,6 @@ input:checked + .slider:before {
     padding: 4px 4px  !important;
     border: none !important;
 </style>
- {% include 'navtrove.html' %}
   <canvas id="particle-canvas" style="z-index:-5"></canvas>
 
   <!-- Main container -->
@@ -3187,7 +3186,7 @@ function initEventListeners() {
 
 
 {% else %}
-
+<head>
     <style>
     /* Add this to the existing <style> tag or create a new one if it doesn't exist */
     .copyright-section {
@@ -3271,168 +3270,6 @@ function initEventListeners() {
             color: var(--primary);
             text-decoration: none;
             background-color: transparent;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
-            position: relative;
-        }
-
-        .logo::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .logo-icon {
-            color: var(--accent);
-            font-size: 2rem;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
-        }
-
-        .nav-links {
-            margin-left: auto;
-            display: flex;
-            gap: 3rem;
-        }
-
-        .nav-links a {
-
-    color: var(--primary);
-            text-decoration: none;
-            position: relative;
-            padding: 0.5rem 0;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            /*font-size: 1rem;*/
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-    .logo-icon h1::after {
-        content: '';
-        position: absolute;
-        bottom: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 200px;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-    }
-        .container {
-            display: flex;
-            gap: 3rem;
-            padding: 3rem;
-            max-width: 1800px;
-        }
-
-        .sidebar {
-            width: 320px;
-            flex-shrink: 0;
-        }
-
-        .user-profile {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .user-profile::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-
-        .profile-picture {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid var(--accent2);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-
-        .profile-picture img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .user-info {
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .username {
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            color: var(--primary);
-            margin-bottom: 0.75rem;
-            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
-        }
-
-        .user-stats {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            font-size: 1rem;
-        }
-
-        .user-stat {
-            background: rgba(191, 151, 255, 0.1);
-            padding: 0.75rem 1.25rem;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid var(--primary);
-        }
-
-        .user-stat-icon {
-            font-size: 1.5rem;
         }
 
         .filters {
@@ -3554,16 +3391,6 @@ function initEventListeners() {
             position: absolute;
             bottom: -15px;
             left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
-        }
-
-        .nav-links h1::after {
-            content: '';
-            position: absolute;
-            left: 10%;
             transform: translateX(-50%);
             width: 200px;
             height: 2px;
@@ -3721,7 +3548,7 @@ function initEventListeners() {
             width: 100%;
             max-width: 1200px;
             margin: auto;
-
+            justify-content: center;
         }
 
         @media (max-width: 1200px) {
@@ -3884,10 +3711,9 @@ p.blog-meta span {
 </script>
 
 
-{% include 'navtrove.html' %}
 
   <main class="main-content" style="">
-                                            {% if profile %}
+            {% if profile %}
                     {% if profile.user == current_user %}
             <h1>My Profile - (<span id="stock-count">{{ user.username }}</span>)</h1>
             {% else %}
@@ -3899,7 +3725,7 @@ p.blog-meta span {
 
                 {% if profile %}
                     {% if profile.avatar %}
-                    <div class="inventory-item">
+                    <div class="inventory-item" style="margin-bottom: 10%;">
                         <div class="legendary-icon">🐉</div>
                         <div class="pokemon-image">
                             <img src="{{profile.avatar.url}}" alt="{{profile.choice_text}} Image">

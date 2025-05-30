@@ -1,8 +1,6 @@
+from celery import shared_task
+from .models import ProfileDetails
 import random
-from django.utils import timezone
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
-from django_apscheduler.jobstores import DjangoJobStore
 from .models import RubyDrop, RubyDropInstance
 
 RARITY_WEIGHTS = {
@@ -49,3 +47,8 @@ def create_instance_for_rubydrop(rubydrop_id):
         opentime=rubydrop.opentime,
         is_active=rubydrop.is_active,
     )
+
+
+@shared_task
+def expire_free_for(profile_id):
+    ProfileDetails.objects.filter(pk=profile_id).update(free=False)

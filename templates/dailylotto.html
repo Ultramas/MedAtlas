@@ -118,6 +118,7 @@
         border: 1px solid rgba(0, 240, 255, 0.2);
         backdrop-filter: blur(10px);
         padding: 30px;
+        width: 750px;
     }
 
     .ticket-card::before {
@@ -536,7 +537,194 @@
             font-size: 0.6rem;
         }
     }
-</style>
+
+
+    body {
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            min-height: 100vh;
+            display: flex;
+            gap: 60px;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .lottery-pot {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            margin: auto;
+            align-items: center;
+            justify-content: center;
+            animation: ebb 4s ease-in-out infinite;
+        }
+
+        .innere-pot {
+            width: 160px;
+            height: 160px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+            border-radius: 50%;
+            position: relative;
+            box-shadow:
+                0 0 30px rgba(255, 215, 0, 0.6),
+                0 0 60px rgba(255, 215, 0, 0.4),
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
+            animation: pulse 2s ease-in-out infinite;
+            border: 4px solid #b8860b;
+        }
+
+        .innere-pot::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+            animation: rotate 3s linear infinite;
+            z-index: -1;
+        }
+
+        .pot-amount {
+            position: absolute;
+            color: #2c1810;
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+            z-index: 10;
+            animation: textPulse 2s ease-in-out infinite;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #ffd700, #ffed4e);
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 6px rgba(255, 215, 0, 0.8);
+        }
+
+        .particle::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow:
+                    0 0 30px rgba(255, 215, 0, 0.6),
+                    0 0 60px rgba(255, 215, 0, 0.4),
+                    inset 0 0 20px rgba(255, 255, 255, 0.2);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow:
+                    0 0 40px rgba(255, 215, 0, 0.8),
+                    0 0 80px rgba(255, 215, 0, 0.6),
+                    inset 0 0 25px rgba(255, 255, 255, 0.3);
+            }
+        }
+
+        @keyframes ebb {
+            0%, 100% {
+                transform: scale(1);
+            }
+            25% {
+                transform: scale(1.02);
+            }
+            50% {
+                transform: scale(1.04);
+            }
+            75% {
+                transform: scale(1.02);
+            }
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes textPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
+        }
+
+        @keyframes particleMove {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.2);
+            }
+        }
+    </style>
+
+<!-- at bottom of dailylotto.html, after jQuery or vanilla JS import -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const potEl = document.querySelector(".lottery-pot");
+  const innerEl = potEl.querySelector(".inner-pot");
+  const amountEl = potEl.querySelector(".pot-amount");
+
+  // read initial prize from data attribute & render
+  let currentPrize = parseInt(potEl.dataset.initialPrize, 10) || 0;
+  renderPot(currentPrize);
+
+  document.getElementById("spin-button").addEventListener("click", () => {
+    const gameId = +event.currentTarget.dataset.gameId;
+    fetch("{% url 'showcase:spin_game' %}", {
+      method: "POST",
+      body: JSON.stringify({ game_id: gameId }),
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) {
+        return alert(data.error || "Something went wrong");
+      }
+      // update both the displayed currency and the pot
+      renderPot(data.lottery_prize);
+    })
+    .catch(console.error);
+  });
+
+  function renderPot(prize) {
+    amountEl.textContent = "$" + prize.toLocaleString();
+    // if you have some cap, e.g. 10k is 100%, otherwise just show
+    const cap = 10000;
+    const pct = Math.min(prize / cap * 100, 100);
+    innerEl.style.width = pct + "%";
+  }
+});
+</script>
+
 
 {% for PostingView in Background %}
 <img class="backgroundimages" src="{{PostingView.cover.url}}" alt="{{ PostingView.backgroundtitle }}">
@@ -550,7 +738,10 @@
 <div class="cosmic-holo">
     <!-- Cosmic elements will be added with JavaScript -->
 </div>
-
+<br>
+<br>
+<br>
+<br>
 <div class="ticket-container">
     <div class="ticket-card">
         <div class="ticket-decoration">
@@ -586,6 +777,143 @@
             </div>
         </form>
     </div>
+
+  <div class="lottery-pot" data-initial-prize="{{ lottery_prize }}">
+    <div class="innere-pot"></div>
+    <span class="pot-amount">{{ lottery_prize }}</span>
+  </div>
+
+    <script>
+        class ParticleSystem {
+            constructor(potElement) {
+                this.pot = potElement;
+                this.particles = [];
+                this.init();
+            }
+
+            init() {
+                this.createParticles();
+                this.animate();
+            }
+
+            createParticles() {
+                setInterval(() => {
+                    this.addParticle();
+                }, 150);
+            }
+
+            addParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+
+                // Random starting position around the pot
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 300 + Math.random() * 200;
+                const potRect = this.pot.getBoundingClientRect();
+                const potCenterX = potRect.left + potRect.width / 2;
+                const potCenterY = potRect.top + potRect.height / 2;
+
+                const startX = potCenterX + Math.cos(angle) * distance - window.scrollX;
+                const startY = potCenterY + Math.sin(angle) * distance - window.scrollY;
+
+                particle.style.left = startX + 'px';
+                particle.style.top = startY + 'px';
+                particle.style.position = 'fixed';
+
+                document.body.appendChild(particle);
+
+                this.particles.push({
+                    element: particle,
+                    x: startX,
+                    y: startY,
+                    targetX: potCenterX - window.scrollX,
+                    targetY: potCenterY - window.scrollY,
+                    life: 1.0,
+                    speed: 0.02 + Math.random() * 0.01
+                });
+            }
+
+            animate() {
+                this.particles.forEach((particle, index) => {
+                    // Move towards the pot center
+                    const dx = particle.targetX - particle.x;
+                    const dy = particle.targetY - particle.y;
+
+                    particle.x += dx * particle.speed;
+                    particle.y += dy * particle.speed;
+                    particle.life -= 0.008;
+
+                    // Update particle position and opacity
+                    particle.element.style.left = particle.x + 'px';
+                    particle.element.style.top = particle.y + 'px';
+                    particle.element.style.opacity = particle.life;
+                    particle.element.style.transform = `scale(${particle.life})`;
+
+                    // Remove particle when it reaches the center or fades out
+                    if (particle.life <= 0 || (Math.abs(dx) < 5 && Math.abs(dy) < 5)) {
+                        particle.element.remove();
+                        this.particles.splice(index, 1);
+                    }
+                });
+
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // Initialize particle systems for each pot
+        document.addEventListener('DOMContentLoaded', () => {
+            const pots = document.querySelectorAll('.lottery-pot');
+            pots.forEach(pot => {
+                new ParticleSystem(pot);
+            });
+
+            // Add random sparkle effects
+            setInterval(() => {
+                pots.forEach(pot => {
+                    if (Math.random() < 0.3) {
+                        const sparkle = document.createElement('div');
+                        sparkle.style.position = 'absolute';
+                        sparkle.style.width = '3px';
+                        sparkle.style.height = '3px';
+                        sparkle.style.background = '#fff';
+                        sparkle.style.borderRadius = '50%';
+                        sparkle.style.boxShadow = '0 0 10px #ffd700';
+                        sparkle.style.left = Math.random() * 160 + 'px';
+                        sparkle.style.top = Math.random() * 160 + 'px';
+                        sparkle.style.animation = 'sparkle 1s ease-out forwards';
+
+                        pot.querySelector('.inner-pot').appendChild(sparkle);
+
+                        setTimeout(() => {
+                            if (sparkle.parentNode) {
+                                sparkle.remove();
+                            }
+                        }, 1000);
+                    }
+                });
+            }, 500);
+        });
+
+        // Add sparkle animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes sparkle {
+                0% {
+                    opacity: 0;
+                    transform: scale(0) rotate(0deg);
+                }
+                50% {
+                    opacity: 1;
+                    transform: scale(1) rotate(180deg);
+                }
+                100% {
+                    opacity: 0;
+                    transform: scale(0) rotate(360deg);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 
     {% if img_obj %}
     <div class="success-message">
@@ -649,8 +977,7 @@
 
         // Run glow effect every 2 seconds
         setInterval(pulseGlowEffect, 2000);
-        
-        // Generate random ticket serial number
+
         const generateSerial = () => {
             const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             let serial = '';

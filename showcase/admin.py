@@ -17,7 +17,8 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     SpinPreference, WithdrawClass, CommerceExchange, ExchangePrize, BattleGame, Membership, Monstrosity, \
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
     TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences, GiftCode, \
-    GiftCodeRedemption, FavoriteChests, IndividualChestStatistics, TotalChestStatistics, RubyDrop
+    GiftCodeRedemption, FavoriteChests, IndividualChestStatistics, TotalChestStatistics, RubyDrop, Season, Tier, \
+    Benefits
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -250,6 +251,7 @@ admin.site.register(PrizePool, PrizePoolAdmin)
 
 
 class LotteryTicketAdmin(admin.ModelAdmin):
+    list_display = ('user', 'lottery', 'lottery_number', 'is_active', 'mfg_date')
     fieldsets = (
         ('Lottery Information - Categorial Descriptions', {
             'fields': ('name', 'flavor_text', 'file', 'user', 'lottery', 'lottery_number', 'image_length', 'image_width', 'is_active')
@@ -262,9 +264,10 @@ admin.site.register(LotteryTickets, LotteryTicketAdmin)
 
 
 class LotteryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'price', 'prize', 'is_active',)
     fieldsets = (
         ('Lottery Information - Categorial Descriptions', {
-            'fields': ('name', 'flavor_text', 'file_path', 'slug', 'maximum_tickets', 'price', 'currency', 'file', 'image_length', 'image_width', 'is_active')
+            'fields': ('name', 'flavor_text', 'file_path', 'slug', 'maximum_tickets', 'price', 'prize', 'currency', 'file', 'image_length', 'image_width', 'is_active')
         }),
     )
     readonly_fields = ('mfg_date',)
@@ -273,11 +276,54 @@ class LotteryAdmin(admin.ModelAdmin):
 admin.site.register(Lottery, LotteryAdmin)
 
 
+class BenefitsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Benefits Information', {
+            'fields': ('benefit', 'is_active',)
+        }),
+    )
+
+
+class BenefitsInline(admin.TabularInline):
+    model = Benefits
+    extra = 1
+
+
+class TierAdmin(admin.ModelAdmin):
+    list_display = ('tier', 'lower_bound', 'upper_bound', 'is_active',)
+    inlines = [BenefitsInline]
+    fieldsets = (
+        ('Membership Information', {
+            'fields': ('tier', 'file', 'description', 'image_length', 'image_width',
+                       'lower_bound', 'upper_bound', 'timeframe', 'is_active',)
+        }),
+    )
+    readonly_fields = ('mfg_date',)
+    @admin.display(description='Sprite')
+    def file_thumbnail(self, obj):
+        if not obj.file:
+            return "-"
+        return format_html(
+            '<img src="{}" style="height: 50px; width: auto;"/>',
+            obj.file.url
+        )
+
+    list_display = (
+        'tier', 'lower_bound','upper_bound',
+        'is_active', 'file_thumbnail',
+    )
+
+
+admin.site.register(Tier, TierAdmin)
+
+
 from .models import VoteQuery, VoteOption, Ballot
+
 
 class VoteOptionInline(admin.TabularInline):
     model = VoteOption
     extra = 2
+
 
 class authorAdmin(admin.ModelAdmin):
     list_display = ('user', 'category', 'is_active', 'mfg_date')
@@ -288,6 +334,7 @@ class authorAdmin(admin.ModelAdmin):
             'fields': ('user', 'description', 'category', 'is_active')
         }),
     )
+
 
 admin.site.register(VoteQuery, authorAdmin)
 
@@ -1525,7 +1572,6 @@ class EventAdminForm(forms.ModelForm):
         model = Event
         fields = '__all__'
 
-    # Generate choices for the time field (every hour and minute)
     hours = [(f'{hour:02d}:{minute:02d}', f'{hour:02d}:{minute:02d}')
              for hour in range(24) for minute in range(0, 60, 15)]
     time = forms.ChoiceField(choices=hours)
@@ -1547,11 +1593,31 @@ class EventAdmin(admin.ModelAdmin):
             'classes': ('collapse-open',),
         }),
     )
-    # Other configurations for your admin
 
 
-# Register your Event model with the custom admin
 admin.site.register(Event, EventAdmin)
+
+
+class SeasonAdmin(admin.ModelAdmin):
+    form = EventAdminForm
+    fieldsets = (
+        ('Season Information - Categorial Descriptions', {
+            'fields': ('name', 'season_length', 'description',),
+            'classes': ('collapse-open',),
+        }),
+        ('Season Information - Image Display', {
+            'fields': ('image', 'image_length', 'image_width',),
+            'classes': ('collapse-open',),
+        }),
+        ('Season Information - Attributes', {
+            'fields': ('date', 'time', 'slug',),
+            'classes': ('collapse-open',),
+        }),
+    )
+    readonly_fields = ('date_and_time',)
+
+
+admin.site.register(Season, SeasonAdmin)
 
 
 class FaviconBaseAdmin(admin.ModelAdmin):
@@ -1888,6 +1954,7 @@ class ClickableAdmin(admin.ModelAdmin):
 
 admin.site.register(Clickable, ClickableAdmin)
 
+
 class UserClickableAdmin(admin.ModelAdmin):
     fieldsets = (
         (' User Clickable Information - Categorial Description', {
@@ -1898,6 +1965,7 @@ class UserClickableAdmin(admin.ModelAdmin):
 
 
 admin.site.register(UserClickable, UserClickableAdmin)
+
 
 class ExchangePrizeAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -2547,15 +2615,34 @@ class UserTypeFilter(admin.SimpleListFilter):
             return queryset.filter(user_id__in=guest_ids)
         return queryset
 
+
 class ProfileDetailsAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Profile Information', {
+        ('Profile Information - User', {
             'fields': (
-                'user', 'email', 'avatar', 'alternate', 'about_me', 'level', 'unlocked_daily_chests', 'subscription',
-                'currency', 'currency_amount', 'total_currency_amount', 'total_currency_spent', 'rubies_spent',
+                'user', 'email', 'about_me', 'level', 'unlocked_daily_chests', 'subscription', 'is_active'
+            )
+        }),
+        ('Profile Information - Avatar', {
+            'fields': (
+                'avatar', 'alternate',
+            )
+        }),
+        ('Profile Information - Currency', {
+            'fields': (
+                'currency', 'currency_amount', 'total_currency_amount', 'total_currency_spent_30', 'total_currency_spent', 'total_card_money_spent', 'rubies_spent',
+            )
+        }),
+        ('Profile Information - Cards Hit', {
+            'fields': (
                 'green_cards_hit', 'yellow_cards_hit', 'orange_cards_hit', 'red_cards_hit', 'black_cards_hit',
-                'gold_cards_hit', 'red_gold_cards_hit', 'cards_counter', 'times_subtract_called', 'monstrosity', 'seller', 'trader', 'membership',
-                'position', 'is_active'
+                'gold_cards_hit', 'red_gold_cards_hit', 'cards_counter',
+            )
+        }),
+        ('Profile Information - Miscellaneous Statistics', {
+            'fields': (
+                'times_subtract_called', 'monstrosity',
+                'seller', 'trader', 'membership', 'tier', 'free', 'position'
             )
         }),
     )
@@ -2581,10 +2668,9 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
     get_membership.short_description = 'Membership'
 
 
-
 class LevelInline(admin.TabularInline):
     model = Experience.level.through
-    extra = 1  # Number of blank fields for new levels
+    extra = 1
 
 
 class ExperienceAdmin(admin.ModelAdmin):

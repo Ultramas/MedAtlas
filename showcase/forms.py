@@ -1187,6 +1187,7 @@ class StoreViewTypeForm(forms.ModelForm):
 
 class GameRoomViewTypeForm(forms.ModelForm):
     slug = forms.CharField(widget=forms.HiddenInput())
+
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
@@ -1217,6 +1218,35 @@ class GameRoomViewTypeForm(forms.ModelForm):
 
 class ProfileViewTypeForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.pk and self.instance.type:
+            self.fields['type'].initial = self.instance.type
+
+        self.fields['type'].widget.attrs.update({'onchange': 'this.form.submit();'})
+
+    class Meta:
+        model = StoreViewType
+        fields = ('type',)
+        widgets = {
+            'type': forms.Select(choices=StoreViewType.VIEW_TYPE_CHOICES),
+        }
+
+    def save(self, commit=True):
+        user = self.request.user if self.request.user.is_authenticated else None
+        storeviewtype = super().save(commit=False)
+        if user and isinstance(user, User):
+            storeviewtype.user = user
+        else:
+            storeviewtype.user = None
+        if commit:
+            storeviewtype.save()
+        return storeviewtype
+
+
+class CurrencyViewTypeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)

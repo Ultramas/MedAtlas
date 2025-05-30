@@ -22,6 +22,21 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/spinboost.css' %}">
      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
      <script defer src="{% static 'css/js/spinboostscript.js' %}"></script>
+<script>
+// Immediately after your volume‑slider code, before any new Audio() calls:
+(function(){
+  const OriginalAudio = window.Audio;
+  window.Audio = function(src){
+    const a = new OriginalAudio(src);
+    // apply saved volume (0.0–1.0)
+    a.volume = parseFloat(localStorage.getItem('volume') ?? '1');
+    return a;
+  };
+  // preserve prototype chain so instanceof still works:
+  window.Audio.prototype = OriginalAudio.prototype;
+  window.Audio.prototype.constructor = window.Audio;
+})();
+</script>
 
     <script>
 $(document).ready(function() {
@@ -3732,6 +3747,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <br>
 <br>
 <br>
+{% if season %}
+{% if season.is_active %}
+  <p>🎉 This season is live!</p>
+{% else %}
+  <p>Coming soon …</p>
+{% endif %}
+{% endif %}
 
   <!-- Background particle effect -->
   <canvas id="particle-canvas"></canvas>
