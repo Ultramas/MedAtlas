@@ -37,8 +37,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     SpinnerChoiceRenders, DefaultAvatar, Achievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
     UserNotification, TopHits, Card, Clickable, GameChoice, Robot, MyPreferences, UserClickable, GiftCodeRedemption, \
-    GiftCode, \
-    IndividualChestStatistics, FavoriteChests, Season, Tier
+    GiftCode, IndividualChestStatistics, FavoriteChests, Season, Tier
 from .models import Idea
 from .models import VoteQuery
 from .models import StaffApplication
@@ -1611,11 +1610,13 @@ class CreatePostView(CreateView):
     template_name = "backgroundimagechange.html"
     success_url = reverse_lazy("index")
 
+
 class ECreatePostView(CreateView):
     model = EBackgroundImage
     form_class = EBackgroundImagery
     template_name = "ebackgroundimagechange.html"
     success_url = reverse_lazy("ehome")
+
 
 class ShowcaseBackgroundView(BaseView):
     model = ShowcaseBackgroundImage
@@ -1683,11 +1684,13 @@ class ShowcaseBackgroundView(BaseView):
 
         return context
 
+
 class ShowcaseCreatePostView(CreateView):
     model = ShowcaseBackgroundImage
     form_class = ShowcaseBackgroundImagery
     template_name = "showcasebackgroundimagechange.html"
     success_url = reverse_lazy("showcase")
+
 
 def create_responding_tradeoffer(request, tradeoffer_pk):
     related_offer = TradeOffer.objects.get(pk=tradeoffer_pk)
@@ -1699,6 +1702,7 @@ def create_responding_tradeoffer(request, tradeoffer_pk):
     else:
         form = RespondingTradeOfferForm(related_offer=related_offer)
     return render(request, 'tradingcentral.html', {'form': form})
+
 
 class ChatBackgroundView(BaseView):
     model = ChatBackgroundImage
@@ -1868,6 +1872,7 @@ class ChatBackgroundView(BaseView):
 
 from django.views.generic import ListView
 
+
 class FriendSearchResultsView(ListView):
     model = Friend
     template_name = 'friendssearchresultview.html'
@@ -1884,7 +1889,6 @@ class FriendSearchResultsView(ListView):
             print('item_list is empty')
         return item_list
 
-from django.shortcuts import render
 
 def friendlysearchresultview(request):
     search_term = request.GET.get('search', '')
@@ -1896,6 +1900,7 @@ def friendlysearchresultview(request):
         item_list = Friend.objects.none()
     context = {'item_list': item_list}
     return render(request, 'friendssearchresultview.html', context)
+
 
 class SupportChatBackgroundView(BaseView):
     model = SupportChatBackgroundImage
@@ -1951,6 +1956,7 @@ class SupportChatBackgroundView(BaseView):
 
         return context
 
+
 class PlaceWagerView(FormView):
     template_name = 'template_name.html'
     form_class = WagerForm
@@ -1982,6 +1988,7 @@ def update_wager(request, wager_id):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
 def create_spinner_choice_render_automatically(request):
     nonce = random.randint(0, 1000000)
     choice = Choice.objects.filter(Q(lower_nonce__lte=nonce) & Q(upper_nonce__gte=nonce)).first()
@@ -2006,9 +2013,11 @@ def create_spinner_choice_render_automatically(request):
     else:
         return render(request, 'error.html', {'message': 'No choice found for the generated nonce'})
 
+
 def spinner_choice_render_list(request):
     spinner_choice_renders = SpinnerChoiceRenders.objects.all()
     return render(request, 'spinner_choice_render_list.html', {'spinner_choice_renders': spinner_choice_renders})
+
 
 def spinner_choice_render_list(request):
     spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=self.game)
@@ -2749,6 +2758,144 @@ class PreferencesDoneView(ListView):
         context['form'] = EmailForm()
 
         newprofile = Game.objects.filter(is_active=1, daily=True)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
+
+class TierView(BaseView):
+    model = Tier
+    template_name = "tiers.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['UpdateProfile'] = UpdateProfile.objects.all()
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['Tiers'] = Tier.objects.filter(is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
+
+class ClickableView(BaseView):
+    model = Clickable
+    template_name = "clickable.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['UpdateProfile'] = UpdateProfile.objects.all()
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['Tiers'] = Tier.objects.filter(is_active=1)
+        context['clickables'] = Clickable.objects.filter(is_active=1)
+
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+
         context['Profiles'] = newprofile
 
         for newprofile in context['Profiles']:

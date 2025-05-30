@@ -158,6 +158,8 @@ urlpatterns = [
     # works at the cost of the blog display
     path('makeacard/', views.UploadACardView.as_view(), name='makeacard'),
     path('users/', views.UserBackgroundView.as_view(), name='users'),
+    path('tiers/', views.TierView.as_view(), name='tiers'),
+    path('clickable/', views.ClickableView.as_view(), name='clickable'),
     path('pollquestions/', views.PollQuestionsView.as_view(), name='pollquestions'),
     path('<int:question_id>/polldetail', views.PollDetailView.as_view(), name='polldetail'),
     path('<int:question_id>/pollresults/', views.PollResultsView.as_view(), name='pollresults'),

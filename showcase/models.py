@@ -1518,6 +1518,7 @@ class Ascension(models.Model):
         verbose_name = "Ascension"
         verbose_name_plural = "Ascensions"
 
+
 class Clickable(models.Model):
     name = models.CharField(max_length=200)
     image = models.ImageField(upload_to='images/', verbose_name="Clickable Image")
