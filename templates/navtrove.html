@@ -1224,7 +1224,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const rubySound = document.getElementById('ruby-sound');
   console.log('Button found?', !!rubyBtn);
 
-  const INTERVAL_MS = 30 * 1000;
+  const INTERVAL_MS = 30 * 60 * 1000;
 
   function getIntervalStart() {
     return Math.floor(Date.now() / INTERVAL_MS) * INTERVAL_MS;
@@ -2044,9 +2044,67 @@ function handleIntervalRollover(prevStart) {
                 </div>
             </div>
                 </a>
+
+
+         <div class="containerents" style="font-family: 'Arial', sans-serif; background-image: linear-gradient(#12121f 0%, #1a1a2e 100%); display: flex; flex-direction: row; justify-content: center; align-items: center; margin: 0;">
+    <div class="notification-bar" style="border-radius: 8px; padding: 15px 30px; color: white; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border-bottom: 2px solid #2d3748;" id="notificationBar">
+        <div class="notification-content">
+      <div class="inner-section" style="display: flex; flex-direction: row; padding: 5px;">
+        <div class="left-section" style="display: flex; flex-direction: column;">
+          <div class="title-container" style="display: flex; align-items: center; gap: 10px;">
+            <div class="title" style="font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">INCOMING</div>
+
+            <div class="dot"></div>
+          </div>
+          <div class="subtitle" style="font-size: 16px; color: #a0aec0; margin-top: 4px;">Ruby Drop</div>
+        </div>
+
+        <div class="right-section" style="display: flex; align-items: center; margin-left: 10px; gap: 15px;">
+<div
+  class="ruby-count tier-{{ user_tier_code }}"
+  style="display: flex;
+         align-items: center;
+         gap: 8px;
+         background-color: #2d3748;
+         padding: 8px 15px;
+         border-radius: 6px;">
+  <div class="ruby-icon" style="color: #38b2f8; font-size: 20px;">
+    <img src="/static/css/images/rubeye.png" style="width: 25px; height: 25px; transform: translate(0%, 15%); display: flex;">
+  </div>
+  <div class="count" id="ruby-count" style="font-size: 18px; font-weight: bold;">
+    2,000
+  </div>
+</div>
+
+    <div class="demo-section">
+        <div class="info-icon">
+            <div class="tooltip">
+                Login for Ruby Multiplier
+
+            </div>
+            <span>i</span>
         </div>
     </div>
+        </div>
+          <div class="sparks">
+  <div class="spark" style="--left: 5%;  --drift-x: -30px; --color: #fef68a; --duration: 2.5s; --delay: 0s;"></div>
+  <div class="spark" style="--left: 15%; --drift-x:  25px; --color: #a0e9ff; --duration: 1.8s; --delay: 0.3s;"></div>
+  <div class="spark" style="--left: 25%; --drift-x: -20px; --color: #ff9ae0; --duration: 2.2s; --delay: 0.6s;"></div>
+  <div class="spark" style="--left: 35%; --drift-x:  40px; --color: #c3ff88; --duration: 3s;   --delay: 0.2s;"></div>
+  <div class="spark" style="--left: 45%; --drift-x: -15px; --color: #ffd47e; --duration: 2.7s; --delay: 0.8s;"></div>
+  <div class="spark" style="--left: 55%; --drift-x:  30px; --color: #ff6b6b; --duration: 1.9s; --delay: 0.4s;"></div>
+  <div class="spark" style="--left: 65%; --drift-x: -35px; --color: #8bd3ff; --duration: 2.4s; --delay: 1s;"></div>
+  <div class="spark" style="--left: 75%; --drift-x:  20px; --color: #d4b0ff; --duration: 2.1s; --delay: 0.5s;"></div>
+  <div class="spark" style="--left: 85%; --drift-x: -25px; --color: #ffee93; --duration: 2.8s; --delay: 0.9s;"></div>
+  <div class="spark" style="--left: 95%; --drift-x:  15px; --color: #ffecb3; --duration: 2s;   --delay: 0.7s;"></div>
+
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
             <br>
+
                                     {% if user.is_authenticated %}
             <div class="containerents" style="font-family: 'Arial', sans-serif; background-image: linear-gradient(#12121f 0%, #1a1a2e 100%); display: flex; flex-direction: row; justify-content: center; align-items: center; margin: 0;">
         <div class="notification-bar" style="border-radius: 8px; padding: 15px 20px; color: white; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border-bottom: 2px solid #2d3748;">
