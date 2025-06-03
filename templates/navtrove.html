@@ -1856,7 +1856,6 @@ function fetchAndUpdateMultiplier() {
 
         .tooltip {
             position: absolute;
-            bottom: 30px;
             right: 0;
             width: 150px;
             background-color: #2d3748;
@@ -2009,7 +2008,7 @@ function fetchAndUpdateMultiplier() {
     <div class="demo-section">
         <div class="info-icon">
             <div class="tooltip">
-                Ruby Multiplier:<span id="rd-multiplier-display" style="margin-left: 5px;">1</span>x
+                Ruby Mult:<span id="rd-multiplier-display" style="margin-left: 5px;">1</span>x
             </div>
             <span>i</span>
         </div>
@@ -2643,7 +2642,7 @@ function updateCountdown() {
                     {% endfor %}
 
                 <div class="progress-bar">
-                    <div class="progress-bar" style="width: 100%; height: 20px; background: #ddd; border-radius: 4px; overflow: hidden;">
+                    <div class="progress-bar" style="width: 100%; height: 10px; background: #ddd; border-radius: 4px; overflow: hidden;">
                         <div class="progress-fill" style="width: {% widthratio userprofile.rubies_spent userprofile.level.experience 100 %}%;">
                         </div>
                     </div>
