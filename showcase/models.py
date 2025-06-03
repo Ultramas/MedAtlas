@@ -1046,7 +1046,7 @@ class ProfileDetails(models.Model):
     trader = models.BooleanField(default=False, null=True)
     partner = models.BooleanField(default=False, null=True)
     membership = models.ForeignKey(Membership, blank=True, null=True, on_delete=models.CASCADE)
-    tier = models.ForeignKey('Tier', blank=True, null=True, on_delete=models.CASCADE)
+    tier = models.ForeignKey('Tier', blank=True, null=True, on_delete=models.CASCADE, default='F')
     favorite_chests = models.ManyToManyField('FavoriteChests', blank=True)
     position = models.UUIDField(
         default=uuid.uuid4,

@@ -17,15 +17,10 @@
   <link rel="stylesheet" href="styles.css">
 </head>
     {% include 'navtrove.html' %}
-  <br>
-<br>
-<br>
-<br>
-<br>
 
 <form id="store-view-type-form"
       method="post"
-      action="{% url 'showcase:currencyviewtypesnippet' %}">
+      action="{% url 'showcase:currencyviewtypesnippet' %}" style="margin-top: 10%;">
   {% csrf_token %}
   {{ store_view_form.type.label_tag }}
   {{ store_view_form.type }}
@@ -1577,7 +1572,7 @@ header {
   <div class="container">
 
     <!-- Header -->
-    <header style="margin-top:10%;">
+    <header style="">
       <div class="logo">
         <div class="logo-hex">
           <svg viewBox="0 0 24 24" class="logo-icon">

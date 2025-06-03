@@ -1204,9 +1204,7 @@
 <body>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // -----------------------------
-  // 1) CSRF helper (unchanged)
-  // -----------------------------
+
   function getCookie(name) {
     let cookie = null;
     if (document.cookie && document.cookie !== '') {
@@ -1220,59 +1218,53 @@ document.addEventListener('DOMContentLoaded', () => {
   const csrftoken = getCookie('csrftoken');
   console.log('CSRF token is:', csrftoken);
 
-  // -----------------------------
-  // 2) Multiplier via AJAX
-  // -----------------------------
-  // Fallback value before AJAX returns
   let RD_MULTIPLIER = 1;
+function fetchAndUpdateMultiplier() {
+  fetch("{% url 'showcase:ajax_update_amount' %}")
+    .then(resp => {
+      if (!resp.ok) {
+        // If the server returned 4xx/5xx, treat it like an error
+        throw new Error(`HTTP ${resp.status}`);
+      }
+      return resp.json();
+    })
+    .then(data => {
+      if (data && data.rd_multiplier !== undefined) {
+        RD_MULTIPLIER = parseFloat(data.rd_multiplier);
+      } else {
+        // If the payload doesn’t include rd_multiplier, default
+        RD_MULTIPLIER = 1;
+      }
 
-  // Define a function that fetches the multiplier and updates both:
-  //  - the global variable RD_MULTIPLIER
-  //  - any on-screen element with id="rd-multiplier-display"
-  function fetchAndUpdateMultiplier() {
-    fetch("{% url 'showcase:ajax_update_amount' %}")
-      .then(resp => {
-        if (!resp.ok) {
-          throw new Error(`HTTP ${resp.status}`);
-        }
-        return resp.json();
-      })
-      .then(data => {
-        if (data && data.rd_multiplier !== undefined) {
-          RD_MULTIPLIER = parseFloat(data.rd_multiplier);
-        } else {
-          RD_MULTIPLIER = 1;
-        }
-        // Update the visible display, if present
-        const displayEl = document.getElementById('rd-multiplier-display');
-        if (displayEl) {
-          // Show two decimal places (or adapt as needed)
-          displayEl.textContent = RD_MULTIPLIER.toFixed(2);
-        }
-      })
-      .catch(err => {
-        console.warn("Could not fetch rd_multiplier:", err);
-        // Keep the old RD_MULTIPLIER value; do not overwrite display in that case.
-      });
-  }
+      // Update the visible display, if present
+      const displayEl = document.getElementById('rd-multiplier-display');
+      if (displayEl) {
+        displayEl.textContent = RD_MULTIPLIER.toFixed(2);
+      }
+    })
+    .catch(err => {
+      console.warn("Could not fetch rd_multiplier:", err);
+      // **FALL BACK TO 1 ON ANY ERROR**
+      RD_MULTIPLIER = 1;
 
-  // Fetch once at load
+      // Also update the display element to show “1.00” if it exists:
+      const displayEl = document.getElementById('rd-multiplier-display');
+      if (displayEl) {
+        displayEl.textContent = (1).toFixed(2);
+      }
+    });
+}
+
   fetchAndUpdateMultiplier();
-  // Then refetch every 30 seconds to keep it up-to-date
+
   setInterval(fetchAndUpdateMultiplier, 30000);
 
-  // -----------------------------
-  // 3) Element references
-  // -----------------------------
   const rubyBtn   = document.getElementById('ruby-drop-btn');
   const timerEl   = document.getElementById('hourly-timer');
   const rubySound = document.getElementById('ruby-sound');
   console.log('Button found?', !!rubyBtn);
 
-  // -----------------------------
-  // 4) Interval‐timing utilities
-  // -----------------------------
-  const INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
+  const INTERVAL_MS = 30 * 1 * 1000;
 
   function getIntervalStart() {
     return Math.floor(Date.now() / INTERVAL_MS) * INTERVAL_MS;
@@ -1327,7 +1319,6 @@ document.addEventListener('DOMContentLoaded', () => {
       dropFired = false;
     }
 
-    // Update the countdown timer display
     const elapsed     = now - start;
     const remainingMs = INTERVAL_MS - elapsed;
     const totalSec    = Math.max(0, Math.ceil(remainingMs / 1000));
@@ -1337,14 +1328,12 @@ document.addEventListener('DOMContentLoaded', () => {
       timerEl.textContent = `${pad(mins)}:${pad(secs)}`;
     }
 
-    // Show the button only in the last 2 minutes of each half‐hour window
     if (rubyBtn) {
       rubyBtn.style.display = (totalSec > 0 && totalSec < 120)
         ? 'inline-block'
         : 'none';
     }
 
-    // Fire the drop logic exactly once when countdown hits 0
     if (!dropFired && totalSec === 0) {
       const prevStart = start - INTERVAL_MS;
       const drop = handleIntervalRollover(prevStart);
@@ -1358,9 +1347,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return n.toString().padStart(2, '0');
   }
 
-  // -----------------------------
-  // 5) Click handler for Ruby button
-  // -----------------------------
   if (rubyBtn) {
     rubyBtn.addEventListener('click', () => {
       console.log('🔘 Click handler start');
@@ -1407,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const multiplier = RD_MULTIPLIER;
           const newAmount  = (data.newAmount || 0) * multiplier;
           console.log('the multiplier is: ' + multiplier);
-          // Update on‐screen currency amount (remove template logic)
+
           const currencyEl = document.getElementById('currency-amount');
           if (currencyEl) {
             currencyEl.textContent = data.newAmount;
@@ -1421,15 +1407,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // -----------------------------
-  // 6) Kick off countdown / rollover checks
-  // -----------------------------
   updateCountdown();
   setInterval(updateCountdown, 1000);
 
-  // -----------------------------
-  // 7) Bubble Animation (unchanged)
-  // -----------------------------
   class BubbleAnimation {
     constructor(container) {
       this.container = container;
@@ -2118,7 +2098,6 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
                 </a>
 
-
          <div class="containerents" style="font-family: 'Arial', sans-serif; background-image: linear-gradient(#12121f 0%, #1a1a2e 100%); display: flex; flex-direction: row; justify-content: center; align-items: center; margin: 0;">
     <div class="notification-bar" style="border-radius: 8px; padding: 15px 30px; color: white; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border-bottom: 2px solid #2d3748;" id="notificationBar">
         <div class="notification-content">
@@ -2242,7 +2221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <audio id="ruby-sound" src="drop-sound.mp3" preload="auto"></audio>
 
 <script>
-const INTERVAL_MS = 30 * 1 * 1000;
+const INTERVAL_MS = 30 * 60 * 1000;
 const timerEl    = document.getElementById('timer');
 const rubyBtn    = document.getElementById('rubyBtn');
 const rubySound  = document.getElementById('rubySound');
@@ -2719,15 +2698,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const icon      = document.querySelector('.volume .icon i');
   const mediaEls  = () => document.querySelectorAll('audio, video');
 
-  // helper: update all UI + media based on a percentage [0‐100]
   function applyVolumePercent(pct) {
-    // 1) clamp
+
     pct = Math.max(0, Math.min(pct, 100));
-    // 2) slider, fill, ticker
+
     slider.value = pct;
     fill.style.width    = pct + '%';
     ticker.textContent  = pct;
-    // 3) icon logic
+
     icon.style.color = '';
     if (pct === 0) {
       icon.className = 'fa fa-volume-off';
@@ -2741,27 +2719,24 @@ document.addEventListener('DOMContentLoaded', () => {
       icon.className = 'fa fa-volume-up';
       icon.style.color = 'red';
     }
-    // 4) set actual media.volume (0.0–1.0)
+
     const frac = pct / 100;
     mediaEls().forEach(m => m.volume = frac);
   }
 
-  // --- 1) On load, read saved volume and apply ---
   let saved = localStorage.getItem('volume');
   let initialPct = saved !== null
                  ? Math.round(parseFloat(saved) * 100)
                  : 100;
   applyVolumePercent(initialPct);
 
-  // --- 2) On slider input, update + persist ---
   slider.addEventListener('input', e => {
     const pct = parseInt(e.target.value, 10);
     applyVolumePercent(pct);
-    // save fraction [0.0–1.0]
+
     localStorage.setItem('volume', (pct/100).toString());
   });
 
-  // --- 3) Listen for storage events (other tabs) ---
   window.addEventListener('storage', e => {
     if (e.key === 'volume') {
       const newFrac = parseFloat(e.newValue);
@@ -2770,8 +2745,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- 4) If media elements get added later (e.g. via AJAX), make sure
-  //     they pick up the current volume ---
   document.addEventListener('play', ev => {
     if (ev.target instanceof HTMLMediaElement) {
       const currentFrac = parseFloat(localStorage.getItem('volume') ?? '1');
@@ -2780,8 +2753,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }, true);
 });
 </script>
-
-
 
             <div class="collection">
                 <h2 class="collection-title">My Collection</h2>

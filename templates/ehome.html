@@ -21,7 +21,7 @@
 <br>
 <br>
 
-<form id="store-view-type-form" method="post" action="{% url 'showcase:currencyviewtypesnippet' %}">
+<form id="store-view-type-form" method="post" action="{% url 'showcase:storeviewtypesnippet' %}">
   {% csrf_token %}
   {{ store_view_form.type.label_tag }}
   {{ store_view_form.type }}
