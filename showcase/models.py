@@ -993,7 +993,6 @@ class RubyDropInstance(models.Model):
         verbose_name_plural = "Ruby Drops"
 
 
-
 class LevelIcon(models.Model):
     name = models.CharField(max_length=200, blank=True, null=True)
     level_icon = models.ImageField(blank=True, null=True)
@@ -1048,7 +1047,6 @@ class ProfileDetails(models.Model):
     partner = models.BooleanField(default=False, null=True)
     membership = models.ForeignKey(Membership, blank=True, null=True, on_delete=models.CASCADE)
     tier = models.ForeignKey('Tier', blank=True, null=True, on_delete=models.CASCADE)
-    free = models.BooleanField(default=True)
     favorite_chests = models.ManyToManyField('FavoriteChests', blank=True)
     position = models.UUIDField(
         default=uuid.uuid4,
@@ -1133,6 +1131,10 @@ class ProfileDetails(models.Model):
 
     post_save.connect(create_user_profile, sender=User)
 
+    @property
+    def is_free(self):
+        return timezone.now() < (self.created_at + timedelta(days=7))
+
     def save(self, *args, **kwargs):
         is_new = self._state.adding
 
@@ -1143,7 +1145,7 @@ class ProfileDetails(models.Model):
         if not self.avatar:
             self.avatar = os.path.join('a.jpg')
             print('saved the profile avatar to default image')
-        if self.total_currency_spent_30 < 25 and self.free:
+        if self.total_currency_spent_30 < 25 and self.is_free:
             code = 'F'
         elif self.total_currency_spent_30 >= 0 and self.total_currency_spent_30 < 25:
             code = 'B'
@@ -1178,12 +1180,10 @@ class ProfileDetails(models.Model):
                 new_level = Level.objects.filter(experience__lte=self.rubies_spent).order_by('-level').first()
                 if new_level:
                     self.level = new_level
-            if self.free and timezone.now() >= self.created_at + timedelta(hours=168):
+            if self.is_free and timezone.now() >= self.created_at + timedelta(hours=168):
                 self.free = False
 
         super().save(*args, **kwargs)
-        if is_new:
-            expire_free_for.apply_async((self.pk,), countdown=168 * 3600)
 
     class Meta:
         verbose_name = "Account Profile"
@@ -1524,6 +1524,7 @@ class Clickable(models.Model):
     image = models.ImageField(upload_to='images/', verbose_name="Clickable Image")
     base_value = models.IntegerField(default=0)
     rarity = models.IntegerField(default=0)
+    lore = models.TextField(blank=True, null=True)
     chance_per_second = models.IntegerField(default=1000)
     sound = models.FileField()
     is_active = models.IntegerField(
@@ -1580,6 +1581,7 @@ class UserClickable(models.Model):
     class Meta:
         verbose_name = "User Clickable"
         verbose_name_plural = "User Clickables"
+
 
 class SecretRoom(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -2465,6 +2467,7 @@ class PartnerApplication(models.Model):
     def __str__(self):
         return self.user + "applicaton for " + self.category
 
+
 class PunishmentAppeal(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, help_text='Your name and tag go here.')
@@ -2555,7 +2558,33 @@ class ReportIssue(models.Model):
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
 
-from django.contrib.auth import get_user_model
+
+class ChangeLog(models.Model):
+    ACTION_CHOICES = [
+        ('update', 'Update'),
+        ('maintenance', 'Maintenance'),
+        ('bugfix', 'Bugfix'),
+        ('urgent', 'Urgent'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
+    action = models.CharField(max_length=11, choices=ACTION_CHOICES)
+    object_id = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(default=timezone.now)
+    changes = models.JSONField(null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.user} {self.action} {self.object_id} at {self.timestamp}'
+
+    def save_with_user(self, user, *args, **kwargs):
+        if not self.user:
+            self.user = user
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Changelog"
+        verbose_name_plural = "Changelogs"
+
 
 class AdministrationChangeLog(models.Model):
     ACTION_CHOICES = [
@@ -2577,6 +2606,7 @@ class AdministrationChangeLog(models.Model):
     class Meta:
         verbose_name = "Administration Changelog"
         verbose_name_plural = "Administration Changelogs"
+
 
 class Support(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -4314,6 +4344,7 @@ class Hits(models.Model):
     class Meta:
         verbose_name = "Hit"
         verbose_name_plural = "Hits"
+
 
 class SelectRelatedConstraint(object):
     def __init__(self, limit_value):
@@ -6813,6 +6844,7 @@ class TradeConfirmation(models.Model):
         verbose_name = "Trade Confirmation"
         verbose_name_plural = "Trade Confirmations"
 
+
 class ChatBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -6823,6 +6855,7 @@ class ChatBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Chat Background Image"
         verbose_name_plural = "Chat Background Images"
+
 
 class SupportChatBackgroundImage(models.Model):
     title = models.TextField()
@@ -6920,6 +6953,7 @@ class SignupBackgroundImage(models.Model):
         verbose_name = "Signup Background Image"
         verbose_name_plural = "SignupBackground Images"
 
+
 class ChangePasswordBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -6931,6 +6965,7 @@ class ChangePasswordBackgroundImage(models.Model):
         verbose_name = "Change Password Background Image"
         verbose_name_plural = "Change Password Background Images"
 
+
 class FeedbackBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -6941,6 +6976,7 @@ class FeedbackBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Feedback Background Image"
         verbose_name_plural = "Feedback Background Images"
+
 
 class IssueBackgroundImage(models.Model):
     title = models.TextField()

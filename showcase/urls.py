@@ -22,7 +22,7 @@ from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, 
     currency_remove_from_cart, currency_add_to_cart, currency_reduce_quantity_item, submit_seller_application, \
     PlaceWagerView, update_wager, SendFriendRequestView, FriendSearchResultsView, GameCategorySearchResultsView, \
     GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView, changelog_view, InventoryTradeView, \
-    CustomPasswordResetView, battle_create_outcome, BattleCreationView
+    CustomPasswordResetView, battle_create_outcome, BattleCreationView, userchangelog_view
 
 # remove this:
 # from . import settings
@@ -294,7 +294,7 @@ urlpatterns = [
     path("update_currency/", views.update_currency, name="update_currency"),
     path('giveaways/', TemplateView.as_view(template_name='giveaways.html'), name='giveaways'),
     path('hostgiveaway/', TemplateView.as_view(template_name='hostgiveaway.html'), name='hostgiveaway'),
-    # path('changelog/', ChangelogView.as_view(), name='changelog'),
+    path('changelog/', views.userchangelog_view, name='changelog'),
     path('generate-invite/', views.generate_invite_link, name='generate_invite'),
     path('create-invite-link/', views.generate_invite_link, name='create_invite_link'),
     path('create_withdraw/', views.CreateWithdrawView.as_view(), name='create_withdraw'),

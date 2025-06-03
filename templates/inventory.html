@@ -11,12 +11,8 @@
 
    </head>
   {% include 'navtrove.html' %}
-<br>
-<br>
-<br>
-<br>
-<br>
-<form id="store-view-type-form" method="post" action="{% url 'showcase:inventory_view_type_url' %}">
+
+<form id="store-view-type-form" method="post" action="{% url 'showcase:inventory_view_type_url' %}" style="margin-top: 150px;">
     {% csrf_token %}
     {{ store_view_form.as_p }}
 </form>
@@ -92,11 +88,34 @@
             position:fixed;
             text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
             background: rgba(0, 0, 0, 0.3);
-            width: 100%;
+            width: 50%;
+            text-align: center;
             color: white;
             padding-left: 5px;
             padding-right: 5px;
+            max-width: 320px;
         }
+        .pokemon-image {
+  width: 100%;
+  box-sizing: border-box;  /* include padding/border in width */
+  overflow: hidden;        /* prevent any child from bleeding out */
+}
+
+.pokemon-image img {
+  display: block;          /* remove inline whitespace */
+  max-width: 100%;
+  height: auto;            /* scale proportionally */
+}
+
+.pokemon-image .pokemon-name {
+  margin: 0.5rem 0 0;
+  word-break: break-word;      /* allow long words/strings to wrap */
+  overflow-wrap: anywhere;     /* ensure text never overflows */
+  white-space: normal;         /* allow line‑wrap */
+   max-width: 320px;
+}
+
+
     * {
       margin: 0;
       padding: 0;
@@ -164,8 +183,8 @@
       --border-radius: 4px;
       --border-radius-large: 8px;
       --header-height: 70px;
-      --sidebar-width: 240px;
-      --right-sidebar-width: 280px;
+      --deadbar-width: 240px;
+      --right-deadbar-width: 280px;
     }
 
     body {
@@ -465,16 +484,16 @@
     /* Dashboard grid */
     .dashboard-grid {
       display: grid;
-      grid-template-columns: var(--sidebar-width) 1fr var(--right-sidebar-width);
+      grid-template-columns: var(--deadbar-width) 1fr var(--right-deadbar-width);
       gap: 20px;
     }
 
-    /* Sidebar */
-    .sidebar {
+    /* deadbar */
+    .deadbar {
       grid-column: 1;
     }
 
-    .sidebar-card {
+    .deadbar-card {
       background: var(--bg-card);
       border-radius: var(--border-radius-large);
       border: 1px solid var(--border-light);
@@ -486,7 +505,7 @@
       flex-direction: column;
     }
 
-    .sidebar-nav {
+    .deadbar-nav {
       padding: 15px;
       flex-grow: 1;
     }
@@ -811,8 +830,8 @@
       border: 2px solid var(--primary);
     }
 
-    /* Right sidebar */
-    .right-sidebar {
+    /* Right deadbar */
+    .right-deadbar {
       grid-column: 3;
       display: flex;
       flex-direction: column;
@@ -1104,7 +1123,7 @@
         grid-template-columns: 200px 1fr;
       }
 
-      .right-sidebar {
+      .right-deadbar {
         grid-column: 1 / -1;
         grid-row: 2;
         display: grid;
@@ -1122,10 +1141,10 @@
         grid-template-columns: 1fr;
       }
 
-      .sidebar {
+      .deadbar {
       }
 
-      .right-sidebar {
+      .right-deadbar {
         grid-template-columns: 1fr;
       }
     }
@@ -1225,8 +1244,8 @@ export const GlobalStyles = createGlobalStyle`
     --border-radius: 4px;
     --border-radius-large: 8px;
     --header-height: 70px;
-    --sidebar-width: 240px;
-    --right-sidebar-width: 280px;
+    --deadbar-width: 240px;
+    --right-deadbar-width: 280px;
   }
 
   * {
@@ -1429,7 +1448,7 @@ export const GlobalStyles = createGlobalStyle`
       grid-template-columns: 200px 1fr;
     }
 
-    .right-sidebar {
+    .right-deadbar {
       grid-column: 1 / -1;
       grid-row: 2;
       display: grid;
@@ -1447,10 +1466,10 @@ export const GlobalStyles = createGlobalStyle`
       grid-template-columns: 1fr;
     }
 
-    .sidebar {
+    .deadbar {
     }
 
-    .right-sidebar {
+    .right-deadbar {
       grid-template-columns: 1fr;
     }
   }
@@ -1579,10 +1598,10 @@ export const GlobalStyles = createGlobalStyle`
 
     <!-- Dashboard grid -->
     <div class="dashboard-grid">
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <div class="sidebar-card">
-          <nav class="sidebar-nav">
+      <!-- deadbar -->
+      <div class="deadbar">
+        <div class="deadbar-card">
+          <nav class="deadbar-nav">
             <button class="element-item">
               <svg viewBox="0 0 24 24"><path d="M3,13H11V3H3V13M3,21H11V15H3V21M13,21H21V11H13V21M13,3V9H21V3H13Z" /></svg>
               <span>Dashboard</span>
@@ -1669,8 +1688,8 @@ export const GlobalStyles = createGlobalStyle`
         </div>
       </div>
 
-      <!-- Right sidebar -->
-      <div class="right-sidebar">
+      <!-- Right deadbar -->
+      <div class="right-deadbar">
         <!-- System time -->
         <div class="card system-time">
           <div class="time-header">
@@ -2914,7 +2933,7 @@ function initEventListeners() {
             margin: 0 auto;
         }
 
-        .sidebar {
+        .deadbar {
             width: 320px;
             flex-shrink: 0;
         }
@@ -3126,6 +3145,7 @@ function initEventListeners() {
             font-family: 'Cinzel', serif;
             color: var(--primary);
             text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+            max-width: 320px;
         }
 
         .pokemon-type {

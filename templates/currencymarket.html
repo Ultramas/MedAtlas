@@ -714,7 +714,6 @@ header {
   fill: currentColor;
 }
 
-/* Inventory grid */
 .inventory-grid {
   display: grid;
   gap: 20px;
@@ -1583,7 +1582,7 @@ header {
             <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M12,6C15.31,6 18,8.69 18,12C18,15.31 15.31,18 12,18C8.69,18 6,15.31 6,12C6,8.69 8.69,6 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" />
           </svg>
         </div>
-        <span class="logo-text">THE TROVE</span>
+        <span class="logo-text">Ruby Refill</span>
       </div>
 
       <div class="header-controls">
@@ -2913,65 +2912,42 @@ p.blog-meta span {
 
 
   <main class="main-content">
-            <h1>Ruby Refill - (<span id="stock-count">{{ Profiles|length }}</span>)</h1>
+            <h1>Ruby Refill - (<span id="stock-count">{{ Currency|length }}</span>)</h1>
 
             <section id="inventoryGrid" class="inventory-grid comfortable-view">
 
-                {% for newprofile in Profiles %}
+                           {% for CurrencyMarket in Currency %}
                     <div class="inventory-item">
-						<a href="{{ newprofile.get_profile_url2 }}">
+                     <a href="{{ CurrencyMarket.get_absolute_url }}">
                         <div class="legendary-icon">🐉</div>
                         <div class="pokemon-image">
-                            <img src="{{ newprofile.image.url }}" alt="{{newprofile.choice_text}} Image">
+                          <img src="{{ CurrencyMarket.file.url }}" alt="{{CurrencyMarket.choice_text}} Image">
                         </div>
                         <div class="pokemon-info">
-							<h3 class="pokemon-name"><a href="">{{newprofile.title}}</a></h3>
-                            							<p class="blog-meta">
-								<span class="author"><i class="fas fa-user"></i> {{ newprofile.get_type_display }} </span>
-								<span class="date"><i class="fas fa-calendar"></i> {{ newprofile.date_and_time|date }} </span>
+							<h3 class="pokemon-name">
+                                {{CurrencyMarket.name}}
+                            </h3>
+                            <p class="blog-meta">
 								<br>
 							</p>
-							{% with description=newprofile.description %}
+							{% with flavor_text=CurrencyMarket.flavor_text %}
 							<p class="excerpt" style=" color: rgba(255, 255, 255, 0.8);">
-								{% if description|length > 200 %}
-									{{ description|slice:":200" }}...
+								{% if flavor_text|length > 200 %}
+									{{ flavor_text|slice:":200" }}...
 								{% else %}
-									{{ description }}
+									{{ flavor_text }}
 								{% endif %}
 							</p>
-                            {% if newprofile.discount_cost %}
-                            <h5>{{ newprofile.discount_cost }}</h5>
+                            {% if CurrencyMarket.discount_price %}
+                            <h5>${{ CurrencyMarket.discount_price }}</h5>
                             {% else %}
-                            <h5>{{ newprofile.cost }}</h5>
+                            <h5>${{ CurrencyMarket.price }}</h5>
                             {% endif %}
-                            <div class="heat_level">
-                    <h5 style="color: white;">Heat:
-                        {% if newprofile.cards.heat == 'M' %}🌶️
-                        {% elif newprofile.cards.heat == 'S' %}🌶️🌶️ (2)
-                        {% elif newprofile.cards.heat == 'F' %}🌶️🌶️🌶️ (3)
-                        {% elif newprofile.cards.heat == 'W' %}🌶️🌶️🌶️🌶️ (4)
-                        {% else %}🌶️🌶️🌶️🌶️🌶️ (5)
-                        {% endif %}
-                    </h5>
-                                <br>
-                </div>
 						{% endwith %}
-						<ul style="width: 100%;">
-								<span class="author" style="display: flex; align-items: center;">
-									{% if newprofile.newprofile_profile_picture_url %}
-									<a href="{{ newprofile.newprofile_profile_url }}">
-										<img src="{{ newprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
-									</a>
-									{% else %}
-									<!-- Placeholder image or default avatar -->
-									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
-									{% endif %}
-									<h5 style="margin-left: 15px; color: var(--primary);">{{ newprofile.name }}</h5>
-								</span>
-						</ul>
 
                         </div>
 						</a>
+
                     </div>
                 {% empty %}
                     <div class="empty-inventory">
@@ -2979,6 +2955,7 @@ p.blog-meta span {
                         <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
                     </div>
                 {% endfor %}
+                </a>
             </section>
         </main>
     </div>

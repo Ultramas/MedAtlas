@@ -18,7 +18,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
     TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences, GiftCode, \
     GiftCodeRedemption, FavoriteChests, IndividualChestStatistics, TotalChestStatistics, RubyDrop, Season, Tier, \
-    Benefits
+    Benefits, ChangeLog
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -1331,7 +1331,17 @@ class AdministrationChangeLogAdmin(admin.ModelAdmin):
         # Disable editing logs manually
         return False
 
+
 admin.site.register(AdministrationChangeLog, AdministrationChangeLogAdmin)
+
+
+class ChangeLogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'action', 'object_id', 'timestamp')
+    list_filter = ('action', 'timestamp', 'user')
+    search_fields = ('user__username', 'model', 'object_id')
+
+
+admin.site.register(ChangeLog, ChangeLogAdmin)
 
 
 class RoomAdmin(admin.ModelAdmin):
@@ -1943,13 +1953,46 @@ class WithdrawClassAdmin(admin.ModelAdmin):
 admin.site.register(WithdrawClass, WithdrawClassAdmin)
 
 
+from django.contrib import admin
+from django.utils.html import format_html
+from .models import Clickable
+
+
 class ClickableAdmin(admin.ModelAdmin):
     fieldsets = (
-        (' Clickable Information - Categorial Description', {
-            'fields': ('name', 'image', 'base_value', 'rarity', 'chance_per_second', 'sound', 'is_active',),
+        ('Clickable Information', {
+            'fields': (
+                'name',
+                'image',
+                'get_image',        # show thumbnail on edit page
+                'base_value',
+                'rarity',
+                'chance_per_second',
+                'sound',
+                'is_active',
+            ),
             'classes': ('open',),
         }),
     )
+
+    list_display = (
+        'name',
+        'get_image',            # add here so it appears as a column
+        'base_value',
+        'rarity',
+        'chance_per_second',
+        'is_active',
+    )
+    readonly_fields = ('get_image',)  # prevents editing and lets it render
+
+    def get_image(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-height:50px;"/>',
+                obj.image.url
+            )
+        return "No Image"
+    get_image.short_description = "Image"
 
 
 admin.site.register(Clickable, ClickableAdmin)
@@ -2466,6 +2509,7 @@ class GiftCodeAdmin(admin.ModelAdmin):
         'is_active',
     )
 
+
 admin.site.register(GiftCode, GiftCodeAdmin)
 
 
@@ -2478,6 +2522,7 @@ class GiftCodeRedemptionAdmin(admin.ModelAdmin):
     readonly_fields = ('redeemed_at',)
 
     list_display = ('user', 'gift_code', 'amount', 'redeemed_at',)
+
 
 admin.site.register(GiftCodeRedemption, GiftCodeRedemptionAdmin)
 
@@ -2642,14 +2687,15 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
         ('Profile Information - Miscellaneous Statistics', {
             'fields': (
                 'times_subtract_called', 'monstrosity',
-                'seller', 'trader', 'membership', 'tier', 'free', 'position'
+                'seller', 'trader', 'membership', 'tier', 'position'
             )
         }),
     )
-    readonly_fields = ('position',)
+    readonly_fields = ('position', 'is_free_display', 'created_at',)
     inlines = [ProfileCurrencyInline]
 
-    list_display = ('display_user_with_tag', 'level', 'trader', 'currency_amount', 'rubies_spent', 'get_selling_status', 'get_membership')
+    list_display = ('display_user_with_tag', 'level', 'trader', 'currency_amount', 'rubies_spent', 'get_selling_status', 'get_membership',
+        'is_free_display', 'created_at',)
     list_filter = [UserTypeFilter, 'trader', 'membership', 'is_active']
 
     def display_user_with_tag(self, obj):
@@ -2666,6 +2712,11 @@ class ProfileDetailsAdmin(admin.ModelAdmin):
     def get_membership(self, obj):
         return obj.membership if obj.membership else 'None'
     get_membership.short_description = 'Membership'
+
+    def is_free_display(self, obj):
+        return obj.is_free
+    is_free_display.boolean = True
+    is_free_display.short_description = 'Free?'
 
 
 class LevelInline(admin.TabularInline):
@@ -2694,6 +2745,7 @@ class ExperienceAdmin(admin.ModelAdmin):
         # Fetch eligible levels and update ManyToMany field
         eligible_levels = Level.objects.filter(experience__lte=obj.amount)
         obj.level.set(eligible_levels)  # Set eligible levels to the ManyToMany field
+
 
 admin.site.register(Experience, ExperienceAdmin)
 
@@ -2725,6 +2777,7 @@ admin.site.register(Transaction, TransactionAdmin)
 
 
 admin.site.register(BattleParticipant)
+
 
 class RobotAdmin(admin.ModelAdmin):
     model = Robot
@@ -2772,6 +2825,7 @@ class BattleAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Battle, BattleAdmin)
+
 
 class BetAdmin(admin.ModelAdmin):
     model = Bet

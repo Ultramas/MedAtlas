@@ -79,6 +79,7 @@
             transition: 0.5s;
             animation: gradient_301 5s ease infinite;
             border: double 4px transparent;
+            margin-bottom: -30px;
         }
 
         #containerteed-stars {
@@ -855,7 +856,6 @@
         }
 
         .main-content {
-            padding: 20px;
             transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -1302,8 +1302,12 @@ function handleIntervalRollover(prevStart) {
     return n.toString().padStart(2, '0');
 }
 
-  rubyBtn.addEventListener('click', () => {
-    const RD_MULTIPLIER = {{ user.profiledetails.rd_multiplier|default:1 }};
+rubyBtn.addEventListener('click', () => {
+    {% if user.profiledetails %}
+      const RD_MULTIPLIER = {{ user.profiledetails.rd_multiplier }};
+    {% else %}
+      const RD_MULTIPLIER = 1;
+    {% endif %}
     console.log('🔘 Click handler start');
     console.log('window.dropAmount =', window.dropAmount);
 

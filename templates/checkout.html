@@ -366,6 +366,14 @@
             right: 1rem;
             color: var(--primary);
         }
+
+    input[type="radio"][name="payment_option"] + label {
+     color: white;
+    cursor: pointer; /* indicates it’s clickable */
+}
+    input[type="radio"][name="payment_option"]:checked + label {
+    color: var(--primary);
+}
     </style>
 </head>
 <body>

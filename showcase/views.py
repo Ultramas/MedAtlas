@@ -37,7 +37,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     SpinnerChoiceRenders, DefaultAvatar, Achievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
     UserNotification, TopHits, Card, Clickable, GameChoice, Robot, MyPreferences, UserClickable, GiftCodeRedemption, \
-    GiftCode, IndividualChestStatistics, FavoriteChests, Season, Tier
+    GiftCode, IndividualChestStatistics, FavoriteChests, Season, Tier, ChangeLog
 from .models import Idea
 from .models import VoteQuery
 from .models import StaffApplication
@@ -15924,6 +15924,12 @@ def get_changes(instance):
                 'new': new_value
             }
     return changes
+
+
+def userchangelog_view(request):
+    changelogs = ChangeLog.objects.all()
+    context = {'changelogs': changelogs}
+    return render(request, 'changelog.html', context)
 
 class HomePageView(TemplateView):
     template_name = 'index.html'

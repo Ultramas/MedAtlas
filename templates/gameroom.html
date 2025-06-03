@@ -104,7 +104,7 @@
   --border-radius: 4px;
   --border-radius-large: 8px;
   --header-height: 70px;
-  --sidebar-width: 240px;
+  --sidebar-width: 320px;
   --right-sidebar-width: 280px;
 }
 
@@ -430,7 +430,6 @@ header {
 }
 
 .sidebar-nav {
-  padding: 15px;
   margin-bottom: 20px;
 }
 
@@ -498,6 +497,7 @@ header {
   margin-bottom: 15px;
   font-family: "Share Tech Mono", monospace;
   letter-spacing: 1px;
+  color: var(--primary);
 }
 
 .filter-group {
@@ -1575,13 +1575,13 @@ header {
     </style>
 </head>
 
-<body>
+<body style="margin-top: 5%;">
   <canvas id="particle-canvas"></canvas>
   <div id="rising-sparks-container"></div>
   <div class="container">
 
     <!-- Header -->
-    <header style="margin-top:10%;">
+    <header>
       <div class="logo">
         <div class="logo-hex">
           <svg viewBox="0 0 24 24" class="logo-icon">
@@ -2388,30 +2388,6 @@ function initFireSparks() {
         .sidebar {
             width: 320px;
             flex-shrink: 0;
-        }
-
-        .user-profile {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .user-profile::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
         }
 
         .user-info {
