@@ -1202,10 +1202,11 @@
 
 </head>
 <body>
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
+  // -----------------------------
+  // 1) CSRF helper (unchanged)
+  // -----------------------------
   function getCookie(name) {
     let cookie = null;
     if (document.cookie && document.cookie !== '') {
@@ -1219,79 +1220,134 @@ document.addEventListener('DOMContentLoaded', () => {
   const csrftoken = getCookie('csrftoken');
   console.log('CSRF token is:', csrftoken);
 
+  // -----------------------------
+  // 2) Multiplier via AJAX
+  // -----------------------------
+  // Fallback value before AJAX returns
+  let RD_MULTIPLIER = 1;
+
+  // Define a function that fetches the multiplier and updates both:
+  //  - the global variable RD_MULTIPLIER
+  //  - any on-screen element with id="rd-multiplier-display"
+  function fetchAndUpdateMultiplier() {
+    fetch("{% url 'showcase:ajax_update_amount' %}")
+      .then(resp => {
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}`);
+        }
+        return resp.json();
+      })
+      .then(data => {
+        if (data && data.rd_multiplier !== undefined) {
+          RD_MULTIPLIER = parseFloat(data.rd_multiplier);
+        } else {
+          RD_MULTIPLIER = 1;
+        }
+        // Update the visible display, if present
+        const displayEl = document.getElementById('rd-multiplier-display');
+        if (displayEl) {
+          // Show two decimal places (or adapt as needed)
+          displayEl.textContent = RD_MULTIPLIER.toFixed(2);
+        }
+      })
+      .catch(err => {
+        console.warn("Could not fetch rd_multiplier:", err);
+        // Keep the old RD_MULTIPLIER value; do not overwrite display in that case.
+      });
+  }
+
+  // Fetch once at load
+  fetchAndUpdateMultiplier();
+  // Then refetch every 30 seconds to keep it up-to-date
+  setInterval(fetchAndUpdateMultiplier, 30000);
+
+  // -----------------------------
+  // 3) Element references
+  // -----------------------------
   const rubyBtn   = document.getElementById('ruby-drop-btn');
   const timerEl   = document.getElementById('hourly-timer');
   const rubySound = document.getElementById('ruby-sound');
   console.log('Button found?', !!rubyBtn);
 
-  const INTERVAL_MS = 30 * 60 * 1000;
+  // -----------------------------
+  // 4) Interval‐timing utilities
+  // -----------------------------
+  const INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 
   function getIntervalStart() {
     return Math.floor(Date.now() / INTERVAL_MS) * INTERVAL_MS;
   }
+
   let currentIntervalStart = getIntervalStart();
   let dropFired            = false;
   window.dropAmount        = 0;
 
-function handleIntervalRollover(prevStart) {
-  const clickKey    = 'rubyClicks_' + prevStart;
-  const totalClicks = parseInt(localStorage.getItem(clickKey), 10) || 0;
+  function handleIntervalRollover(prevStart) {
+    const clickKey    = 'rubyClicks_' + prevStart;
+    const totalClicks = parseInt(localStorage.getItem(clickKey), 10) || 0;
 
-  console.log(`handleIntervalRollover – window start ${prevStart}: totalClicks = ${totalClicks}`);
+    console.log(`handleIntervalRollover – window start ${prevStart}: totalClicks = ${totalClicks}`);
 
-  let reward;
-  if (totalClicks < 100) {
-    reward = Math.floor(Math.random() * (25 - 10 + 1)) + 10;
-  } else {
+    let reward;
+    if (totalClicks < 100) {
+      reward = Math.floor(Math.random() * (25 - 10 + 1)) + 10;
+    } else {
+      reward = Math.round(2500 / totalClicks);
+    }
 
-    reward = Math.round(2500 / totalClicks);
+    window.dropAmount = reward;
+    console.log(`Calculated reward from ${totalClicks} clicks → dropAmount = ${reward}`);
+
+    localStorage.removeItem(clickKey);
+    return reward;
   }
-
-  window.dropAmount = reward;
-  console.log(`Calculated reward from ${totalClicks} clicks → dropAmount = ${reward}`);
-
-  localStorage.removeItem(clickKey);
-  return reward;
-}
 
   function updateCountdown() {
-  const now   = Date.now();
-  const start = getIntervalStart();
+    const now   = Date.now();
+    const start = getIntervalStart();
 
-  if (start !== currentIntervalStart) {
-    const prevStart = currentIntervalStart;
+    if (start !== currentIntervalStart) {
+      const prevStart = currentIntervalStart;
 
-    console.log(`🔄 Interval rolled over. Previous window started at ${new Date(prevStart).toISOString()}`);
-    const clicked = localStorage.getItem('rubyClickedInterval') === String(prevStart);
-    console.log(`👤 User ${clicked ? 'did' : 'did NOT'} click in that window.`);
+      console.log(`🔄 Interval rolled over. Previous window started at ${new Date(prevStart).toISOString()}`);
+      const clicked = localStorage.getItem('rubyClickedInterval') === String(prevStart);
+      console.log(`👤 User ${clicked ? 'did' : 'did NOT'} click in that window.`);
 
-    const drop = handleIntervalRollover(prevStart);
-    console.log(`💎 handleIntervalRollover returned: ${drop}`);
+      const drop = handleIntervalRollover(prevStart);
+      console.log(`💎 handleIntervalRollover returned: ${drop}`);
 
-    localStorage.removeItem('rubyClickedInterval');
-    rubyBtn.classList.remove('clicked');
-    rubyBtn.disabled = false;
-    rubyBtn.textContent = 'Ruby Drop';
+      localStorage.removeItem('rubyClickedInterval');
+      if (rubyBtn) {
+        rubyBtn.classList.remove('clicked');
+        rubyBtn.disabled = false;
+        rubyBtn.textContent = 'Ruby Drop';
+      }
 
-    currentIntervalStart = start;
-    dropFired = false;
-  }
+      currentIntervalStart = start;
+      dropFired = false;
+    }
 
-  const elapsed     = now - start;
-  const remainingMs = INTERVAL_MS - elapsed;
-  const totalSec    = Math.max(0, Math.ceil(remainingMs / 1000));
-  const mins = Math.floor(totalSec / 60);
-  const secs = totalSec % 60;
-  timerEl.textContent = `${pad(mins)}:${pad(secs)}`;
+    // Update the countdown timer display
+    const elapsed     = now - start;
+    const remainingMs = INTERVAL_MS - elapsed;
+    const totalSec    = Math.max(0, Math.ceil(remainingMs / 1000));
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    if (timerEl) {
+      timerEl.textContent = `${pad(mins)}:${pad(secs)}`;
+    }
 
-  rubyBtn.style.display = (totalSec > 0 && totalSec < 120)
-    ? 'inline-block'
-    : 'none';
+    // Show the button only in the last 2 minutes of each half‐hour window
+    if (rubyBtn) {
+      rubyBtn.style.display = (totalSec > 0 && totalSec < 120)
+        ? 'inline-block'
+        : 'none';
+    }
 
+    // Fire the drop logic exactly once when countdown hits 0
     if (!dropFired && totalSec === 0) {
       const prevStart = start - INTERVAL_MS;
       const drop = handleIntervalRollover(prevStart);
-      handleIntervalRollover(prevStart);
       dropFired = true;
       const clicked = localStorage.getItem('rubyClickedInterval') === prevStart.toString();
       console.log(`💎 Drop: ${drop}. User ${clicked ? 'did' : 'did NOT'} click.`);
@@ -1300,185 +1356,198 @@ function handleIntervalRollover(prevStart) {
 
   function pad(n) {
     return n.toString().padStart(2, '0');
-}
+  }
 
-rubyBtn.addEventListener('click', () => {
-    {% if user.profiledetails %}
-      const RD_MULTIPLIER = {{ user.profiledetails.rd_multiplier }};
-    {% else %}
-      const RD_MULTIPLIER = 1;
-    {% endif %}
-    console.log('🔘 Click handler start');
-    console.log('window.dropAmount =', window.dropAmount);
+  // -----------------------------
+  // 5) Click handler for Ruby button
+  // -----------------------------
+  if (rubyBtn) {
+    rubyBtn.addEventListener('click', () => {
+      console.log('🔘 Click handler start');
+      console.log('window.dropAmount =', window.dropAmount);
 
-    const start = getIntervalStart().toString();
-    if (localStorage.getItem('rubyClickedInterval') === start) {
-      console.log('Already clicked this interval, ignoring.');
-      return;
-    }
-
-    localStorage.setItem('rubyClickedInterval', start);
-    const clickKey = 'rubyClicks_' + start;
-    const prev     = parseInt(localStorage.getItem(clickKey), 10) || 0;
-    localStorage.setItem(clickKey, prev + 1);
-
-    rubyBtn.classList.add('clicked');
-    rubyBtn.disabled = true;
-    rubyBtn.textContent = 'Claimed!';
-    rubySound.currentTime = 0;
-    rubySound.play().catch(() => {});
-
-    const url = "{% url 'showcase:claim-ruby' %}";
-    console.log('Will POST to:', url);
-    console.log('About to call fetch…');
-    fetch(url, {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken,
-      },
-      body: JSON.stringify({ dropAmount: window.dropAmount })
-    })
-    .then(resp => {
-      console.log('↪️ fetch resolved, status:', resp.status);
-      return resp.json();
-    })
-    .then(data => {
-      console.log('📬 Response JSON:', data);
-      if (data.newAmount !== undefined) {
-        const multiplier = RD_MULTIPLIER;
-        const newAmount  = (data.newAmount || 0) * multiplier;
-        console.log('the multiplier is: ' + multiplier)
-        document.getElementById('currency-amount').textContent = data.newAmount;
-        console.log('Final increase is ', (window.dropAmount) * (multiplier));
+      const start = getIntervalStart().toString();
+      if (localStorage.getItem('rubyClickedInterval') === start) {
+        console.log('Already clicked this interval, ignoring.');
+        return;
       }
-    })
-    .catch(err => console.error('❌ fetch error:', err));
 
-    console.log('🔚 Click handler end');
-  });
+      localStorage.setItem('rubyClickedInterval', start);
+      const clickKey = 'rubyClicks_' + start;
+      const prev     = parseInt(localStorage.getItem(clickKey), 10) || 0;
+      localStorage.setItem(clickKey, prev + 1);
 
+      rubyBtn.classList.add('clicked');
+      rubyBtn.disabled = true;
+      rubyBtn.textContent = 'Claimed!';
+      if (rubySound) {
+        rubySound.currentTime = 0;
+        rubySound.play().catch(() => {});
+      }
+
+      const url = "{% url 'showcase:claim-ruby' %}";
+      console.log('Will POST to:', url);
+      console.log('About to call fetch…');
+      fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({ dropAmount: window.dropAmount })
+      })
+      .then(resp => {
+        console.log('↪️ fetch resolved, status:', resp.status);
+        return resp.json();
+      })
+      .then(data => {
+        console.log('📬 Response JSON:', data);
+        if (data.newAmount !== undefined) {
+          const multiplier = RD_MULTIPLIER;
+          const newAmount  = (data.newAmount || 0) * multiplier;
+          console.log('the multiplier is: ' + multiplier);
+          // Update on‐screen currency amount (remove template logic)
+          const currencyEl = document.getElementById('currency-amount');
+          if (currencyEl) {
+            currencyEl.textContent = data.newAmount;
+          }
+          console.log('Final increase is ', (window.dropAmount) * (multiplier));
+        }
+      })
+      .catch(err => console.error('❌ fetch error:', err));
+
+      console.log('🔚 Click handler end');
+    });
+  }
+
+  // -----------------------------
+  // 6) Kick off countdown / rollover checks
+  // -----------------------------
   updateCountdown();
   setInterval(updateCountdown, 1000);
-});
 
-        class BubbleAnimation {
-            constructor(container) {
-                this.container = container;
-                this.bubbles = [];
-                this.isRunning = false;
-                this.init();
-            }
+  // -----------------------------
+  // 7) Bubble Animation (unchanged)
+  // -----------------------------
+  class BubbleAnimation {
+    constructor(container) {
+      this.container = container;
+      this.bubbles = [];
+      this.isRunning = false;
+      this.init();
+    }
 
-            init() {
-                this.startAnimation();
-            }
+    init() {
+      this.startAnimation();
+    }
 
-            createBubble() {
-                const bubble = document.createElement('div');
-                bubble.className = 'bubble';
+    createBubble() {
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
 
-                const sizes = ['small', 'medium', 'large'];
-                const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
-                bubble.classList.add(randomSize);
+      const sizes = ['small', 'medium', 'large'];
+      const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
+      bubble.classList.add(randomSize);
 
-                const containerWidth = this.container.offsetWidth;
-                const bubbleSize = randomSize === 'small' ? 20 : randomSize === 'medium' ? 35 : 50;
-                const maxLeft = containerWidth - bubbleSize;
-                const randomLeft = Math.random() * maxLeft;
+      const containerWidth = this.container.offsetWidth;
+      const bubbleSize = randomSize === 'small' ? 20 : randomSize === 'medium' ? 35 : 50;
+      const maxLeft = containerWidth - bubbleSize;
+      const randomLeft = Math.random() * maxLeft;
 
-                bubble.style.left = randomLeft + 'px';
-                bubble.style.bottom = '-50px';
+      bubble.style.left = randomLeft + 'px';
+      bubble.style.bottom = '-50px';
 
-                const drift = (Math.random() - 0.5) * 100;
-                bubble.style.setProperty('--drift', drift + 'px');
+      const drift = (Math.random() - 0.5) * 100;
+      bubble.style.setProperty('--drift', drift + 'px');
 
-                const driftKeyframes = `
-                    @keyframes rise-${Date.now()} {
-                        0% {
-                            transform: translateY(0) translateX(0) rotate(0deg);
-                            opacity: 0;
-                        }
-                        10% {
-                            opacity: 1;
-                        }
-                        50% {
-                            transform: translateY(-50vh) translateX(${drift/2}px) rotate(180deg);
-                        }
-                        90% {
-                            opacity: 1;
-                        }
-                        100% {
-                            transform: translateY(-100vh) translateX(${drift}px) rotate(360deg);
-                            opacity: 0;
-                        }
-                    }
-                `;
-
-                const style = document.createElement('style');
-                style.textContent = driftKeyframes;
-                document.head.appendChild(style);
-
-                bubble.style.animationName = `rise-${Date.now()}`;
-
-                this.container.appendChild(bubble);
-                this.bubbles.push(bubble);
-
-                const animationDuration = randomSize === 'small' ? 8000 : randomSize === 'medium' ? 12000 : 15000;
-                setTimeout(() => {
-                    if (bubble.parentNode) {
-                        bubble.parentNode.removeChild(bubble);
-                        document.head.removeChild(style);
-                    }
-                    this.bubbles = this.bubbles.filter(b => b !== bubble);
-                }, animationDuration);
-            }
-
-            startAnimation() {
-                if (this.isRunning) return;
-                this.isRunning = true;
-
-                this.createBubble();
-
-                this.intervalId = setInterval(() => {
-                    this.createBubble();
-                }, Math.random() * 2000 + 1000);
-            }
-
-            stopAnimation() {
-                this.isRunning = false;
-                if (this.intervalId) {
-                    clearInterval(this.intervalId);
-                }
-            }
-
-            destroy() {
-                this.stopAnimation();
-                this.bubbles.forEach(bubble => {
-                    if (bubble.parentNode) {
-                        bubble.parentNode.removeChild(bubble);
-                    }
-                });
-                this.bubbles = [];
-            }
+      const driftKeyframes = `
+        @keyframes rise-${Date.now()} {
+          0% {
+            transform: translateY(0) translateX(0) rotate(0deg);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          50% {
+            transform: translateY(-50vh) translateX(${drift/2}px) rotate(180deg);
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-100vh) translateX(${drift}px) rotate(360deg);
+            opacity: 0;
+          }
         }
+      `;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const notificationBar = document.getElementById('notificationBar');
-            const bubbleAnimation = new BubbleAnimation(notificationBar);
+      const style = document.createElement('style');
+      style.textContent = driftKeyframes;
+      document.head.appendChild(style);
 
-            notificationBar.addEventListener('click', function() {
-                if (bubbleAnimation.isRunning) {
-                    bubbleAnimation.stopAnimation();
-                    console.log('Bubble animation stopped');
-                } else {
-                    bubbleAnimation.startAnimation();
-                    console.log('Bubble animation started');
-                }
-            });
-        });
-    </script>
+      bubble.style.animationName = `rise-${Date.now()}`;
+
+      this.container.appendChild(bubble);
+      this.bubbles.push(bubble);
+
+      const animationDuration = randomSize === 'small' ? 8000 : randomSize === 'medium' ? 12000 : 15000;
+      setTimeout(() => {
+        if (bubble.parentNode) {
+          bubble.parentNode.removeChild(bubble);
+          document.head.removeChild(style);
+        }
+        this.bubbles = this.bubbles.filter(b => b !== bubble);
+      }, animationDuration);
+    }
+
+    startAnimation() {
+      if (this.isRunning) return;
+      this.isRunning = true;
+
+      this.createBubble();
+
+      this.intervalId = setInterval(() => {
+        this.createBubble();
+      }, Math.random() * 2000 + 1000);
+    }
+
+    stopAnimation() {
+      this.isRunning = false;
+      if (this.intervalId) {
+        clearInterval(this.intervalId);
+      }
+    }
+
+    destroy() {
+      this.stopAnimation();
+      this.bubbles.forEach(bubble => {
+        if (bubble.parentNode) {
+          bubble.parentNode.removeChild(bubble);
+        }
+      });
+      this.bubbles = [];
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const notificationBar = document.getElementById('notificationBar');
+    const bubbleAnimation = new BubbleAnimation(notificationBar);
+
+    notificationBar.addEventListener('click', function() {
+      if (bubbleAnimation.isRunning) {
+        bubbleAnimation.stopAnimation();
+        console.log('Bubble animation stopped');
+      } else {
+        bubbleAnimation.startAnimation();
+        console.log('Bubble animation started');
+      }
+    });
+  });
+});
+</script>
+
     <script>
         class BubbleAnimation {
             constructor(container) {
@@ -1960,8 +2029,7 @@ rubyBtn.addEventListener('click', () => {
     <div class="demo-section">
         <div class="info-icon">
             <div class="tooltip">
-                Ruby Multiplier:
-                {{ user.profiledetails.rd_multiplier|default:1 }}x
+                Ruby Multiplier:<span id="rd-multiplier-display" style="margin-left: 5px;">1</span>x
             </div>
             <span>i</span>
         </div>
@@ -2027,7 +2095,8 @@ rubyBtn.addEventListener('click', () => {
     </div>
 {% empty %}
     <div class="user-profile">
-        <div class="profile-picture" style="--profile-bg-image: url('/static/css/images/a.jpg');">
+        <div class="profile-picture" style="--profile-bg-image: url('/static/css/images/a.jpg'); margin-top: 40px;
+">
             <a href="{% url 'login' %}?next={{ request.path }}" style="display: contents;">
                 <img src="/static/css/images/a.jpg" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;">
             </a>

@@ -32,8 +32,12 @@
   {{ store_view_form.errors }}
 </form>
 
+
 {% if store_view == "detail" %}
- <style>
+<!--detailed view-->
+
+<head>
+   <style>
 * {
   margin: 0;
   padding: 0;
@@ -97,7 +101,7 @@
   --border-radius: 4px;
   --border-radius-large: 8px;
   --header-height: 70px;
-  --sidebar-width: 240px;
+  --sidebar-width: 280px;
   --right-sidebar-width: 280px;
 }
 
@@ -423,7 +427,6 @@ header {
 }
 
 .sidebar-nav {
-  padding: 15px;
   margin-bottom: 20px;
 }
 
@@ -477,6 +480,9 @@ header {
   margin-right: 12px;
   fill: currentColor;
 }
+
+.user-profile{
+    }
 
 /* Filter section */
 .filter-section {
@@ -1462,9 +1468,6 @@ header {
     grid-template-columns: 1fr;
   }
 
-  .sidebar {
-
-  }
 
   .right-sidebar {
     grid-template-columns: repeat(2, 1fr);
@@ -1565,14 +1568,13 @@ header {
   background: radial-gradient(circle at center, var(--secondary) 0%, transparent 70%);
   box-shadow: 0 0 15px var(--secondary);
 }
-    </style>
+  </style>
 </head>
-
 <body>
+
   <canvas id="particle-canvas"></canvas>
   <div id="rising-sparks-container"></div>
   <div class="container">
-    {% include 'navtrove.html' %}
 
     <!-- Header -->
     <header style="margin-top:10%;">
@@ -2285,10 +2287,13 @@ function initFireSparks() {
 
   </script>
 
-{% else %}
 
- <style>
-    /* Add this to the existing <style> tag or create a new one if it doesn't exist */
+
+
+
+
+{% else %}
+    <style>
     .copyright-section {
         background: linear-gradient(
             to right,
@@ -2366,11 +2371,7 @@ function initFireSparks() {
             top: 0;
             z-index: 100;
         }
-        a {
-            color: var(--primary);
-            text-decoration: none;
-            background-color: transparent;
-        }
+
         .logo {
             display: flex;
             align-items: center;
@@ -2420,6 +2421,7 @@ function initFireSparks() {
         }
 
         .nav-links a:hover {
+            color: var(--accent);
         }
 
         .nav-links a::after {
@@ -2429,6 +2431,7 @@ function initFireSparks() {
             left: 0;
             width: 0;
             height: 2px;
+            background: var(--accent);
             transition: width 0.3s ease;
         }
 
@@ -2454,40 +2457,11 @@ function initFireSparks() {
             margin: 0 auto;
         }
 
-        .sidebar {
+        .deadbar {
             width: 320px;
             flex-shrink: 0;
         }
 
-        .user-profile {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .user-profile::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-
-        .user-info {
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
 
         .username {
             font-family: 'Cinzel', serif;
@@ -2497,26 +2471,6 @@ function initFireSparks() {
             text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
         }
 
-        .user-stats {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            font-size: 1rem;
-        }
-
-        .user-stat {
-            background: rgba(191, 151, 255, 0.1);
-            padding: 0.75rem 1.25rem;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid var(--primary);
-        }
-
-        .user-stat-icon {
-            font-size: 1.5rem;
-        }
 
         .filters {
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
@@ -2622,6 +2576,9 @@ function initFireSparks() {
             color: var(--accent);
         }
 
+        .main-content {
+            width: 100%;
+        }
         .main-content h1 {
             color: var(--primary);
             font-size: 3rem;
@@ -2642,6 +2599,7 @@ function initFireSparks() {
             height: 2px;
             background: linear-gradient(90deg, transparent, #bf97ff, transparent);
         }
+
 
         .pokemon-grid {
             display: grid;
@@ -2690,8 +2648,6 @@ function initFireSparks() {
         .pokemon-image::after {
             content: '';
             position: absolute;
-            width: 150%;
-            height: 150%;
             background: radial-gradient(circle at center, rgba(255, 215, 0, 0.1), transparent);
             animation: rotate 20s linear infinite;
         }
@@ -2708,15 +2664,16 @@ function initFireSparks() {
         }
 
         .pokemon-name {
-            font-size: 1.75rem;
+            font-size: 1.00rem;
             margin-bottom: 0.75rem;
             font-family: 'Cinzel', serif;
             color: var(--primary);
             text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+            max-width: 320px;
         }
 
         .pokemon-type {
-            color: rgba(255, 255, 255, 0.8);
+            color: white;
             font-size: 1.1rem;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -2853,7 +2810,7 @@ function initFireSparks() {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-.inventory-grid.compact-view .inventory-item {
+.inventory-grid.compact-view .gridCardItem {
     font-size: 0.9em;
 }
 
@@ -2895,21 +2852,212 @@ nav.main-menu ul li a {
     padding: 15px;
 }
 
-p.blog-meta span {
-    margin-right: 15px;
-    opacity: 0.6;
-    color: rgba(255, 255, 255, 1);
-    font-size: 0.85em;
+/* Hide the default checkbox */
+.item-select-checkbox {
+    display: none;
 }
+
+.outerContainer {
+    position: relative;
+    cursor: pointer;
+}
+
+.item-select-checkbox:checked + .gridCardItem {
+    background-color: rgba(0, 128, 0, 0.1); /* Example: light green background */
+}
+
+.item-select-checkbox:checked + .gridCardItem::before {
+    content: '✔'; /* Checkmark symbol */
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 20px;
+    color: green;
+    z-index: 100;
+}
+
+          .withdraw-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 20px;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+  .popup-content {
+    text-align: center;
+  }
+
+    .popup-content::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #d4af37, #f9f095, #d4af37);
+      border-radius: 2px;
+    }
+            h2 {
+      color: #1a1a1a;
+      font-size: 24px;
+      font-weight: 600;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    p {
+      color: #555;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    p strong {
+      color: #d4af37;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      outline: none;
+      letter-spacing: 0.5px;
+    }
+
+    #confirm-withdraw {
+      background: linear-gradient(135deg, #d4af37, #e5c760);
+      color: #000;
+      border: none;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+    }
+
+    #confirm-withdraw:hover {
+      background: linear-gradient(135deg, #c9a431, #d4af37);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+    }
+
+    #cancel-withdraw {
+      background-color: transparent;
+      color: #555;
+      border: 1px solid #d1d1d1;
+    }
+
+    #cancel-withdraw:hover {
+      background-color: #f5f5f5;
+      color: #333;
+      border-color: #bbb;
+    }
+
+    /* Demo button */
+    #show-popup {
+      background: linear-gradient(135deg, #d4af37, #e5c760);
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+      margin: 20px;
+    }
+
+    #show-popup:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+    }
     </style>
 </head>
 <body>
+<div id="withdraw-popup" class="withdraw-popup">
+  <div class="popup-content">
+    <h2>Confirm Withdrawal</h2>
+    <p>The shipping fee is <strong>599 rubies</strong>. Do you wish to proceed?</p>
+    <div class="popup-buttons">
+      <button id="confirm-withdraw">Yes, proceed</button>
+      <button id="cancel-withdraw">No, cancel</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
+    // Load audio files
+    const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
+    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
+    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
 
+    // Add event listeners to sell forms
+    document.querySelectorAll('.sell-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            sellAudio.play(); // Play the sell sound
+            console.log('')
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
+
+    // Add event listeners to withdraw forms
+    document.querySelectorAll('.withdraw-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            withdrawAudio.play(); // Play the withdraw sound
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
+
+	document.querySelectorAll('.trade-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            tradeAudio.play(); // Play the withdraw sound
+        });
+    });
+
+    // Generic AJAX form submission handler
+    function handleAjaxFormSubmission(form) {
+        const formData = new FormData(form);
+        const actionUrl = form.getAttribute('action');
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('stock-count').textContent = data.number_of_cards;
+                document.getElementById('stock-count2').textContent = data.number_of_cards;
+            } else {
+                console.error(data.error);
+            }
+        });
+    }
 </script>
 
-
+    <div class="container">
 
   <main class="main-content">
             <h1>Ruby Refill - (<span id="stock-count">{{ Currency|length }}</span>)</h1>

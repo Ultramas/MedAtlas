@@ -383,6 +383,7 @@ urlpatterns = [
     path('sell-all/', views.SellAllInventoryObjectsView.as_view(), name='sell_all_inventory_objects'),
     path('sell-everything/', views.SellEverythingInventoryObjectsView.as_view(), name='sell_everything_inventory_objects'),
     path("claim-ruby/", views.claim_ruby, name="claim-ruby"),
+    path("ajax_update_amount/", views.ajax_update_amount, name="ajax_update_amount"),
     path('dailyroom/', views.DailyRoomView.as_view(), name='dailyroom'), #game with a single game
     path('dailygame/<slug:slug>/', views.DailyChestView.as_view(), name='dailygame'), #game with a single game
     path('spin_game/', views.spin_game, name='spin_game'),

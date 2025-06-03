@@ -1054,6 +1054,7 @@ class ProfileDetails(models.Model):
         unique=True,
         help_text="Position for sorting",
     )
+    free = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.IntegerField(default=1,
                                     blank=True,
@@ -1063,14 +1064,10 @@ class ProfileDetails(models.Model):
 
     def __str__(self):
         return str(self.user) + " Selling Status: " + str(self.seller) + " Membership: " + str(self.membership)
+
     @property
     def rd_multiplier(self):
-        benefit = (
-            self.tier
-                .benefits
-                .filter(benefit='RD', is_active=1)
-                .first()
-        )
+        benefit = (self.tier.benefits.filter(benefit='RD', is_active=1).first())
         return benefit.multiplier if benefit else 1
 
     def get_absolute_url(self):
@@ -1131,59 +1128,79 @@ class ProfileDetails(models.Model):
 
     post_save.connect(create_user_profile, sender=User)
 
-    @property
-    def is_free(self):
-        return timezone.now() < (self.created_at + timedelta(days=7))
-
     def save(self, *args, **kwargs):
-        is_new = self._state.adding
+        is_creating = self._state.adding
 
-        if not self.currency:
-            from .models import Currency
-            self.currency = Currency.objects.filter(is_active=1).first()
+        if is_creating:
+            # (Optional) set any defaults before the first save:
+            if not self.currency:
+                from .models import Currency
+                self.currency = Currency.objects.filter(is_active=1).first()
 
-        if not self.avatar:
-            self.avatar = os.path.join('a.jpg')
-            print('saved the profile avatar to default image')
-        if self.total_currency_spent_30 < 25 and self.is_free:
+            if not self.avatar:
+                self.avatar = 'a.jpg'
+
+            # First insert—after this, self.pk and self.created_at exist.
+            super().save(*args, **kwargs)
+            return  # <— stop here on new objects to avoid a second INSERT
+
+        # ==== from here on, we're updating an existing ProfileDetails ====
+
+        # If still marked free but 7 days have passed since `created_at`, turn off free.
+        if self.free and timezone.now() >= (self.created_at + timedelta(days=7)):
+            self.free = False
+
+        # Tier‐assignment logic:
+        if self.total_currency_spent_30 < 25 and self.free:
             code = 'F'
-        elif self.total_currency_spent_30 >= 0 and self.total_currency_spent_30 < 25:
+        elif 0 <= self.total_currency_spent_30 < 25:
             code = 'B'
-        elif self.total_currency_spent_30 >= 25 and self.total_currency_spent_30 < 100:
+        elif 25 <= self.total_currency_spent_30 < 100:
             code = 'G'
-        elif self.total_currency_spent_30 >= 100 and self.total_currency_spent_30 < 250:
+        elif 100 <= self.total_currency_spent_30 < 250:
             code = 'S'
-        elif self.total_currency_spent_30 >= 250 and self.total_currency_spent_30 < 500:
+        elif 250 <= self.total_currency_spent_30 < 500:
             code = 'D'
-        elif self.total_currency_spent_30 >= 500 and self.total_currency_spent_30 < 1000:
+        elif 500 <= self.total_currency_spent_30 < 1000:
             code = 'W'
-        elif self.total_currency_spent_30 >= 1000 and self.total_currency_spent_30 < 2000:
+        elif 1000 <= self.total_currency_spent_30 < 2000:
             code = 'BA'
-        elif self.total_currency_spent_30 >= 2000 and self.total_currency_spent_30 < 5000:
+        elif 2000 <= self.total_currency_spent_30 < 5000:
             code = 'GT'
         elif self.total_currency_spent_30 >= 5000:
             code = 'M'
         else:
             code = 'B'
 
+        from .models import Tier
         self.tier = Tier.objects.filter(tier=code).first()
 
-        if self.pk:
-            previous_instance = ProfileDetails.objects.get(pk=self.pk)
-            if previous_instance.currency_amount > self.currency_amount:
-                spent_amount = previous_instance.currency_amount - self.currency_amount
-                first_currency = Currency.objects.filter(is_active=1).first()
-                if first_currency and self.currency == first_currency:
-                    self.rubies_spent = (self.rubies_spent or 0) + spent_amount
+        # Handle “rubies_spent” / level‐up logic:
+        previous = ProfileDetails.objects.get(pk=self.pk)
+        if previous.currency_amount > self.currency_amount:
+            spent = previous.currency_amount - self.currency_amount
+            from .models import Currency
+            first_currency = Currency.objects.filter(is_active=1).first()
+            if first_currency and self.currency == first_currency:
+                self.rubies_spent = (self.rubies_spent or 0) + spent
 
-            if self.rubies_spent != previous_instance.rubies_spent:
-                new_level = Level.objects.filter(experience__lte=self.rubies_spent).order_by('-level').first()
-                if new_level:
-                    self.level = new_level
-            if self.is_free and timezone.now() >= self.created_at + timedelta(hours=168):
-                self.free = False
+        if self.rubies_spent != previous.rubies_spent:
+            from .models import Level
+            new_level = Level.objects.filter(experience__lte=self.rubies_spent).order_by('-level').first()
+            if new_level:
+                self.level = new_level
 
+        # Finally, save the updated fields:
         super().save(*args, **kwargs)
+
+    @property
+    def is_free(self):
+        return timezone.now() < (self.created_at + timedelta(days=7))
+
+    @property
+    def is_free(self):
+        # Only called after created_at has been set (because save() logic ensures that)
+        return timezone.now() < (self.created_at + timedelta(days=7))
 
     class Meta:
         verbose_name = "Account Profile"
