@@ -841,6 +841,15 @@ class CurrencyMarket(models.Model):
         verbose_name_plural = "Currency Markets"
 
 
+class FavoriteCurrency(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    currency_market = models.ForeignKey(CurrencyMarket, on_delete=models.CASCADE)
+    favorited_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'currency_market')
+
+
 def generate_unique_code(length=16):
     while True:
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
@@ -1347,6 +1356,7 @@ class CurrencyOrder(models.Model):
     class Meta:
         verbose_name = "Individiual Currency Order"
         verbose_name_plural = "Individiual Currency Orders"
+
 
 class CurrencyFullOrder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -4022,6 +4032,7 @@ class Achievements(models.Model):
         verbose_name = "Achievement"
         verbose_name_plural = "Achievements"
 
+
 class SpinnerChoiceRenders(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="game_player")
     slug = AutoSlugField(populate_from='nonce', unique=True)
@@ -4108,10 +4119,12 @@ class SpinnerChoiceRenders(models.Model):
         instance.save()
         return instance
 
+
 class Robot(models.Model):
     name = models.CharField(max_length=200)
     is_bot = models.BooleanField(default=True)
     image = models.FileField()
+    battle = models.ForeignKey('Battle', on_delete=models.CASCADE)
     is_active = models.IntegerField(
         default=1,
         blank=True,
@@ -4123,6 +4136,7 @@ class Robot(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class BattleParticipant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
@@ -4139,6 +4153,7 @@ class BattleParticipant(models.Model):
     class Meta:
         verbose_name = "Battle Participant"
         verbose_name_plural = "Battle Participants"
+
 
 class BattleGame(models.Model):
     battle = models.ForeignKey('Battle', on_delete=models.CASCADE, related_name='battle_games')
@@ -4165,6 +4180,7 @@ class BattleGame(models.Model):
         return self.game.discount_cost
 
     game_discount_cost.short_description = "Discounted Cost"
+
 
 class Battle(models.Model):
     BATTLE_SLOTS = (
@@ -4200,12 +4216,6 @@ class Battle(models.Model):
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     price = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    participants = models.ManyToManyField(
-        BattleParticipant, blank=True, related_name='battles', limit_choices_to={'is_bot': False}
-    )
-    robots = models.ManyToManyField(
-        Robot, blank=True, related_name='battles', limit_choices_to={'is_bot': True}
-    )
     min_human_participants = models.PositiveIntegerField(
         default=0,
         validators=[MinValueValidator(0)],
@@ -6939,6 +6949,7 @@ class ReasonsBackgroundImage(models.Model):
         verbose_name = "Reasons Background Image"
         verbose_name_plural = "Reasons Background Images"
 
+
 class OrderBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -6950,6 +6961,7 @@ class OrderBackgroundImage(models.Model):
         verbose_name = "Order Background Image"
         verbose_name_plural = "Order Background Images"
 
+
 class CheckoutBackgroundImage(models.Model):
     title = models.TextField()
     cover = models.ImageField(upload_to='images/')
@@ -6960,6 +6972,7 @@ class CheckoutBackgroundImage(models.Model):
     class Meta:
         verbose_name = "Checkout Background Image"
         verbose_name_plural = "Checkout Background Images"
+
 
 class SignupBackgroundImage(models.Model):
     title = models.TextField()
@@ -7029,7 +7042,7 @@ class OrderItem(models.Model):
     quantity = models.IntegerField(default=1)
     order_date = models.DateTimeField(auto_now_add=True, verbose_name="Order date")
     orderprice = models.FloatField(verbose_name="Order price", default=0)
-    currencyorderprice = models.IntegerField(verbose_name="Curency order price", default=0)
+    currencyorderprice = models.IntegerField(verbose_name="Currency order price", default=0)
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -7297,6 +7310,7 @@ class Answer(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s answer to '{self.question.text}'"
+
 
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

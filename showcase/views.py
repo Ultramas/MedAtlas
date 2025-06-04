@@ -37,7 +37,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     SpinnerChoiceRenders, DefaultAvatar, Achievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
     UserNotification, TopHits, Card, Clickable, GameChoice, Robot, MyPreferences, UserClickable, GiftCodeRedemption, \
-    GiftCode, IndividualChestStatistics, FavoriteChests, Season, Tier, ChangeLog
+    GiftCode, IndividualChestStatistics, FavoriteChests, Season, Tier, ChangeLog, FavoriteCurrency
 from .models import Idea
 from .models import VoteQuery
 from .models import StaffApplication
@@ -3000,6 +3000,7 @@ class DailyRoomView(BaseView):
 
         return context
 
+
 def get_next_5pm_pst():
 
     pst = pytz.timezone('US/Pacific')
@@ -3010,6 +3011,7 @@ def get_next_5pm_pst():
         next_5pm += timedelta(days=1)
 
     return next_5pm
+
 
 class DailyChestView(BaseView):
     template_name = "game.html"
@@ -3367,6 +3369,7 @@ def create_card_instance(request):
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
+
 class OpenBattleListView(ListView):
     model = Battle
     template_name = "battle.html"
@@ -3528,6 +3531,15 @@ class SingleBattleListView(DetailView):
         participants = list(battle.battle_joined.all())
 
         grid = [participants[i] if i < len(participants) else None for i in range(total_capacity)]
+
+        user_ids = [p.user.id for p in grid if p and p.user]
+        profiles = ProfileDetails.objects.filter(user_id__in=user_ids)
+        profile_map = {p.user_id: p for p in profiles}
+
+        # Attach profile to each slot (if it exists)
+        for slot in grid:
+            if slot and slot.user:
+                slot.profile = profile_map.get(slot.user.id)
 
         context['grid'] = grid
         context['is_full'] = len(participants) >= total_capacity
@@ -3707,6 +3719,7 @@ from .forms import (
     SpinPreferenceForm
 )
 
+
 class ActualBattleView(DetailView):
     model = Battle
     template_name = "actualbattle.html"
@@ -3733,9 +3746,14 @@ class ActualBattleView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         battle = self.object
-        humans = list(battle.participants.all())
-        bots = list(battle.robots.all())
-        context['players'] = [('human',  h) for h in humans] + [('robot',  r) for r in bots]
+        # All participants linked to this battle
+        all_participants = BattleParticipant.objects.filter(battle=battle)
+
+        # Split humans and bots
+        humans = [bp.user for bp in all_participants if not bp.is_bot and bp.user]
+        bots = [bp.robot for bp in all_participants if bp.is_bot and bp.robot]
+
+        context['players'] = [('human', h) for h in humans] + [('robot', b) for b in bots]
 
         # 1) Grab all prefetched games
         games = getattr(battle, 'games_with_choices', [])
@@ -3859,6 +3877,8 @@ class ActualBattleView(DetailView):
         is_active=1)
         if user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=user).order_by("created_at")
+        print(battle.participants.all())  # Should return BattleParticipant objects
+        print(battle.robots.all())
 
         return context
 
@@ -3867,6 +3887,7 @@ from django.contrib.sessions.models import Session
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import timedelta
+
 
 def active_users_count(request):
     now = timezone.now()
@@ -3891,7 +3912,9 @@ class BattleCreationView(CreateView):
     model = Battle
     form_class = BattleCreationForm
     template_name = "battlecreator.html"
-    success_url = reverse_lazy('showcase:battle')
+
+    def get_success_url(self):
+        return reverse_lazy('showcase:battle_detail', kwargs={'battle_id': self.object.id})
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -3909,6 +3932,7 @@ class BattleCreationView(CreateView):
         battle.price = battle.total_game_values
         battle.save(update_fields=['price'])
 
+        BattleParticipant.objects.get_or_create(user=self.request.user, battle=battle)
         return response
 
     def get_context_data(self, **kwargs):
@@ -3953,7 +3977,6 @@ class BattleCreationView(CreateView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
-
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -3986,6 +4009,7 @@ class BattleCreationView(CreateView):
 
         return context
 
+
 def join_battle(request):
     battle_id = request.POST.get('battle_id')
     battle = Battle.objects.get(id=battle_id)
@@ -4014,6 +4038,7 @@ def join_battle(request):
         form = BattleJoinForm(user=request.user, battle=battle)
 
     return render(request, 'showcase/join_battle.html', {'form': form, 'battle': battle})
+
 
 def add_robot(request, battle_id):
     battle = get_object_or_404(Battle, id=battle_id)
@@ -10777,7 +10802,6 @@ class EBackgroundView(BaseView, FormView):
     template_name = "ehome.html"
     form_class = EmailForm
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -10790,6 +10814,9 @@ class EBackgroundView(BaseView, FormView):
         paginator = Paginator(items_query, paginate_by)
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
+
+        active_order = (Order.objects.filter(user=self.request.user, ordered=False).prefetch_related('items').first())
+        context['order'] = active_order
 
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -18154,12 +18181,7 @@ class CurrencyMarketView(EBaseView, FormView, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        active_order = (
-            Order.objects
-            .filter(user=self.request.user, ordered=False)
-            .prefetch_related('items')
-            .first()
-        )
+        active_order = (CurrencyFullOrder.objects.filter(user=self.request.user, ordered=False).prefetch_related('items').first())
         context['order'] = active_order
 
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
@@ -18215,8 +18237,21 @@ class CurrencyMarketView(EBaseView, FormView, ListView):
                 context['profile_pk'] = profile.pk
                 context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
+            favorited_items = FavoriteCurrency.objects.filter(user=self.request.user).values_list('currency_market_id', flat=True)
+            context['favorited_ids'] = set(favorited_items)
+
+            show_only_favorites = self.request.GET.get('favorites') == '1'
+            if show_only_favorites:
+                context['Currency'] = CurrencyMarket.objects.filter(id__in=favorited_items,
+                                                                    is_active=1).order_by(
+                    'price')
+            else:
+                context['Currency'] = CurrencyMarket.objects.filter(is_active=1).order_by('price')
+
         context['Currency'] = CurrencyMarket.objects.filter(is_active=1).order_by(
             'price')
+
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -18241,6 +18276,15 @@ class CurrencyMarketView(EBaseView, FormView, ListView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
+
+
+@login_required
+def toggle_favorite_currency(request, slug):
+    item = get_object_or_404(CurrencyMarket, slug=slug)
+    favorite, created = FavoriteCurrency.objects.get_or_create(user=request.user, currency_market=item)
+    if not created:
+        favorite.delete()
+    return JsonResponse({'favorited': created})
 
 
 class CurrencyCheckoutView(EBaseView):
@@ -18571,6 +18615,7 @@ class CurrencyPaypalFormView(FormView):
             'no_shipping': '1',
         }
 
+
 @allow_guest_user
 def currency_add_to_cart(request, slug):
     item = get_object_or_404(CurrencyMarket, slug=slug)
@@ -18634,6 +18679,7 @@ def currency_remove_from_cart(request, slug):
     else:
         messages.info(request, "You do not have an active cart.")
         return redirect("showcase:currencymarket")
+
 
 def currency_get_coupon(request, code):
     try:

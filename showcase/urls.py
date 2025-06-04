@@ -404,15 +404,7 @@ urlpatterns = [
     path('battle/<int:battle_id>/add_robot/', views.add_robot, name='add_robot'),
     path('actualbattle/<int:battle_id>/', views.ActualBattleView.as_view(), name='actualbattle'),
     path('battles/<int:battle_id>/games/<int:game_id>/outcome/', views.battle_create_outcome, name='battle_create_outcome'),
-
-    path(
-        'battlecreator/',
-        login_required(
-            BattleCreationView.as_view(),
-            login_url=reverse_lazy('login')
-        ),
-        name='battlecreator'
-    ),
+    path('battlecreator/', login_required(BattleCreationView.as_view(), login_url=reverse_lazy('login')), name='battlecreator'),
     path('active-users/', views.active_users_count, name='active_users_count'),
     path('clubroom/', views.ClubRoomView.as_view(), name='clubroom'),
     path('inventory/', views.PlayerInventoryView.as_view(), name='inventory'),
@@ -444,6 +436,7 @@ urlpatterns = [
     path('currency-reduce-quantity-item/<slug>/', currency_reduce_quantity_item, name='currency-reduce-quantity-item'),
     path('currencycheckout/', views.CurrencyCheckoutView.as_view(), name='currencycheckout'),
     path('currencypayment/<payment_option>/', views.CurrencyPaymentView.as_view(), name='currencypayment'),
+    path('currency/favorite-toggle/<slug:slug>/', views.toggle_favorite_currency, name='toggle-favorite-currency'),
     path('create_inventory_object/', views.create_inventory_object, name='create_inventory_object'),
     path('under_construction/', TemplateView.as_view(template_name='under_construction.html'), name='under_construction'),
 

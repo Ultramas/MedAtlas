@@ -447,7 +447,6 @@ document.addEventListener("DOMContentLoaded", function () {
 <form method="post" id="battle-creator-form">
     {% csrf_token %}
 
-    <!-- Render the 'battle_name' field -->
     <div class="form-group">
         <label for="{{ form.battle_name.id_for_label }}">{{ form.battle_name.label }}</label>
         {{ form.battle_name }}

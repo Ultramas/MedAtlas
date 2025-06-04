@@ -2764,7 +2764,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h2 class="collection-title">My Collection</h2>
                     {% if user.is_authenticated %}
                     <a href="{% url 'showcase:inventory' %}" class="collection-item">
-                <button class="view-collection">
+                <button class="view-collection" style="display: flex; flex-direction: row; gap: 0px;">
                     🐉 View Collection (<span id="stock-count2">{{ StockObject|length }}</span>)
                 </button>
                     </a>

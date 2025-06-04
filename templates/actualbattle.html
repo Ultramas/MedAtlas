@@ -9,7 +9,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1200, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PokeTrove - Game</title>
@@ -40,12 +39,9 @@
      <script src="{% static 'css/js/sticker.js' %}"></script>
      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-
     <script src="{% static 'css/js/build.js' %}"></script>
     <script src="{% static 'css/js/start.js' %}"></script>
     <script src="{% static 'css/js/test.js' %}"></script>
-
-
 
      <style>
         body{
@@ -93,25 +89,12 @@
         }
 
         .spinner-arrow {
-            /*width: 50px;*/
+
             height: 50px;
             z-index: 10;
         }
 
-        .cards-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            height: 300px;
-            overflow-y: auto;
-            transition: justify-content 0.3s ease-in-out;
-            gap: 10px;
-        }
-
-
         .cards-container .popup-card:first-child {
-            margin-left: 250px;
         }
 
         .cards-container::-webkit-scrollbar {
@@ -119,12 +102,12 @@
         }
 
         .cards-container::-webkit-scrollbar-thumb {
-            background-color: #888; /* Custom scrollbar color */
+            background-color: #888;
             border-radius: 4px;
         }
 
         .cards-container::-webkit-scrollbar-thumb:hover {
-            background-color: #555; /* Darker color on hover */
+            background-color: #555;
         }
 
         .card{
@@ -140,6 +123,9 @@
             margin-left: 10px;
             text-align: center;
             overflow: hidden;
+            height: 325px;
+            margin-top: 15px;
+            margin-bottom: 15px;
         }
 
     .individuallootelement {
@@ -150,15 +136,14 @@
     }
 
     .cards {
-        /*margin-right: 15px;
-        margin-left: 15px;*/
+
         flex: 1 1 200px;
-       /*margin: 10px;*/
+
         box-sizing: border-box;
         display: flex;
-        flex-direction: column; /* Align elements vertically */
-        align-items: center; /* Centers horizontally */
-        justify-content: center; /* Centers vertically */
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         text-align: center;
         height: 20em;
         width: 10em;
@@ -182,8 +167,6 @@
             --light-gold: #FFF8DC;
             --background: #1A1A1A;
         }
-
-
 
         .containerev {
             width: 100%;
@@ -316,7 +299,6 @@
   transform: scale(1.05) rotate(-1deg);
 }
 
-
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap');
 
         :root {
@@ -410,7 +392,7 @@
             font-family: 'Cinzel', serif;
             text-transform: uppercase;
             letter-spacing: 2px;
-            /*font-size: 1rem;*/
+
             transition: color 0.3s ease;
         }
 
@@ -792,8 +774,6 @@
             border-color: var(--accent);
         }
 
-
-
 .view-toggle {
     text-align: right;
     margin-bottom: 1rem;
@@ -929,7 +909,7 @@ p.blog-meta span {
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4), 0 0 20px rgba(79, 28, 177, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
-    /* text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); */
+
     outline: none;
     transform: perspective(1px) translateZ(0);
 }
@@ -950,7 +930,6 @@ p.blog-meta span {
     position: relative;
     z-index: 2;
 }
-
 
 .button-shine {
     position: absolute;
@@ -1086,14 +1065,11 @@ p.blog-meta span {
   };
 </script>
 
-
-
 <div class="total" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;
     position: relative;">
 	<!-- header -->
 {% include 'navtrove.html' %}
 	<!-- end header -->
-
 
 	<div class="list-section pt-80 pb-80" style="background: rgba(0, 255, 255, 0); z-index: 3;">
     <div class="container">
@@ -1124,18 +1100,21 @@ p.blog-meta span {
         {% endfor %}
     </div>
 </div>
-
+<script>
+  window.USER = {
+    isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }}
+  };
+</script>
 <style>
 .top-hits-container {
-    /*background: linear-gradient(to bottom,
-rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
+
     border-radius: 16px;
     padding: 2rem 1rem;
     margin: 2rem 0;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     position: relative;
     overflow: hidden;
-    /*border: 1px solid rgba(255, 255, 255, 0.1);*/
+    background: rgb(61 55 55 / 50%);
 }
 
 .top-hits-container::before {
@@ -1286,7 +1265,6 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
     background-size:cover;
 }
 
-
 .top-hit-card:hover .card-glow {
     opacity: 0.7;
     animation: pulse-glow 2s infinite;
@@ -1297,15 +1275,15 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
 }
 
 .card-image-container {
-  position: absolute;      /* if needed for centering */
+  position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
 }
 .card-image {
-  max-width: 100%;         /* fit within container */
+  max-width: 100%;
   max-height: 100%;
-  position: relative;      /* bring into stacking context */
-  z-index: 2;              /* above any overlays */
+  position: relative;
+  z-index: 2;
 }
 .top-hit-card:hover .card-image {
     transform: scale(1.05);
@@ -1420,7 +1398,7 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
 <div class="selections">
     <div class="flame-effect"></div>
     <div class="content">
-        <label style="background: rgba(255, 255, 255, 0.3); padding: 2px; border-radius: 10px;"> Spin Boost Power</label>
+        <label style="background: rgba(255, 255, 255, 0.3); padding: 2px; padding-left: 5px; padding-right: 5px; border-radius: 10px;"> Spin Boost Power</label>
         <div id="spinCount">
             <button class="spin-option" data-value="1">1x</button>
             <button class="spin-option" data-value="2">2x</button>
@@ -1462,7 +1440,7 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
     const cookies = document.cookie.split(";");
     for (let i = 0; i < cookies.length; i++) {
       const cookie = cookies[i].trim();
-      // Does this cookie string begin with the name we want?
+
       if (cookie.substring(0, name.length + 1) === name + "=") {
         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
         break;
@@ -1471,7 +1449,6 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
   }
   return cookieValue;
 }
-
 
 document.addEventListener("DOMContentLoaded", function () {
     const spinButtons = document.querySelectorAll(".spin-option");
@@ -1496,17 +1473,15 @@ document.addEventListener("DOMContentLoaded", function () {
         <label for="persist-spin-checkbox">Save Spin Boost</label><br>
     </div>
 
-
 {% if game.daily %}
  {% if user.is_authenticated %}
-
 
 <button class="start gamer-button begin-button"
         id="start" style="display: none;"
         data-game-id="{{ game.id }}"
         data-nonce="{{ nonce }}"
         data-slug="{{ game.slug }}"
-        data-daily="false"
+        data-daily="true"
          style="position: absolute; bottom: 5px; left: 5px;">
 
 {% if preference and preference.spintype == 'I' %}
@@ -1520,10 +1495,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     {% else %}
         <a href="{% url 'login' %}?next={{ request.path }}">
-    <button class="start gamer-button"
-        id="login"
+
+<button class="start gamer-button begin-button"
+        id="start"
+        data-game-id="{{ game.id }}"
+        data-nonce="{{ nonce }}"
+        data-slug="{{ game.slug }}"
+        data-daily="false"
          style="position: absolute; bottom: 5px; left: 5px;">
-    Login
 </button>
     </a>
     {% endif %}
@@ -1551,7 +1530,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         startButton.disabled = false;
                     }
 
-                    // Update button text or display countdown (optional)
                     const hours = Math.floor(timeLeft / 3600);
                     const minutes = Math.floor((timeLeft % 3600) / 60);
                     const seconds = Math.floor(timeLeft % 60);
@@ -1584,8 +1562,13 @@ document.addEventListener("DOMContentLoaded", function () {
 </button>
     {% else %}
     <a href="{% url 'login' %}?next={{ request.path }}">
-    <button class="start gamer-button"
-        id="login"
+
+<button class="start gamer-button begin-button"
+        id="start"
+        data-game-id="{{ game.id }}"
+        data-nonce="{{ nonce }}"
+        data-slug="{{ game.slug }}"
+        data-daily="false"
          style="position: absolute; bottom: 5px; left: 5px;">
     Login
 </button>
@@ -1603,14 +1586,7 @@ document.addEventListener("DOMContentLoaded", function () {
         data-next-5pm="{{ next_5pm.timestamp }}"
          style="position: absolute; bottom: 5px; right: 5px;"
         disabled>
-
-{% if preference and preference.spintype == 'I' %}
-⚡Demo
-    {% elif preference and preference.spintype == 'S' %}
-🔥Demo
-    {% else %}
-    Demo
-    {% endif %}
+   Demo
 </button>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -1621,7 +1597,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const next5pmTimestamp = parseInt(startButton.getAttribute("data-next-5pm"), 10);
 
         if (isDaily) {
-            const now = Date.now() / 1000; // Current time in seconds
+            const now = Date.now() / 1000;
             const timeRemaining = next5pmTimestamp - now;
 
             if (timeRemaining > 0) {
@@ -1667,6 +1643,13 @@ document.addEventListener("DOMContentLoaded", function () {
 </button>
 {% endif %}
 </div>
+<script>
+  window.USER = {
+    isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }}
+  };
+
+  window.CSRF_TOKEN = "{{ csrf_token }}";
+</script>
 
 <script>
     function getCSRFToken() {
@@ -1676,7 +1659,7 @@ let currentSpintype = null;
 
 function triggerSpin(spintype) {
     currentSpintype = spintype;
-    // Update UI elements
+
     const demoButtons = document.querySelectorAll('.demo-button');
     demoButtons.forEach(button => {
         if (spintype === 'I') {
@@ -1700,7 +1683,6 @@ function triggerSpin(spintype) {
 }
     </script>
 
-
 <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function () {
     const spinButtons = document.querySelectorAll(".spin-option");
@@ -1709,13 +1691,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const startButton = document.getElementById("start");
     const baseCost = parseFloat(baseCostElement.textContent) || 0;
 
-    // Initialize user cash as a proxy
     let userCash = parseFloat({{ user_cash|safe }});
     const userCashProxy = new Proxy({ value: userCash }, {
         set(target, key, newValue) {
             if (key === "value") {
                 target[key] = newValue;
-                updateStartButton(); // Re-run the logic on change
+                updateStartButton();
             }
             return true;
         }
@@ -1757,7 +1738,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    /*function fetchUserCash() {
+    function fetchUserCash() {
         fetch('/api/get-user-cash/')
             .then(response => response.json())
             .then(data => {
@@ -1768,37 +1749,31 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(error => console.error('Error fetching user cash:', error));
     }
 
-    setInterval(fetchUserCash, 5000);*/
+    setInterval(fetchUserCash, 500);
 });
 
 </script>
 
-
-
-
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    let selectedMultiplier = 1; // Default multiplier
+    let selectedMultiplier = 1;
 
-    // Add event listener to each spin-option button
     document.querySelectorAll(".spin-option").forEach(button => {
         button.addEventListener("click", function () {
             selectedMultiplier = parseInt(this.getAttribute("data-value"));
-            console.log("Selected multiplier:", selectedMultiplier); // For debugging
+            console.log("Selected multiplier:", selectedMultiplier);
         });
     });
 
-    // Add event listener to the spin button
     document.getElementById("start").addEventListener("click", function () {
-        console.log("Spin button clicked!"); // Debug log
+        console.log("Spin button clicked!");
 
         const button = this;
         const gameId = button.getAttribute("data-game-id");
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value; // Fetch CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-        console.log("Game ID:", gameId); // Debug log
-        console.log("CSRF Token:", csrfToken); // Debug log
+        console.log("Game ID:", gameId);
+        console.log("CSRF Token:", csrfToken);
         console.log("Spin Multiplier:", selectedMultiplier);
 
         fetch("{% url 'showcase:spin_game' %}", {
@@ -1814,18 +1789,19 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .then(response => response.json())
         .then(data => {
-            console.log("Response data:", data); // Debug log
-            if (data.daily === false) { // Check if daily is explicitly false
+            console.log("Response data:", data);
+            if (data.daily === false) {
                 if (data.success) {
-                    // Update the currency amount automatically
                     const currencyElement = document.getElementById("currency-amount");
                     if (currencyElement) {
                         currencyElement.innerText = `${data.updated_currency_amount} ${data.currency_name}`;
+                        const increaseInLotteryPot = data.currency_amount / 250;
+                        lotteryPot += increaseInLotteryPot;
                     }
-                    // Optionally, display a success message
+
                     console.log("Spin successful:", data.message);
                 } else {
-                    alert(data.error); // Show error message if the spin fails
+                    alert(data.error);
                 }
             } else {
                 console.log("The game is marked as daily, action skipped.");
@@ -1833,24 +1809,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
         })
         .catch(error => {
-            console.error("Error during fetch:", error); // Log any fetch errors
+            console.error("Error during fetch:", error);
         });
     });
 });
 </script>
 
-
-
 <!-- Embed choices and other data in a script tag -->
-
 
 <script type="text/javascript">
 $(document).ready(function() {
     console.log("jQuery is loaded.");
 
-    let spinMultiplier = 1; // Default to 1 spin if no option is selected
+    let spinMultiplier = 1;
 
-    // Set spin multiplier based on selected option
     $('.spin-option').on('click', function() {
         $('.spin-option').removeClass('selected');
         $(this).addClass('selected');
@@ -1885,11 +1857,10 @@ $(document).ready(function() {
                         allChoices = allChoices.concat(response.choices);
                         console.log('Choice received successfully for spin', i + 1);
 
-                        // Update the UI only after all spins are completed
                         if (completedSpins === spinMultiplier) {
                             console.log('All spins completed.');
-                            //updateWheelContents(allChoices); // Display all outcomes at once
-                            initializeAnimation(response.nonce, isQuickSpin); // Pass Quick Spin mode to the animation
+
+                            initializeAnimation(response.nonce, isQuickSpin);
                         }
                     } else {
                         console.error(response.message);
@@ -1930,7 +1901,6 @@ $(document).ready(function() {
             $(".start").prop('disabled', false);
         }
 
-
         addAnimation();
         console.log('the preference is ' + isQuickSpinInteractive)
         const quickSpinDuration = (typeof isQuickSpinInteractive !== "undefined" && isQuickSpinInteractive)
@@ -1949,7 +1919,6 @@ $(document).ready(function() {
 });
 
 </script>
-
 
     </div>
 
@@ -1983,17 +1952,28 @@ $(document).ready(function() {
 </div>
 
     </div>
-<!--check mypreference of user, should one exist; default is classic-->
+<ul>
+  {% for kind, player in players %}
+    <h2>Battle Chests</h2>
+<div class="chests-list">
+  {% for game in games %}
+    <div class="chest-card">
+      <h3>{{ game.name }}</h3>
+      <p>Slug: {{ game.slug }}</p>
+      <p>Cost: {{ game.get_effective_cost }}</p>
 
+      <ul>
+        {% for gc in game.gamechoice_links %}
+          <li>{{ gc.choice.choice_text }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+</div>
 
-{% for role, p in players %}
-  <li>
-    {% if role == 'human' %}
-      {{ p.user.username }}
-    {% else %}
-      {{ p.name }} (bot)
-    {% endif %}
-  </li>
+    <li>
+      {% if kind == 'human' %}
+        👤 {{ player.username }}
     <div class="wrapper">
         <div class="containerre"  style="display: flex;">
             <div class="slider" id="slider">
@@ -2048,6 +2028,71 @@ $(document).ready(function() {
             {% endwith %}
         {% endfor %}
 
+            </div>
+
+            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow" style="">
+        </div>
+
+      <div class="labeltag" style="">
+        <h4 style="">{{game.name}}</h4>
+      </div>
+    </div>
+                    </div></div></div></div></div></div></div>
+      {% elif kind == 'robot' %}
+        🤖 {{ player.name }}
+    <div class="wrapper">
+        <div class="containerre"  style="display: flex;">
+            <div class="slider" id="slider">
+<!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
+{% for item in choices_with_nonce %}
+            {% with choice=item.choice %}
+            {% with color=game|get_color:choice %}
+                <div id="{{ choice.choice_text }}" class="cards" style="background: url({% static 'css/images/'|add:color|add:'.png' %});">
+
+                        <div class="lootelement"
+                             data-price="{{ choice.value }}"
+                             data-currency-file="{{ item.currency.file_url }}"
+                             data-currency-symbol="{{ item.currency.symbol }}">
+                                {% if choice.file.url %}
+                                <div class="sliderImg" style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
+                                {% endif %}
+                            <div class="sliderPrice"><b class="innerprice">{{ choice.value }}</b>💎</div>
+                        </div>
+                    {% endwith %}
+                </div>
+            {% endwith %}
+        {% endfor %}
+
+        {% for nonce, choice in matching_choices %}
+            <p>Value: {{ choice.value }}</p>
+            <p>Nonces: {{ nonce }}</p>
+            <p>Choice: {{ choice.choice_text }}</p>
+
+            {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 cost_threshold_100000=game.cost|mul:1000 cost_threshold_100000000=game.cost|mul:1000000 %}
+
+                {% if choice.value <= cost_threshold_80 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/gray.png' %}); color: black;">
+                {% elif choice.value <= cost_threshold_100 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); color: black;">
+                {% elif choice.value <= cost_threshold_200 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); color: black;">
+                {% elif choice.value <= cost_threshold_500 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); color: black;">
+                {% elif choice.value <= cost_threshold_10000 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); color: black;">
+                {% elif choice.value <= cost_threshold_100000 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); color: black;">
+                {% elif choice.value <= cost_threshold_100000000 %}
+                    <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); color: black;">
+                {% else %}
+                    <div class="lootelement" style="background: url({% static 'css/images/redgold.png' %}); color: black;">
+                {% endif %}
+
+                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
+                </div>
+
+            {% endwith %}
+        {% endfor %}
 
             </div>
 
@@ -2059,18 +2104,24 @@ $(document).ready(function() {
       </div>
     </div>
                     </div></div></div></div></div></div></div>
-{% endfor %}
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
+
 
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
-fetch(`/create_outcome/${slug}/`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-CSRFToken': csrftoken,
-  },
-  body: JSON.stringify({ game_id: gameId, button_id: buttonId }),
-})
+    const outcomeUrl = `/battles/${battleId}/games/${gameId}/outcome/`;
+
+    fetch(outcomeUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken,
+      },
+      body: JSON.stringify({ button_id: buttonId }),
+    })
   .then(response => response.json())
   .then(data => {
     if (data.status !== 'success') {
@@ -2092,10 +2143,7 @@ fetch(`/create_outcome/${slug}/`, {
   .catch(err => console.error('Fetch error:', err));
 </script>
 
-
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
 
 <script>
 $(".start").click(function () {
@@ -2128,7 +2176,6 @@ $(".start").click(function () {
         console.error('Error:', error);
         button.prop('disabled', false);
     });
-
 
                 console.log('Nonce:', chosenNonce);
                 console.log('Choice ID:', choiceId);
@@ -2194,7 +2241,6 @@ $(".start").click(function () {
                             }
                         }
 
-
                         const choiceFileElement = document.getElementById('choice-file');
                         if (choiceFile) {
                             choiceFileElement.src = choiceFile;
@@ -2207,7 +2253,6 @@ $(".start").click(function () {
                         console.error('Error: Target card not found.');
                     }
 
-                    // Re-enable the button after the animation finishes
                     button.prop('disabled', false);
 
                 }, 9000);
@@ -2223,17 +2268,14 @@ $(".start").click(function () {
         });
 });
 
-
-
 </script>
 
     <!--sell item(s) after spins-->
 
-
+    {% include 'gameloottable.html' %}
 
 <br>
 <br></div>
-
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -2264,7 +2306,7 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(data => {
                 if (data.success) {
-                    // Update stock count
+
                     const stockCountElement = document.querySelector("#stock-count");
                     if (stockCountElement) {
                         stockCountElement.textContent = data.stock_count;
@@ -2274,7 +2316,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         currencyAmountElement.textContent = data.currency_amount;
                     }
 
-                    // Example: Remove the item from the UI
                     this.closest(".inventory-item").remove();
                 } else {
                     console.error("Action failed.");
@@ -2286,9 +2327,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
-
-
-
 
 document.addEventListener("DOMContentLoaded", function () {
     const withdrawButtons = document.querySelectorAll(".withdraw-button");

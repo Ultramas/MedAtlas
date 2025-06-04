@@ -1,4 +1,4 @@
-
+{% include 'navtrove.html' %}
 {% load static %}
 
 <html>
@@ -106,95 +106,6 @@
 </head>
 <body style="background: linear-gradient(rgba(0, 23, 45), rgba(34, 20, 64));">
 
-
-
-	<!-- header -->
-	<div class="top-header-area" id="sticker" style="background: linear-gradient(rgba(0, 0, 0, 1) 5%, rgba(0,0,0,0)); position: fixed;">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-12 col-sm-12 text-center">
-					<div class="main-menu-wrap">
-						<!-- logo -->
-						<div class="site-logo">
-							<a href="index.html">
-							{% for BackgroundView in Logo %}
-								{% if BackgroundView.page == 'index.html' %}
-								<a class="logo" href="{{BackgroundView.hyperlink}}">
-								  <img class="imageicon" src="{{BackgroundView.logocover.url}}"
-										alt="{{BackgroundView.alternate}}" style="length: {{BackgroundView.length_for_resize}}px; width: {{BackgroundView.width_for_resize}}px;"></a>
-								{% endif %}
-							{% endfor %}
-							</a>
-						</div>
-						<!-- logo -->
-
-						<!-- menu start -->
-						<nav class="main-menu">
-							<ul>
-							  {% for column in Header %}
-
-      <li class="current-list-item"><a href="#{{ column.section }}">{{ column.text }}</a>
-									<ul class="sub-menu">
-										{% for row in DropDown %}
-          {% if row.row == column.row %}
-            {% if row.url == 'http://127.0.0.1:8000/profile' %}
-              {% if row.opennew %}
-										<li> <a href="{{ profile_url }}" target="_blank">{{ row.text }}</a></li>
-              {% else %}
-										<li> <a href="{{ profile_url }}">{{ row.text }}</a></li>
-              {% endif %}
-            {% else %}
-              {% if row.opennew %}
-										<li><a href="{{ row.url }}" target="_blank">{{ row.text }}</a></li>
-              {% else %}
-										<li><a href="{{ row.url }}">{{ row.text }}</a></li>
-              {% endif %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-									</ul>
-        {% endfor %}
-								</li>
-								<li>
-									<div class="header-icons" style="display: flex; flex-direction: right;">
-										<a class="shopping-cart" href="{% url 'showcase:ehome' %}">
-											<img src="{% static 'css/images/cart.png' %}" style="width: 15px; height: 15px;">
-										</a>
-										<a class="mobile-hide search-bar-icon" href="#"><img src="{% static 'css/images/search-icon.png' %}" style="width: 20px; height: 15px;"></a>
-									</div>
-
-
-
-								</li>
-								<li style="margin-right: -10%;">
-									{% for userprofile in Profiles %}
-									{% if userprofile.newprofile_profile_picture_url %}
-									<a href="{{ userprofile.newprofile_profile_url }}">
-										<img src="{{ userprofile.newprofile_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 50px; margin-right: 20px;">
-									</a>
-									{% else %}
-									<!-- Placeholder image or default avatar -->
-									<img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 50px;">
-									{% endif %}
-									{% endfor %}
-								</li>
-							</ul>
-						</nav>
-						<a class="mobile-show search-bar-icon" href="#"><i class="fas fa-search"></i></a>
-						<div class="mobile-menu"></div>
-						<!-- menu end -->
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-{% for ContactViewe in Logo %}
-        {% if ContactViewe.page == 'contact.html' %}
-        <a class="logo" href="{{ContactViewe.hyperlink}}">
-          <img class="imageicon" src="{{ContactViewe.logocover.url}}"
-                alt="{{ContactViewe.alternate}}" style="length: {{ContactViewe.length_for_resize}}px; width: {{ContactViewe.width_for_resize}}px; position: fixed;"></a>
-        {% endif %}
-{% endfor %}
 
 {% for ContactViewe in Background %}
 {% if ContactViewe.page == "contact.html" %}

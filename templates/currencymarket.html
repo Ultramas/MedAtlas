@@ -1619,6 +1619,18 @@ header {
         </div>
       </div>
     </header>
+<script>
+document.querySelectorAll('.favorite-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const slug = button.getAttribute('data-slug');
+        fetch(`/currency/favorite-toggle/${slug}/`)
+            .then(res => res.json())
+            .then(data => {
+                button.innerText = data.favorited ? '❤️' : '🤍';
+            });
+    });
+});
+</script>
 
     <!-- Dashboard grid -->
     <div class="dashboard-grid">
@@ -1626,35 +1638,45 @@ header {
       <div class="sidebar">
         <div class="sidebar-card">
           <nav class="sidebar-nav">
+            <a href="{% url 'showcase:index' %}">
             <button class="element-item">
               <svg viewBox="0 0 24 24"><path d="M3,13H11V3H3V13M3,21H11V15H3V21M13,21H21V11H13V21M13,3V9H21V3H13Z" /></svg>
               <span>Dashboard</span>
             </button>
+            </a>
+            <a href="{% url 'showcase:ehome' %}">
             <button class="element-item active">
               <svg viewBox="0 0 24 24"><path d="M12,13A5,5 0 0,1 7,8H9A3,3 0 0,0 12,11A3,3 0 0,0 15,8H17A5,5 0 0,1 12,13M12,3A3,3 0 0,1 15,6H9A3,3 0 0,1 12,3M19,6H17A5,5 0 0,0 12,1A5,5 0 0,0 7,6H5C3.89,6 3,6.89 3,8V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V8C21,6.89 20.1,6 19,6Z" /></svg>
               <span>THE TROVE</span>
             </button>
+            </a>
+            <a href="{% url 'showcase:inventory' %}">
             <button class="element-item">
               <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M12,6C15.31,6 18,8.69 18,12C18,15.31 15.31,18 12,18C8.69,18 6,15.31 6,12C6,8.69 8.69,6 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" /></svg>
               <span>My Collection</span>
             </button>
+            </a>
+            <a href="{% url 'showcase:tradingcentral' %}">
             <button class="element-item">
               <svg viewBox="0 0 24 24"><path d="M21,9L17,5V8H10V10H17V13M7,11L3,15L7,19V16H14V14H7V11Z" /></svg>
               <span>Trades</span>
             </button>
+            </a>
           </nav>
 
           <div class="filter-section">
             <h3 class="section-title">FILTERS</h3>
             <div class="filter-group">
-              <label class="filter-label">Category</label>
-              <select class="filter-select">
-                <option value="all">All Categories</option>
-                <option value="pokemon">Pokemon</option>
-                <option value="magic">Magic The Gathering</option>
-                <option value="yugioh">Yu-Gi-Oh!</option>
-                <option value="bakugo">Bakugo</option>
-              </select>
+              <form method="get" class="filter-section">
+                    <div class="filter-group">
+                        <label>
+                            <input type="checkbox" name="favorites" value="1" {% if request.GET.favorites == '1' %}checked{% endif %}>
+                            Show only favorites
+                        </label>
+                    </div>
+                    <button type="submit">Apply Filters</button>
+                </form>
+
             </div>
 
             <div class="filter-group">
@@ -1738,9 +1760,21 @@ header {
               <a href="{{ CurrencyMarket.get_absolute_url }}">
                 <div class="item-image">
                   <img src="{{ CurrencyMarket.file.url }}" alt="{{CurrencyMarket.choice_text}} Image">
-                  <div class="legendary-badge">
-                    <svg viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" /></svg>
-                  </div>
+                  <div class="favorite-toggle">
+                      <button class="favorite-btn" data-slug="{{ CurrencyMarket.slug }}" style="z-index: 50;"
+                        {% if CurrencyMarket.id in favorited_ids %}
+                          data-favorited="true"
+                        {% else %}
+                          data-favorited="false"
+                        {% endif %}>
+                        {% if CurrencyMarket.id in favorited_ids %}
+                          ❤️
+                        {% else %}
+                          🤍
+                        {% endif %}
+                      </button>
+                    </div>
+
                 </div>
                 <div class="item-details">
                   <div class="item-header">
@@ -1824,43 +1858,25 @@ header {
           </div>
           <div class="card-content">
             <div class="cart-items">
-              <div class="cart-item">
-                <div class="cart-item-image">
-                  <img src="https://via.placeholder.com/50" alt="Card">
-                </div>
     {% for order_item in order.items.all %}
-                <div class="cart-item-details">
-                  <div class="cart-item-name">{{ order_item.items.name}}</div>
-                  <div class="cart-item-price">${{ order_item.get_final_price }}</div>
-                </div>
-                <button class="remove-item-btn">
-                  <svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>
-                </button>
-              </div>
-              <div class="cart-item">
-                <div class="cart-item-image">
-                  <img src="https://via.placeholder.com/50" alt="Card">
-                </div>
-    {% endfor %}
-                <div class="cart-item-details">
-                  <div class="cart-item-name">Blastoise EX</div>
-                  <div class="cart-item-price">$85.50</div>
-                </div>
-                <button class="remove-item-btn">
-                  <svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>
-                </button>
-              </div>
-              <div class="cart-item">
-                <div class="cart-item-image">
-                  <img src="https://via.placeholder.com/50" alt="Card">
-                </div>
-                <div class="cart-item-details">
-                  <div class="cart-item-name">Venusaur V</div>
-                  <div class="cart-item-price">$65.25</div>
-                </div>
-                <button class="remove-item-btn">
-                  <svg viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>
-                </button>
+  <div class="cart-item">
+    <div class="cart-item-image">
+      <img src="{{ order_item.items.file.url }}" alt="Card">
+    </div>
+    <div class="cart-item-details">
+      <div class="cart-item-name">{{ order_item.items.name }}</div>
+      <div class="cart-item-price">${{ order_item.get_final_price }}</div>
+    </div>
+    <a href="{% url 'showcase:currency-remove-from-cart' order_item.items.slug %}">
+      <button type="button" class="remove-item-btn">
+        <svg viewBox="0 0 24 24">
+          <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+        </svg>
+      </button>
+    </a>
+  </div>
+{% endfor %}
+
               </div>
             </div>
 
@@ -1879,10 +1895,12 @@ header {
               </div>
             </div>
 
+            <a href="{% url 'showcase:currencycheckout' %}">
             <button class="checkout-btn">
               <svg viewBox="0 0 24 24"><path d="M20,8H4V6H20M20,18H4V12H20M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" /></svg>
               CHECKOUT
             </button>
+            </a>
           </div>
         </div>
 

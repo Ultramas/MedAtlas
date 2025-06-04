@@ -767,7 +767,7 @@ nav.main-menu ul li a {
 </head>
 <body>
 
-  <main class="main-content" style="display: flex; flex-direction: column;views.py">
+  <main class="main-content" style="display: flex; flex-direction: column;">
 
 
 {% include 'navtrove.html' %}
@@ -775,7 +775,7 @@ nav.main-menu ul li a {
           {% load static %}
 {% load random_nonce %}
 
-    <div class="container">
+    <div class="container" style="margin-top: 10%;">
         <div class="battle-header">
             <h1>{{ battle.battle_name }}</h1>
             <br>
@@ -844,7 +844,7 @@ nav.main-menu ul li a {
             <div class="games-grid">
                 {% for game in battle.chests.all %}
                     <div class="game-card">
-                        <div class="game-header">
+                        <div class="game-header" style="display: flex; flex-direction: column;">
                             {% if game.image.url %}
                                 <img src="{{ game.image.url }}" alt="{{ game.name }}" class="game-image">
                             {% else %}
@@ -888,11 +888,15 @@ nav.main-menu ul li a {
   <td style="width: 100px; height: 50px; text-align: center;
     color: white;">
     {% if slot %}
-      {% if slot.user %}
-        {{ slot.user.username }}
-      {% elif slot.robot %}
-        🤖 {{ slot.robot.name }}
-      {% endif %}
+        {% if slot.user %}
+    {% if slot.profile and slot.profile.avatar %}
+      <img src="{{ slot.profile.avatar.url }}" alt="{{ slot.user.username }}'s Avatar" style="width: 50px; height: 50px; border-radius: 50%; margin: 5px;">
+    {% endif %}
+    <br>{{ slot.user.username }}
+  {% elif slot.robot %}
+        <img src="{{ slot.robot.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; margin: 5px;"> <br>
+      {{ slot.robot.name }}
+  {% endif %}
     {% else %}
       {% if user == battle.creator %}
         <form method="POST" action="{% url 'showcase:add_robot' battle.id %}">

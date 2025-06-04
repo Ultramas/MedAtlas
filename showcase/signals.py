@@ -4,7 +4,7 @@ from django.db.models.signals import m2m_changed, post_save, post_delete
 from django.dispatch import receiver
 
 from .models import Outcome, Achievements, ProfileDetails
-from .models import User, Profile, AdministrationChangeLog, Battle, Room, Message, Notification, Game
+from .models import User, Profile, AdministrationChangeLog, Battle, Room, Message, Notification, Game, BattleParticipant
 from .views import get_changes
 
 @receiver(post_save, sender=User, dispatch_uid='save_new_user_profile')
@@ -92,14 +92,10 @@ def update_currencies_for_profile(instance):
 def populate_other_currencies(sender, instance, **kwargs):
     update_currencies_for_profile(instance)
 
-@receiver(m2m_changed, sender=Battle.participants.through)
-def update_participant_battle(sender, instance, action, **kwargs):
-    if action == "post_add":
-        for participant in instance.participants.all():
-            if participant.battle != instance:
-                participant.battle = instance
-                print('participant saved')
-                participant.save()
+@receiver(post_save, sender=BattleParticipant)
+def update_participant_battle(sender, instance, created, **kwargs):
+    if created and instance.battle:
+        print(f"Participant added to battle {instance.battle}")
 
 from django.contrib.auth.signals import user_logged_out
 from .models import SettingsModel

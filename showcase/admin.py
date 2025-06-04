@@ -2797,15 +2797,15 @@ class BattleGameInline(admin.TabularInline):
 
 
 class BattleParticipantInline(admin.TabularInline):
-    model = Battle.participants.through  # Use the through model for the ManyToMany field
+    model = BattleParticipant
     extra = 1
     verbose_name = "Participant"
     verbose_name_plural = "Participants"
-    fields = ('battleparticipant',)
+    fields = ('user', 'robot', 'is_bot')
 
 
 class RobotInline(admin.TabularInline):
-    model = Battle.robots.through
+    model = Robot
     extra = 1
     verbose_name = "Robot"
     verbose_name_plural = "Robots"
