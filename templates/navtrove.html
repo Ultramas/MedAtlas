@@ -1273,7 +1273,7 @@ function getIntervalStart() {
   // Initialize:
   let currentIntervalStart = getIntervalStart();
   let dropFired = false;
-  window.dropAmount = 3;
+  window.dropAmount = Math.floor(Math.random() * 15) + 1;
 
   function handleIntervalRollover(prevStart) {
     const clickKey    = 'rubyClicks_' + prevStart;
