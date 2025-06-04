@@ -1,5 +1,4 @@
 import os
-import string
 import uuid
 from datetime import timedelta, time, datetime
 import requests
@@ -32,6 +31,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.files.base import ContentFile
 import random
+import string
 from random import randint
 
 CATEGORY_CHOICES = (
@@ -3011,7 +3011,9 @@ class BlogHeader(models.Model):
     def __str__(self):
         return self.category
 
-from django.template.defaultfilters import slugify, random, date, register
+
+from django.template.defaultfilters import slugify, date, register
+
 
 class BlogFilter(models.Model):
     blog_filter = models.CharField(verbose_name="Hashtag filters", max_length=200, blank=True, null=True)
