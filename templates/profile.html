@@ -19,12 +19,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap">
 </head>
   {% include 'navtrove.html' %}
-<br>
-<br>
-<br>
-<br>
-<br>
-<form id="store-view-type-form" method="post" action="{% url 'showcase:profile_view_type_url' pk=profile.pk %}">
+<form id="store-view-type-form" method="post" action="{% url 'showcase:profile_view_type_url' pk=profile.pk %}" style="margin-top: 10%;">
     {% csrf_token %}
     {{ store_view_form.as_p }}
 </form>

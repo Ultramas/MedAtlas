@@ -1264,15 +1264,16 @@ function fetchAndUpdateMultiplier() {
   const rubySound = document.getElementById('ruby-sound');
   console.log('Button found?', !!rubyBtn);
 
-  const INTERVAL_MS = 30 * 60 * 1000;
+  const INTERVAL_MS = 30 * 1 * 1000;
 
-  function getIntervalStart() {
+function getIntervalStart() {
     return Math.floor(Date.now() / INTERVAL_MS) * INTERVAL_MS;
   }
 
+  // Initialize:
   let currentIntervalStart = getIntervalStart();
-  let dropFired            = false;
-  window.dropAmount        = 0;
+  let dropFired = false;
+  window.dropAmount = 3;
 
   function handleIntervalRollover(prevStart) {
     const clickKey    = 'rubyClicks_' + prevStart;
@@ -1282,7 +1283,7 @@ function fetchAndUpdateMultiplier() {
 
     let reward;
     if (totalClicks < 100) {
-      reward = Math.floor(Math.random() * (25 - 10 + 1)) + 10;
+      reward = Math.floor(Math.random() * (25 - 16 + 1)) + 1;
     } else {
       reward = Math.round(2500 / totalClicks);
     }
@@ -1290,25 +1291,23 @@ function fetchAndUpdateMultiplier() {
     window.dropAmount = reward;
     console.log(`Calculated reward from ${totalClicks} clicks → dropAmount = ${reward}`);
 
+    // Once we’ve computed it, clear that old‐interval counter
     localStorage.removeItem(clickKey);
     return reward;
   }
 
-  function updateCountdown() {
+
+   function updateCountdown() {
     const now   = Date.now();
     const start = getIntervalStart();
 
     if (start !== currentIntervalStart) {
+      // The interval truly just rolled over (not our “on‐load” calculation)
       const prevStart = currentIntervalStart;
-
       console.log(`🔄 Interval rolled over. Previous window started at ${new Date(prevStart).toISOString()}`);
-      const clicked = localStorage.getItem('rubyClickedInterval') === String(prevStart);
-      console.log(`👤 User ${clicked ? 'did' : 'did NOT'} click in that window.`);
+      handleIntervalRollover(prevStart);
 
-      const drop = handleIntervalRollover(prevStart);
-      console.log(`💎 handleIntervalRollover returned: ${drop}`);
-
-      localStorage.removeItem('rubyClickedInterval');
+      // Reset the “Claim” button for the new interval
       if (rubyBtn) {
         rubyBtn.classList.remove('clicked');
         rubyBtn.disabled = false;
@@ -2576,11 +2575,19 @@ function updateCountdown() {
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{% url 'showcase:policy' %}" class="nav-link">
-                                <i class="fas fa-shield-alt"></i>
+                            <a href="{% url 'showcase:changelog' %}" class="nav-link">
+                                <i class="fas fa-cog"></i>
                                 <span class="nav-text">Changelog</span>
                             </a>
                         </li>
+                        {% if user.is_staff %}
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:administrationchangelog' %}" class="nav-link">
+                                <i class="fas fa-magic"></i>
+                                <span class="nav-text">Admin Changelog</span>
+                            </a>
+                        </li>
+                        {% endif %}
                         <li class="nav-item">
                             <a href="{% url 'showcase:policy' %}" class="nav-link">
                                 <i class="fas fa-shield-alt"></i>
@@ -2755,22 +2762,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <div class="collection">
                 <h2 class="collection-title">My Collection</h2>
-                <button class="view-collection">
                     {% if user.is_authenticated %}
                     <a href="{% url 'showcase:inventory' %}" class="collection-item">
-
+                <button class="view-collection">
                     🐉 View Collection (<span id="stock-count2">{{ StockObject|length }}</span>)
-
+                </button>
                     </a>
                     {% else %}
 
                     <a href="{% url 'login' %}?next={{ request.path }}" class="collection-item">
-
+                <button class="view-collection">
                     Login To Collect!
-
+                </button>
                     </a>
                     {% endif %}
-                </button>
             </div>
         </aside>
     </div>
