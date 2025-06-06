@@ -21,8 +21,8 @@ from django.views.generic.base import TemplateView
 from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, BlogSearchResultsView, \
     currency_remove_from_cart, currency_add_to_cart, currency_reduce_quantity_item, submit_seller_application, \
     PlaceWagerView, update_wager, SendFriendRequestView, FriendSearchResultsView, GameCategorySearchResultsView, \
-    GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView, changelog_view, InventoryTradeView, \
-    CustomPasswordResetView, battle_create_outcome, BattleCreationView, userchangelog_view
+    GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView, InventoryTradeView, \
+    CustomPasswordResetView, battle_create_outcome, BattleCreationView
 
 # remove this:
 # from . import settings
@@ -294,7 +294,7 @@ urlpatterns = [
     path("update_currency/", views.update_currency, name="update_currency"),
     path('giveaways/', TemplateView.as_view(template_name='giveaways.html'), name='giveaways'),
     path('hostgiveaway/', TemplateView.as_view(template_name='hostgiveaway.html'), name='hostgiveaway'),
-    path('changelog/', views.userchangelog_view, name='changelog'),
+    path('changelog/', views.ChangeLogView.as_view(), name='changelog'),
     path('generate-invite/', views.generate_invite_link, name='generate_invite'),
     path('create-invite-link/', views.generate_invite_link, name='create_invite_link'),
     path('create_withdraw/', views.CreateWithdrawView.as_view(), name='create_withdraw'),
@@ -583,7 +583,7 @@ urlpatterns = [
     path('charge/', views.charge, name='charge'),
     path('patreoned/<str:args>/', views.PatreonedView.as_view(), name='patreoned'),
     path('accounts/login/', views.CustomLoginView.as_view(), name='account_login'),
-    path('administrationchangelog/', views.changelog_view, name='administrationchangelog'),
+    path('administrationchangelog/', views.AdministrationChangeLogView.as_view(), name='administrationchangelog'),
     # (r'^accounts/update/(?P<pk>[\-\w]+)/$', views.edit_user, name='account_update'),
     path('support/', views.SupportBackgroundView.as_view(), name="support"),
     path('accounts/change-password/', views.change_password, name="accounts/change-password"),

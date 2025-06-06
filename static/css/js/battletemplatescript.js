@@ -62,20 +62,117 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('the value of totalspins at step 1 is ' + totalSpins)
     });
 
+$(function () {
+    // Function to simulate the click event
+    function triggerStartButton() {
+        const $startButton = $(".start").first();
+        if ($startButton.length) {
+            $startButton.trigger("click");
+        } else {
+            console.warn("No .start button found on the page.");
+        }
+    }
+
+    // Original click handler
     $(".start").click(function (event) {
-        const buttonId = event.target.id;
+        const buttonId = event.target.id || "defaultStartButton";
         console.log(`Button clicked: ${buttonId}`);
         sessionStorage.setItem("startAnimation", "true");
         sessionStorage.setItem("isQuickSpin", $("#quickspin-checkbox").is(":checked"));
 
         let currentSpin = 0;
-        console.log('current spin set to 0')
+        console.log("current spin set to 0");
+
+        // Initialize currentSpintype
+        sessionStorage.setItem("currentSpintype", "regular");
         initializeAnimation(buttonId);
 
-        handleInventory(buttonId, data);
-    });
-    observer.observe(document.querySelector('#card-container'), { childList: true });
+        // Fetch data from window.battleChoices
+        const selectedChoice = window.battleChoices && window.battleChoices.length > 0 ? window.battleChoices[0] : null;
+        const data = selectedChoice
+            ? {
+                  choice_id: selectedChoice.choice.pk,
+                  choice_value: selectedChoice.value || 0,
+                  category: selectedChoice.category || "default",
+                  condition: selectedChoice.rarity || "common",
+              }
+            : null;
 
+        if (!selectedChoice) {
+            console.warn("No valid battleChoices found. Skipping inventory handling.");
+            return; // Skip handleInventory if no valid data
+        }
+
+        if (typeof handleInventory === "function") {
+            handleInventory(buttonId, data).then((response) => {
+                if (response) {
+                    console.log("Inventory response:", response);
+                }
+            }).catch((error) => {
+                console.error("Failed to handle inventory:", error);
+            });
+        } else {
+            console.warn("handleInventory is not defined. Skipping inventory handling.");
+        }
+    });
+
+    // Trigger the click handler on page load
+    triggerStartButton();
+});
+
+async function handleInventory(buttonId, data) {
+    const inventoryPayload = {
+        choice_id: data.choice_id,
+        choice_value: data.choice_value,
+        category: data.category,
+        price: data.choice_value || 0,
+        condition: data.condition,
+        quantity: 1,
+        buttonId: buttonId,
+    };
+    console.log("Payload:", inventoryPayload);
+
+    if (buttonId !== "start2") {
+        try {
+            const response = await fetch("/create_inventory_object/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                body: JSON.stringify(inventoryPayload),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${JSON.stringify(errorData)}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Error in handleInventory:", error);
+            return null;
+        }
+    } else {
+        console.log(`Skipping fetch for "${buttonId}"`);
+        return null;
+    }
+}
+
+// CSRF token helper function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
     function initializeAnimation(buttonId) {
         $(".start").prop('disabled', true);
         const isQuickSpin = sessionStorage.getItem("isQuickSpin") === "true";
@@ -207,34 +304,7 @@ async function randomizeContents() {
             }
         });
 
-        async function handleInventory(buttonId, data) {
-          const inventoryPayload = {
-            choice_id:    data.choice_id,
-            choice_value: data.choice_value,
-            category:     data.category,
-            price:        data.choice_value,
-            condition:    data.condition,
-            quantity:     1,
-            buttonId:     buttonId,
-          };
-          console.log("Payload:", inventoryPayload);
 
-          if (buttonId !== "start2") {
-            const response = await fetch("/create_inventory_object/", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken"),
-                "X-Requested-With": "XMLHttpRequest"
-              },
-              body: JSON.stringify(inventoryPayload),
-            });
-            return response.json();  // return the parsed JSON
-          } else {
-            console.log(`Skipping fetch for "${buttonId}"`);
-            return null;
-          }
-        }
 
         try {
             const inventoryData = await handleInventory(buttonId, data)

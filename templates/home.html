@@ -188,29 +188,6 @@
             flex-shrink: 0;
         }
 
-        .user-profile {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .user-profile::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
 
         .user-info {
             text-align: center;
@@ -749,10 +726,7 @@ button[type="submit"] {
 
 
 {% include 'navtrove.html' %}
-
-        <br>
-        <br>
-		<div class="container-fluid h-100" style=" margin-top: 75px;">
+		<div class="container-fluid h-100" style=" margin-top: 175px;">
 			<div class="row justify-content-center h-100">
 				<div class="col-md-4 col-xl-3 chat"><div class="card mb-sm-3 mb-md-0 contacts_card">
 					<div class="card-header">

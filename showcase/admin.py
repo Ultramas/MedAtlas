@@ -2783,9 +2783,11 @@ class RobotAdmin(admin.ModelAdmin):
     model = Robot
     fieldsets = (
         ('Robot Information', {
-            'fields': ('name', 'is_bot', 'image', 'is_active'),
+            'fields': ('name', 'is_bot', 'image', 'sound', 'is_active'),
         }),
     )
+
+
 admin.site.register(Robot, RobotAdmin)
 
 
@@ -2804,14 +2806,6 @@ class BattleParticipantInline(admin.TabularInline):
     fields = ('user', 'robot', 'is_bot')
 
 
-class RobotInline(admin.TabularInline):
-    model = Robot
-    extra = 1
-    verbose_name = "Robot"
-    verbose_name_plural = "Robots"
-    fields = ('robot',)
-
-
 class BattleAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Battle Information', {
@@ -2821,7 +2815,7 @@ class BattleAdmin(admin.ModelAdmin):
     list_display = ('battle_name', 'creator', 'price', 'currency', 'status', 'is_active', 'time', 'bets_allowed')
     list_filter = ('status', 'is_active', 'currency', 'creator')
     search_fields = ('battle_name', 'creator__username')
-    inlines = [BattleGameInline, BattleParticipantInline, RobotInline]
+    inlines = [BattleGameInline, BattleParticipantInline]
 
 
 admin.site.register(Battle, BattleAdmin)

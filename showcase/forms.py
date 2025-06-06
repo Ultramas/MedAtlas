@@ -503,6 +503,7 @@ class BattleCreationForm(forms.ModelForm):
 
         return battle
 
+
 class BetForm(forms.ModelForm):
     class Meta:
         model = Bet
@@ -542,6 +543,7 @@ class BetForm(forms.ModelForm):
             instance.save()
         return instance
 
+
 BattleGameFormSet = inlineformset_factory(
     parent_model=Battle,
     model=BattleGame,
@@ -553,6 +555,7 @@ BattleGameFormSet = inlineformset_factory(
         'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
     }
 )
+
 
 class BattleJoinForm(forms.ModelForm):
     class Meta:

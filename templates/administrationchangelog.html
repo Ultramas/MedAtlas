@@ -1,3 +1,5 @@
+{% include 'navtrove.html' %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -302,7 +304,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Hide the original Django-rendered table initially */
         #originalTable {
             display: none;
         }
@@ -379,7 +380,7 @@
     </div>
 
     <script>
-        // Extract data from Django-rendered table
+
         function extractDataFromDjangoTable() {
             const originalTable = document.getElementById('originalTable');
             const rows = originalTable.querySelectorAll('tbody tr');
@@ -401,7 +402,6 @@
             return data;
         }
 
-        // Initialize data from Django template
         let currentData = extractDataFromDjangoTable();
         let filteredData = [...currentData];
         let currentPage = 1;
@@ -409,9 +409,8 @@
         let sortColumn = '';
         let sortDirection = 'asc';
 
-        // Initialize the table
         function init() {
-            // Populate change type filter with unique values from data
+
             populateChangeTypeFilter();
             renderTable();
             updateStats();
@@ -422,10 +421,8 @@
             const changeTypes = [...new Set(currentData.map(item => item.change_type))];
             const filterSelect = document.getElementById('changeTypeFilter');
 
-            // Clear existing options except "All Change Types"
             filterSelect.innerHTML = '<option value="">All Change Types</option>';
 
-            // Add unique change types from the data
             changeTypes.forEach(type => {
                 const option = document.createElement('option');
                 option.value = type;
@@ -435,13 +432,11 @@
         }
 
         function setupEventListeners() {
-            // Search functionality
+
             document.getElementById('searchInput').addEventListener('input', handleSearch);
 
-            // Filter functionality
             document.getElementById('changeTypeFilter').addEventListener('change', handleFilter);
 
-            // Sort functionality
             document.querySelectorAll('th.sortable').forEach(th => {
                 th.addEventListener('click', () => handleSort(th.dataset.column));
             });
@@ -464,7 +459,6 @@
             const filterValue = document.getElementById('changeTypeFilter').value;
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
-            // Apply both search and filter
             filteredData = currentData.filter(item => {
                 const matchesSearch = searchTerm === '' ||
                     item.model.toLowerCase().includes(searchTerm) ||
@@ -490,7 +484,6 @@
                 sortDirection = 'asc';
             }
 
-            // Update sort indicators
             document.querySelectorAll('th.sortable').forEach(th => {
                 th.classList.remove('sort-asc', 'sort-desc');
             });
@@ -498,7 +491,6 @@
             const currentTh = document.querySelector(`th[data-column="${column}"]`);
             currentTh.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
 
-            // Sort the data
             filteredData.sort((a, b) => {
                 let aVal = a[column];
                 let bVal = b[column];
@@ -556,7 +548,7 @@
             try {
                 const date = new Date(timestamp);
                 if (isNaN(date.getTime())) {
-                    return timestamp; // Return original if can't parse
+                    return timestamp;
                 }
                 return date.toLocaleString('en-US', {
                     year: 'numeric',
@@ -566,7 +558,7 @@
                     minute: '2-digit'
                 });
             } catch (e) {
-                return timestamp; // Return original if error
+                return timestamp;
             }
         }
 
@@ -592,7 +584,6 @@
             }
         }
 
-        // Initialize the application when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             init();
         });

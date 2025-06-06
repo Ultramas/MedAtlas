@@ -18,6 +18,15 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
 
+    {% if robot_sound_url %}
+  <audio
+    id="robot-sound"
+    src="{{ robot_sound_url }}"
+    autoplay
+    onplay="console.log('🔊 Robot sound playing:', '{{ robot_sound_url }}')">
+  </audio>
+{% endif %}
+
     <style>
        .copyright-section {
         background: linear-gradient(
@@ -899,10 +908,12 @@ nav.main-menu ul li a {
   {% endif %}
     {% else %}
       {% if user == battle.creator %}
-        <form method="POST" action="{% url 'showcase:add_robot' battle.id %}">
-          {% csrf_token %}
-          <button type="submit" name="add_robot_submit">Add Robot</button>
-        </form>
+<form id="add-robot-form" method="POST" action="{% url 'showcase:add_robot' battle.id %}">
+  {% csrf_token %}
+  <button type="submit" name="add_robot_submit">Add Robot</button>
+</form>
+
+
       {% else %}
         <form method="POST">
           {% csrf_token %}
@@ -920,6 +931,85 @@ nav.main-menu ul li a {
 
   </tr>
 </table>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 1) Grab every Add-Robot form by class
+  const forms = document.querySelectorAll('form.add-robot-form');
+  if (!forms || forms.length === 0) return;
+
+  forms.forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault(); // Stop full‐page reload
+
+      const url = form.action;
+      const csrftoken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      // 2) Send AJAX POST
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': csrftoken,
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin'
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => {
+            console.error('Add‐robot failed:', err);
+            throw new Error(err.error || 'Add robot error');
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        // 3) Play the sound if provided
+        if (data.sound_url) {
+          const audio = new Audio(data.sound_url);
+          audio.play().catch(err => {
+            console.error('Could not play robot sound:', err);
+          });
+          console.log('🔊 Playing robot sound:', data.sound_url);
+        } else {
+          console.log('🦾 Robot added, but no sound_url returned.');
+        }
+
+        // 4) Replace **this** form’s <td> with the new robot info
+        // "form" is the current form in this loop, so:
+        const td = form.closest('td');
+        if (!td) {
+          console.warn('Could not find enclosing <td> for the clicked form.');
+        } else {
+          const imageUrl = data.robot_image_url || '';
+          const name = data.robot_name || 'Unknown Robot';
+
+          // Overwrite the <td> contents with the robot display:
+          td.innerHTML = `
+            ${ imageUrl
+                ? `<img src="${imageUrl}"
+                         alt="${name}"
+                         style="width: 50px; height: 50px; border-radius: 50%; margin: 5px;" /><br>`
+                : ``
+            }
+            <span style="color: white;">${name}</span>
+          `;
+          console.log('➕ Replaced that slot with robot:', name);
+        }
+
+        // 5) If the battle has become full, redirect immediately
+        if (data.is_full && data.redirect_url) {
+          console.log('⚔️ Battle is now full—redirecting to:', data.redirect_url);
+          window.location.href = data.redirect_url;
+        }
+      })
+      .catch(err => {
+        console.error('AJAX error:', err);
+      });
+    });
+  });
+});
+</script>
 
 {% else %}
       <div class="wrapper" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">

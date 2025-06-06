@@ -4124,7 +4124,7 @@ class Robot(models.Model):
     name = models.CharField(max_length=200)
     is_bot = models.BooleanField(default=True)
     image = models.FileField()
-    battle = models.ForeignKey('Battle', on_delete=models.CASCADE)
+    sound = models.FileField(blank=True, null=True)
     is_active = models.IntegerField(
         default=1,
         blank=True,
@@ -4142,7 +4142,7 @@ class BattleParticipant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     is_bot = models.BooleanField(default=False)
     robot = models.ForeignKey(Robot, blank=True, null=True, on_delete=models.CASCADE)
-    battle = models.ForeignKey('Battle', on_delete=models.CASCADE, blank=True, null=True, related_name='battle_joined')
+    battle = models.ForeignKey('Battle', on_delete=models.CASCADE, blank=True, null=True,  related_name='participants')
 
     def __str__(self):
         if self.user:
@@ -4245,7 +4245,7 @@ class Battle(models.Model):
         return {bg.game: bg.quantity for bg in self.battle_games.all()}
 
     def get_total_participants(self):
-        return self.battle_joined.count()
+        return self.participants.count()
 
     def __str__(self):
         return f"{self.battle_name} submitted by {self.creator}"
@@ -4302,6 +4302,7 @@ class Battle(models.Model):
     class Meta:
         verbose_name = "Battle"
         verbose_name_plural = "Battles"
+
 
 class Bet(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -5731,6 +5732,7 @@ class FriendRequest(models.Model):
         verbose_name = "Friend Request"
         verbose_name_plural = "Friend Requests"
         unique_together = ('sender', 'receiver')
+
 
 class Room(models.Model):
     name = models.CharField(max_length=1000)

@@ -17,6 +17,7 @@ import self
 from django.contrib.messages import get_messages
 from django.db import transaction
 from django.shortcuts import render, redirect
+from django.templatetags.static import static
 from django.utils.html import strip_tags
 from django.views.generic import ListView
 import stripe
@@ -3524,11 +3525,11 @@ class SingleBattleListView(DetailView):
                 context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
         user = self.request.user
-        context['is_participant'] = battle.battle_joined.filter(user=user).exists()
+        context['is_participant'] = battle.participants.filter(user=user).exists()
 
         total_capacity = battle.get_total_capacity()
 
-        participants = list(battle.battle_joined.all())
+        participants = list(battle.participants.all())
 
         grid = [participants[i] if i < len(participants) else None for i in range(total_capacity)]
 
@@ -3643,6 +3644,10 @@ class SingleBattleListView(DetailView):
 
         if 'join_form' not in context:
             context['join_form'] = BattleJoinForm(user=user, battle=battle)
+
+        sound_url = self.request.session.pop('robot_sound_url', None)
+        if sound_url:
+            context['robot_sound_url'] = sound_url
 
         return context
 
@@ -3761,8 +3766,8 @@ class ActualBattleView(DetailView):
             raise Http404("No games found for this battle.")
 
         # 2) Build list of slugs and pass games themselves
-        context['games']       = games
-        context['game_slugs']  = [game.slug for game in games]
+        context['games'] = games
+        context['game_slugs'] = [game.slug for game in games]
 
         # 3) For backwards compatibility: pick a “primary” game for single‐game logic
         primary_game          = games[0]
@@ -3877,9 +3882,39 @@ class ActualBattleView(DetailView):
         is_active=1)
         if user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=user).order_by("created_at")
-        print(battle.participants.all())  # Should return BattleParticipant objects
-        print(battle.robots.all())
+        print(battle.participants.all())
 
+        newprofile = ProfileDetails.objects.filter(is_active=1)
+        context['Profiles'] = newprofile
+
+        for profile in context['Profiles']:
+            user = profile.user
+
+            profile.newprofile_profile_picture_url = profile.avatar.url if profile.avatar else None
+            profile.newprofile_profile_url = profile.get_profile_url()
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
         return context
 
 
@@ -4045,41 +4080,60 @@ def add_robot(request, battle_id):
 
     if request.user != battle.creator:
         messages.error(request, "Only the battle creator can add robots.")
-        return redirect('battle_detail', battle_id=battle.id)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': "Only the battle creator can add robots."}, status=403)
+        return redirect('showcase:battle_detail', battle_id=battle.id)
 
-    used_robot_ids = battle.battle_joined.filter(robot__isnull=False).values_list('robot_id', flat=True)
+    used_robot_ids = battle.participants.filter(robot__isnull=False).values_list('robot_id', flat=True)
     available_robots = Robot.objects.filter(is_active=1).exclude(id__in=used_robot_ids)
-
     if not available_robots.exists():
         messages.error(request, "No available robots to add.")
-        return redirect(reverse('showcase:battle_detail', kwargs={'battle_id': battle.id}))
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': "No available robots to add."}, status=400)
+        return redirect('showcase:battle_detail', battle_id=battle.id)
 
     selected_robot = random.choice(available_robots)
-
-    bot_participant = BattleParticipant.objects.create(
+    BattleParticipant.objects.create(
         user=None,
         is_bot=True,
         robot=selected_robot,
         battle=battle
     )
 
+    # Build the sound URL (if any)
+    sound_url = None
+    if selected_robot.sound:
+        sound_url = selected_robot.sound.url
+
+    # Check if the battle is now full
+    is_now_full = battle.is_full()
+    redirect_url = None
+    if is_now_full:
+        # This is the same redirect you used in SingleBattleListView.dispatch
+        redirect_url = reverse('showcase:actualbattle', kwargs={'battle_id': battle.id})
+
     messages.success(request, f"Robot '{selected_robot.name}' added successfully!")
+
+    # If this is AJAX, return JSON; otherwise do a normal redirect
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'sound_url': sound_url,
+            'robot_id': selected_robot.id,
+            'robot_name': selected_robot.name,
+            'robot_image_url': selected_robot.image.url if selected_robot.image else None,
+            'is_full': is_now_full,
+            'redirect_url': redirect_url,
+        })
     return redirect('showcase:battle_detail', battle_id=battle.id)
+
 
 def battle_detail_view(request, battle_id):
     battle = get_object_or_404(Battle, id=battle_id)
 
     slot_number = int(slugify(battle.slots).split('v')[-1]) if 'v' in battle.slots else int(battle.slots)
 
-    return render(
-        request,
-        'battle_detail.html',
-        {
-            'game': game,
-            'battle': battle,
-            'slots': slot_number
-        }
-    )
+    return render(request,'battle_detail.html',{'game': game, 'battle': battle, 'slots': slot_number})
+
 
 def update_profile_level(profile):
     if profile.rubies_spent is not None:
@@ -11832,17 +11886,20 @@ class BilletBackgroundView(BaseView):
 
         return context
 
+
 class BilletCreatePostView(CreateView):
     model = BilletBackgroundImage
     form_class = BilletBackgroundImagery
     template_name = "billetbackgroundimagechange.html"
     success_url = reverse_lazy("billets")
 
+
 class RuleCreatePostView(CreateView):
     model = RuleBackgroundImage
     form_class = RuleBackgroundImagery
     template_name = "rulebackgroundimagechange.html"
     success_url = reverse_lazy("rules")
+
 
 class AboutBackgroundView(BaseView):
     model = AboutBackgroundImage
@@ -13574,6 +13631,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             })
         return redirect('showcase:inventory')
 
+
     def sell_inventory_object(self, request, pk):
         inventory_object = get_object_or_404(InventoryObject, pk=pk)
 
@@ -13608,6 +13666,7 @@ class PlayerInventoryView(LoginRequiredMixin, FormMixin, ListView):
             'currency_amount': user_profile.currency_amount,
             'sold_value': sold_value,
         })
+
 
     def move_to_trade(self, request, pk):
         # Fetch the InventoryObject instance by primary key
@@ -13849,6 +13908,7 @@ def create_inventory_object(request):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
+
 @csrf_exempt
 def delete_inventory_object(request, object_id):
     if request.method == 'DELETE':
@@ -13862,6 +13922,7 @@ def delete_inventory_object(request, object_id):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
 
 class CreateChestView(FormView):
     template_name = "create_chest.html"
@@ -15931,10 +15992,81 @@ class SettingsBackgroundView(SuccessMessageMixin, FormView):
 from django.shortcuts import render
 from .models import AdministrationChangeLog
 
-def changelog_view(request):
-    changelogs = AdministrationChangeLog.objects.all()
-    context = {'changelogs': changelogs}
-    return render(request, 'administrationchangelog.html', context)
+
+
+class AdministrationChangeLogView(ListView):
+    model = AdministrationChangeLog
+    template_name = "administrationchangelog.html"
+
+    # By default, a ListView will provide a context variable named "object_list".
+    # We’d rather call it "changelogs" in the template. This replaces the old
+    # function that did:
+    #     changelogs = ChangeLog.objects.all()
+    #     return render(..., {'changelogs': changelogs})
+    context_object_name = "changelogs"
+
+    def get_context_data(self, **kwargs):
+        # First, let the ListView build the baseline context (which already contains
+        #   "changelogs" = ChangeLog.objects.all(), plus pagination stuff if you enabled it).
+        context = super().get_context_data(**kwargs)
+
+        # ─── Navbar/Header Stuff ─────────────────────────────────────────────────────
+        # (unchanged from your original get_context_data)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        # ─── User‐specific clickables & profile URLs ─────────────────────────────────
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for uc in user_clickables:
+                if uc.clickable.chance_per_second > 0:
+                    # Precompute chance (your original logic)
+                    uc.precomputed_chance = 1000 / uc.clickable.chance_per_second
+                else:
+                    uc.precomputed_chance = 0
+            context["Clickables"] = user_clickables
+
+            # Grab the ProfileDetails for this user (if any)
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        else:
+            # If not authenticated, you may want to explicitly set these to empty
+            context["Clickables"] = []
+            context['Profile'] = []
+            context['profile_pk'] = None
+            context['profile_url'] = None
+
+        # ─── Feedback / Footer / Background / NewsProfiles ───────────────────────────
+        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+
+        # “NewsProfiles” logic: if the user is authenticated, pass back their ProfileDetails;
+        # otherwise, create a dummy object for avatar and url placeholders.
+        if self.request.user.is_authenticated:
+            userprofile_qs = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile_qs = ProfileDetails.objects.none()
+
+        if userprofile_qs.exists():
+            # If there _are_ active profiles, annotate each with picture_url and profile_url
+            for up in userprofile_qs:
+                up.newprofile_profile_picture_url = up.avatar.url if up.avatar else ""
+                up.newprofile_profile_url = up.get_profile_url()  # assuming get_profile_url() exists on your model
+            context['NewsProfiles'] = userprofile_qs
+        else:
+            # Create a dummy “object” with just two attributes so the template can still find them:
+            dummy = type("DummyProfile", (), {})()
+            dummy.newprofile_profile_picture_url = "static/css/images/a.jpg"
+            dummy.newprofile_profile_url = None
+            context['NewsProfiles'] = [dummy]
+
+        return context
+
 
 def get_changes(instance):
     if not instance.pk:
@@ -15953,10 +16085,80 @@ def get_changes(instance):
     return changes
 
 
-def userchangelog_view(request):
-    changelogs = ChangeLog.objects.all()
-    context = {'changelogs': changelogs}
-    return render(request, 'changelog.html', context)
+class ChangeLogView(ListView):
+    model = ChangeLog
+    template_name = "changelog.html"
+
+    # By default, a ListView will provide a context variable named "object_list".
+    # We’d rather call it "changelogs" in the template. This replaces the old
+    # function that did:
+    #     changelogs = ChangeLog.objects.all()
+    #     return render(..., {'changelogs': changelogs})
+    context_object_name = "changelogs"
+
+    def get_context_data(self, **kwargs):
+        # First, let the ListView build the baseline context (which already contains
+        #   "changelogs" = ChangeLog.objects.all(), plus pagination stuff if you enabled it).
+        context = super().get_context_data(**kwargs)
+
+        # ─── Navbar/Header Stuff ─────────────────────────────────────────────────────
+        # (unchanged from your original get_context_data)
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        # ─── User‐specific clickables & profile URLs ─────────────────────────────────
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for uc in user_clickables:
+                if uc.clickable.chance_per_second > 0:
+                    # Precompute chance (your original logic)
+                    uc.precomputed_chance = 1000 / uc.clickable.chance_per_second
+                else:
+                    uc.precomputed_chance = 0
+            context["Clickables"] = user_clickables
+
+            # Grab the ProfileDetails for this user (if any)
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+        else:
+            # If not authenticated, you may want to explicitly set these to empty
+            context["Clickables"] = []
+            context['Profile'] = []
+            context['profile_pk'] = None
+            context['profile_url'] = None
+
+        # ─── Feedback / Footer / Background / NewsProfiles ───────────────────────────
+        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+
+        # “NewsProfiles” logic: if the user is authenticated, pass back their ProfileDetails;
+        # otherwise, create a dummy object for avatar and url placeholders.
+        if self.request.user.is_authenticated:
+            userprofile_qs = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile_qs = ProfileDetails.objects.none()
+
+        if userprofile_qs.exists():
+            # If there _are_ active profiles, annotate each with picture_url and profile_url
+            for up in userprofile_qs:
+                up.newprofile_profile_picture_url = up.avatar.url if up.avatar else ""
+                up.newprofile_profile_url = up.get_profile_url()  # assuming get_profile_url() exists on your model
+            context['NewsProfiles'] = userprofile_qs
+        else:
+            # Create a dummy “object” with just two attributes so the template can still find them:
+            dummy = type("DummyProfile", (), {})()
+            dummy.newprofile_profile_picture_url = "static/css/images/a.jpg"
+            dummy.newprofile_profile_url = None
+            context['NewsProfiles'] = [dummy]
+
+        return context
+
+
 
 class HomePageView(TemplateView):
     template_name = 'index.html'
