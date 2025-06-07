@@ -18383,8 +18383,12 @@ class CurrencyMarketView(EBaseView, FormView, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        active_order = (CurrencyFullOrder.objects.filter(user=self.request.user, ordered=False).prefetch_related('items').first())
-        context['order'] = active_order
+        user = self.request.user
+        if user.is_authenticated:
+            active_order = (CurrencyFullOrder.objects.filter(user=user, ordered=False).prefetch_related('items').first())
+            context['order'] = active_order
+        else:
+            context['order'] = None
 
         context['Favicon'] = FaviconBase.objects.filter(is_active=1)
 
@@ -18398,26 +18402,24 @@ class CurrencyMarketView(EBaseView, FormView, ListView):
 
         current_user = self.request.user
         if current_user.is_authenticated:
-            context['StockObject'] = InventoryObject.objects.filter(
-                is_active=1, user=self.request.user
-            ).order_by("created_at")
+            context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=self.request.user).order_by("created_at")
             context['preferenceform'] = MyPreferencesForm(user=self.request.user)
-        try:
-            active = StoreViewType.objects.get(
-                user=self.request.user,
-                is_active=1
+            try:
+                active = StoreViewType.objects.get(
+                    user=self.request.user,
+                    is_active=1
+                )
+            except StoreViewType.DoesNotExist:
+                active = None
+
+            # 2) set the “store_view” string (fallback to 'stream')
+            context['store_view'] = active.type if active else 'stream'
+
+            # 3) build the same form you had in CurrencyTypeView
+            context['store_view_form'] = StoreViewTypeForm(
+                instance=active,
+                request=self.request
             )
-        except StoreViewType.DoesNotExist:
-            active = None
-
-        # 2) set the “store_view” string (fallback to 'stream')
-        context['store_view'] = active.type if active else 'stream'
-
-        # 3) build the same form you had in CurrencyTypeView
-        context['store_view_form'] = StoreViewTypeForm(
-            instance=active,
-            request=self.request
-        )
 
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
