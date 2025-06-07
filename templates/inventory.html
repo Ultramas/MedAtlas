@@ -16,6 +16,92 @@
     {% csrf_token %}
     {{ store_view_form.as_p }}
 </form>
+<script>
+    // Load audio files
+    const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
+    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
+    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
+
+    // Add event listeners to sell forms
+    document.querySelectorAll('.sell-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            sellAudio.play(); // Play the sell sound
+            console.log('')
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
+
+    // Add event listeners to withdraw forms
+    document.querySelectorAll('.withdraw-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            withdrawAudio.play(); // Play the withdraw sound
+            handleAjaxFormSubmission(form); // Handle the AJAX request
+        });
+    });
+
+	document.querySelectorAll('.trade-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            tradeAudio.play(); // Play the withdraw sound
+        });
+    });
+
+    // Generic AJAX form submission handler
+    function handleAjaxFormSubmission(form) {
+        const formData = new FormData(form);
+        const actionUrl = form.getAttribute('action');
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('stock-count').textContent = data.number_of_cards;
+                document.getElementById('stock-count2').textContent = data.number_of_cards;
+            } else {
+                console.error(data.error);
+            }
+        });
+    }
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('store-view-type-form');
+    // Remove the native form submission triggered by onchange if you want to handle it via JavaScript.
+    form.addEventListener('submit', function(e) {
+      e.preventDefault(); // Prevent the default form submission
+
+      const formData = new FormData(form);
+      fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'  // This header can help you detect an AJAX request in your view.
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json();  // Expecting JSON response (customize as needed)
+        }
+        throw new Error("Network response was not ok.");
+      })
+      .then(data => {
+        console.log("Store view type updated successfully", data);
+        // Optionally, update parts of your UI based on the response.
+      })
+      .catch(error => {
+        console.error('There was an error submitting the form:', error);
+      });
+    });
+  });
+</script>
 
 {% if store_view == "detail" %}
 <!--detailed view-->
@@ -1511,38 +1597,6 @@ export const GlobalStyles = createGlobalStyle`
 </head>
 <body>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('store-view-type-form');
-    // Remove the native form submission triggered by onchange if you want to handle it via JavaScript.
-    form.addEventListener('submit', function(e) {
-      e.preventDefault(); // Prevent the default form submission
-
-      const formData = new FormData(form);
-      fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'  // This header can help you detect an AJAX request in your view.
-        }
-      })
-      .then(response => {
-        if (response.ok) {
-          return response.json();  // Expecting JSON response (customize as needed)
-        }
-        throw new Error("Network response was not ok.");
-      })
-      .then(data => {
-        console.log("Store view type updated successfully", data);
-        // Optionally, update parts of your UI based on the response.
-      })
-      .catch(error => {
-        console.error('There was an error submitting the form:', error);
-      });
-    });
-  });
-</script>
-
 
   <!-- Loading overlay -->
 
@@ -1687,9 +1741,56 @@ export const GlobalStyles = createGlobalStyle`
                 <strong>Total Value:</strong>
                 <span id="total_value">0</span>
 
-            <div id="inventory-items-container">
-                {% include "inventory_items.html" with StockObject=StockObject %}
-            </div>
+            <form id="sell-all-form" class="sell-all-form" action="{% url 'showcase:sell_all_inventory_objects' %}" method="post" style="display: none; margin-bottom: 20px;">
+              {% csrf_token %}
+              <input type="hidden" name="selected_ids" id="sell-all-selected-ids">
+              <button type="submit" class="card-button sell-button">Sell Selected</button>
+            </form>
+
+           <section id="inventory-items-container" class="inventory-grid comfortable-view">
+
+                {% for Inventory in StockObject %}
+                    <div class="inventory-item">
+                        <div class="legendary-icon">🐉</div>
+                        <div class="pokemon-image">
+                            <img src="{{ Inventory.image.url }}" alt="{{Inventory.choice_text}} Image">
+                        </div>
+                        <div class="pokemon-info">
+                            <h3 class="pokemon-name">{{ Inventory.choice.choice_text }}</h3>
+                            <p class="pokemon-type">{{ Inventory.price }} 💎</p>
+                            <p class="product-condition" style="color: rgba(255, 255, 255, 0.8);">Card Condition: {{ Inventory.condition }}</p>
+                            <p class="product-description">{{ Inventory.description }}</p>
+                            <div class="action-buttons">
+                                <form id="sell-form-{{ Inventory.pk }}" action="{% url 'showcase:sell_inventory_object' Inventory.pk %}" method="post" class="ajax-form sell-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="sell">
+                                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
+                                    <button type="submit" class="add-button sell-button">Sell</button>
+                                </form>
+
+                                <form id="withdraw-form-{{ Inventory.pk }}" action="{% url 'showcase:withdraw_inventory_object' Inventory.pk %}" method="post" class="ajax-form withdraw-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="withdraw">
+                                    <input type="hidden" name="pk" value="{{ Inventory.pk }}">
+                                    <button type="submit" class="add-button withdraw-button">Withdraw</button>
+                                </form>
+
+                                <form action="{% url 'showcase:move_to_trade' pk=Inventory.pk %}" method="post" class="trade-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="move">
+                                    <button type="submit" class="add-button trade-button" class="cart-btn">Set Tradable</button>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="empty-inventory">
+                        <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy">
+                        <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
+                    </div>
+                {% endfor %}
+            </section>
 
             </div>
           </div>
@@ -1998,67 +2099,6 @@ export const GlobalStyles = createGlobalStyle`
       }
 
       // Function to handle AJAX form submissions
-      function handleAjaxFormSubmission(form) {
-        const formData = new FormData(form);
-        const url = form.getAttribute('action');
-
-        fetch(url, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-          },
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // Update stock count
-            const stockCountElement = document.getElementById('stock-count');
-            if (stockCountElement) {
-              stockCountElement.textContent = data.stock_count;
-            }
-
-            // Update inventory items
-            if (data.inventory_html) {
-              document.getElementById('inventory-items-container').innerHTML = data.inventory_html;
-            }
-
-            // Update currency amount if available
-            if (data.currency_amount) {
-              const currencyElement = document.getElementById('sellupdate');
-              if (currencyElement) {
-                currencyElement.textContent = data.currency_amount;
-              }
-            }
-
-            // Update total value if available
-            if (data.total_value) {
-              document.getElementById('total_value').textContent = data.total_value;
-            }
-
-            // If the item was removed, remove it from the UI
-            if (!data.inventory_html) {
-              const inventoryItem = form.closest('.gridCardItem');
-              if (inventoryItem) {
-                inventoryItem.remove();
-              }
-            }
-
-            // Re-attach event listeners to checkboxes
-            document.querySelectorAll('.item-select-checkbox').forEach((checkbox) => {
-              checkbox.addEventListener('change', updateSellAllButton);
-            });
-          } else {
-            alert('Action failed: ' + (data.error || 'Unknown error'));
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('An error occurred while processing your request.');
-        });
-      }
-    });
 
     // Loading screen
     function initLoading() {
@@ -2496,66 +2536,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Function to handle AJAX form submissions
-  function handleAjaxFormSubmission(form) {
-    const formData = new FormData(form)
-    const url = form.getAttribute("action")
 
-    fetch(url, {
-      method: "POST",
-      body: formData,
-      headers: {
-        "X-Requested-With": "XMLHttpRequest",
-        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          // Update stock count
-          const stockCountElement = document.getElementById("stock-count")
-          if (stockCountElement) {
-            stockCountElement.textContent = data.stock_count
-          }
-
-          // Update inventory items
-          if (data.inventory_html) {
-            document.getElementById("inventory-items-container").innerHTML = data.inventory_html
-          }
-
-          // Update currency amount if available
-          if (data.currency_amount) {
-            const currencyElement = document.getElementById("sellupdate")
-            if (currencyElement) {
-              currencyElement.textContent = data.currency_amount
-            }
-          }
-
-          // Update total value if available
-          if (data.total_value) {
-            document.getElementById("total_value").textContent = data.total_value
-          }
-
-          if (!data.inventory_html) {
-            const inventoryItem = form.closest(".gridCardItem")
-            if (inventoryItem) {
-              inventoryItem.remove()
-            }
-          }
-
-          document.querySelectorAll(".item-select-checkbox").forEach((checkbox) => {
-            checkbox.addEventListener("change", updateSellAllButton)
-          })
-        } else {
-          alert("Action failed: " + (data.error || "Unknown error"))
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error)
-        alert("An error occurred while processing your request.")
-      })
-  }
-})
 
 // Loading screen
 function initLoading() {
@@ -2772,7 +2753,25 @@ function initEventListeners() {
 </body>
 </html>
 
+<style>
+    .sell-button{
+    padding: 5px;
+    border-radius: 10px;
+    margin: 5px;
+    }
 
+    .withdraw-button{
+    padding: 5px;
+    border-radius: 10px;
+    margin: 5px;
+    }
+
+    .trade-button{
+    padding: 5px;
+    border-radius: 10px;
+    margin: 5px;
+    }
+</style>
 
 
 
@@ -3486,60 +3485,7 @@ nav.main-menu ul li a {
 </div>
 
 
-<script>
-    // Load audio files
-    const sellAudio = new Audio("{% static 'css/sounds/sell_coin.mp3' %}");
-    const withdrawAudio = new Audio("/static/css/sounds/withdraw.mp3");
-    const tradeAudio = new Audio("/static/css/sounds/trade.mp3");
 
-    // Add event listeners to sell forms
-    document.querySelectorAll('.sell-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            sellAudio.play(); // Play the sell sound
-            console.log('')
-            handleAjaxFormSubmission(form); // Handle the AJAX request
-        });
-    });
-
-    // Add event listeners to withdraw forms
-    document.querySelectorAll('.withdraw-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            withdrawAudio.play(); // Play the withdraw sound
-            handleAjaxFormSubmission(form); // Handle the AJAX request
-        });
-    });
-
-	document.querySelectorAll('.trade-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            tradeAudio.play(); // Play the withdraw sound
-        });
-    });
-
-    // Generic AJAX form submission handler
-    function handleAjaxFormSubmission(form) {
-        const formData = new FormData(form);
-        const actionUrl = form.getAttribute('action');
-
-        fetch(actionUrl, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('stock-count').textContent = data.number_of_cards;
-                document.getElementById('stock-count2').textContent = data.number_of_cards;
-            } else {
-                console.error(data.error);
-            }
-        });
-    }
-</script>
 
     <div class="container">
 
