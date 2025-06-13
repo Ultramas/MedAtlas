@@ -15,7 +15,8 @@ from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewTy
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
     SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame, Monstrosity, \
-    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet, GameChoice, MyPreferences, GiftCode, GiftCodeRedemption
+    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet, GameChoice, MyPreferences, GiftCode, \
+    GiftCodeRedemption, Endowment
 from .models import UpdateProfile
 from .models import VoteQuery
 from .models import StaffApplication
@@ -1092,7 +1093,6 @@ class FeedMonstrosityForm(forms.ModelForm):
             raise forms.ValidationError("Currency amount must be positive.")
         return currency_amount
 
-from .models import Endowment
 
 class EndowmentForm(forms.Form):
     user = forms.CharField(widget=forms.HiddenInput())
@@ -1128,8 +1128,10 @@ class EndowmentForm(forms.Form):
             instance.save()
         return instance
 
+
 class HitStandForm(forms.Form):
     action = forms.ChoiceField(choices=[('hit', 'Hit'), ('stand', 'Stand')], label='Action')
+
 
 class CreateChest(forms.ModelForm):
     class Meta:

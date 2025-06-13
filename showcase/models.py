@@ -2825,19 +2825,20 @@ class FrequentlyAskedQuestions(models.Model):
 
 
 class Event(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='host', blank=True, null=True)
     name = models.CharField(max_length=100, help_text='Event name goes here.')
     category = models.CharField(max_length=200,
                                 help_text='Please let us know what type of event this is (tournament, stage night, etc).')
-    numeric_quantifier = models.FloatField()
-    qualitative_qualifier = models.CharField(max_length=500)
+    numeric_quantifier = models.FloatField(blank=True, null=True)
+    qualitative_qualifier = models.CharField(max_length=500, blank=True, null=True)
     description = models.TextField(help_text='Give a brief description of the event.')
     date = models.DateField(null=True, help_text='Event date (day, date, and month)')
     time = models.TimeField(null=True, help_text='Event time (hour/minute)')
-    date_and_time = models.DateTimeField(null=True, verbose_name="Time and date of Event Creation")
+    length = models.DurationField(default=timedelta(days=7), help_text="Duration of the event; defaults to 7 days", verbose_name="Event duration")
+    date_and_time = models.DateTimeField(verbose_name="Time and date of Event Creation", auto_now_add=True)
     section = models.IntegerField(verbose_name="Page Section", blank=True, null=True)
-    page = models.TextField(verbose_name="Page Name")
-    slug = models.SlugField()
+    page = models.TextField(verbose_name="Page Name", blank=True, null=True)
+    slug = models.SlugField(blank=True, null=True)
     anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
     image = models.ImageField(help_text='Please provide a cover image for the event.', upload_to='images/')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -2863,6 +2864,9 @@ class Event(models.Model):
 
             if profile:
                 self.position = profile.position
+        if not self.slug:
+            self.slug = slugify(self.name)
+
         super().save(*args, **kwargs)
 
     def get_profile_url(self):
@@ -3165,6 +3169,7 @@ class ShuffleType(models.Model):
     class Meta:
         verbose_name = "Shuffle Type"
         verbose_name_plural = "Shuffle Types"
+
 
 class DailySpin(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="daily_spins")
@@ -3515,6 +3520,7 @@ class GameChoice(models.Model):
         print('save committed of gamechoice')
         super().save(*args, **kwargs)
 
+
 class Choice(models.Model):
     """Used for voting on different new ideas"""
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
@@ -3623,29 +3629,39 @@ class Choice(models.Model):
             else:
                 self.rarity = Decimal(0)
 
-        if not self.currency:
-            first_currency = Currency.objects.first()
-            if first_currency:
-                self.currency = first_currency
+        if self.lower_nonce is None or self.lower_nonce == 0:
+            print(f"initial number: {self.number}")
+            if self.number == 0:
+                self.lower_nonce = 0
+                print(f"[Choice.save] number=0 → lower_nonce set to 0")
+            else:
+                prev = Choice.objects.filter(
+                    game=self.game,
+                    number=self.number - 1
+                ).order_by('number').first()
 
-        if not self.pk and self.game:
-            existing_choices = Choice.objects.filter(game=self.game).count()
-            existing_gamechoices = GameChoice.objects.filter(game=self.game).count()
+                if prev and prev.upper_nonce is not None:
+                    self.lower_nonce = prev.upper_nonce + 1
+                    print(
+                        f"[Choice.save] Chaining lower_nonce: "
+                        f"{self.lower_nonce} (prev.upper_nonce was {prev.upper_nonce})"
+                    )
+                else:
+                    self.lower_nonce = 0
+                    print(
+                        "[Choice.save] No valid previous choice found; "
+                        "fallback lower_nonce=0"
+                    )
+                    print(f"[Choice.save] number: {self.number}")
 
-            self.number = existing_choices + existing_gamechoices + 1
-
-        if self.upper_nonce is not None:
-            if self.upper_nonce % 10 == 0:
-                print("The last digit of upper_nonce is 0")
-                if self.upper_nonce > 0 and self.upper_nonce != 1000000:
-                    self.upper_nonce -= 1
-
+            # ensure an upper_nonce exists
         if self.upper_nonce is None:
-            self.upper_nonce = random.randint(0, 1000000)
+            self.upper_nonce = random.randint(0, 1_000_000)
 
+            # optionally recompute rarity from nonce span
         if self.upper_nonce is not None and self.lower_nonce is not None:
-            rarity_value = (self.upper_nonce - self.lower_nonce) / 10000
-            self.rarity = round(rarity_value, 6)
+            span = self.upper_nonce - self.lower_nonce
+            self.rarity = round(Decimal(span) / Decimal(10000), 6)
 
         if not self.choice_text and self.name:
             self.choice_text = self.name
@@ -3714,6 +3730,7 @@ class Choice(models.Model):
         verbose_name = "Choice"
         verbose_name_plural = "Choices"
 
+
 class Card(models.Model):
     card_id = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100)
@@ -3778,6 +3795,7 @@ class SpinPreference(models.Model):
         verbose_name = "Spin Preference"
         verbose_name_plural = "Spin Preferences"
 
+
 class Outcome(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="player")
     quick_spin = models.BooleanField(default=False)
@@ -3795,6 +3813,7 @@ class Outcome(models.Model):
     color = models.CharField(choices=COLOR, max_length=6, blank=True, null=True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     game_creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="creator")
+    total_count = models.IntegerField(blank=True, null=True, default=0)
     green_counter = models.IntegerField(blank=True, null=True, default=0)
     yellow_counter = models.IntegerField(blank=True, null=True, default=0)
     orange_counter = models.IntegerField(blank=True, null=True, default=0)
@@ -3871,6 +3890,7 @@ class Outcome(models.Model):
             return 'green'
         else:
             return 'gray'
+
 
 class Achievements(models.Model):
     user = models.ManyToManyField(User, related_name="achiever", blank=True)
@@ -6388,6 +6408,7 @@ class Item(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
 
 class GameHistory(models.Model):
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,

@@ -1,0 +1,101 @@
+{% include 'navtrove.html' %}
+<h2>Recent Outcomes</h2>
+
+<div id="outcomes-list">
+  {# server-rendered first 30 so you’re never blank #}
+  {% for o in outcomes %}
+    <div class="outcome-item">
+      <strong>{{ o.date_and_time|date:"Y-m-d H:i" }}</strong> —
+      {{ o.slug }} (Value: {{ o.value }}) — Nonce: {{ o.nonce }}
+    </div>
+  {% empty %}
+    <p>No outcomes yet.</p>
+  {% endfor %}
+</div>
+
+<button id="load-more"
+        style="display:none;"
+        data-next-page="2"
+        data-url="{% url 'showcase:recent_outcomes' %}">
+  Load more
+</button>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const listEl   = document.getElementById('outcomes-list');
+  const loadBtn  = document.getElementById('load-more');
+  const recentUrl= loadBtn.dataset.url;  // e.g. "/outcomes/recent/"
+
+  // fetch page N from the correct endpoint
+  function fetchPage(page) {
+    fetch(`${recentUrl}?page=${page}`, {
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(r => r.json())
+    .then(data => {
+      data.outcomes.forEach(o => {
+        const div = document.createElement('div');
+        div.className = 'outcome-item';
+        div.innerHTML = `<strong>${o.date_and_time}</strong> —
+                         ${o.slug} (Value: ${o.value}) —
+                         Nonce: ${o.nonce}`;
+        listEl.appendChild(div);
+      });
+      if (data.has_next) {
+        loadBtn.style.display    = 'block';
+        loadBtn.dataset.nextPage = data.page + 1;
+      } else {
+        loadBtn.style.display = 'none';
+      }
+    })
+    .catch(console.error);
+  }
+
+  // initial pagination preload (you already have SSR fallback, so optional)
+  // fetchPage(1);
+
+  loadBtn.addEventListener('click', () => {
+    fetchPage(loadBtn.dataset.nextPage);
+  });
+
+  // helper to add one new outcome at the top
+  function prependOutcome(o) {
+    const div = document.createElement('div');
+    div.className = 'outcome-item';
+    div.innerHTML = `<strong>${o.date_and_time}</strong> —
+                     ${o.slug} (Value: ${o.value}) —
+                     Nonce: ${o.nonce}`;
+    listEl.prepend(div);
+
+    // Optional: keep only 30 in the DOM
+    if (listEl.children.length > 30) {
+      listEl.removeChild(listEl.lastChild);
+    }
+  }
+
+  // wire spin-button to create_outcome AND prepend
+  document.getElementById('spin-button').addEventListener('click', () => {
+    fetch(`/games/{{ game.slug }}/create_outcome/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':     'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken':      '{{ csrf_token }}',
+      },
+      body: JSON.stringify({
+        game_id:   {{ game.id }},
+        button_id: 'start'
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        prependOutcome(data);
+      } else {
+        console.error('Spin error:', data.message);
+      }
+    })
+    .catch(console.error);
+  });
+});
+</script>

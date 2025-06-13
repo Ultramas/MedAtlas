@@ -731,7 +731,7 @@ p.blog-meta span {
             {% endif %}
         </div>
 
-        <div class="levels-container">
+        <div class="levels-container" style="margin-top: 2%;">
             {% for level_data in levels %}
                 <div class="level-card {% if level_data.level.level > Profile.level.level %}locked{% endif %}"
                      data-level="{{ level_data.level.level }}"

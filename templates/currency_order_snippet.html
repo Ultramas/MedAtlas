@@ -170,17 +170,30 @@
     {% endif %}
 <br>
 <br>
- <form method="post">
+<form id="endowmentForm" method="post">
     {% csrf_token %}
 
-    <!-- Endowment Form Fields -->
+    <div class="form-group">
+        {{ endowment_form.as_p }}
+    </div>
+    <button type="submit" class="submit-btn">Submit</button>
+</form>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('endowmentForm');
+  form.addEventListener('submit', e => {
+    // read the hidden & visible fields
+    const data = {
+      user:   form.querySelector('[name="user"]').value,
+      target: form.querySelector('[name="target"]').value,
+      order:  form.querySelector('[name="order"]').value,
+    };
+    console.log('💌 Endowment form submitted:', data);
+    // NOTE: we do NOT call e.preventDefault(), so the form still posts to the server!
+  });
+});
+</script>
 
-            <div class="form-group">
-                {{ endowment_form.as_p }}
-
-            </div>
-     <button type="submit" class="submit-btn">Submit</button>
-    </form>
     </div>
 
     <script>

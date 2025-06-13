@@ -2024,6 +2024,7 @@ def spinner_choice_render_list(request):
     spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=self.game)
     return render(request, 'game.html', {'spinner_choice_renders': spinner_choice_renders})
 
+
 class ChestBackgroundView(BaseView):
     model = UserProfile
     template_name = "blackjack.html"
@@ -2197,90 +2198,89 @@ class FindChoiceView(View):
 
         return render(request, self.template_name, context)
 
+
 def generate_nonce():
     return random.randint(1, 1000000)
 
+
 @csrf_exempt
 def create_outcome(request, slug):
-    if request.method == 'POST':
-        try:
-            django.db.close_old_connections()
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
-            with transaction.atomic():
-                body = json.loads(request.body)
-                game_id = body.get('game_id')
-                button_id = body.get('button_id')
-                user = request.user
+    try:
+        close_old_connections()
+        with transaction.atomic():
+            body      = json.loads(request.body)
+            game_id   = body.get('game_id')
+            button_id = body.get('button_id')
+            user      = request.user
 
-                if not game_id:
-                    return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
+            if not game_id:
+                return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
 
-                game = Game.objects.get(id=game_id, slug=slug)
-                nonce = random.randint(1, 1000000)
+            game  = get_object_or_404(Game, id=game_id, slug=slug)
+            nonce = random.randint(1, 1000000)
 
-                game_choice_instance = GameChoice.objects.filter(
+            game_choice = (
+                GameChoice.objects
+                .filter(game=game, lower_nonce__lte=nonce, upper_nonce__gte=nonce)
+                .first()
+            )
+            if game_choice:
+                choice = game_choice.choice
+            else:
+                choices = Choice.objects.filter(
                     game=game,
                     lower_nonce__lte=nonce,
                     upper_nonce__gte=nonce
-                ).first()
+                )
+                if not choices.exists():
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'No valid choice found for the given nonce.'
+                    })
+                choice = choices.order_by('?').first()
 
-                if game_choice_instance:
-                    choice = game_choice_instance.choice
-                else:
-                    choices = Choice.objects.filter(
-                        game=game,
-                        lower_nonce__lte=nonce,
-                        upper_nonce__gte=nonce
-                    )
-                    if not choices.exists():
-                        return JsonResponse(
-                            {'status': 'error', 'message': 'No valid choice found for the given nonce.'})
-                    choice = choices.order_by('?').first()
+            color = game.get_color(choice)
+            choice.color = color
+            choice.save()
 
-                color = game.get_color(choice)
-                choice.color = color
-                choice.save()
+            demonstration_flag = (button_id == "start2")
 
-                demonstration_flag = True if button_id == "start2" else False
+            outcome = Outcome(
+                game=game,
+                choice=choice,
+                color=color,
+                nonce=nonce,
+                value=choice.value,
+                ratio=random.randint(1, 10),
+                type=game.type,
+                demonstration=demonstration_flag,
+                user=user if user.is_authenticated else None,
+            )
+            outcome.save()
 
-                outcome_data = {
-                    'game': game,
-                    'choice': choice,
-                    'color': choice.color,
-                    'nonce': nonce,
-                    'value': choice.value,
-                    'ratio': random.randint(1, 10),
-                    'type': game.type,
-                    'demonstration': demonstration_flag
-                }
-                if user.is_authenticated and button_id == "start":
-                    outcome_data['user'] = user
-                else:
-                    outcome_data['user'] = None
+        return JsonResponse({
+            'status': 'success',
+            'id': outcome.id,
+            'slug': outcome.slug,
+            'nonce': int(outcome.nonce),
+            'value': outcome.value,
+            'ratio': outcome.ratio,
+            'date_and_time': outcome.date_and_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'choice_id': choice.id,
+            'choice_text': choice.choice_text,
+            'choice_color': choice.color,
+            'choice_file': choice.file.url if choice.file else None,
+            'demonstration': outcome.demonstration,
+        })
 
-
-                outcome = Outcome.objects.create(**outcome_data)
-
-            return JsonResponse({
-                'status': 'success',
-                'outcome': outcome.id,
-                'nonce': outcome.nonce,
-                'choice_id': choice.id,
-                'choice_value': choice.value,
-                'choice_text': choice.choice_text,
-                'choice_color': choice.color,
-                'choice_file': choice.file.url if choice.file else None,
-                'demonstration': outcome.demonstration
-            })
-
-        except Game.DoesNotExist:
-            return JsonResponse({'status': 'error', 'message': 'Game not found.'})
-        except Exception as e:
-
-            django.db.close_old_connections()
-            return JsonResponse({'status': 'error', 'message': str(e)})
-
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+    except Game.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Game not found.'})
+    except Exception as e:
+        close_old_connections()
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 
 @csrf_exempt
@@ -4594,9 +4594,6 @@ def toggle_favorite(request, game_id):
         next_url = request.POST.get('next', request.META.get('HTTP_REFERER', '/'))
         return redirect(next_url)
 
-from django.core.serializers.json import DjangoJSONEncoder
-from django.shortcuts import render
-import json
 
 class OutcomeHistoryView(BaseView):
     model = Outcome
@@ -4670,6 +4667,100 @@ class OutcomeHistoryView(BaseView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
+
+
+class UserRecentOutcomesView(LoginRequiredMixin, ListView):
+    model = Outcome
+    template_name = 'recent_outcomes.html'
+    context_object_name = 'outcomes'
+    paginate_by = 30
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['Game'] = GameHub.objects.filter(is_active=1).first()
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['form'] = EmailForm()
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
+    def get_queryset(self):
+        user_id = self.kwargs.get('user_id')
+        target = (
+            get_object_or_404(User, pk=user_id)
+            if user_id
+            else self.request.user
+        )
+        return (
+            Outcome.objects
+            .filter(user=target, is_active=1)
+            .order_by('-date_and_time')
+        )
+
+    def render_to_response(self, context, **response_kwargs):
+        is_ajax = self.request.headers.get('x-requested-with') == 'XMLHttpRequest'
+        if is_ajax:
+            page = context['page_obj']
+            outcomes = page.object_list
+
+            data = [
+                {
+                    'slug': o.slug,
+                    'nonce': int(o.nonce),
+                    'value': o.value,
+                    'ratio': o.ratio,
+                    'date_and_time': o.date_and_time.strftime('%Y-%m-%d %H:%M:%S'),
+                }
+                for o in outcomes
+            ]
+            return JsonResponse({
+                'outcomes': data,
+                'has_next': page.has_next(),
+                'page': page.number,
+            })
+        return super().render_to_response(context, **response_kwargs)
+
 
 class ClubRoomView(BaseView):
     model = GameHub
@@ -5682,11 +5773,13 @@ class MegaBackgroundView(BaseView):
 
         return context
 
+
 class MegaCreatePostView(CreateView):
     model = MegaBackgroundImage
     form_class = MegaBackgroundImagery
     template_name = "megacoinsbackgroundimagechange.html"
     success_url = reverse_lazy("megacoins")
+
 
 class EventBackgroundView(BaseView):
     model = EventBackgroundImage
@@ -5699,6 +5792,9 @@ class EventBackgroundView(BaseView):
         context['EventBackgroundImage'] = EventBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Events'] = Event.objects.all()
 
         newprofile = Event.objects.filter(is_active=1)
@@ -8823,6 +8919,7 @@ class votingview(ListView):
 
         return context
 
+
 class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
     model = Item
     paginate_by = 10
@@ -10118,6 +10215,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from email.mime.image import MIMEImage
 
+
 def get_games_context(request):
     filter_type = request.GET.get('filter')
 
@@ -10139,6 +10237,7 @@ def get_games_context(request):
         'game_length': game_length,
     }
     return context
+
 
 def filter_games(request):
     context = get_games_context(request)
@@ -10205,9 +10304,20 @@ class BackgroundView(FormMixin, BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['messages'] = SupportMessage.objects.filter(room=self.request.user.username).order_by('-date')
         context['friendmessages'] = Message.objects.filter(room=self.request.user.username).order_by('-date')
-        context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by(
-            "carouselposition")
+        context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by("carouselposition")
+        events = Event.objects.filter(is_active=1, page=self.template_name)
+        for e in events:
+            # combine date + time
+            dt = datetime.combine(e.date, e.time)
+            # make it timezone-aware
+            dt = timezone.make_aware(dt, timezone.get_default_timezone())
 
+            # milliseconds since epoch!
+            e.start_timestamp = int(dt.timestamp() * 1000)
+
+            # length must be a timedelta (DurationField)
+            e.duration_ms = int(e.length.total_seconds() * 1000)
+        context['Events'] = events
 
         spinpreference = None
         user = self.request.user
@@ -15311,6 +15421,7 @@ class DailyLotteryView(FormMixin, ListView):
             messages.error(request, 'You need to log in to claim your daily ticket!')
             return render(request, 'registration/login.html', {'form': form})
 
+
 class DailyLotteryClaimedView(ListView):
     model = Lottery
     template_name = "dailylottoclaimed.html"
@@ -15417,6 +15528,7 @@ def claim_ruby(request):
         "added":         applied_amount,
     })
 
+
 def login_view(request):
     next_url = request.GET.get('next', '/')
 
@@ -15435,6 +15547,7 @@ def login_view(request):
         form = AuthenticationForm()
 
     return render(request, 'accounts/login.html', {'form': form, 'next': next_url})
+
 
 class Lottereal(BaseView):
     model = Lottery
@@ -15993,7 +16106,6 @@ from django.shortcuts import render
 from .models import AdministrationChangeLog
 
 
-
 class AdministrationChangeLogView(ListView):
     model = AdministrationChangeLog
     template_name = "administrationchangelog.html"
@@ -16014,7 +16126,7 @@ class AdministrationChangeLogView(ListView):
         # (unchanged from your original get_context_data)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         # ─── User‐specific clickables & profile URLs ─────────────────────────────────
         user = self.request.user
         if user.is_authenticated:
@@ -16135,7 +16247,7 @@ class ChangeLogView(ListView):
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         # “NewsProfiles” logic: if the user is authenticated, pass back their ProfileDetails;
         # otherwise, create a dummy object for avatar and url placeholders.
         if self.request.user.is_authenticated:

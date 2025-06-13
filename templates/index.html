@@ -2889,7 +2889,6 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
     background-attachment: fixed;
     background-position: center;
     width: 100%;
-    min-height: 100vh; /* Ensures background always covers the section */
 }
 
 
@@ -3471,8 +3470,72 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
       font-size: 1.1rem;
     }
   }
+.event-item {
+  position: relative;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  color: white;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 8px;
+  /* optional overlay to improve text legibility */
+}
+.event-item::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  border-radius: inherit;
+}
+.event-item h3,
+.event-item p,
+.event-item .countdown {
+  position: relative;  /* so text sits above the overlay */
+  z-index: 1;
+}
 
+        #chestCollection {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
 </style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('chestCollection');
+  const items     = Array.from(container.getElementsByClassName('prismatic-chest'));
+  const btn       = document.getElementById('toggleGamesBtn');
+
+  // compute collapsed height (first 5 items)
+  const visibleCount = 1;
+  const collapsedHeight = items
+    .slice(0, visibleCount)
+    .reduce((sum, el) => sum + el.offsetHeight, 0);
+
+  // if there are <=5 items, hide the button and leave it expanded
+  if (items.length <= visibleCount) {
+    btn.style.display = 'none';
+    return;
+  }
+
+  // initialize in collapsed state
+  let expanded = false;
+  container.style.maxHeight = collapsedHeight + 'px';
+
+  btn.addEventListener('click', () => {
+    if (expanded) {
+      // collapse back to first 5
+      container.style.maxHeight = collapsedHeight + 'px';
+      btn.textContent = 'Show More';
+    } else {
+      // expand to show all
+      container.style.maxHeight = container.scrollHeight + 'px';
+      btn.textContent = 'Show Less';
+    }
+    expanded = !expanded;
+  });
+});
+</script>
 
 <script>
 window.onscroll = function() {
@@ -3753,6 +3816,21 @@ document.addEventListener('DOMContentLoaded', function() {
 {% endif %}
 
   <!-- Background particle effect -->
+<a href="">{% for event in Events %}
+  <div class="event-item">
+    <h3>{{ event.name }}</h3>
+    <p>{{ event.description }}</p>
+    <div
+      class="countdown"
+      data-start="{{ event.start_timestamp }}"
+      data-duration="{{ event.duration_ms }}"
+    >Loading…</div>
+  </div>
+{% endfor %}
+
+
+</a>
+
   <canvas id="particle-canvas"></canvas>
         {% for BackgroundImage in Background %}
     {% if BackgroundImage.page == "index.html" %}
@@ -3827,7 +3905,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <!-- Banner header (always visible) -->
     <div class="play-banner-header">
-        <h2 class="play-title">How To Play</h2>
+        <h2 class="play-title" id="howtoplay">How To Play</h2>
         <div class="header-glow"></div>
     </div>
 
@@ -3965,7 +4043,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 {% endif %}
             {% endif %}
         {% endfor %}
-           <div class="chest-container" id="#game">
+           <div class="chest-container" id="#featuredgame">
     <div class="background-effect"></div>
     <div class="wave-effect"></div>
     <div class="cosmic-holo">
@@ -3976,8 +4054,8 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <h2 class="chest-header"><span class="highlight-text" id="game">Featured</span> Chests</h2>
 
-    <div class="chest-collection">
-        {% for Game in FeaturedGame %}
+ <div id="chestCollection" class="chest-collection">
+  {% for Game in FeaturedGame %}
         <div class="prismatic-chest">
             <a href="{{ Game.get_profile_url2 }}">
                 <!-- Holographic Chest -->
@@ -4014,12 +4092,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </a>
         </div>
-        {% endfor %}
+  {% endfor %}
     </div>
 </div>
 
+<button id="toggleGamesBtn">Show More</button>
+
+
 <!-- New Chests - Shiny, Clean, Pristine Animation -->
-<div class="chest2-container" id="#game">
+<div class="chest2-container" id="#newgame chestCollection">
     <div class="background-effect"></div>
     <div class="shine-effect"></div>
     <div class="cosmic-holo">
@@ -4073,7 +4154,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-<div class="chest3-container" id="#game">
+<div class="chest3-container" id="#populargame chestCollection">
     <div class="background-effect"></div>
     <div class="fire-effect"></div>
     <div class="cosmic-holo">
@@ -5999,6 +6080,55 @@ function showChatWidget() {
 }
 </script>
 		<i class="icon"></i>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('⏱️ Countdown script loaded');
+  const items = Array.from(document.querySelectorAll('.countdown'));
+  console.log('Found countdown elements:', items.length);
+
+  function formatTime(ms) {
+    let total = Math.floor(ms / 1000);
+    const days    = Math.floor(total / 86400); total %= 86400;
+    const hours   = Math.floor(total / 3600);  total %= 3600;
+    const minutes = Math.floor(total / 60);    total %= 60;
+    const seconds = total;
+    const parts = [];
+    if (days)    parts.push(days    + 'd');
+    if (hours)   parts.push(hours   + 'h');
+    if (minutes) parts.push(minutes + 'm');
+    parts.push(seconds + 's');
+    return parts.join(' ');
+  }
+
+  function updateAll() {
+    const now = Date.now();
+    items.forEach(el => {
+      const start    = Number(el.dataset.start);
+      const duration = Number(el.dataset.duration);
+      const end      = start + duration;
+
+      // DEBUG: inspect each box’s data
+      console.log({ now, start, duration, end });
+
+      if (isNaN(start) || isNaN(duration)) {
+        el.textContent = '⏳ data missing';
+      }
+      else if (now < start) {
+        el.textContent = 'Starts in ' + formatTime(start - now);
+      }
+      else if (now < end) {
+        el.textContent = 'Ends in ' + formatTime(end - now);
+      }
+      else {
+        el.textContent = 'Event finished';
+      }
+    });
+  }
+
+  updateAll();
+  setInterval(updateAll, 1000);
+});
+</script>
 
 	<!-- end copyright -->
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
