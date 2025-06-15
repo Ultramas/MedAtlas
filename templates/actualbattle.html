@@ -1852,9 +1852,8 @@ $(document).ready(function() {
 <div class="chests-list">
   {% for game in games %}
     <div class="chest-card">
-        <img src="{{game.image.url}}">
-      <h3>{{ game.name }}</h3>
-      <p>Cost: {{ game.get_effective_cost }}</p>
+        <img src="{{game.image.url}}" style="width: 70px; height: 100px; margin: 25px;">
+      <h3 style="color: white;">{{ game.name }}</h3>
       <p>Cost: {{ game.get_effective_cost }}</p>
 
       <ul>
@@ -1870,7 +1869,7 @@ $(document).ready(function() {
       {% if kind == 'human' %}
         <div class="elementhead">
             👤 {{ player.username }}
-            <img src="{{player.profiledetails.avatar.url }}">
+            <img src="{{player.profiledetails.avatar.url }}" style="width:50px; height: 50px; border-radius: 50px;">
         </div>
     <div class="wrapper">
         <div class="containerre"  style="display: flex;">
@@ -1940,7 +1939,7 @@ $(document).ready(function() {
 
         <div class="elementhead">
             🤖 {{ player.name }}
-            <img src="{{player.image.url }}">
+            <img src="{{player.image.url }}" style="width:50px; height: 50px; border-radius: 50px;">
         </div>
     <div class="wrapper">
         <div class="containerre"  style="display: flex;">

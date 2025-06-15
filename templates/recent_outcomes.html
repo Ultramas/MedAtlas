@@ -1,5 +1,415 @@
-{% include 'navtrove.html' %}
-<h2>Recent Outcomes</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NavTrove - Recent Outcomes</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Base styles */
+:root {
+  --background: #0f172a;
+  --background-gradient-from: #0f172a;
+  --background-gradient-to: #020617;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --card-bg: #1e293b;
+  --card-border: #334155;
+  --primary: #8b5cf6;
+  --primary-hover: #7c3aed;
+  --primary-light: rgba(139, 92, 246, 0.2);
+  --button-text: #ffffff;
+  --border-radius: 0.5rem;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --transition: all 0.3s ease;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: linear-gradient(to bottom, var(--background-gradient-from), var(--background-gradient-to));
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-4);
+}
+
+/* Header styles */
+header {
+  margin-bottom: var(--spacing-8);
+}
+
+h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-2);
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-6);
+}
+
+.spin-button-container {
+  margin-bottom: var(--spacing-6);
+}
+
+.spin-button {
+  background: linear-gradient(to right, #8b5cf6, #3b82f6);
+  color: var(--button-text);
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-3) var(--spacing-6);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+}
+
+.spin-button:hover {
+  background: linear-gradient(to right, #7c3aed, #2563eb);
+  transform: translateY(-1px);
+}
+
+.spin-button:active {
+  transform: translateY(0);
+}
+
+.spin-button i {
+  margin-right: var(--spacing-2);
+}
+
+.spin-button.spinning {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Outcomes list styles */
+.outcomes-list {
+  display: grid;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+}
+
+.outcome-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.outcome-card.new {
+  box-shadow: 0 0 0 2px var(--primary);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.outcome-card-content {
+  padding: var(--spacing-4);
+}
+
+@media (min-width: 768px) {
+  .outcome-card-content {
+    padding: var(--spacing-6);
+  }
+}
+
+.outcome-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+}
+
+@media (min-width: 768px) {
+  .outcome-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.outcome-date-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.outcome-date {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.outcome-new-badge {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: 9999px;
+}
+
+.outcome-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-2);
+}
+
+.outcome-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2) var(--spacing-6);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-4);
+}
+
+.outcome-detail-label {
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.outcome-detail-value {
+  font-family: monospace;
+}
+
+.outcome-image-container {
+  position: relative;
+  min-width: 120px;
+  height: 80px;
+  border-radius: calc(var(--border-radius) - 2px);
+  overflow: hidden;
+  background-color: #2d3748;
+}
+
+@media (min-width: 768px) {
+  .outcome-image-container {
+    min-width: 200px;
+    height: 100px;
+  }
+}
+
+.outcome-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+.outcome-image-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.outcome-image-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Loading and load more styles */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-8) 0;
+}
+
+.loading.hidden {
+  display: none;
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(139, 92, 246, 0.3);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: var(--spacing-2);
+}
+
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-6);
+}
+
+.load-more-button {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-2) var(--spacing-6);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.load-more-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.load-more-button.hidden {
+  display: none;
+}
+
+.load-more-button.loading {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Toast notification styles */
+.toast {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  max-width: 350px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  transform: translateY(150%);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.toast.show {
+  transform: translateY(0);
+}
+
+.toast-content {
+  display: flex;
+  padding: var(--spacing-4);
+  align-items: flex-start;
+}
+
+.toast-icon {
+  margin-right: var(--spacing-3);
+  color: var(--primary);
+  font-size: 1.25rem;
+}
+
+.toast-message {
+  flex: 1;
+}
+
+.toast-title {
+  font-weight: 600;
+  margin-bottom: var(--spacing-1);
+}
+
+.toast-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: var(--spacing-2);
+}
+
+.toast-close:hover {
+  color: var(--text-primary);
+}
+
+/* Empty state */
+.empty-state {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-8);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* Animations */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(139, 92, 246, 0);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>NavTrove</h1>
+      <h2>Recent Outcomes</h2>
+      <div class="spin-button-container">
+        <button id="spin-button" class="spin-button">
+          <i class="fas fa-sparkles"></i>
+          Spin to Create Outcome
+        </button>
+      </div>
+    </header>
+
+    <main>
 
 <div id="outcomes-list">
   {# server-rendered first 30 so you’re never blank #}
@@ -8,6 +418,7 @@
       <strong>{{ o.date_and_time|date:"Y-m-d H:i" }}</strong> —
       {{ o.slug }} (Value: {{ o.value }}) — Nonce: {{ o.nonce }}
     </div>
+  <img src="{{o.file.url}}">
   {% empty %}
     <p>No outcomes yet.</p>
   {% endfor %}
@@ -99,3 +510,323 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+
+
+      <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <span>Loading outcomes...</span>
+      </div>
+
+      <div class="load-more-container">
+        <button id="load-more" class="load-more-button">
+          Load More
+        </button>
+      </div>
+    </main>
+
+    <div id="toast" class="toast">
+      <div class="toast-content">
+        <div class="toast-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-message">
+          <div class="toast-title">Success</div>
+          <div class="toast-description">Operation completed successfully</div>
+        </div>
+        <button class="toast-close">&times;</button>
+      </div>
+    </div>
+  </div>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+  // DOM Elements
+  const outcomesList = document.getElementById("outcomes-list")
+  const loadMoreButton = document.getElementById("load-more")
+  const spinButton = document.getElementById("spin-button")
+  const loadingElement = document.getElementById("loading")
+  const toast = document.getElementById("toast")
+
+  // State
+  let currentPage = 1
+  let hasMore = true
+  let isLoading = false
+  let isSpinning = false
+
+  // Initialize
+  fetchOutcomes(1)
+
+  // Event Listeners
+  loadMoreButton.addEventListener("click", () => {
+    if (!isLoading && hasMore) {
+      fetchOutcomes(currentPage + 1)
+    }
+  })
+
+  spinButton.addEventListener("click", createOutcome)
+
+  document.querySelector(".toast-close").addEventListener("click", () => {
+    hideToast()
+  })
+
+  // Functions
+  async function fetchOutcomes(page) {
+    if (isLoading) return
+
+    setLoading(true)
+
+    try {
+      // In a real app, this would be a fetch to your API
+      // For demo purposes, we'll simulate a response
+      await new Promise((resolve) => setTimeout(resolve, 800))
+
+      const mockOutcomes = generateMockOutcomes(page)
+
+      if (page === 1) {
+        renderOutcomes(mockOutcomes, true)
+      } else {
+        renderOutcomes(mockOutcomes, false)
+      }
+
+      // For demo, limit to 3 pages
+      hasMore = page < 3
+      currentPage = page
+
+      updateLoadMoreButton()
+    } catch (error) {
+      showToast("Error", "Failed to load outcomes. Please try again.", "error")
+      console.error("Failed to fetch outcomes:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function renderOutcomes(outcomes, replace = false) {
+    if (replace) {
+      outcomesList.innerHTML = ""
+    }
+
+    if (outcomes.length === 0 && outcomesList.children.length === 0) {
+      outcomesList.innerHTML = '<div class="empty-state">No outcomes yet.</div>'
+      return
+    }
+
+    outcomes.forEach((outcome) => {
+      const outcomeElement = createOutcomeElement(outcome)
+      outcomesList.appendChild(outcomeElement)
+    })
+  }
+
+  function createOutcomeElement(outcome, isNew = false) {
+    const outcomeCard = document.createElement("div")
+    outcomeCard.className = `outcome-card ${isNew ? "new" : ""}`
+
+    const formattedDate = new Date(outcome.date_and_time).toLocaleString()
+    const timeAgo = formatTimeAgo(new Date(outcome.date_and_time))
+
+    outcomeCard.innerHTML = `
+      <div class="outcome-card-content">
+        <div class="outcome-header">
+          <div>
+            <div class="outcome-date-container">
+              <span class="outcome-date">${formattedDate}</span>
+              ${isNew ? '<span class="outcome-new-badge">New</span>' : ""}
+            </div>
+            <h3 class="outcome-title">${outcome.slug}</h3>
+          </div>
+          ${
+            outcome.file
+              ? `
+            <div class="outcome-image-container">
+              <div class="outcome-image-loading">
+                <div class="outcome-image-spinner"></div>
+              </div>
+              <img
+                src="${outcome.file.url}"
+                alt="Image for ${outcome.slug}"
+                class="outcome-image"
+                style="opacity: 0;"
+                onload="this.style.opacity = 1; this.previousElementSibling.style.display = 'none';"
+                onerror="this.parentElement.style.display = 'none';"
+              >
+            </div>
+          `
+              : ""
+          }
+        </div>
+
+        <div class="outcome-details">
+          <div>
+            <span class="outcome-detail-label">Value:</span>
+            <span class="outcome-detail-value">${outcome.value}</span>
+          </div>
+          <div>
+            <span class="outcome-detail-label">Nonce:</span>
+            <span class="outcome-detail-value">${outcome.nonce}</span>
+          </div>
+          <div>
+            <span class="outcome-detail-label">Time:</span>
+            <span>${timeAgo}</span>
+          </div>
+        </div>
+      </div>
+    `
+
+    return outcomeCard
+  }
+
+  async function createOutcome() {
+    if (isSpinning) return
+
+    setSpinning(true)
+
+    try {
+      // In a real app, this would be a fetch to your API
+      // For demo purposes, we'll simulate a response
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // Simulate a successful outcome
+      const newOutcome = {
+        id: `outcome-new-${Date.now()}`,
+        date_and_time: new Date().toISOString(),
+        slug: `outcome-${Math.floor(Math.random() * 1000)}`,
+        value: Math.floor(Math.random() * 100),
+        nonce: Math.random().toString(36).substring(2, 10),
+        file: Math.random() > 0.5 ? { url: `/placeholder.svg?height=100&width=200` } : undefined,
+      }
+
+      // Remove empty state if it exists
+      const emptyState = outcomesList.querySelector(".empty-state")
+      if (emptyState) {
+        outcomesList.removeChild(emptyState)
+      }
+
+      // Add the new outcome to the top of the list
+      const outcomeElement = createOutcomeElement(newOutcome, true)
+      outcomesList.insertBefore(outcomeElement, outcomesList.firstChild)
+
+      // Show success toast
+      showToast("New outcome created!", `${newOutcome.slug} with value ${newOutcome.value}`)
+
+      // Remove the oldest outcome if we have more than 30
+      if (outcomesList.children.length > 30) {
+        outcomesList.removeChild(outcomesList.lastChild)
+      }
+    } catch (error) {
+      showToast("Spin failed", "Failed to create a new outcome. Please try again.", "error")
+      console.error("Failed to spin:", error)
+    } finally {
+      setSpinning(false)
+    }
+  }
+
+  function setLoading(loading) {
+    isLoading = loading
+
+    if (loading) {
+      loadingElement.classList.remove("hidden")
+      loadMoreButton.classList.add("loading")
+      loadMoreButton.disabled = true
+      loadMoreButton.textContent = "Loading..."
+    } else {
+      loadingElement.classList.add("hidden")
+      loadMoreButton.classList.remove("loading")
+      loadMoreButton.disabled = false
+      loadMoreButton.textContent = "Load More"
+    }
+  }
+
+  function setSpinning(spinning) {
+    isSpinning = spinning
+
+    if (spinning) {
+      spinButton.classList.add("spinning")
+      spinButton.disabled = true
+      spinButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Spinning...'
+    } else {
+      spinButton.classList.remove("spinning")
+      spinButton.disabled = false
+      spinButton.innerHTML = '<i class="fas fa-sparkles"></i> Spin to Create Outcome'
+    }
+  }
+
+  function updateLoadMoreButton() {
+    if (hasMore) {
+      loadMoreButton.classList.remove("hidden")
+    } else {
+      loadMoreButton.classList.add("hidden")
+    }
+  }
+
+  function showToast(title, message, type = "success") {
+    const toastTitle = document.querySelector(".toast-title")
+    const toastDescription = document.querySelector(".toast-description")
+    const toastIcon = document.querySelector(".toast-icon i")
+
+    toastTitle.textContent = title
+    toastDescription.textContent = message
+
+    if (type === "error") {
+      toastIcon.className = "fas fa-exclamation-circle"
+      toastIcon.style.color = "#ef4444"
+    } else {
+      toastIcon.className = "fas fa-check-circle"
+      toastIcon.style.color = "#8b5cf6"
+    }
+
+    toast.classList.add("show")
+
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+      hideToast()
+    }, 5000)
+  }
+
+  function hideToast() {
+    toast.classList.remove("show")
+  }
+
+  // Helper Functions
+  function generateMockOutcomes(page) {
+    const pageSize = 10
+
+    return Array.from({ length: pageSize }, (_, i) => ({
+      id: `outcome-${page}-${i}`,
+      date_and_time: new Date(Date.now() - (page * pageSize + i) * 3600000).toISOString(),
+      slug: `outcome-${Math.floor(Math.random() * 1000)}`,
+      value: Math.floor(Math.random() * 100),
+      nonce: Math.random().toString(36).substring(2, 10),
+      file: Math.random() > 0.5 ? { url: `/placeholder.svg?height=100&width=200` } : undefined,
+    }))
+  }
+
+  function formatTimeAgo(date) {
+    const seconds = Math.floor((new Date() - date) / 1000)
+
+    let interval = Math.floor(seconds / 31536000)
+    if (interval > 1) return interval + " years ago"
+    if (interval === 1) return "1 year ago"
+
+    interval = Math.floor(seconds / 2592000)
+    if (interval > 1) return interval + " months ago"
+    if (interval === 1) return "1 month ago"
+
+    interval = Math.floor(seconds / 86400)
+    if (interval > 1) return interval + " days ago"
+    if (interval === 1) return "1 day ago"
+
+    interval = Math.floor(seconds / 3600)
+    if (interval > 1) return interval + " hours ago"
+    if (interval === 1) return "1 hour ago"
+
+    interval = Math.floor(seconds / 60)
+    if (interval > 1) return interval + " minutes ago"
+    if (interval === 1) return "1 minute ago"
+
+    return "just now"
+  }
+})
+
+</script>
+  <script src="script.js"></script>
+</body>
+</html>

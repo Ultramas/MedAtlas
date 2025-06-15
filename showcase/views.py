@@ -11040,6 +11040,12 @@ class EBackgroundView(BaseView, FormView):
         context['categorizeditems'] = categoryitems
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
 
+        total_price = sum(item.price for item in Item.objects.filter(is_active=1, price__isnull=False))
+        tax = total_price*0.08
+        final_price = total_price+tax
+        context['total_item_price'] = total_price
+        context['tax_price'] = tax_price
+        context['final_price'] = final_price
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:

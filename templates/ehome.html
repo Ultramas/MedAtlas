@@ -2814,15 +2814,15 @@ header {
             <div class="cart-total">
               <div class="total-row">
                 <div class="total-label">Subtotal</div>
-                <div class="total-value">$270.75</div>
+                <div class="total-value">${{ total_item_price|floatformat:2 }}</div>
               </div>
               <div class="total-row">
                 <div class="total-label">Tax</div>
-                <div class="total-value">$21.66</div>
+                <div class="total-value">${{total_price}}</div>
               </div>
               <div class="total-row final-total">
                 <div class="total-label">Total</div>
-                <div class="total-value">$292.41</div>
+                <div class="total-value">${{tax_price}}</div>
               </div>
             </div>
 

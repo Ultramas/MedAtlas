@@ -6306,6 +6306,7 @@ from django.db.models.signals import pre_save
 from django.http import JsonResponse
 from django.core import serializers
 
+
 class ItemFilter(models.Model):
     product_filter = models.CharField(verbose_name="Hashtag filters", max_length=200, blank=True, null=True)
     clicks = models.IntegerField(verbose_name="Popularity", blank=True, null=True)
@@ -6325,6 +6326,7 @@ class ItemFilter(models.Model):
     class Meta:
         verbose_name = "Item Filter"
         verbose_name_plural = "Item Filters"
+
 
 class Item(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
