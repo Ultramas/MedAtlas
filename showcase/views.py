@@ -21,6 +21,7 @@ from django.db import transaction
 from django.shortcuts import render, redirect
 from django.templatetags.static import static
 from django.utils.html import strip_tags
+from django.utils.safestring import mark_safe
 from django.views.generic import ListView
 import stripe
 from social_core.backends.stripe import StripeOAuth2
@@ -3487,13 +3488,16 @@ class SingleBattleListView(DetailView):
 
     def dispatch(self, request, *args, **kwargs):
         battle = self.get_object()
+        redirect_url = None
         if battle.is_full():
             if battle.status == 'O':
                 battle.status = 'R'
                 battle.save(update_fields=['status'])
             print('battle is full, starting battle')
-            return redirect(reverse('showcase:actualbattle',
-                                    kwargs={'battle_id': battle.id}))
+            redirect_url = reverse('showcase:actualbattle', kwargs={'battle_id': battle.id})
+            redirect_url += '?auto_spin=true'
+            print('the url is: ' + redirect_url)
+            return redirect(redirect_url)
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -3509,6 +3513,7 @@ class SingleBattleListView(DetailView):
         context['related_games'] = related_games
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context["battle_absolute_url"] = self.request.build_absolute_uri(battle.get_absolute_url())
+        context['auto_spin'] = self.request.GET.get('auto_spin') == 'true'
 
         user = self.request.user
         if user.is_authenticated:
@@ -3665,14 +3670,16 @@ class SingleBattleListView(DetailView):
             if request.user in battle.participants.all():
                 messages.error(request, 'You are already a participant in this battle.')
                 return redirect('showcase:battle_detail', battle_id=battle.id)
+            redirect_url = None
             if battle.is_full():
                 battle.status = 'R'
                 battle.save()
                 messages.error(request, 'This battle is now full and has started.')
                 console.log('reached a full battle')
-                return redirect(reverse('showcase:actualbattle',
-                                        kwargs={'battle_id': battle.id}))
-
+                redirect_url = reverse('showcase:actualbattle', kwargs={'battle_id': battle.id})
+                redirect_url += '?auto_spin=true'
+                print('the url is: ' + redirect_url)
+                return redirect(redirect_url)
             join_form = BattleJoinForm(request.POST, user=request.user, battle=battle)
             if join_form.is_valid():
                 join_form.save()
@@ -3762,6 +3769,17 @@ class ActualBattleView(DetailView):
         bots = [bp.robot for bp in all_participants if bp.is_bot and bp.robot]
 
         context['players'] = [('human', h) for h in humans] + [('robot', b) for b in bots]
+        context['battle_games'] = [
+            {
+                'id': bg.game.id,
+                'slug': bg.game.slug,
+                'quantity': bg.quantity
+            }
+            for bg in self.object.battle_games.all()  
+        ]
+        context['battle_games_json'] = mark_safe(
+            json.dumps(context['battle_games'])
+        )
 
         # 1) Grab all prefetched games
         games = getattr(battle, 'games_with_choices', [])
@@ -3775,6 +3793,7 @@ class ActualBattleView(DetailView):
         # 3) For backwards compatibility: pick a “primary” game for single‐game logic
         primary_game          = games[0]
         context['game']       = primary_game
+        context['auto_spin'] = self.request.GET.get('auto_spin') == 'true'
 
         # 4) User & profile info
         user = self.request.user
@@ -4144,9 +4163,9 @@ def add_robot(request, battle_id):
     is_now_full = battle.is_full()
     redirect_url = None
     if is_now_full:
+        print('battle is now full, starting')
         rf = RequestFactory()
         for game in battle.chests.all():
-            # build JSON body exactly as battle_create_outcome expects
             payload = json.dumps({
                 'game_id': game.id,
                 'button_id': 'start2'  # or whatever flag you need
@@ -4159,8 +4178,11 @@ def add_robot(request, battle_id):
             fake_req.user = request.user
 
             battle_create_outcome(fake_req, battle.id, game.id)
-
+        print('started battle trigger')
         redirect_url = reverse('showcase:actualbattle', kwargs={'battle_id': battle.id})
+        redirect_url += '?auto_spin=true'
+        print('the url is: ' + redirect_url)
+        return redirect(redirect_url)
 
     messages.success(request, f"Robot '{selected_robot.name}' added successfully!")
 

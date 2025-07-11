@@ -9,6 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedItems = [];
     let totalSpins = 1;
     let currentSpin = 0;
+    // parse the JSON once, before anything else:
+    const battleGames = JSON.parse(
+      document.getElementById('battle-games-data').textContent
+    );
+    console.log('Loaded battleGames:', battleGames);
+
+    // these must live in the same scope as spin():
+    let gameIndex     = 0;
+    let instanceIndex = 0;
 
     let persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
@@ -817,52 +826,61 @@ function randomizedContents() {
     console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`);
 
     if (currentSpin < totalSpins) {
-        setTimeout(() => spin(buttonId), buffer);
-         setTimeout(() => {
-        randomizedContents();
-    }, 150);
+  // still mid-spin of the *current* copy
+  setTimeout(() => spin(buttonId), buffer);
+  setTimeout(() => {
+    randomizedContents();
+    document.dispatchEvent(new CustomEvent('spinComplete', { detail:{buttonId} }));
+  }, 150);
+
+}  else {
+  // we’ve just finished one copy of the current game
+  instanceIndex++;
+
+  // safe‐guard in case battleGames is ever empty
+  const thisGame = battleGames[gameIndex] || { quantity: 0, slug: '??' };
+
+  if (instanceIndex < thisGame.quantity) {
+    // more copies of *this* game to run
+    console.log(`— Copy ${instanceIndex+1}/${thisGame.quantity} of "${thisGame.slug}"`);
+    currentSpin      = 0;
+    totalSpins       = 1;           // or whatever per-copy spin‐count you want
+    animationStopped = false;
+    setTimeout(() => spin(buttonId), buffer);
+
+  } else {
+    // done all copies of this game → advance to next game
+    gameIndex++;
+    instanceIndex = 0;
+
+    if (gameIndex < battleGames.length) {
+      const nextGame = battleGames[gameIndex];
+      console.log(`→ Next "${nextGame.slug}" ×${nextGame.quantity}`);
+      // patch your button so spin() picks up the new game
+      const btn = document.querySelector(`.start`);
+      btn.dataset.gameId = nextGame.id;
+      btn.dataset.slug   = nextGame.slug;
+
+      currentSpin      = 0;
+      totalSpins       = 1;
+      animationStopped = false;
+      setTimeout(() => spin(btn.id), buffer);
+
     } else {
-        animationStopped = true;
-        console.log(`The spins have ended.`);
-        setTimeout(() => {
+      // **all** games & copies are done
+      console.log("🎉 All battle rounds complete.");
+      animationStopped = true;
+      setTimeout(() => {
         restoreCards();
-        showPopup(buttonId);
-    }, 250);
-
-               if (!persistSpin) {
-    totalSpins = 1;
-    console.log("persistSpin not enabled; reset spins to 1");
-    sessionStorage.setItem("totalSpins", totalSpins);
-    $(".spin-option").removeClass("selected active");
-    $(".spin-option[data-value='1']").addClass("selected active");
-
-    const baseCost = document.getElementById('spin-container').getAttribute('data-base-cost');
-    console.log('Base cost:', baseCost);
-
-    const totalCost = parseInt(baseCost) * totalSpins;
-    const costDisplay = document.getElementById('cost-display');
-    if (costDisplay) {
-    costDisplay.innerHTML = `<span id="total-cost">${totalCost}</span> 💎`;
+        document.dispatchEvent(new CustomEvent('spinComplete', { detail: { buttonId } }));
+      }, 250);
     }
+  }
 }
-             else {
-                    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
 
-                    $(".spin-option").removeClass("selected active");
-                    $(".spin-option[data-value='1']").addClass("selected active");
 
-                    setTimeout(() => {
-                        $(".spin-option").removeClass("selected active");
-                        $(".spin-option[data-value='" + currentSelectionValue + "']")
-                            .addClass("selected active");
 
-                        totalSpins = currentSelectionValue;
-                        console.log("Reverted spin to:", totalSpins);
-                    }, 0);
-                }
 
-        $(".spin-option").prop('disabled', false);
-    }
 }, animationDuration);
 
 }
