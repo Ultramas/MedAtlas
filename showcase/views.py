@@ -6,6 +6,8 @@ import string
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from decimal import Decimal
+
 import pytz
 from celery import shared_task
 from django.contrib.auth.views import PasswordResetView, LoginView
@@ -29,6 +31,7 @@ from django.contrib.auth.forms import UserChangeForm, AuthenticationForm
 import math
 from django.contrib.auth.models import AnonymousUser
 from paypalrestsdk import Payment as PayPalPayment
+from django.test import RequestFactory
 
 from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
@@ -2205,105 +2208,6 @@ def generate_nonce():
 
 @csrf_exempt
 def create_outcome(request, slug):
-    if request.method != 'POST':
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-
-    try:
-        close_old_connections()
-        with transaction.atomic():
-            body      = json.loads(request.body)
-            game_id   = body.get('game_id')
-            button_id = body.get('button_id')
-            user      = request.user
-
-            if not game_id:
-                return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
-
-            game  = get_object_or_404(Game, id=game_id, slug=slug)
-            nonce = random.randint(1, 1000000)
-
-            game_choice = (
-                GameChoice.objects
-                .filter(game=game, lower_nonce__lte=nonce, upper_nonce__gte=nonce)
-                .first()
-            )
-            if game_choice:
-                choice = game_choice.choice
-            else:
-                choices = Choice.objects.filter(
-                    game=game,
-                    lower_nonce__lte=nonce,
-                    upper_nonce__gte=nonce
-                )
-                if not choices.exists():
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': 'No valid choice found for the given nonce.'
-                    })
-                choice = choices.order_by('?').first()
-
-            color = game.get_color(choice)
-            choice.color = color
-            choice.save()
-
-            demonstration_flag = (button_id == "start2")
-
-            outcome = Outcome(
-                game=game,
-                choice=choice,
-                color=color,
-                nonce=nonce,
-                value=choice.value,
-                ratio=random.randint(1, 10),
-                type=game.type,
-                demonstration=demonstration_flag,
-                user=user if user.is_authenticated else None,
-            )
-            outcome.save()
-
-        return JsonResponse({
-            'status': 'success',
-            'id': outcome.id,
-            'slug': outcome.slug,
-            'nonce': int(outcome.nonce),
-            'value': outcome.value,
-            'ratio': outcome.ratio,
-            'date_and_time': outcome.date_and_time.strftime('%Y-%m-%d %H:%M:%S'),
-            'choice_id': choice.id,
-            'choice_text': choice.choice_text,
-            'choice_color': choice.color,
-            'choice_file': choice.file.url if choice.file else None,
-            'demonstration': outcome.demonstration,
-        })
-
-    except Game.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Game not found.'})
-    except Exception as e:
-        close_old_connections()
-        return JsonResponse({'status': 'error', 'message': str(e)})
-
-
-@csrf_exempt
-def battle_create_outcome(request, battle_id, game_id):
-    if request.method != 'POST':
-        return JsonResponse({'status':'error','message':'POST required'}, status=405)
-
-    battle = get_object_or_404(Battle, id=battle_id)
-    # 1) only when battle is open
-    if battle.status != BattleStatus.OPEN:   # or whatever your “open” code is
-        return JsonResponse({
-            'status':'error',
-            'message':'Cannot create outcome: battle is not open.'
-        }, status=400)
-
-    # 2) only once per game in this battle
-    bg = get_object_or_404(BattleGame, battle=battle, game_id=game_id)
-    if bg.outcome_created:
-        return JsonResponse({
-            'status':'error',
-            'message':'Outcome already generated for this game in this battle.'
-        }, status=400)
-
     if request.method == 'POST':
         try:
             django.db.close_old_connections()
@@ -2355,8 +2259,106 @@ def battle_create_outcome(request, battle_id, game_id):
                     'type': game.type,
                     'demonstration': demonstration_flag
                 }
+                if user.is_authenticated and button_id == "start":
+                    outcome_data['user'] = user
+                else:
+                    outcome_data['user'] = None
+
+
+                outcome = Outcome.objects.create(**outcome_data)
+
+            return JsonResponse({
+                'status': 'success',
+                'outcome': outcome.id,
+                'nonce': outcome.nonce,
+                'choice_id': choice.id,
+                'choice_value': choice.value,
+                'choice_text': choice.choice_text,
+                'choice_color': choice.color,
+                'choice_file': choice.file.url if choice.file else None,
+                'demonstration': outcome.demonstration
+            })
+
+        except Game.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Game not found.'})
+        except Exception as e:
+
+            django.db.close_old_connections()
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+
+@csrf_exempt
+def battle_create_outcome(request, battle_id, game_id):
+    if request.method != 'POST':
+        return JsonResponse({'status':'error','message':'POST required'}, status=405)
+
+    battle = get_object_or_404(Battle, id=battle_id)
+    if battle.status != "O":
+        return JsonResponse({'status':'error','message':'Cannot create outcome: battle is not open.'}, status=400)
+
+    bg = get_object_or_404(BattleGame, battle=battle, game_id=game_id)
+    if bg.outcome_created:
+        return JsonResponse({'status':'error','message':'Outcome already generated for this game in this battle.'}, status=400)
+
+
+    if request.method == 'POST':
+        try:
+            django.db.close_old_connections()
+            with transaction.atomic():
+                body = json.loads(request.body)
+                game_id = body.get('game_id')
+                button_id = body.get('button_id')
+                user = request.user
+
+                if not game_id:
+                    return JsonResponse({'status': 'error', 'message': 'Game ID is required.'}, status=400)
+
+                game = Game.objects.get(id=game_id)
+                nonce = random.randint(1, 1000000)
+
+                game_choice_instance = GameChoice.objects.filter(
+                    game=game,
+                    lower_nonce__lte=nonce,
+                    upper_nonce__gte=nonce
+                ).first()
+
+                if game_choice_instance:
+                    choice = game_choice_instance.choice
+                else:
+                    choices = Choice.objects.filter(
+                        game=game,
+                        lower_nonce__lte=nonce,
+                        upper_nonce__gte=nonce
+                    )
+                    if not choices.exists():
+                        return JsonResponse(
+                            {'status': 'error', 'message': 'No valid choice found for the given nonce.'})
+                    choice = choices.order_by('?').first()
+
+                color = game.get_color(choice)
+                choice.color = color
+                choice.save()
+
+                demonstration_flag = True if button_id == "start2" else False
+
+                outcome_data = {
+                    'game': game,
+                    'choice': choice,
+                    'color': choice.color,
+                    'nonce': nonce,
+                    'value': choice.value,
+                    'ratio': random.randint(1, 10),
+                    'type': game.type,
+                    'demonstration': demonstration_flag
+                }
                 if user.is_authenticated:
                     outcome_data['user'] = user
+                bg.outcome_created = True
+                bg.save(update_fields=['outcome_created'])
+
+                print(f"[BattleCreateOutcome] Outcome#{outcome.pk} → Game={game.slug}, User={user.username if user.is_authenticated else 'anon'}")
 
                 outcome = Outcome.objects.create(**outcome_data)
 
@@ -3506,6 +3508,7 @@ class SingleBattleListView(DetailView):
         related_games = Game.objects.filter(game_battles__battle=battle).distinct()
         context['related_games'] = related_games
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context["battle_absolute_url"] = self.request.build_absolute_uri(battle.get_absolute_url())
 
         user = self.request.user
         if user.is_authenticated:
@@ -4044,6 +4047,38 @@ class BattleCreationView(CreateView):
 
         return context
 
+def create_outcomes_for_battle(battle):
+    """
+    For every (Game × User) in this battle, make one Outcome.
+    """
+    # 1) all non-bot, authenticated participants
+    participants = BattleParticipant.objects.filter(
+        battle=battle,
+        is_bot=False,
+        user__isnull=False
+    ).select_related('user')
+
+    # 2) all the games in the battle
+    games = battle.chests.all().prefetch_related('choice_fk_set', 'choices')
+
+    for game in games:
+        # pick a default choice for this game (you can customize this)
+        default_choice = (
+            game.choice_fk_set.first()    or
+            game.choices.first()
+        )
+        for bp in participants:
+            outcome = Outcome.objects.create(
+                game=game,
+                user=bp.user,
+                type=game.type,
+                choice=default_choice
+            )
+            print(
+                f"[BattleStart] Outcome #{outcome.pk} → "
+                f"Game={game.slug}, User={bp.user.username}"
+            )
+
 
 def join_battle(request):
     battle_id = request.POST.get('battle_id')
@@ -4109,7 +4144,22 @@ def add_robot(request, battle_id):
     is_now_full = battle.is_full()
     redirect_url = None
     if is_now_full:
-        # This is the same redirect you used in SingleBattleListView.dispatch
+        rf = RequestFactory()
+        for game in battle.chests.all():
+            # build JSON body exactly as battle_create_outcome expects
+            payload = json.dumps({
+                'game_id': game.id,
+                'button_id': 'start2'  # or whatever flag you need
+            })
+            fake_req = rf.post(
+                path='/',  # path doesn’t actually matter
+                data=payload,
+                content_type='application/json'
+            )
+            fake_req.user = request.user
+
+            battle_create_outcome(fake_req, battle.id, game.id)
+
         redirect_url = reverse('showcase:actualbattle', kwargs={'battle_id': battle.id})
 
     messages.success(request, f"Robot '{selected_robot.name}' added successfully!")
@@ -11040,12 +11090,16 @@ class EBackgroundView(BaseView, FormView):
         context['categorizeditems'] = categoryitems
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
 
-        total_price = sum(item.price for item in Item.objects.filter(is_active=1, price__isnull=False))
-        tax = total_price*0.08
-        final_price = total_price+tax
-        context['total_item_price'] = total_price
+        items = Item.objects.filter(is_active=1, price__isnull=False)
+        total_price = sum(item.price for item in items)
+        tax_price = total_price * Decimal('0.08')
+        final_price = total_price + tax_price
+
+        context['total_price'] = total_price  # match template name
         context['tax_price'] = tax_price
         context['final_price'] = final_price
+        print(f"Total: {total_price}, Tax: {tax_price}, Final: {final_price}")
+
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -16890,6 +16944,7 @@ class WithdrawView(LoginRequiredMixin, ListView):
                 withdraw.mark_complete()
                 messages.success(request, "Withdrawal marked complete successfully!")
         return redirect('showcase:withdraws')
+
 
 class WithdrawDetailView(LoginRequiredMixin, DetailView):
     model = Withdraw

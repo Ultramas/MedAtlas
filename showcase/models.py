@@ -3781,6 +3781,7 @@ class TopHits(models.Model):
     class Meta:
         verbose_name = "Top Hit"
 
+
 class SpinPreference(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="spinpreferer")
     game = models.ForeignKey(Game, on_delete=models.CASCADE, blank=True, null=True)

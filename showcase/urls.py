@@ -198,6 +198,7 @@ urlpatterns = [
     path('supportissues/', views.supportview.as_view(), name='supportissues'),
     path('', views.BackgroundView.as_view(), name='index'),
     path('ehome/', views.EBackgroundView.as_view(), name='ehome'),
+    path('slabgrabs/', views.EBackgroundView.as_view(), name='slabgrabs'),
     path('item_category/', views.EBackgroundView.as_view(), name='item_category'),
     path('storeviewtypesnippet/', views.StoreView.as_view(), name='storeviewtypesnippet'),
     path('gameroomviewtypesnippet/<slug:slug>/', views.GameRoomTypeView.as_view(), name='gameroomviewtypesnippet'),

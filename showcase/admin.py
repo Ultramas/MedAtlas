@@ -2229,6 +2229,7 @@ class OutcomeAdmin(admin.ModelAdmin):
        'game',
        'choice',
        'nonce',
+       'date_and_time',
        'demonstration',
        'is_active',
    )

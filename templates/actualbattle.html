@@ -1048,7 +1048,122 @@ p.blog-meta span {
   font-size:16px;
   }
 }
+.elementhead {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-width: 250px;
+        }
 
+        .elementhead::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .elementhead:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .elementhead:hover::before {
+            left: 100%;
+        }
+
+        .player-emoji {
+            font-size: 1.5rem;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+        }
+
+        .player-username {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            flex-grow: 1;
+        }
+
+        .player-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .elementhead:hover .player-avatar {
+            transform: scale(1.1);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 12px;
+            height: 12px;
+            background: #4ade80;
+            border-radius: 50%;
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .elementhead {
+                padding: 15px 20px;
+                min-width: 200px;
+            }
+
+            .player-username {
+                font-size: 1.1rem;
+            }
+
+            .player-avatar {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        /* Loading animation */
+        .elementhead {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideIn 0.6s ease forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 </style>
 </head>
 <body>
@@ -1074,32 +1189,6 @@ p.blog-meta span {
 	<div class="list-section pt-80 pb-80" style="background: rgba(0, 255, 255, 0); z-index: 3;">
     <div class="container">
 
-       <div class="top-hits-container" style="margin-top: 100px;">
-
-    <div class="top-hits-row">
-        {% for TopHits in tophit %}
-            <div class="top-hit-card">
-                <div class="top-hit-content" style="--card-color: {{ TopHits.color }};">
-                    <div class="card-frame">
-                        <div class="card-glow"></div>
-                        <div class="card-image-container">
-                            <img src="{{ TopHits.file.url }}" alt="{{ TopHits.user.username }}'s card" class="card-image">
-                        </div>
-                    </div>
-                    <div class="top-hit-info">
-                        <div class="username-badge">
-                            <span class="username-text">{{ TopHits.user.username }}</span>
-                        </div>
-                        <div class="hit-details">
-                            <div class="hit-game">{{ TopHits.game.name }}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-shine"></div>
-            </div>
-        {% endfor %}
-    </div>
-</div>
 <script>
   window.USER = {
     isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }}
@@ -1394,428 +1483,6 @@ p.blog-meta span {
     background-position: center;
 " alt="{{ game.name }}">
 </div>
-    <div class="selectionsWrapper">
-<div class="selections">
-    <div class="flame-effect"></div>
-    <div class="content">
-        <label style="background: rgba(255, 255, 255, 0.3); padding: 2px; padding-left: 5px; padding-right: 5px; border-radius: 10px;"> Spin Boost Power</label>
-        <div id="spinCount">
-            <button class="spin-option" data-value="1">1x</button>
-            <button class="spin-option" data-value="2">2x</button>
-            <button class="spin-option" data-value="3">3x</button>
-            <button class="spin-option" data-value="4">4x</button>
-            <button class="spin-option" data-value="5">5x</button>
-            <button class="spin-option" data-value="10">10x</button>
-        </div>
-        <br>
-    <div id="spin-container" data-base-cost="{{ game.cost }}">
-        <h3 id="cost-display">
-            {% if game.daily %}
-                {% if game.discount_cost == 0 %}
-                    <span id="base-cost" style="display: none;">{{ game.discount_cost }} 💎</span>
-
-                    <span>Chest Value: {{ game.cost }}</span> 💎
-             <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const costDisplayElement = document.getElementById("cost-display");
-                if (costDisplayElement) {
-                    costDisplayElement.innerHTML = `<span id="base-cost"> {{ game.cost }}</span> 💎`;
-                }
-            });
-        </script>
-                {% endif %}
-            {% else %}
-                {% if game.discount_cost %}
-                    <span id="base-cost">{{ game.discount_cost }}</span> 💎
-                {% else %}
-                    <span id="base-cost">{{ game.cost }}</span> 💎
-                {% endif %}
-            {% endif %}
-        </h3>
-    </div>
-        <script>
-  function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== "") {
-    const cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-
-      if (cookie.substring(0, name.length + 1) === name + "=") {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-    const spinButtons = document.querySelectorAll(".spin-option");
-    const baseCostElement = document.getElementById("base-cost");
-    const costDisplayElement = document.getElementById("cost-display");
-
-    const baseCost = parseFloat(baseCostElement.textContent) || 0;
-
-    spinButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            const spinMultiplier = parseInt(this.dataset.value, 10);
-            const totalCost = baseCost * spinMultiplier;
-            costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`;
-        });
-    });
-});
-</script>
-
-        <input type="checkbox" id="quickspin-checkbox">
-        <label for="quickspin-checkbox">Quick Spin</label>
-        <input type="checkbox" id="persist-spin-checkbox">
-        <label for="persist-spin-checkbox">Save Spin Boost</label><br>
-    </div>
-
-<button class="start gamer-button begin-button"
-        id="start" style="display: none;"
-        data-game-id="{{ game.id }}"
-        data-nonce="{{ nonce }}"
-        data-slug="{{ game.slug }}"
-        data-daily="true"
-         style="position: absolute; bottom: 5px; left: 5px;">
-
-{% if preference and preference.spintype == 'I' %}
-⚡Spin!
-    {% elif preference and preference.spintype == 'S' %}
-🔥Spin!
-    {% else %}
-    Spin!
-    {% endif %}
-</button>
-
-
-<button class="start gamer-button begin-button"
-        id="start"
-        data-game-id="{{ game.id }}"
-        data-nonce="{{ nonce }}"
-        data-slug="{{ game.slug }}"
-        data-daily="false"
-         style="position: absolute; bottom: 5px; left: 5px;">
-</button>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-    const startButton = document.getElementById("start");
-
-    if (startButton) {
-        const isDaily = startButton.getAttribute("data-daily") === "true";
-        const next5pmTimestamp = parseInt(startButton.getAttribute("data-next-5pm"), 10);
-
-        if (isDaily) {
-            const now = Date.now() / 1000;
-            const timeRemaining = next5pmTimestamp - now;
-
-            if (timeRemaining > 0) {
-                startButton.disabled = true;
-
-                const countdownInterval = setInterval(() => {
-                    const now = Date.now() / 1000;
-                    const timeLeft = next5pmTimestamp - now;
-
-                    if (timeLeft <= 0) {
-                        clearInterval(countdownInterval);
-                        startButton.disabled = false;
-                    }
-
-                    const hours = Math.floor(timeLeft / 3600);
-                    const minutes = Math.floor((timeLeft % 3600) / 60);
-                    const seconds = Math.floor(timeLeft % 60);
-                    startButton.innerText = `Spin in ${hours}h ${minutes}m ${seconds}s`;
-                }, 1000);
-            } else {
-                startButton.disabled = false;
-            }
-        }
-    }
-});
-
-        </script>
-
-</div>
-<script>
-  window.USER = {
-    isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }}
-  };
-
-  window.CSRF_TOKEN = "{{ csrf_token }}";
-</script>
-
-<script>
-    function getCSRFToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]').value;
-    }
-let currentSpintype = null;
-
-function triggerSpin(spintype) {
-    currentSpintype = spintype;
-
-    const demoButtons = document.querySelectorAll('.demo-button');
-    demoButtons.forEach(button => {
-        if (spintype === 'I') {
-            button.textContent = "⚡Demo";
-        } else if (spintype === 'S') {
-            button.textContent = "🔥Demo";
-        } else {
-            button.textContent = "Demo";
-        }
-    });
-    const beginButtons = document.querySelectorAll('.begin-button');
-    beginButtons.forEach(ebutton => {
-        if (spintype === 'I') {
-            ebutton.textContent = "⚡Spin!";
-        } else if (spintype === 'S') {
-            ebutton.textContent = "🔥Spin!";
-        } else {
-            ebutton.textContent = "Spin!";
-        }
-    });
-}
-    </script>
-
-<script type="text/javascript">
-document.addEventListener("DOMContentLoaded", function () {
-    const spinButtons = document.querySelectorAll(".spin-option");
-    const baseCostElement = document.getElementById("base-cost");
-    const costDisplayElement = document.getElementById("cost-display");
-    const startButton = document.getElementById("start");
-    const baseCost = parseFloat(baseCostElement.textContent) || 0;
-
-    let userCash = parseFloat({{ user_cash|safe }});
-    const userCashProxy = new Proxy({ value: userCash }, {
-        set(target, key, newValue) {
-            if (key === "value") {
-                target[key] = newValue;
-                updateStartButton();
-            }
-            return true;
-        }
-    });
-
-    function updateStartButton() {
-        const spinMultiplier = parseInt(
-            document.querySelector(".spin-option.active")?.dataset.value || 1,
-            10
-        );
-        const totalCost = baseCost * spinMultiplier;
-
-        costDisplayElement.innerHTML = `<span id="base-cost">${totalCost}</span> 💎`;
-
-        if (userCashProxy.value < totalCost) {
-            if (!startButton.parentElement.matches("a")) {
-                const link = document.createElement("a");
-                link.href = "currencymarket.html";
-                link.style.textDecoration = "none";
-                startButton.parentNode.replaceChild(link, startButton);
-                link.appendChild(startButton);
-            }
-            startButton.disabled = true;
-        } else {
-            if (startButton.parentElement.matches("a")) {
-                const parent = startButton.parentElement;
-                const container = parent.parentNode;
-                parent.replaceWith(startButton);
-                container.appendChild(startButton);
-            }
-        }
-    }
-
-    spinButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            spinButtons.forEach(btn => btn.classList.remove("active"));
-            this.classList.add("active");
-            updateStartButton();
-        });
-    });
-
-    function fetchUserCash() {
-        fetch('/api/get-user-cash/')
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.user_cash !== undefined) {
-                    userCashProxy.value = data.user_cash;
-                }
-            })
-            .catch(error => console.error('Error fetching user cash:', error));
-    }
-
-    setInterval(fetchUserCash, 500);
-});
-
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    let selectedMultiplier = 1;
-
-    document.querySelectorAll(".spin-option").forEach(button => {
-        button.addEventListener("click", function () {
-            selectedMultiplier = parseInt(this.getAttribute("data-value"));
-            console.log("Selected multiplier:", selectedMultiplier);
-        });
-    });
-
-    document.getElementById("start").addEventListener("click", function () {
-        console.log("Spin button clicked!");
-
-        const button = this;
-        const gameId = button.getAttribute("data-game-id");
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        console.log("Game ID:", gameId);
-        console.log("CSRF Token:", csrfToken);
-        console.log("Spin Multiplier:", selectedMultiplier);
-
-        fetch("{% url 'showcase:spin_game' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrfToken
-            },
-            body: JSON.stringify({
-                game_id: gameId,
-                spin_multiplier: selectedMultiplier
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Response data:", data);
-            if (data.daily === false) {
-                if (data.success) {
-                    const currencyElement = document.getElementById("currency-amount");
-                    if (currencyElement) {
-                        currencyElement.innerText = `${data.updated_currency_amount} ${data.currency_name}`;
-                        const increaseInLotteryPot = data.currency_amount / 250;
-                        lotteryPot += increaseInLotteryPot;
-                    }
-
-                    console.log("Spin successful:", data.message);
-                } else {
-                    alert(data.error);
-                }
-            } else {
-                console.log("The game is marked as daily, action skipped.");
-            }
-
-        })
-        .catch(error => {
-            console.error("Error during fetch:", error);
-        });
-    });
-});
-</script>
-
-<!-- Embed choices and other data in a script tag -->
-
-<script type="text/javascript">
-$(document).ready(function() {
-    console.log("jQuery is loaded.");
-
-    let spinMultiplier = 1;
-
-    $('.spin-option').on('click', function() {
-        $('.spin-option').removeClass('selected');
-        $(this).addClass('selected');
-        spinMultiplier = parseInt($(this).data('value'));
-        console.log("Spin multiplier selected:", spinMultiplier);
-    });
-
-    $('#start').on('click', function() {
-        const gameId = $(this).data('game-id');
-        const slug = $(this).data('slug');
-        const csrfToken = '{{ csrf_token }}';
-        const url = '{% url "showcase:create_outcome" "SLUG_PLACEHOLDER" %}'.replace('SLUG_PLACEHOLDER', slug);
-
-        let completedSpins = 0;
-        let allChoices = [];
-
-        const isQuickSpin = $('#quickspin-checkbox').is(':checked');
-        console.log("Quick Spin mode:", isQuickSpin);
-
-        for (let i = 0; i < spinMultiplier; i++) {
-            $.ajax({
-                type: 'POST',
-                url: url,
-                data: {
-                    csrfmiddlewaretoken: csrfToken,
-                    game_id: gameId,
-                    console.log('the game id is ', game_id);
-                },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        completedSpins++;
-                        allChoices = allChoices.concat(response.choices);
-                        console.log('Choice received successfully for spin', i + 1);
-
-                        if (completedSpins === spinMultiplier) {
-                            console.log('All spins completed.');
-
-                            initializeAnimation(response.nonce, isQuickSpin);
-                        }
-                    } else {
-                        console.error(response.message);
-                    }
-                },
-                error: function(error) {
-                    console.error('Error during spin', i + 1, ':', error);
-                }
-            });
-        }
-    });
-
-    function initializeAnimation(targetNonce, isQuickSpin) {
-        $(".start").prop('disabled', true);
-
-        function addAnimation() {
-            document.querySelectorAll('.slider').forEach(scroller => {
-                scroller.style.animation = 'none';
-                scroller.offsetHeight;
-                const animationDuration = isQuickSpin ? '9s' : '18s';
-                scroller.style.animation = `slideshow ${animationDuration} cubic-bezier(0.25, 0.1, 0.25, 1) forwards`;
-                scroller.style.animationPlayState = 'running';
-            });
-        }
-
-        function stopAtSelectedCard() {
-            document.querySelectorAll('.cards').forEach(card => {
-                const cardNonce = card.getAttribute('data-nonce');
-
-                if (cardNonce === targetNonce) {
-                    $(card).addClass('highlighted');
-                    card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-                } else {
-                    $(card).removeClass('highlighted');
-                }
-            });
-
-            $(".start").prop('disabled', false);
-        }
-
-        addAnimation();
-        console.log('the preference is ' + isQuickSpinInteractive)
-        const quickSpinDuration = (typeof isQuickSpinInteractive !== "undefined" && isQuickSpinInteractive)
-            ? (isQuickSpin ? 500 : 1000)
-            : (isQuickSpin ? 4500 : 9000);
-
-        console.log('the duration is ' + quickSpinDuration)
-        setTimeout(() => {
-            document.querySelectorAll('.slider').forEach(scroller => {
-                scroller.style.animationPlayState = 'paused';
-            });
-
-            stopAtSelectedCard();
-        },quickSpinDuration);
-    }
-});
-
-</script>
-
-    </div>
 
 <div class="popupWrapper">
     <div id="popup" class="popup">
@@ -1849,12 +1516,13 @@ $(document).ready(function() {
     </div>
 <ul>
   {% for kind, player in players %}
-<div class="chests-list">
+<div class="chests-list" style="display: flex; flex-direction: row; gap: 50px; background-position: center; justify-content: center; position: relative; margin-top: 10%;
+margin-left: 14.5%; max-width: 1200px; overflow: auto;">
   {% for game in games %}
     <div class="chest-card">
         <img src="{{game.image.url}}" style="width: 70px; height: 100px; margin: 25px;">
       <h3 style="color: white;">{{ game.name }}</h3>
-      <p>Cost: {{ game.get_effective_cost }}</p>
+      <p>{{ game.get_effective_cost }}</p>
 
       <ul>
         {% for gc in game.gamechoice_links %}
@@ -1867,10 +1535,15 @@ $(document).ready(function() {
 
     <li>
       {% if kind == 'human' %}
-        <div class="elementhead">
-            👤 {{ player.username }}
+
+ <div class="elementhead" style="color: white; width: 150px; position: relative; left: 14.5%;">
+        <span class="player-emoji">👤</span>
+             {{ player.username }}
+        <div style="position: relative;">
             <img src="{{player.profiledetails.avatar.url }}" style="width:50px; height: 50px; border-radius: 50px;">
+            <div class="status-indicator"></div>
         </div>
+    </div>
     <div class="wrapper">
         <div class="containerre"  style="display: flex;">
             <div class="slider" id="slider">
@@ -1937,10 +1610,14 @@ $(document).ready(function() {
                     </div></div></div></div></div></div></div>
       {% elif kind == 'robot' %}
 
-        <div class="elementhead">
-            🤖 {{ player.name }}
+         <div class="elementhead" style="color: white; width: 150px; left: 14.5%;">
+        <span class="player-emoji">🤖</span>
+             {{ player.name }}
+        <div style="position: relative;">
             <img src="{{player.image.url }}" style="width:50px; height: 50px; border-radius: 50px;">
+            <div class="status-indicator"></div>
         </div>
+    </div>
     <div class="wrapper">
         <div class="containerre"  style="display: flex;">
             <div class="slider" id="slider">
@@ -2011,6 +1688,39 @@ $(document).ready(function() {
 </ul>
 
 
+    <script>
+        // Add click interaction
+        document.querySelector('.elementhead').addEventListener('click', function() {
+            this.style.transform = 'scale(0.98) translateY(-3px)';
+            setTimeout(() => {
+                this.style.transform = 'translateY(-3px)';
+            }, 150);
+        });
+
+        // Add avatar click effect
+        document.querySelector('.player-avatar').addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.style.transform = 'scale(1.2) rotate(360deg)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1.1)';
+            }, 300);
+        });
+
+        // Simulate online status changes
+        const statusIndicator = document.querySelector('.status-indicator');
+        const statuses = [
+            { color: '#4ade80', title: 'Online' },
+            { color: '#fbbf24', title: 'Away' },
+            { color: '#ef4444', title: 'Busy' }
+        ];
+
+        let currentStatus = 0;
+        setInterval(() => {
+            currentStatus = (currentStatus + 1) % statuses.length;
+            statusIndicator.style.backgroundColor = statuses[currentStatus].color;
+            statusIndicator.title = statuses[currentStatus].title;
+        }, 5000);
+    </script>
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
     const outcomeUrl = `/battles/${battleId}/games/${gameId}/outcome/`;
