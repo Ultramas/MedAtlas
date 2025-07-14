@@ -1,0 +1,33 @@
+{% load static %}
+{% load static custom_filters %}
+
+<div class="wrapper" id="game-{{ game.id }}">
+  <div class="containerre" style="display: flex;">
+    <div class="slider" id="slider-{{ game.id }}">
+      {% for item in choices_with_nonce %}
+        {% with choice=item.choice %}
+          {% with color=game|get_color:choice %}
+            <div id="{{ choice.choice_text }}" class="cards" style="background: url({% static 'css/images/'|add:color|add:'.png' %});">
+              <div class="lootelement"
+                   data-price="{{ choice.value }}"
+                   data-currency-file="{{ item.currency.file_url }}"
+                   data-currency-symbol="{{ item.currency.symbol }}">
+                {% if choice.file.url %}
+                  <div class="sliderImg"
+                       style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
+                {% endif %}
+                <div class="sliderPrice"><b class="innerprice">{{ choice.value }}</b>💎</div>
+              </div>
+            </div>
+          {% endwith %}
+        {% endwith %}
+      {% endfor %}
+    </div>
+
+    <img id="selector" class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
+  </div>
+
+  <div class="labeltag">
+    <h4>{{ game.name }}</h4>
+  </div>
+</div>

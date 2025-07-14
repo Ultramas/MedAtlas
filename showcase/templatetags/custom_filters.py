@@ -28,8 +28,8 @@ def mul(value, arg):
         return ''
 
 
+@register.filter
 def get_color(game, choice):
-    # Ensure that 'game' is a Game instance and has a get_color method
     if hasattr(game, 'get_color'):
         return game.get_color(choice)
     else:
@@ -39,3 +39,10 @@ def get_color(game, choice):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.filter
+def get_item(dictionary, key):
+    if isinstance(dictionary, dict):
+        return dictionary.get(str(key)) or dictionary.get(key)
+    return None

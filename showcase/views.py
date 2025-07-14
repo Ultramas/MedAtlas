@@ -3761,10 +3761,8 @@ class ActualBattleView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         battle = self.object
-        # All participants linked to this battle
         all_participants = BattleParticipant.objects.filter(battle=battle)
 
-        # Split humans and bots
         humans = [bp.user for bp in all_participants if not bp.is_bot and bp.user]
         bots = [bp.robot for bp in all_participants if bp.is_bot and bp.robot]
 
@@ -3773,9 +3771,11 @@ class ActualBattleView(DetailView):
             {
                 'id': bg.game.id,
                 'slug': bg.game.slug,
-                'quantity': bg.quantity
+                'quantity': bg.quantity,
+                'name': bg.game.name,
+                'image_url': bg.game.image.url if bg.game.image else ''
             }
-            for bg in self.object.battle_games.all()  
+            for bg in self.object.battle_games.all()
         ]
         context['battle_games_json'] = mark_safe(
             json.dumps(context['battle_games'])
@@ -4097,6 +4097,101 @@ def create_outcomes_for_battle(battle):
                 f"[BattleStart] Outcome #{outcome.pk} → "
                 f"Game={game.slug}, User={bp.user.username}"
             )
+
+
+from django.http import Http404
+
+def load_game_wrapper(request, game_id, battle_id=None):
+    game = get_object_or_404(Game, id=game_id)
+
+    # Try to get battle from battle_id or from related BattleGame
+    if battle_id:
+        battle = get_object_or_404(Battle, id=battle_id)
+    else:
+        battle_game = BattleGame.objects.filter(game=game).first()
+        if not battle_game:
+            raise Http404("No BattleGame found for this Game")
+        battle = battle_game.battle
+
+    # 👥 Get participants
+    all_participants = BattleParticipant.objects.filter(battle=battle)
+    humans = [bp.user for bp in all_participants if not bp.is_bot and bp.user]
+    bots   = [bp.robot for bp in all_participants if bp.is_bot and bp.robot]
+    players = [('human', h) for h in humans] + [('robot', b) for b in bots]
+
+    # Prefetch and combine choices
+    inline_choices = game.choice_fk_set.all()
+    m2m_choices = game.choices.all()
+    combined = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
+
+    through_qs = GameChoice.objects.filter(game=game).select_related('choice')
+    through_data = {}
+    for gc in through_qs:
+        c = gc.choice
+        through_data[c.pk] = {
+            'lower_nonce': gc.lower_nonce or c.lower_nonce,
+            'upper_nonce': gc.upper_nonce or c.upper_nonce,
+            'value':       gc.value or c.value,
+            'rarity':      gc.rarity or c.rarity,
+            'file_url':    c.file.url if c.file else '',
+            'category':    c.category or '',
+            'currency': {
+                'symbol':   c.currency.name if c.currency else '💎',
+                'file_url': c.currency.file.url if c.currency and c.currency.file else None
+            }
+        }
+
+    all_choices = []
+    for pk, choice in combined.items():
+        info = through_data.get(pk, {
+            'lower_nonce': choice.lower_nonce,
+            'upper_nonce': choice.upper_nonce,
+            'value':       choice.value,
+            'rarity':      choice.rarity,
+            'file_url':    choice.file.url if choice.file else '',
+            'category':    choice.category or '',
+            'currency': {
+                'symbol':   choice.currency.name if choice.currency else '💎',
+                'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+            }
+        })
+        all_choices.append({
+            'choice':      choice,
+            'choice_text': choice.choice_text,
+            **info,
+            'image_width':  getattr(choice, 'image_width', None),
+            'image_length': getattr(choice, 'image_length', None),
+            'get_color_display': choice.get_color_display(),
+            'get_tier_display':  choice.get_tier_display(),
+        })
+
+    quick_spin = False
+    rand_amt = random.randint(500, 1000) if quick_spin else random.randint(150, 300)
+    random_nonces = [random.randint(0, 1_000_000) for _ in range(rand_amt)]
+
+    choices_with_nonce = []
+    for nonce in random_nonces:
+        for cd in all_choices:
+            if cd['lower_nonce'] <= nonce <= cd['upper_nonce']:
+                choices_with_nonce.append({
+                    'choice':     cd['choice'],
+                    'nonce':      nonce,
+                    'lower_nonce':cd['lower_nonce'],
+                    'upper_nonce':cd['upper_nonce'],
+                    'rarity':     cd['rarity'],
+                    'file_url':   cd['file_url'],
+                    'currency':   cd['currency']
+                })
+                break
+
+    context = {
+        'game': game,
+        'choices_with_nonce': choices_with_nonce,
+        'players': players,
+    }
+
+    return render(request, "partials/game_wrapper.html", context)
+
 
 
 def join_battle(request):

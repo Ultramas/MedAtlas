@@ -1987,81 +1987,48 @@ $(document).ready(function() {
     </div>
 <!--check mypreference of user, should one exist; default is classic-->
 
+<div id="all-wrappers-container">
+  {% for role, p in players %}
+    <li>
+      {% if role == 'human' %}
+        {{ p.user.username }}
+      {% else %}
+        {{ p.name }} (bot)
+      {% endif %}
+    </li>
 
-{% for role, p in players %}
-  <li>
-    {% if role == 'human' %}
-      {{ p.user.username }}
-    {% else %}
-      {{ p.name }} (bot)
-    {% endif %}
-  </li>
-    <div class="wrapper">
-        <div class="containerre"  style="display: flex;">
-            <div class="slider" id="slider">
-<!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
-{% for item in choices_with_nonce %}
+    <div class="wrapper" id="game-{{ game.id }}">
+      <div class="containerre" style="display: flex;">
+        <div class="slider" id="slider-{{ game.id }}">
+          {% for item in choices_with_nonce %}
             {% with choice=item.choice %}
-            {% with color=game|get_color:choice %}
+              {% with color=game|get_color:choice %}
                 <div id="{{ choice.choice_text }}" class="cards" style="background: url({% static 'css/images/'|add:color|add:'.png' %});">
-
-                        <div class="lootelement"
-                             data-price="{{ choice.value }}"
-                             data-currency-file="{{ item.currency.file_url }}"
-                             data-currency-symbol="{{ item.currency.symbol }}">
-                                {% if choice.file.url %}
-                                <div class="sliderImg" style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
-                                {% endif %}
-                            <div class="sliderPrice"><b class="innerprice">{{ choice.value }}</b>💎</div>
-                        </div>
-                    {% endwith %}
+                  <div class="lootelement"
+                       data-price="{{ choice.value }}"
+                       data-currency-file="{{ item.currency.file_url }}"
+                       data-currency-symbol="{{ item.currency.symbol }}">
+                    {% if choice.file.url %}
+                      <div class="sliderImg"
+                           style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
+                    {% endif %}
+                    <div class="sliderPrice"><b class="innerprice">{{ choice.value }}</b>💎</div>
+                  </div>
                 </div>
+              {% endwith %}
             {% endwith %}
-        {% endfor %}
-
-        {% for nonce, choice in matching_choices %}
-            <p>Value: {{ choice.value }}</p>
-            <p>Nonces: {{ nonce }}</p>
-            <p>Choice: {{ choice.choice_text }}</p>
-
-            {% with cost_threshold_80=game.cost|mul:0.8 cost_threshold_100=game.cost cost_threshold_200=game.cost|mul:2 cost_threshold_500=game.cost|mul:5 cost_threshold_10000=game.cost|mul:100 cost_threshold_100000=game.cost|mul:1000 cost_threshold_100000000=game.cost|mul:1000000 %}
-
-                {% if choice.value <= cost_threshold_80 %}
-                    <div class="lootelement" style="background: url({% static 'css/images/gray.png' %}); color: black;">
-                {% elif choice.value <= cost_threshold_100 %}
-                    <div class="lootelement" style="background: url({% static 'css/images/green.png' %}); color: black;">
-                {% elif choice.value <= cost_threshold_200 %}
-                    <div class="lootelement" style="background: url({% static 'css/images/yellow.png' %}); color: black;">
-                {% elif choice.value <= cost_threshold_500 %}
-                    <div class="lootelement" style="background: url({% static 'css/images/orange.png' %}); color: black;">
-                {% elif choice.value <= cost_threshold_10000 %}
-                    <div class="lootelement" style="background: url({% static 'css/images/red.png' %}); color: black;">
-                {% elif choice.value <= cost_threshold_100000 %}
-                    <div class="lootelement" style="background: url({% static 'css/images/black.png' %}); color: black;">
-                {% elif choice.value <= cost_threshold_100000000 %}
-                    <div class="lootelement" style="background: url({% static 'css/images/redblack.png' %}); color: black;">
-                {% else %}
-                    <div class="lootelement" style="background: url({% static 'css/images/redgold.png' %}); color: black;">
-                {% endif %}
-
-                <p><img src="{{ choice.file.url }}" alt="{{ choice.choice_text }}"></p>
-                </div>
-
-            {% endwith %}
-        {% endfor %}
-
-
-            </div>
-
-            <img id='selector' class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow" style="">
+          {% endfor %}
         </div>
 
-      <div class="labeltag" style="">
-        <h4 style="">{{game.name}}</h4>
+        <img id="selector" class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
+      </div>
+
+      <div class="labeltag">
+        <h4>{{ game.name }}</h4>
       </div>
     </div>
-                    </div></div></div></div></div></div></div>
-{% endfor %}
+  {% endfor %}
+</div>
 
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
@@ -2383,15 +2350,31 @@ document.addEventListener("DOMContentLoaded", function() {
      <script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
      <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
      <script src="{% static 'css/js/sticker.js' %}"></script>
-{% if auto_spin %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // 1) Grab the JSON array we prepared in the view
-  const battleGames = {{ battle_games_json }};
-  // 2) Find your single “start” button
-  const startBtn    = document.querySelector('.start');
+  const battleGames = JSON.parse(document.getElementById('battle-games-data').textContent);
+  const startBtn = document.querySelector('.start');
 
-  // Run exactly one spin for a given game, resolve when its spinComplete fires
+  // Loop through each game and its quantity
+  async function autoSpinBattleGames() {
+    console.log(`🕹️ Auto‐spinning ${battleGames.length} games…`);
+
+    for (let gameIndex = 0; gameIndex < battleGames.length; gameIndex++) {
+      const game = battleGames[gameIndex];
+      console.log(`🔄 Game "${game.slug}" ×${game.quantity}`);
+
+      for (let i = 0; i < game.quantity; i++) {
+        console.log(`   • Instance ${i + 1}/${game.quantity}`);
+
+        await runOneSpin(game);
+        console.log(`   ✓ Done instance ${i + 1}`);
+      }
+    }
+
+    console.log("🎉 All battle games complete.");
+    window.animationStopped = true;
+  }
+
   function runOneSpin(game) {
     return new Promise(resolve => {
       function onComplete(e) {
@@ -2400,35 +2383,34 @@ document.addEventListener('DOMContentLoaded', () => {
           resolve();
         }
       }
+
       document.addEventListener('spinComplete', onComplete);
 
-      // patch the button for this game
-      startBtn.setAttribute('data-game-id', game.id);
-      startBtn.setAttribute('data-slug',    game.slug);
+      // Dynamically update the button with current game data
+      startBtn.dataset.gameId = game.id;
+      startBtn.dataset.slug   = game.slug;
 
-      // trigger your existing click‐handler
+      // Optionally update any global tracking variable if needed:
+      window.currentGameId = game.id;
+      console.log('updated the game, next')
       startBtn.click();
     });
   }
+function showGameUI(gameId) {
+  // Hide all game blocks
+  document.querySelectorAll('.game-wrapper').forEach(div => {
+    div.style.display = 'none';
+  });
 
-  // Kick things off
-  (async () => {
-    console.log(`🕹️ Auto‐spinning ${battleGames.length} games…`);
-    for (const game of battleGames) {
-      console.log(`🔄 Game "${game.slug}" ×${game.quantity}`);
-      for (let i = 1; i <= game.quantity; i++) {
-        console.log(`   • Instance ${i}/${game.quantity}`);
-        await runOneSpin(game);
-        console.log(`   ✓ Done instance ${i}`);
-      }
-    }
-    console.log("🎉 All battle rounds complete.");
-    // if your spin() checks this flag:
-    window.animationStopped = true;
-  })();
+  // Show the current one
+  const current = document.getElementById(`game-${gameId}`);
+  if (current) current.style.display = 'block';
+}
+
 });
+
+
 </script>
-{% endif %}
 
 
 </body>
