@@ -35,6 +35,9 @@ def get_color(game, choice):
     else:
         raise ValueError("Expected a Game instance, got something else.")
 
+@register.filter
+def make_range(value):
+    return range(value)
 
 @register.filter
 def get_item(dictionary, key):

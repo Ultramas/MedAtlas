@@ -586,7 +586,7 @@ let choiceColor = targetCard ? targetCard.getAttribute('data-color') : 'gray';
 
 console.log('Given the choice color:', choiceColor);
 
-function randomizedContents() {
+function randomizedContents(wrapper) {
     const currentGameWrapper = document.querySelector('.wrapper:not([style*="display: none"])');
     if (!currentGameWrapper) {
         console.warn("🚫 No visible wrapper found.");
@@ -642,31 +642,32 @@ function randomizedContents() {
     console.log("✅ Slider randomized with target card centered.");
 }
 
-function waitForSliderAndRandomize(wrapper) {
-    const currentGameWrapper = document.querySelector('.wrapper:not([style*="display: none"])');
-    const observer = new MutationObserver((mutations, obs) => {
-        const slider = currentGameWrapper.querySelector(`.slider`);
-        if (slider) {
-            console.log("✅ Slider detected via MutationObserver");
-            obs.disconnect();
-            randomizedContents();
-        }
+function waitForSliderAndRandomize() {
+    const wrappers = document.querySelectorAll('.wrapper');
+    wrappers.forEach(wrapper => {
+        const observer = new MutationObserver((mutations, obs) => {
+            const slider = wrapper.querySelector(`.slider`);
+            if (slider) {
+                console.log("✅ Slider detected via MutationObserver for", wrapper.id);
+                obs.disconnect();
+                randomizedContents();  // Customize this if each wrapper needs individual logic
+            }
+        });
+
+        observer.observe(wrapper, { childList: true, subtree: true });
+
+        setTimeout(() => {
+            const slider = wrapper.querySelector(`.slider`);
+            if (slider) {
+                console.log("✅ Slider found via fallback timeout for", wrapper.id);
+                randomizedContents();
+                observer.disconnect();
+            } else {
+                console.warn("❌ Slider still not found in wrapper:", wrapper.id);
+                observer.disconnect();
+            }
+        }, 300);
     });
-
-    observer.observe(currentGameWrapper, { childList: true, subtree: true });
-
-    // Also fallback after a delay in case observer fails
-    setTimeout(() => {
-        const slider = currentGameWrapper.querySelector(`.slider`);
-        if (slider) {
-            console.log("✅ Slider found via fallback timeout");
-            randomizedContents();
-            observer.disconnect();
-        } else {
-            console.warn("❌ Slider still not found after observer timeout.");
-            observer.disconnect();
-        }
-    }, 300);  // increase if needed
 }
 
 

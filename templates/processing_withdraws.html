@@ -671,8 +671,8 @@ p.blog-meta span {
                         <div class="pokemon-info">
 							<h3 class="pokemon-name"><a href="{% url 'showcase:withdraw_detail' newprofile.slag %}">{{newprofile.title}}</a></h3>
                             							<p class="blog-meta">
-								<span class="author"><i class="fas fa-user"></i> {{ gamehub.get_type_display }} </span>
-								<span class="date"><i class="fas fa-calendar"></i> {{ gamehub.date_and_time|date }} </span>
+								<span class="author"><i class="fas fa-user"></i> {{ newprofile.number_of_cards }} Cards</span>
+								<span class="date"><i class="fas fa-calendar"></i> {{ newprofile.date_and_time|date }} </span>
 								<br>
 							</p>
 							{% with description=newprofile.description %}

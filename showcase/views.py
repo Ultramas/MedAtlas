@@ -3948,7 +3948,7 @@ from datetime import timedelta
 
 def active_users_count(request):
     now = timezone.now()
-    window = now - timedelta(seconds=10)  
+    window = now - timedelta(seconds=10)
     sessions = Session.objects.filter(expire_date__gt=now)
     count = 0
 
@@ -4099,27 +4099,37 @@ def create_outcomes_for_battle(battle):
             )
 
 
-from django.http import Http404
-
 def load_game_wrapper(request, game_id, battle_id=None):
     game = get_object_or_404(Game, id=game_id)
 
-    # Try to get battle from battle_id or from related BattleGame
+    # Get battle
     if battle_id:
         battle = get_object_or_404(Battle, id=battle_id)
+        battle_game = BattleGame.objects.filter(game=game, battle=battle).first()
     else:
         battle_game = BattleGame.objects.filter(game=game).first()
         if not battle_game:
             raise Http404("No BattleGame found for this Game")
         battle = battle_game.battle
 
-    # 👥 Get participants
+    quantity = battle_game.quantity if battle_game else 1
     all_participants = BattleParticipant.objects.filter(battle=battle)
     humans = [bp.user for bp in all_participants if not bp.is_bot and bp.user]
-    bots   = [bp.robot for bp in all_participants if bp.is_bot and bp.robot]
+    bots = [bp.robot for bp in all_participants if bp.is_bot and bp.robot]
     players = [('human', h) for h in humans] + [('robot', b) for b in bots]
 
-    # Prefetch and combine choices
+    # Auth-related profile context
+    user = request.user
+    if user.is_authenticated:
+        profile = ProfileDetails.objects.filter(user=user).first()
+        user_cash = profile.currency_amount if profile else 0
+        spin_pref = SpinPreference.objects.get_or_create(user=user, defaults={'quick_spin': False})[0]
+        quick_spin = spin_pref.quick_spin
+    else:
+        user_cash = None
+        quick_spin = False
+
+    # Choices
     inline_choices = game.choice_fk_set.all()
     m2m_choices = game.choices.all()
     combined = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
@@ -4165,7 +4175,7 @@ def load_game_wrapper(request, game_id, battle_id=None):
             'get_tier_display':  choice.get_tier_display(),
         })
 
-    quick_spin = False
+    # Randomization logic
     rand_amt = random.randint(500, 1000) if quick_spin else random.randint(150, 300)
     random_nonces = [random.randint(0, 1_000_000) for _ in range(rand_amt)]
 
@@ -4186,12 +4196,16 @@ def load_game_wrapper(request, game_id, battle_id=None):
 
     context = {
         'game': game,
-        'choices_with_nonce': choices_with_nonce,
+        'battle': battle,
         'players': players,
+        'quantity': quantity,
+        'choices_with_nonce': choices_with_nonce,
+        'user_cash': user_cash,
+        'quick_spin': quick_spin,
+        'random_nonces': random_nonces,
     }
 
     return render(request, "partials/game_wrapper.html", context)
-
 
 
 def join_battle(request):
@@ -11248,7 +11262,7 @@ class EBackgroundView(BaseView, FormView):
         }
         return render(request, 'seasons.html', context)
 
-    
+
 
     def get_items_by_category(self, category):
         if category == 'all':
@@ -16965,6 +16979,7 @@ class CreateWithdrawView(LoginRequiredMixin, CreateView):
             form = WithdrawForm()
             return render(request, "create_withdraw.html", {'form': form})
 
+
 class WithdrawView(LoginRequiredMixin, ListView):
     model = Withdraw
     template_name = "withdraws.html"
@@ -19921,7 +19936,13 @@ class PaymentView(EBaseView):
             return redirect("showcase:checkout")
 
     def post(self, *args, **kwargs):
-        order = Order.objects.get(user=self.request.user, ordered=False)
+        order_user = self.request.user
+        orders = Order.objects.filter(user=order_user, ordered=False)
+
+        if not orders.exists():
+            messages.warning(self.request, "No active orders found.")
+            return redirect("/checkout/")
+
         if self.request.content_type == 'application/json':
             try:
                 data = json.loads(self.request.body.decode('utf-8'))
@@ -19934,30 +19955,28 @@ class PaymentView(EBaseView):
             token = self.request.POST.get('token')
             payment_method = self.request.POST.get('payment_method')
 
-        order_user = request.user
-        order = Order.objects.filter(user=order_user, ordered=False)
-        if not order.exists():
-            messages.warning(request, "No active orders found.")
-            return redirect("/checkout/")
         ruby_profile = get_object_or_404(ProfileDetails, user=order_user)
 
         total_amount = sum(order.get_total_price() for order in orders)
-        total_currency_amount = sum(order.items.amount for order in orders)
+        total_currency_amount = sum(
+            item.orderprice * item.quantity for order in orders for item in order.items.all()
+        )
 
         if token:
             try:
+                # Assuming single charge for all orders
                 charge = stripe.Charge.create(
-                    amount=int(order.get_total_price() * 100),
+                    amount=int(total_amount * 100),
                     currency="usd",
                     source=token,
-                    description=f"Order {order.id}",
+                    description=f"User {order_user.id} purchase",
                 )
                 ruby_profile.total_currency_amount += total_amount
                 ruby_profile.save()
-
                 return JsonResponse({"success": "Thanks for purchasing!"})
             except stripe.error.StripeError as e:
                 return JsonResponse({"error": str(e)}, status=400)
+
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
 

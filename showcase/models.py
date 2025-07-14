@@ -7,7 +7,6 @@ from uuid import uuid4
 from decimal import Decimal, getcontext, ROUND_DOWN
 import json
 from PIL import Image
-from decimal import Decimal
 from colorfield.fields import ColorField
 import logging
 import math
@@ -3449,6 +3448,7 @@ class Game(models.Model):
         verbose_name = "Game"
         verbose_name_plural = "Games"
 
+
 class GameChoice(models.Model):
     game = models.ForeignKey('Game', on_delete=models.CASCADE)
     choice = models.ForeignKey('Choice', on_delete=models.CASCADE)
@@ -6453,6 +6453,7 @@ class GameHistory(models.Model):
             self.file = self.game.image
         super().save(*args, **kwargs)
 
+
 class QuickItem(models.Model):
     title = models.CharField(max_length=100, blank=True, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
@@ -7398,7 +7399,7 @@ class Order(models.Model):
         super().save(*args, **kwargs)
 
     def get_total_price(self):
-        return str(self.orderprice) or 0
+        return Decimal(self.orderprice) or 0
 
     def get_total_currency_price(self):
         return str(self.currencyorderprice) or 0
