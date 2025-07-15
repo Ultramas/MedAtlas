@@ -118,7 +118,7 @@
 
         /* Spacing */
         --spacing-xs: 0.5rem;
-        --spacing-sm: 1rem;
+        --spacing-sm: 0.3rem;
         --spacing-md: 1.5rem;
         --spacing-lg: 2rem;
         --spacing-xl: 3rem;
@@ -546,49 +546,48 @@
     }
 
     /* ===== VIDEO BACKGROUND ===== */
+.video-background {
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    .video-background {
-        position: relative;
-        overflow: hidden;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+.video-background__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    z-index: -2;
 
-    .video-background__image {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-size: cover;
-        background-attachment: fixed;
-        background-position: center;
-        z-index: -2;
-        mask-image: linear-gradient(to bottom,
-            rgba(0,0,0,1) 0%,
-            rgba(0,0,0,0.6) 50%,
-            rgba(0,0,0,0) 100%);
-        -webkit-mask-image: linear-gradient(to bottom,
-            rgba(0,0,0,1) 0%,
-            rgba(0,0,0,0.6) 50%,
-            rgba(0,0,0,0) 100%);
-    }
+    mask-image: linear-gradient(to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.6) 50%,
+        rgba(0, 0, 0, 0) 100%);
+    -webkit-mask-image: linear-gradient(to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.6) 50%,
+        rgba(0, 0, 0, 0) 100%);
+}
 
-    .video-background::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg,
-            rgba(0, 0, 0, 0.3) 0%,
-            rgba(0, 229, 255, 0.1) 50%,
-            rgba(0, 0, 0, 0.3) 100%);
-        z-index: -1;
-    }
+/* Overlay to fade to black in the bottom 30% */
+.video-background__image::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, black 100%);
+    z-index: 1; /* ensures it overlays image but still behind content */
+    pointer-events: none;
+}
 
     /* ===== HOW TO PLAY BANNER ===== */
 
@@ -903,212 +902,204 @@
     }
 
     /* ===== TOP HITS SECTION ===== */
+//top-hits
+.top-hits-container {
+    /*background: linear-gradient(to bottom,
+rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
+    border-radius: 16px;
+    padding: 2rem 1rem;
+    margin: 2rem 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+    /*border: 1px solid rgba(255, 255, 255, 0.1);*/
+}
 
-    .top-hits-container {
-        background: linear-gradient(135deg,
-            rgba(26, 26, 46, 0.4) 0%,
-            rgba(22, 33, 62, 0.4) 100%);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl) var(--spacing-md);
-        margin: var(--spacing-xl) 0;
-        box-shadow: var(--shadow-hard);
-        position: relative;
-        overflow: hidden;
-        border: 1px solid var(--border-light);
-        backdrop-filter: blur(20px);
+.top-hits-container::before {
+    content: '';
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+}
+
+.top-hits-header {
+    position: relative;
+    text-align: center;
+    margin-bottom: 2rem;
+    z-index: 1;
+}
+
+.top-hits-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.top-hits-title h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    background: linear-gradient(to right, #ffd700, #ff9900);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0 1rem;
+    letter-spacing: 2px;
+}
+
+.title-icon {
+    font-size: 2rem;
+    animation: bounce 2s infinite;
+}
+
+.top-hits-glow {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #ffd700, transparent);
+    bottom: -10px;
+    left: 0;
+}
+
+.top-hits-row {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem 0.5rem;
+    position: relative;
+    z-index: 1;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 215, 0, 0.5) rgba(0, 0, 0, 0.2);
+}
+
+.top-hits-row::-webkit-scrollbar {
+    height: 8px;
+}
+
+.top-hits-row::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.top-hits-row::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.5);
+    border-radius: 4px;
+}
+
+.top-hit-link {
+    text-decoration: none;
+    color: white;
+    flex: 0 0 auto;
+}
+
+.top-hit-card {
+    position: relative;
+    width: 180px;
+    transition: all 0.3s ease;
+    transform-origin: center bottom;
+    transform: perspective(800px) rotateY(0deg);
+}
+
+.top-hit-card:hover {
+    transform: perspective(800px) rotateY(5deg) translateY(-10px) scale(1.02);
+    z-index: 10;
+}
+
+.top-hit-rank {
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #ffd700, #ff9900);
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+    z-index: 2;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.top-hit-content {
+    background: linear-gradient(135deg, #2a2a3a, #1e1e2e);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-frame {
+    position: relative;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+.top-hit-card:hover .card-frame {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 20px var(--card-color, rgba(0, 100, 255, 0.5));
     }
 
-    .top-hits-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: radial-gradient(circle at 30% 40%,
-            rgba(255, 215, 0, 0.1) 0%,
-            transparent 70%);
-        z-index: 0;
-    }
+.card-glow {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: top center;
+    width: 100%;
+    height: 100%;
+    background-repeat:no-repeat;
+    background-size:cover;
+}
 
-    .top-hits-header {
-        position: relative;
-        text-align: center;
-        margin-bottom: var(--spacing-xl);
-        z-index: 1;
-    }
 
-    .top-hits-title {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: var(--spacing-md);
-    }
+.top-hit-card:hover .card-glow {
+    opacity: 0.7;
+    animation: pulse-glow 2s infinite;
+    width:100%;
+    height:100%;
+    background-repeat:no-repeat;
+    background-size:cover;
+}
 
-    .top-hits-title h2 {
-        font-size: 2.5rem;
-        font-weight: 800;
-        background: linear-gradient(90deg, var(--gold), var(--warning));
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        margin: 0 var(--spacing-md);
-        letter-spacing: 2px;
-        text-shadow: var(--shadow-glow);
-    }
+.card-image-container {
+    position: relative;
+    background: radial-gradient(circle at center, white 0%, var(--card-color, blue) 70%, #1a1a2e 100%);
+    border-radius: 8px;
+    overflow: hidden;
+}
 
-    .title-icon {
-        font-size: 2rem;
-        animation: bounce 2s infinite;
-    }
+.card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 2;
+    transition: transform 0.5s ease;
+}
 
-    .top-hits-glow {
-        position: absolute;
-        width: 100%;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, var(--gold), transparent);
-        bottom: -10px;
-        left: 0;
-    }
+.top-hit-card:hover .card-image {
+    transform: scale(1.05);
+}
 
-    .top-hits-row {
-        display: flex;
-        gap: var(--spacing-lg);
-        padding: var(--spacing-md) var(--spacing-xs);
-        position: relative;
-        z-index: 1;
-        overflow-x: auto;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(255, 215, 0, 0.5) rgba(0, 0, 0, 0.2);
-    }
-
-    .top-hits-row::-webkit-scrollbar {
-        height: 8px;
-    }
-
-    .top-hits-row::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 4px;
-    }
-
-    .top-hits-row::-webkit-scrollbar-thumb {
-        background: rgba(255, 215, 0, 0.5);
-        border-radius: 4px;
-    }
-
-    .top-hit-link {
-        text-decoration: none;
-        color: var(--text-primary);
-        flex: 0 0 auto;
-    }
-
-    .top-hit-card {
-        position: relative;
-        width: 200px;
-        transition: all var(--transition-medium);
-        transform-origin: center bottom;
-    }
-
-    .top-hit-card:hover {
-        transform: translateY(-12px) scale(1.03);
-        z-index: 10;
-    }
-
-    .top-hit-rank {
-        position: absolute;
-        top: -15px;
-        left: -15px;
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, var(--gold), var(--warning));
-        color: var(--bg-dark);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 1.2rem;
-        box-shadow: var(--shadow-glow);
-        z-index: 2;
-        border: 2px solid rgba(255, 255, 255, 0.8);
-    }
-
-    .top-hit-content {
-        background: linear-gradient(135deg,
-            rgba(42, 42, 58, 0.9) 0%,
-            rgba(30, 30, 46, 0.9) 100%);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-md);
-        box-shadow: var(--shadow-medium);
-        position: relative;
-        overflow: hidden;
-        border: 1px solid var(--border-light);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        backdrop-filter: blur(10px);
-    }
-
-    .card-frame {
-        position: relative;
-        margin-bottom: var(--spacing-md);
-        border-radius: var(--radius-sm);
-        overflow: hidden;
-        box-shadow: var(--shadow-medium);
-        transition: all var(--transition-medium);
-    }
-
-    .top-hit-card:hover .card-frame {
-        box-shadow: var(--shadow-hard),
-                    0 0 30px var(--primary-glow);
-    }
-
-    .card-glow {
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-        width: 100%;
-        height: 200px;
-        transition: all var(--transition-medium);
-    }
-
-    .top-hit-card:hover .card-glow {
-        opacity: 0.8;
-        animation: pulse-glow 2s infinite;
-    }
-
-    .card-image-container {
-        position: relative;
-        background: radial-gradient(circle at center,
-            rgba(255, 255, 255, 0.1) 0%,
-            var(--primary-glow) 70%,
-            var(--bg-dark) 100%);
-        border-radius: var(--radius-sm);
-        overflow: hidden;
-        height: 200px;
-    }
-
-    .card-image {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        z-index: 2;
-        transition: transform var(--transition-slow);
-    }
-
-    .top-hit-card:hover .card-image {
-        transform: scale(1.05);
-    }
-
-    .top-hit-info {
-        margin-top: auto;
-        text-align: center;
-    }
+.top-hit-info {
+    margin-top: auto;
+    text-align: center;
+}
 
     .username-badge {
         background: linear-gradient(135deg,
@@ -1517,6 +1508,7 @@
         box-shadow: 0 0 20px var(--primary-glow);
         position: relative;
         overflow: hidden;
+        padding: 1em;
     }
 
     .view-button::before {
@@ -1780,7 +1772,6 @@
     }
 
     .gridCardContent {
-        padding: var(--spacing-lg);
         color: var(--text-primary);
     }
 
@@ -2011,7 +2002,7 @@
     .email-form {
         display: flex;
         align-items: center;
-        gap: var(--spacing-xs);
+        /*gap: var(--spacing-xs);*/
         margin-bottom: var(--spacing-md);
     }
 
@@ -2028,6 +2019,8 @@
         color: var(--text-primary);
         outline: none;
         transition: all var(--transition-medium);
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
     }
 
     .email-input-container input:focus {
@@ -2518,6 +2511,7 @@
             padding: 0;
         }
 
+
         .prismatic-chest {
             height: 400px;
         }
@@ -2691,6 +2685,18 @@
         }
     }
 
+  .hover-link {
+    color: #03a4ed;
+    background: rgba(255, 255, 255, 0.14);
+    width: 100%;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding: 20px;
+  }
+  .hover-link:hover {
+    color: #bf97ff;
+  }
+
     @keyframes rotateIn {
         from {
             opacity: 0;
@@ -2783,230 +2789,247 @@
         </div>
     </div>
 
-    <!-- Background particle effect -->
-    <canvas id="particle-canvas"></canvas>
 
-    <!-- Season Status -->
-    {% if season %}
-    <div class="season-status">
-        {% if season.is_active %}
-        <p>🎉 This season is live!</p>
-        {% else %}
-        <p>Coming soon …</p>
-        {% endif %}
-    </div>
-    {% endif %}
 
-    <!-- Events -->
-    {% for event in Events %}
-    <div class="event-item unified-card animate-fadeInUp">
-        <h3>{{ event.name }}</h3>
-        <p>{{ event.description }}</p>
-        <div class="countdown"
-             data-start="{{ event.start_timestamp }}"
-             data-duration="{{ event.duration_ms }}">
-            Loading…
-        </div>
-    </div>
-    {% endfor %}
 
-    <!-- Video Background Hero Section -->
-    {% for BackgroundImage in Background %}
-    {% if BackgroundImage.page == "index.html" and BackgroundImage.position == 1 %}
-    <div class="video-background">
-        <div class="video-background__image"
-             style="background-image: url('{% if BackgroundImage.file and BackgroundImage.file.url %}{{ BackgroundImage.file.url }}{% else %}{{ BackgroundImage.cover.url }}{% endif %}');">
-        </div>
-        <div class="containered">
-            <div class="gameaddition animate-fadeIn">
-                {% if game %}
-                {% include 'gametemplate.html' with game=game %}
-                {% else %}
-                <div class="unified-card text-center">
-                    <p>No active games available.</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    {% endfor %}
 
     <!-- Main Container -->
     <div class="container">
         <!-- Header -->
-        <header class="animate-fadeInDown">
-            <div class="logo">
-                <div class="logo-hex">
-                    <svg class="logo-icon" viewBox="0 0 24 24">
-                        <path d="M12,2L2,7V17L12,22L22,17V7L12,2M12,4.14L19.25,8L12,11.86L4.75,8L12,4.14M4,9.86L11,13.14V20.14L4,16.86V9.86M13,20.14V13.14L20,9.86V16.86L13,20.14Z"/>
-                    </svg>
-                </div>
-                <h1 class="logo-text">PokeTrove</h1>
-            </div>
+<br>
+<br>
+<br>
+<br>
+{% if season %}
+{% if season.is_active %}
+  <p>🎉 This season is live!</p>
+{% else %}
+  <p>Coming soon …</p>
+{% endif %}
+{% endif %}
 
-            <!-- How to Play Banner -->
-            <div class="play-banner {% if user.is_authenticated %}collapsed{% endif %} animate-fadeIn" id="playBanner">
-                <div class="play-banner-toggle">
-                    <button id="togglePlayBanner" aria-label="Toggle How To Play">
-                        <span class="toggle-icon"></span>
-                    </button>
-                </div>
 
-                <!-- Featured Cards Background -->
-                {% for ImageBase in Image %}
-                {% if ImageBase.image_position == 1 %}
-                <div class="featured-card featured-card-1">
-                    <div class="card-glow" style="background-image: url('{{ImageBase.image.url}}');"></div>
-                </div>
-                {% endif %}
-                {% if ImageBase.image_position == 2 %}
-                <div class="featured-card featured-card-2">
-                    <div class="card-glow" style="background-image: url('{{ImageBase.image.url}}');"></div>
-                </div>
-                {% endif %}
-                {% if ImageBase.image_position == 3 %}
-                <div class="featured-card featured-card-3">
-                    <div class="card-glow" style="background-image: url('{{ImageBase.image.url}}');"></div>
-                </div>
-                {% endif %}
-                {% endfor %}
+        {% for BackgroundImage in Background %}
+    {% if BackgroundImage.page == "index.html" %}
+        {% if BackgroundImage.position == 1 %}
+<div class="video-background" style="display: flex; flex-direction: column;">
+     <!-- Background particle effect -->
+<a href="#" class="hover-link" style="text-decoration: none;">
 
-                <div class="play-banner-header">
-                    <h2 class="play-title" id="howtoplay">How To Play</h2>
-                    <div class="header-glow"></div>
-                </div>
+    {% for event in Events %}
+  <div class="event-item">
+    <h3 class="event-title">{{ event.name }}</h3>
+    <p>{{ event.description }}</p>
+    <div
+      class="countdown"
+      data-start="{{ event.start_timestamp }}"
+      data-duration="{{ event.duration_ms }}"
+    >Loading…</div>
+  </div>
+{% endfor %}
 
-                <div class="play-banner-collapsible">
-                    <div class="play-banner-content">
-                        <div class="play-steps animate-stagger">
-                            <div class="play-step">
-                                <div class="step-number">1</div>
-                                <div class="step-icon">
-                                    <svg viewBox="0 0 24 24" class="step-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M21 7.5V18C21 19.6569 19.6569 21 18 21H6C4.34315 21 3 19.6569 3 18V7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                        <path d="M3 7.5V6C3 4.34315 4.34315 3 6 3H18C19.6569 3 21 4.34315 21 6V7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                        <path d="M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9C9 10.6569 10.3431 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                        <path d="M12 12V16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                        <path d="M9.5 14.5L14.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                    </svg>
-                                </div>
-                                <h3>Spin Chests</h3>
-                                <p>Find a treasure chest and spin to pull banger cards!</p>
-                            </div>
-                            <div class="step-arrow">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </div>
-                            <div class="play-step">
-                                <div class="step-number">2</div>
-                                <div class="step-icon">
-                                    <svg viewBox="0 0 24 24" class="step-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M21 5L2 12.5L9 13.5L18 7L11 17L14 21L21 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </div>
-                                <h3>Win REAL Cards</h3>
-                                <p>What you see is what you get! Hit them virtually, see them physically!</p>
-                            </div>
-                            <div class="step-arrow">
-                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </div>
-                            <div class="play-step">
-                                <div class="step-number">3</div>
-                                <div class="step-icon">
-                                    <svg viewBox="0 0 24 24" class="step-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M12 3V4M12 20V21M4 12H3M6.31412 6.31412L5.5 5.5M17.6859 6.31412L18.5 5.5M6.31412 17.69L5.5 18.5M17.69 17.69L18.5 18.5M21 12H20M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                    </svg>
-                                </div>
-                                <h3>Ship or Sell</h3>
-                                <p>Have your cards shipped to you or sell them for rubies to open more chests!</p>
-                            </div>
-                        </div>
-                        <div class="play-actions">
-                            <a href="/about/" class="play-button secondary">Learn More</a>
-                            <a href="{% url 'showcase:cv-form' %}?next=gameroom/123" class="play-button primary">Sign Up Now!</a>
-                        </div>
+
+</a>
+    <!-- The separate element for the background image -->
+    <div class="video-background__image"
+         style="background: url('{% if BackgroundImage.file and BackgroundImage.file.url %}{{ BackgroundImage.file.url }}{% else %}{{ BackgroundImage.cover.url }}{% endif %}');
+                background-size: cover;
+                background-attachment: fixed;">
+    </div>
+
+    <!-- The content container - remains fully opaque, causes chat issues -->
+    <div class="containered">
+        <div class="gameaddition" style="top: 300px;">
+            {% if game %}
+                {% include 'gametemplate.html' with game=game %}
+            {% else %}
+                <p>No active games available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+        {% endif %}
+    {% endif %}
+{% endfor %}
+  <!-- Main container -->
+<div class="container" style="background: linear-gradient(transparent 0%, rgb(139 9 202 / 50%) 5%, rgba(0, 255, 255, 0.2) 90%, rgb(255 0 0 / 1%) 100%); z-index: 0; position: relative;">
+
+    <!-- Header -->
+    <header style="background: linear-gradient(rgba(0, 0, 0, 0), rgba(255, 255, 255, 0.2));
+    color: var(--text-primary);
+    color: var(--text-primary); border-radius:10px;
+        position: relative;">
+              <div class="play-banner {% if user.is_authenticated %}collapsed{% endif %}" id="playBanner">
+    <!-- Toggle button -->
+ <div class="play-banner-toggle">
+        <button id="togglePlayBanner" aria-label="Toggle How To Play">
+            <span class="toggle-icon"></span>
+        </button>
+    </div>
+
+    <!-- Decorative background cards -->
+    <div class="bg-card card-1"></div>
+    <div class="bg-card card-2"></div>
+    <div class="bg-card card-3"></div>
+    <div class="bg-card card-4"></div>
+    <div class="bg-card card-5"></div>
+    <div class="bg-card card-6"></div>
+
+    <!-- Featured larger cards -->
+    <div class="featured-card featured-card-1" style="">
+        {% for ImageBase in Image %}
+            {% if ImageBase.image_position == 1 %}
+        <div class="card-glow" style="background: url('{{ImageBase.image.url}}')"></div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="featured-card featured-card-2" style="z-index: 10;">
+       {% for ImageBase in Image %}
+            {% if ImageBase.image_position == 2 %}
+        <div class="card-glow" style="background: url('{{ImageBase.image.url}}')"></div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="featured-card featured-card-3" style="z-index: 10;">
+        {% for ImageBase in Image %}
+            {% if ImageBase.image_position == 3 %}
+        <div class="card-glow" style="background: url('{{ImageBase.image.url}}')"></div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Banner header (always visible) -->
+    <div class="play-banner-header">
+        <h2 class="play-title" id="howtoplay">How To Play</h2>
+        <div class="header-glow"></div>
+    </div>
+
+    <!-- Collapsible content -->
+    <div class="play-banner-collapsible">
+        <div class="play-banner-content">
+            <div class="play-steps">
+                <div class="play-step">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" class="step-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 7.5V18C21 19.6569 19.6569 21 18 21H6C4.34315 21 3 19.6569 3 18V7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M3 7.5V6C3 4.34315 4.34315 3 6 3H18C19.6569 3 21 4.34315 21 6V7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9C9 10.6569 10.3431 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M12 12V16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M9.5 14.5L14.5 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
                     </div>
+                    <h3>Spin Chests</h3>
+                    <p>Find a treasure chest and spin to pull banger cards!</p>
+                </div>
+
+                <div class="step-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <div class="play-step">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" class="step-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 5L2 12.5L9 13.5L18 7L11 17L14 21L21 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Win REAL Cards</h3>
+                    <p>What you see is what you get! Hit them virtually, see them physically!</p>
+                </div>
+
+                <div class="step-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <div class="play-step">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" class="step-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 3V4M12 20V21M4 12H3M6.31412 6.31412L5.5 5.5M17.6859 6.31412L18.5 5.5M6.31412 17.69L5.5 18.5M17.69 17.69L18.5 18.5M21 12H20M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>Ship or Sell</h3>
+                    <p>Have your cards shipped to you or sell them for rubies to open more chests!</p>
                 </div>
             </div>
 
-            <div class="header-controls">
-                <div class="search-bar">
-                    <svg viewBox="0 0 24 24" class="search-icon">
-                        <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
-                    </svg>
-                    <input type="text" placeholder="Search collection...">
-                </div>
-                <div class="header-buttons">
-                    <button class="icon-button notification-button">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21" />
-                        </svg>
-                        <span class="notification-dot"></span>
-                    </button>
-                    <button class="icon-button theme-button">
-                        <svg viewBox="0 0 24 24" id="theme-icon">
-                            <path d="M12,18C11.11,18 10.26,17.8 9.5,17.45C11.56,16.5 13,14.42 13,12C13,9.58 11.56,7.5 9.5,6.55C10.26,6.2 11.11,6 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31L23.31,12L20,8.69Z" />
-                        </svg>
-                    </button>
+            <div class="play-actions">
+                <a href="/about/" class="play-button secondary">Learn More</a>
+                <a href="{% url 'showcase:cv-form' %}?next=gameroom/123" class="play-button primary">Sign Up Now!</a>
+            </div>
+        </div>
+    </div>
+</div>
+      <div class="header-controls">
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24" class="search-icon">
+            <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+          </svg>
+          <input type="text" placeholder="Search collection...">
+        </div>
+
+        <div class="header-buttons">
+          <button class="icon-button notification-button">
+            <svg viewBox="0 0 24 24">
+              <path d="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21" />
+            </svg>
+            <span class="notification-dot"></span>
+          </button>
+          <button class="icon-button theme-button">
+            <svg viewBox="0 0 24 24" id="theme-icon">
+              <path d="M12,18C11.11,18 10.26,17.8 9.5,17.45C11.56,16.5 13,14.42 13,12C13,9.58 11.56,7.5 9.5,6.55C10.26,6.2 11.11,6 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31L23.31,12L20,8.69Z" />
+            </svg>
+          </button>
                     <div class="user-avatar">
-                        {% for userprofile in NewsProfiles %}
-                        <a href="{{ userprofile.newprofile_profile_url }}">
-                            <img src="{{ userprofile.newprofile_profile_picture_url|default:'/static/css/images/a.jpg' }}"
-                                 alt="Profile Picture"
-                                 onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
-                        </a>
-                        {% empty %}
-                        <a href="{% url 'login' %}?next={{ request.path }}">
-                            <img src="/static/css/images/a.jpg" alt="Profile Picture">
-                        </a>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Top Hits Section -->
-            <div class="top-hits-container animate-fadeInUp">
-                <div class="top-hits-header">
-                    <div class="top-hits-title">
-                        <span class="title-icon">⭐</span>
-                        <h2>Top Hits</h2>
-                        <span class="title-icon">⭐</span>
-                    </div>
-                    <div class="top-hits-glow"></div>
-                </div>
-                <div class="top-hits-row">
-                    {% for TopHits in tophit %}
-                    <a href="{% url 'showcase:game' TopHits.game.slug %}" class="top-hit-link">
-                        <div class="top-hit-card" style="--card-color: {{ TopHits.color }};">
-                            <div class="top-hit-rank">{{ forloop.counter }}</div>
-                            <div class="top-hit-content">
-                                <div class="card-frame">
-                                    <div class="card-glow" style="background-image: url('{{ TopHits.file.url }}');"></div>
-                                    <div class="card-image-container">
-                                        <img src="{{ TopHits.file.url }}" alt="{{ TopHits.user.username }}'s card" class="card-image">
-                                    </div>
-                                </div>
-                                <div class="top-hit-info">
-                                    <div class="username-badge">
-                                        <span class="username-text">{{ TopHits.user.username }}</span>
-                                    </div>
-                                    <div class="hit-details">
-                                        <div class="hit-game">{{ TopHits.game.name }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-shine"></div>
-                        </div>
+             {% for userprofile in NewsProfiles %}
+                     <a href="{{ userprofile.newprofile_profile_url }}">
+                        <img src="{{ userprofile.newprofile_profile_picture_url|default:'/static/css/images/a.jpg' }}" alt="Profile Picture" style="" onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
                     </a>
-                    {% endfor %}
-                </div>
-            </div>
-        </header>
 
+
+{% empty %}
+            <a href="{% url 'login' %}?next={{ request.path }}" style="display: contents;">
+                <img src="/static/css/images/a.jpg" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;">
+            </a>
+
+{% endfor %}
+          </div>
+        </div>
+      </div>
+         <div class="top-hits-container">
+
+    <div class="top-hits-row" style="overflow: hidden;">
+        {% for TopHits in tophit %}
+        <a href="{% url 'showcase:game' TopHits.game.slug %}" class="top-hit-link">
+            <div class="top-hit-card">
+                <div class="top-hit-content" style="--card-color: {{ TopHits.color }};">
+                    <div class="card-frame">
+                        <div class="card-glow"></div>
+                        <div class="card-image-container">
+                            <img src="{{ TopHits.file.url }}" alt="{{ TopHits.user.username }}'s card" class="card-image">
+                        </div>
+                    </div>
+                    <div class="top-hit-info">
+                        <div class="username-badge">
+                            <span class="username-text">{{ TopHits.user.username }}</span>
+                        </div>
+                        <div class="hit-details">
+                            <div class="hit-game">{{ TopHits.game.name }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-shine"></div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+    </header>
         <!-- Featured Chests Section -->
         <div class="chest-container animate-fadeInUp" id="featuredgame">
             <h2 class="chest-header">
@@ -3318,7 +3341,7 @@
                     </div>
                     <div class="col-lg-3 col-md-6">
                         <div class="footer-box pages">
-                            <h2 class="widget-title">Pages</h2>
+                            <h2 class="widget-title">Links</h2>
                             <ul>
                                 <li><a href="{% url 'showcase:index' %}">Home</a></li>
                                 <li><a href="{% url 'showcase:about' %}">About</a>
@@ -3330,7 +3353,7 @@
                     </div>
                     <div class="col-lg-3 col-md-6">
                         <div class="footer-box subscribe">
-                            <h2 class="widget-title">Subscribe</h2>
+                            <h2 class="widget-title">Subscribe!</h2>
                             <p>Subscribe to our mailing list to get the latest updates!</p>
                             <form method="post" action="{% url 'showcase:emaildone' %}" class="email-form">
                                 {% csrf_token %}
