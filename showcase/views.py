@@ -20428,6 +20428,85 @@ def create_currency_checkout_session(request, slug):
         print('there were errors with the submition of the one-click checkout ')
         print('the errors are ' + str(e))
         return JsonResponse({'errors here': str(e)}, status=400)
+# payments/views.py
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .utils import get_paypal_access_token
+from django.conf import settings
+import requests
+
+@csrf_exempt
+def create_order(request):
+    access_token = get_paypal_access_token()
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {access_token}'
+    }
+
+    data = {
+        "intent": "CAPTURE",
+        "purchase_units": [{
+            "amount": {
+                "currency_code": "USD",
+                "value": "10.00"
+            }
+        }]
+    }
+
+    response = requests.post(
+        f"{settings.PAYPAL_API_BASE}/v2/checkout/orders",
+        headers=headers,
+        json=data
+    )
+
+    return JsonResponse(response.json())
+
+
+@csrf_exempt
+def capture_order(request):
+    import json
+    access_token = get_paypal_access_token()
+    body = json.loads(request.body)
+    order_id = body.get('orderID')
+
+    response = requests.post(
+        f"{settings.PAYPAL_API_BASE}/v2/checkout/orders/{order_id}/capture",
+        headers={
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}'
+        }
+    )
+
+    return JsonResponse(response.json())
+
+
+@csrf_exempt
+def create_subscription(request):
+    import json
+    access_token = get_paypal_access_token()
+    body = json.loads(request.body)
+    plan_id = body.get('plan_id')  # send from JS
+
+    response = requests.post(
+        f"{settings.PAYPAL_API_BASE}/v1/billing/subscriptions",
+        headers={
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}'
+        },
+        json={
+            "plan_id": plan_id,
+            "application_context": {
+                "brand_name": "My Django App",
+                "return_url": "http://localhost:8000/payment/success/",
+                "cancel_url": "http://localhost:8000/payment/cancel/"
+            }
+        }
+    )
+
+    return JsonResponse(response.json())
+
 
 from django.forms.models import inlineformset_factory
 from django.core.exceptions import PermissionDenied

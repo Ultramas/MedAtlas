@@ -443,6 +443,9 @@ urlpatterns = [
     path('currencycheckout/', views.CurrencyCheckoutView.as_view(), name='currencycheckout'),
     path('currencypayment/<payment_option>/', views.CurrencyPaymentView.as_view(), name='currencypayment'),
     path('currency/favorite-toggle/<slug:slug>/', views.toggle_favorite_currency, name='toggle-favorite-currency'),
+    path('create-order/', views.create_order, name='create_order'),
+    path('capture-order/', views.capture_order, name='capture_order'),
+    path('create-subscription/', views.create_subscription, name='create_subscription'),
     path('create_inventory_object/', views.create_inventory_object, name='create_inventory_object'),
     path('under_construction/', TemplateView.as_view(template_name='under_construction.html'), name='under_construction'),
 

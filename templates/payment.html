@@ -84,6 +84,12 @@
             backdrop-filter: blur(10px);
         }
 
+        .StripeElement {
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            color: #fff;
+        }
+
         .security-badge {
             display: inline-flex;
             align-items: center;
@@ -675,13 +681,76 @@
                 </div>
 
                 <!-- PayPal Payment Method -->
-                <div class="payment-method" id="paypal-method">
-                    <div class="divider">
-                        <span>Pay with PayPal</span>
-                    </div>
+                <div id="paypal-method" class="payment-method" style="display: none;">
                     <div id="paypal-button-container"></div>
                 </div>
+
             </div>
+<script>
+let paypalRendered = false;
+
+window.addEventListener('load', function () {
+    document.querySelectorAll('.method-tab').forEach(tab => {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+
+            const method = this.getAttribute('data-method');
+
+            document.querySelectorAll('.payment-method').forEach(methodDiv => {
+                methodDiv.style.display = 'none';
+            });
+
+            const selectedMethod = document.getElementById(`${method}-method`);
+            if (selectedMethod) {
+                selectedMethod.style.display = 'block';
+
+                if (method === 'paypal' && !paypalRendered) {
+                    if (typeof paypal === 'undefined') {
+                        console.error('PayPal SDK not loaded');
+                        return;
+                    }
+
+                    console.log('Rendering PayPal button...');
+
+                    paypal.Buttons({
+                        style: {
+                            layout: 'vertical',
+                            color: 'blue',
+                            shape: 'rect',
+                            label: 'paypal',
+                            height: 50
+                        },
+                        createOrder: function (data, actions) {
+                            return actions.order.create({
+                                purchase_units: [{
+                                    amount: {
+                                        value: '0.01'
+                                    }
+                                }]
+                            });
+                        },
+                        onApprove: function (data, actions) {
+                            return actions.order.capture().then(function (details) {
+                                alert('Payment completed by ' + details.payer.name.given_name);
+                                setTimeout(() => {
+                                    window.location.href = '/';
+                                }, 2000);
+                            });
+                        },
+                        onError: function (err) {
+                            console.error('PayPal error:', err);
+                            alert('Payment failed.');
+                        }
+                    }).render('#paypal-button-container');
+
+                    paypalRendered = true;
+                }
+            }
+        });
+    });
+});
+</script>
 
             <div class="security-footer">
                 <div class="security-features">
@@ -780,7 +849,11 @@
             cardErrors.classList.remove('show');
 
             try {
-                const { token, error } = await stripe.createToken(cardElement);
+                const { error, paymentMethod } = await stripe.createPaymentMethod({
+                    type: 'card',
+                    card: cardElement,
+                });
+
 
                 if (error) {
                     showError(error.message);
@@ -816,36 +889,6 @@
             }
         });
 
-        // Enhanced PayPal Integration
-        paypal.Buttons({
-            style: {
-                layout: 'vertical',
-                color: 'blue',
-                shape: 'rect',
-                label: 'paypal',
-                height: 50
-            },
-            createOrder: function (data, actions) {
-                return actions.order.create({
-                    purchase_units: [{
-                        amount: {
-                            value: '{{ order.get_total_price|default:"0.00" }}'
-                        }
-                    }]
-                });
-            },
-            onApprove: function (data, actions) {
-                return actions.order.capture().then(function (details) {
-                    showSuccess();
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 2000);
-                });
-            },
-            onError: function (err) {
-                showError('PayPal payment failed. Please try again.');
-            }
-        }).render('#paypal-button-container');
 
         // Utility functions
         function showError(message) {
@@ -861,7 +904,7 @@
                     <span>Payment Successful!</span>
                 </div>
             `;
-            submitButton.style.background = 'linear-gradient(135deg, var(--success), #00cc52)';
+            submitButton.style.background = `linear-gradient(135deg, ${getComputedStyle(document.documentElement).getPropertyValue('--success')}, #00cc52)`;
         }
 
         function resetButton() {
