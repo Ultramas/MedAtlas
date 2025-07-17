@@ -587,17 +587,10 @@ let choiceColor = targetCard ? targetCard.getAttribute('data-color') : 'gray';
 console.log('Given the choice color:', choiceColor);
 
 function randomizedContents(wrapper) {
-    const currentGameWrapper = document.querySelector('.wrapper:not([style*="display: none"])');
-    if (!currentGameWrapper) {
-        console.warn("🚫 No visible wrapper found.");
-        return;
-    }
+    const slider = wrapper.querySelector('.slider');
 
-    console.log("👀 Found visible wrapper:", currentGameWrapper.id);
-
-    const slider = currentGameWrapper.querySelector('.slider');
     if (!slider) {
-        console.warn("⚠️ No slider found in wrapper:", currentGameWrapper.id);
+        console.warn(`⚠️ No slider found in wrapper ${wrapper.id}`);
         return;
     }
 
@@ -617,13 +610,11 @@ function randomizedContents(wrapper) {
 
     const nonTargetCards = children.filter(child => !child.classList.contains('target-card'));
 
-    // Shuffle non-target cards
     for (let i = nonTargetCards.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [nonTargetCards[i], nonTargetCards[j]] = [nonTargetCards[j], nonTargetCards[i]];
     }
 
-    // Clear and rebuild the slider
     slider.innerHTML = '';
     const middleIndex = Math.floor(nonTargetCards.length / 2);
 
@@ -634,7 +625,6 @@ function randomizedContents(wrapper) {
         slider.appendChild(card);
     });
 
-    // If targetCard wasn't added (e.g., no nonTargetCards)
     if (targetCard && !slider.querySelector('.target-card')) {
         slider.appendChild(targetCard);
     }
@@ -642,33 +632,32 @@ function randomizedContents(wrapper) {
     console.log("✅ Slider randomized with target card centered.");
 }
 
-function waitForSliderAndRandomize() {
-    const wrappers = document.querySelectorAll('.wrapper');
-    wrappers.forEach(wrapper => {
-        const observer = new MutationObserver((mutations, obs) => {
-            const slider = wrapper.querySelector(`.slider`);
-            if (slider) {
-                console.log("✅ Slider detected via MutationObserver for", wrapper.id);
-                obs.disconnect();
-                randomizedContents();  // Customize this if each wrapper needs individual logic
-            }
-        });
 
-        observer.observe(wrapper, { childList: true, subtree: true });
-
-        setTimeout(() => {
-            const slider = wrapper.querySelector(`.slider`);
-            if (slider) {
-                console.log("✅ Slider found via fallback timeout for", wrapper.id);
-                randomizedContents();
-                observer.disconnect();
-            } else {
-                console.warn("❌ Slider still not found in wrapper:", wrapper.id);
-                observer.disconnect();
-            }
-        }, 300);
+function waitForSliderAndRandomize(wrapper) {
+    const observer = new MutationObserver((mutations, obs) => {
+        const slider = wrapper.querySelector('.slider');
+        if (slider) {
+            console.log("✅ Slider detected via MutationObserver for", wrapper.id);
+            obs.disconnect();
+            randomizedContents(wrapper);
+        }
     });
+
+    observer.observe(wrapper, { childList: true, subtree: true });
+
+    // Fallback
+    setTimeout(() => {
+        const slider = wrapper.querySelector('.slider');
+        if (slider) {
+            console.log("✅ Slider found via fallback timeout for", wrapper.id);
+            randomizedContents(wrapper);
+        } else {
+            console.warn("❌ Slider still not found in wrapper:", wrapper.id);
+        }
+        observer.disconnect();
+    }, 300);
 }
+
 
 
 function spin(buttonId) {
@@ -680,7 +669,7 @@ function spin(buttonId) {
 
     $(".spin-option").prop('disabled', true);
 
-    randomizeContents();
+    randomizedContents();
     if (
         !userContext.isSignedIn ||
         !userContext.hasPreference ||
@@ -890,26 +879,32 @@ setTimeout(() => {
         randomizedContents();
     } else {
         fetch(`/load-game-wrapper/${nextGame.id}/`)
-        .then(response => response.text())
-        .then(html => {
-            const container = document.createElement('div');
-            container.innerHTML = html;
+    .then(response => response.text())
+    .then(html => {
+        const container = document.createElement('div');
+        container.innerHTML = html;
 
-            const newWrapper = container.querySelector('.wrapper');
-            if (!newWrapper) {
-                console.error("❌ No .wrapper found in injected HTML");
-                return;
-            }
+        const newWrapper = container.querySelector('.wrapper');
+        if (!newWrapper) {
+            console.error("❌ No .wrapper found in injected HTML");
+            return;
+        }
 
-            document.querySelector('#all-wrappers-container').appendChild(newWrapper);
-            newWrapper.style.display = 'block';
-            console.log(`✅ Injected wrapper for game-${nextGame.id}`);
+        newWrapper.style.display = 'block';
+        document.querySelector('#all-wrappers-container').appendChild(newWrapper);
+        console.log(`✅ Injected wrapper for game-${nextGame.id}`);
 
-            waitForSliderAndRandomize(newWrapper);
-        })
-        .catch(error => {
-            console.error(`❌ Failed to load wrapper for game-${nextGame.id}`, error);
-        });
+        waitForSliderAndRandomize(newWrapper);  // 🟢 safe and scoped
+
+        currentSpin = 0;
+        totalSpins = 1;
+        animationStopped = false;
+        setTimeout(() => spin(btn.id), buffer);
+    })
+    .catch(error => {
+        console.error(`❌ Failed to load wrapper for game-${nextGame.id}`, error);
+    });
+
 
     }
 

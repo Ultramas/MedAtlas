@@ -26,7 +26,6 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/spinboost.css' %}">
      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
      <script defer src="{% static 'css/js/battletemplatescript.js' %}"></script>
-     <script defer src="{% static 'css/js/spinboostscript.js' %}"></script>
 
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
      <script src="{% static 'css/js/main.js' %}"></script>
@@ -1988,47 +1987,56 @@ $(document).ready(function() {
 <!--check mypreference of user, should one exist; default is classic-->
 
 <div id="all-wrappers-container">
-  {% for role, p in players %}
-    <li>
-      {% if role == 'human' %}
-        {{ p.user.username }}
-      {% else %}
-        {{ p.name }} (bot)
-      {% endif %}
-    </li>
+  {% for round in game_rounds %}
+    {% with participant=round.participant game=round.game %}
+      <li>
+        {% if participant.is_bot %}
+          {{ participant.robot.name }} (bot)
+        {% else %}
+          {{ participant.user.username }}
+        {% endif %}
+      </li>
 
-    <div class="wrapper" id="game-{{ game.id }}">
-      <div class="containerre" style="display: flex;">
-        <div class="slider" id="slider-{{ game.id }}">
-          {% for item in choices_with_nonce %}
-            {% with choice=item.choice %}
-              {% with color=game|get_color:choice %}
-                <div id="{{ choice.choice_text }}" class="cards" style="background: url({% static 'css/images/'|add:color|add:'.png' %});">
-                  <div class="lootelement"
-                       data-price="{{ choice.value }}"
-                       data-currency-file="{{ item.currency.file_url }}"
-                       data-currency-symbol="{{ item.currency.symbol }}">
-                    {% if choice.file.url %}
-                      <div class="sliderImg"
-                           style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
-                    {% endif %}
-                    <div class="sliderPrice"><b class="innerprice">{{ choice.value }}</b>💎</div>
+     <div class="wrapper"
+     id="game-{{ game.id }}-participant-{{ participant.id }}-round-{{ round.round_index }}"
+     data-key="game-{{ game.id }}-round-{{ round.round_index }}"
+     style="display: none;">
+
+        <div class="containerre" style="display: flex;">
+          <div class="slider" id="slider-{{ game.id }}-{{ participant.id }}-{{ round.round_index }}">
+              <div id="autoplay-status" style="margin-top: 1em; font-weight: bold;"></div>
+
+            {% for item in choices_with_nonce %}
+              {% with choice=item.choice %}
+                {% with color=game|get_color:choice %}
+                  <div id="{{ choice.choice_text }}" class="cards" style="background: url({% static 'css/images/'|add:color|add:'.png' %});">
+                    <div class="lootelement"
+                         data-price="{{ choice.value }}"
+                         data-currency-file="{{ item.currency.file_url }}"
+                         data-currency-symbol="{{ item.currency.symbol }}">
+                      {% if choice.file.url %}
+                        <div class="sliderImg"
+                             style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
+                      {% endif %}
+                      <div class="sliderPrice"><b class="innerprice">{{ choice.value }}</b>💎</div>
+                    </div>
                   </div>
-                </div>
+                {% endwith %}
               {% endwith %}
-            {% endwith %}
-          {% endfor %}
+            {% endfor %}
+          </div>
+
+          <img id="selector" class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
         </div>
 
-        <img id="selector" class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
+        <div class="labeltag">
+          <h4>{{ game.name }} — Round {{ round.round_index }}</h4>
+        </div>
       </div>
-
-      <div class="labeltag">
-        <h4>{{ game.name }}</h4>
-      </div>
-    </div>
+    {% endwith %}
   {% endfor %}
 </div>
+
 
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
@@ -2066,136 +2074,6 @@ fetch(`/create_outcome/${slug}/`, {
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 
-<script>
-$(".start").click(function () {
-    const button = $(this);
-    button.prop('disabled', true);
-
-   createOutcome(button.data('game-id'), button.data('slug'))
-    .then(data => {
-        if (data.status === 'success') {
-            const choice = {
-                id: data.choice_id,
-                choice_text: data.choice_text,
-                color: data.choice_color,
-                file: data.choice_file,
-                value: data.choice_value || 0,
-                lowerNonce: data.lower_nonce || 'N/A',
-                upperNonce: data.upper_nonce || 'N/A',
-            };
-
-            console.log('Choice Object:', choice);
-
-            renderChoiceDetails(choice);
-
-        } else {
-            console.error('Error:', data.message);
-            button.prop('disabled', false);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        button.prop('disabled', false);
-    });
-
-
-                console.log('Nonce:', chosenNonce);
-                console.log('Choice ID:', choiceId);
-                console.log('Choice Text:', choiceText);
-                console.log('Choice Color:', choiceColor);
-                console.log('Choice File:', choiceFile);
-
-                let randomizeFlag = true;
-
-                function randomizeContents() {
-                    if (randomizeFlag) {
-                        $('div#slider').each(function () {
-                            var $div_parent = $(this);
-                            var $divsArr = $div_parent.children('div.cards');
-                            $divsArr.sort(function (a, b) {
-                                var temp = parseInt(Math.random() * 10);
-                                var isOddOrEven = temp % 2;
-                                var isPosOrNeg = temp > 5 ? 1 : -1;
-                                return (isOddOrEven * isPosOrNeg);
-                            }).appendTo($div_parent);
-                        });
-                        setTimeout(randomizeContents, 2000);
-                    }
-                }
-
-                randomizeContents();
-
-                setTimeout(() => {
-                    randomizeFlag = false;
-
-                    const slider = document.querySelector('.slider');
-                    const cards = slider.querySelectorAll('.card');
-
-                    let targetCard = null;
-                    cards.forEach(card => {
-                        if (parseInt(card.dataset.choiceId) === choiceId) {
-                            targetCard = card;
-                        }
-                    });
-
-                    if (targetCard) {
-                        const targetOffsetLeft = targetCard.offsetLeft;
-                        const sliderWidth = slider.offsetWidth;
-                        const cardWidth = targetCard.offsetWidth;
-                        const targetScrollPosition = targetOffsetLeft - (sliderWidth / 2) + (cardWidth / 2);
-
-                        slider.scrollTo({
-                            left: targetScrollPosition,
-                            behavior: 'smooth'
-                        });
-
-                        function renderChoiceDetails(choice) {
-                            document.getElementById('choice-id').innerText = `Selected Choice ID: ${choice.id || 'N/A'}`;
-                            document.getElementById('choice-text').innerText = `Selected Choice Text: ${choice.choice_text || 'N/A'}`;
-                            document.getElementById('choice-color').innerText = `Selected Choice Color: ${choice.color || 'N/A'}`;
-
-                            const choiceFileElement = document.getElementById('choice-file');
-                            if (choice.file) {
-                                choiceFileElement.src = choice.file;
-                                choiceFileElement.style.display = 'block';
-                            } else {
-                                choiceFileElement.style.display = 'none';
-                            }
-                        }
-
-
-                        const choiceFileElement = document.getElementById('choice-file');
-                        if (choiceFile) {
-                            choiceFileElement.src = choiceFile;
-                            choiceFileElement.style.display = 'block';
-                        } else {
-                            choiceFileElement.style.display = 'none';
-                        }
-
-                    } else {
-                        console.error('Error: Target card not found.');
-                    }
-
-                    // Re-enable the button after the animation finishes
-                    button.prop('disabled', false);
-
-                }, 9000);
-
-            } else {
-                console.error('Error:', data.message);
-                button.prop('disabled', false);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            button.prop('disabled', false);
-        });
-});
-
-
-
-</script>
-
     <!--sell item(s) after spins-->
 
 
@@ -2204,130 +2082,6 @@ $(".start").click(function () {
 <br></div>
 
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const forms = document.querySelectorAll(".ajax-form");
-
-    forms.forEach(form => {
-        form.addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            const formData = new FormData(this);
-            const url = this.getAttribute("action");
-            const csrfToken = formData.get("csrfmiddlewaretoken");
-
-            fetch(url, {
-                method: "POST",
-				headers: {
-					"X-Requested-With": "XMLHttpRequest",
-					"X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-				},
-
-                body: formData,
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Update stock count
-                    const stockCountElement = document.querySelector("#stock-count");
-                    if (stockCountElement) {
-                        stockCountElement.textContent = data.stock_count;
-                    }
-                    const currencyAmountElement = document.querySelector("#currency-amount");
-                    if (currencyAmountElement) {
-                        currencyAmountElement.textContent = data.currency_amount;
-                    }
-
-                    // Example: Remove the item from the UI
-                    this.closest(".inventory-item").remove();
-                } else {
-                    console.error("Action failed.");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-        });
-    });
-});
-
-
-
-
-document.addEventListener("DOMContentLoaded", function () {
-    const withdrawButtons = document.querySelectorAll(".withdraw-button");
-
-    withdrawButtons.forEach((button) => {
-        button.addEventListener("click", function (event) {
-            event.preventDefault();
-
-            const form = button.closest("form");
-            const formData = new FormData(form);
-            const actionUrl = form.getAttribute("action") || window.location.href;
-
-            console.log("Submitting form to:", actionUrl);
-            console.log("Form Data:", [...formData.entries()]);
-
-            fetch(actionUrl, {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP status ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    if (data.success) {
-                        const inventoryItem = form.closest(".inventory-item");
-                        if (inventoryItem) inventoryItem.remove();
-
-                        const stockCountElement = document.getElementById("stock-count");
-                        if (stockCountElement) {
-                            stockCountElement.textContent = data.stock_count;
-                        }
-                    } else {
-                        console.error("Server error:", data.error);
-                        alert(data.error || "An error occurred.");
-                    }
-                })
-                .catch((error) => {
-                    console.error("Fetch error:", error);
-                    alert("An unexpected error occurred. Please try again.");
-                });
-        });
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    const toggleBtn = document.getElementById("toggleViewBtn");
-    const inventoryGrid = document.getElementById("inventoryGrid");
-
-    toggleBtn.addEventListener("click", function() {
-        inventoryGrid.classList.toggle("compact-view");
-        inventoryGrid.classList.toggle("comfortable-view");
-
-        const isCompact = inventoryGrid.classList.contains("compact-view");
-        localStorage.setItem("inventoryViewPreference", isCompact ? "compact" : "comfortable");
-    });
-
-    const savedViewPreference = localStorage.getItem("inventoryViewPreference");
-    if (savedViewPreference === "compact") {
-        inventoryGrid.classList.remove("comfortable-view");
-        inventoryGrid.classList.add("compact-view");
-    }
-});
-</script>
 
 	<!-- jquery -->
      <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
@@ -2341,65 +2095,86 @@ document.addEventListener("DOMContentLoaded", function() {
      <script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
      <script src="{% static 'css/js/sticker.js' %}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const battleGames = JSON.parse(document.getElementById('battle-games-data').textContent);
-  const startBtn = document.querySelector('.start');
+  document.addEventListener("DOMContentLoaded", function () {
+    const wrappers = Array.from(document.querySelectorAll(".wrapper"));
+    let currentIndex = 0;
 
-  // Loop through each game and its quantity
-  async function autoSpinBattleGames() {
-    console.log(`🕹️ Auto‐spinning ${battleGames.length} games…`);
-
-    for (let gameIndex = 0; gameIndex < battleGames.length; gameIndex++) {
-      const game = battleGames[gameIndex];
-      console.log(`🔄 Game "${game.slug}" ×${game.quantity}`);
-
-      for (let i = 0; i < game.quantity; i++) {
-        console.log(`   • Instance ${i + 1}/${game.quantity}`);
-
-        await runOneSpin(game);
-        console.log(`   ✓ Done instance ${i + 1}`);
+    function showNextWrapper() {
+      if (currentIndex >= wrappers.length) {
+        document.getElementById("autoplay-status").innerText = "All rounds completed!";
+        return;
       }
+
+      // Hide all wrappers first
+      wrappers.forEach(w => w.style.display = "none");
+
+      // Show the current one
+      const currentWrapper = wrappers[currentIndex];
+      currentWrapper.style.display = "block";
+
+      // Optional: Update status text
+      const parts = currentWrapper.id.split("-");
+      const gameId = parts[1];
+      const participantId = parts[3];
+      const round = parts[5];
+      document.getElementById("autoplay-status").innerText =
+        `Playing Game ${gameId}, Round ${round}, Participant ${participantId}`;
+
+      currentIndex++;
+
+      setTimeout(showNextWrapper, 9000); // 3.5 seconds per round
     }
 
-    console.log("🎉 All battle games complete.");
-    window.animationStopped = true;
-  }
+    showNextWrapper();
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const wrappers = Array.from(document.querySelectorAll(".wrapper"));
 
-  function runOneSpin(game) {
-    return new Promise(resolve => {
-      function onComplete(e) {
-        if (e.detail.buttonId === startBtn.id) {
-          document.removeEventListener('spinComplete', onComplete);
-          resolve();
-        }
+    // Step 1: Group wrappers by game-round key
+    const grouped = {};
+    wrappers.forEach(w => {
+      const key = w.dataset.key;
+      if (!key) return;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(w);
+    });
+
+    // Step 2: Sort keys by game ID then round index
+    const groupKeys = Object.keys(grouped).sort((a, b) => {
+      const [gA, rA] = a.match(/\d+/g).map(Number);
+      const [gB, rB] = b.match(/\d+/g).map(Number);
+      return gA === gB ? rA - rB : gA - gB;
+    });
+
+    let currentGroupIndex = 0;
+
+    function showNextGroup() {
+      if (currentGroupIndex >= groupKeys.length) {
+        const statusEl = document.getElementById("autoplay-status");
+        if (statusEl) statusEl.innerText = "✅ All rounds completed!";
+        return;
       }
 
-      document.addEventListener('spinComplete', onComplete);
+      // Hide all wrappers
+      wrappers.forEach(w => w.style.display = "none");
 
-      // Dynamically update the button with current game data
-      startBtn.dataset.gameId = game.id;
-      startBtn.dataset.slug   = game.slug;
+      // Show current group
+      const currentKey = groupKeys[currentGroupIndex];
+      const currentGroup = grouped[currentKey];
+      currentGroup.forEach(w => w.style.display = "block");
 
-      // Optionally update any global tracking variable if needed:
-      window.currentGameId = game.id;
-      console.log('updated the game, next')
-      startBtn.click();
-    });
-  }
-function showGameUI(gameId) {
-  // Hide all game blocks
-  document.querySelectorAll('.game-wrapper').forEach(div => {
-    div.style.display = 'none';
+      const statusEl = document.getElementById("autoplay-status");
+      if (statusEl) statusEl.innerText = `▶ Now playing ${currentKey.replace(/-/g, ' ')}`;
+
+      currentGroupIndex++;
+      setTimeout(showNextGroup, 9000); // ⏱ Change this delay as needed
+    }
+
+    // Start autoplay
+    showNextGroup();
   });
-
-  // Show the current one
-  const current = document.getElementById(`game-${gameId}`);
-  if (current) current.style.display = 'block';
-}
-
-});
-
-
 </script>
 
 
