@@ -3741,9 +3741,23 @@ class ActualBattleView(DetailView):
     context_object_name = "battle"
 
     def get_object(self):
-        battle = super().get_object()
-        # Check if the current user is a participant in this battle
-        return battle
+        return get_object_or_404(
+            Battle.objects.prefetch_related(
+                Prefetch(
+                    'chests',
+                    queryset=Game.objects.prefetch_related(
+                        Prefetch(
+                            'gamechoice_set',
+                            queryset=GameChoice.objects.select_related('choice'),
+                            to_attr='gamechoice_links'
+                        )
+                    ),
+                    to_attr='games_with_choices'
+                )
+            ),
+            id=self.kwargs['battle_id']
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         battle = self.object
