@@ -3675,7 +3675,7 @@ class SingleBattleListView(DetailView):
                 battle.status = 'R'
                 battle.save()
                 messages.error(request, 'This battle is now full and has started.')
-                console.log('reached a full battle')
+                print('reached a full battle')
                 redirect_url = reverse('showcase:actualbattle', kwargs={'battle_id': battle.id})
                 redirect_url += '?auto_spin=true'
                 print('the url is: ' + redirect_url)
@@ -3741,114 +3741,48 @@ class ActualBattleView(DetailView):
     context_object_name = "battle"
 
     def get_object(self):
-        return get_object_or_404(
-            Battle.objects.prefetch_related(
-                Prefetch(
-                    'chests',
-                    queryset=Game.objects.prefetch_related(
-                        Prefetch(
-                            'gamechoice_set',
-                            queryset=GameChoice.objects.select_related('choice'),
-                            to_attr='gamechoice_links'
-                        )
-                    ),
-                    to_attr='games_with_choices'
-                )
-            ),
-            id=self.kwargs['battle_id']
-        )
-
+        battle = super().get_object()
+        # Check if the current user is a participant in this battle
+        return battle
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         battle = self.object
+        all_participants = BattleParticipant.objects.filter(battle=battle)
 
-        all_participants_qs = BattleParticipant.objects.select_related('user', 'robot').filter(battle=battle)
+        humans = [bp.user for bp in all_participants if not bp.is_bot and bp.user]
+        bots = [bp.robot for bp in all_participants if bp.is_bot and bp.robot]
 
-        # 1. Split participants
-        humans = [bp for bp in all_participants_qs if not bp.is_bot and bp.user]
-        bots = [bp for bp in all_participants_qs if bp.is_bot and bp.robot]
-
-        context['human_participants'] = humans
-        context['bot_participants'] = bots
-        context['all_participants'] = humans + bots
-
-        # 2. Prepare game data
+        context['players'] = [('human', h) for h in humans] + [('robot', b) for b in bots]
         context['battle_games'] = [
             {
                 'id': bg.game.id,
                 'slug': bg.game.slug,
                 'quantity': bg.quantity,
                 'name': bg.game.name,
-                'image_url': bg.game.image.url if bg.game.image else ''
+                'image_url': bg.game.image.url if bg.game.image else '',
+                'battle_id': self.object.id
             }
-            for bg in self.object.battle_games.all().order_by("order")
+            for bg in self.object.battle_games.all()
         ]
+        context['battle_games_json'] = mark_safe(
+            json.dumps(context['battle_games'])
+        )
 
-        context['battle_games_json'] = mark_safe(json.dumps(context['battle_games']))
-
+        # 1) Grab all prefetched games
         games = getattr(battle, 'games_with_choices', [])
         if not games:
             raise Http404("No games found for this battle.")
-        context['games'] = games
-        context['game_slugs'] = [game.slug for game in games]
-        primary_game = games[0]
-        context['game'] = primary_game
-        context['auto_spin'] = self.request.GET.get('auto_spin') == 'true'
 
-        # 3. Build round structure: [(participant, game, round_index)]
-        battle_game_qs = self.object.battle_games.select_related('game').order_by("order")
-        context['game_rounds'] = []
-        for bg in battle_game_qs:
-            game = bg.game
-            for round_num in range(bg.quantity):
-                for participant in context['all_participants']:
-                    context['game_rounds'].append({
-                        'participant': participant,
-                        'game': game,
-                        'round_index': round_num + 1
-                    })
+        # 2) Prepare detailed context for ALL games
+        context['all_games_data'] = []
+        for game in games:
+            # Choices
+            inline_choices = game.choice_fk_set.all()
+            m2m_choices = game.choices.all()
+            combined = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
 
-            # 4) User & profile info
-            user = self.request.user
-            if user.is_authenticated:
-                profile = ProfileDetails.objects.filter(user=user).first()
-                context['user_cash']  = profile.currency_amount if profile else 0
-                context['total_cost'] = primary_game.get_effective_cost()
-                # MyPreferences form
-                pref_inst = getattr(user, 'mypreferences', None)
-                context['preferenceform']     = (
-                    MyPreferencesForm(instance=pref_inst, user=user)
-                    if pref_inst else
-                    MyPreferencesForm(user=user)
-                )
-                # SpinPreference
-                spin_pref = SpinPreference.objects.get_or_create(user=user, defaults={'quick_spin': False})[0]
-                context['quick_spin']         = spin_pref.quick_spin
-                context['spinpreference']     = spin_pref
-                context['spin_preference_form']= SpinPreferenceForm(instance=spin_pref)
-            else:
-                context.update({
-                    'user_cash': None,
-                    'total_cost': None,
-                    'quick_spin': False,
-                    'spinpreference': None,
-                    'spin_preference_form': SpinPreferenceForm(),
-                    'preferenceform': MyPreferencesForm()
-                })
-
-            # 5) Random nonces for your spinner logic
-            rand_amt = random.randint(500, 1000) if context.get('quick_spin') else random.randint(150, 300)
-            context['random_amount']      = rand_amt
-            context['range_random_amount']= range(rand_amt)
-            context['random_nonces']      = [random.randint(0, 1_000_000) for _ in range(rand_amt)]
-
-            # 6) Choice‐generation logic (unchanged)
-            inline_choices = primary_game.choice_fk_set.all()
-            m2m_choices    = primary_game.choices.all()
-            combined       = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
-
-            through_qs     = GameChoice.objects.filter(game=primary_game).select_related('choice')
-            through_data   = {}
+            through_qs = GameChoice.objects.filter(game=game).select_related('choice')
+            through_data = {}
             for gc in through_qs:
                 c = gc.choice
                 through_data[c.pk] = {
@@ -3867,7 +3801,6 @@ class ActualBattleView(DetailView):
             all_choices = []
             for pk, choice in combined.items():
                 info = through_data.get(pk, {
-                    **through_data.get(pk, {}),
                     'lower_nonce': choice.lower_nonce,
                     'upper_nonce': choice.upper_nonce,
                     'value':       choice.value,
@@ -3884,19 +3817,20 @@ class ActualBattleView(DetailView):
                     'choice_text': choice.choice_text,
                     **info,
                     'image_width':  getattr(choice, 'image_width', None),
-                    'image_length': getattr(choice, 'image_length',None),
+                    'image_length': getattr(choice, 'image_length', None),
                     'get_color_display': choice.get_color_display(),
                     'get_tier_display':  choice.get_tier_display(),
                 })
 
-            context['choices'] = all_choices
+            # Randomization logic
+            rand_amt = random.randint(500, 1000) if context.get('quick_spin') else random.randint(150, 300)
+            random_nonces = [random.randint(0, 1_000_000) for _ in range(rand_amt)]
 
-            # 7) Matching nonces → choice objects
-            with_nonce = []
-            for nonce in context['random_nonces']:
+            choices_with_nonce = []
+            for nonce in random_nonces:
                 for cd in all_choices:
                     if cd['lower_nonce'] <= nonce <= cd['upper_nonce']:
-                        with_nonce.append({
+                        choices_with_nonce.append({
                             'choice':     cd['choice'],
                             'nonce':      nonce,
                             'lower_nonce':cd['lower_nonce'],
@@ -3906,50 +3840,157 @@ class ActualBattleView(DetailView):
                             'currency':   cd['currency']
                         })
                         break
-            context['choices_with_nonce'] = with_nonce
 
-            context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-            context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-            context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-            context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-            context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-            context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'),
-            is_active=1)
-            if user.is_authenticated:
-                context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=user).order_by("created_at")
-            print(battle.participants.all())
+            context['all_games_data'].append({
+                'game': game,
+                'choices_with_nonce': choices_with_nonce,
+                'random_nonces': random_nonces,
+            })
 
-            newprofile = ProfileDetails.objects.filter(is_active=1)
-            context['Profiles'] = newprofile
+        # 3) For backwards compatibility: pick a “primary” game for single‐game logic
+        primary_game = games[0]
+        context['game'] = primary_game
+        context['auto_spin'] = self.request.GET.get('auto_spin') == 'true'
 
-            for profile in context['Profiles']:
-                user = profile.user
+        # 4) User & profile info
+        user = self.request.user
+        if user.is_authenticated:
+            profile = ProfileDetails.objects.filter(user=user).first()
+            context['user_cash'] = profile.currency_amount if profile else 0
+            context['total_cost'] = primary_game.get_effective_cost()
+            # MyPreferences form
+            pref_inst = getattr(user, 'mypreferences', None)
+            context['preferenceform'] = (
+                MyPreferencesForm(instance=pref_inst, user=user)
+                if pref_inst else
+                MyPreferencesForm(user=user)
+            )
+            # SpinPreference
+            spin_pref = SpinPreference.objects.get_or_create(user=user, defaults={'quick_spin': False})[0]
+            context['quick_spin'] = spin_pref.quick_spin
+            context['spinpreference'] = spin_pref
+            context['spin_preference_form'] = SpinPreferenceForm(instance=spin_pref)
+        else:
+            context.update({
+                'user_cash': None,
+                'total_cost': None,
+                'quick_spin': False,
+                'spinpreference': None,
+                'spin_preference_form': SpinPreferenceForm(),
+                'preferenceform': MyPreferencesForm()
+            })
 
-                profile.newprofile_profile_picture_url = profile.avatar.url if profile.avatar else None
-                profile.newprofile_profile_url = profile.get_profile_url()
+        # 5) Random nonces for your spinner logic
+        rand_amt = random.randint(500, 1000) if context.get('quick_spin') else random.randint(150, 300)
+        context['random_amount'] = rand_amt
+        context['range_random_amount'] = range(rand_amt)
+        context['random_nonces'] = [random.randint(0, 1_000_000) for _ in range(rand_amt)]
 
-            if self.request.user.is_authenticated:
-                userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-            else:
-                userprofile = None
+        # 6) Choice‐generation logic (unchanged)
+        inline_choices = primary_game.choice_fk_set.all()
+        m2m_choices = primary_game.choices.all()
+        combined = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
 
-            if userprofile:
-                context['NewsProfiles'] = userprofile
-            else:
-                context['NewsProfiles'] = None
+        through_qs = GameChoice.objects.filter(game=primary_game).select_related('choice')
+        through_data = {}
+        for gc in through_qs:
+            c = gc.choice
+            through_data[c.pk] = {
+                'lower_nonce': gc.lower_nonce or c.lower_nonce,
+                'upper_nonce': gc.upper_nonce or c.upper_nonce,
+                'value':       gc.value or c.value,
+                'rarity':      gc.rarity or c.rarity,
+                'file_url':    c.file.url if c.file else '',
+                'category':    c.category or '',
+                'currency': {
+                    'symbol':   c.currency.name if c.currency else '💎',
+                    'file_url': c.currency.file.url if c.currency and c.currency.file else None
+                }
+            }
 
-            if context['NewsProfiles'] == None:
+        all_choices = []
+        for pk, choice in combined.items():
+            info = through_data.get(pk, {
+                **through_data.get(pk, {}),
+                'lower_nonce': choice.lower_nonce,
+                'upper_nonce': choice.upper_nonce,
+                'value':       choice.value,
+                'rarity':      choice.rarity,
+                'file_url':    choice.file.url if choice.file else '',
+                'category':    choice.category or '',
+                'currency': {
+                    'symbol':   choice.currency.name if choice.currency else '💎',
+                    'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                }
+            })
+            all_choices.append({
+                'choice':      choice,
+                'choice_text': choice.choice_text,
+                **info,
+                'image_width':  getattr(choice, 'image_width', None),
+                'image_length': getattr(choice, 'image_length', None),
+                'get_color_display': choice.get_color_display(),
+                'get_tier_display':  choice.get_tier_display(),
+            })
 
-                userprofile = type('', (), {})()
-                userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-                userprofile.newprofile_profile_url = None
-            else:
-                for userprofile in context['NewsProfiles']:
-                    user = userprofile.user
-                    profile = ProfileDetails.objects.filter(user=user).first()
-                    if profile:
-                        userprofile.newprofile_profile_picture_url = profile.avatar.url
-                        userprofile.newprofile_profile_url = userprofile.get_profile_url()
+        context['choices'] = all_choices
+
+        # 7) Matching nonces → choice objects
+        with_nonce = []
+        for nonce in context['random_nonces']:
+            for cd in all_choices:
+                if cd['lower_nonce'] <= nonce <= cd['upper_nonce']:
+                    with_nonce.append({
+                        'choice':     cd['choice'],
+                        'nonce':      nonce,
+                        'lower_nonce':cd['lower_nonce'],
+                        'upper_nonce':cd['upper_nonce'],
+                        'rarity':     cd['rarity'],
+                        'file_url':   cd['file_url'],
+                        'currency':   cd['currency']
+                    })
+                    break
+        context['choices_with_nonce'] = with_nonce
+
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        if user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=user).order_by("created_at")
+        print(battle.participants.all())
+
+        newprofile = ProfileDetails.objects.filter(is_active=1)
+        context['Profiles'] = newprofile
+
+        for profile in context['Profiles']:
+            user = profile.user
+            profile.newprofile_profile_picture_url = profile.avatar.url if profile.avatar else None
+            profile.newprofile_profile_url = profile.get_profile_url()
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
         return context
 
 
@@ -4112,20 +4153,12 @@ def create_outcomes_for_battle(battle):
             )
 
 
-def load_game_wrapper(request, game_id, battle_id=None):
+def load_game_wrapper(request, game_id, battle_id):
     game = get_object_or_404(Game, id=game_id)
+    battle = get_object_or_404(Battle, id=battle_id)
+    battle_game = get_object_or_404(BattleGame, game=game, battle=battle)
+    quantity = battle_game.quantity
 
-    # Get battle
-    if battle_id:
-        battle = get_object_or_404(Battle, id=battle_id)
-        battle_game = BattleGame.objects.filter(game=game, battle=battle).first()
-    else:
-        battle_game = BattleGame.objects.filter(game=game).first()
-        if not battle_game:
-            raise Http404("No BattleGame found for this Game")
-        battle = battle_game.battle
-
-    quantity = battle_game.quantity if battle_game else 1
     all_participants = BattleParticipant.objects.filter(battle=battle)
     humans = [bp.user for bp in all_participants if not bp.is_bot and bp.user]
     bots = [bp.robot for bp in all_participants if bp.is_bot and bp.robot]

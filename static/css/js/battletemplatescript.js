@@ -15,9 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     );
     console.log('Loaded battleGames:', battleGames);
 
-    // these must live in the same scope as spin():
-    let gameIndex     = 0;
-    let instanceIndex = 0;
+
 
     let persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
@@ -585,12 +583,17 @@ const targetCard = document.querySelector('.target-card');
 let choiceColor = targetCard ? targetCard.getAttribute('data-color') : 'gray';
 
 console.log('Given the choice color:', choiceColor);
-
 function randomizedContents(wrapper) {
-    const slider = wrapper.querySelector('.slider');
+    if (!wrapper) {
+        console.warn("🚫 No wrapper passed to randomizedContents");
+        return;
+    }
 
+    console.log("👀 Working on wrapper:", wrapper.id);
+
+    const slider = wrapper.querySelector('.slider');
     if (!slider) {
-        console.warn(`⚠️ No slider found in wrapper ${wrapper.id}`);
+        console.warn("⚠️ No slider found in wrapper:", wrapper.id);
         return;
     }
 
@@ -633,58 +636,73 @@ function randomizedContents(wrapper) {
 }
 
 
-function waitForSliderAndRandomize(wrapper) {
-    const observer = new MutationObserver((mutations, obs) => {
-        const slider = wrapper.querySelector('.slider');
-        if (slider) {
-            console.log("✅ Slider detected via MutationObserver for", wrapper.id);
-            obs.disconnect();
-            randomizedContents(wrapper);
-        }
+function waitForSliderAndRandomize() {
+    const wrappers = document.querySelectorAll('.wrapper');
+    wrappers.forEach(wrapper => {
+        const observer = new MutationObserver((mutations, obs) => {
+            const slider = wrapper.querySelector(`.slider`);
+            if (slider) {
+                console.log("✅ Slider detected via MutationObserver for", wrapper.id);
+                obs.disconnect();
+                randomizedContents();  // Customize this if each wrapper needs individual logic
+            }
+        });
+
+        observer.observe(wrapper, { childList: true, subtree: true });
+
+        setTimeout(() => {
+            const slider = wrapper.querySelector(`.slider`);
+            if (slider) {
+                console.log("✅ Slider found via fallback timeout for", wrapper.id);
+                randomizedContents();
+                observer.disconnect();
+            } else {
+                console.warn("❌ Slider still not found in wrapper:", wrapper.id);
+                observer.disconnect();
+            }
+        }, 300);
     });
-
-    observer.observe(wrapper, { childList: true, subtree: true });
-
-    // Fallback
-    setTimeout(() => {
-        const slider = wrapper.querySelector('.slider');
-        if (slider) {
-            console.log("✅ Slider found via fallback timeout for", wrapper.id);
-            randomizedContents(wrapper);
-        } else {
-            console.warn("❌ Slider still not found in wrapper:", wrapper.id);
-        }
-        observer.disconnect();
-    }, 300);
 }
 
 
+let gameIndex = 0;
+let instanceIndex = 0;
+let currentSpin = 0;
+let totalSpins = 1; // Adjust as needed for spins per instance
+let animationStopped = false;
+
+const battleGames = JSON.parse(document.getElementById('battle-games-data').textContent);
+console.log('Loaded battleGames:', battleGames);
 
 function spin(buttonId) {
-    if (currentSpin === totalSpins || animationStopped) {
+    if (currentSpin >= totalSpins || animationStopped) {
         currentSpin = 0;
         animationStopped = false;
-        console.log('the value of totalspins at step 3 is ' + totalSpins)
+        console.log('Reset spin state for new instance');
     }
 
     $(".spin-option").prop('disabled', true);
 
-    randomizedContents();
-    if (
-        !userContext.isSignedIn ||
-        !userContext.hasPreference ||
-        userContext.preferenceValue !== "I"
-    )
-    {   console.log('not an instant spin')
-        randomizedContents();
-        addAnimation();
-        }
+    // Randomize contents for the current game
+    const currentWrapper = document.getElementById(`game-${battleGames[gameIndex].id}`);
+    if (currentWrapper) {
+        randomizedContents(currentWrapper);
+    } else {
+        console.error(`Wrapper for game-${battleGames[gameIndex].id} not found`);
+        return;
+    }
 
-        else{
-         console.log('actually instant spin')
-        randomizedContents();
+    if (
+        !window.USER?.isAuthenticated ||
+        !window.USER?.hasPreference ||
+        window.USER?.preferenceValue !== "I"
+    ) {
+        console.log('Not an instant spin');
         addAnimation();
-        }
+    } else {
+        console.log('Instant spin');
+        addAnimation();
+    }
 
     if (buttonId === "start") {
         console.log("Regular Spin triggered");
@@ -692,25 +710,24 @@ function spin(buttonId) {
         console.log("Demo Spin triggered");
     }
 
-        let animationDuration;
-        if (!window.USER?.isAuthenticated) {
-          currentSpintype = "C";
-          console.log('currentspintype with guest')
-        } else {
-          if (typeof currentSpintype === "undefined" || currentSpintype === null) {
-            console.error("currentSpintype is not set");
-            return;
-          }
-        }
+    let animationDuration;
+    if (!window.USER?.isAuthenticated) {
+        currentSpintype = "C";
+        console.log('currentspintype with guest');
+    } else if (typeof currentSpintype === "undefined" || currentSpintype === null) {
+        console.error("currentSpintype is not set");
+        return;
+    }
+
     if (currentSpintype === 'I') {
-                animationDuration = isQuickSpin ? 500 : 1000;
-            } else if (currentSpintype === 'S') {
-                animationDuration = isQuickSpin ? 4000 : 8000;
-            } else if (currentSpintype === 'C') {
-                animationDuration = isQuickSpin ? 4500 : 9000;
-            } else {
-                animationDuration = isQuickSpin ? 4500 : 9000;
-            }
+        animationDuration = isQuickSpin ? 500 : 1000;
+    } else if (currentSpintype === 'S') {
+        animationDuration = isQuickSpin ? 4000 : 8000;
+    } else if (currentSpintype === 'C') {
+        animationDuration = isQuickSpin ? 4500 : 9000;
+    } else {
+        animationDuration = isQuickSpin ? 4500 : 9000;
+    }
 
     const buffer = 150;
     const audiobuffer = 100;
@@ -731,33 +748,33 @@ function spin(buttonId) {
         console.error('Audio failed to load:', e);
     });
 
-setTimeout(() => {
-    document.querySelectorAll('.slider').forEach((scroller) => {
-        scroller.style.animationPlayState = 'paused';
+    setTimeout(() => {
+        document.querySelectorAll('.slider').forEach((scroller) => {
+            scroller.style.animationPlayState = 'paused';
+        });
 
-    const targetCard = document.querySelector('.target-card');
+        const targetCard = document.querySelector('.target-card');
+        const startButton = document.getElementById('start');
 
-    const startButton = document.getElementById('start');
+        if (targetCard) {
+            let choiceColor = targetCard.getAttribute('data-color') || 'gray';
+            let choiceId = targetCard.getAttribute('id');
+            let gameId = startButton.getAttribute("data-game-id");
 
-    if (targetCard) {
-        let choiceColor = targetCard.getAttribute('data-color') || 'gray';
-        let choiceId = targetCard.getAttribute('id');
-        let gameId = startButton.getAttribute("data-game-id");
+            console.log('The choice color is:', choiceColor);
+            console.log('The choice id is:', choiceId);
+            console.log('The game id is:', gameId);
 
-        console.log('The choice color is:', choiceColor);
-        console.log('The choice id is:', choiceId);
-        console.log('The game id is:', gameId);
-        if (choiceColor === 'gray') {
-                console.log('gray hit')
-            playThump();
-
-        } else if (choiceColor === 'green') {
-                console.log('green hit')
-            playCasinoGreenSound();
-            $(".start").prop('disabled', true);
-        } else if (choiceColor === 'yellow') {
-                console.log('yellow hit')
-            playCasinoGreenSound();
+            if (choiceColor === 'gray') {
+                console.log('gray hit');
+                playThump();
+            } else if (choiceColor === 'green') {
+                console.log('green hit');
+                playCasinoGreenSound();
+                $(".start").prop('disabled', true);
+            } else if (choiceColor === 'yellow') {
+                console.log('yellow hit');
+                playCasinoGreenSound();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
@@ -765,10 +782,10 @@ setTimeout(() => {
                 };
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
-                console.log('processed the top hit')
-        } else if (choiceColor === 'orange') {
-                console.log('orange hit')
-            playCasinoYellowSound();
+                console.log('processed the top hit');
+            } else if (choiceColor === 'orange') {
+                console.log('orange hit');
+                playCasinoYellowSound();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
@@ -776,10 +793,10 @@ setTimeout(() => {
                 };
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
-                console.log('processed the top hit')
-        } else if (choiceColor === 'red') {
-                console.log('red hit')
-            playCasinoRedSound();
+                console.log('processed the top hit');
+            } else if (choiceColor === 'red') {
+                console.log('red hit');
+                playCasinoRedSound();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
@@ -787,10 +804,10 @@ setTimeout(() => {
                 };
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
-                console.log('processed the top hit')
-        } else if (choiceColor === 'black') {
-                console.log('black hit')
-            playCasinoBlackSound();
+                console.log('processed the top hit');
+            } else if (choiceColor === 'black') {
+                console.log('black hit');
+                playCasinoBlackSound();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
@@ -798,10 +815,10 @@ setTimeout(() => {
                 };
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
-                console.log('processed the top hit')
-        } else if (choiceColor === 'redblack') {
-                console.log('redblack hit')
-            playCasinoRedBlackSound();
+                console.log('processed the top hit');
+            } else if (choiceColor === 'redblack') {
+                console.log('redblack hit');
+                playCasinoRedBlackSound();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
@@ -809,10 +826,10 @@ setTimeout(() => {
                 };
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
-                console.log('processed the top hit')
-        } else if (choiceColor === 'redgold') {
-                console.log('redgold hit')
-            playCasinoRedGoldSound();
+                console.log('processed the top hit');
+            } else if (choiceColor === 'redgold') {
+                console.log('redgold hit');
+                playCasinoRedGoldSound();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
@@ -820,118 +837,70 @@ setTimeout(() => {
                 };
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
-                console.log('processed the top hit')
+                console.log('processed the top hit');
+            }
         }
-        }
 
-    });
+        currentSpin++;
+        console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`);
 
+        if (currentSpin < totalSpins) {
+            // Continue spinning the current instance
+            setTimeout(() => spin(buttonId), buffer);
+            setTimeout(() => {
+                randomizedContents(currentWrapper);
+                document.dispatchEvent(new CustomEvent('spinComplete', { detail: { buttonId } }));
+            }, 150);
+        } else {
+            // Finished spins for the current instance, move to next instance or game
+            instanceIndex++;
+            const thisGame = battleGames[gameIndex] || { quantity: 0, slug: '??' };
 
+            if (instanceIndex < thisGame.quantity) {
+                // More instances of the current game
+                console.log(`— Copy ${instanceIndex + 1}/${thisGame.quantity} of "${thisGame.slug}"`);
+                currentSpin = 0;
+                totalSpins = 1; // Adjust as needed
+                animationStopped = false;
+                setTimeout(() => spin(buttonId), buffer);
+            } else {
+                // Move to the next game
+                gameIndex++;
+                instanceIndex = 0;
 
-    currentSpin++;
-    console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`);
+                if (gameIndex < battleGames.length) {
+    const nextGame = battleGames[gameIndex];
+    console.log(`→ Next "${nextGame.slug}" ×${nextGame.quantity}`);
+    const btn = document.querySelector(`.start`);
+    btn.dataset.gameId = nextGame.id;
+    btn.dataset.slug = nextGame.slug;
 
-    if (currentSpin < totalSpins) {
-  // still mid-spin of the *current* copy
-  setTimeout(() => spin(buttonId), buffer);
-  setTimeout(() => {
-    randomizedContents();
-    document.dispatchEvent(new CustomEvent('spinComplete', { detail:{buttonId} }));
-  }, 150);
-
-}  else {
-  // we’ve just finished one copy of the current game
-  instanceIndex++;
-
-  // safe‐guard in case battleGames is ever empty
-  const thisGame = battleGames[gameIndex] || { quantity: 0, slug: '??' };
-
-  if (instanceIndex < thisGame.quantity) {
-    // more copies of *this* game to run
-    console.log(`— Copy ${instanceIndex+1}/${thisGame.quantity} of "${thisGame.slug}"`);
-    currentSpin      = 0;
-    totalSpins       = 1;           // or whatever per-copy spin‐count you want
-    animationStopped = false;
-    setTimeout(() => spin(buttonId), buffer);
-
-  } else {
-    // done all copies of this game → advance to next game
-    gameIndex++;
-    instanceIndex = 0;
-
-    if (gameIndex < battleGames.length) {
-      const nextGame = battleGames[gameIndex];
-      console.log(`→ Next "${nextGame.slug}" ×${nextGame.quantity}`);
-      // patch your button so spin() picks up the new game
-      const btn = document.querySelector(`.start`);
-      btn.dataset.gameId = nextGame.id;
-      btn.dataset.slug   = nextGame.slug;
-      console.log('the gameID of the next game is ' + btn.dataset.gameId + "the slug of the dataset is " + btn.dataset.slug)
-      document.querySelectorAll('.wrapper').forEach(wrapper => {
+    // Hide all wrappers
+    document.querySelectorAll('.wrapper').forEach(wrapper => {
         wrapper.style.display = 'none';
     });
 
+    // Show the next wrapper (preloaded)
     const newWrapper = document.getElementById(`game-${nextGame.id}`);
-    console.log("Looking for wrapper with ID:", `game-${nextGame.id}`);
-
     if (newWrapper) {
         newWrapper.style.display = 'block';
-        randomizedContents();
+        randomizedContents(newWrapper);
+        setTimeout(() => spin(buttonId), buffer);
     } else {
-        fetch(`/load-game-wrapper/${nextGame.id}/`)
-    .then(response => response.text())
-    .then(html => {
-        const container = document.createElement('div');
-        container.innerHTML = html;
-
-        const newWrapper = container.querySelector('.wrapper');
-        if (!newWrapper) {
-            console.error("❌ No .wrapper found in injected HTML");
-            return;
-        }
-
-        newWrapper.style.display = 'block';
-        document.querySelector('#all-wrappers-container').appendChild(newWrapper);
-        console.log(`✅ Injected wrapper for game-${nextGame.id}`);
-
-        waitForSliderAndRandomize(newWrapper);  // 🟢 safe and scoped
-
-        currentSpin = 0;
-        totalSpins = 1;
-        animationStopped = false;
-        setTimeout(() => spin(btn.id), buffer);
-    })
-    .catch(error => {
-        console.error(`❌ Failed to load wrapper for game-${nextGame.id}`, error);
-    });
-
-
+        console.error(`Wrapper for game-${nextGame.id} not found`);
     }
-
-
-
-      currentSpin      = 0;
-      totalSpins       = 1;
-      animationStopped = false;
-      setTimeout(() => spin(btn.id), buffer);
-
-    } else {
-      // **all** games & copies are done
-      console.log("🎉 All battle rounds complete.");
-      animationStopped = true;
-      setTimeout(() => {
+} else {
+    // All games and instances complete
+    console.log("🎉 All battle rounds complete.");
+    animationStopped = true;
+    setTimeout(() => {
         restoreCards();
         document.dispatchEvent(new CustomEvent('spinComplete', { detail: { buttonId } }));
-      }, 250);
-    }
-  }
+    }, 250);
 }
-
-
-
-
-}, animationDuration);
-
+            }
+        }
+    }, animationDuration);
 }
 spin(buttonId);
 
