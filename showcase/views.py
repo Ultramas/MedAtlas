@@ -2303,7 +2303,6 @@ def battle_create_outcome(request, battle_id, game_id):
     if bg.outcome_created:
         return JsonResponse({'status':'error','message':'Outcome already generated for this game in this battle.'}, status=400)
 
-
     if request.method == 'POST':
         try:
             django.db.close_old_connections()
@@ -3506,6 +3505,7 @@ class SingleBattleListView(DetailView):
 
         battle_games = battle.battle_games.all().order_by('order')
         ordered_games = [bg.game for bg in battle_games]
+        context['battle_game_data'] = battle_games
         context['bet_form'] = BetForm(battle=battle)
         context['ordered_games'] = ordered_games
         context['default_game'] = ordered_games[0] if ordered_games else None
@@ -3729,6 +3729,7 @@ from .models import (
     Titled, NavBarHeader, NavBar, LogoBase,
     InventoryObject
 )
+
 from .forms import (
     MyPreferencesForm, WagerForm,
     SpinPreferenceForm
@@ -4133,6 +4134,7 @@ class BattleCreationView(CreateView):
             context['is_full'] = False
 
         return context
+
 
 def create_outcomes_for_battle(battle):
     """
@@ -6151,6 +6153,7 @@ class NewsBackgroundView(BaseView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
+
 
 class SingleNewsView(DetailView):
     model = NewsFeed
@@ -9266,7 +9269,8 @@ class TradeItemCreateView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+       
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -9326,6 +9330,7 @@ class TradeBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -9436,6 +9441,7 @@ def contact_trader(self, request, trade_item_id):
     room = trade_item.create_room(current_user)
 
     return redirect('showcase:room', room=room.name, username=current_user.username)
+
 
 class ResponseTradeOfferCreateView(CreateView):
     model = RespondingTradeOffer

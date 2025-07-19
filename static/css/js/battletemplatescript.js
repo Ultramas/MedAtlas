@@ -675,45 +675,43 @@ const battleGames = JSON.parse(document.getElementById('battle-games-data').text
 console.log('Loaded battleGames:', battleGames);
 
 function spin(buttonId) {
+    // Reset spin state if needed
     if (currentSpin >= totalSpins || animationStopped) {
         currentSpin = 0;
         animationStopped = false;
         console.log('Reset spin state for new instance');
     }
 
+    // Disable spin options during animation
     $(".spin-option").prop('disabled', true);
 
-    // Randomize contents for the current game
-    const currentWrapper = document.getElementById(`game-${battleGames[gameIndex].id}`);
-    if (currentWrapper) {
-        randomizedContents(currentWrapper);
-    } else {
-        console.error(`Wrapper for game-${battleGames[gameIndex].id} not found`);
+    // Get the current game and wrapper
+    const currentGame = battleGames[gameIndex];
+    if (!currentGame) {
+        console.error('No current game found at gameIndex:', gameIndex);
         return;
     }
 
-    if (
-        !window.USER?.isAuthenticated ||
-        !window.USER?.hasPreference ||
-        window.USER?.preferenceValue !== "I"
-    ) {
-        console.log('Not an instant spin');
-        addAnimation();
-    } else {
-        console.log('Instant spin');
-        addAnimation();
+    const currentWrapper = document.getElementById(`game-${currentGame.id}`);
+    if (!currentWrapper) {
+        console.error(`Wrapper for game-${currentGame.id} not found`);
+        return;
     }
 
-    if (buttonId === "start") {
-        console.log("Regular Spin triggered");
-    } else if (buttonId === "start2") {
-        console.log("Demo Spin triggered");
-    }
+    // Hide all wrappers and show the current one
+    document.querySelectorAll('.wrapper').forEach(wrapper => {
+        wrapper.style.display = 'none';
+    });
+    currentWrapper.style.display = 'block';
 
+    // Randomize contents for the current game
+    randomizedContents(currentWrapper);
+
+    // Determine spin type and animation duration
     let animationDuration;
     if (!window.USER?.isAuthenticated) {
         currentSpintype = "C";
-        console.log('currentspintype with guest');
+        console.log('currentspintype set to C for guest');
     } else if (typeof currentSpintype === "undefined" || currentSpintype === null) {
         console.error("currentSpintype is not set");
         return;
@@ -729,25 +727,37 @@ function spin(buttonId) {
         animationDuration = isQuickSpin ? 4500 : 9000;
     }
 
+    // Play animation and sound
+    if (!window.USER?.isAuthenticated || !window.USER?.hasPreference || window.USER?.preferenceValue !== "I") {
+        console.log('Not an instant spin');
+        addAnimation();
+    } else {
+        console.log('Instant spin');
+        addAnimation();
+    }
+
+    if (buttonId === "start") {
+        console.log("Regular Spin triggered");
+    } else if (buttonId === "start2") {
+        console.log("Demo Spin triggered");
+    }
+
     const buffer = 150;
     const audiobuffer = 100;
     const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
-
     audio.addEventListener('loadedmetadata', () => {
         const adjustedDuration = (animationDuration + audiobuffer) / 1000;
         const originalDuration = audio.duration;
-
         if (originalDuration) {
             audio.playbackRate = originalDuration / adjustedDuration;
         }
-
         audio.play().catch((error) => console.error('Error playing audio:', error));
     });
-
     audio.addEventListener('error', (e) => {
         console.error('Audio failed to load:', e);
     });
 
+    // Handle spin completion
     setTimeout(() => {
         document.querySelectorAll('.slider').forEach((scroller) => {
             scroller.style.animationPlayState = 'paused';
@@ -755,16 +765,15 @@ function spin(buttonId) {
 
         const targetCard = document.querySelector('.target-card');
         const startButton = document.getElementById('start');
-
-        if (targetCard) {
+        if (targetCard && startButton) {
             let choiceColor = targetCard.getAttribute('data-color') || 'gray';
             let choiceId = targetCard.getAttribute('id');
             let gameId = startButton.getAttribute("data-game-id");
-
             console.log('The choice color is:', choiceColor);
             console.log('The choice id is:', choiceId);
             console.log('The game id is:', gameId);
 
+            // Handle different color outcomes
             if (choiceColor === 'gray') {
                 console.log('gray hit');
                 playThump();
@@ -772,64 +781,17 @@ function spin(buttonId) {
                 console.log('green hit');
                 playCasinoGreenSound();
                 $(".start").prop('disabled', true);
-            } else if (choiceColor === 'yellow') {
-                console.log('yellow hit');
-                playCasinoGreenSound();
-                const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1],
-                    color: choiceColor,
-                    game_id: gameId,
+            } else if (['yellow', 'orange', 'red', 'black', 'redblack', 'redgold'].includes(choiceColor)) {
+                console.log(`${choiceColor} hit`);
+                const soundFunctions = {
+                    yellow: playCasinoGreenSound,
+                    orange: playCasinoYellowSound,
+                    red: playCasinoRedSound,
+                    black: playCasinoBlackSound,
+                    redblack: playCasinoRedBlackSound,
+                    redgold: playCasinoRedGoldSound
                 };
-                createTopHit(topHitData);
-                $(".start").prop('disabled', true);
-                console.log('processed the top hit');
-            } else if (choiceColor === 'orange') {
-                console.log('orange hit');
-                playCasinoYellowSound();
-                const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1],
-                    color: choiceColor,
-                    game_id: gameId,
-                };
-                createTopHit(topHitData);
-                $(".start").prop('disabled', true);
-                console.log('processed the top hit');
-            } else if (choiceColor === 'red') {
-                console.log('red hit');
-                playCasinoRedSound();
-                const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1],
-                    color: choiceColor,
-                    game_id: gameId,
-                };
-                createTopHit(topHitData);
-                $(".start").prop('disabled', true);
-                console.log('processed the top hit');
-            } else if (choiceColor === 'black') {
-                console.log('black hit');
-                playCasinoBlackSound();
-                const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1],
-                    color: choiceColor,
-                    game_id: gameId,
-                };
-                createTopHit(topHitData);
-                $(".start").prop('disabled', true);
-                console.log('processed the top hit');
-            } else if (choiceColor === 'redblack') {
-                console.log('redblack hit');
-                playCasinoRedBlackSound();
-                const topHitData = {
-                    choice_id: targetCard.getAttribute('id').split('-')[1],
-                    color: choiceColor,
-                    game_id: gameId,
-                };
-                createTopHit(topHitData);
-                $(".start").prop('disabled', true);
-                console.log('processed the top hit');
-            } else if (choiceColor === 'redgold') {
-                console.log('redgold hit');
-                playCasinoRedGoldSound();
+                soundFunctions[choiceColor]();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
@@ -855,7 +817,6 @@ function spin(buttonId) {
             // Finished spins for the current instance, move to next instance or game
             instanceIndex++;
             const thisGame = battleGames[gameIndex] || { quantity: 0, slug: '??' };
-
             if (instanceIndex < thisGame.quantity) {
                 // More instances of the current game
                 console.log(`— Copy ${instanceIndex + 1}/${thisGame.quantity} of "${thisGame.slug}"`);
@@ -867,37 +828,34 @@ function spin(buttonId) {
                 // Move to the next game
                 gameIndex++;
                 instanceIndex = 0;
-
                 if (gameIndex < battleGames.length) {
-    const nextGame = battleGames[gameIndex];
-    console.log(`→ Next "${nextGame.slug}" ×${nextGame.quantity}`);
-    const btn = document.querySelector(`.start`);
-    btn.dataset.gameId = nextGame.id;
-    btn.dataset.slug = nextGame.slug;
+                    const nextGame = battleGames[gameIndex];
+                    console.log(`→ Next "${nextGame.slug}" ×${nextGame.quantity}`);
+                    const btn = document.querySelector(`.start`);
+                    btn.dataset.gameId = nextGame.id;
+                    btn.dataset.slug = nextGame.slug;
 
-    // Hide all wrappers
-    document.querySelectorAll('.wrapper').forEach(wrapper => {
-        wrapper.style.display = 'none';
-    });
-
-    // Show the next wrapper (preloaded)
-    const newWrapper = document.getElementById(`game-${nextGame.id}`);
-    if (newWrapper) {
-        newWrapper.style.display = 'block';
-        randomizedContents(newWrapper);
-        setTimeout(() => spin(buttonId), buffer);
-    } else {
-        console.error(`Wrapper for game-${nextGame.id} not found`);
-    }
-} else {
-    // All games and instances complete
-    console.log("🎉 All battle rounds complete.");
-    animationStopped = true;
-    setTimeout(() => {
-        restoreCards();
-        document.dispatchEvent(new CustomEvent('spinComplete', { detail: { buttonId } }));
-    }, 250);
-}
+                    // Hide all wrappers and show the next one
+                    document.querySelectorAll('.wrapper').forEach(wrapper => {
+                        wrapper.style.display = 'none';
+                    });
+                    const newWrapper = document.getElementById(`game-${nextGame.id}`);
+                    if (newWrapper) {
+                        newWrapper.style.display = 'block';
+                        randomizedContents(newWrapper);
+                        setTimeout(() => spin(buttonId), buffer);
+                    } else {
+                        console.error(`Wrapper for game-${nextGame.id} not found`);
+                    }
+                } else {
+                    // All games and instances complete
+                    console.log("🎉 All battle rounds complete.");
+                    animationStopped = true;
+                    setTimeout(() => {
+                        restoreCards();
+                        document.dispatchEvent(new CustomEvent('spinComplete', { detail: { buttonId } }));
+                    }, 250);
+                }
             }
         }
     }, animationDuration);

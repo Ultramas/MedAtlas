@@ -85,7 +85,6 @@
             justify-content: center;
             overflow: hidden;
             position: relative;
-            margin-bottom: 5em;
         }
 
         .sliderlootlist {
@@ -905,7 +904,6 @@ p.blog-meta span {
          .labeltag {
     position: absolute;
     left: 20%;
-    margin-top: 171px;
     background-color: #4299e1;
     color: white;
     padding: 8px 15px;
@@ -1098,7 +1096,7 @@ p.blog-meta span {
 
 
 	<div class="list-section pt-80 pb-80" style="background: rgba(0, 255, 255, 0); z-index: 3;">
-    <div class="container">
+    <div class="container" style="display: none;">
 
        <div class="top-hits-container" style="margin-top: 100px;">
 
@@ -1418,7 +1416,7 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
     background-position: center;
 " alt="{{ game.name }}">
 </div>
-    <div class="selectionsWrapper">
+    <div class="selectionsWrapper" style="display: none;">
 <div class="selections">
     <div class="flame-effect"></div>
     <div class="content">
@@ -1986,9 +1984,20 @@ $(document).ready(function() {
     </div>
 <!--check mypreference of user, should one exist; default is classic-->
 
-<div id="all-wrappers-container">
+<div id="all-wrappers-container" style="margin-top: 20%;">
+    {% if current_participant %}
+        <h2>
+            {% if current_participant.is_bot %}
+                Battle for Bot: {{ current_participant.robot.name }}
+            {% else %}
+                Your Battle, {{ current_participant.user.username }}
+            {% endif %}
+        </h2>
+    {% else %}
+        <h2>Your Battle</h2>
+    {% endif %}
     {% for game_data in all_games_data %}
-        <div class="wrapper" id="game-{{ game_data.game.id }}" style="{% if forloop.first %}display: block;{% else %}display: none;{% endif %}">
+        <div class="wrapper" id="game-{{ game_data.game.id }}" style="{% if forloop.first %}display: block;{% else %}display: none;{% endif %} margin-bottom: 5%;">
             <div class="containerre" style="display: flex;">
                 <div class="slider" id="slider-{{ game_data.game.id }}">
                     {% for item in game_data.choices_with_nonce %}

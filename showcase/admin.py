@@ -504,10 +504,17 @@ class TradeItemAdmin(admin.ModelAdmin):
             'classes': ('open',),
         }),
         ('Trade Item Information - Image Description', {
-            'fields': ('image', 'image_length', 'image_width','length_for_resize', 'width_for_resize',),
+            'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize',),
             'classes': ('open',),
         }),
     )
+    list_display = ('user', 'title', 'status', 'slug', 'display_image', 'is_active')
+
+    def display_image(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="100" height="100" style="object-fit: contain;" />', obj.image.url)
+        return "No Image"
+    display_image.short_description = 'Image'
 
 
 admin.site.register(TradeItem, TradeItemAdmin)
@@ -516,10 +523,19 @@ admin.site.register(TradeItem, TradeItemAdmin)
 class InventoryTradeOfferAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Inventory Trade Offer Information - Categorial Description', {
-            'fields': ('initiator', 'receiver', 'offered_items', 'requested_items',  'final_cost', 'status', 'is_active', ),
+            'fields': ('initiator', 'receiver', 'offered_items', 'requested_items', 'final_cost', 'status', 'is_active', ),
             'classes': ('open',),
         }),
     )
+    list_display = ('initiator', 'receiver', 'get_offered_items', 'get_requested_items', 'final_cost', 'status', 'is_active')
+
+    def get_offered_items(self, obj):
+        return ", ".join([str(item) for item in obj.offered_items.all()])
+    get_offered_items.short_description = 'Offered Items'
+
+    def get_requested_items(self, obj):
+        return ", ".join([str(item) for item in obj.requested_items.all()])
+    get_requested_items.short_description = 'Requested Items'
 
 
 admin.site.register(InventoryTradeOffer, InventoryTradeOfferAdmin)
@@ -551,6 +567,11 @@ class TradeOfferAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('slug', 'timestamp',)
+    list_display = ('title', 'get_trade_items', 'estimated_trading_value', 'user', 'user2', 'trade_status', 'timestamp', 'is_active')
+
+    def get_trade_items(self, obj):
+        return ", ".join([str(item) for item in obj.trade_items.all()])
+    get_trade_items.short_description = 'Trade Items'
 
 
 admin.site.register(TradeOffer, TradeOfferAdmin)

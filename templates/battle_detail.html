@@ -909,11 +909,11 @@ nav.main-menu ul li a {
         <div class="game-list">
             <h2 style="color: white;">Battle Selection</h2>
             <div class="games-grid">
-                {% for game in battle.chests.all %}
+                      {% for bg in battle_game_data %}
                     <div class="game-card">
                         <div class="game-header" style="display: flex; flex-direction: column;">
-                            {% if game.image.url %}
-                                <img src="{{ game.image.url }}" alt="{{ game.name }}" class="game-image">
+                            {% if bg.game.image.url %}
+                                <img src="{{ bg.game.image.url }}" alt="{{ bg.game.name }}" class="game-image">
                             {% else %}
                                 <div class="game-image" style="background-color: #374151; display: flex; align-items: center; justify-content: center;">
                                     <span style="color: #6b7280;">No image</span>
@@ -921,24 +921,25 @@ nav.main-menu ul li a {
                             {% endif %}
                             <div>
                             <br>
-                                <h3 class="game-title">{{ game.name }}</h3>
+                                <h3 class="game-title">{{ bg.name }}</h3>
 
-                                {% if game.category %}
-                                <p class="game-category">{{ game.category }}</p>
+                                {% if bg.category %}
+                                <p class="game-category">{{ bg.category }}</p>
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="game-details">
-                            <p>Type: {{ game.type }}</p>
-                            <br>
-                            <p>Power Meter: {{ game.power_meter }}</p>
-                            <br>
-                            <p>Cost: ${{ game.cost }}</p>
-                            <br>
-                            {% if game.discount_cost %}
-                                <p>Discount: ${{ game.discount_cost }}</p>
-                            {% endif %}
-                        </div>
+    <div class="game-details">
+        <p>Type: {{ bg.game.type }}</p>
+        <br>
+        <p>Quantity: {{ bg.quantity }}</p>
+        <br>
+        <p>Cost: {{ bg.game.cost }}</p>
+        <br>
+        {% if bg.game.discount_cost %}
+            <p>Discount: ${{ bg.game.discount_cost }}</p>
+        {% endif %}
+    </div>
+
                     </div>
                 {% endfor %}
             </div>
