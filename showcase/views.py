@@ -8031,6 +8031,7 @@ class BlogBaseView(ListView):
         return context
 
 
+@login_required
 def ajax_update_amount(request):
     profile      = request.user.profiledetails
     rd_benefit   = profile.tier.benefits \
@@ -11225,9 +11226,9 @@ class EBackgroundView(BaseView, FormView):
         paginator = Paginator(items_query, paginate_by)
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
-
-        active_order = (Order.objects.filter(user=self.request.user, ordered=False).prefetch_related('items').first())
-        context['order'] = active_order
+        if self.request.user.is_authenticated:
+            active_order = (Order.objects.filter(user=self.request.user, ordered=False).prefetch_related('items').first())
+            context['order'] = active_order
 
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")

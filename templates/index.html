@@ -2956,7 +2956,7 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
                         </svg>
                     </div>
                     <h3>Ship or Sell</h3>
-                    <p>Have your cards shipped to you or sell them for rubies to open more chests!</p>
+                    <p>Have your cards shipped to you or sell them for Rubies to open more chests!</p>
                 </div>
             </div>
 
@@ -3258,19 +3258,556 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
 
         <!-- Shop Banner -->
         {% for BackgroundImage in Advertisement %}
-        <section class="shop-banner animate-fadeInUp">
-            <h3>Daily Deal: {{ BackgroundImage.advertisementtitle }}</h3>
-            <div class="sale-percent">
-                <span>{{ BackgroundImage.relevance }}</span>
+<section class="daily-deal-banner" data-aos="fade-up">
+    <div class="deal-container">
+        <!-- Deal Badge -->
+        <div class="deal-badge">
+            <i class="fas fa-fire"></i>
+            <span>Daily Deal</span>
+        </div>
+
+        <!-- Content Section -->
+        <div class="deal-content">
+            <div class="deal-text">
+                <h2 class="deal-title">{{ BackgroundImage.advertisementtitle }}</h2>
+                <div class="deal-highlight">
+                    <span class="deal-label">Save up to</span>
+                    <span class="deal-percentage">{{ BackgroundImage.relevance }}</span>
+                </div>
+                <p class="deal-description">Limited time offer - Don't miss out on this exclusive deal!</p>
+
+                <div class="deal-actions">
+                    <a href="{{ BackgroundImage.advertisement_hyperlink }}"
+                       class="deal-button primary"
+                       target="_blank">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Get Mine Now!</span>
+                        <div class="button-shine"></div>
+                    </a>
+                    <div class="deal-timer">
+                        <i class="fas fa-clock"></i>
+                        <span>Ends in 24h</span>
+                    </div>
+                </div>
             </div>
-            <a href="{{ BackgroundImage.advertisement_hyperlink }}" class="btn-unified btn-primary" target="_blank">
-                Get Mine Now!
-            </a>
-            <img src="{{ BackgroundImage.advertisement.url }}"
-                 alt="{{ BackgroundImage.advertisementtitle }}"
-                 style="margin-left: 50%; margin-top: -50%; height: {{BackgroundImage.length_for_resize}}; width: {{BackgroundImage.width_for_resize}};">
-        </section>
-        {% endfor %}
+
+            <!-- Image Section -->
+            <div class="deal-image-container">
+                <div class="image-frame">
+                    <img src="{{ BackgroundImage.advertisement.url }}"
+                         alt="{{ BackgroundImage.advertisementtitle }}"
+                         class="deal-image"
+                         loading="lazy">
+                    <div class="image-overlay"></div>
+                </div>
+                <div class="image-glow"></div>
+            </div>
+        </div>
+
+        <!-- Decorative Elements -->
+        <div class="deal-decoration">
+            <div class="decoration-circle circle-1"></div>
+            <div class="decoration-circle circle-2"></div>
+            <div class="decoration-circle circle-3"></div>
+        </div>
+    </div>
+</section>
+{% endfor %}
+
+<style>
+/* Advertisement Section Styles */
+.daily-deal-banner {
+    margin: 2rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.deal-container {
+    background: linear-gradient(135deg,
+        rgba(26, 26, 46, 0.95) 0%,
+        rgba(15, 15, 35, 0.95) 50%,
+        rgba(26, 26, 46, 0.95) 100%);
+    border-radius: 20px;
+    border: 2px solid var(--border-glow, rgba(0, 245, 255, 0.3));
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.5),
+        0 0 50px rgba(0, 245, 255, 0.2);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    transition: all 0.4s ease;
+}
+
+.deal-container:hover {
+    transform: translateY(-5px);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.6),
+        0 0 60px rgba(0, 245, 255, 0.3);
+    border-color: var(--accent-gold, #ffd700);
+}
+
+.deal-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(0, 245, 255, 0.1), transparent);
+    animation: rotated 10s linear infinite;
+    z-index: -1;
+}
+
+/* Deal Badge */
+.deal-badge {
+    position: absolute;
+    top: -10px;
+    left: 2rem;
+    background: linear-gradient(45deg, var(--secondary-glow, #ff6b35), var(--accent-gold, #ffd700));
+    color: var(--bg-dark, #0a0a0f);
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+    z-index: 10;
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Content Layout */
+.deal-content {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+    align-items: center;
+    min-height: 200px;
+}
+
+.deal-text {
+    z-index: 2;
+    position: relative;
+}
+
+.deal-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--text-primary, #ffffff);
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    text-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+}
+
+.deal-highlight {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.deal-label {
+    color: var(--text-secondary, #b8c5d6);
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.deal-percentage {
+    font-family: 'Orbitron', monospace;
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(45deg, var(--primary-glow, #00f5ff), var(--accent-gold, #ffd700));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+    animation: percentageGlow 3s ease-in-out infinite;
+}
+
+@keyframes percentageGlow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+}
+
+.deal-description {
+    color: var(--text-secondary, #b8c5d6);
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+/* Deal Actions */
+.deal-actions {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.deal-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    background: linear-gradient(45deg, var(--primary-glow, #00f5ff), var(--secondary-glow, #ff6b35));
+    color: var(--text-primary, #ffffff);
+    text-decoration: none;
+    border-radius: 12px;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 245, 255, 0.4);
+    z-index: 1;
+}
+
+.deal-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+    z-index: -1;
+}
+
+.deal-button:hover::before {
+    left: 100%;
+}
+
+.deal-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 245, 255, 0.6);
+    color: var(--text-primary, #ffffff);
+}
+
+.deal-button:active {
+    transform: translateY(-1px);
+}
+
+.button-shine {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0) 40%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0) 60%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: translateX(-100%);
+    animation: shine 3s infinite;
+    pointer-events: none;
+}
+
+@keyframes shine {
+    0%, 90%, 100% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    95% {
+        opacity: 1;
+        transform: translateX(100%);
+    }
+}
+
+.deal-timer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--secondary-glow, #ff6b35);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.deal-timer i {
+    animation: timerPulse 1s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Image Section */
+.deal-image-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-frame {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 3px solid var(--border-glow, rgba(0, 245, 255, 0.3));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: all 0.4s ease;
+}
+
+.image-frame:hover {
+    border-color: var(--accent-gold, #ffd700);
+    box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3);
+    transform: scale(1.05);
+}
+
+.deal-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.image-frame:hover .deal-image {
+    transform: scale(1.1);
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 245, 255, 0.1) 0%,
+        transparent 50%,
+        rgba(255, 215, 0, 0.1) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.image-frame:hover .image-overlay {
+    opacity: 1;
+}
+
+.image-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(0, 245, 255, 0.2) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    animation: imageGlow 4s ease-in-out infinite;
+}
+
+@keyframes imageGlow {
+    0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* Decorative Elements */
+.deal-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.decoration-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 245, 255, 0.1) 0%, transparent 70%);
+    animation: floated 6s ease-in-out infinite;
+}
+
+.circle-1 {
+    width: 100px;
+    height: 100px;
+    top: 10%;
+    right: 10%;
+    animation-delay: 0s;
+}
+
+.circle-2 {
+    width: 60px;
+    height: 60px;
+    bottom: 20%;
+    left: 15%;
+    animation-delay: 2s;
+}
+
+.circle-3 {
+    width: 80px;
+    height: 80px;
+    top: 60%;
+    right: 20%;
+    animation-delay: 4s;
+}
+
+@keyframes floated {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .deal-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        text-align: center;
+    }
+
+    .deal-title {
+        font-size: 1.5rem;
+    }
+
+    .deal-percentage {
+        font-size: 2rem;
+    }
+
+    .deal-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .deal-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .image-frame {
+        max-width: 250px;
+        margin: 0 auto;
+    }
+
+    .deal-image {
+        height: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .deal-container {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+
+    .deal-badge {
+        left: 1rem;
+        padding: 0.4rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .deal-title {
+        font-size: 1.3rem;
+    }
+
+    .deal-percentage {
+        font-size: 1.8rem;
+    }
+}
+
+/* Animation keyframes */
+@keyframes rotated {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* AOS Animation Support */
+[data-aos="fade-up"] {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+[data-aos="fade-up"].aos-animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+</style>
+
+<script>
+// Enhanced advertisement interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click tracking for analytics
+    document.querySelectorAll('.deal-button').forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Track click event
+            console.log('Deal clicked:', this.href);
+
+            // Add click animation
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+
+    // Add intersection observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('aos-animate');
+            }
+        });
+    }, observerOptions);
+
+    // Observe all deal banners
+    document.querySelectorAll('.daily-deal-banner').forEach(banner => {
+        observer.observe(banner);
+    });
+
+    // Add countdown timer functionality (optional)
+    function updateCountdown() {
+        const timers = document.querySelectorAll('.deal-timer span');
+        timers.forEach(timer => {
+            // This would connect to your backend for real countdown
+            // For demo purposes, showing static text
+            if (timer.textContent.includes('24h')) {
+                const now = new Date();
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(0, 0, 0, 0);
+
+                const diff = tomorrow - now;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+                timer.textContent = `Ends in ${hours}h ${minutes}m`;
+            }
+        });
+    }
+
+    // Update countdown every minute
+    updateCountdown();
+    setInterval(updateCountdown, 60000);
+});
+</script>
+
 
         <!-- Testimonial Section -->
         <div class="testimonail-section animate-fadeInUp">

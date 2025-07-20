@@ -805,8 +805,18 @@
 
     .footer-box form {
         display: flex;
-        gap: var(--spacing-sm);
+        /*gap: var(--spacing-sm);*/
         margin-top: var(--spacing-md);
+    }
+
+    .footer-box.subscribe form input[type=email] {
+        border: none;
+        background-color: #012738;
+        width: 78%;
+        padding: 15px;
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+        color: #fff;
     }
 
     .footer-box input {
@@ -1155,7 +1165,7 @@
                         <p>Subscribe to our mailing list to get the latest updates.</p>
                         <form action="index.html">
                             <input type="email" placeholder="Email">
-                            <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                            <button type="submit" style="border-top-left-radius: 0px; border-bottom-left-radius: 0px;"><i class="fas fa-paper-plane"></i></button>
                         </form>
                     </div>
                 </div>

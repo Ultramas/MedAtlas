@@ -8,7 +8,7 @@
     <!-- Stripe.js -->
     <script src="https://js.stripe.com/v3/"></script>
     <!-- PayPal SDK -->
-    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=USD"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&vault=true&intent=subscription"></script>
     <style>
@@ -676,44 +676,56 @@
                 </div>
 
                 <!-- PayPal Payment Method -->
-                <div class="payment-method" id="paypal-method">
-                    <div class="divider">
-                       <div id="paypal-button-container"></div>
 
-                        <script>
-                        paypal.Buttons({
-                            createOrder: function(data, actions) {
-                                return fetch('/payments/create-order/', {
-                                    method: 'post'
-                                }).then(res => res.json())
-                                  .then(data => data.id);
-                            },
-                            onApprove: function(data, actions) {
-                                return fetch('/payments/capture-order/', {
-                                    method: 'post',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({ orderID: data.orderID })
-                                }).then(res => res.json())
-                                  .then(details => {
-                                      alert('Transaction completed');
-                                      console.log(details);
-                                  });
-                            }
-                        }).render('#paypal-button-container');
-                        </script>
 
-                    </div>
+            <!-- PayPal Payment Method -->
+            <div class="payment-method" id="paypal-method">
+                <div class="divider">
                     <div id="paypal-button-container"></div>
                 </div>
+            </div>
+
+            <script>
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return fetch('/payments/create-order/', {
+                        method: 'post',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'  // Optional: if Django requires CSRF protection
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => data.id);
+                },
+                onApprove: function(data, actions) {
+                    return fetch('/payments/capture-order/', {
+                        method: 'post',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'  // Optional: CSRF
+                        },
+                        body: JSON.stringify({
+                            orderID: data.orderID
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(details => {
+                        alert('Transaction completed by ' + details.payer.name.given_name + '!');
+                        console.log(details);
+                        // Optionally redirect or trigger follow-up logic here
+                    });
+                }
+            }).render('#paypal-button-container');
+            </script>
+
             </div>
 
             <div class="security-footer">
                 <div class="security-features">
                     <div class="security-feature">
                         <i class="fas fa-check-circle"></i>
-                        <span>100% Secure Checkout</span>
+                        <span>256-Bit Encryption</span>
                     </div>
                     <div class="security-feature">
                         <i class="fas fa-undo"></i>

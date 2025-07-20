@@ -7829,10 +7829,11 @@ class ImageCarousel(models.Model):
             print(f"IntegrityError during save: {e}")
         super().save(*args, **kwargs)
 
+
 class AdvertisementBase(models.Model):
     advertisementtitle = models.CharField(max_length=100, help_text='Advertisement title.',
                                           verbose_name="advertisement title")
-    advertisement = models.ImageField(help_text='Image of the advertisement.', upload_to='images/',
+    advertisement = models.ImageField(blank=True, null=True, help_text='Image of the advertisement.', upload_to='images/',
                                       height_field="advertisement_width",
                                       width_field="advertisement_length")
     advertisement_file = models.FileField(blank=True, null=True, upload_to='images/', verbose_name="Non-image File")
@@ -7844,14 +7845,14 @@ class AdvertisementBase(models.Model):
                                                       verbose_name="advertisement width")
     length_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Length")
     width_for_resize = models.PositiveIntegerField(default=100, verbose_name="Resized Width")
-    advertisement_position = models.IntegerField(help_text='Positioning of the advertisement.', verbose_name='Position')
+    advertisement_position = models.IntegerField(help_text='Positioning of the advertisement.', verbose_name='Position', default=0)
     page = models.TextField(verbose_name="Page Name")
-    xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position")
+    xposition = models.IntegerField(help_text='x-position.', verbose_name="x-position", default=0)
     yposition = models.IntegerField(help_text='x-position.', verbose_name="y-position")
     relevance = models.TextField(help_text='Relevance of advertisement')
     correlating_product = models.OneToOneField(Item, blank=True, null=True, on_delete=models.CASCADE)
-    type = models.CharField(max_length=200, help_text='Type of product.')
-    advertisement_hyperlink = models.TextField(verbose_name="Hyperlink")
+    type = models.CharField(blank=True, null=True, max_length=200, help_text='Type of product.')
+    advertisement_hyperlink = models.TextField(blank=True, null=True, verbose_name="Hyperlink")
     is_active = models.IntegerField(default=1,
                                     blank=True,
                                     null=True,
@@ -7866,6 +7867,10 @@ class AdvertisementBase(models.Model):
             return self.advertisementtitle
 
     def save(self, *args, **kwargs):
+        if not self.page.endswith('.html'):
+            self.page += '.html'
+        if not self.pk:
+            self.advertisement_position = AdvertisementBase.objects.filter(page=self.page).count() + 1
         if not self.id:
             super().save(*args, **kwargs)
             img = Image.open(self.advertisement.path)
@@ -7881,8 +7886,10 @@ class AdvertisementBase(models.Model):
             self.advertisement_position = AdvertisementBase.objects.filter(page=self.page).count() + 1
         super().save(*args, **kwargs)
 
+
 class Advertising(AdvertisementBase):
     pass
+
 
 class ImageBase(models.Model):
     IMAGE_MEASUREMENT_CHOICES = (
@@ -7974,6 +7981,7 @@ class ImageBase(models.Model):
         elif self.file and not self.alternate:
             self.alternate = str(self.file)
         super().save(*args, **kwargs)
+
 
 class State(models.Model):
     name = models.CharField(max_length=50)
