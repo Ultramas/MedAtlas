@@ -1,244 +1,796 @@
 {% extends 'base.html' %}
-
 {% load static %}
 
 {% block title %}
     {% for EBackgroundImage in Titles %}
-      {% if EBackgroundImage.page == 'ehome.html' %}
-         {{ EBackgroundImage.overtitle }}
-      {% endif %}
+        {% if EBackgroundImage.page == 'ehome.html' %}
+            {{ EBackgroundImage.overtitle }}
+        {% endif %}
     {% endfor %}
-{% endblock title %} 
+{% endblock title %}
 
 {% block content %}
-   
+<head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800&display=swap">
+    <style>
+        :root {
+            --primary: #00f0ff;
+            --primary-dark: #00a0a8;
+            --secondary: #ff00e5;
+            --dark: #0a0a20;
+            --darker: #050510;
+            --light: #e1e1ff;
+            --gray: #2a2a40;
+            --success: #00ff66;
+            --warning: #ffcc00;
+            --danger: #ff3366;
+            --gold: #ffd700;
+            --platinum: #e5e4e2;
+            --emerald: #50c878;
+            --diamond: #b9f2ff;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<head><!-- HTML !-->
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--darker);
+            color: var(--light);
+            background-image:
+                radial-gradient(circle at 20% 35%, rgba(0, 240, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 75% 65%, rgba(255, 0, 229, 0.15) 0%, transparent 40%);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
 
-    <link rel="stylesheet" type="text/css" href="{% static 'css/buttonclasse.css' %}">
-<style>
-    h3, h4 {
-    color: white;
-}
+        .ecommerce {
+            position: relative;
+            min-height: 100vh;
+        }
 
-h3:hover, h4:hover {
-    color: black;
-}
-/* CSS */
-.button-64 {
-  align-items: center;
-  background-image: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
-  border: 0;
-  border-radius: 8px;
-  box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
-  box-sizing: border-box;
-  color: #FFFFFF;
-  font-family: Phantomsans, sans-serif;
-  font-size: 20px;
-  justify-content: center;
-  line-height: 1em;
-  min-width: 440px;
-  padding: 3px;
-  text-decoration: none;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  white-space: nowrap;
-  cursor: pointer;
-}
+        /* BACKGROUND HERO SECTION */
+        .hero-section {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
 
-.button-64:active,
-.button-64:hover {
-  outline: 0;
-}
+        .ebackgroundimages {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.4);
+        }
 
-.button-64 span {
-  background-color: rgb(5, 6, 45);
-  padding: 16px 24px;
-  border-radius: 6px;
-  height: 100%;
-  transition: 300ms;
-}
+        .view.overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(10, 10, 32, 0.8), rgba(42, 42, 64, 0.6));
+        }
 
-.button-64:hover span {
-  background: none;
-}
+        .hero-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+        }
 
-@media (min-width: 768px) {
-  .button-64 {
-    font-size: 24px;
-    min-width: 16px;
-  }
-}
-</style>
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            color: var(--primary);
+            text-shadow: 0 0 30px rgba(0, 240, 255, 0.7);
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--light);
+            font-weight: 500;
+        }
+
+        /* MAIN CONTAINER */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* SEARCH SECTION */
+        .search-section {
+            background: linear-gradient(135deg, rgba(42, 42, 64, 0.8), rgba(10, 10, 32, 0.9));
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .searchbar {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .searchbar input {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            background: rgba(42, 42, 64, 0.8);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            border-radius: 30px;
+            color: var(--light);
+            font-family: 'Rajdhani', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .searchbar input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .searchbar input::placeholder {
+            color: rgba(225, 225, 255, 0.6);
+        }
+
+        /* NAVIGATION BAR */
+        .navbarbo {
+            background: linear-gradient(135deg, rgba(42, 42, 64, 0.9), rgba(10, 10, 32, 0.95));
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+
+        .navbarbeo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbarbeo .nav-link {
+            color: var(--light);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .navbarbeo .nav-link:hover {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--primary);
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+        .navbarbeo .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .navbarbeo .nav-link:hover::before {
+            left: 100%;
+        }
+
+        /* PAGINATION CONTROLS */
+        .pagination-controls {
+            background: rgba(10, 10, 32, 0.6);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .pagination-controls label {
+            color: var(--light);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .pagination-controls input {
+            padding: 8px 12px;
+            background: rgba(42, 42, 64, 0.8);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 6px;
+            color: var(--light);
+            font-family: 'Rajdhani', sans-serif;
+            width: 80px;
+        }
+
+        .pagination-controls input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .button-64 {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .button-64:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.3);
+        }
+
+        .button-64::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .button-64:hover::before {
+            left: 100%;
+        }
+
+        /* ORDER HISTORY GRID */
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .orderhistory {
+            background: linear-gradient(135deg, rgba(42, 42, 64, 0.8), rgba(10, 10, 32, 0.9));
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .orderhistory:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .orderhistory::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(0, 240, 255, 0.05) 0%, transparent 70%);
+            z-index: 0;
+        }
+
+        .order-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            margin-right: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .username {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .product-info {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .product-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            color: var(--light);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .order-date {
+            color: var(--warning);
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .product-image {
+            width: 100%;
+            max-width: 250px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            transition: all 0.3s ease;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .product-image:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.2);
+        }
+
+        .review-button {
+            width: 100%;
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, var(--success), var(--emerald));
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+
+        .review-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 255, 102, 0.3);
+            text-decoration: none;
+            color: white;
+        }
+
+        /* PAGINATION */
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 3rem 0;
+        }
+
+        .pagination {
+            display: flex;
+            list-style: none;
+            background: linear-gradient(135deg, rgba(42, 42, 64, 0.8), rgba(10, 10, 32, 0.9));
+            border-radius: 12px;
+            padding: 0.5rem;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .page-item {
+            margin: 0 2px;
+        }
+
+        .page-link {
+            display: block;
+            padding: 10px 15px;
+            color: var(--light);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .page-link:hover {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .page-item.active .page-link {
+            background: var(--primary);
+            color: var(--dark);
+        }
+
+        .page-item.disabled .page-link {
+            color: rgba(225, 225, 255, 0.3);
+            cursor: not-allowed;
+        }
+
+        .page-item.disabled .page-link:hover {
+            background: transparent;
+            color: rgba(225, 225, 255, 0.3);
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1024px) {
+            .orders-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            }
+
+            .navbarbeo {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 0 1rem;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .orders-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .navbarbeo {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .pagination-controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 1.5rem;
+            }
+
+            .orderhistory {
+                padding: 1.5rem;
+            }
+
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .user-avatar {
+                margin-right: 0;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        /* LOADING ANIMATION */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* FADE IN ANIMATION */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
 </head>
 
 <main>
-  <div class = "ecommerce">
-          {% for EBackgroundImage in Background %}
-     <img class = "ebackgroundimages" src="{{ EBackgroundImage.cover.url }}" alt="{{ EBackgroundImage.title }}">
-       <div class="view overlay">
-                  <div class="mask rgba-white-slight"></div>
-              </div>
-    {% endfor %}
-    
-<br>
-  <br>
-<div class = "search">
-
-
-<form class = "searchbar" action="{% url 'showcase:ecommercesearch_results' %}" method="get" style="border-radius: 30px;">
-  <input name="q" type="text" placeholder="Search Products..." style="border-radius: 30px;">
-</form>
-  <br>
-  <br>
-</div>
-
-      <!--Navbar-->
-      <div class="navbarbo">
-        
-        <!-- Navbar brand -->
-        <!--<span class="navbar-brand">Categories:</span>-->
-
-        <!-- Collapse button -->
-        <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav"
-          aria-controls="basicExampleNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>-->
-
-        <!-- Collapsible content -->
-        <div class="collapse navbar-collapse" id="basicExampleNav">
-
-          <!-- Links -->
-          <ul class="navbarbeo">
-              <a class="nav-link" href="#">All     
-              </a>
-            
-              <a class="nav-link" href="#">Gold Tier </a>
-            
-              <a class="nav-link" href="#">Platinum Tier</a>
-
-              <a class="nav-link" href="#">Emerald Tier</a>
-     
-              <a class="nav-link" href="#">Diamond Tier</a>
-          </ul>
-          <!-- Links -->
-
-          <form class="form-inline">
-            <div class="md-form my-0">
-              <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-            </div>
-          </form>
-        </div>
-        <!-- Collapsible content -->
-
-      </div>         
-      <!--/.Navbar-->
-
-         <!--pagination change station-->
-<form method="GET">
-    <label for="paginate-by" style="margin-right: 1%;">
-        <p style="color: white; font-size: 10x; margin-left: 50px;">Orders per page: </p>
-    </label>
-    <input type="number" name="paginate_by" id="paginate-by" value="{{ orders.paginator.per_page }}">
-<br>
-    <button class="button-64" role="button" type="submit" title="Update Page Filter" style="
-    background-color: rgb(5, 6, 45);
-    padding: 21px 3px;
-    border-radius: 6px;
-    margin-left: 50px;
-    transition: 300ms;"><span class="text">Submit</span></button>
-</form>
-
-
-
-      <!--Section: Products v.3-->
-      <section class="text-center mb-4">
-
-        <!--Grid row-->
-        <div class="row wow fadeIn"><!--eee-->
-            {% for order_item in orders %}
-    <div class="orderhistory" style="margin-top: 10%; justify-content: center; margin-left: auto; margin-right: auto;">
-
-        <ul style="align-items: center; justify-content: center;">
-            <li style="display: flex; align-items: center; justify-content: center;">
-                {% if order_item.author_profile_picture_url %}
-                    <a href="{{ order_item.profile_url }}">
-                        <img src="{{ order_item.author_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 25px;">
-                    </a>
-                    <h2 style="padding-left: 10px; color: white;">{{ order_item.user.username }}</h2>
-                {% else %}
-                    <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 25px;">
-                {% endif %}
-            </li>
-        </ul>
-
-
-<a href="{{ order_item.author_profile_url }}">
-
-            <h3>Product Name: {{ order_item.item }}</h3>
-            <br>
-            <h4>Order Date: {{ order_item.order_date }}</h4>
-            <img src="{{order_item.image.url}}" alt="{{order_item.item}}" style="width: 50%; height: 50%; border-radius: 20px;">
-                    </a>
-<br>
-<br>
-<a href="{% url 'showcase:create_review' %}?item_slug={{ order_item.item.slug }}&orderitem_id={{ order_item.id }}" class="button-64" role="button" style="width: 100%; height: 10%; justify-content: center; align-items: center;">
-
-    <span class="text" style="justify-content: center;
-padding: 1px 3px; border-radius: 6px;">Leave Feedback</span></a>
-
-<!--how to pass the orderitem.item to the form once the button is pressed based on the associated item-->
-            <br>
+    <div class="ecommerce">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            {% for EBackgroundImage in Background %}
+                <img class="ebackgroundimages" src="{{ EBackgroundImage.cover.url }}" alt="{{ EBackgroundImage.title }}">
+                <div class="view overlay">
+                    <div class="mask rgba-white-slight"></div>
                 </div>
-{% endfor %}
+            {% endfor %}
+            <div class="hero-content">
+                <h1 class="hero-title">🛍️ ORDER HISTORY 🛍️</h1>
+                <p class="hero-subtitle">Track your purchases and leave reviews</p>
+            </div>
+        </section>
+
+        <div class="main-container">
+            <!-- Search Section -->
+            <div class="search-section">
+                <form class="searchbar" action="{% url 'showcase:ecommercesearch_results' %}" method="get">
+                    <input name="q" type="text" placeholder="🔍 Search your orders..." />
+                </form>
+            </div>
+
+            <!-- Navigation Bar -->
+            <div class="navbarbo">
+                <div class="collapse navbar-collapse" id="basicExampleNav">
+                    <ul class="navbarbeo">
+                        <a class="nav-link" href="#">🌟 All Orders</a>
+                        <a class="nav-link" href="#">🥇 Gold Tier</a>
+                        <a class="nav-link" href="#">🥈 Platinum Tier</a>
+                        <a class="nav-link" href="#">💎 Emerald Tier</a>
+                        <a class="nav-link" href="#">💠 Diamond Tier</a>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="pagination-controls">
+                <form method="GET" style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                    <label for="paginate-by">
+                        📄 Orders per page:
+                    </label>
+                    <input type="number" name="paginate_by" id="paginate-by" value="{{ orders.paginator.per_page }}" min="1" max="50">
+                    <button class="button-64" type="submit" title="Update Page Filter">
+                        <span class="text">Update</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Orders Grid -->
+            <section class="orders-section">
+                <div class="orders-grid">
+                    {% for order_item in orders %}
+                        <div class="orderhistory fade-in">
+                            <div class="order-content">
+                                <!-- User Info -->
+                                <div class="user-info">
+                                    {% if order_item.author_profile_picture_url %}
+                                        <a href="{{ order_item.profile_url }}">
+                                            <img src="{{ order_item.author_profile_picture_url }}" alt="Profile Picture" class="user-avatar">
+                                        </a>
+                                    {% else %}
+                                        <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" class="user-avatar">
+                                    {% endif %}
+                                    <h2 class="username">{{ order_item.user.username }}</h2>
+                                </div>
+
+                                <!-- Product Info -->
+                                <div class="product-info">
+                                    <a href="{{ order_item.author_profile_url }}" style="text-decoration: none;">
+                                        <h3 class="product-name">{{ order_item.item }}</h3>
+                                        <div class="order-date">📅 {{ order_item.order_date }}</div>
+                                        <img src="{{ order_item.image.url }}" alt="{{ order_item.item }}" class="product-image">
+                                    </a>
+                                </div>
+
+                                <!-- Review Button -->
+                                <a href="{% url 'showcase:create_review' %}?item_slug={{ order_item.item.slug }}&orderitem_id={{ order_item.id }}"
+                                   class="review-button">
+                                    ⭐ Leave Feedback ⭐
+                                </a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="orderhistory" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                            <div class="order-content">
+                                <h3 style="color: var(--primary); font-size: 1.5rem; margin-bottom: 1rem;">📦 No Orders Found</h3>
+                                <p style="color: var(--light); opacity: 0.8;">You haven't made any purchases yet. Start shopping to see your order history here!</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Pagination -->
+            <div class="pagination-wrapper">
+                <ul class="pagination">
+                    <li class="page-item {% if not orders.has_previous %}disabled{% endif %}">
+                        {% if orders.has_previous %}
+                            <a class="page-link" href="?page={{ orders.previous_page_number }}&paginate_by={{ orders.paginator.per_page }}" aria-label="Previous">
+                                <span aria-hidden="true">« Previous</span>
+                            </a>
+                        {% else %}
+                            <span class="page-link">« Previous</span>
+                        {% endif %}
+                    </li>
+
+                    {% for page in orders.paginator.page_range %}
+                        <li class="page-item {% if page == orders.number %}active{% endif %}">
+                            <a class="page-link" href="?page={{ page }}&paginate_by={{ orders.paginator.per_page }}">{{ page }}</a>
+                        </li>
+                    {% endfor %}
+
+                    <li class="page-item {% if not orders.has_next %}disabled{% endif %}">
+                        {% if orders.has_next %}
+                            <a class="page-link" href="?page={{ orders.next_page_number }}&paginate_by={{ orders.paginator.per_page }}" aria-label="Next">
+                                <span aria-hidden="true">Next »</span>
+                            </a>
+                        {% else %}
+                            <span class="page-link">Next »</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
         </div>
-        <!--Grid row-->
+    </div>
 
-      </section>
-      <!--Section: Products v.3-->
+    {% block javascript %}
+        <script src="{% static 'css/js/script.js' %}"></script>
+        <script src="{% static 'css/js.darkmode.js' %}"></script>
+        <script src="{% static 'css/js/navbar.js' %}"></script>
+        <script src="{% static 'css/js/scroll.js' %}"></script>
 
-      <!--Pagination-->
-      <div class="d-flex justify-content-center wow fadeIn">
-        <ul class="pagination pg-blue">
-<li class="page-item {% if not orders.has_previous %}disabled{% endif %}">
-    {% if orders.has_previous %}
-        <a class="page-link" href="?page={{ orders.previous_page_number }}&paginate_by={{ orders.paginator.per_page }}" aria-label="Previous">
-            <span aria-hidden="true">&laquo;</span>
-            <span class="sr-only">Previous</span>
-        </a>
-    {% endif %}
-</li>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                // Fade in animation for order cards
+                const observerOptions = {
+                    threshold: 0.1,
+                    rootMargin: '0px 0px -50px 0px'
+                };
 
-<!-- Page numbers -->
-{% for page in orders.paginator.page_range %}
-    <li class="page-item {% if page == orders.number %}active{% endif %}">
-        <a class="page-link" href="?page={{ page }}&paginate_by={{ orders.paginator.per_page }}">{{ page }}</a>
-    </li>
-{% endfor %}
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                        }
+                    });
+                }, observerOptions);
 
-<!-- Arrow right -->
-<li class="page-item {% if not orders.has_next %}disabled{% endif %}">
-    {% if orders.has_next %}
-        <a class="page-link" href="?page={{ orders.next_page_number }}&paginate_by={{ orders.paginator.per_page }}" aria-label="Next">
-            <span aria-hidden="true">&raquo;</span>
-            <span class="sr-only">Next</span>
-        </a>
-    {% endif %}
-</li>
-        </ul>
-      </div>
-      <!--Pagination-->
-  </div>
+                document.querySelectorAll('.fade-in').forEach(item => {
+                    observer.observe(item);
+                });
 
-  {% block javascript %}
-    <script src="{% static 'css/js/script.js' %}"></script>
-    <script src="{% static 'css/js.darkmode.js' %}"></script>
-    <script src="{% static 'css/js/navbar.js' %}"></script>
-    <script src="{% static 'css/js/scroll.js' %}"></script>
-  {% endblock javascript %}
-  </main>
-  <!--Main layout-->
+                // Enhanced hover effects for order cards
+                const orderCards = document.querySelectorAll('.orderhistory');
+                orderCards.forEach(card => {
+                    card.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-8px) scale(1.02)';
+                    });
 
+                    card.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    });
+                });
+
+                // Search input enhancement
+                const searchInput = document.querySelector('.searchbar input');
+                if (searchInput) {
+                    searchInput.addEventListener('focus', function() {
+                        this.parentElement.style.transform = 'scale(1.02)';
+                        this.parentElement.style.boxShadow = '0 10px 30px rgba(0, 240, 255, 0.2)';
+                    });
+
+                    searchInput.addEventListener('blur', function() {
+                        this.parentElement.style.transform = 'scale(1)';
+                        this.parentElement.style.boxShadow = 'none';
+                    });
+                }
+
+                // Button click effects
+                const buttons = document.querySelectorAll('.button-64, .review-button');
+                buttons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        // Create ripple effect
+                        const ripple = document.createElement('span');
+                        const rect = this.getBoundingClientRect();
+                        const size = Math.max(rect.width, rect.height);
+                        const x = e.clientX - rect.left - size / 2;
+                        const y = e.clientY - rect.top - size / 2;
+
+                        ripple.style.width = ripple.style.height = size + 'px';
+                        ripple.style.left = x + 'px';
+                        ripple.style.top = y + 'px';
+                        ripple.style.position = 'absolute';
+                        ripple.style.borderRadius = '50%';
+                        ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+                        ripple.style.transform = 'scale(0)';
+                        ripple.style.animation = 'ripple 0.6s linear';
+                        ripple.style.pointerEvents = 'none';
+
+                        this.style.position = 'relative';
+                        this.style.overflow = 'hidden';
+                        this.appendChild(ripple);
+
+                        setTimeout(() => {
+                            ripple.remove();
+                        }, 600);
+                    });
+                });
+
+                // Add ripple animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes ripple {
+                        to {
+                            transform: scale(4);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+
+                // Pagination enhancement
+                const paginationLinks = document.querySelectorAll('.page-link');
+                paginationLinks.forEach(link => {
+                    link.addEventListener('mouseenter', function() {
+                        if (!this.parentElement.classList.contains('disabled')) {
+                            this.style.transform = 'translateY(-2px)';
+                        }
+                    });
+
+                    link.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0)';
+                    });
+                });
+
+                // Form validation for pagination
+                const paginationForm = document.querySelector('.pagination-controls form');
+                const paginationInput = document.getElementById('paginate-by');
+
+                if (paginationForm && paginationInput) {
+                    paginationForm.addEventListener('submit', function(e) {
+                        const value = parseInt(paginationInput.value);
+                        if (value < 1 || value > 50) {
+                            e.preventDefault();
+                            alert('Please enter a number between 1 and 50');
+                            paginationInput.focus();
+                        }
+                    });
+                }
+
+                console.log('Order history page loaded with', orderCards.length, 'orders');
+            });
+        </script>
+    {% endblock javascript %}
+</main>
 {% endblock content %}

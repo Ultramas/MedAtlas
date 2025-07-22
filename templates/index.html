@@ -3361,9 +3361,9 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
 
 /* Deal Badge */
 .deal-badge {
-    position: absolute;
-    top: -10px;
+    width: 130px;
     left: 2rem;
+    margin: 10px;
     background: linear-gradient(45deg, var(--secondary-glow, #ff6b35), var(--accent-gold, #ffd700));
     color: var(--bg-dark, #0a0a0f);
     padding: 0.5rem 1.5rem;
@@ -3810,48 +3810,793 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         <!-- Testimonial Section -->
-        <div class="testimonail-section animate-fadeInUp">
-            <div class="container">
-                <div class="testimonial-sliders unified-card">
-                    {% for BackgroundImage in Feedback %}
-                    {% if BackgroundImage.showcase == 1 %}
-                    <div class="single-testimonial-slider">
-                        {% for feed in FeedBacking %}
-                        {% if feed.feedback_profile_url %}
-                        <a href="{{feed.feedback_profile_url}}">
-                        {% endif %}
-                        {% endfor %}
-                        {% if feedback_objects.newprofile_profile_picture_url %}
-                        <a href="{{ feedback_objects.newprofile_profile_url }}">
-                            <div class="client-avater">
-                                <img src="{{ feedback_objects.newprofile_profile_picture_url }}" alt="Profile Picture">
+        <section class="testimonial-section" data-aos="fade-up">
+    <div class="container">
+        <!-- Section Header -->
+        <div class="testimonial-header">
+            <h2 class="sectionedtitle">
+                <span class="title-icon">💬</span>
+                What Our Players Say
+                <span class="title-icon">⭐</span>
+            </h2>
+            <p class="section-subtitle">
+                Discover why thousands of gamers trust PokeTrove for their ultimate gaming experience
+            </p>
+        </div>
+
+        <!-- Testimonial Slider Container -->
+        <div class="testimonial-slider-container">
+            <div class="testimonial-slider" id="testimonialSlider">
+                <div class="testimonial-track" id="testimonialTrack">
+                    {% for Feedback in Feed %}
+                    <div class="testimonial-slide">
+                        <div class="testimonial-card">
+                            <!-- Quote Icon -->
+                            <div class="quote-icon">
+                                <i class="fas fa-quote-left"></i>
                             </div>
-                        </a>
-                        {% else %}
-                        <div class="client-avater">
-                            <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar">
-                        </div>
-                        {% endif %}
-                        </a>
-                        <div class="client-meta">
-                            <h3>
-                                <a href="{{ feedback_objects.newprofile_profile_url }}">
-                                    {{ feedback_objects.username }}
+
+                            <!-- Testimonial Content -->
+                            <div class="testimonial-content">
+                                <p class="testimonial-text">
+                                    "{{ Feedback.comment }}"
+                                </p>
+
+                                <!-- Rating Stars -->
+                                <div class="rating-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+
+                            <!-- Client Info -->
+                            <div class="client-info">
+                                {% if Feedback.feedback_profile_url or Feedback.newprofile_profile_url %}
+                                <a href="{{ Feedback.feedback_profile_url|default:Feedback.newprofile_profile_url }}" class="client-link">
+                                {% endif %}
+                                    <div class="client-avatar">
+                                        {% if Feedback.newprofile_profile_picture_url %}
+                                        <img src="{{ Feedback.newprofile_profile_picture_url }}"
+                                             alt="{{ Feedback.username }}'s avatar"
+                                             class="avatar-image">
+                                        {% else %}
+                                        <img src="{% static 'css/images/a.jpg' %}"
+                                             alt="Default avatar"
+                                             class="avatar-image">
+                                        {% endif %}
+                                        <div class="avatar-ring"></div>
+                                    </div>
+
+                                    <div class="client-details">
+                                        <h4 class="client-name">{{ Feedback.username }}</h4>
+                                        <p class="client-title">Verified Player</p>
+                                    </div>
+                                {% if Feedback.feedback_profile_url or Feedback.newprofile_profile_url %}
                                 </a>
-                            </h3>
-                            <p class="testimonial-body">
-                                "{{ BackgroundImage.comment }}"
-                            </p>
-                            <div class="last-icon">
-                                <h6>→</h6>
+                                {% endif %}
+
+                                <div class="testimonial-badge">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+
+                            <!-- Card Decoration -->
+                            <div class="card-decoration">
+                                <div class="decoration-dot dot-1"></div>
+                                <div class="decoration-dot dot-2"></div>
+                                <div class="decoration-dot dot-3"></div>
                             </div>
                         </div>
                     </div>
-                    {% endif %}
                     {% endfor %}
                 </div>
             </div>
+
+            <!-- Navigation Controls -->
+            <div class="slider-controls">
+                <button class="slider-btn prev-btn" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="slider-btn next-btn" id="nextBtn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Pagination Dots -->
+            <div class="slider-pagination" id="sliderPagination">
+                <!-- Dots will be generated by JavaScript -->
+            </div>
         </div>
+    </div>
+</section>
+
+<style>
+/* Testimonial Section */
+.testimonial-section {
+    padding: 4rem 0;
+    background: linear-gradient(
+        135deg,
+        var(--bg-dark, #0a0a0f) 0%,
+        var(--bg-card, #1a1a2e) 50%,
+        var(--bg-dark, #0a0a0f) 100%
+    );
+    position: relative;
+    overflow: hidden;
+}
+
+.testimonial-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(0, 245, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 107, 53, 0.05) 0%, transparent 50%);
+    z-index: 1;
+}
+
+/* Section Header */
+.testimonial-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.sectionedtitle {
+    font-family: 'Orbitron', monospace;
+    font-size: 2.5rem;
+    font-weight: 900;
+    background: linear-gradient(45deg, var(--primary-glow, #00f5ff), var(--accent-gold, #ffd700));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.title-icon {
+    font-size: 2rem;
+    filter: drop-shadow(0 0 10px var(--accent-gold, #ffd700));
+}
+
+.section-subtitle {
+    color: var(--text-secondary, #b8c5d6);
+    font-size: 1.1rem;
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
+
+    line-height: 1.6;
+}
+
+/* Slider Container */
+.testimonial-slider-container {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.testimonial-slider {
+    overflow: hidden;
+    border-radius: 20px;
+    position: relative;
+}
+
+.testimonial-track {
+    display: flex;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+}
+
+.testimonial-slide {
+    min-width: 100%;
+    padding: 0 1rem;
+    box-sizing: border-box;
+}
+
+/* Testimonial Card */
+.testimonial-card {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 100%
+    );
+    backdrop-filter: blur(20px);
+    border: 2px solid var(--border-glow, rgba(0, 245, 255, 0.3));
+    border-radius: 20px;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.3),
+        0 0 50px rgba(0, 245, 255, 0.1);
+    transition: all 0.4s ease;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.testimonial-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(0, 245, 255, 0.1), transparent);
+    animation: rotatede 15s linear infinite;
+    z-index: -1;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-gold, #ffd700);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 60px rgba(255, 215, 0, 0.2);
+}
+
+/* Quote Icon */
+.quote-icon {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(45deg, var(--primary-glow, #00f5ff), var(--secondary-glow, #ff6b35));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 15px rgba(0, 245, 255, 0.3);
+}
+
+.quote-icon i {
+    color: white;
+    font-size: 1.2rem;
+}
+
+/* Testimonial Content */
+.testimonial-content {
+    margin: 3rem 0 2rem 0;
+    text-align: center;
+}
+
+.testimonial-text {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--text-primary, #ffffff);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.rating-stars {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.rating-stars i {
+    color: var(--accent-gold, #ffd700);
+    font-size: 1.1rem;
+    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
+    animation: starTwinkle 2s ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * 0.2s);
+}
+
+.rating-stars i:nth-child(1) { --i: 0; }
+.rating-stars i:nth-child(2) { --i: 1; }
+.rating-stars i:nth-child(3) { --i: 2; }
+.rating-stars i:nth-child(4) { --i: 3; }
+.rating-stars i:nth-child(5) { --i: 4; }
+
+@keyframes starTwinkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* Client Info */
+.client-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.client-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+    flex: 1;
+    transition: all 0.3s ease;
+}
+
+.client-link:hover {
+    transform: translateX(5px);
+}
+
+.client-avatar {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+}
+
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-glow, #00f5ff);
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.client-link:hover .avatar-image {
+    border-color: var(--accent-gold, #ffd700);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+}
+
+.avatar-ring {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 70px;
+    height: 70px;
+    border: 2px solid transparent;
+    border-top: 2px solid var(--primary-glow, #00f5ff);
+    border-radius: 50%;
+    animation: avatarSpin 3s linear infinite;
+}
+
+@keyframes avatarSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.client-details {
+    flex: 1;
+}
+
+.client-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-glow, #00f5ff);
+    margin-bottom: 0.25rem;
+    transition: color 0.3s ease;
+}
+
+.client-link:hover .client-name {
+    color: var(--accent-gold, #ffd700);
+}
+
+.client-title {
+    color: var(--text-secondary, #b8c5d6);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.testimonial-badge {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.testimonial-badge i {
+    color: white;
+    font-size: 0.9rem;
+}
+
+/* Card Decoration */
+.card-decoration {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+}
+
+.decoration-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--primary-glow, #00f5ff);
+    border-radius: 50%;
+    animation: dotFloat 3s ease-in-out infinite;
+}
+
+.dot-1 {
+    top: 20px;
+    right: 30px;
+    animation-delay: 0s;
+}
+
+.dot-2 {
+    top: 40px;
+    right: 50px;
+    animation-delay: 1s;
+}
+
+.dot-3 {
+    top: 60px;
+    right: 20px;
+    animation-delay: 2s;
+}
+
+@keyframes dotFloat {
+    0%, 100% { transform: translateY(0px); opacity: 0.5; }
+    50% { transform: translateY(-10px); opacity: 1; }
+}
+
+/* Slider Controls */
+.slider-controls {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.slider-btn {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(45deg, var(--primary-glow, #00f5ff), var(--secondary-glow, #ff6b35));
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    pointer-events: all;
+    box-shadow: 0 5px 15px rgba(0, 245, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slider-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(0, 245, 255, 0.5);
+}
+
+.slider-btn:active {
+    transform: scale(0.95);
+}
+
+.prev-btn {
+    transform: translateX(-25px);
+}
+
+.next-btn {
+    transform: translateX(25px);
+}
+
+/* Pagination */
+.slider-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.pagination-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.pagination-dot.active {
+    background: var(--primary-glow, #00f5ff);
+    border-color: var(--accent-gold, #ffd700);
+    box-shadow: 0 0 15px rgba(0, 245, 255, 0.5);
+}
+
+.pagination-dot:hover {
+    background: var(--accent-gold, #ffd700);
+    transform: scale(1.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sectionedtitle {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .testimonial-card {
+        padding: 2rem 1.5rem;
+        min-height: 250px;
+    }
+
+    .testimonial-text {
+        font-size: 1.1rem;
+    }
+
+    .client-avatar {
+        width: 50px;
+        height: 50px;
+    }
+
+    .avatar-ring {
+        width: 60px;
+        height: 60px;
+        top: -5px;
+        left: -5px;
+    }
+
+    .slider-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .prev-btn {
+        transform: translateX(-10px);
+    }
+
+    .next-btn {
+        transform: translateX(10px);
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 1rem;
+    }
+
+    .testimonial-slide {
+        padding: 0 0.5rem;
+    }
+
+    .testimonial-card {
+        padding: 1.5rem 1rem;
+    }
+
+    .client-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    .client-link {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* Animation keyframes */
+@keyframes rotatede {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+// Professional Testimonial Slider
+class TestimonialSlider {
+    constructor(sliderId) {
+        this.slider = document.getElementById(sliderId);
+        this.track = document.getElementById('testimonialTrack');
+        this.slides = this.track.querySelectorAll('.testimonial-slide');
+        this.prevBtn = document.getElementById('prevBtn');
+        this.nextBtn = document.getElementById('nextBtn');
+        this.pagination = document.getElementById('sliderPagination');
+
+        this.currentSlide = 0;
+        this.totalSlides = this.slides.length;
+        this.isAnimating = false;
+        this.autoPlayInterval = null;
+        this.autoPlayDelay = 5000; // 5 seconds
+
+        this.init();
+    }
+
+    init() {
+        if (this.totalSlides === 0) return;
+
+        this.createPagination();
+        this.bindEvents();
+        this.updateSlider();
+        this.startAutoPlay();
+    }
+
+    createPagination() {
+        this.pagination.innerHTML = '';
+        for (let i = 0; i < this.totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'pagination-dot';
+            dot.addEventListener('click', () => this.goToSlide(i));
+            this.pagination.appendChild(dot);
+        }
+    }
+
+    bindEvents() {
+        this.prevBtn.addEventListener('click', () => this.prevSlide());
+        this.nextBtn.addEventListener('click', () => this.nextSlide());
+
+        // Touch/swipe support
+        let startX = 0;
+        let endX = 0;
+
+        this.slider.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+
+        this.slider.addEventListener('touchend', (e) => {
+            endX = e.changedTouches[0].clientX;
+            this.handleSwipe(startX, endX);
+        });
+
+        // Mouse drag support
+        let isDragging = false;
+        let startMouseX = 0;
+
+        this.slider.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startMouseX = e.clientX;
+            this.slider.style.cursor = 'grabbing';
+        });
+
+        this.slider.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+        });
+
+        this.slider.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            this.slider.style.cursor = 'grab';
+            this.handleSwipe(startMouseX, e.clientX);
+        });
+
+        // Pause auto-play on hover
+        this.slider.addEventListener('mouseenter', () => this.stopAutoPlay());
+        this.slider.addEventListener('mouseleave', () => this.startAutoPlay());
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') this.prevSlide();
+            if (e.key === 'ArrowRight') this.nextSlide();
+        });
+    }
+
+    handleSwipe(startX, endX) {
+        const threshold = 50;
+        const diff = startX - endX;
+
+        if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+                this.nextSlide();
+            } else {
+                this.prevSlide();
+            }
+        }
+    }
+
+    goToSlide(index) {
+        if (this.isAnimating || index === this.currentSlide) return;
+
+        this.currentSlide = index;
+        this.updateSlider();
+    }
+
+    nextSlide() {
+        if (this.isAnimating) return;
+
+        this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
+        this.updateSlider();
+    }
+
+    prevSlide() {
+        if (this.isAnimating) return;
+
+        this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
+        this.updateSlider();
+    }
+
+    updateSlider() {
+        this.isAnimating = true;
+
+        // Update track position
+        const translateX = -this.currentSlide * 100;
+        this.track.style.transform = `translateX(${translateX}%)`;
+
+        // Update pagination
+        const dots = this.pagination.querySelectorAll('.pagination-dot');
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === this.currentSlide);
+        });
+
+        // Update button states
+        this.prevBtn.style.opacity = this.totalSlides > 1 ? '1' : '0.5';
+        this.nextBtn.style.opacity = this.totalSlides > 1 ? '1' : '0.5';
+
+        // Reset animation flag
+        setTimeout(() => {
+            this.isAnimating = false;
+        }, 500);
+    }
+
+    startAutoPlay() {
+        if (this.totalSlides <= 1) return;
+
+        this.stopAutoPlay();
+        this.autoPlayInterval = setInterval(() => {
+            this.nextSlide();
+        }, this.autoPlayDelay);
+    }
+
+    stopAutoPlay() {
+        if (this.autoPlayInterval) {
+            clearInterval(this.autoPlayInterval);
+            this.autoPlayInterval = null;
+        }
+    }
+
+    destroy() {
+        this.stopAutoPlay();
+        // Remove event listeners and clean up
+    }
+}
+
+// Initialize slider when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const testimonialSlider = new TestimonialSlider('testimonialSlider');
+
+    // Add entrance animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe testimonial section
+    const testimonialSection = document.querySelector('.testimonial-section');
+    if (testimonialSection) {
+        testimonialSection.style.opacity = '0';
+        testimonialSection.style.transform = 'translateY(30px)';
+        testimonialSection.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        observer.observe(testimonialSection);
+    }
+});
+</script>
+
 
         <!-- Footer -->
         <div class="footer-area animate-fadeInUp">
@@ -3873,8 +4618,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             <ul>
                                 <li>On File</li>
                                 <li><a href="{% url 'showcase:contact' %}" target="_blank">PokeTroveCompany@gmail.com</a></li>
-                                <li>916-932-6450</li>
-                                <li><a href="{% url 'showcase:home' %}" target="_blank">Find Your Community</a></li>
+                                <li>916-790-4134</li>
+                                <li><a href="{% url 'showcase:home' %}" target="_blank">PokeTrove Communities</a></li>
                             </ul>
                         </div>
                     </div>
@@ -3997,7 +4742,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             {% else %}
             <h5>Guest User</h5>
-            <h6>Please sign in to participate in the chat.</h6>
+            <h6>Please sign in to message our support agent.</h6>
             <div class="message2">
                 <div id="display-general" class="chat-messages"></div>
             </div>

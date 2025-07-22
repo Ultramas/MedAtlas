@@ -10888,7 +10888,7 @@ class BackgroundView(FormMixin, BaseView):
         context['NewGame'] = Game.objects.filter(is_active=1, filter='N')
         context['PopularGame'] = Game.objects.filter(is_active=1, filter='P')
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
-        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
+        context['Feed'] = Feedback.objects.filter(showcase=1, is_active=1).order_by("slug")
         context['Email'] = EmailField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
@@ -19946,6 +19946,7 @@ class PaymentView(EBaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")

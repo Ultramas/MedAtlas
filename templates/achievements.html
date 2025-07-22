@@ -612,11 +612,20 @@
                 {% endfor %}
             </div>
         </section>
+<br>
+<br>
     </main>
 
-    <footer>
-        <p>&copy; 2023 PokeTrove. All rights reserved.</p>
-    </footer>
+        <footer class="copyright-section">
+    <div class="container">
+        <p>{% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
+
+        {{BaseCopyrightTextField.copyright}}
+
+            {% endfor %}
+        </p>
+    </div>
+</footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

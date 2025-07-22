@@ -8009,6 +8009,7 @@ def create_profile(sender, **kwargs):
 
 post_save.connect(create_profile, sender=User)
 
+
 class Feedback(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True,
                              null=True)
