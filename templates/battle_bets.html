@@ -18,7 +18,7 @@
     <div class="form-group">
         <label for="team-select">Select Team To Win</label>
         <div class="select-wrapper" style="color: black;">
-            <label style="color: black;"> {{ bet_form.winning_team }}</label>
+            <label> {{ bet_form.winning_team }}</label>
         </div>
     </div>
     {% endif %}
@@ -99,6 +99,10 @@
         font-size: 1rem;
         appearance: none;
         cursor: pointer;
+    }
+
+    .option{
+        color: white;
     }
 
     .currency-input {

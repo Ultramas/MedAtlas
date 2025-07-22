@@ -235,7 +235,7 @@ from django.views.generic.edit import FormView
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.db.models import Prefetch
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -3861,7 +3861,87 @@ class ActualBattleView(DetailView):
                 'choices_with_nonce': choices_with_nonce,
                 'random_nonces': random_nonces,
             })
+        context['participant_wrappers'] = []
 
+        for participant in all_participants:
+            participant_data = {
+                'participant': participant,
+                'is_bot': participant.is_bot,
+                'name': participant.robot.name if participant.is_bot else participant.user.username,
+                'games': []
+            }
+
+            for game in games:
+                inline_choices = game.choice_fk_set.all()
+                m2m_choices = game.choices.all()
+                combined = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
+
+                through_qs = GameChoice.objects.filter(game=game).select_related('choice')
+                through_data = {}
+                for gc in through_qs:
+                    c = gc.choice
+                    through_data[c.pk] = {
+                        'lower_nonce': gc.lower_nonce or c.lower_nonce,
+                        'upper_nonce': gc.upper_nonce or c.upper_nonce,
+                        'value': gc.value or c.value,
+                        'rarity': gc.rarity or c.rarity,
+                        'file_url': c.file.url if c.file else '',
+                        'category': c.category or '',
+                        'currency': {
+                            'symbol': c.currency.name if c.currency else '💎',
+                            'file_url': c.currency.file.url if c.currency and c.currency.file else None
+                        }
+                    }
+
+                all_choices = []
+                for pk, choice in combined.items():
+                    info = through_data.get(pk, {
+                        'lower_nonce': choice.lower_nonce,
+                        'upper_nonce': choice.upper_nonce,
+                        'value': choice.value,
+                        'rarity': choice.rarity,
+                        'file_url': choice.file.url if choice.file else '',
+                        'category': choice.category or '',
+                        'currency': {
+                            'symbol': choice.currency.name if choice.currency else '💎',
+                            'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                        }
+                    })
+                    all_choices.append({
+                        'choice': choice,
+                        'choice_text': choice.choice_text,
+                        **info,
+                        'image_width': getattr(choice, 'image_width', None),
+                        'image_length': getattr(choice, 'image_length', None),
+                        'get_color_display': choice.get_color_display(),
+                        'get_tier_display': choice.get_tier_display(),
+                    })
+
+                rand_amt = random.randint(150, 300)
+                random_nonces = [random.randint(0, 1_000_000) for _ in range(rand_amt)]
+
+                choices_with_nonce = []
+                for nonce in random_nonces:
+                    for cd in all_choices:
+                        if cd['lower_nonce'] <= nonce <= cd['upper_nonce']:
+                            choices_with_nonce.append({
+                                'choice': cd['choice'],
+                                'nonce': nonce,
+                                'lower_nonce': cd['lower_nonce'],
+                                'upper_nonce': cd['upper_nonce'],
+                                'rarity': cd['rarity'],
+                                'file_url': cd['file_url'],
+                                'currency': cd['currency']
+                            })
+                            break
+
+                participant_data['games'].append({
+                    'game': game,
+                    'choices_with_nonce': choices_with_nonce,
+                    'random_nonces': random_nonces,
+                })
+
+            context['participant_wrappers'].append(participant_data)
         # 3) For backwards compatibility: pick a “primary” game for single‐game logic
         primary_game = games[0]
         context['game'] = primary_game
@@ -4169,29 +4249,26 @@ def create_outcomes_for_battle(battle):
             )
 
 
-def load_game_wrapper(request, game_id, battle_id):
-    game = get_object_or_404(Game, id=game_id)
-    battle = get_object_or_404(Battle, id=battle_id)
-    battle_game = get_object_or_404(BattleGame, game=game, battle=battle)
-    quantity = battle_game.quantity
-
+@require_GET
+def load_game_wrapper(request, game_id, participant_slug):
+    battle = get_object_or_404(Battle, pk=request.session.get("current_battle_id"))
     all_participants = BattleParticipant.objects.filter(battle=battle)
-    humans = [bp.user for bp in all_participants if not bp.is_bot and bp.user]
-    bots = [bp.robot for bp in all_participants if bp.is_bot and bp.robot]
-    players = [('human', h) for h in humans] + [('robot', b) for b in bots]
 
-    # Auth-related profile context
-    user = request.user
-    if user.is_authenticated:
-        profile = ProfileDetails.objects.filter(user=user).first()
-        user_cash = profile.currency_amount if profile else 0
-        spin_pref = SpinPreference.objects.get_or_create(user=user, defaults={'quick_spin': False})[0]
-        quick_spin = spin_pref.quick_spin
+    # Find the right participant
+    for participant in all_participants:
+        name = participant.robot.name if participant.is_bot else participant.user.username
+        if slugify(name) == participant_slug:
+            break
     else:
-        user_cash = None
-        quick_spin = False
+        raise Http404("Participant not found")
 
-    # Choices
+    # Find the correct game data
+    games = getattr(battle, 'games_with_choices', [])
+    game = next((g for g in games if g.id == int(game_id)), None)
+    if not game:
+        raise Http404("Game not found")
+
+    # Match choices for the game
     inline_choices = game.choice_fk_set.all()
     m2m_choices = game.choices.all()
     combined = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
@@ -4203,71 +4280,52 @@ def load_game_wrapper(request, game_id, battle_id):
         through_data[c.pk] = {
             'lower_nonce': gc.lower_nonce or c.lower_nonce,
             'upper_nonce': gc.upper_nonce or c.upper_nonce,
-            'value':       gc.value or c.value,
-            'rarity':      gc.rarity or c.rarity,
-            'file_url':    c.file.url if c.file else '',
-            'category':    c.category or '',
+            'value': gc.value or c.value,
+            'rarity': gc.rarity or c.rarity,
+            'file_url': c.file.url if c.file else '',
+            'category': c.category or '',
             'currency': {
-                'symbol':   c.currency.name if c.currency else '💎',
+                'symbol': c.currency.name if c.currency else '💎',
                 'file_url': c.currency.file.url if c.currency and c.currency.file else None
             }
         }
 
     all_choices = []
     for pk, choice in combined.items():
-        info = through_data.get(pk, {
-            'lower_nonce': choice.lower_nonce,
-            'upper_nonce': choice.upper_nonce,
-            'value':       choice.value,
-            'rarity':      choice.rarity,
-            'file_url':    choice.file.url if choice.file else '',
-            'category':    choice.category or '',
-            'currency': {
-                'symbol':   choice.currency.name if choice.currency else '💎',
-                'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
-            }
-        })
+        info = through_data.get(pk, {})
         all_choices.append({
-            'choice':      choice,
-            'choice_text': choice.choice_text,
+            'choice': choice,
             **info,
-            'image_width':  getattr(choice, 'image_width', None),
-            'image_length': getattr(choice, 'image_length', None),
-            'get_color_display': choice.get_color_display(),
-            'get_tier_display':  choice.get_tier_display(),
         })
 
-    # Randomization logic
-    rand_amt = random.randint(500, 1000) if quick_spin else random.randint(150, 300)
-    random_nonces = [random.randint(0, 1_000_000) for _ in range(rand_amt)]
-
+    rand_nonces = [random.randint(0, 1_000_000) for _ in range(200)]
     choices_with_nonce = []
-    for nonce in random_nonces:
+    for nonce in rand_nonces:
         for cd in all_choices:
             if cd['lower_nonce'] <= nonce <= cd['upper_nonce']:
                 choices_with_nonce.append({
-                    'choice':     cd['choice'],
-                    'nonce':      nonce,
-                    'lower_nonce':cd['lower_nonce'],
-                    'upper_nonce':cd['upper_nonce'],
-                    'rarity':     cd['rarity'],
-                    'file_url':   cd['file_url'],
-                    'currency':   cd['currency']
+                    'choice': cd['choice'],
+                    'nonce': nonce,
+                    'lower_nonce': cd['lower_nonce'],
+                    'upper_nonce': cd['upper_nonce'],
+                    'rarity': cd['rarity'],
+                    'file_url': cd['file_url'],
+                    'currency': cd['currency'],
                 })
                 break
 
     context = {
-        'game': game,
-        'battle': battle,
-        'players': players,
-        'quantity': quantity,
-        'choices_with_nonce': choices_with_nonce,
-        'user_cash': user_cash,
-        'quick_spin': quick_spin,
-        'random_nonces': random_nonces,
+        'game_data': {
+            'game': game,
+            'choices_with_nonce': choices_with_nonce,
+        },
+        'participant_data': {
+            'name': name,
+        }
     }
 
-    return render(request, "partials/game_wrapper.html", context)
+    html = render_to_string("partials/game_wrapper.html", context, request=request)
+    return HttpResponse(html)
 
 
 def join_battle(request):

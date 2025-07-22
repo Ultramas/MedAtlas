@@ -1985,47 +1985,45 @@ $(document).ready(function() {
 <!--check mypreference of user, should one exist; default is classic-->
 
 <div id="all-wrappers-container" style="margin-top: 20%;">
-    {% if current_participant %}
-        <h2>
-            {% if current_participant.is_bot %}
-                Battle for Bot: {{ current_participant.robot.name }}
-            {% else %}
-                Your Battle, {{ current_participant.user.username }}
-            {% endif %}
-        </h2>
-    {% else %}
-        <h2>Your Battle</h2>
-    {% endif %}
-    {% for game_data in all_games_data %}
-        <div class="wrapper" id="game-{{ game_data.game.id }}" style="{% if forloop.first %}display: block;{% else %}display: none;{% endif %} margin-bottom: 5%;">
-            <div class="containerre" style="display: flex;">
-                <div class="slider" id="slider-{{ game_data.game.id }}">
-                    {% for item in game_data.choices_with_nonce %}
-                        {% with choice=item.choice %}
-                            {% with color=game_data.game|get_color:choice %}
-                                <div id="{{ choice.choice_text }}" class="cards" style="background: url({% static 'css/images/'|add:color|add:'.png' %});">
-                                    <div class="lootelement"
-                                         data-price="{{ choice.value }}"
-                                         data-currency-file="{{ item.currency.file_url }}"
-                                         data-currency-symbol="{{ item.currency.symbol }}">
-                                        {% if choice.file.url %}
-                                            <div class="sliderImg"
-                                                 style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
-                                        {% endif %}
-                                        <div class="sliderPrice"><b class="innerprice">{{ choice.value }}</b>💎</div>
-                                    </div>
+    {% for participant_data in participant_wrappers %}
+    <div class="participant-wrapper">
+        <h3>{{ participant_data.name }}</h3>
+        {% for game_data in participant_data.games %}
+           <div class="wrapper" id="game-{{ game_data.game.id }}-{{ participant_data.name|slugify }}">
+    <div class="containerre" style="display: flex;">
+        <div class="slider" id="slider-{{ game_data.game.id }}-{{ participant_data.name|slugify }}">
+            {% for item in game_data.choices_with_nonce %}
+                {% with choice=item.choice %}
+                    {% with color=game_data.game|get_color:choice %}
+                        <div class="cards" style="background: url({% static 'css/images/'|add:color|add:'.png' %});">
+                            <div class="lootelement"
+                                 data-price="{{ choice.value }}"
+                                 data-currency-file="{{ item.currency.file_url }}"
+                                 data-currency-symbol="{{ item.currency.symbol }}">
+                                {% if choice.file.url %}
+                                    <div class="sliderImg"
+                                         style="background-image: url({{ choice.file.url }}); background-repeat: no-repeat; background-position: center; background-size: contain; height: 10em; width: 100%;"></div>
+                                {% endif %}
+                                <div class="sliderPrice">
+                                    <b class="innerprice">{{ choice.value }}</b>{{ item.currency.symbol }}
                                 </div>
-                            {% endwith %}
-                        {% endwith %}
-                    {% endfor %}
-                </div>
-                <img id="selector" class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
-            </div>
-            <div class="labeltag">
-                <h4>{{ game_data.game.name }}</h4>
-            </div>
+                            </div>
+                        </div>
+                    {% endwith %}
+                {% endwith %}
+            {% endfor %}
         </div>
-    {% endfor %}
+        <img class="spinner-arrow" src="{% static 'css/images/opener_selector.jpg' %}" alt="spinner-arrow">
+    </div>
+    <div class="labeltag">
+        <h4>{{ game_data.game.name }}</h4>
+    </div>
+</div>
+
+        {% endfor %}
+    </div>
+{% endfor %}
+
 </div>
 
     <script>
@@ -2411,6 +2409,35 @@ function showGameUI(gameId) {
 
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const participants = {{ participant_wrappers|safe }};
+
+    participants.forEach(participant => {
+        const slugifiedName = participant.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const containerId = `participant-wrapper-${slugifiedName}`;
+
+        participant.games.forEach(gameData => {
+            const gameId = gameData.game.id;
+
+            fetch(`/load-game-wrapper/${gameId}/${slugifiedName}/`)
+                .then(response => response.text())
+                .then(html => {
+                    const container = document.getElementById(containerId);
+                    if (container) {
+                        container.insertAdjacentHTML('beforeend', html);
+                        console.log(`✅ Injected wrapper for game-${gameId} → ${containerId}`);
+                    } else {
+                        console.warn(`❌ No container found for ${containerId}`);
+                    }
+                })
+                .catch(error => {
+                    console.error(`❌ Failed to load wrapper for game-${gameId}:`, error);
+                });
+        });
+    });
+});
+</script>
 
 </body>
 </html>

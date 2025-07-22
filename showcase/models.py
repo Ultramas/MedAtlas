@@ -1571,6 +1571,7 @@ class Clickable(models.Model):
 
         super().save(*args, **kwargs)
 
+
 class UserClickable(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     clickable = models.ForeignKey(Clickable, on_delete=models.CASCADE)

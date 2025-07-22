@@ -286,11 +286,13 @@ class BenefitsAdmin(admin.ModelAdmin):
 
 class BenefitsInline(admin.TabularInline):
     model = Benefits
-    extra = 1
+    extra = 0
+    fields = ('benefit', 'multiplier', 'is_active')
+    show_change_link = True
 
 
 class TierAdmin(admin.ModelAdmin):
-    list_display = ('tier', 'lower_bound', 'upper_bound', 'is_active',)
+    list_display = ('id',  '__str__', 'tier', 'lower_bound', 'upper_bound', 'is_active',)
     inlines = [BenefitsInline]
     fieldsets = (
         ('Membership Information', {
@@ -299,6 +301,7 @@ class TierAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('mfg_date',)
+
     @admin.display(description='Sprite')
     def file_thumbnail(self, obj):
         if not obj.file:

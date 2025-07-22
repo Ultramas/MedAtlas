@@ -405,6 +405,7 @@ urlpatterns = [
     path('battle_detail/<int:battle_id>/', views.SingleBattleListView.as_view(), name='battle_detail'),
     path("load-game-wrapper/<int:game_id>/", views.load_game_wrapper, name="load_game_wrapper"),
     path('load-game-wrapper/<int:game_id>/<int:battle_id>/', views.load_game_wrapper, name='load_game_wrapper'),
+    path("load-game-wrapper/<int:game_id>/<slug:participant_slug>/", views.load_game_wrapper, name="load_game_wrapper"),
     path('battle/<int:battle_id>/join/', views.join_battle, name='join_battle'),
     path('battle/<int:battle_id>/add_robot/', views.add_robot, name='add_robot'),
     path('actualbattle/<int:battle_id>/', views.ActualBattleView.as_view(), name='actualbattle'),
