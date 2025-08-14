@@ -159,10 +159,17 @@ class ProfileForm(forms.ModelForm):
         model = ProductReview
         fields = '__all__'"""
 
+
 class ShippingForm(forms.ModelForm):
     class Meta:
         model = UserProfile2
-        fields = ('first_name', 'last_name', 'address', 'city', 'state', 'country', 'zip_code', 'phone_number', 'profile_picture')
+        fields = (
+            'first_name', 'last_name', 'address', 'city', 'state',
+            'country', 'zip_code', 'phone_number', 'profile_picture'
+        )
+        widgets = {
+            'country': forms.Select(attrs={'class': 'form-control'})  # override with plain select
+        }
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -184,6 +191,7 @@ class ShippingForm(forms.ModelForm):
                 user_profile.user = self.user
                 user_profile.save()
         return user_profile
+
 
 class StaffJoin(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Lemon Sauce'}))
@@ -789,18 +797,24 @@ PAYMENT_CHOICES = (
     ('C', 'Card')
 )
 
+
 class CheckoutForm(forms.Form):
     shipping_address = forms.CharField(required=False)
     shipping_address2 = forms.CharField(required=False)
-    shipping_country = CountryField(blank_label='(select country)').formfield(required=False,
-                                                                              widget=CountrySelectWidget(attrs={
-                                                                                  'class': 'custom-select d-block w-100'}))
+    shipping_country = CountryField(blank_label='(select country)').formfield(
+        required=False,
+        widget=forms.Select(attrs={'class': 'custom-select d-block w-100'})
+    )
+
     shipping_zip = forms.CharField(required=False)
 
     billing_address = forms.CharField(required=False)
     billing_address2 = forms.CharField(required=False)
-    billing_country = CountryField(blank_label='(select country)').formfield(required=False, widget=CountrySelectWidget(
-        attrs={'class': 'custom-select d-block w-100'}))
+    billing_country = CountryField(blank_label='(select country)').formfield(
+        required=False,
+        widget=forms.Select(attrs={'class': 'custom-select d-block w-100'})
+    )
+
     billing_zip = forms.CharField(required=False)
 
     same_billing_address = forms.BooleanField(required=False)
@@ -819,6 +833,7 @@ class CheckoutForm(forms.Form):
             self.fields['payment_option'].required = False
             self.fields['payment_option'].widget = forms.HiddenInput()
 
+
 class CouponForm(forms.Form):
     code = forms.CharField(widget=forms.TextInput(attrs={
         'class': 'form-control',
@@ -826,6 +841,7 @@ class CouponForm(forms.Form):
         'aria-label': 'Recipient\'s username',
         'aria-describedby': 'basic-addon2'
     }))
+
 
 class GiftCodeForm(forms.Form):
     code = forms.CharField(max_length=64)

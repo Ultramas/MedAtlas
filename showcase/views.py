@@ -19723,6 +19723,7 @@ def check_and_deduct_currency(user, amount_required):
     except ProfileDetails.DoesNotExist:
         return False, 0
 
+
 class CheckoutView(EBaseView):
     model = CheckoutBackgroundImage
     template_name = "checkout.html"
@@ -19759,11 +19760,13 @@ class CheckoutView(EBaseView):
                 context['profile_pk'] = profile.pk
                 context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
-        context['address'] = Address.objects.filter(is_active=1, user=self.request.user).first()
+        if self.request.user.is_authenticated:
+            context['address'] = Address.objects.filter(is_active=1, user=self.request.user).first()
         context.update(kwargs)
 
-        user_profile_exists = UserProfile2.objects.filter(user=self.request.user, is_active=1).exists()
-        context['user_profile_exists'] = user_profile_exists
+        if self.request.user.is_authenticated:
+            user_profile_exists = UserProfile2.objects.filter(user=self.request.user, is_active=1).exists()
+            context['user_profile_exists'] = user_profile_exists
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -19791,51 +19794,63 @@ class CheckoutView(EBaseView):
         return context
 
     def get(self, *args, **kwargs):
-        try:
-            order = Order.objects.get(user=self.request.user, ordered=False)
+        user = self.request.user
 
-            if hasattr(order, "update_total_prices"):
-                order.update_total_prices()
+        form = CheckoutForm(all_items_currency_based=False)  # default fallback form
 
+        order = None
+        currency_order = None
+
+        if user.is_authenticated:
             try:
-                currency_order = CurrencyOrder.objects.filter(user=self.request.user, ordered=False)
-                if hasattr(currency_order, "update_total_prices"):
-                    currency_order.update_total_prices()
-            except CurrencyOrder.DoesNotExist:
-                currency_order = None
+                order = Order.objects.get(user=user, ordered=False)
 
-            all_items_currency_based = self.are_all_items_currency_based(order)
-            form = CheckoutForm(all_items_currency_based=all_items_currency_based)
+                if hasattr(order, "update_total_prices"):
+                    order.update_total_prices()
 
-            shipping_address_qs = Address.objects.filter(user=self.request.user, address_type='S', is_active=1)
-            if shipping_address_qs.exists():
-                shipping_address = shipping_address_qs.first()
-                form.fields['shipping_address'].initial = shipping_address.street_address
-                form.fields['shipping_address2'].initial = shipping_address.apartment_address
-                form.fields['shipping_country'].initial = shipping_address.country
-                form.fields['shipping_zip'].initial = shipping_address.zip
+                currency_order_qs = CurrencyOrder.objects.filter(user=user, ordered=False)
+                if currency_order_qs.exists():
+                    currency_order = currency_order_qs.first()
+                    if hasattr(currency_order, "update_total_prices"):
+                        currency_order.update_total_prices()
 
-            billing_address_qs = Address.objects.filter(user=self.request.user, address_type='B', is_active=1)
-            if billing_address_qs.exists():
-                billing_address = billing_address_qs.first()
-                form.fields['billing_address'].initial = billing_address.street_address
-                form.fields['billing_address2'].initial = billing_address.apartment_address
-                form.fields['billing_country'].initial = billing_address.country
-                form.fields['billing_zip'].initial = billing_address.zip
+                all_items_currency_based = self.are_all_items_currency_based(order)
+                form = CheckoutForm(all_items_currency_based=all_items_currency_based)
 
-            context = self.get_context_data(
-                form=form,
-                couponform=CouponForm(),
-                order=order,
-                currency_order=currency_order,
-                DISPLAY_COUPON_FORM=True
-            )
+                # Try to pre-fill shipping address
+                shipping_address_qs = Address.objects.filter(user=user, address_type='S', is_active=True)
+                if shipping_address_qs.exists():
+                    shipping_address = shipping_address_qs.first()
+                    form.fields['shipping_address'].initial = shipping_address.street_address
+                    form.fields['shipping_address2'].initial = shipping_address.apartment_address
+                    form.fields['shipping_country'].initial = shipping_address.country
+                    form.fields['shipping_zip'].initial = shipping_address.zip
 
-            return render(self.request, self.template_name, context)
+                # Try to pre-fill billing address
+                billing_address_qs = Address.objects.filter(user=user, address_type='B', is_active=True)
+                if billing_address_qs.exists():
+                    billing_address = billing_address_qs.first()
+                    form.fields['billing_address'].initial = billing_address.street_address
+                    form.fields['billing_address2'].initial = billing_address.apartment_address
+                    form.fields['billing_country'].initial = billing_address.country
+                    form.fields['billing_zip'].initial = billing_address.zip
 
-        except ObjectDoesNotExist:
-            messages.info(self.request, "You do not have an active order")
-            return redirect("showcase:checkout")
+            except ObjectDoesNotExist:
+                messages.info(self.request, "You do not have an active order")
+                # You could optionally still render the checkout page without an order
+                # return redirect("showcase:checkout")  # OLD (causes infinite redirect)
+                pass  # Just continue to render empty form
+
+        context = self.get_context_data(
+            form=form,
+            couponform=CouponForm(),
+            order=order,
+            currency_order=currency_order,
+            DISPLAY_COUPON_FORM=True
+        )
+
+        return render(self.request, self.template_name, context)
+
 
     def post(self, request, *args, **kwargs):
         try:
@@ -19878,9 +19893,19 @@ class CheckoutView(EBaseView):
             use_default_shipping = form.cleaned_data.get('use_default_shipping')
             order.deduct_currency_amount()
             if use_default_shipping:
-                address_qs = Address.objects.filter(user=self.request.user, address_type='S', default=True)
+                address_qs = Address.objects.filter(
+                    user=self.request.user,
+                    address_type='S',
+                    default=True,
+                    is_active=1
+                ).exclude(
+                    street_address__isnull=True
+                ).exclude(
+                    street_address__exact=""
+                ).order_by('-id')
+
                 if address_qs.exists():
-                    shipping_address = address_qs[0]
+                    shipping_address = address_qs.first()
                     order.shipping_address = shipping_address
                     order.save()
                 else:
@@ -19910,9 +19935,20 @@ class CheckoutView(EBaseView):
                         shipping_address.default = True
                         shipping_address.save()
                 else:
-                    address_qs = Address.objects.filter(user=self.request.user, address_type='S', default=True)
+                    address_qs = Address.objects.filter(
+                        user=self.request.user,
+                        address_type='S',
+                        default=True,
+                        is_active=1
+                    ).exclude(
+                        street_address__isnull=True
+                    ).exclude(
+                        street_address__exact=""
+                    ).order_by('-id')
+
+
                     if address_qs.exists():
-                        shipping_address = address_qs[0]
+                        shipping_address = address_qs.first()
                         order.shipping_address = shipping_address
                         order.save()
                     else:
@@ -19931,9 +19967,19 @@ class CheckoutView(EBaseView):
                 order.billing_address = billing_address
                 order.save()
             elif use_default_billing:
-                address_qs = Address.objects.filter(user=self.request.user, address_type='B', default=True)
+                address_qs = Address.objects.filter(
+                    user=self.request.user,
+                    address_type='S',
+                    default=True,
+                    is_active=1
+                ).exclude(
+                    street_address__isnull=True
+                ).exclude(
+                    street_address__exact=""
+                ).order_by('-id')
+
                 if address_qs.exists():
-                    billing_address = address_qs[0]
+                    billing_address = address_qs.first()
                     order.billing_address = billing_address
                     order.save()
                 else:
@@ -19963,9 +20009,19 @@ class CheckoutView(EBaseView):
                         billing_address.default = True
                         billing_address.save()
                 else:
-                    address_qs = Address.objects.filter(user=self.request.user, address_type='S', default=True)
+                    address_qs = Address.objects.filter(
+                        user=self.request.user,
+                        address_type='S',
+                        default=True,
+                        is_active=1
+                    ).exclude(
+                        street_address__isnull=True
+                    ).exclude(
+                        street_address__exact=""
+                    ).order_by('-id')
+
                     if address_qs.exists():
-                        shipping_address = address_qs[0]
+                        shipping_address = address_qs.first()
                         order.shipping_address = shipping_address
                         order.save()
                     else:

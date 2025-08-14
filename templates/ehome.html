@@ -647,6 +647,125 @@
             font-size: 1.5rem;
             text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
         }
+
+        .product-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .spec-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .spec-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .spec-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #006aff;
+        }
+
+        .spec-value.gold { color: #f59e0b; }
+        .spec-value.platinum { color: #8b5cf6; }
+        .spec-value.emerald { color: #10b981; }
+        .spec-value.diamond { color: #3b82f6; }
+
+        .tier-full-width {
+            grid-column: 1 / -1;
+        }
+
+        .product-description {
+            font-size: 0.875rem;
+            color: #ffffff;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgb(0 127 255 / 10%);
+            border-radius: 6px;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+        }
+
+        .btn-secondary:hover {
+            background: #3b82f6;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
     </style>
 </head>
 
@@ -700,54 +819,55 @@
 
                                     <h3 class="product-title">{{item.title}}</h3>
 
-                                    <div class="card-stats">
-                                        <div class="stat">
-                                            <span class="stat-label">CONDITION</span>
-                                            <span class="stat-value">{{ item.condition }}</span>
-                                        </div>
-                                        <div class="stat">
-                                            <span class="stat-label">CATEGORY</span>
-                                            <span class="stat-value">
-                                                {% if item.category and item.category.lower == 'p' %}
-                                                    Pokemon
-                                                {% elif item.category.lower == 'm' %}
-                                                    Magic The Gathering
-                                                {% elif item.category.lower == 'b' %}
-                                                    Bakugo
-                                                {% elif item.category.lower == 'y' %}
-                                                    Yu-Gi-Oh!
-                                                {% else %}
-                                                    Other
-                                                {% endif %}
-                                            </span>
-                                        </div>
-                                        <div class="stat">
-                                            <span class="stat-label">TIER</span>
-                                            <span class="stat-value {% if item.category and item.category.lower == 'g' %}gold
-                                                {% elif item.category.lower == 'p' %}platinum
-                                                {% elif item.category.lower == 'e' %}emerald
-                                                {% else %}diamond{% endif %}">
-                                                {% if item.category and item.category.lower == 'g' %}
-                                                    Gold
-                                                {% elif item.category.lower == 'p' %}
-                                                    Platinum
-                                                {% elif item.category.lower == 'e' %}
-                                                    Emerald
-                                                {% else %}
-                                                    Diamond
-                                                {% endif %}
-                                            </span>
-                                        </div>
-                                    </div>
+                                  <div class="product-specs">
+                <div class="spec-item">
+                    <span class="spec-label">Condition</span>
+                    <span class="spec-value">{{ item.condition }}</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Category</span>
+                    <span class="spec-value">
+                        {% if item.category and item.category.lower == 'p' %}
+                            Pokemon
+                        {% elif item.category.lower == 'm' %}
+                            Magic The Gathering
+                        {% elif item.category.lower == 'b' %}
+                            Bakugo
+                        {% elif item.category.lower == 'y' %}
+                            Yu-Gi-Oh!
+                        {% else %}
+                            Other
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="spec-item tier-full-width">
+                    <span class="spec-label">Tier</span>
+                    <span class="spec-value {% if item.category and item.category.lower == 'g' %}gold
+                        {% elif item.category.lower == 'p' %}platinum
+                        {% elif item.category.lower == 'e' %}emerald
+                        {% else %}diamond{% endif %}">
+                        {% if item.category and item.category.lower == 'g' %}
+                            Gold
+                        {% elif item.category.lower == 'p' %}
+                            Platinum
+                        {% elif item.category.lower == 'e' %}
+                            Emerald
+                        {% else %}
+                            Diamond
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
 
                                     <div class="product-description">
                                         {{ item.description }}
                                     </div>
 
-                                    <div class="action-buttons">
-                                            <span class="cyber-button-text" style="font-size: 24px;">ADD TO CART</span>
-                                            <span class="cyber-button-glitch"></span>
-                                    </div>
+
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="addToCart(this)">Add to Cart</button>
+                    </div>
                                 </div>
                             </div>
                         </a>

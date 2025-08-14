@@ -1054,7 +1054,7 @@ class ProfileDetails(models.Model):
     trader = models.BooleanField(default=False, null=True)
     partner = models.BooleanField(default=False, null=True)
     membership = models.ForeignKey(Membership, blank=True, null=True, on_delete=models.CASCADE)
-    tier = models.ForeignKey('Tier', blank=True, null=True, on_delete=models.CASCADE, default='F')
+    tier = models.ForeignKey('Tier', blank=True, null=True, on_delete=models.CASCADE)
     favorite_chests = models.ManyToManyField('FavoriteChests', blank=True)
     position = models.UUIDField(
         default=uuid.uuid4,
@@ -1110,19 +1110,21 @@ class ProfileDetails(models.Model):
                 profile_currency.quantity = 0
                 profile_currency.save()
 
+    from .models import Tier
+
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
         if created:
-
             default_level = Level.objects.first()
             default_currency = Currency.objects.first()
-            profile_image = '/bed.jpg'
+            default_tier = Tier.objects.filter(tier='F').first()  # ✅ safer lookup by 'F' code
 
             ProfileDetails.objects.create(
                 user=instance,
                 currency=default_currency,
                 level=default_level,
-                avatar=profile_image
+                tier=default_tier,  # ✅ assign the actual Tier object, not 'F'
+                avatar='/bed.jpg'
             )
 
             Inventory.objects.create(
@@ -1136,11 +1138,11 @@ class ProfileDetails(models.Model):
 
     post_save.connect(create_user_profile, sender=User)
 
+
     def save(self, *args, **kwargs):
         is_creating = self._state.adding
 
         if is_creating:
-            # (Optional) set any defaults before the first save:
             if not self.currency:
                 from .models import Currency
                 self.currency = Currency.objects.filter(is_active=1).first()
@@ -1148,17 +1150,13 @@ class ProfileDetails(models.Model):
             if not self.avatar:
                 self.avatar = 'a.jpg'
 
-            # First insert—after this, self.pk and self.created_at exist.
             super().save(*args, **kwargs)
-            return  # <— stop here on new objects to avoid a second INSERT
+            return
 
-        # ==== from here on, we're updating an existing ProfileDetails ====
-
-        # If still marked free but 7 days have passed since `created_at`, turn off free.
+        # Tier logic
         if self.free and timezone.now() >= (self.created_at + timedelta(days=7)):
             self.free = False
 
-        # Tier‐assignment logic:
         if self.total_currency_spent_30 < 25 and self.free:
             code = 'F'
         elif 0 <= self.total_currency_spent_30 < 25:
@@ -1180,25 +1178,15 @@ class ProfileDetails(models.Model):
         else:
             code = 'B'
 
-        from .models import Tier
-        self.tier = Tier.objects.filter(tier=code).first()
+        # ✅ Now map `code` to a Level instance
+        level_obj = Level.objects.filter(code=code).first()  # Assuming Level model has `code` field
 
-        # Handle “rubies_spent” / level‐up logic:
-        previous = ProfileDetails.objects.get(pk=self.pk)
-        if previous.currency_amount > self.currency_amount:
-            spent = previous.currency_amount - self.currency_amount
-            from .models import Currency
-            first_currency = Currency.objects.filter(is_active=1).first()
-            if first_currency and self.currency == first_currency:
-                self.rubies_spent = (self.rubies_spent or 0) + spent
+        if level_obj:
+            self.level = level_obj
+        else:
+            # fallback to default level if no match
+            self.level = Level.objects.first()
 
-        if self.rubies_spent != previous.rubies_spent:
-            from .models import Level
-            new_level = Level.objects.filter(experience__lte=self.rubies_spent).order_by('-level').first()
-            if new_level:
-                self.level = new_level
-
-        # Finally, save the updated fields:
         super().save(*args, **kwargs)
 
     @property
@@ -7383,9 +7371,14 @@ class Order(models.Model):
    '''
 
     def __str__(self):
-        items_list = ", ".join([str(item) for item in self.items.all()])
-        status = "Shipped" if self.being_delivered else "Not Shipped"
-        return f"{self.user.username} | Items: [{items_list}] - {status}"
+        if not self.pk:
+            return "Unsaved Order"
+
+        try:
+            items_list = ", ".join([str(item) for item in self.items.all()])
+            return f"Order #{self.pk} with items: {items_list}"
+        except:
+            return f"Order #{self.pk} (items unavailable)"
 
         if self.profile:
             self.shipping_address = self.profile.shipping_address
@@ -7396,8 +7389,12 @@ class Order(models.Model):
         self.currencyorderprice = sum(item.get_final_currency_price() for item in self.items.all() if item.get_final_currency_price())
 
     def save(self, *args, **kwargs):
-        self.update_total_prices()
-        super().save(*args, **kwargs)
+        is_creating = self._state.adding
+
+        super().save(*args, **kwargs)  # Save first
+
+        if is_creating:
+            self.update_total_prices()
 
     def get_total_price(self):
         return Decimal(self.orderprice) or 0
@@ -7419,6 +7416,7 @@ class Order(models.Model):
 
     def get_profile_url2(self):
         return reverse('showcase:products', args=[str(self.slug)])
+
 
 class Address(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -7450,6 +7448,7 @@ class Address(models.Model):
     class Meta:
         verbose_name_plural = 'Saved Address'
         verbose_name_plural = 'Saved Addresses'
+
 
 class Payment(models.Model):
     stripe_charge_id = models.CharField(max_length=50)

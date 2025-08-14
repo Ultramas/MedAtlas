@@ -280,8 +280,8 @@
             background-size: 100% auto;
             background-position: center;
             background-repeat: no-repeat;
-            height: 1.3em;
-    width: 1.5em;
+            height: 3em;
+            width: 3em;
         }
 
         .sidebar-container {
@@ -1752,7 +1752,11 @@ function getIntervalStart() {
             </a>
         </div>
         <div class="user-info">
-            <h4 class="username">{{ user.username }}</h4>
+            {% if user.username|length > 20 %}
+            <h4 class="username">{{ user.username|slice:":20" }}...</h4>
+            {% else %}
+            <h4 class="username">{{ user.username }}...</h4>
+            {% endif %}
             <div class="user-stats">
                 <a href="{% url 'showcase:currencymarket' %}">
                     <div class="user-stat">
