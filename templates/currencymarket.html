@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ruby Refill</title>
+  <title>PokeTrove Chests</title>
   <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
@@ -416,7 +416,7 @@ header {
   backdrop-filter: blur(10px);
   overflow: hidden;
   box-shadow: var(--shadow-medium);
-  /*height: calc(138vh - var(--header-height) - 40px);*/
+  height: calc(138vh - var(--header-height) - 40px);
   display: flex;
   flex-direction: column;
 }
@@ -1902,6 +1902,49 @@ document.querySelectorAll('.favorite-btn').forEach(button => {
           </div>
         </div>
 
+        <!-- Featured items -->
+        <div class="card featured-items">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" /></svg>
+              Featured Items
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="featured-item">
+              <div class="featured-item-image">
+                <img src="https://via.placeholder.com/80" alt="Featured Card">
+              </div>
+              <div class="featured-item-details">
+                <div class="featured-item-name">Mewtwo GX Rainbow Rare</div>
+                <div class="featured-item-price">$350.00</div>
+                <div class="featured-item-tier diamond">Diamond</div>
+              </div>
+            </div>
+            <div class="featured-item">
+              <div class="featured-item-image">
+                <img src="https://via.placeholder.com/80" alt="Featured Card">
+              </div>
+              <div class="featured-item-details">
+                <div class="featured-item-name">Lugia V Alt Art</div>
+                <div class="featured-item-price">$275.00</div>
+                <div class="featured-item-tier platinum">Platinum</div>
+              </div>
+            </div>
+            <div class="featured-item">
+              <div class="featured-item-image">
+                <img src="https://via.placeholder.com/80" alt="Featured Card">
+              </div>
+              <div class="featured-item-details">
+                <div class="featured-item-name">Pikachu VMAX</div>
+                <div class="featured-item-price">$180.00</div>
+                <div class="featured-item-tier gold">Gold</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <footer class="copyright-section">
       <div class="container">

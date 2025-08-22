@@ -286,13 +286,11 @@ class BenefitsAdmin(admin.ModelAdmin):
 
 class BenefitsInline(admin.TabularInline):
     model = Benefits
-    extra = 0
-    fields = ('benefit', 'multiplier', 'is_active')
-    show_change_link = True
+    extra = 1
 
 
 class TierAdmin(admin.ModelAdmin):
-    list_display = ('id',  '__str__', 'tier', 'lower_bound', 'upper_bound', 'is_active',)
+    list_display = ('tier', 'lower_bound', 'upper_bound', 'is_active',)
     inlines = [BenefitsInline]
     fieldsets = (
         ('Membership Information', {
@@ -301,7 +299,6 @@ class TierAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('mfg_date',)
-
     @admin.display(description='Sprite')
     def file_thumbnail(self, obj):
         if not obj.file:
@@ -507,17 +504,10 @@ class TradeItemAdmin(admin.ModelAdmin):
             'classes': ('open',),
         }),
         ('Trade Item Information - Image Description', {
-            'fields': ('image', 'image_length', 'image_width', 'length_for_resize', 'width_for_resize',),
+            'fields': ('image', 'image_length', 'image_width','length_for_resize', 'width_for_resize',),
             'classes': ('open',),
         }),
     )
-    list_display = ('user', 'title', 'status', 'slug', 'display_image', 'is_active')
-
-    def display_image(self, obj):
-        if obj.image:
-            return format_html('<img src="{}" width="100" height="100" style="object-fit: contain;" />', obj.image.url)
-        return "No Image"
-    display_image.short_description = 'Image'
 
 
 admin.site.register(TradeItem, TradeItemAdmin)
@@ -526,19 +516,10 @@ admin.site.register(TradeItem, TradeItemAdmin)
 class InventoryTradeOfferAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Inventory Trade Offer Information - Categorial Description', {
-            'fields': ('initiator', 'receiver', 'offered_items', 'requested_items', 'final_cost', 'status', 'is_active', ),
+            'fields': ('initiator', 'receiver', 'offered_items', 'requested_items',  'final_cost', 'status', 'is_active', ),
             'classes': ('open',),
         }),
     )
-    list_display = ('initiator', 'receiver', 'get_offered_items', 'get_requested_items', 'final_cost', 'status', 'is_active')
-
-    def get_offered_items(self, obj):
-        return ", ".join([str(item) for item in obj.offered_items.all()])
-    get_offered_items.short_description = 'Offered Items'
-
-    def get_requested_items(self, obj):
-        return ", ".join([str(item) for item in obj.requested_items.all()])
-    get_requested_items.short_description = 'Requested Items'
 
 
 admin.site.register(InventoryTradeOffer, InventoryTradeOfferAdmin)
@@ -570,11 +551,6 @@ class TradeOfferAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ('slug', 'timestamp',)
-    list_display = ('title', 'get_trade_items', 'estimated_trading_value', 'user', 'user2', 'trade_status', 'timestamp', 'is_active')
-
-    def get_trade_items(self, obj):
-        return ", ".join([str(item) for item in obj.trade_items.all()])
-    get_trade_items.short_description = 'Trade Items'
 
 
 admin.site.register(TradeOffer, TradeOfferAdmin)
@@ -715,7 +691,10 @@ class GameHubAdmin(admin.ModelAdmin):
 admin.site.register(GameHub, GameHubAdmin)
 
 
+from django.utils.html import format_html
 from decimal import Decimal
+from django.contrib.admin.widgets import AutocompleteSelect
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class ChoiceAdmin(admin.ModelAdmin):
@@ -755,7 +734,6 @@ class ChoiceAdmin(admin.ModelAdmin):
         'value',
         'is_active',
     )
-
 
 admin.site.register(Choice, ChoiceAdmin)
 
@@ -807,53 +785,56 @@ class GameAdmin(admin.ModelAdmin):
     inlines = [GameChoiceInline, GameChoiceMiddleInline]
 
     def save_related(self, request, form, formsets, change):
+        """Ensure GameChoice instances are saved properly when Game is saved."""
         super().save_related(request, form, formsets, change)
 
         game = form.instance
+        game_choices = GameChoice.objects.filter(game=game)
 
-        # 1) Pull in all of the saved Choice rows for this game,
-        #    in whatever order you want them numbered in:
-        choices = list(Choice.objects
-            .filter(game=game)
-            .order_by('value', '-total_number_of_choice')  # for example
-        )
+        for game_choice in game_choices:
+            if game_choice.choice:
+                if game_choice.choice.total_number_of_choice and game_choice.choice.number_of_choice:
+                    if game_choice.choice.total_number_of_choice != 0:
+                        game_choice.choice.rarity = (Decimal(game_choice.choice.number_of_choice) /
+                                                            Decimal(game_choice.choice.total_number_of_choice)
+                                                    ) * Decimal(100)
+                    else:
+                        game_choice.choice.rarity = Decimal(0)
 
-        print(f"[GameAdmin] Re‐numbering and chaining {len(choices)} choices…")
+                if not game_choice.choice.currency:
+                    first_currency = Currency.objects.first()
+                    if first_currency:
+                        game_choice.choice.currency = first_currency
 
-        for idx, choice in enumerate(choices):
-            # 2) Assign a sequential `number` (starting at 0):
-            choice.number = idx
-            print(f" → Choice#{choice.pk} set to number={idx}")
+                if game_choice.choice.lower_nonce is None:
+                    game_choice.choice.lower_nonce = random.randint(0, 1000000)
+                if game_choice.choice.upper_nonce is None:
+                    game_choice.choice.upper_nonce = random.randint(0, 1000000)
 
-            # 3) Chain the lower_nonce off the previous choice’s upper_nonce:
-            if idx == 0:
-                choice.lower_nonce = 0
-                print(f"    ↳ first choice → lower_nonce=0")
-            else:
-                prev = choices[idx - 1]
-                # ensure the prev has an upper_nonce
-                if prev.upper_nonce is None:
-                    prev.upper_nonce = random.randint(0, 1_000_000)
-                    prev.save()
-                    print(f"    ↳ assigned prev.upper_nonce={prev.upper_nonce}")
+                if game_choice.choice.upper_nonce is not None and game_choice.choice.lower_nonce is not None:
+                    rarity_value = (game_choice.choice.upper_nonce - game_choice.choice.lower_nonce) / 10000
+                    game_choice.choice.rarity = round(rarity_value, 6)
 
-                choice.lower_nonce = prev.upper_nonce + 1
-                print(
-                    f"    ↳ chained lower_nonce = {prev.upper_nonce} + 1 "
-                    f"→ {choice.lower_nonce}"
-                )
+                if not game_choice.choice.choice_text and game_choice.choice.name:
+                    game_choice.choice.choice_text = game_choice.choice.name
+                if not game_choice.choice.value and game_choice.choice.price:
+                    game_choice.choice.value = game_choice.choice.price * 100
+                if not game_choice.choice.subcategory and game_choice.choice.subtypes:
+                    game_choice.choice.subcategory = game_choice.choice.subtypes
 
-            # 4) Ensure *this* choice has an upper_nonce:
-            if choice.upper_nonce is None:
-                choice.upper_nonce = random.randint(0, 1_000_000)
-                print(f"    ↳ assigned upper_nonce={choice.upper_nonce}")
+                game_choice.choice.save()
 
-            # 5) Recompute rarity if you want based on nonce span:
-            span = choice.upper_nonce - choice.lower_nonce
-            choice.rarity = round(Decimal(span) / Decimal(10000), 6)
-            print(f"    ↳ rarity set to {choice.rarity}")
+            game_choice.save()
 
-            choice.save()
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        game = form.instance
+        game_choices = GameChoice.objects.filter(game=game)
+        for game_choice in game_choices:
+            if game_choice.choice:
+                game_choice.choice.asave()
+                game_choice.choice.save()
+            game_choice.save()
 
     fieldsets = (
         ('Game Information - Categorial Description', {
@@ -892,7 +873,6 @@ class GameAdmin(admin.ModelAdmin):
         'category',
         'is_active',
     )
-
 
 admin.site.register(Game, GameAdmin)
 
@@ -1619,11 +1599,10 @@ class EventAdmin(admin.ModelAdmin):
             'classes': ('collapse-open',),
         }),
         ('Event  Information - Attributes', {
-            'fields': ('date', 'time', 'length', 'slug', 'anonymous', 'is_active',),
+            'fields': ('date', 'time', 'date_and_time', 'slug', 'anonymous', 'is_active',),
             'classes': ('collapse-open',),
         }),
     )
-    readonly_fields = ('date_and_time',)
 
 
 admin.site.register(Event, EventAdmin)
@@ -2253,7 +2232,6 @@ class OutcomeAdmin(admin.ModelAdmin):
        'game',
        'choice',
        'nonce',
-       'date_and_time',
        'demonstration',
        'is_active',
    )

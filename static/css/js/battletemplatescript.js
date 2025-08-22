@@ -9,13 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedItems = [];
     let totalSpins = 1;
     let currentSpin = 0;
-    // parse the JSON once, before anything else:
-    const battleGames = JSON.parse(
-      document.getElementById('battle-games-data').textContent
-    );
-    console.log('Loaded battleGames:', battleGames);
-
-
 
     let persistSpin = localStorage.getItem('persistSpinChecked') === 'true';
     const quickSpin = localStorage.getItem('quickSpinChecked') === 'true';
@@ -583,29 +576,12 @@ const targetCard = document.querySelector('.target-card');
 let choiceColor = targetCard ? targetCard.getAttribute('data-color') : 'gray';
 
 console.log('Given the choice color:', choiceColor);
-function randomizedContents(wrapper) {
-    if (!wrapper) {
-        console.warn("🚫 No wrapper passed to randomizedContents");
-        return;
-    }
 
-    console.log("👀 Working on wrapper:", wrapper.id);
-
-    const slider = wrapper.querySelector('.slider');
-    if (!slider) {
-        console.warn("⚠️ No slider found in wrapper:", wrapper.id);
-        return;
-    }
-
-    const cards = slider.querySelectorAll('.cards');
-    if (!cards.length) {
-        console.warn("⚠️ No cards found in slider.");
-        return;
-    }
-
+function randomizedContents() {
+    const slider = document.querySelector('.slider');
     const children = Array.from(slider.children);
-    const targetIndex = children.findIndex(child => child.classList.contains('target-card'));
 
+    const targetIndex = children.findIndex(child => child.classList.contains('target-card'));
     let targetCard = null;
     if (targetIndex !== -1) {
         targetCard = children[targetIndex];
@@ -619,122 +595,51 @@ function randomizedContents(wrapper) {
     }
 
     slider.innerHTML = '';
-    const middleIndex = Math.floor(nonTargetCards.length / 2);
 
-    nonTargetCards.forEach((card, i) => {
-        if (i === middleIndex && targetCard) {
+    const middlePosition = Math.floor(nonTargetCards.length / 2);
+
+    for (let i = 0; i < nonTargetCards.length; i++) {
+        if (i === middlePosition && targetCard) {
             slider.appendChild(targetCard);
         }
-        slider.appendChild(card);
-    });
+        slider.appendChild(nonTargetCards[i]);
+    }
 
     if (targetCard && !slider.querySelector('.target-card')) {
-        slider.appendChild(targetCard);
+        const allCards = Array.from(slider.children);
+        const middleIndex = Math.floor(allCards.length / 2);
+
+        slider.insertBefore(targetCard, allCards[middleIndex]);
     }
 
-    console.log("✅ Slider randomized with target card centered.");
+    console.log("Slider contents randomized with target card positioned in the middle.");
 }
-
-
-function waitForSliderAndRandomize() {
-    const wrappers = document.querySelectorAll('.wrapper');
-    wrappers.forEach(wrapper => {
-        const observer = new MutationObserver((mutations, obs) => {
-            const slider = wrapper.querySelector(`.slider`);
-            if (slider) {
-                console.log("✅ Slider detected via MutationObserver for", wrapper.id);
-                obs.disconnect();
-                randomizedContents();  // Customize this if each wrapper needs individual logic
-            }
-        });
-
-        observer.observe(wrapper, { childList: true, subtree: true });
-
-        setTimeout(() => {
-            const slider = wrapper.querySelector(`.slider`);
-            if (slider) {
-                console.log("✅ Slider found via fallback timeout for", wrapper.id);
-                randomizedContents();
-                observer.disconnect();
-            } else {
-                console.warn("❌ Slider still not found in wrapper:", wrapper.id);
-                observer.disconnect();
-            }
-        }, 300);
-    });
-}
-
-
-let gameIndex = 0;
-let instanceIndex = 0;
-let currentSpin = 0;
-let totalSpins = 1; // Adjust as needed for spins per instance
-let animationStopped = false;
-
-const battleGames = JSON.parse(document.getElementById('battle-games-data').textContent);
-console.log('Loaded battleGames:', battleGames);
 
 function spin(buttonId) {
-    // Reset spin state if needed
-    if (currentSpin >= totalSpins || animationStopped) {
+    if (currentSpin === totalSpins || animationStopped) {
         currentSpin = 0;
         animationStopped = false;
-        console.log('Reset spin state for new instance');
+        console.log('the value of totalspins at step 3 is ' + totalSpins)
     }
 
-    // Disable spin options during animation
     $(".spin-option").prop('disabled', true);
 
-    // Get the current game and wrapper
-    const currentGame = battleGames[gameIndex];
-    if (!currentGame) {
-        console.error('No current game found at gameIndex:', gameIndex);
-        return;
-    }
-
-    const currentWrapper = document.getElementById(`game-${currentGame.id}`);
-    if (!currentWrapper) {
-        console.error(`Wrapper for game-${currentGame.id} not found`);
-        return;
-    }
-
-    // Hide all wrappers and show the current one
-    document.querySelectorAll('.wrapper').forEach(wrapper => {
-        wrapper.style.display = 'none';
-    });
-    currentWrapper.style.display = 'block';
-
-    // Randomize contents for the current game
-    randomizedContents(currentWrapper);
-
-    // Determine spin type and animation duration
-    let animationDuration;
-    if (!window.USER?.isAuthenticated) {
-        currentSpintype = "C";
-        console.log('currentspintype set to C for guest');
-    } else if (typeof currentSpintype === "undefined" || currentSpintype === null) {
-        console.error("currentSpintype is not set");
-        return;
-    }
-
-    if (currentSpintype === 'I') {
-        animationDuration = isQuickSpin ? 500 : 1000;
-    } else if (currentSpintype === 'S') {
-        animationDuration = isQuickSpin ? 4000 : 8000;
-    } else if (currentSpintype === 'C') {
-        animationDuration = isQuickSpin ? 4500 : 9000;
-    } else {
-        animationDuration = isQuickSpin ? 4500 : 9000;
-    }
-
-    // Play animation and sound
-    if (!window.USER?.isAuthenticated || !window.USER?.hasPreference || window.USER?.preferenceValue !== "I") {
-        console.log('Not an instant spin');
+    randomizeContents();
+    if (
+        !userContext.isSignedIn ||
+        !userContext.hasPreference ||
+        userContext.preferenceValue !== "I"
+    )
+    {   console.log('not an instant spin')
+        randomizedContents();
         addAnimation();
-    } else {
-        console.log('Instant spin');
+        }
+
+        else{
+         console.log('actually instant spin')
+        randomizedContents();
         addAnimation();
-    }
+        }
 
     if (buttonId === "start") {
         console.log("Regular Spin triggered");
@@ -742,56 +647,72 @@ function spin(buttonId) {
         console.log("Demo Spin triggered");
     }
 
+        let animationDuration;
+        if (!window.USER?.isAuthenticated) {
+          currentSpintype = "C";
+          console.log('currentspintype with guest')
+        } else {
+          if (typeof currentSpintype === "undefined" || currentSpintype === null) {
+            console.error("currentSpintype is not set");
+            return;
+          }
+        }
+    if (currentSpintype === 'I') {
+                animationDuration = isQuickSpin ? 500 : 1000;
+            } else if (currentSpintype === 'S') {
+                animationDuration = isQuickSpin ? 4000 : 8000;
+            } else if (currentSpintype === 'C') {
+                animationDuration = isQuickSpin ? 4500 : 9000;
+            } else {
+                animationDuration = isQuickSpin ? 4500 : 9000;
+            }
+
     const buffer = 150;
     const audiobuffer = 100;
     const audio = new Audio('/static/css/sounds/roulette_sound_effect.mp3');
+
     audio.addEventListener('loadedmetadata', () => {
         const adjustedDuration = (animationDuration + audiobuffer) / 1000;
         const originalDuration = audio.duration;
+
         if (originalDuration) {
             audio.playbackRate = originalDuration / adjustedDuration;
         }
+
         audio.play().catch((error) => console.error('Error playing audio:', error));
     });
+
     audio.addEventListener('error', (e) => {
         console.error('Audio failed to load:', e);
     });
 
-    // Handle spin completion
-    setTimeout(() => {
-        document.querySelectorAll('.slider').forEach((scroller) => {
-            scroller.style.animationPlayState = 'paused';
-        });
+setTimeout(() => {
+    document.querySelectorAll('.slider').forEach((scroller) => {
+        scroller.style.animationPlayState = 'paused';
 
-        const targetCard = document.querySelector('.target-card');
-        const startButton = document.getElementById('start');
-        if (targetCard && startButton) {
-            let choiceColor = targetCard.getAttribute('data-color') || 'gray';
-            let choiceId = targetCard.getAttribute('id');
-            let gameId = startButton.getAttribute("data-game-id");
-            console.log('The choice color is:', choiceColor);
-            console.log('The choice id is:', choiceId);
-            console.log('The game id is:', gameId);
+    const targetCard = document.querySelector('.target-card');
 
-            // Handle different color outcomes
-            if (choiceColor === 'gray') {
-                console.log('gray hit');
-                playThump();
-            } else if (choiceColor === 'green') {
-                console.log('green hit');
-                playCasinoGreenSound();
-                $(".start").prop('disabled', true);
-            } else if (['yellow', 'orange', 'red', 'black', 'redblack', 'redgold'].includes(choiceColor)) {
-                console.log(`${choiceColor} hit`);
-                const soundFunctions = {
-                    yellow: playCasinoGreenSound,
-                    orange: playCasinoYellowSound,
-                    red: playCasinoRedSound,
-                    black: playCasinoBlackSound,
-                    redblack: playCasinoRedBlackSound,
-                    redgold: playCasinoRedGoldSound
-                };
-                soundFunctions[choiceColor]();
+    const startButton = document.getElementById('start');
+
+    if (targetCard) {
+        let choiceColor = targetCard.getAttribute('data-color') || 'gray';
+        let choiceId = targetCard.getAttribute('id');
+        let gameId = startButton.getAttribute("data-game-id");
+
+        console.log('The choice color is:', choiceColor);
+        console.log('The choice id is:', choiceId);
+        console.log('The game id is:', gameId);
+        if (choiceColor === 'gray') {
+                console.log('gray hit')
+            playThump();
+
+        } else if (choiceColor === 'green') {
+                console.log('green hit')
+            playCasinoGreenSound();
+            $(".start").prop('disabled', true);
+        } else if (choiceColor === 'yellow') {
+                console.log('yellow hit')
+            playCasinoGreenSound();
                 const topHitData = {
                     choice_id: targetCard.getAttribute('id').split('-')[1],
                     color: choiceColor,
@@ -799,66 +720,151 @@ function spin(buttonId) {
                 };
                 createTopHit(topHitData);
                 $(".start").prop('disabled', true);
-                console.log('processed the top hit');
-            }
+                console.log('processed the top hit')
+        } else if (choiceColor === 'orange') {
+                console.log('orange hit')
+            playCasinoYellowSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
+        } else if (choiceColor === 'red') {
+                console.log('red hit')
+            playCasinoRedSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
+        } else if (choiceColor === 'black') {
+                console.log('black hit')
+            playCasinoBlackSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
+        } else if (choiceColor === 'redblack') {
+                console.log('redblack hit')
+            playCasinoRedBlackSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
+        } else if (choiceColor === 'redgold') {
+                console.log('redgold hit')
+            playCasinoRedGoldSound();
+                const topHitData = {
+                    choice_id: targetCard.getAttribute('id').split('-')[1],
+                    color: choiceColor,
+                    game_id: gameId,
+                };
+                createTopHit(topHitData);
+                $(".start").prop('disabled', true);
+                console.log('processed the top hit')
+        }
         }
 
-        currentSpin++;
-        console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`);
+    });
 
-        if (currentSpin < totalSpins) {
-            // Continue spinning the current instance
-            setTimeout(() => spin(buttonId), buffer);
-            setTimeout(() => {
-                randomizedContents(currentWrapper);
-                document.dispatchEvent(new CustomEvent('spinComplete', { detail: { buttonId } }));
-            }, 150);
+function randomizedContents() {
+    const slider = document.querySelector('.slider');
+    const children = Array.from(slider.children);
+
+    const targetIndex = children.findIndex(child => child.classList.contains('target-card'));
+    let targetCard = null;
+    if (targetIndex !== -1) {
+        targetCard = children[targetIndex];
+    }
+
+    const nonTargetCards = children.filter(child => !child.classList.contains('target-card'));
+
+    for (let i = nonTargetCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [nonTargetCards[i], nonTargetCards[j]] = [nonTargetCards[j], nonTargetCards[i]];
+    }
+
+    slider.innerHTML = '';
+
+    const totalCards = nonTargetCards.length + (targetCard ? 1 : 0);
+    for (let i = 0, j = 0; i < totalCards; i++) {
+        if (i === targetIndex && targetCard) {
+            slider.appendChild(targetCard);
         } else {
-            // Finished spins for the current instance, move to next instance or game
-            instanceIndex++;
-            const thisGame = battleGames[gameIndex] || { quantity: 0, slug: '??' };
-            if (instanceIndex < thisGame.quantity) {
-                // More instances of the current game
-                console.log(`— Copy ${instanceIndex + 1}/${thisGame.quantity} of "${thisGame.slug}"`);
-                currentSpin = 0;
-                totalSpins = 1; // Adjust as needed
-                animationStopped = false;
-                setTimeout(() => spin(buttonId), buffer);
-            } else {
-                // Move to the next game
-                gameIndex++;
-                instanceIndex = 0;
-                if (gameIndex < battleGames.length) {
-                    const nextGame = battleGames[gameIndex];
-                    console.log(`→ Next "${nextGame.slug}" ×${nextGame.quantity}`);
-                    const btn = document.querySelector(`.start`);
-                    btn.dataset.gameId = nextGame.id;
-                    btn.dataset.slug = nextGame.slug;
-
-                    // Hide all wrappers and show the next one
-                    document.querySelectorAll('.wrapper').forEach(wrapper => {
-                        wrapper.style.display = 'none';
-                    });
-                    const newWrapper = document.getElementById(`game-${nextGame.id}`);
-                    if (newWrapper) {
-                        newWrapper.style.display = 'block';
-                        randomizedContents(newWrapper);
-                        setTimeout(() => spin(buttonId), buffer);
-                    } else {
-                        console.error(`Wrapper for game-${nextGame.id} not found`);
-                    }
-                } else {
-                    // All games and instances complete
-                    console.log("🎉 All battle rounds complete.");
-                    animationStopped = true;
-                    setTimeout(() => {
-                        restoreCards();
-                        document.dispatchEvent(new CustomEvent('spinComplete', { detail: { buttonId } }));
-                    }, 250);
-                }
-            }
+            slider.appendChild(nonTargetCards[j]);
+            j++;
         }
-    }, animationDuration);
+    }
+
+    console.log("Slider contents randomized without affecting target card position.");
+}
+
+    currentSpin++;
+    console.log(`Spin #${currentSpin} completed for Button ID: ${buttonId}`);
+
+    if (currentSpin < totalSpins) {
+        setTimeout(() => spin(buttonId), buffer);
+         setTimeout(() => {
+        randomizedContents();
+    }, 150);
+    } else {
+        animationStopped = true;
+        console.log(`The spins have ended.`);
+        setTimeout(() => {
+        restoreCards();
+        showPopup(buttonId);
+    }, 250);
+
+               if (!persistSpin) {
+    totalSpins = 1;
+    console.log("persistSpin not enabled; reset spins to 1");
+    sessionStorage.setItem("totalSpins", totalSpins);
+    $(".spin-option").removeClass("selected active");
+    $(".spin-option[data-value='1']").addClass("selected active");
+
+    const baseCost = document.getElementById('spin-container').getAttribute('data-base-cost');
+    console.log('Base cost:', baseCost);
+
+    const totalCost = parseInt(baseCost) * totalSpins;
+    const costDisplay = document.getElementById('cost-display');
+    if (costDisplay) {
+    costDisplay.innerHTML = `<span id="total-cost">${totalCost}</span> 💎`;
+    }
+}
+             else {
+                    const currentSelectionValue = parseInt($(".spin-option.selected").data("value") || 1, 10);
+
+                    $(".spin-option").removeClass("selected active");
+                    $(".spin-option[data-value='1']").addClass("selected active");
+
+                    setTimeout(() => {
+                        $(".spin-option").removeClass("selected active");
+                        $(".spin-option[data-value='" + currentSelectionValue + "']")
+                            .addClass("selected active");
+
+                        totalSpins = currentSelectionValue;
+                        console.log("Reverted spin to:", totalSpins);
+                    }, 0);
+                }
+
+        $(".spin-option").prop('disabled', false);
+    }
+}, animationDuration);
+
 }
 spin(buttonId);
 

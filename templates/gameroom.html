@@ -2832,11 +2832,7 @@ p.blog-meta span {
                         <div class="pokemon-info">
 							<h3 class="pokemon-name"><a href="">{{newprofile.title}}</a></h3>
                             							<p class="blog-meta">
-                                                            {% if newprofile.user %}
-								<span class="author"><i class="fas fa-user"></i> {{ newprofile.user.username }} </span>
-                                                            {% else %}
-								<span class="author"><i class="fas fa-user"></i> PokeTrove Official</span>
-                                                            {% endif %}
+								<span class="author"><i class="fas fa-user"></i> {{ newprofile.get_type_display }} </span>
 								<span class="date"><i class="fas fa-calendar"></i> {{ newprofile.date_and_time|date }} </span>
 								<br>
 							</p>

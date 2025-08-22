@@ -174,6 +174,30 @@
             flex-shrink: 0;
         }
 
+        .user-profile {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-profile::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
         .user-info {
             text-align: center;
             position: relative;
@@ -603,7 +627,7 @@ p.blog-meta span {
 
 {% include 'navtrove.html' %}
 
-  <main class="main-content" style="margin-top: 6%;">
+  <main class="main-content">
             <h1>Full Withdraws - (<span id="stock-count">{{ CompletedWithdraws|length }}</span>)</h1>
 
             <section id="inventoryGrid" class="inventory-grid comfortable-view" style="display: flex;">
@@ -651,7 +675,7 @@ p.blog-meta span {
                 {% empty %}
                     <div class="empty-inventory">
                         <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy">
-                        <h3 style="color: white;">Looks like you don't have anything here! Time to pull some bangers!</h3>
+                        <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
                     </div>
                 {% endfor %}
             </section>
@@ -671,8 +695,8 @@ p.blog-meta span {
                         <div class="pokemon-info">
 							<h3 class="pokemon-name"><a href="{% url 'showcase:withdraw_detail' newprofile.slag %}">{{newprofile.title}}</a></h3>
                             							<p class="blog-meta">
-								<span class="author"><i class="fas fa-user"></i> {{ newprofile.number_of_cards }} Cards</span>
-								<span class="date"><i class="fas fa-calendar"></i> {{ newprofile.date_and_time|date }} </span>
+								<span class="author"><i class="fas fa-user"></i> {{ gamehub.get_type_display }} </span>
+								<span class="date"><i class="fas fa-calendar"></i> {{ gamehub.date_and_time|date }} </span>
 								<br>
 							</p>
 							{% with description=newprofile.description %}
@@ -727,19 +751,12 @@ p.blog-meta span {
                 {% empty %}
                     <div class="empty-inventory">
                         <img src="{% static 'css/images/broke.gif' %}" alt="broke buddy">
-                        <h3 style="color: white;">Looks like you don't have anything here! Time to pull some bangers!</h3>
+                        <h3>Looks like you don't have anything here! Time to pull some bangers!</h3>
                     </div>
                 {% endfor %}
             </section>
         </main>
     </div>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
 
 <footer class="copyright-section">
     <div class="container">

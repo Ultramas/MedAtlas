@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Gaming Marketplace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #00f0ff;
@@ -57,7 +58,6 @@
             color: var(--primary);
             font-size: 2.5rem;
             margin-bottom: 2rem;
-            margin-top: 50px;
             text-transform: uppercase;
             letter-spacing: 2px;
             position: relative;
@@ -374,55 +374,20 @@
     input[type="radio"][name="payment_option"]:checked + label {
     color: var(--primary);
 }
-
-        .form-section {
-  margin-bottom: 2rem;
-}
-
-.section-title {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-row {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.custom-checkbox {
-  margin-top: 0.5rem;
-}
-
-.navLogo {
-    background-size: 100% auto;
-    background-position: center;
-    background-repeat: no-repeat;
-    height: 1.5em !important;
-    width: 1.5em !important;
-        }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     {% include 'navtrove.html' %}
 
-    <div class="container" style="margin-top: 7%;">
+    <div class="container">
         <h1 class="checkout-title">PokeTrove Checkout</h1>
 
         <div class="checkout-grid">
             <div class="checkout-form">
-                {% if user.is_authenticated %}
                 <form id="checkout-form" method="POST" class="checkout-card" action="{% url 'showcase:payment' payment_option='card' %}">
                     {% csrf_token %}
 
-                    {% if address and address.street_address %}
+                    {% if address %}
                         <div class="shipping-label">
                             <div class="label-header">
                                 <h2>Shipping Label</h2>
@@ -454,98 +419,6 @@
                             </div>
                         </div>
                     {% else %}
-                       <div class="form-section">
-  <!-- SHIPPING ADDRESS -->
-  <h2 class="section-title">Shipping Address</h2>
-
-  {% if default_shipping_address %}
-    <div class="custom-checkbox">
-      <input type="checkbox" name="use_default_shipping" id="use_default_shipping">
-      <label for="use_default_shipping">
-        Use default shipping: {{ default_shipping_address.street_address|truncatechars:30 }}
-      </label>
-    </div>
-  {% endif %}
-
-  <div class="hideable_shipping_form">
-    <div class="form-group">
-      <label for="shipping_address" class="form-label">Street Address</label>
-      <input type="text" placeholder="1234 Main St" id="shipping_address" name="shipping_address" class="form-control">
-    </div>
-
-    <div class="form-group">
-      <label for="shipping_address2" class="form-label">Apartment / Suite (optional)</label>
-      <input type="text" id="shipping_address2" name="shipping_address2" class="form-control">
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Country</label>
-        {{ form.shipping_country }}
-      </div>
-
-      <div class="form-group">
-        <label for="shipping_zip" class="form-label">ZIP Code</label>
-        <input type="text" id="shipping_zip" name="shipping_zip" class="form-control">
-      </div>
-    </div>
-
-    <div class="custom-checkbox">
-      <input type="checkbox" name="same_billing_address" id="same_billing_address">
-      <label for="same_billing_address" style="color: white;">Billing address same as shipping</label>
-    </div>
-
-    <div class="custom-checkbox">
-      <input type="checkbox" name="set_default_shipping" id="set_default_shipping">
-      <label for="set_default_shipping" style="color: white;">Save as default shipping address</label>
-    </div>
-  </div>
-
-  <!-- BILLING ADDRESS -->
-  <h2 class="section-title mt-4">Billing Address</h2>
-
-  {% if default_billing_address %}
-    <div class="custom-checkbox">
-      <input type="checkbox" name="use_default_billing" id="use_default_billing">
-      <label for="use_default_billing">
-        Use default billing: {{ default_billing_address.street_address|truncatechars:30 }}
-      </label>
-    </div>
-  {% endif %}
-
-  <div class="hideable_billing_form">
-    <div class="form-group">
-      <label for="billing_address" class="form-label">Street Address</label>
-      <input type="text" placeholder="1234 Main St" id="billing_address" name="billing_address" class="form-control">
-    </div>
-
-    <div class="form-group">
-      <label for="billing_address2" class="form-label">Apartment / Suite (optional)</label>
-      <input type="text" id="billing_address2" name="billing_address2" class="form-control">
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Country</label>
-        {{ form.billing_country }}
-      </div>
-
-      <div class="form-group">
-        <label for="billing_zip" class="form-label">ZIP Code</label>
-        <input type="text" id="billing_zip" name="billing_zip" class="form-control">
-      </div>
-    </div>
-
-    <div class="custom-checkbox">
-      <input type="checkbox" name="set_default_billing" id="set_default_billing">
-      <label for="set_default_billing" style="color: white;">Save as default billing address</label>
-    </div>
-  </div>
-</div>
-
-                    {% endif %}
-                {% else %}
-
                         <div class="form-section">
                             <h2 class="section-title">Shipping Address</h2>
 
@@ -623,6 +496,7 @@
                             {% endif %}
                         </div>
                     {% endif %}
+
                     {% if not form.payment_option.is_hidden %}
                         <h2 class="section-title">Payment Options</h2>
                         <div class="payment-options">

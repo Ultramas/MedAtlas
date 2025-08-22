@@ -6,8 +6,6 @@ import string
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from decimal import Decimal
-
 import pytz
 from celery import shared_task
 from django.contrib.auth.views import PasswordResetView, LoginView
@@ -21,7 +19,6 @@ from django.db import transaction
 from django.shortcuts import render, redirect
 from django.templatetags.static import static
 from django.utils.html import strip_tags
-from django.utils.safestring import mark_safe
 from django.views.generic import ListView
 import stripe
 from social_core.backends.stripe import StripeOAuth2
@@ -32,7 +29,6 @@ from django.contrib.auth.forms import UserChangeForm, AuthenticationForm
 import math
 from django.contrib.auth.models import AnonymousUser
 from paypalrestsdk import Payment as PayPalPayment
-from django.test import RequestFactory
 
 from . import models
 from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, TradeItem, TradeOffer, Shuffler, \
@@ -198,7 +194,7 @@ from django.views.generic.edit import FormMixin
 import pdb
 from django.core.mail import send_mail, BadHeaderError, EmailMultiAlternatives
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, HttpResponseNotFound, \
-    HttpResponseBadRequest, Http404
+    HttpResponseBadRequest
 from .forms import ContactForm
 from .forms import BusinessContactForm
 from .forms import BusinessMailingForm
@@ -235,7 +231,7 @@ from django.views.generic.edit import FormView
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_POST
 from django.db.models import Prefetch
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -2028,7 +2024,6 @@ def spinner_choice_render_list(request):
     spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=self.game)
     return render(request, 'game.html', {'spinner_choice_renders': spinner_choice_renders})
 
-
 class ChestBackgroundView(BaseView):
     model = UserProfile
     template_name = "blackjack.html"
@@ -2202,10 +2197,8 @@ class FindChoiceView(View):
 
         return render(request, self.template_name, context)
 
-
 def generate_nonce():
     return random.randint(1, 1000000)
-
 
 @csrf_exempt
 def create_outcome(request, slug):
@@ -2296,16 +2289,25 @@ def battle_create_outcome(request, battle_id, game_id):
         return JsonResponse({'status':'error','message':'POST required'}, status=405)
 
     battle = get_object_or_404(Battle, id=battle_id)
-    if battle.status != "O":
-        return JsonResponse({'status':'error','message':'Cannot create outcome: battle is not open.'}, status=400)
+    # 1) only when battle is open
+    if battle.status != BattleStatus.OPEN:   # or whatever your “open” code is
+        return JsonResponse({
+            'status':'error',
+            'message':'Cannot create outcome: battle is not open.'
+        }, status=400)
 
+    # 2) only once per game in this battle
     bg = get_object_or_404(BattleGame, battle=battle, game_id=game_id)
     if bg.outcome_created:
-        return JsonResponse({'status':'error','message':'Outcome already generated for this game in this battle.'}, status=400)
+        return JsonResponse({
+            'status':'error',
+            'message':'Outcome already generated for this game in this battle.'
+        }, status=400)
 
     if request.method == 'POST':
         try:
             django.db.close_old_connections()
+
             with transaction.atomic():
                 body = json.loads(request.body)
                 game_id = body.get('game_id')
@@ -2313,9 +2315,9 @@ def battle_create_outcome(request, battle_id, game_id):
                 user = request.user
 
                 if not game_id:
-                    return JsonResponse({'status': 'error', 'message': 'Game ID is required.'}, status=400)
+                    return JsonResponse({'status': 'error', 'message': 'Game ID is required.'})
 
-                game = Game.objects.get(id=game_id)
+                game = Game.objects.get(id=game_id, slug=slug)
                 nonce = random.randint(1, 1000000)
 
                 game_choice_instance = GameChoice.objects.filter(
@@ -2355,10 +2357,6 @@ def battle_create_outcome(request, battle_id, game_id):
                 }
                 if user.is_authenticated:
                     outcome_data['user'] = user
-                bg.outcome_created = True
-                bg.save(update_fields=['outcome_created'])
-
-                print(f"[BattleCreateOutcome] Outcome#{outcome.pk} → Game={game.slug}, User={user.username if user.is_authenticated else 'anon'}")
 
                 outcome = Outcome.objects.create(**outcome_data)
 
@@ -3487,16 +3485,13 @@ class SingleBattleListView(DetailView):
 
     def dispatch(self, request, *args, **kwargs):
         battle = self.get_object()
-        redirect_url = None
         if battle.is_full():
             if battle.status == 'O':
                 battle.status = 'R'
                 battle.save(update_fields=['status'])
             print('battle is full, starting battle')
-            redirect_url = reverse('showcase:actualbattle', kwargs={'battle_id': battle.id})
-            redirect_url += '?auto_spin=true'
-            print('the url is: ' + redirect_url)
-            return redirect(redirect_url)
+            return redirect(reverse('showcase:actualbattle',
+                                    kwargs={'battle_id': battle.id}))
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -3505,15 +3500,12 @@ class SingleBattleListView(DetailView):
 
         battle_games = battle.battle_games.all().order_by('order')
         ordered_games = [bg.game for bg in battle_games]
-        context['battle_game_data'] = battle_games
         context['bet_form'] = BetForm(battle=battle)
         context['ordered_games'] = ordered_games
         context['default_game'] = ordered_games[0] if ordered_games else None
         related_games = Game.objects.filter(game_battles__battle=battle).distinct()
         context['related_games'] = related_games
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-        context["battle_absolute_url"] = self.request.build_absolute_uri(battle.get_absolute_url())
-        context['auto_spin'] = self.request.GET.get('auto_spin') == 'true'
 
         user = self.request.user
         if user.is_authenticated:
@@ -3670,16 +3662,14 @@ class SingleBattleListView(DetailView):
             if request.user in battle.participants.all():
                 messages.error(request, 'You are already a participant in this battle.')
                 return redirect('showcase:battle_detail', battle_id=battle.id)
-            redirect_url = None
             if battle.is_full():
                 battle.status = 'R'
                 battle.save()
                 messages.error(request, 'This battle is now full and has started.')
-                print('reached a full battle')
-                redirect_url = reverse('showcase:actualbattle', kwargs={'battle_id': battle.id})
-                redirect_url += '?auto_spin=true'
-                print('the url is: ' + redirect_url)
-                return redirect(redirect_url)
+                console.log('reached a full battle')
+                return redirect(reverse('showcase:actualbattle',
+                                        kwargs={'battle_id': battle.id}))
+
             join_form = BattleJoinForm(request.POST, user=request.user, battle=battle)
             if join_form.is_valid():
                 join_form.save()
@@ -3729,7 +3719,6 @@ from .models import (
     Titled, NavBarHeader, NavBar, LogoBase,
     InventoryObject
 )
-
 from .forms import (
     MyPreferencesForm, WagerForm,
     SpinPreferenceForm
@@ -3762,209 +3751,46 @@ class ActualBattleView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         battle = self.object
+        # All participants linked to this battle
         all_participants = BattleParticipant.objects.filter(battle=battle)
 
+        # Split humans and bots
         humans = [bp.user for bp in all_participants if not bp.is_bot and bp.user]
         bots = [bp.robot for bp in all_participants if bp.is_bot and bp.robot]
 
         context['players'] = [('human', h) for h in humans] + [('robot', b) for b in bots]
-        context['battle_games'] = [
-            {
-                'id': bg.game.id,
-                'slug': bg.game.slug,
-                'quantity': bg.quantity,
-                'name': bg.game.name,
-                'image_url': bg.game.image.url if bg.game.image else '',
-                'battle_id': self.object.id
-            }
-            for bg in self.object.battle_games.all()
-        ]
-        context['battle_games_json'] = mark_safe(
-            json.dumps(context['battle_games'])
-        )
 
         # 1) Grab all prefetched games
         games = getattr(battle, 'games_with_choices', [])
         if not games:
             raise Http404("No games found for this battle.")
 
-        # 2) Prepare detailed context for ALL games
-        context['all_games_data'] = []
-        for game in games:
-            # Choices
-            inline_choices = game.choice_fk_set.all()
-            m2m_choices = game.choices.all()
-            combined = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
+        # 2) Build list of slugs and pass games themselves
+        context['games'] = games
+        context['game_slugs'] = [game.slug for game in games]
 
-            through_qs = GameChoice.objects.filter(game=game).select_related('choice')
-            through_data = {}
-            for gc in through_qs:
-                c = gc.choice
-                through_data[c.pk] = {
-                    'lower_nonce': gc.lower_nonce or c.lower_nonce,
-                    'upper_nonce': gc.upper_nonce or c.upper_nonce,
-                    'value':       gc.value or c.value,
-                    'rarity':      gc.rarity or c.rarity,
-                    'file_url':    c.file.url if c.file else '',
-                    'category':    c.category or '',
-                    'currency': {
-                        'symbol':   c.currency.name if c.currency else '💎',
-                        'file_url': c.currency.file.url if c.currency and c.currency.file else None
-                    }
-                }
-
-            all_choices = []
-            for pk, choice in combined.items():
-                info = through_data.get(pk, {
-                    'lower_nonce': choice.lower_nonce,
-                    'upper_nonce': choice.upper_nonce,
-                    'value':       choice.value,
-                    'rarity':      choice.rarity,
-                    'file_url':    choice.file.url if choice.file else '',
-                    'category':    choice.category or '',
-                    'currency': {
-                        'symbol':   choice.currency.name if choice.currency else '💎',
-                        'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
-                    }
-                })
-                all_choices.append({
-                    'choice':      choice,
-                    'choice_text': choice.choice_text,
-                    **info,
-                    'image_width':  getattr(choice, 'image_width', None),
-                    'image_length': getattr(choice, 'image_length', None),
-                    'get_color_display': choice.get_color_display(),
-                    'get_tier_display':  choice.get_tier_display(),
-                })
-
-            # Randomization logic
-            rand_amt = random.randint(500, 1000) if context.get('quick_spin') else random.randint(150, 300)
-            random_nonces = [random.randint(0, 1_000_000) for _ in range(rand_amt)]
-
-            choices_with_nonce = []
-            for nonce in random_nonces:
-                for cd in all_choices:
-                    if cd['lower_nonce'] <= nonce <= cd['upper_nonce']:
-                        choices_with_nonce.append({
-                            'choice':     cd['choice'],
-                            'nonce':      nonce,
-                            'lower_nonce':cd['lower_nonce'],
-                            'upper_nonce':cd['upper_nonce'],
-                            'rarity':     cd['rarity'],
-                            'file_url':   cd['file_url'],
-                            'currency':   cd['currency']
-                        })
-                        break
-
-            context['all_games_data'].append({
-                'game': game,
-                'choices_with_nonce': choices_with_nonce,
-                'random_nonces': random_nonces,
-            })
-        context['participant_wrappers'] = []
-
-        for participant in all_participants:
-            participant_data = {
-                'participant': participant,
-                'is_bot': participant.is_bot,
-                'name': participant.robot.name if participant.is_bot else participant.user.username,
-                'games': []
-            }
-
-            for game in games:
-                inline_choices = game.choice_fk_set.all()
-                m2m_choices = game.choices.all()
-                combined = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
-
-                through_qs = GameChoice.objects.filter(game=game).select_related('choice')
-                through_data = {}
-                for gc in through_qs:
-                    c = gc.choice
-                    through_data[c.pk] = {
-                        'lower_nonce': gc.lower_nonce or c.lower_nonce,
-                        'upper_nonce': gc.upper_nonce or c.upper_nonce,
-                        'value': gc.value or c.value,
-                        'rarity': gc.rarity or c.rarity,
-                        'file_url': c.file.url if c.file else '',
-                        'category': c.category or '',
-                        'currency': {
-                            'symbol': c.currency.name if c.currency else '💎',
-                            'file_url': c.currency.file.url if c.currency and c.currency.file else None
-                        }
-                    }
-
-                all_choices = []
-                for pk, choice in combined.items():
-                    info = through_data.get(pk, {
-                        'lower_nonce': choice.lower_nonce,
-                        'upper_nonce': choice.upper_nonce,
-                        'value': choice.value,
-                        'rarity': choice.rarity,
-                        'file_url': choice.file.url if choice.file else '',
-                        'category': choice.category or '',
-                        'currency': {
-                            'symbol': choice.currency.name if choice.currency else '💎',
-                            'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
-                        }
-                    })
-                    all_choices.append({
-                        'choice': choice,
-                        'choice_text': choice.choice_text,
-                        **info,
-                        'image_width': getattr(choice, 'image_width', None),
-                        'image_length': getattr(choice, 'image_length', None),
-                        'get_color_display': choice.get_color_display(),
-                        'get_tier_display': choice.get_tier_display(),
-                    })
-
-                rand_amt = random.randint(150, 300)
-                random_nonces = [random.randint(0, 1_000_000) for _ in range(rand_amt)]
-
-                choices_with_nonce = []
-                for nonce in random_nonces:
-                    for cd in all_choices:
-                        if cd['lower_nonce'] <= nonce <= cd['upper_nonce']:
-                            choices_with_nonce.append({
-                                'choice': cd['choice'],
-                                'nonce': nonce,
-                                'lower_nonce': cd['lower_nonce'],
-                                'upper_nonce': cd['upper_nonce'],
-                                'rarity': cd['rarity'],
-                                'file_url': cd['file_url'],
-                                'currency': cd['currency']
-                            })
-                            break
-
-                participant_data['games'].append({
-                    'game': game,
-                    'choices_with_nonce': choices_with_nonce,
-                    'random_nonces': random_nonces,
-                })
-
-            context['participant_wrappers'].append(participant_data)
         # 3) For backwards compatibility: pick a “primary” game for single‐game logic
-        primary_game = games[0]
-        context['game'] = primary_game
-        context['auto_spin'] = self.request.GET.get('auto_spin') == 'true'
+        primary_game          = games[0]
+        context['game']       = primary_game
 
         # 4) User & profile info
         user = self.request.user
         if user.is_authenticated:
             profile = ProfileDetails.objects.filter(user=user).first()
-            context['user_cash'] = profile.currency_amount if profile else 0
+            context['user_cash']  = profile.currency_amount if profile else 0
             context['total_cost'] = primary_game.get_effective_cost()
             # MyPreferences form
             pref_inst = getattr(user, 'mypreferences', None)
-            context['preferenceform'] = (
+            context['preferenceform']     = (
                 MyPreferencesForm(instance=pref_inst, user=user)
                 if pref_inst else
                 MyPreferencesForm(user=user)
             )
             # SpinPreference
             spin_pref = SpinPreference.objects.get_or_create(user=user, defaults={'quick_spin': False})[0]
-            context['quick_spin'] = spin_pref.quick_spin
-            context['spinpreference'] = spin_pref
-            context['spin_preference_form'] = SpinPreferenceForm(instance=spin_pref)
+            context['quick_spin']         = spin_pref.quick_spin
+            context['spinpreference']     = spin_pref
+            context['spin_preference_form']= SpinPreferenceForm(instance=spin_pref)
         else:
             context.update({
                 'user_cash': None,
@@ -3977,17 +3803,17 @@ class ActualBattleView(DetailView):
 
         # 5) Random nonces for your spinner logic
         rand_amt = random.randint(500, 1000) if context.get('quick_spin') else random.randint(150, 300)
-        context['random_amount'] = rand_amt
-        context['range_random_amount'] = range(rand_amt)
-        context['random_nonces'] = [random.randint(0, 1_000_000) for _ in range(rand_amt)]
+        context['random_amount']      = rand_amt
+        context['range_random_amount']= range(rand_amt)
+        context['random_nonces']      = [random.randint(0, 1_000_000) for _ in range(rand_amt)]
 
         # 6) Choice‐generation logic (unchanged)
         inline_choices = primary_game.choice_fk_set.all()
-        m2m_choices = primary_game.choices.all()
-        combined = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
+        m2m_choices    = primary_game.choices.all()
+        combined       = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
 
-        through_qs = GameChoice.objects.filter(game=primary_game).select_related('choice')
-        through_data = {}
+        through_qs     = GameChoice.objects.filter(game=primary_game).select_related('choice')
+        through_data   = {}
         for gc in through_qs:
             c = gc.choice
             through_data[c.pk] = {
@@ -4023,7 +3849,7 @@ class ActualBattleView(DetailView):
                 'choice_text': choice.choice_text,
                 **info,
                 'image_width':  getattr(choice, 'image_width', None),
-                'image_length': getattr(choice, 'image_length', None),
+                'image_length': getattr(choice, 'image_length',None),
                 'get_color_display': choice.get_color_display(),
                 'get_tier_display':  choice.get_tier_display(),
             })
@@ -4052,7 +3878,8 @@ class ActualBattleView(DetailView):
         context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'),
+        is_active=1)
         if user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(is_active=1, user=user).order_by("created_at")
         print(battle.participants.all())
@@ -4062,6 +3889,7 @@ class ActualBattleView(DetailView):
 
         for profile in context['Profiles']:
             user = profile.user
+
             profile.newprofile_profile_picture_url = profile.avatar.url if profile.avatar else None
             profile.newprofile_profile_url = profile.get_profile_url()
 
@@ -4076,6 +3904,7 @@ class ActualBattleView(DetailView):
             context['NewsProfiles'] = None
 
         if context['NewsProfiles'] == None:
+
             userprofile = type('', (), {})()
             userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
             userprofile.newprofile_profile_url = None
@@ -4097,7 +3926,7 @@ from datetime import timedelta
 
 def active_users_count(request):
     now = timezone.now()
-    window = now - timedelta(seconds=10)
+    window = now - timedelta(seconds=10)  
     sessions = Session.objects.filter(expire_date__gt=now)
     count = 0
 
@@ -4216,118 +4045,6 @@ class BattleCreationView(CreateView):
         return context
 
 
-def create_outcomes_for_battle(battle):
-    """
-    For every (Game × User) in this battle, make one Outcome.
-    """
-    # 1) all non-bot, authenticated participants
-    participants = BattleParticipant.objects.filter(
-        battle=battle,
-        is_bot=False,
-        user__isnull=False
-    ).select_related('user')
-
-    # 2) all the games in the battle
-    games = battle.chests.all().prefetch_related('choice_fk_set', 'choices')
-
-    for game in games:
-        # pick a default choice for this game (you can customize this)
-        default_choice = (
-            game.choice_fk_set.first()    or
-            game.choices.first()
-        )
-        for bp in participants:
-            outcome = Outcome.objects.create(
-                game=game,
-                user=bp.user,
-                type=game.type,
-                choice=default_choice
-            )
-            print(
-                f"[BattleStart] Outcome #{outcome.pk} → "
-                f"Game={game.slug}, User={bp.user.username}"
-            )
-
-
-@require_GET
-def load_game_wrapper(request, game_id, participant_slug):
-    battle = get_object_or_404(Battle, pk=request.session.get("current_battle_id"))
-    all_participants = BattleParticipant.objects.filter(battle=battle)
-
-    # Find the right participant
-    for participant in all_participants:
-        name = participant.robot.name if participant.is_bot else participant.user.username
-        if slugify(name) == participant_slug:
-            break
-    else:
-        raise Http404("Participant not found")
-
-    # Find the correct game data
-    games = getattr(battle, 'games_with_choices', [])
-    game = next((g for g in games if g.id == int(game_id)), None)
-    if not game:
-        raise Http404("Game not found")
-
-    # Match choices for the game
-    inline_choices = game.choice_fk_set.all()
-    m2m_choices = game.choices.all()
-    combined = {c.pk: c for c in list(inline_choices) + list(m2m_choices)}
-
-    through_qs = GameChoice.objects.filter(game=game).select_related('choice')
-    through_data = {}
-    for gc in through_qs:
-        c = gc.choice
-        through_data[c.pk] = {
-            'lower_nonce': gc.lower_nonce or c.lower_nonce,
-            'upper_nonce': gc.upper_nonce or c.upper_nonce,
-            'value': gc.value or c.value,
-            'rarity': gc.rarity or c.rarity,
-            'file_url': c.file.url if c.file else '',
-            'category': c.category or '',
-            'currency': {
-                'symbol': c.currency.name if c.currency else '💎',
-                'file_url': c.currency.file.url if c.currency and c.currency.file else None
-            }
-        }
-
-    all_choices = []
-    for pk, choice in combined.items():
-        info = through_data.get(pk, {})
-        all_choices.append({
-            'choice': choice,
-            **info,
-        })
-
-    rand_nonces = [random.randint(0, 1_000_000) for _ in range(200)]
-    choices_with_nonce = []
-    for nonce in rand_nonces:
-        for cd in all_choices:
-            if cd['lower_nonce'] <= nonce <= cd['upper_nonce']:
-                choices_with_nonce.append({
-                    'choice': cd['choice'],
-                    'nonce': nonce,
-                    'lower_nonce': cd['lower_nonce'],
-                    'upper_nonce': cd['upper_nonce'],
-                    'rarity': cd['rarity'],
-                    'file_url': cd['file_url'],
-                    'currency': cd['currency'],
-                })
-                break
-
-    context = {
-        'game_data': {
-            'game': game,
-            'choices_with_nonce': choices_with_nonce,
-        },
-        'participant_data': {
-            'name': name,
-        }
-    }
-
-    html = render_to_string("partials/game_wrapper.html", context, request=request)
-    return HttpResponse(html)
-
-
 def join_battle(request):
     battle_id = request.POST.get('battle_id')
     battle = Battle.objects.get(id=battle_id)
@@ -4392,26 +4109,8 @@ def add_robot(request, battle_id):
     is_now_full = battle.is_full()
     redirect_url = None
     if is_now_full:
-        print('battle is now full, starting')
-        rf = RequestFactory()
-        for game in battle.chests.all():
-            payload = json.dumps({
-                'game_id': game.id,
-                'button_id': 'start2'  # or whatever flag you need
-            })
-            fake_req = rf.post(
-                path='/',  # path doesn’t actually matter
-                data=payload,
-                content_type='application/json'
-            )
-            fake_req.user = request.user
-
-            battle_create_outcome(fake_req, battle.id, game.id)
-        print('started battle trigger')
+        # This is the same redirect you used in SingleBattleListView.dispatch
         redirect_url = reverse('showcase:actualbattle', kwargs={'battle_id': battle.id})
-        redirect_url += '?auto_spin=true'
-        print('the url is: ' + redirect_url)
-        return redirect(redirect_url)
 
     messages.success(request, f"Robot '{selected_robot.name}' added successfully!")
 
@@ -4895,6 +4594,9 @@ def toggle_favorite(request, game_id):
         next_url = request.POST.get('next', request.META.get('HTTP_REFERER', '/'))
         return redirect(next_url)
 
+from django.core.serializers.json import DjangoJSONEncoder
+from django.shortcuts import render
+import json
 
 class OutcomeHistoryView(BaseView):
     model = Outcome
@@ -4968,100 +4670,6 @@ class OutcomeHistoryView(BaseView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
-
-
-class UserRecentOutcomesView(LoginRequiredMixin, ListView):
-    model = Outcome
-    template_name = 'recent_outcomes.html'
-    context_object_name = 'outcomes'
-    paginate_by = 30
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
-        context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
-        context['Money'] = Currency.objects.filter(is_active=1).first()
-        context['Game'] = GameHub.objects.filter(is_active=1).first()
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-        context['form'] = EmailForm()
-
-        newprofile = UpdateProfile.objects.filter(is_active=1)
-
-        context['Profiles'] = newprofile
-
-        for newprofile in context['Profiles']:
-            user = newprofile.user
-            profile = ProfileDetails.objects.filter(user=user).first()
-            if profile:
-                newprofile.newprofile_profile_picture_url = profile.avatar.url
-                newprofile.newprofile_profile_url = newprofile.get_profile_url()
-
-        if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-        else:
-            userprofile = None
-
-        if userprofile:
-            context['NewsProfiles'] = userprofile
-        else:
-            context['NewsProfiles'] = None
-
-        if context['NewsProfiles'] == None:
-
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
-        else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-        return context
-
-    def get_queryset(self):
-        user_id = self.kwargs.get('user_id')
-        target = (
-            get_object_or_404(User, pk=user_id)
-            if user_id
-            else self.request.user
-        )
-        return (
-            Outcome.objects
-            .filter(user=target, is_active=1)
-            .order_by('-date_and_time')
-        )
-
-    def render_to_response(self, context, **response_kwargs):
-        is_ajax = self.request.headers.get('x-requested-with') == 'XMLHttpRequest'
-        if is_ajax:
-            page = context['page_obj']
-            outcomes = page.object_list
-
-            data = [
-                {
-                    'slug': o.slug,
-                    'nonce': int(o.nonce),
-                    'value': o.value,
-                    'ratio': o.ratio,
-                    'date_and_time': o.date_and_time.strftime('%Y-%m-%d %H:%M:%S'),
-                }
-                for o in outcomes
-            ]
-            return JsonResponse({
-                'outcomes': data,
-                'has_next': page.has_next(),
-                'page': page.number,
-            })
-        return super().render_to_response(context, **response_kwargs)
-
 
 class ClubRoomView(BaseView):
     model = GameHub
@@ -6074,13 +5682,11 @@ class MegaBackgroundView(BaseView):
 
         return context
 
-
 class MegaCreatePostView(CreateView):
     model = MegaBackgroundImage
     form_class = MegaBackgroundImagery
     template_name = "megacoinsbackgroundimagechange.html"
     success_url = reverse_lazy("megacoins")
-
 
 class EventBackgroundView(BaseView):
     model = EventBackgroundImage
@@ -6093,9 +5699,6 @@ class EventBackgroundView(BaseView):
         context['EventBackgroundImage'] = EventBackgroundImage.objects.all()
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['Events'] = Event.objects.all()
 
         newprofile = Event.objects.filter(is_active=1)
@@ -6211,7 +5814,6 @@ class NewsBackgroundView(BaseView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
-
 
 class SingleNewsView(DetailView):
     model = NewsFeed
@@ -8089,7 +7691,6 @@ class BlogBaseView(ListView):
         return context
 
 
-@login_required
 def ajax_update_amount(request):
     profile      = request.user.profiledetails
     rd_benefit   = profile.tier.benefits \
@@ -9222,7 +8823,6 @@ class votingview(ListView):
 
         return context
 
-
 class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
     model = Item
     paginate_by = 10
@@ -9328,8 +8928,7 @@ class TradeItemCreateView(ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
-       
+
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
                 is_active=1, user=self.request.user
@@ -9389,7 +8988,6 @@ class TradeBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -9500,7 +9098,6 @@ def contact_trader(self, request, trade_item_id):
     room = trade_item.create_room(current_user)
 
     return redirect('showcase:room', room=room.name, username=current_user.username)
-
 
 class ResponseTradeOfferCreateView(CreateView):
     model = RespondingTradeOffer
@@ -10521,7 +10118,6 @@ from django.core.mail import send_mail
 from django.conf import settings
 from email.mime.image import MIMEImage
 
-
 def get_games_context(request):
     filter_type = request.GET.get('filter')
 
@@ -10543,7 +10139,6 @@ def get_games_context(request):
         'game_length': game_length,
     }
     return context
-
 
 def filter_games(request):
     context = get_games_context(request)
@@ -10610,20 +10205,9 @@ class BackgroundView(FormMixin, BaseView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['messages'] = SupportMessage.objects.filter(room=self.request.user.username).order_by('-date')
         context['friendmessages'] = Message.objects.filter(room=self.request.user.username).order_by('-date')
-        context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by("carouselposition")
-        events = Event.objects.filter(is_active=1, page=self.template_name)
-        for e in events:
-            # combine date + time
-            dt = datetime.combine(e.date, e.time)
-            # make it timezone-aware
-            dt = timezone.make_aware(dt, timezone.get_default_timezone())
+        context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by(
+            "carouselposition")
 
-            # milliseconds since epoch!
-            e.start_timestamp = int(dt.timestamp() * 1000)
-
-            # length must be a timedelta (DurationField)
-            e.duration_ms = int(e.length.total_seconds() * 1000)
-        context['Events'] = events
 
         spinpreference = None
         user = self.request.user
@@ -10946,7 +10530,7 @@ class BackgroundView(FormMixin, BaseView):
         context['NewGame'] = Game.objects.filter(is_active=1, filter='N')
         context['PopularGame'] = Game.objects.filter(is_active=1, filter='P')
         context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
-        context['Feed'] = Feedback.objects.filter(showcase=1, is_active=1).order_by("slug")
+        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['Email'] = EmailField.objects.filter(is_active=1)
         context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
@@ -11284,9 +10868,9 @@ class EBackgroundView(BaseView, FormView):
         paginator = Paginator(items_query, paginate_by)
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
-        if self.request.user.is_authenticated:
-            active_order = (Order.objects.filter(user=self.request.user, ordered=False).prefetch_related('items').first())
-            context['order'] = active_order
+
+        active_order = (Order.objects.filter(user=self.request.user, ordered=False).prefetch_related('items').first())
+        context['order'] = active_order
 
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -11346,16 +10930,6 @@ class EBackgroundView(BaseView, FormView):
         context['categorizeditems'] = categoryitems
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
 
-        items = Item.objects.filter(is_active=1, price__isnull=False)
-        total_price = sum(item.price for item in items)
-        tax_price = total_price * Decimal('0.08')
-        final_price = total_price + tax_price
-
-        context['total_price'] = total_price  # match template name
-        context['tax_price'] = tax_price
-        context['final_price'] = final_price
-        print(f"Total: {total_price}, Tax: {tax_price}, Final: {final_price}")
-
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -11387,7 +10961,7 @@ class EBackgroundView(BaseView, FormView):
         }
         return render(request, 'seasons.html', context)
 
-
+    
 
     def get_items_by_category(self, category):
         if category == 'all':
@@ -15737,7 +15311,6 @@ class DailyLotteryView(FormMixin, ListView):
             messages.error(request, 'You need to log in to claim your daily ticket!')
             return render(request, 'registration/login.html', {'form': form})
 
-
 class DailyLotteryClaimedView(ListView):
     model = Lottery
     template_name = "dailylottoclaimed.html"
@@ -15844,7 +15417,6 @@ def claim_ruby(request):
         "added":         applied_amount,
     })
 
-
 def login_view(request):
     next_url = request.GET.get('next', '/')
 
@@ -15863,7 +15435,6 @@ def login_view(request):
         form = AuthenticationForm()
 
     return render(request, 'accounts/login.html', {'form': form, 'next': next_url})
-
 
 class Lottereal(BaseView):
     model = Lottery
@@ -16422,6 +15993,7 @@ from django.shortcuts import render
 from .models import AdministrationChangeLog
 
 
+
 class AdministrationChangeLogView(ListView):
     model = AdministrationChangeLog
     template_name = "administrationchangelog.html"
@@ -16442,7 +16014,7 @@ class AdministrationChangeLogView(ListView):
         # (unchanged from your original get_context_data)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
         # ─── User‐specific clickables & profile URLs ─────────────────────────────────
         user = self.request.user
         if user.is_authenticated:
@@ -16563,7 +16135,7 @@ class ChangeLogView(ListView):
         context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
         # “NewsProfiles” logic: if the user is authenticated, pass back their ProfileDetails;
         # otherwise, create a dummy object for avatar and url placeholders.
         if self.request.user.is_authenticated:
@@ -17104,7 +16676,6 @@ class CreateWithdrawView(LoginRequiredMixin, CreateView):
             form = WithdrawForm()
             return render(request, "create_withdraw.html", {'form': form})
 
-
 class WithdrawView(LoginRequiredMixin, ListView):
     model = Withdraw
     template_name = "withdraws.html"
@@ -17201,7 +16772,6 @@ class WithdrawView(LoginRequiredMixin, ListView):
                 withdraw.mark_complete()
                 messages.success(request, "Withdrawal marked complete successfully!")
         return redirect('showcase:withdraws')
-
 
 class WithdrawDetailView(LoginRequiredMixin, DetailView):
     model = Withdraw
@@ -19723,7 +19293,6 @@ def check_and_deduct_currency(user, amount_required):
     except ProfileDetails.DoesNotExist:
         return False, 0
 
-
 class CheckoutView(EBaseView):
     model = CheckoutBackgroundImage
     template_name = "checkout.html"
@@ -19760,13 +19329,11 @@ class CheckoutView(EBaseView):
                 context['profile_pk'] = profile.pk
                 context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
 
-        if self.request.user.is_authenticated:
-            context['address'] = Address.objects.filter(is_active=1, user=self.request.user).first()
+        context['address'] = Address.objects.filter(is_active=1, user=self.request.user).first()
         context.update(kwargs)
 
-        if self.request.user.is_authenticated:
-            user_profile_exists = UserProfile2.objects.filter(user=self.request.user, is_active=1).exists()
-            context['user_profile_exists'] = user_profile_exists
+        user_profile_exists = UserProfile2.objects.filter(user=self.request.user, is_active=1).exists()
+        context['user_profile_exists'] = user_profile_exists
 
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
@@ -19794,63 +19361,51 @@ class CheckoutView(EBaseView):
         return context
 
     def get(self, *args, **kwargs):
-        user = self.request.user
+        try:
+            order = Order.objects.get(user=self.request.user, ordered=False)
 
-        form = CheckoutForm(all_items_currency_based=False)  # default fallback form
+            if hasattr(order, "update_total_prices"):
+                order.update_total_prices()
 
-        order = None
-        currency_order = None
-
-        if user.is_authenticated:
             try:
-                order = Order.objects.get(user=user, ordered=False)
+                currency_order = CurrencyOrder.objects.filter(user=self.request.user, ordered=False)
+                if hasattr(currency_order, "update_total_prices"):
+                    currency_order.update_total_prices()
+            except CurrencyOrder.DoesNotExist:
+                currency_order = None
 
-                if hasattr(order, "update_total_prices"):
-                    order.update_total_prices()
+            all_items_currency_based = self.are_all_items_currency_based(order)
+            form = CheckoutForm(all_items_currency_based=all_items_currency_based)
 
-                currency_order_qs = CurrencyOrder.objects.filter(user=user, ordered=False)
-                if currency_order_qs.exists():
-                    currency_order = currency_order_qs.first()
-                    if hasattr(currency_order, "update_total_prices"):
-                        currency_order.update_total_prices()
+            shipping_address_qs = Address.objects.filter(user=self.request.user, address_type='S', is_active=1)
+            if shipping_address_qs.exists():
+                shipping_address = shipping_address_qs.first()
+                form.fields['shipping_address'].initial = shipping_address.street_address
+                form.fields['shipping_address2'].initial = shipping_address.apartment_address
+                form.fields['shipping_country'].initial = shipping_address.country
+                form.fields['shipping_zip'].initial = shipping_address.zip
 
-                all_items_currency_based = self.are_all_items_currency_based(order)
-                form = CheckoutForm(all_items_currency_based=all_items_currency_based)
+            billing_address_qs = Address.objects.filter(user=self.request.user, address_type='B', is_active=1)
+            if billing_address_qs.exists():
+                billing_address = billing_address_qs.first()
+                form.fields['billing_address'].initial = billing_address.street_address
+                form.fields['billing_address2'].initial = billing_address.apartment_address
+                form.fields['billing_country'].initial = billing_address.country
+                form.fields['billing_zip'].initial = billing_address.zip
 
-                # Try to pre-fill shipping address
-                shipping_address_qs = Address.objects.filter(user=user, address_type='S', is_active=True)
-                if shipping_address_qs.exists():
-                    shipping_address = shipping_address_qs.first()
-                    form.fields['shipping_address'].initial = shipping_address.street_address
-                    form.fields['shipping_address2'].initial = shipping_address.apartment_address
-                    form.fields['shipping_country'].initial = shipping_address.country
-                    form.fields['shipping_zip'].initial = shipping_address.zip
+            context = self.get_context_data(
+                form=form,
+                couponform=CouponForm(),
+                order=order,
+                currency_order=currency_order,
+                DISPLAY_COUPON_FORM=True
+            )
 
-                # Try to pre-fill billing address
-                billing_address_qs = Address.objects.filter(user=user, address_type='B', is_active=True)
-                if billing_address_qs.exists():
-                    billing_address = billing_address_qs.first()
-                    form.fields['billing_address'].initial = billing_address.street_address
-                    form.fields['billing_address2'].initial = billing_address.apartment_address
-                    form.fields['billing_country'].initial = billing_address.country
-                    form.fields['billing_zip'].initial = billing_address.zip
+            return render(self.request, self.template_name, context)
 
-            except ObjectDoesNotExist:
-                messages.info(self.request, "You do not have an active order")
-                # You could optionally still render the checkout page without an order
-                # return redirect("showcase:checkout")  # OLD (causes infinite redirect)
-                pass  # Just continue to render empty form
-
-        context = self.get_context_data(
-            form=form,
-            couponform=CouponForm(),
-            order=order,
-            currency_order=currency_order,
-            DISPLAY_COUPON_FORM=True
-        )
-
-        return render(self.request, self.template_name, context)
-
+        except ObjectDoesNotExist:
+            messages.info(self.request, "You do not have an active order")
+            return redirect("showcase:checkout")
 
     def post(self, request, *args, **kwargs):
         try:
@@ -19893,19 +19448,9 @@ class CheckoutView(EBaseView):
             use_default_shipping = form.cleaned_data.get('use_default_shipping')
             order.deduct_currency_amount()
             if use_default_shipping:
-                address_qs = Address.objects.filter(
-                    user=self.request.user,
-                    address_type='S',
-                    default=True,
-                    is_active=1
-                ).exclude(
-                    street_address__isnull=True
-                ).exclude(
-                    street_address__exact=""
-                ).order_by('-id')
-
+                address_qs = Address.objects.filter(user=self.request.user, address_type='S', default=True)
                 if address_qs.exists():
-                    shipping_address = address_qs.first()
+                    shipping_address = address_qs[0]
                     order.shipping_address = shipping_address
                     order.save()
                 else:
@@ -19935,20 +19480,9 @@ class CheckoutView(EBaseView):
                         shipping_address.default = True
                         shipping_address.save()
                 else:
-                    address_qs = Address.objects.filter(
-                        user=self.request.user,
-                        address_type='S',
-                        default=True,
-                        is_active=1
-                    ).exclude(
-                        street_address__isnull=True
-                    ).exclude(
-                        street_address__exact=""
-                    ).order_by('-id')
-
-
+                    address_qs = Address.objects.filter(user=self.request.user, address_type='S', default=True)
                     if address_qs.exists():
-                        shipping_address = address_qs.first()
+                        shipping_address = address_qs[0]
                         order.shipping_address = shipping_address
                         order.save()
                     else:
@@ -19967,19 +19501,9 @@ class CheckoutView(EBaseView):
                 order.billing_address = billing_address
                 order.save()
             elif use_default_billing:
-                address_qs = Address.objects.filter(
-                    user=self.request.user,
-                    address_type='S',
-                    default=True,
-                    is_active=1
-                ).exclude(
-                    street_address__isnull=True
-                ).exclude(
-                    street_address__exact=""
-                ).order_by('-id')
-
+                address_qs = Address.objects.filter(user=self.request.user, address_type='B', default=True)
                 if address_qs.exists():
-                    billing_address = address_qs.first()
+                    billing_address = address_qs[0]
                     order.billing_address = billing_address
                     order.save()
                 else:
@@ -20009,19 +19533,9 @@ class CheckoutView(EBaseView):
                         billing_address.default = True
                         billing_address.save()
                 else:
-                    address_qs = Address.objects.filter(
-                        user=self.request.user,
-                        address_type='S',
-                        default=True,
-                        is_active=1
-                    ).exclude(
-                        street_address__isnull=True
-                    ).exclude(
-                        street_address__exact=""
-                    ).order_by('-id')
-
+                    address_qs = Address.objects.filter(user=self.request.user, address_type='S', default=True)
                     if address_qs.exists():
-                        shipping_address = address_qs.first()
+                        shipping_address = address_qs[0]
                         order.shipping_address = shipping_address
                         order.save()
                     else:
@@ -20060,7 +19574,6 @@ class PaymentView(EBaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
@@ -20118,13 +19631,7 @@ class PaymentView(EBaseView):
             return redirect("showcase:checkout")
 
     def post(self, *args, **kwargs):
-        order_user = self.request.user
-        orders = Order.objects.filter(user=order_user, ordered=False)
-
-        if not orders.exists():
-            messages.warning(self.request, "No active orders found.")
-            return redirect("/checkout/")
-
+        order = Order.objects.get(user=self.request.user, ordered=False)
         if self.request.content_type == 'application/json':
             try:
                 data = json.loads(self.request.body.decode('utf-8'))
@@ -20137,28 +19644,30 @@ class PaymentView(EBaseView):
             token = self.request.POST.get('token')
             payment_method = self.request.POST.get('payment_method')
 
+        order_user = request.user
+        order = Order.objects.filter(user=order_user, ordered=False)
+        if not order.exists():
+            messages.warning(request, "No active orders found.")
+            return redirect("/checkout/")
         ruby_profile = get_object_or_404(ProfileDetails, user=order_user)
 
         total_amount = sum(order.get_total_price() for order in orders)
-        total_currency_amount = sum(
-            item.orderprice * item.quantity for order in orders for item in order.items.all()
-        )
+        total_currency_amount = sum(order.items.amount for order in orders)
 
         if token:
             try:
-                # Assuming single charge for all orders
                 charge = stripe.Charge.create(
-                    amount=int(total_amount * 100),
+                    amount=int(order.get_total_price() * 100),
                     currency="usd",
                     source=token,
-                    description=f"User {order_user.id} purchase",
+                    description=f"Order {order.id}",
                 )
                 ruby_profile.total_currency_amount += total_amount
                 ruby_profile.save()
+
                 return JsonResponse({"success": "Thanks for purchasing!"})
             except stripe.error.StripeError as e:
                 return JsonResponse({"error": str(e)}, status=400)
-
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
 
@@ -20610,85 +20119,6 @@ def create_currency_checkout_session(request, slug):
         print('there were errors with the submition of the one-click checkout ')
         print('the errors are ' + str(e))
         return JsonResponse({'errors here': str(e)}, status=400)
-# payments/views.py
-
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .utils import get_paypal_access_token
-from django.conf import settings
-import requests
-
-@csrf_exempt
-def create_order(request):
-    access_token = get_paypal_access_token()
-
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {access_token}'
-    }
-
-    data = {
-        "intent": "CAPTURE",
-        "purchase_units": [{
-            "amount": {
-                "currency_code": "USD",
-                "value": "10.00"
-            }
-        }]
-    }
-
-    response = requests.post(
-        f"{settings.PAYPAL_API_BASE}/v2/checkout/orders",
-        headers=headers,
-        json=data
-    )
-
-    return JsonResponse(response.json())
-
-
-@csrf_exempt
-def capture_order(request):
-    import json
-    access_token = get_paypal_access_token()
-    body = json.loads(request.body)
-    order_id = body.get('orderID')
-
-    response = requests.post(
-        f"{settings.PAYPAL_API_BASE}/v2/checkout/orders/{order_id}/capture",
-        headers={
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {access_token}'
-        }
-    )
-
-    return JsonResponse(response.json())
-
-
-@csrf_exempt
-def create_subscription(request):
-    import json
-    access_token = get_paypal_access_token()
-    body = json.loads(request.body)
-    plan_id = body.get('plan_id')  # send from JS
-
-    response = requests.post(
-        f"{settings.PAYPAL_API_BASE}/v1/billing/subscriptions",
-        headers={
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {access_token}'
-        },
-        json={
-            "plan_id": plan_id,
-            "application_context": {
-                "brand_name": "My Django App",
-                "return_url": "http://localhost:8000/payment/success/",
-                "cancel_url": "http://localhost:8000/payment/cancel/"
-            }
-        }
-    )
-
-    return JsonResponse(response.json())
-
 
 from django.forms.models import inlineformset_factory
 from django.core.exceptions import PermissionDenied

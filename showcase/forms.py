@@ -15,8 +15,7 @@ from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewTy
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
     SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame, Monstrosity, \
-    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet, GameChoice, MyPreferences, GiftCode, \
-    GiftCodeRedemption, Endowment
+    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet, GameChoice, MyPreferences, GiftCode, GiftCodeRedemption
 from .models import UpdateProfile
 from .models import VoteQuery
 from .models import StaffApplication
@@ -159,17 +158,10 @@ class ProfileForm(forms.ModelForm):
         model = ProductReview
         fields = '__all__'"""
 
-
 class ShippingForm(forms.ModelForm):
     class Meta:
         model = UserProfile2
-        fields = (
-            'first_name', 'last_name', 'address', 'city', 'state',
-            'country', 'zip_code', 'phone_number', 'profile_picture'
-        )
-        widgets = {
-            'country': forms.Select(attrs={'class': 'form-control'})  # override with plain select
-        }
+        fields = ('first_name', 'last_name', 'address', 'city', 'state', 'country', 'zip_code', 'phone_number', 'profile_picture')
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -191,7 +183,6 @@ class ShippingForm(forms.ModelForm):
                 user_profile.user = self.user
                 user_profile.save()
         return user_profile
-
 
 class StaffJoin(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Lemon Sauce'}))
@@ -797,24 +788,18 @@ PAYMENT_CHOICES = (
     ('C', 'Card')
 )
 
-
 class CheckoutForm(forms.Form):
     shipping_address = forms.CharField(required=False)
     shipping_address2 = forms.CharField(required=False)
-    shipping_country = CountryField(blank_label='(select country)').formfield(
-        required=False,
-        widget=forms.Select(attrs={'class': 'custom-select d-block w-100'})
-    )
-
+    shipping_country = CountryField(blank_label='(select country)').formfield(required=False,
+                                                                              widget=CountrySelectWidget(attrs={
+                                                                                  'class': 'custom-select d-block w-100'}))
     shipping_zip = forms.CharField(required=False)
 
     billing_address = forms.CharField(required=False)
     billing_address2 = forms.CharField(required=False)
-    billing_country = CountryField(blank_label='(select country)').formfield(
-        required=False,
-        widget=forms.Select(attrs={'class': 'custom-select d-block w-100'})
-    )
-
+    billing_country = CountryField(blank_label='(select country)').formfield(required=False, widget=CountrySelectWidget(
+        attrs={'class': 'custom-select d-block w-100'}))
     billing_zip = forms.CharField(required=False)
 
     same_billing_address = forms.BooleanField(required=False)
@@ -833,7 +818,6 @@ class CheckoutForm(forms.Form):
             self.fields['payment_option'].required = False
             self.fields['payment_option'].widget = forms.HiddenInput()
 
-
 class CouponForm(forms.Form):
     code = forms.CharField(widget=forms.TextInput(attrs={
         'class': 'form-control',
@@ -841,7 +825,6 @@ class CouponForm(forms.Form):
         'aria-label': 'Recipient\'s username',
         'aria-describedby': 'basic-addon2'
     }))
-
 
 class GiftCodeForm(forms.Form):
     code = forms.CharField(max_length=64)
@@ -1109,6 +1092,7 @@ class FeedMonstrosityForm(forms.ModelForm):
             raise forms.ValidationError("Currency amount must be positive.")
         return currency_amount
 
+from .models import Endowment
 
 class EndowmentForm(forms.Form):
     user = forms.CharField(widget=forms.HiddenInput())
@@ -1144,10 +1128,8 @@ class EndowmentForm(forms.Form):
             instance.save()
         return instance
 
-
 class HitStandForm(forms.Form):
     action = forms.ChoiceField(choices=[('hit', 'Hit'), ('stand', 'Stand')], label='Action')
-
 
 class CreateChest(forms.ModelForm):
     class Meta:
