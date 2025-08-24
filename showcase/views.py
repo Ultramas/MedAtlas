@@ -8914,6 +8914,7 @@ class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
             })
         return render(request, 'some_template.html', {'fields': fields})
 
+
 class TradeItemCreateView(ListView):
     model = TradeItem
     template_name = 'tradingcentral.html'
@@ -8974,6 +8975,162 @@ class TradeItemCreateView(ListView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
+
+
+class ConsignmentView(FormMixin, LoginRequiredMixin, ListView):
+    model = Item
+    paginate_by = 10
+    template_name = 'consignment.html'
+    form_class = ItemForm
+
+    def get_context_data(self, **kwargs):
+        self.object_list = self.get_queryset()
+        context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+        context['Item'] = Item.objects.filter(is_active=1)
+
+        newprofile = Item.objects.filter(is_active=1)
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+        form = ItemForm()
+        context = self.get_context_data()
+        context['form'] = form
+        return render(request, 'consignment.html', context)
+
+    def post(self, request, *args, **kwargs):
+        form = ItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+            messages.success(request, 'Form submitted successfully.')
+            return redirect('showcase:ehome')
+        else:
+            messages.error(request, "Form submission invalid")
+            print(form.errors)
+            print(form.non_field_errors())
+            print(form.cleaned_data)
+            form = ItemForm()
+        return render(request, 'consignment.html', {'form': form})
+
+    def profileview(request):
+        instance = Item.objects.get(pk=1)
+        fields = []
+        for field in instance._meta.get_fields():
+            fields.append({
+                'name': field.name,
+                'value': getattr(instance, field.name),
+            })
+        return render(request, 'consignment.html', {'fields': fields})
+
+
+class TradeItemCreateView(ListView):
+    model = TradeItem
+    template_name = 'tradingcentral.html'
+    success_url = '/tradingcentral/'
+
+    def get_context_data(self, **kwargs):
+        self.object_list = self.get_queryset()
+        context = super().get_context_data(**kwargs)
+        context['Background'] = BackgroundImageBase.objects.filter(
+            is_active=1, page=self.template_name).order_by("position")
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+        context['TradeItems'] = TradeItem.objects.filter(is_active=1)
+        context['TradeOffers'] = TradeOffer.objects.filter(is_active=1)
+        context['Friends'] = Friend.objects.filter(user=self.request.user, is_active=1)
+        tradeoffering = RespondingTradeOffer.objects.filter(is_active=1)
+        context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
+
+        trade_offers = TradeOffer.objects.filter(is_active=1)
+
+        slug = self.kwargs.get('slug')
+
+        if slug:
+
+            trade_objects = TradeOffer.objects.filter(slug=slug)
+
+            context['TradeOffered'] = trade_objects
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
 
 class TradeBackgroundView(FormMixin, LoginRequiredMixin, ListView):
     model = TradeItem
@@ -19013,6 +19170,7 @@ class GiftCodeRedemptionView(LoginRequiredMixin, ListView, FormMixin):
             return redirect('accounts/login')
 
         return self.get(request, *args, **kwargs)
+
 
 class GiftCodeClaimedView(ListView):
     model = Lottery

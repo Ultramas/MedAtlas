@@ -1293,8 +1293,43 @@ p.blog-meta span {
 {% include 'navtrove.html' %}
 	<!-- end header -->
 
-
-<div class="boxes" style="
+<h2 class="chest-header">
+            </h2>
+            <div id="chestCollection" class="chest-collection animate-stagger">
+                {% for product in Products %}
+                {% if product.specialty == 'PR' %}
+                <div class="prismatic-chest">
+                    <a href="{{ product.get_profile_url }}">
+                        <div class="chest-base">
+                            <div class="chest-interior"></div>
+                            <div class="light-beam"></div>
+                        </div>
+                        <div class="floating-card">
+                            <div class="card-inner">
+                                <div class="card-image" style="background-image: url('{{ product.image.url }}');"></div>
+                                <div class="card-holographic-overlay"></div>
+                                <div class="card-shine"></div>
+                            </div>
+                        </div>
+                        <div class="chest-info">
+                            <h3 class="chest-title">{{ product.title }}</h3>
+                            <div class="price-tag">
+                                <!--<div class="diamond-icon">💎</div>-->
+                                {% if Game.discount_cost %}
+                                <div class="price-amount">${{ product.discount_price }}</div>
+                                <div class="original-price">${{ product.price }}</div>
+                                {% else %}
+                                <div class="price-amount">${{ product.price }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="view-button">Check It Out!</div>
+                        </div>
+                    </a>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+<!--<div class="boxes" style="
     left: 0%;
     position: absolute;
     width: 100%;
@@ -1306,9 +1341,9 @@ p.blog-meta span {
     background-position: center;
 " alt="{{ game.name }}">
 </div>
-    <div class="selectionsWrapper">
-<div class="selections">
-    <div class="flame-effect"></div>
+    <div class="selectionsWrapper">-->
+<!--<div class="selections">-->
+    <!--<div class="flame-effect"></div>
     <div class="content">
         <label style="background: rgba(255, 255, 255, 0.3); padding: 2px; padding-left: 5px; padding-right: 5px;border-radius: 10px;"> Spin Boost Power</label>
         <div id="spinCount">
@@ -1384,8 +1419,8 @@ document.addEventListener("DOMContentLoaded", function () {
         <label for="quickspin-checkbox">Quick Spin</label>
         <input type="checkbox" id="persist-spin-checkbox">
         <label for="persist-spin-checkbox">Save Spin Boost</label><br>
-    </div>
-
+    </div>-->
+<!--
 
 {% if game.daily %}
 
@@ -1530,7 +1565,7 @@ document.addEventListener("DOMContentLoaded", function () {
     {% endif %}
 </button>
 {% endif %}
-</div>
+</div>-->
 
 <style>
 .gamer-button {
@@ -1930,7 +1965,7 @@ $(document).ready(function() {
 
     </div>
 
-<div class="popupWrapper">
+<!--<div class="popupWrapper">
     <div id="popup" class="popup" style="height:45em;">
         <div class="fire-container">
             <div class="fire">
@@ -1959,13 +1994,13 @@ $(document).ready(function() {
     </div>
 </div>
 
-    </div>
+    </div>-->
 <!--check mypreference of user, should one exist; default is classic-->
 
-    <div class="wrapper">
+<!--    <div class="wrapper">
         <div class="containerre"  style="display: flex;">
             <div class="slider" id="slider">
-<!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
+
 {% for item in choices_with_nonce %}
             {% with choice=item.choice %}
             {% with color=game|get_color:choice %}
@@ -2028,7 +2063,7 @@ $(document).ready(function() {
     </a>
     </div>
                     </div></div></div></div></div></div></div>
-
+-->
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
     const outcomeUrl = `/battles/${battleId}/games/${gameId}/outcome/`;

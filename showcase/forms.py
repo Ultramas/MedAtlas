@@ -2,6 +2,7 @@ from datetime import timezone, timedelta, date
 from urllib import request
 
 import self
+from _decimal import Decimal
 from django import forms
 from django.forms import inlineformset_factory, modelformset_factory
 from django.http import JsonResponse
@@ -60,6 +61,7 @@ from django.forms.widgets import CheckboxSelectMultiple
 
 users = User.objects.filter()
 
+
 class SignUpForm(UserCreationForm):
     username = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': '150 Characters or fewer. Letters, digits and @/./+/-/_ only.'})
@@ -86,11 +88,13 @@ class SignUpForm(UserCreationForm):
             raise ValidationError("This email is already in use. Please use a different email address.")
         return email
 
+
 CONTACT_PREFERENCE = [
     ('email', 'Email'),
     ('chat', 'Chat'),
     ('call', 'Call'),
 ]
+
 
 class ContactForm(forms.ModelForm):
     prefered_contact = forms.MultipleChoiceField(choices=CONTACT_PREFERENCE, widget=forms.CheckboxSelectMultiple())
@@ -99,12 +103,14 @@ class ContactForm(forms.ModelForm):
         model = Contact
         fields = '__all__'
 
+
 class BusinessContactForm(forms.ModelForm):
     prefered_contact = forms.MultipleChoiceField(choices=CONTACT_PREFERENCE, widget=forms.CheckboxSelectMultiple())
 
     class Meta:
         model = BusinessMailingContact
         fields = '__all__'
+
 
 class PostForm(forms.ModelForm):
     name = forms.CharField(
@@ -115,6 +121,7 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = UpdateProfile
         fields = ('name', 'description', 'image')
+
 
 class Postit(forms.ModelForm):
     name = forms.CharField(
@@ -128,10 +135,12 @@ class Postit(forms.ModelForm):
         model = Idea
         fields = ('name', 'category', 'description', 'image')
 
+
 class VoteQueryForm(forms.ModelForm):
     class Meta:
         model = VoteQuery
         fields = ['description', 'category']
+
 
 VoteOptionFormSet = inlineformset_factory(
     VoteQuery,
@@ -140,6 +149,7 @@ VoteOptionFormSet = inlineformset_factory(
     extra=2,
     can_delete=False
 )
+
 
 class ProfileForm(forms.ModelForm):
     class Meta:
@@ -150,6 +160,7 @@ class ProfileForm(forms.ModelForm):
             'last_name',
             'email',
         ]
+
 
 """class ReviewForm(forms.ModelForm):
     review = forms.CharField(widget=forms.Textarea(attrs={'placeholder': "Write Your Review Here"}))
@@ -210,12 +221,14 @@ class StaffJoin(forms.ModelForm):
                   'How_do_you_think_you_can_make_PokeTrove_better',
                   'I_confirm_that_I_have_read_all_the_staff_requirements_and_meet_all_of_them')
 
+
 class Server_Partner(forms.ModelForm):
     class Meta:
         model = PartnerApplication
         fields = (
             'user', 'name', 'category', 'multi_category', 'description', 'resume', 'requirement_check', 'policy_check',
             'voucher',)
+
 
 class SupportForm(forms.ModelForm):
     name = forms.CharField(
@@ -231,20 +244,24 @@ class SupportForm(forms.ModelForm):
         model = Support
         fields = ('name', 'category', 'issue', 'Additional_comments', 'image',)
 
+
 class PunishAppeale(forms.ModelForm):
     class Meta:
         model = PunishmentAppeal
         fields = ('name', 'Rule_broken', 'Why_I_should_have_my_punishment_revoked', 'Additional_comments',)
+
 
 class BanAppeale(forms.ModelForm):
     class Meta:
         model = BanAppeal
         fields = ('name', 'Rule_broken', 'Why_I_should_have_my_ban_revoked', 'Additional_comments',)
 
+
 class ReportIssues(forms.ModelForm):
     class Meta:
         model = ReportIssue
         fields = ('name', 'category', 'issue', 'Additional_comments', 'image',)
+
 
 class News_Feed(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
@@ -256,6 +273,7 @@ class News_Feed(forms.ModelForm):
     class Meta:
         model = NewsFeed
         fields = '__all__'
+
 
 class Staffprofile(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam_Mannara#6510'}))
@@ -272,6 +290,7 @@ class Staffprofile(forms.ModelForm):
         model = StaffProfile
         fields = '__all__'
 
+
 class Eventform(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'The event name goes here'}))
     category = forms.CharField(widget=forms.TextInput(
@@ -286,14 +305,17 @@ class Eventform(forms.ModelForm):
         model = Event
         fields = '__all__'
 
+
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = 'post', 'name', 'email', 'body', 'active'
 
+
 from django import forms
 from django.forms import inlineformset_factory
 from .models import Game, Choice
+
 
 class PlayerInventoryGameForm(forms.ModelForm):
     items = forms.ModelMultipleChoiceField(
@@ -320,6 +342,7 @@ class PlayerInventoryGameForm(forms.ModelForm):
         model = Game
         fields = ['name', 'cost', 'discount_cost', 'type', 'category', 'image', 'power_meter', 'items']
 
+
 class InventoryGameForm(forms.ModelForm):
     choices = forms.ModelMultipleChoiceField(
         queryset=Choice.objects.all(),
@@ -333,6 +356,7 @@ class InventoryGameForm(forms.ModelForm):
             'name', 'cost', 'discount_cost', 'type', 'category', 'image',
         ]
 
+
 class ChoiceForm(forms.ModelForm):
     class Meta:
         model = Choice
@@ -341,6 +365,7 @@ class ChoiceForm(forms.ModelForm):
             'file': forms.FileInput(attrs={'class': 'form-control-file'}),
         }
 
+
 ChoiceFormSet = modelformset_factory(
     Choice,
     form=ChoiceForm,
@@ -348,6 +373,7 @@ ChoiceFormSet = modelformset_factory(
 )
 
 from django.utils.safestring import mark_safe
+
 
 class TypeaheadSelectWidget(forms.Select):
     class Media:
@@ -360,7 +386,6 @@ class TypeaheadSelectWidget(forms.Select):
         )
 
     def render(self, name, value, attrs=None, renderer=None):
-
         output = super().render(name, value, attrs, renderer)
 
         element_id = attrs.get('id', 'id_%s' % name)
@@ -379,6 +404,7 @@ class TypeaheadSelectWidget(forms.Select):
         '''
         return mark_safe(output + js)
 
+
 class GameChoiceForm(forms.ModelForm):
     choice = forms.ModelChoiceField(
         queryset=Choice.objects.all(),
@@ -390,8 +416,10 @@ class GameChoiceForm(forms.ModelForm):
         model = GameChoice
         fields = '__all__'
 
+
 class ToggleFavoriteForm(forms.Form):
     game_id = forms.IntegerField(widget=forms.HiddenInput())
+
 
 class MyPreferencesForm(forms.ModelForm):
     class Meta:
@@ -402,10 +430,12 @@ class MyPreferencesForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
+
 class AscensionCreateForm(forms.ModelForm):
     class Meta:
         model = Ascension
         fields = []
+
 
 class CardUploading(forms.ModelForm):
     class Meta:
@@ -416,7 +446,9 @@ class CardUploading(forms.ModelForm):
         user = kwargs.pop('user', None)
         super(CardUploading, self).__init__(*args, **kwargs)
 
+
 ChoiceFormSet = inlineformset_factory(Game, Choice, form=CardUploading, extra=1)
+
 
 class GameAdminForm(forms.ModelForm):
     class Meta:
@@ -432,6 +464,7 @@ class GameAdminForm(forms.ModelForm):
             raise ValidationError("An unlocking level must be set for daily games.")
 
         return cleaned_data
+
 
 class BattleCreationForm(forms.ModelForm):
     game_values = forms.CharField(
@@ -588,6 +621,7 @@ class BattleJoinForm(forms.ModelForm):
 
         return participant
 
+
 class MoveToTradeForm(forms.Form):
     title = forms.CharField(max_length=100, required=False)
     fees = forms.DecimalField(max_digits=10, decimal_places=2, required=False)
@@ -608,6 +642,7 @@ class MoveToTradeForm(forms.Form):
         model = TradeItem
         fields = '__all__'
 
+
 class AddTradeForm(forms.ModelForm):
     class Meta:
         model = InventoryObject
@@ -619,10 +654,12 @@ class AddTradeForm(forms.ModelForm):
         if user:
             self.fields['add_trade_item'].queryset = InventoryObject.objects.filter(user=user)
 
+
 class Trade_In_Form(forms.ModelForm):
     class Meta:
         model = Trade_In_Cards
         fields = ('card_name', 'card_image', 'card_condition',)
+
 
 class SettingsForm(forms.ModelForm):
     class Meta:
@@ -636,124 +673,126 @@ class SettingsForm(forms.ModelForm):
             instance.save()
         return instance
 
-class BaseCopyrightTextFielde(forms.ModelForm):
 
+class BaseCopyrightTextFielde(forms.ModelForm):
     class Meta:
         model = BaseCopyrightTextField
         fields = '__all__'
 
-class BackgroundImagery(forms.ModelForm):
 
+class BackgroundImagery(forms.ModelForm):
     class Meta:
         model = BackgroundImage
         fields = '__all__'
 
-class BackgroundImagery(forms.ModelForm):
 
+class BackgroundImagery(forms.ModelForm):
     class Meta:
         model = BackgroundImage
         fields = '__all__'
+
 
 class EBackgroundImagery(forms.ModelForm):
-
     class Meta:
         model = EBackgroundImage
         fields = '__all__'
 
-class ChatBackgroundImagery(forms.ModelForm):
 
+class ChatBackgroundImagery(forms.ModelForm):
     class Meta:
         model = ChatBackgroundImage
         fields = '__all__'
 
-class ShowcaseBackgroundImagery(forms.ModelForm):
 
+class ShowcaseBackgroundImagery(forms.ModelForm):
     class Meta:
         model = ShowcaseBackgroundImage
         fields = '__all__'
 
-class BlogBackgroundImagery(forms.ModelForm):
 
+class BlogBackgroundImagery(forms.ModelForm):
     class Meta:
         model = BlogBackgroundImage
         fields = '__all__'
 
-class PostBackgroundImagery(forms.ModelForm):
 
+class PostBackgroundImagery(forms.ModelForm):
     class Meta:
         model = PostBackgroundImage
         fields = '__all__'
 
-class RuleBackgroundImagery(forms.ModelForm):
 
+class RuleBackgroundImagery(forms.ModelForm):
     class Meta:
         model = RuleBackgroundImage
         fields = '__all__'
 
-class AboutBackgroundImagery(forms.ModelForm):
 
+class AboutBackgroundImagery(forms.ModelForm):
     class Meta:
         model = AboutBackgroundImage
         fields = '__all__'
 
-class FaqBackgroundImagery(forms.ModelForm):
 
+class FaqBackgroundImagery(forms.ModelForm):
     class Meta:
         model = FaqBackgroundImage
         fields = '__all__'
 
-class StaffBackgroundImagery(forms.ModelForm):
 
+class StaffBackgroundImagery(forms.ModelForm):
     class Meta:
         model = StaffBackgroundImage
         fields = '__all__'
 
-class InformationBackgroundImagery(forms.ModelForm):
 
+class InformationBackgroundImagery(forms.ModelForm):
     class Meta:
         model = InformationBackgroundImage
         fields = '__all__'
 
-class TagBackgroundImagery(forms.ModelForm):
 
+class TagBackgroundImagery(forms.ModelForm):
     class Meta:
         model = TagBackgroundImage
         fields = '__all__'
 
-class UserBackgroundImagery(forms.ModelForm):
 
+class UserBackgroundImagery(forms.ModelForm):
     class Meta:
         model = UserBackgroundImage
         fields = '__all__'
 
-class StaffRanksBackgroundImagery(forms.ModelForm):
 
+class StaffRanksBackgroundImagery(forms.ModelForm):
     class Meta:
         model = StaffRanksBackgroundImage
         fields = '__all__'
 
-class MegaBackgroundImagery(forms.ModelForm):
 
+class MegaBackgroundImagery(forms.ModelForm):
     class Meta:
         model = MegaBackgroundImage
         fields = '__all__'
 
-class EventBackgroundImagery(forms.ModelForm):
 
+class EventBackgroundImagery(forms.ModelForm):
     class Meta:
         model = EventBackgroundImage
         fields = '__all__'
 
-class NewsBackgroundImagery(forms.ModelForm):
 
+class NewsBackgroundImagery(forms.ModelForm):
     class Meta:
         model = NewsBackgroundImage
         fields = '__all__'
+
 
 class RoomSettings(forms.ModelForm):
     class Meta:
         model = Room
         fields = ['public', 'logo']
+
 
 class UploadCardsForm(forms.ModelForm):
     name = forms.CharField(
@@ -767,6 +806,7 @@ class UploadCardsForm(forms.ModelForm):
         model = UploadACard
         fields = ('name', 'image', 'public',)
 
+
 class InviteCodeForm(forms.ModelForm):
     class Meta:
         model = InviteCode
@@ -778,6 +818,7 @@ class InviteCodeForm(forms.ModelForm):
         user = self.request.user
         if user.is_authenticated:
             self.initial['user'] = user
+
 
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
@@ -856,10 +897,12 @@ class GiftCodeForm(forms.Form):
 
         return cleaned_data
 
+
 class RefundForm(forms.Form):
     ref_code = forms.CharField()
     message = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}))
     email = forms.EmailField()
+
 
 class PaymentForm(forms.Form):
     number = forms.IntegerField(required=False)
@@ -870,8 +913,8 @@ class PaymentForm(forms.Form):
     save = forms.BooleanField(required=False)
     use_default = forms.BooleanField(required=False)
 
-class PaypalPaymentForm(forms.Form):
 
+class PaypalPaymentForm(forms.Form):
     number = forms.CharField(required=True)
     exp_month = forms.IntegerField(required=True)
     expiry = forms.CharField(required=True)
@@ -880,9 +923,11 @@ class PaypalPaymentForm(forms.Form):
     save = forms.BooleanField(required=False)
     use_default = forms.BooleanField(required=False)
 
+
 class CurrencyCheckoutForm(forms.Form):
     payment_option = forms.ChoiceField(
         widget=forms.RadioSelect, choices=PAYMENT_CHOICES)
+
 
 class CurrencyPaymentForm(forms.Form):
     number = forms.IntegerField(required=False)
@@ -893,8 +938,8 @@ class CurrencyPaymentForm(forms.Form):
     save = forms.BooleanField(required=False)
     use_default = forms.BooleanField(required=False)
 
-class CurrencyPaypalPaymentForm(forms.Form):
 
+class CurrencyPaypalPaymentForm(forms.Form):
     number = forms.CharField(required=True)
     exp_month = forms.IntegerField(required=True)
     expiry = forms.CharField(required=True)
@@ -903,10 +948,12 @@ class CurrencyPaypalPaymentForm(forms.Form):
     save = forms.BooleanField(required=False)
     use_default = forms.BooleanField(required=False)
 
+
 from .models import Withdraw
 
 from django import forms
 from .models import Withdraw, InventoryObject
+
 
 class WithdrawForm(forms.ModelForm):
     selected_cards = forms.ModelMultipleChoiceField(
@@ -925,6 +972,7 @@ class WithdrawForm(forms.ModelForm):
         if user:
             self.fields['selected_cards'].queryset = InventoryObject.objects.filter(user=user)
 
+
 class DegeneratePlaylistForm(forms.ModelForm):
     class Meta:
         model = DegeneratePlaylist
@@ -935,6 +983,7 @@ class DegeneratePlaylistForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['song'].queryset = DegeneratePlaylistLibrary.objects.filter(user=user)
+
 
 class TradeProposalForm(forms.ModelForm):
     class Meta:
@@ -947,6 +996,7 @@ class TradeProposalForm(forms.ModelForm):
         if user:
             self.fields['trade_items'].queryset = TradeItem.objects.filter(user=user)
 
+
 class InventoryTradeOfferResponseForm(forms.ModelForm):
     class Meta:
         model = InventoryTradeOffer
@@ -954,6 +1004,7 @@ class InventoryTradeOfferResponseForm(forms.ModelForm):
         widgets = {
             'status': forms.RadioSelect(choices=[('accepted', 'Accept'), ('declined', 'Decline')]),
         }
+
 
 class ExchangePrizesForm(forms.ModelForm):
     usercard = forms.ModelMultipleChoiceField(
@@ -1033,6 +1084,7 @@ class ExchangePrizesForm(forms.ModelForm):
             self.instance.save()
         return self.instance
 
+
 class InventoryTradeForm(forms.ModelForm):
     trading_user = forms.ModelChoiceField(
         queryset=User.objects.none(),
@@ -1068,6 +1120,7 @@ class InventoryTradeForm(forms.ModelForm):
 
         self.fields['exchangeprizes'].queryset = TradeItem.objects.filter(is_active=True)
 
+
 class AddMonstrosityForm(forms.ModelForm):
     class Meta:
         model = Monstrosity
@@ -1081,10 +1134,11 @@ class AddMonstrosityForm(forms.ModelForm):
             choices=[(sprite.id, sprite) for sprite in self.fields['monstrositysprite'].queryset],
         )
 
+
 class FeedMonstrosityForm(forms.ModelForm):
     class Meta:
         model = Monstrosity
-        fields = ['feed_amount',]
+        fields = ['feed_amount', ]
 
     def clean_currency_amount(self):
         currency_amount = self.cleaned_data['currency_amount']
@@ -1138,7 +1192,9 @@ class CreateChest(forms.ModelForm):
                   'total_number_of_choice', 'cost',)
         readonly_fields = ('mfg_date',)
 
+
 from .models import SellerApplication
+
 
 class SellerApplicationForm(forms.ModelForm):
     class Meta:
@@ -1300,10 +1356,12 @@ class RegistrationForm(UserCreationForm):
 
         return user
 
+
 class EditProfileForm(UserChangeForm):
     class Meta:
         model = User
         fields = ('email', 'first_name', 'last_name', 'password',)
+
 
 class BilletBackgroundImagery(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(
@@ -1319,6 +1377,7 @@ class BilletBackgroundImagery(forms.ModelForm):
         model = BilletBackgroundImage
         fields = '__all__'
 
+
 class TagBackgroundImagery(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(
         attrs={'placeholder': 'e.g. Liam Mannara'}))
@@ -1333,6 +1392,7 @@ class TagBackgroundImagery(forms.ModelForm):
         model = TagBackgroundImage
         fields = '__all__'
 
+
 class StaffRanksBackgroundImagery(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
     category = forms.CharField(
@@ -1342,6 +1402,7 @@ class StaffRanksBackgroundImagery(forms.ModelForm):
     class Meta:
         model = StaffRanksBackgroundImage
         fields = '__all__'
+
 
 class MegaBackgroundImagery(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Liam Mannara'}))
@@ -1353,11 +1414,13 @@ class MegaBackgroundImagery(forms.ModelForm):
         model = MegaBackgroundImage
         fields = '__all__'
 
+
 from django.contrib.auth import get_user_model
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import Group
 
 User = get_user_model()
+
 
 class GroupAdminForm(forms.ModelForm):
     class Meta:
@@ -1372,25 +1435,23 @@ class GroupAdminForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
-
         super(GroupAdminForm, self).__init__(*args, **kwargs)
 
         if self.instance.pk:
-
             self.fields['users'].initial = self.instance.user_set.all()
 
     def save_m2m(self):
-
         self.instance.user_set.set(self.cleaned_data['users'])
 
     def save(self, *args, **kwargs):
-
         instance = super(GroupAdminForm, self).save()
 
         self.save_m2m()
         return instance
 
+
 from django.core.mail import send_mail
+
 
 class ContactForme(forms.ModelForm):
     class Meta:
@@ -1431,6 +1492,7 @@ class ContactForme(forms.ModelForm):
             from_email=from_email,
             recipient_list=[settings.EMAIL_HOST_USER]
         )
+
 
 class BusinessMailingForm(forms.ModelForm):
     class Meta:
@@ -1473,10 +1535,12 @@ class BusinessMailingForm(forms.ModelForm):
             recipient_list=[to_email]
         )
 
+
 from .models import Feedback
 
 from django.contrib import admin
 from django.contrib.auth.models import User
+
 
 class OrderItemForm(forms.ModelForm):
     class Meta:
@@ -1487,12 +1551,15 @@ class OrderItemForm(forms.ModelForm):
 
         }
 
+
 class OrderItemAdmin(admin.ModelAdmin):
     form = OrderItemForm
+
 
 admin.site.register(OrderItem, OrderItemAdmin)
 
 from .models import Wager
+
 
 class WagerForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -1509,6 +1576,7 @@ class WagerForm(forms.ModelForm):
             raise forms.ValidationError("Insufficient funds for this bet.")
         return amount
 
+
 class DirectedTradeOfferForm(forms.ModelForm):
     class Meta:
         model = TradeOffer
@@ -1522,21 +1590,66 @@ class DirectedTradeOfferForm(forms.ModelForm):
         user = self.instance.user
         return user
 
+
 class TradeOfferAcceptanceForm(forms.ModelForm):
     class Meta:
         model = TradeOffer
         fields = ['user', 'user2']
 
+
 from django.core.exceptions import ValidationError
+from django import forms
+from django.core.exceptions import ValidationError
+from .models import Item
+from django import forms
+from django.core.exceptions import ValidationError
+from .models import Item
 
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
         fields = (
-            'title', 'price', 'discount_price', 'specialty', 'label', 'slug', 'description', 'image')
+            'title', 'price', 'discount_price', 'specialty', 'label',
+            'slug', 'description', 'image'
+        )
         widgets = {
-
+            # Floating fields
+            'title': forms.TextInput(attrs={'class': 'form-input'}),
+            'price': forms.NumberInput(attrs={'class': 'form-input'}),
+            'discount_price': forms.NumberInput(attrs={'class': 'form-input'}),
+            'slug': forms.TextInput(attrs={'class': 'form-input'}),
+            'description': forms.Textarea(attrs={'class': 'form-textarea', 'rows': 4}),
+            # Choice fields (non-floating selects from choices)
+            'specialty': forms.Select(attrs={'class': 'form-select no-float'}),
+            'label': forms.Select(attrs={'class': 'form-select no-float'}),
+            # File input (non-floating)
+            'image': forms.ClearableFileInput(attrs={'class': 'form-file no-float'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        non_float_fields = ('specialty', 'label', 'image')
+        float_fields = [n for n in self.fields if n not in non_float_fields]
+
+        # Optional: prepend prompt to specialty (ChoiceField)
+        if 'specialty' in self.fields:
+            choices = list(self.fields['specialty'].choices)
+            if choices and choices[0][0] != '':
+                self.fields['specialty'].choices = [('', 'Select specialty')] + choices
+            self.fields['specialty'].required = False
+
+        # Floating fields setup
+        for name in float_fields:
+            field = self.fields[name]
+            label_text = field.label or name.replace('_', ' ').title()
+            field.widget.attrs['placeholder'] = ' '   # single space for :placeholder-shown
+            field.widget.attrs['class'] = (field.widget.attrs.get('class', '') + ' float-input').strip()
+            field.label = label_text
+
+        # Ensure no placeholder on non-floating
+        for name in non_float_fields:
+            self.fields[name].widget.attrs.pop('placeholder', None)
 
     def clean_title(self):
         title = self.cleaned_data.get('title')
@@ -1547,26 +1660,31 @@ class ItemForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        price = cleaned_data.get('price')
-        discount_price = cleaned_data.get('discount_price')
+        price = cleaned_data.get('price')              # Decimal or None
+        discount_price = cleaned_data.get('discount_price')  # Decimal or None
 
-        if discount_price is not None:
-            fees = discount_price * 0.07
+        rate = Decimal('0.07')
+        base = discount_price if discount_price is not None else price
+        if base is not None:
+            # Optional: quantize to 2 decimals to match model field
+            cleaned_data['fees'] = (base * rate).quantize(Decimal('0.01'))
         else:
-            fees = price * 0.07
-
-        cleaned_data['fees'] = fees
+            # No price fields supplied (currency-based); leave fees empty
+            cleaned_data['fees'] = None
 
         return cleaned_data
+
 
 class QuickItemForm(forms.ModelForm):
     class Meta:
         model = QuickItem
         fields = ['image', 'image_length', 'image_width']
 
+
 from .models import TradeItem
 
 from .models import TradeOffer
+
 
 class TradeItemForm(forms.ModelForm):
     class Meta:
@@ -1585,6 +1703,7 @@ class TradeItemForm(forms.ModelForm):
             self.fields['description'].initial = inventory_object.description
             self.fields['image'].initial = inventory_object.image
 
+
 class TradeProposalForm(forms.ModelForm):
     class Meta:
         model = TradeOffer
@@ -1595,6 +1714,7 @@ class TradeProposalForm(forms.ModelForm):
         super(TradeProposalForm, self).__init__(*args, **kwargs)
         if user:
             self.fields['trade_items'].queryset = TradeItem.objects.filter(user=user)
+
 
 class FriendRequestForm(forms.ModelForm):
     receiver = forms.CharField(widget=forms.TextInput(
@@ -1612,10 +1732,12 @@ class FriendRequestForm(forms.ModelForm):
             raise ValidationError("User with this username does not exist.")
         return receiver
 
+
 class FriendRequestAcceptanceForm(forms.ModelForm):
     class Meta:
         model = FriendRequest
         fields = ['sender', 'receiver']
+
 
 from django import forms
 from .models import RespondingTradeOffer, TradeOffer
@@ -1626,6 +1748,7 @@ from django import forms
 from .models import TradeItem, RespondingTradeOffer
 
 from .fields import UserRestrictedModelMultipleChoiceField
+
 
 class RespondingTradeOfferForm(forms.ModelForm):
     offered_trade_items = UserRestrictedModelMultipleChoiceField(user=None, required=False)
@@ -1640,7 +1763,9 @@ class RespondingTradeOfferForm(forms.ModelForm):
         model = RespondingTradeOffer
         fields = ['estimated_trading_value', 'offered_trade_items', 'wanted_trade_items', 'message']
 
+
 from django.utils import timezone
+
 
 class TicketRequestForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -1664,6 +1789,7 @@ class TicketRequestForm(forms.ModelForm):
     class Meta:
         model = LotteryTickets
         fields = ('name',)
+
 
 from django.contrib.auth import get_user_model
 from django import forms
@@ -1705,6 +1831,7 @@ from .models import Feedback
 from django import forms
 from .models import Feedback
 
+
 class FeedbackForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -1742,10 +1869,12 @@ class FeedbackForm(forms.ModelForm):
             feedback.save()
         return feedback
 
+
 class FeedForm(forms.ModelForm):
     class Meta:
         model = Feedback
         fields = ('order', 'star_rating', 'comment', 'slug', 'image')
+
 
 class EmailForm(forms.ModelForm):
     email = forms.CharField(widget=forms.TextInput(
@@ -1761,10 +1890,12 @@ class EmailForm(forms.ModelForm):
             raise forms.ValidationError("You must agree to the terms to continue.")
         return confirmation
 
+
 class SpinPreferenceForm(forms.ModelForm):
     class Meta:
         model = SpinPreference
         fields = ['quick_spin']
+
 
 class QuestionForm(forms.Form):
     text = forms.CharField(max_length=255)
@@ -1785,6 +1916,7 @@ class QuestionForm(forms.Form):
                 widget=forms.TextInput(attrs={'placeholder': 'Choice 1, Choice 2, ...'}),
             )
 
+
 class QuestionCountForm(forms.Form):
     num_questions = forms.IntegerField(label="Number of Questions", )
     form_name = forms.CharField()
@@ -1793,7 +1925,9 @@ class QuestionCountForm(forms.Form):
         model = Questionaire
         fields = {"form_name", "form_text", "text"}
 
+
 from .models import Answer
+
 
 class AnswerForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -1807,6 +1941,7 @@ class AnswerForm(forms.Form):
                 required=True,
                 widget=forms.TextInput(attrs={'class': 'form-control'})
             )
+
 
 class MemeForm(forms.ModelForm):
     class Meta:

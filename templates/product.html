@@ -706,13 +706,21 @@
                                             Diamond
                                         {% endif %}
                                     </span>
+
                                 </div>
+                                <div class="stat">
+                               {% if item.user %}
+                                <p>Sold By {{ item.user }}</p>
+                                {% else %}
+                                <p>Sold By PokeTrove</p>
+                                {% endif %}
                             </div>
-                            
+                            </div>
+
                             <div class="product-description">
                                 <p>{{ item.description }}</p>
                             </div>
-                            
+
                             <div class="action-buttons">
                                 <a href="{{ object.get_add_to_cart_url }}" class="cyber-button add-to-cart-btn">
                                     <span class="cyber-button-text">ADD TO CART</span>

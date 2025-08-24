@@ -43,6 +43,7 @@ CATEGORY_CHOICES = (
 
 SPECIAL_CHOICES = (
     ('F', 'Featured'),
+    ('N', 'New'),
     ('P', 'Popular'),
     ('PR', 'Premium'),
     ('LE', 'Limited Edition'),

@@ -552,6 +552,8 @@ urlpatterns = [
     path('giftcoderedemption/', views.GiftCodeRedemptionView.as_view(), name='giftcoderedemption'),
     path('giftcodeclaimed/', views.GiftCodeClaimedView.as_view(), name='giftcodeclaimed'),
     path('ebase/', EBaseView.as_view(), name='ebase'),
+    path('consignment/', views.ConsignmentView.as_view(), name='consignment'),
+    path('consignmentinfo/', TemplateView.as_view(template_name='consignmentinfo.html'), name='consignmentinfo'),
     path("backgroundimagechange/", BackgroundView.as_view(), name="backgroundimagechange"),
     path("ebackgroundimagechange/", EBackgroundView.as_view(), name="ebackgroundimagechange"),
     path("showcasebackgroundimagechange/", ShowcaseBackgroundView.as_view(), name="showcasebackgroundimagechange"),
