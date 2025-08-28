@@ -2838,7 +2838,7 @@ class Event(models.Model):
     date_and_time = models.DateTimeField(null=True, verbose_name="Time and date of Event Creation")
     section = models.IntegerField(verbose_name="Page Section", blank=True, null=True)
     page = models.TextField(verbose_name="Page Name")
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True)
     anonymous = models.BooleanField(default=False, help_text="Remain anonymous? (not recommended)")
     image = models.ImageField(help_text='Please provide a cover image for the event.', upload_to='images/')
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
@@ -6307,6 +6307,7 @@ class ItemFilter(models.Model):
         verbose_name = "Item Filter"
         verbose_name_plural = "Item Filters"
 
+
 class Item(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=100)
@@ -6318,7 +6319,7 @@ class Item(models.Model):
     fees = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     discount_price = models.DecimalField(max_digits=16, decimal_places=2, blank=True, null=True)
     discount_currency_price = models.IntegerField(blank=True, null=True)
-    category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
+    category = models.CharField(choices=CATEGORY_CHOICES, max_length=2, blank=True, null=True)
     card_category = models.CharField(choices=CARD_CATEGORIES, max_length=1, default='P')
     condition = models.CharField(choices=CONDITION_CHOICES, default="M", max_length=2, blank=True, null=True)
 
@@ -6379,6 +6380,27 @@ class Item(models.Model):
 
         if self.price is None and self.discount_price is None:
             self.is_currency_based = True
+
+        if not self.category and self.discount_price:
+            if self.discount_price <= 100:
+                self.category = 'G'
+            elif self.discount_price <= 500:
+                self.category = 'P'
+            elif self.discount_price <= 1000:
+                self.category = 'E'
+            else:
+                self.category = 'D'
+        elif not self.category and self.price:
+            if self.price <= 100:
+                self.category = 'G'
+            elif self.price <= 500:
+                self.category = 'P'
+            elif self.price <= 1000:
+                self.category = 'E'
+            else:
+                self.category = 'D'
+
+            print('selugified')
 
         super().save(*args, **kwargs)
 

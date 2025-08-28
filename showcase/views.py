@@ -5688,6 +5688,7 @@ class MegaCreatePostView(CreateView):
     template_name = "megacoinsbackgroundimagechange.html"
     success_url = reverse_lazy("megacoins")
 
+
 class EventBackgroundView(BaseView):
     model = EventBackgroundImage
     template_name = "events.html"
@@ -5736,6 +5737,58 @@ class EventBackgroundView(BaseView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
+
+class EventMoreBackgroundView(BaseView):
+    template_name = "eventmore.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # ✅ Always pull from self.kwargs in CBVs
+        slug = self.kwargs.get("slug")
+
+        # ✅ Be robust to legacy rows with is_active NULL/True/1
+        event = get_object_or_404(
+            Event,
+            Q(slug=slug) & (Q(is_active=1) | Q(is_active=True) | Q(is_active__isnull=True))
+        )
+        context["event"] = event
+
+        # --- rest unchanged ---
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['EventBackgroundImage'] = EventBackgroundImage.objects.all()
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+
+        context['Events'] = (
+            Event.objects.filter(is_active=1).exclude(pk=event.pk).order_by('-date', '-time')
+        )
+
+        profiles = Event.objects.filter(is_active=1)
+        for e in profiles:
+            profile = ProfileDetails.objects.filter(user=e.user).first()
+            if profile:
+                e.newprofile_profile_picture_url = profile.avatar.url
+                e.newprofile_profile_url = e.get_profile_url()
+        context['Profiles'] = profiles
+
+        userprofile = (
+            ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+            if self.request.user.is_authenticated else None
+        )
+        if userprofile:
+            for up in userprofile:
+                profile = ProfileDetails.objects.filter(user=up.user).first()
+                if profile:
+                    up.newprofile_profile_picture_url = profile.avatar.url
+                    up.newprofile_profile_url = up.get_profile_url()
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        return context
+
 
 class EventCreatePostView(CreateView):
     model = EventBackgroundImage
@@ -8980,7 +9033,6 @@ class TradeItemCreateView(ListView):
 class ConsignmentView(FormMixin, LoginRequiredMixin, ListView):
     model = Item
     paginate_by = 10
-    template_name = 'consignment.html'
     form_class = ItemForm
 
     def get_context_data(self, **kwargs):
@@ -8992,6 +9044,7 @@ class ConsignmentView(FormMixin, LoginRequiredMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -9067,6 +9120,122 @@ class ConsignmentView(FormMixin, LoginRequiredMixin, ListView):
                 'value': getattr(instance, field.name),
             })
         return render(request, 'consignment.html', {'fields': fields})
+
+
+class PurchasePolicyView(LoginRequiredMixin, ListView):
+    model = Item
+    paginate_by = 10
+    template_name = 'purchasepolicy.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
+
+class TradePolicyView(LoginRequiredMixin, ListView):
+    model = Item
+    paginate_by = 10
+    template_name = 'tradepolicy.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
 
 
 class TradeItemCreateView(ListView):
@@ -11019,7 +11188,7 @@ class EBackgroundView(BaseView, FormView):
         current_user = self.request.user
         total_items = Item.objects.filter(is_active=1).count()
 
-        paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
+        paginate_by = int(self.request.GET.get('paginate_by', 12))
 
         items_query = Item.objects.filter(is_active=1).order_by('price')
         paginator = Paginator(items_query, paginate_by)

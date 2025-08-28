@@ -674,6 +674,7 @@ nav.main-menu ul li a {
         <tr>
             <th scope="col" style="color: white;">#</th>
             <th scope="col" style="color: white;">Item Name</th>
+            <th scope="col" style="color: white;">Seller</th>
             <th scope="col" style="color: white;">Price</th>
             <th scope="col" style="color: white; display: flex; flex-direction: row;">Quantity</th>
             <th scope="col" style="color: white;">Total Item Price</th>
@@ -684,6 +685,11 @@ nav.main-menu ul li a {
         <tr><b>
             <th scope="row" style="color: white;">{{ forloop.counter }}</th>
             <td style="color: white;">{{ order_item.item.title }}</td>
+            {% if order_item.item.user %}
+            <td style="color: white;">{{ order_item.item.user }}</td>
+            {% else %}
+            <td style="color: white;">PokeTrove</td>
+            {% endif %}
             <td style="color: white;">
             {% if order_item.item.price %}
                 {% if order_item.item.discount_price %}
@@ -746,20 +752,20 @@ nav.main-menu ul li a {
 
         {% if object.get_total_price %}
         <tr>
-            <td colspan="4" style="color: white;"><b>Total Order Price</b></td>
+            <td colspan="5" style="color: white;"><b>Total Order Price</b></td>
             <td style="color: white;">${{ object.get_total_price }}</td>
         </tr>
 
         {% endif %}
         {% if object.get_total_currency_price %}
         <tr>
-            <td colspan="4" style="color: white;"><b>Total Exchange Cost (💎)</b></td>
+            <td colspan="5" style="color: white;"><b>Total Exchange Cost (💎)</b></td>
             <td style="color: white;">💎{{ object.get_total_currency_price }}</td>
         </tr>
 
         {% endif %}
          <tr>
-            <td colspan="5">
+            <td colspan="6">
                 {% if user_profile_exists %}
     <a href="{% url 'showcase:checkout' %}" class="btn btn-warning float-right ml-2" style="color: black;">Checkout</a>
   <!--<a href="{% url 'showcase:payment' payment_option='card' %}" class="btn btn-warning float-right ml-2" style="color: black;">Use Saved Information</a>-->

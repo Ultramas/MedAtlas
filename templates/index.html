@@ -389,43 +389,27 @@
         flex-wrap: wrap;
         gap: var(--spacing-md);
     }
-
-    .logo {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .logo-hex {
-        width: 50px;
-        height: 50px;
-        position: relative;
-    }
-
-    .logo-icon {
-        width: 100%;
-        height: 100%;
-        fill: var(--primary);
-        filter: drop-shadow(var(--shadow-glow));
-    }
-
-    .logo-text {
-        font-size: 1.8rem;
-        font-weight: 700;
-        background: linear-gradient(90deg, var(--primary) 0%, var(--accent-light) 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        letter-spacing: 1px;
-    }
-
     .header-controls {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-        flex-wrap: wrap;
-        justify-content: flex-end;
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between; /* search on left, buttons on right */
     }
+
+    .dropheader {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+      text-align: center;
+    }
+
+    .header-bar {
+      margin-left: auto;
+      margin-right: 10px;
+    }
+
 
     .search-bar {
         display: flex;
@@ -467,6 +451,7 @@
         display: flex;
         align-items: center;
         gap: var(--spacing-sm);
+        padding-right: 15px;
     }
 
     .icon-button {
@@ -590,6 +575,20 @@
     pointer-events: none;
 }
 
+.video-background__image::before {
+    content: "";
+    position: absolute;
+    inset: 0;               /* top:0; right:0; bottom:0; left:0 */
+    pointer-events: none;
+    z-index: 1;             /* above the image, below your content */
+
+    /* Two linear-gradients, each confined to 2% width via background-size */
+    background:
+        linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0)) left top / 5% 100% no-repeat,
+        /* Right side: black → transparent across 2% */
+        linear-gradient(to left,  rgba(0,0,0,1), rgba(0,0,0,0)) right top / 5% 100% no-repeat;
+}
+
     /* ===== HOW TO PLAY BANNER ===== */
 
     .play-banner {
@@ -619,7 +618,7 @@
 
     .play-banner::before {
         content: '';
-        position: absolute;
+        /*position: absolute;*/
         top: 0;
         left: 0;
         right: 0;
@@ -2421,10 +2420,6 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
             --spacing-xl: 2rem;
         }
 
-        .logo-text {
-            font-size: 1.5rem;
-        }
-
         .search-bar {
             display: none;
         }
@@ -2490,10 +2485,6 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
             padding: var(--spacing-sm);
             flex-direction: column;
             text-align: center;
-        }
-
-        .logo {
-            margin-bottom: var(--spacing-sm);
         }
 
         .play-banner:not(.collapsed) {
@@ -2687,14 +2678,27 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
         }
     }
 
-  .hover-link {
-    color: #03a4ed;
-    background: rgba(255, 255, 255, 0.14);
-    width: 100%;
-    padding-left: 50px;
-    padding-right: 50px;
-    padding: 20px;
-  }
+.hover-link {
+  display: block;                  /* ensure background spans full width */
+  width: 100%;
+  color: #03a4ed;
+  text-decoration: none;
+
+  /* remove duplicate padding declarations */
+  padding: 20px 50px;
+
+  /* left-edge fade: 0% -> transparent, 5% -> opaque, then solid */
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.14) 5%,
+    rgba(255, 255, 255, 0.14) 100%
+  );
+
+  /* optional: keep the fade within padding (avoid bleeding under borders) */
+  background-clip: padding-box;
+}
+
   .hover-link:hover {
     color: #bf97ff;
   }
@@ -2816,10 +2820,9 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
         {% if BackgroundImage.position == 1 %}
 <div class="video-background" style="display: flex; flex-direction: column;">
      <!-- Background particle effect -->
-<a href="#" class="hover-link" style="text-decoration: none;">
-
     {% for event in Events %}
-  <div class="event-item">
+        <a href="{{Event.get_profile_url}}"class="hover-link" style="text-decoration: none;">
+            <div class="event-item">
     <h3 class="event-title">{{ event.name }}</h3>
     <p style="text-shadow:
 -1px -1px 0 black,
@@ -2833,6 +2836,7 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
       data-duration="{{ event.duration_ms }}"
     >Loading…</div>
   </div>
+        </a>
 {% endfor %}
 
 
@@ -2972,12 +2976,15 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
         </div>
     </div>
 </div>-->
-      <div class="header-controls">
-        <div class="search-bar">
+      <div class="header-controls" style="padding-top: 15px;">
+              <h3 class="dropheader" style="margin-left: auto; margin-right: auto; position: absolute;">Limited Drops</h3>
+          <div class="header-bar">
+        <div class="search-bar" style="display: flex; flex-direction: row;">
           <svg viewBox="0 0 24 24" class="search-icon">
             <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
           </svg>
           <input type="text" placeholder="Search collection...">
+        </div>
         </div>
 
         <div class="header-buttons">
@@ -3266,8 +3273,8 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
                             <div class="gridCardPrice">💎{{ product.currency_price }}</div>
                             {% endif %}
                             {% endif %}
-                            <div class="cartBtn">
-                                <h2 class="cartBtnFire">Check It Out!</h2>
+                            <div class="cartBtn" style="width: 130px;">
+                                <h2 class="cartBtnFire" style="">Check It Out!</h2>
                             </div>
                         </div>
                     </div>

@@ -33,7 +33,7 @@
   }
   
   .gridCardImg {
-    height: 30em;
+    height: 50em;
     width: 100%;
     background-repeat: no-repeat;
     background-position: center;
@@ -45,8 +45,8 @@
     flex-direction: column;
     font-size: 0.9em;
     width: 100%;
-    padding: 1em;
-    height: 100%;
+    padding: 2em;
+    /*height: 100%;*/
     align-items: center;
     text-align: center;
 
@@ -54,7 +54,7 @@
 
   .gridCardTitle {
     font-size: 1.5em;
-    height: 4em;
+    /*height: 4em;*/
     padding: 0;
     line-height: unset;
     margin: 0;
@@ -103,7 +103,7 @@
     color: white;
     background-color: #bf97ff;
     justify-self: flex-end;
-    margin-top: auto;
+    margin-top: 5px;
   }
 
   .cartBtnFire {

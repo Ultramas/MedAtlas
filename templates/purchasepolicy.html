@@ -420,49 +420,9 @@
 
 </style>
 {% include 'navtrove.html' %}
-<div class="signup-container" style="margin-top: 10%;">
-  <div class="forme-card">
-    <div class="form-header">
-      <h1>Consign With Us!</h1>
-    </div>
-
-    <form method="POST" enctype="multipart/form-data" class="form-content post">
-  {% csrf_token %}
-
-  {% for field in form %}
-    {% if field.name in 'specialty,label,image' %}
-      <div class="field normal-field">
-        {{ field.label_tag }}
-        {{ field }}
-        {% for error in field.errors %}<div class="error">{{ error }}</div>{% endfor %}
-      </div>
-    {% else %}
-      <div class="field floating-group">
-        {{ field }}
-        <label for="{{ field.auto_id }}">{{ field.label }}</label>
-        {% for error in field.errors %}<div class="error">{{ error }}</div>{% endfor %}
-      </div>
+    {% for BackgroundImage in TextFielde %}
+    {% if BackgroundImage.page == "purchasepolicy.html" and BackgroundImage.section == 1 %}
+    <p>{{BackgroundImage.text}}</p>
     {% endif %}
-  {% endfor %}
-
-  <button type="submit">Submit</button>
-</form>
-
-
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Keep your existing tooltip + card animation JS if you like
-        const formCard = document.querySelector('.forme-card');
-        formCard.style.opacity = '0';
-        formCard.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-          formCard.style.transition = 'all 0.6s ease-out';
-          formCard.style.opacity = '1';
-          formCard.style.transform = 'translateY(0)';
-        }, 100);
-      });
-    </script>
-  </div>
-</div>
-
+    {% endfor %}
 {% endblock content %}

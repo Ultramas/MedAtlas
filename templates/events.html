@@ -1,4 +1,6 @@
+
 {% load static %}
+{% include 'navtrove.html' %}
 <head>
     <style>
     :root {
@@ -27,7 +29,8 @@
     <h2 class="realm-title">Events</h2>
     <div class="events-grid">
         {% for Event in Events %}
-        <div class="event-card">
+        <a href="{{Event.get_profile_url}}">
+            <div class="event-card">
             <div class="event-image-container">
                 <img src="{{Event.image.url}}" alt="{{ Event.name }}" class="event-image">
                 <div class="event-overlay"></div>
@@ -51,6 +54,7 @@
             </div>
             <div class="event-glow"></div>
         </div>
+        </a>
         {% endfor %}
     </div>
 </section>
@@ -183,6 +187,7 @@
         position: relative;
         padding-left: 0.5rem;
         text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        text-decoration: none;
     }
 
     .event-title::before {

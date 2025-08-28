@@ -1396,7 +1396,7 @@ class ItemAdmin(admin.ModelAdmin):
     inlines = [QuickItemInLine]
     fieldsets = (
         ('Item Information - Categorial Descriptions', {
-            'fields': ('user', 'title', 'is_currency_based', 'category', 'label', 'slug', 'description', 'specialty',),
+            'fields': ('user', 'title', 'is_currency_based', 'category', 'type', 'specialty', 'label', 'slug', 'description',),
             'classes': ('collapse-open',),
         }),
         ('Item Information - Prices', {

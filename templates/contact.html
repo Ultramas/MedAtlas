@@ -35,7 +35,7 @@
         color: var(--light);
     }
 
-    .form-card {
+    .forme-card {
         background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
         border-radius: 16px;
         padding: 2.5rem;
@@ -48,7 +48,7 @@
         backdrop-filter: blur(10px);
     }
 
-    .form-card::before {
+    .forme-card::before {
         content: '';
         position: absolute;
         top: 0;
@@ -318,7 +318,7 @@
             left: -50%;
         }
 
-        .form-card {
+        .forme-card {
             padding: 2rem 1.5rem;
         }
     }
@@ -351,8 +351,8 @@
 {% endif %}
 
 {% include 'navtrove.html' %}
-<div class="signup-container">
-    <div class="form-card">
+<div class="signup-container" style="height: 150%; display: flex;">
+    <div class="forme-card" style="margin-left: auto; margin-right: auto; position: relative !important;">
         <div class="form-header">
 			<h1>Contact Us</h1>
 			<p>We strive to respond within 1 business day or less. </p>
@@ -454,7 +454,7 @@
                 });
 
                 // Add subtle animation to the form on load
-                const formCard = document.querySelector('.form-card');
+                const formCard = document.querySelector('.forme-card');
                 formCard.style.opacity = '0';
                 formCard.style.transform = 'translateY(20px)';
 
