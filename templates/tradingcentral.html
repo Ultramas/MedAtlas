@@ -1,5 +1,4 @@
-
-{% extends 'tradebase.html' %}
+{% include 'navtrove.html' %}
 
 {% load static %}
 
@@ -32,7 +31,8 @@
 
 <style>
 	:root {
-    --color-primary: #3498db;
+    --color-primary: #00f0ff;
+    --primary: #00f0ff;
     --color-secondary: #2ecc71;
     --color-background: #ecf0f1;
     --color-text: #2c3e50;
@@ -41,7 +41,18 @@
     --border-radius: 8px;
     --transition: all 0.3s ease;
 }
-
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: var(--foreground);
+            position: relative;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            gap: 15px;
+    		color: var(--primary);
+        }
 body {
     font-family: 'Arial', sans-serif;
     line-height: 1.6;
@@ -423,7 +434,7 @@ img.hover-shadow {
                 {% endif %}
             {% endif %}
         {% endfor %}
-		<div class="container">
+		<div class="container" style="margin-top: 10%;">
 			<div class="row">
 				<div class="col-lg-8 offset-lg-2 text-center">
 					<div class="breadcrumb-text">
@@ -435,7 +446,7 @@ img.hover-shadow {
 						{% endif %}
 						{% endfor %}
 
-						<h2 style="display: flex; text-align: center; margin-left: 15%; margin-top: 20px;"><span class="orange-text"> PokeTrove </span> <div style="color: white; opacity: 0.5;">Trading Central</div> </h2>
+						<h2 style="display: flex; justify-content: center;"><span class="orange-text"> PokeTrove </span> <div style="color: white; opacity: 0.5;">Trading Central</div> </h2>
 					</div>
 				</div>
 			</div>
@@ -445,17 +456,8 @@ img.hover-shadow {
 
 	<!-- products -->
 	<div class="product-section mt-150 mb-150" style="background: none;">
-		<div class="container">
+		<div class="container" style="margin-top: 10%;">
 
-			<div class="row">
-                <div class="col-md-12">
-                    <div class="product-filters">
-                        <ul>
-                            <li class="active" data-filter="*">All</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
 
 
     <main class="trade-offers-container">
@@ -476,10 +478,12 @@ img.hover-shadow {
                                 </button>
                             {% endif %}
                         {% endwith %}
-                        <a href="{% url 'showcase:responsetradeitems' TradeOffer.slug %}" class="btn btn--primary">
-                            <img src="{% static 'css/images/trades.png' %}" alt="" class="btn__icon">
-                            Set Trade
-                        </a>
+						{% if TradeOffer.slug %}
+							<a href="{% url 'showcase:responsetradeitems' TradeOffer.slug %}" class="btn btn--primary">
+								<img src="{% static 'css/images/trades.png' %}" alt="" class="btn__icon">
+								Set Trade
+							</a>
+						{% endif %}
                     </header>
                     <div class="trade-offer__header">
                         <h2 class="trade-offer__title">{{TradeOffer.title}}</h2>

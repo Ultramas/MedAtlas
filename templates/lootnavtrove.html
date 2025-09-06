@@ -21,9 +21,7 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>    /* ===== UNIFIED DESIGN SYSTEM ===== */
-        .logo {
+    <style>        .logo {
             display: flex;
             align-items: center;
             gap: 0.75rem;
@@ -247,214 +245,6 @@
             transform: translateY(-2px);
             color: var(--accent);
         }
-
-    :root {
-        /* Primary Colors */
-        --primary: #00e5ff;
-        --primary-dark: #00b8d4;
-        --primary-light: #18ffff;
-        --primary-glow: rgba(0, 229, 255, 0.5);
-
-        /* Secondary Colors */
-        --secondary: #ff0055;
-        --secondary-dark: #c6004e;
-        --secondary-light: #ff4081;
-
-        /* Accent Colors */
-        --accent: #7c4dff;
-        --accent-dark: #651fff;
-        --accent-light: #b388ff;
-
-        /* Background Colors */
-        --bg-dark: #0a0e17;
-        --bg-darker: #050a14;
-        --bg-card: rgba(16, 23, 41, 0.85);
-        --bg-card-hover: rgba(20, 29, 49, 0.9);
-        --bg-glass: rgba(255, 255, 255, 0.05);
-
-        /* Text Colors */
-        --text-primary: #ffffff;
-        --text-secondary: rgba(255, 255, 255, 0.8);
-        --text-disabled: rgba(255, 255, 255, 0.5);
-        --text-hint: rgba(255, 255, 255, 0.3);
-
-        /* Status Colors */
-        --success: #00e676;
-        --warning: #ffea00;
-        --error: #ff1744;
-        --info: #2979ff;
-
-        /* Card Rarity Colors */
-        --gold: #ffd700;
-        --platinum: #e5e4e2;
-        --emerald: #50c878;
-        --diamond: #b9f2ff;
-
-        /* Border & Shadow */
-        --border-light: rgba(255, 255, 255, 0.1);
-        --border-medium: rgba(255, 255, 255, 0.2);
-        --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
-        --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.4);
-        --shadow-hard: 0 12px 40px rgba(0, 0, 0, 0.5);
-        --shadow-glow: 0 0 20px var(--primary-glow);
-
-        /* Transitions */
-        --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        --transition-medium: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-
-        /* Spacing */
-        --spacing-xs: 0.5rem;
-        --spacing-sm: 0.3rem;
-        --spacing-md: 1.5rem;
-        --spacing-lg: 2rem;
-        --spacing-xl: 3rem;
-
-        /* Border Radius */
-        --radius-sm: 8px;
-        --radius-md: 12px;
-        --radius-lg: 16px;
-        --radius-xl: 24px;
-    }
-
-    /* ===== GLOBAL STYLES ===== */
-
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: "Rajdhani", sans-serif;
-        background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
-        color: var(--text-primary);
-        min-height: 100vh;
-        overflow-x: hidden;
-        line-height: 1.6;
-    }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: linear-gradient(45deg, var(--primary-dark), var(--primary));
-        border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(45deg, var(--primary), var(--primary-light));
-    }
-
-    /* ===== UNIFIED CARD SYSTEM ===== */
-
-    .unified-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border-light);
-        border-radius: var(--radius-lg);
-        backdrop-filter: blur(20px);
-        box-shadow: var(--shadow-medium);
-        transition: all var(--transition-medium);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .unified-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.05) 50%,
-            transparent 100%);
-        opacity: 0;
-        transition: opacity var(--transition-medium);
-        pointer-events: none;
-    }
-
-    .unified-card:hover {
-        transform: translateY(-8px);
-        box-shadow: var(--shadow-hard), var(--shadow-glow);
-        border-color: var(--primary);
-    }
-
-    .unified-card:hover::before {
-        opacity: 1;
-    }
-
-    /* ===== UNIFIED BUTTON SYSTEM ===== */
-
-    .btn-unified {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--spacing-xs);
-        padding: var(--spacing-sm) var(--spacing-md);
-        border: none;
-        border-radius: var(--radius-md);
-        font-family: inherit;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        transition: all var(--transition-medium);
-        position: relative;
-        overflow: hidden;
-        white-space: nowrap;
-    }
-
-    .btn-unified::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg,
-            transparent,
-            rgba(255, 255, 255, 0.2),
-            transparent);
-        transition: left var(--transition-slow);
-    }
-
-    .btn-unified:hover::before {
-        left: 100%;
-    }
-
-    .btn-primary {
-        background: linear-gradient(45deg, var(--primary-dark), var(--primary));
-        color: var(--bg-dark);
-        box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 229, 255, 0.4);
-    }
-
-    .btn-secondary {
-        background: var(--bg-glass);
-        color: var(--text-primary);
-        border: 1px solid var(--border-medium);
-    }
-
-    .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: var(--primary);
-        color: var(--primary);
-    }
-
-
 
         :root {
             --background: #0a0a13;
@@ -2154,8 +1944,8 @@ function getIntervalStart() {
                     </ul>
                 </li>
                 {% endfor %}
-                <a href="{% url 'showcase:currencymarket' %}" style="margin-left: 25px;">
-                    <button class="button-85" role="button" style="display: flex; flex-direction: row;"><i class="fas fa-gem user-stat-icon" style="color: #ED2221; margin-top: 4px;"></i>➕</button>
+                <a href="{% url 'showcase:currencymarket' %}">
+                    <button class="button-85" role="button" style="margin-left: 50px; display: flex; flex-direction: row;"><i class="fas fa-gem user-stat-icon" style="color: #ED2221; margin-top: 4px;"></i>➕</button>
                 </a>
             </ul>
             <ul id="simpleNavbar" style="display: none; flex-direction: row; align-items: center;">
@@ -2192,9 +1982,38 @@ function getIntervalStart() {
         </div>
         <div class="user-info">
             <h4 class="username">{{ user.username }}</h4>
-            <a href="{% url 'showcase:loothome' %}">
-            <button class="buttonets" style="margin-left: auto; margin-right: auto; margin-top: 10px; margin-bottom: 10px;">
-                  <strong><h6 id="visual-mode-text">Lootbox</h6></strong>
+            <div class="user-stats">
+                <a href="{% url 'showcase:currencymarket' %}">
+                    <div class="user-stat">
+                        <img src="/static/css/images/rubeye.png" style="width: 20px; height: 20px; transform: translate(0%, 15%); display: flex;">
+                        <div class="sellupdate" id="sellupdate">
+                            <span id="currency-amount">{{ userprofile.currency_amount }}</span>
+                        </div>
+                    </div>
+                </a>
+                <a href="{% url 'showcase:mylevel' %}">
+                    <div class="user-stat">
+                        <i class="fas fa-trophy user-stat-icon" style="color: var(--accent);"></i>
+                        <span>{{ userprofile.level }}</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!--<button class="buttonets" onclick="toggleMode()" style="margin-left: auto; margin-right: auto; margin-top: 10px;">
+              <strong><h6 id="visual-mode-text">Visual Mode</h6></strong>
+              <div id="containerteed-stars">
+                <div id="stars"></div>
+              </div>
+
+              <div id="glow">
+                <div class="circle"></div>
+                <div class="circle"></div>
+              </div>
+            </button>-->
+        <a href="{% url 'showcase:index' %}">
+            <button class="buttonets" style="margin-left: auto; margin-right: auto; margin-top: 10px;">
+                  <strong><h6 id="visual-mode-text">Home</h6></strong>
                   <div id="containerteed-stars">
                     <div id="stars"></div>
                   </div>
@@ -2205,9 +2024,6 @@ function getIntervalStart() {
                   </div>
                 </button>
         </a>
-        </div>
-
-
         <br>
         <style>.notification-bar {
   position: relative;
@@ -2395,7 +2211,99 @@ function getIntervalStart() {
 
         </style>
                   {% if user.is_authenticated %}
+  <div class="containerents" style="font-family: 'Arial', sans-serif; background-image: linear-gradient(#12121f 0%, #1a1a2e 100%); display: flex; flex-direction: row; justify-content: center; align-items: center; margin: 0;">
+    <div class="notification-bar" style="border-radius: 8px; padding: 15px 30px; color: white; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border-bottom: 2px solid #2d3748;" id="notificationBar">
+        <div class="notification-content">
+      <div class="inner-section" style="display: flex; flex-direction: row; padding: 5px;">
+        <div class="left-section" style="display: flex; flex-direction: column;">
+          <div class="title-container" style="display: flex; align-items: center; gap: 10px;">
+            <div class="title" style="font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">INCOMING</div>
 
+            <div class="dot"></div>
+          </div>
+          <div class="subtitle" style="font-size: 16px; color: #a0aec0; margin-top: 4px;">Ruby Drop</div>
+        </div>
+
+        <div class="right-section" style="display: flex; align-items: center; margin-left: 10px; gap: 15px;">
+<div
+  class="ruby-count tier-{{ user_tier_code }}"
+  style="display: flex;
+         align-items: center;
+         gap: 8px;
+         background-color: #2d3748;
+         padding: 8px 15px;
+         border-radius: 6px;">
+  <div class="ruby-icon" style="color: #38b2f8; font-size: 20px;">
+    <img src="/static/css/images/rubeye.png" style="width: 25px; height: 25px; transform: translate(0%, 15%); display: flex;">
+  </div>
+  <div class="count" id="ruby-count" style="font-size: 18px; font-weight: bold;">
+    2,000
+  </div>
+</div>
+
+    <div class="demo-section">
+        <div class="info-icon">
+            <div class="tooltip">
+                Ruby Mult:<span id="rd-multiplier-display" style="margin-left: 5px;">1</span>x
+            </div>
+            <span>i</span>
+        </div>
+    </div>
+        </div>
+          <div class="sparks">
+  <div class="spark" style="--left: 5%;  --drift-x: -30px; --color: #fef68a; --duration: 2.5s; --delay: 0s;"></div>
+  <div class="spark" style="--left: 15%; --drift-x:  25px; --color: #a0e9ff; --duration: 1.8s; --delay: 0.3s;"></div>
+  <div class="spark" style="--left: 25%; --drift-x: -20px; --color: #ff9ae0; --duration: 2.2s; --delay: 0.6s;"></div>
+  <div class="spark" style="--left: 35%; --drift-x:  40px; --color: #c3ff88; --duration: 3s;   --delay: 0.2s;"></div>
+  <div class="spark" style="--left: 45%; --drift-x: -15px; --color: #ffd47e; --duration: 2.7s; --delay: 0.8s;"></div>
+  <div class="spark" style="--left: 55%; --drift-x:  30px; --color: #ff6b6b; --duration: 1.9s; --delay: 0.4s;"></div>
+  <div class="spark" style="--left: 65%; --drift-x: -35px; --color: #8bd3ff; --duration: 2.4s; --delay: 1s;"></div>
+  <div class="spark" style="--left: 75%; --drift-x:  20px; --color: #d4b0ff; --duration: 2.1s; --delay: 0.5s;"></div>
+  <div class="spark" style="--left: 85%; --drift-x: -25px; --color: #ffee93; --duration: 2.8s; --delay: 0.9s;"></div>
+  <div class="spark" style="--left: 95%; --drift-x:  15px; --color: #ffecb3; --duration: 2s;   --delay: 0.7s;"></div>
+</div>
+
+      </div><!-- INSIDE your notification-bar, at the end: -->
+
+      </div>
+
+      <!-- TIMER & BUTTON -->
+      <div style="margin-top: 12px; display: flex; align-items: center;">
+        <div
+          id="hourly-timer"
+          style="
+            font-family: Arial, sans-serif;
+            background-color: #2d3748;
+            color: #38b2f8;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            display: inline-block;
+          "
+        >30:00</div>
+
+        <button
+          id="ruby-drop-btn"
+          style="
+            display: none;
+            margin-left: 10px;
+            padding: 8px 15px;
+            border-radius: 6px;
+            background-color: #e53e3e;
+            color: white;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 100;
+          "
+        >Ruby Drop</button>
+
+        <audio id="ruby-sound" src="{% static 'css/sounds/dropcollect.mp3' %}" preload="auto"></audio>
+      </div>
+    </div>
+  </div>
 
 {% endif %}
 
@@ -2411,7 +2319,18 @@ function getIntervalStart() {
         <div class="user-info">
             <h2 class="username">Guest</h2>
             <a href="{% url 'login' %}?next={% url 'showcase:currencymarket' %}" style="text-decoration: none;">
-
+            <div class="user-stats">
+                <div class="user-stat">
+                     <img src="/static/css/images/rubeye.png" style="width: 20px; height: 20px; transform: translate(0%, 15%); display: flex;">
+                    <div class="sellupdate" id="sellupdate">
+                        <span id="currency-amount">Login To Earn Rubies!</span>
+                    </div>
+                </div>
+                <div class="user-stat">
+                    <i class="fas fa-trophy user-stat-icon" style="color: var(--accent);"></i>
+                    <span>Login To Level!</span>
+                </div>
+            </div>
                 </a>
 
          <div class="containerents" style="font-family: 'Arial', sans-serif; background-image: linear-gradient(#12121f 0%, #1a1a2e 100%); display: flex; flex-direction: row; justify-content: center; align-items: center; margin: 0;">
@@ -2754,60 +2673,37 @@ function updateCountdown() {
                                 <span class="nav-text">Community</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{% url 'showcase:webuy' %}" class="nav-link">
-                                <i class="fas fa-dollar"></i>
-                                <span class="nav-text">We Buy!</span>
-                            </a>
-                        </li>
                     </ul>
                     </div>
                 </div>
 
                  <div class="nav-section">
-                    <h3 class="section-title"><i class="fas fa-compass"></i> Marketplace<i class="fas fa-chevron-down toggle-icon"></i></h3>
+                    <h3 class="section-title"><i class="fas fa-compass"></i> Rubies<i class="fas fa-chevron-down toggle-icon"></i></h3>
                      <div class="section-content">
                     <ul>
                         <li class="nav-item">
-                            <a href="#limited" class="nav-link">
-                                <i class="fas fa-hourglass-half"></i>
-                                <span class="nav-text">Limited Edition</span>
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'showcase:currencymarket' %}" class="nav-link">
+                                <i class="fas fa-diamond"></i>
+                                <span class="nav-text" style="color: rgba(255, 50, 0, 1);">Rubies</span>
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#premium" class="nav-link">
-                                <i class="fa fa-rocket"></i>
-                                <span class="nav-text">Premium</span>
+                            {% else %}
+                            <a href="{% url 'login' %}?next={% url 'showcase:currencymarket' %}" class="nav-link">
+                                <i class="fas fa-diamond"></i>
+                                <span class="nav-text" style="color: rgba(255, 50, 0, 1);">Rubies</span>
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#featuredgame" class="nav-link">
-                                <i class="fa fa-space-shuttle"></i>
-                                <span class="nav-text">Featured</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#newgame" class="nav-link">
-                                <i class="fas fa-plane"></i>
-                                <span class="nav-text">New</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#populargame" class="nav-link">
-                                <i class="fas fa-fire"></i>
-                                <span class="nav-text">Popular</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#marketgame" class="nav-link">
-                                <i class="fas fa-store"></i>
-                                <span class="nav-text">Showcase</span>
-                            </a>
+                            {% endif %}
                         </li>
                         <li class="nav-item">
                             <a href="{% url 'showcase:ehome' %}" class="nav-link">
-                                <i class="fas fa-globe"></i>
+                                <i class="fas fa-store"></i>
                                 <span class="nav-text">Marketplace</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:gamehub' slug='123'  %}" class="nav-link">
+                                <i class="fas fa-box"></i>
+                                <span class="nav-text">Chests</span>
                             </a>
                         </li>
                     </ul>
@@ -2816,10 +2712,28 @@ function updateCountdown() {
 
                 <!-- Collection Navigation -->
                 <div class="nav-section">
-                    <h3 class="section-title"><i class="fas fa-layer-group"></i> Orders<i class="fas fa-chevron-down toggle-icon"></i></h3>
+                    <h3 class="section-title"><i class="fas fa-layer-group"></i> Collections<i class="fas fa-chevron-down toggle-icon"></i></h3>
                     <div class="section-content">
                     <ul>
-
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:inventory' %}" class="nav-link">
+                                <i class="fas fa-fire"></i>
+                                <span class="nav-text">Inventory</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'showcase:commerce' %}" class="nav-link">
+                                <i class="fa-solid fa-money-bill-trend-up"></i>
+                                <span class="nav-text">Exchange</span>
+                            </a>
+                            {% else %}
+                            <a href="{% url 'login' %}?next={% url 'showcase:commerce' %}" class="nav-link">
+                                <i class="fa-solid fa-money-bill-trend-up"></i>
+                                <span class="nav-text">Exchange</span>
+                            </a>
+                            {% endif %}
+                        </li>
                         <li class="nav-item">
                             <a href="#" class="nav-link">
                                 <i class="fas fa-star"></i>
@@ -2827,15 +2741,46 @@ function updateCountdown() {
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{% url 'showcase:order_history' %}" class="nav-link">
+                            <a href="#" class="nav-link">
                                 <i class="fas fa-history"></i>
-                                <span class="nav-text">Order History</span>
+                                <span class="nav-text">Recent</span>
                             </a>
                         </li>
                     </ul>
                     </div>
                 </div>
-
+                <!-- Daily Navigation -->
+                <div class="nav-section">
+                    <h3 class="section-title"><i class="fas fa-layer-group"></i> Levels<i class="fas fa-chevron-down toggle-icon"></i></h3>
+                    <div class="section-content">
+                    <ul>
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:mylevel' %}" class="nav-link">
+                                <i class="fas fa-fire"></i>
+                                <span class="nav-text">Levels</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'showcase:dailylotto' %}" class="nav-link">
+                                <i class="fa-solid fa-money-bill-trend-up"></i>
+                                <span class="nav-text">Daily Lotto</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-star"></i>
+                                <span class="nav-text">Favorites</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-history"></i>
+                                <span class="nav-text">Recent</span>
+                            </a>
+                        </li>
+                    </ul>
+                    </div>
+                </div>
 
                 <!-- Settings Navigation -->
                 <div class="nav-section">
@@ -2896,7 +2841,25 @@ function updateCountdown() {
                             </form>
                         {% endif %}
 
-
+                        {% if user.is_authenticated %}
+                        <br>
+                        <li class="nav-item">
+                            <button onclick="togglePreferences()" class="nav-link linker">
+                                <i class="fas fa-wheel-alt"></i>
+                                <span class="nav-text">Spin Preferences</span>
+                            </button>
+                        </li>
+                        <script>
+                        function togglePreferences() {
+                            const container = document.getElementById("preferencescontainer");
+                            if (container.style.display === "none" || container.style.display === "") {
+                                container.style.display = "block";
+                            } else {
+                                container.style.display = "none";
+                            }
+                        }
+                        </script>
+                        {% endif %}
 
                     </ul>
                     </div>
@@ -2987,7 +2950,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ticker.textContent  = pct;
 
     icon.style.color = '';
-    if (pct === 0) {
+        if (pct === 0) {
       icon.className = 'fa fa-volume-mute';
     } else if (pct <= 25) {
       icon.className = 'fa fa-volume-off';
@@ -2999,6 +2962,7 @@ document.addEventListener('DOMContentLoaded', () => {
       icon.className = 'fa fa-volume-up';
       icon.style.color = 'red';
     }
+
 
     const frac = pct / 100;
     mediaEls().forEach(m => m.volume = frac);

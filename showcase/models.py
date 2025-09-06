@@ -2,11 +2,14 @@ import os
 import uuid
 from datetime import timedelta, time, datetime
 import requests
+from django.forms import DecimalField
+from django.db.models.signals import m2m_changed
 from django.utils import timezone
 from uuid import uuid4
 from decimal import Decimal, getcontext, ROUND_DOWN
 import json
 from PIL import Image
+from django.utils.text import slugify
 from decimal import Decimal
 from colorfield.fields import ColorField
 import logging
@@ -17,7 +20,7 @@ from django.db.models.signals import post_save, post_delete, pre_delete
 from django.conf import settings
 from django.contrib.auth.models import User, AbstractUser, Permission
 from django.db import models, transaction
-from django.db.models import Max, F, Count, Sum
+from django.db.models import Max, F, Count, Sum, ExpressionWrapper
 from django.dispatch import receiver
 from django_countries.fields import CountryField
 from django.utils.timezone import now, make_aware
@@ -33,6 +36,8 @@ from django.core.files.base import ContentFile
 import random
 import string
 from random import randint
+
+from stripe.api_resources import order
 
 CATEGORY_CHOICES = (
     ('G', 'Gold'),
@@ -2187,6 +2192,7 @@ class InventoryTradeOffer(models.Model):
         else:
             raise ValueError("Insufficient funds for the trade.")
 
+
 class TradeOfferManager(models.Manager):
     def get_queryset(self, user=None):
         queryset = super().get_queryset()
@@ -2195,6 +2201,7 @@ class TradeOfferManager(models.Manager):
                 Q(initiator=user) | Q(receiver=user)
             ).select_related('initiator', 'receiver')
         return queryset
+
 
 class CommerceExchange(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -3515,6 +3522,7 @@ class GameChoice(models.Model):
             self.value = self.choice.value
         print('save committed of gamechoice')
         super().save(*args, **kwargs)
+
 
 class Choice(models.Model):
     """Used for voting on different new ideas"""
@@ -6330,6 +6338,10 @@ class Item(models.Model):
     status = models.IntegerField(choices=((0, "Draft"), (1, "Publish")), default=1)
     description = models.TextField()
     image = models.FileField()
+    image2 = models.FileField(blank=True, null=True)
+    image3 = models.FileField(blank=True, null=True)
+    image4 = models.FileField(blank=True, null=True)
+    image5 = models.FileField(blank=True, null=True)
     image_length = models.PositiveIntegerField(blank=True, null=True, default=100,
                                                help_text='Original length of the advertisement (use for original ratio).',
                                                verbose_name="image length")
@@ -6411,6 +6423,7 @@ class Item(models.Model):
         profile = ProfileDetails.objects.filter(user=self.user).first()
         if profile:
             return reverse('showcase:profile', args=[str(profile.pk)])
+
 
 class GameHistory(models.Model):
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
@@ -6537,7 +6550,6 @@ class Transaction(models.Model):
         verbose_name = "Transaction"
         verbose_name_plural = "Transactions"
 
-from django.utils.text import slugify
 
 class TradeOffer(models.Model):
     PENDING = 0
@@ -6644,6 +6656,7 @@ class TradeOffer(models.Model):
         verbose_name = "Trade Offer"
         verbose_name_plural = "Trade Offers"
 
+
 class TradeShippingLabel(models.Model):
     trade_offer = models.ForeignKey(TradeOffer, on_delete=models.CASCADE)
 
@@ -6702,6 +6715,7 @@ class TradeShippingLabel(models.Model):
 
         super().save(*args, **kwargs)"""
 
+
 class RespondingTradeOffer(models.Model):
     PENDING = 0
     ACCEPTED = 1
@@ -6712,33 +6726,34 @@ class RespondingTradeOffer(models.Model):
         (ACCEPTED, 'Accepted'),
         (DECLINED, 'Declined')
     )
+
     wanted_trade_items = models.ForeignKey(TradeOffer, on_delete=models.CASCADE, blank=True, null=True)
     trade_offer_exists = models.BooleanField(default=False,
-                                             help_text="Indicates if the trade has been completed previously.")
+        help_text="Indicates if the trade has been completed previously.")
     offered_trade_items = models.ManyToManyField(TradeItem)
     trade_shipping_label = models.ForeignKey(TradeShippingLabel, on_delete=models.CASCADE, null=True, blank=True)
     estimated_trading_value = models.DecimalField(
-        help_text="Estimated Market Price of Trade Item (will be displayed to potential traders)", decimal_places=2,
-        max_digits=12)
+        help_text="Estimated Market Price of Trade Item (will be displayed to potential traders)",
+        decimal_places=2, max_digits=12
+    )
     message = models.CharField(max_length=2000, blank=True, null=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Dealer', blank=True,
-                             null=True,
-                             verbose_name="Dealer")
-    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='Recipient', blank=True,
-                              null=True, help_text="Optional", verbose_name="Recipient")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='Dealer', blank=True, null=True, verbose_name="Dealer")
+    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='Recipient', blank=True, null=True, help_text="Optional", verbose_name="Recipient")
     slug = models.SlugField(unique=True, editable=False, blank=True, null=True)
     trade_status = models.IntegerField(choices=TRADE_STATUS, default=PENDING)
     timestamp = models.DateTimeField(auto_now_add=True)
     quantity = models.IntegerField(default=1)
-    is_active = models.IntegerField(default=1,
-                                    blank=True,
-                                    null=True,
-                                    help_text='1->Active, 0->Inactive',
-                                    choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?")
+    is_active = models.IntegerField(
+        default=1, blank=True, null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')), verbose_name="Out of stock?"
+    )
 
     def __str__(self):
-        item_titles = " ".join([item.__str__() for item in self.offered_trade_items.all()])
-        return f"{self.slug} - {item_titles}"
+        title_bits = " ".join(str(item) for item in self.offered_trade_items.all())
+        return f"{self.slug or 'unslugged'} - {title_bits}".strip()
 
     def get_profile_url(self):
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
@@ -6747,35 +6762,43 @@ class RespondingTradeOffer(models.Model):
         return reverse('showcase:responsetradeitems', args=[str(self.slug)])
 
     def get_absolute_url(self):
-
         return reverse('showcase:directedtradeoffers', args=[str(self.pk)])
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+    def _build_slug(self) -> str:
+        parts = []
+        if self.wanted_trade_items_id:
+            parts.append(f"w{self.wanted_trade_items_id}")
+        if self.user_id:
+            parts.append(f"u{self.user_id}")
+        base = "-".join(parts) or "rto"
+        return f"{slugify(base)}-{uuid.uuid4().hex[:8]}"
 
-        if self.offered_trade_items.all():
+
+    def save(self, *args, **kwargs):
+        # If you infer user from offered items, keep this for updates
+        if self.pk and self.offered_trade_items.exists():
             first_trade_item = self.offered_trade_items.first()
             if first_trade_item and first_trade_item.user:
                 self.user = first_trade_item.user
-                print("sent trade offer to initial trader")
 
-        if self.slug is None and self.wanted_trade_items:
-            self.slug = self.wanted_trade_items.slug
+        super().save(*args, **kwargs)
 
+        # Ensure slug exists on both create and update
+        if not self.slug:
+            self.slug = self._build_slug()
+            super().save(update_fields=["slug"])
+
+        # --- your linking logic (trades, labels) ---
         if self.pk is not None:
             related_trade = Trade.objects.filter(trade_offers=self.wanted_trade_items).first()
             responding_related_trade = Trade.objects.filter(users__in=[self.user, self.user2]).first()
             if related_trade is not None:
                 related_trade.responding_trade_offers.add(self)
-
             if responding_related_trade is not None:
-
                 responding_related_trade.responding_trade_offers.clear()
-
                 responding_related_trade.responding_trade_offers.add(self)
 
         if self.pk is not None and self.trade_status == self.ACCEPTED and self.trade_shipping_label is None:
-
             userprofile = self.user2.ship_profile if self.user2 else None
             self.trade_shipping_label = TradeShippingLabel.objects.create(
                 trade_offer=self.wanted_trade_items,
@@ -6788,21 +6811,16 @@ class RespondingTradeOffer(models.Model):
                 state=userprofile.state if userprofile else '',
                 zip_code=userprofile.zip_code if userprofile else '',
                 phone_number=userprofile.phone_number if userprofile else '',
-
             )
+
         if self.pk is not None and self.trade_status == self.ACCEPTED:
-
+            # NOTE: see warning below about this query
             trade_offers = TradeOffer.objects.filter(
-                id__in=[self.wanted_trade_items.id, self.offered_trade_items.first().id])
-            trade = Trade.objects.create(
-
+                id__in=[self.wanted_trade_items.id, self.offered_trade_items.first().id]
             )
-
+            trade = Trade.objects.create()
             trade.trade_offers.set(trade_offers)
-
             trade.users.set([self.user, self.user2])
-
-        super().save(*args, **kwargs)
 
     def get_trade_item_details(self):
         details = []
@@ -6822,6 +6840,7 @@ class RespondingTradeOffer(models.Model):
     class Meta:
         verbose_name = "Trade Offer Response"
         verbose_name_plural = "Trade Offer Responses"
+
 
 class Trade(models.Model):
     trade_offers = models.ManyToManyField(TradeOffer)
@@ -6878,6 +6897,7 @@ class TradeContract(models.Model):
         verbose_name = "Trade Contract"
         verbose_name_plural = "Trade Contracts"
 
+
 class TradeConfirmation(models.Model):
     trade = models.ForeignKey(Trade, on_delete=models.CASCADE, related_name='tradeconfirm')
     trader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='traderconfirm')
@@ -6897,6 +6917,51 @@ class TradeConfirmation(models.Model):
     class Meta:
         verbose_name = "Trade Confirmation"
         verbose_name_plural = "Trade Confirmations"
+
+
+class WeBuy(models.Model):
+    seller = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    class Meta:
+        verbose_name = "We Buy Card"
+        verbose_name_plural = "We Buy Cards"
+
+    def __str__(self):
+        return f"WeBuy #{self.pk} - {self.seller}"
+
+
+class BuyCards(models.Model):
+    webuy = models.ForeignKey(WeBuy, related_name='cards', on_delete=models.CASCADE)
+
+    seller = models.ForeignKey(User, on_delete=models.CASCADE)
+    image = models.FileField()
+    image2 = models.FileField()
+    image3 = models.FileField(blank=True, null=True)
+    image4 = models.FileField(blank=True, null=True)
+    image5 = models.FileField(blank=True, null=True)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    class Meta:
+        verbose_name = "We Buy Card"
+        verbose_name_plural = "We Buy Cards"
+
+    def __str__(self):
+        return f"BuyCards #{self.pk} for WeBuy #{self.webuy_id}"
 
 
 class ChatBackgroundImage(models.Model):
@@ -7046,8 +7111,6 @@ class IssueBackgroundImage(models.Model):
         verbose_name = "Issue Background Image"
         verbose_name_plural = "Issue Background Images"
 
-import uuid
-
 
 class OrderItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -7167,6 +7230,7 @@ class OrderItem(models.Model):
        if not self.slug:
            self.slug = slugify(self.item.slug)
        super().save(*args, **kwargs)"""
+
 
 class OrderItemField(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -7380,9 +7444,14 @@ class Order(models.Model):
    '''
 
     def __str__(self):
-        items_list = ", ".join([str(item) for item in self.items.all()])
-        status = "Shipped" if self.being_delivered else "Not Shipped"
-        return f"{self.user.username} | Items: [{items_list}] - {status}"
+        if not self.pk:
+            return "Unsaved Order"
+
+        try:
+            items_list = ", ".join([str(item) for item in self.items.all()])
+            return f"Order #{self.pk} with items: {items_list}"
+        except:
+            return f"Order #{self.pk} (items unavailable)"
 
         if self.profile:
             self.shipping_address = self.profile.shipping_address
@@ -7393,11 +7462,15 @@ class Order(models.Model):
         self.currencyorderprice = sum(item.get_final_currency_price() for item in self.items.all() if item.get_final_currency_price())
 
     def save(self, *args, **kwargs):
-        self.update_total_prices()
-        super().save(*args, **kwargs)
+        is_creating = self._state.adding
+
+        super().save(*args, **kwargs)  # Save first
+
+        if is_creating:
+            self.update_total_prices()
 
     def get_total_price(self):
-        return str(self.orderprice) or 0
+        return Decimal(self.orderprice) or 0
 
     def get_total_currency_price(self):
         return str(self.currencyorderprice) or 0
@@ -7416,6 +7489,7 @@ class Order(models.Model):
 
     def get_profile_url2(self):
         return reverse('showcase:products', args=[str(self.slug)])
+
 
 class Address(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -7500,7 +7574,6 @@ class Refund(models.Model):
     def __str__(self):
         return f"{self.pk}"
 
-from django.db.models.signals import m2m_changed
 
 from django.db import models
 from django.urls import reverse

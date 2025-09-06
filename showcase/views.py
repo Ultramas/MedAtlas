@@ -126,7 +126,7 @@ from .models import Ascension
 from .models import (Item, OrderItem, Order, Address, Payment, Coupon, Refund,
                      UserProfile)
 
-from .forms import CouponForm, RefundForm, PaymentForm, CurrencyViewTypeForm
+from .forms import CouponForm, RefundForm, PaymentForm, CurrencyViewTypeForm, WeBuyForm, BuyCardsForm, BuyCardsFormSet
 
 from .forms import VoteQueryForm, EmailForm, AnswerForm, ItemForm, TradeItemForm, TradeProposalForm, \
     SellerApplicationForm, \
@@ -8968,68 +8968,6 @@ class CreateItemView(FormMixin, LoginRequiredMixin, ListView):
         return render(request, 'some_template.html', {'fields': fields})
 
 
-class TradeItemCreateView(ListView):
-    model = TradeItem
-    template_name = 'tradingcentral.html'
-    success_url = '/tradingcentral/'
-
-    def get_context_data(self, **kwargs):
-        self.object_list = self.get_queryset()
-        context = super().get_context_data(**kwargs)
-        context['Background'] = BackgroundImageBase.objects.filter(
-            is_active=1, page=self.template_name).order_by("position")
-        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
-        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
-        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
-        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
-
-        if self.request.user.is_authenticated:
-            context['StockObject'] = InventoryObject.objects.filter(
-                is_active=1, user=self.request.user
-            ).order_by("created_at")
-            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
-        context['TradeItems'] = TradeItem.objects.filter(is_active=1)
-        context['TradeOffers'] = TradeOffer.objects.filter(is_active=1)
-        context['Friends'] = Friend.objects.filter(user=self.request.user, is_active=1)
-        tradeoffering = RespondingTradeOffer.objects.filter(is_active=1)
-        context['TextFielde'] = TextBase.objects.filter(is_active=1, page=self.template_name).order_by("section")
-
-        trade_offers = TradeOffer.objects.filter(is_active=1)
-
-        slug = self.kwargs.get('slug')
-
-        if slug:
-
-            trade_objects = TradeOffer.objects.filter(slug=slug)
-
-            context['TradeOffered'] = trade_objects
-
-        if self.request.user.is_authenticated:
-            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
-        else:
-            userprofile = None
-
-        if userprofile:
-            context['NewsProfiles'] = userprofile
-        else:
-            context['NewsProfiles'] = None
-
-        if context['NewsProfiles'] == None:
-
-            userprofile = type('', (), {})()
-            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
-            userprofile.newprofile_profile_url = None
-        else:
-            for userprofile in context['NewsProfiles']:
-                user = userprofile.user
-                profile = ProfileDetails.objects.filter(user=user).first()
-                if profile:
-                    userprofile.newprofile_profile_picture_url = profile.avatar.url
-                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
-
-        return context
-
-
 class ConsignmentView(FormMixin, LoginRequiredMixin, ListView):
     model = Item
     paginate_by = 10
@@ -9120,6 +9058,60 @@ class ConsignmentView(FormMixin, LoginRequiredMixin, ListView):
                 'value': getattr(instance, field.name),
             })
         return render(request, 'consignment.html', {'fields': fields})
+
+
+class ConsignmentInfoView(LoginRequiredMixin, ListView):
+    model = Item
+    paginate_by = 10
+    template_name = 'consignmentinfo.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['UpdateProfile'] = UpdateProfile.objects.all()
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
 
 
 class PurchasePolicyView(LoginRequiredMixin, ListView):
@@ -9314,6 +9306,7 @@ class TradeBackgroundView(FormMixin, LoginRequiredMixin, ListView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -9362,6 +9355,7 @@ class TradeBackgroundView(FormMixin, LoginRequiredMixin, ListView):
             print(form.cleaned_data)
             form = TradeItemForm()
         return render(request, 'tradeitems.html', {'form': form})
+
 
 class TradeOfferCreateView(CreateView):
     model = TradeOffer
@@ -9425,6 +9419,7 @@ def contact_trader(self, request, trade_item_id):
 
     return redirect('showcase:room', room=room.name, username=current_user.username)
 
+
 class ResponseTradeOfferCreateView(CreateView):
     model = RespondingTradeOffer
     form_class = RespondingTradeOfferForm
@@ -9472,6 +9467,7 @@ class ResponseTradeOfferCreateView(CreateView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -11071,6 +11067,601 @@ class BackgroundView(FormMixin, BaseView):
         )
         return context
 
+
+class LootBackgroundView(FormMixin, BaseView):
+    model = BackgroundImage
+    form_class = EmailForm
+    template_name = "loothome.html"
+    section = TextBase.section
+
+    def post(self, request, *args, **kwargs):
+        form = EmailForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            form.instance.user = request.user
+            post.save()
+
+            subject = "Subscription Confirmation"
+            recipient_email = form.cleaned_data.get('email')
+            sender_email = settings.DEFAULT_FROM_EMAIL
+
+            html_content = render_to_string('email_template.html', {'user': request.user})
+            text_content = strip_tags(html_content)
+
+            email = EmailMultiAlternatives(
+                subject,
+                text_content,
+                sender_email,
+                [recipient_email],
+            )
+            email.attach_alternative(html_content, "text/html")
+
+            image_path = os.path.join(settings.BASE_DIR, 'static/css/images/poketrove_logo.png')
+            with open(image_path, 'rb') as img:
+                image = MIMEImage(img.read())
+                image.add_header('Content-ID', '<subscription_image>')
+                email.attach(image)
+
+            try:
+                email.send()
+                messages.success(request, 'Form submitted successfully. A confirmation email has been sent.')
+            except Exception as e:
+                messages.error(request, f"Form submitted successfully, but email could not be sent: {e}")
+
+            return redirect('showcase:emaildone')
+        else:
+            messages.error(request, "Form submission invalid")
+            return render(request, "loothome.html", {'form': form})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        signed_in_user = self.request.user
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['TextFielde'] = TextBase.objects.filter(page=self.template_name).order_by("section")
+        context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
+        context['messages'] = SupportMessage.objects.filter(room=self.request.user.username).order_by('-date')
+        context['friendmessages'] = Message.objects.filter(room=self.request.user.username).order_by('-date')
+        context['Carousel'] = ImageCarousel.objects.filter(is_active=1, carouselpage=self.template_name).order_by(
+            "carouselposition")
+
+
+        spinpreference = None
+        user = self.request.user
+        if user.is_authenticated:
+            preference_instance = MyPreferences.objects.filter(user=user).first()
+            if preference_instance:
+                context['preferenceform'] = MyPreferencesForm(instance=preference_instance, user=user)
+                context['preference_instance'] = preference_instance
+                context['is_signed_in'] = user.is_authenticated
+                context['has_preference'] = preference_instance is not None
+                context['preference_value'] = preference_instance.spintype if preference_instance else None
+            else:
+                context['preferenceform'] = MyPreferencesForm(user=user)
+                context['preference_instance'] = None
+            try:
+                spinpreference = SpinPreference.objects.get(user=user)
+            except SpinPreference.DoesNotExist:
+                spinpreference = SpinPreference(user=user, quick_spin=False)
+                spinpreference.save()
+
+            context['quick_spin'] = spinpreference.quick_spin
+        else:
+            context['quick_spin'] = False
+
+        context['spinpreference'] = spinpreference
+
+        active_games = Game.objects.filter(is_active=1, filter='F')
+
+        if active_games.exists():
+            game = random.choice(list(active_games))
+        else:
+            game = None
+
+        if game:
+            slug = game.slug
+            context['slug'] = game.slug
+            context['game'] = game
+        else:
+            context['slug'] = ''
+            context['game'] = None
+
+        user = self.request.user
+        if user.is_authenticated:
+            try:
+                context['SentProfile'] = UserProfile.objects.get(user=self.request.user)
+            except UserProfile.DoesNotExist:
+                context['SentProfile'] = None
+        else:
+            context['SentProfile'] = None
+
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+        context['wager_form'] = WagerForm()
+
+        choices = Choice.objects.filter(game=game)
+        spinner_choice_renders = SpinnerChoiceRenders.objects.filter(game=game)
+        context['spinner_choice_renders'] = spinner_choice_renders
+
+        user = self.request.user
+        if user.is_authenticated:
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                effective_cost = game.get_effective_cost()
+                spin_multiplier = 1
+                total_cost = effective_cost * spin_multiplier
+                context['user_cash'] = profile.currency_amount
+                context['total_cost'] = total_cost
+            else:
+                context['user_cash'] = None
+                context['total_cost'] = None
+        else:
+            context['user_cash'] = None
+            context['total_cost'] = None
+
+        button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
+
+        if game:
+            button_type = self.request.GET.get('button_type') or self.request.POST.get('button_type')
+            if button_type == "start2":
+                cost = 0
+            else:
+                cost = game.discount_cost if game.discount_cost else game.cost
+        else:
+            cost = 0
+
+        context.update({
+            'cost_threshold_80': cost * 0.8,
+            'cost_threshold_100': cost,
+            'cost_threshold_200': cost * 2,
+            'cost_threshold_500': cost * 5,
+            'cost_threshold_10000': cost * 100,
+        })
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        user_profile = None
+        slug = game.slug if game else None
+        if game:
+            if game.user:
+                user_profile, created = UserProfile.objects.get_or_create(user=game.user)
+
+                context['SentProfile'] = user_profile
+                user_cash = user_profile.currency_amount
+
+                context = {
+                    'user_cash': user_cash,
+                }
+
+        context['Money'] = Currency.objects.filter(is_active=1).first()
+
+        spinpreference = None
+
+        if user.is_authenticated:
+            try:
+                spinpreference = SpinPreference.objects.get(user=user)
+            except SpinPreference.DoesNotExist:
+                spinpreference = SpinPreference(user=user, quick_spin=False)
+                spinpreference.save()
+
+            context['quick_spin'] = spinpreference.quick_spin
+        else:
+            context['quick_spin'] = False
+
+        context['spinpreference'] = spinpreference
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['Profiles'] = userprofile
+        else:
+            context['Profiles'] = None
+
+        if context['Profiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['Profiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        if spinpreference:
+            spinform = SpinPreferenceForm(instance=spinpreference)
+        else:
+            spinform = SpinPreferenceForm()
+        context['spin_preference_form'] = spinform
+
+        if user.is_authenticated:
+            if spinpreference.quick_spin:
+                random_amount = random.randint(500, 1000)
+            else:
+                random_amount = random.randint(150, 300)
+        else:
+            random_amount = random.randint(150, 300)
+
+        context['random_amount'] = random_amount
+        context['range_random_amount'] = range(random_amount)
+        print(str('the random amount is ') + str(random_amount))
+
+        random_amount = random.randint(150, 300)
+        random_nonces = [random.randint(0, 1000000) for _ in range(random_amount)]
+        context['random_nonces'] = random_nonces
+
+        game_id = self.kwargs.get('slug')
+
+        game = get_object_or_404(Game, slug=slug)
+
+        context['game'] = game
+
+        inline_choices = game.choice_fk_set.all()
+        m2m_choices = game.choices.all()
+        combined_choices = {choice.pk: choice for choice in list(inline_choices) + list(m2m_choices)}
+
+        through_qs = GameChoice.objects.filter(game=game).select_related('choice')
+        through_data = {}
+        for gc in through_qs:
+            choice = gc.choice
+            through_data[choice.pk] = {
+                'choice': choice,
+                'lower_nonce': gc.lower_nonce if gc.lower_nonce is not None else choice.lower_nonce,
+                'upper_nonce': gc.upper_nonce if gc.upper_nonce is not None else choice.upper_nonce,
+                'value': gc.value if gc.value is not None else choice.value,
+                'rarity': gc.rarity if gc.rarity is not None else choice.rarity,
+                'file_url': choice.file.url if choice.file else '',
+                'category': choice.category if choice.category else '',
+                'currency': {
+                    'symbol': choice.currency.name if choice.currency else '💎',
+                    'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                }
+            }
+
+        all_choices = []
+        for pk, choice in combined_choices.items():
+            nonce_info = through_data.get(pk, {
+                'choice': choice,
+                'lower_nonce': choice.lower_nonce,
+                'upper_nonce': choice.upper_nonce,
+                'value': choice.value,
+                'rarity': choice.rarity,
+                'file_url': choice.file.url if choice.file else '',
+                'category': choice.category if choice.category else '',
+                'currency': {
+                    'symbol': choice.currency.name if choice.currency else '💎',
+                    'file_url': choice.currency.file.url if choice.currency and choice.currency.file else None
+                }
+            })
+
+            all_choices.append({
+                'choice': choice,
+                'choice_text': choice.choice_text,
+                'lower_nonce': nonce_info['lower_nonce'],
+                'upper_nonce': nonce_info['upper_nonce'],
+                'value': nonce_info['value'],
+                'rarity': nonce_info['rarity'],
+                'file_url': nonce_info['file_url'],
+                'category': nonce_info['category'],
+                'currency': nonce_info['currency'],
+                'image_width': getattr(choice, 'image_width', None),
+                'image_length': getattr(choice, 'image_length', None),
+                'get_color_display': getattr(choice, 'get_color_display', lambda: ''),
+                'get_tier_display': getattr(choice, 'get_tier_display', lambda: ''),
+            })
+
+        context['choices'] = all_choices
+
+        choices_with_nonce = []
+        for nonce in random_nonces:
+            for choice_data in all_choices:
+                lower = choice_data['lower_nonce']
+                upper = choice_data['upper_nonce']
+                if lower is not None and upper is not None and lower <= nonce <= upper:
+                    choices_with_nonce.append({
+                        'choice': choice_data['choice'],
+                        'nonce': nonce,
+                        'lower_nonce': lower,
+                        'upper_nonce': upper,
+                        'rarity': choice_data['rarity'],
+                        'file_url': choice_data['file_url'],
+                        'currency': choice_data['currency']
+                    })
+                    break
+
+        context['choices_with_nonce'] = choices_with_nonce
+
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        print(context['Background'])
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        context['Advertisement'] = AdvertisementBase.objects.filter(page=self.template_name, is_active=1).order_by(
+            "advertisement_position")
+        context['Image'] = ImageBase.objects.filter(page=self.template_name, is_active=1).order_by("image_position")
+        context['Favicon'] = FaviconBase.objects.filter(is_active=1)
+        context['FeaturedGame'] = Game.objects.filter(is_active=1, filter='F')
+        context['NewGame'] = Game.objects.filter(is_active=1, filter='N')
+        context['PopularGame'] = Game.objects.filter(is_active=1, filter='P')
+        context['Social'] = SocialMedia.objects.filter(page=self.template_name, is_active=1)
+        context['Feed'] = Feedback.objects.filter(is_active=1, feedbackpage=self.template_name).order_by("slug")
+        context['Email'] = EmailField.objects.filter(is_active=1)
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
+
+        user = self.request.user
+        if user.is_authenticated:
+            user_clickables = UserClickable.objects.filter(user=user)
+            for user_clickable in user_clickables:
+                if user_clickable.clickable.chance_per_second > 0:
+                    user_clickable.precomputed_chance = 1000 / user_clickable.clickable.chance_per_second
+                    print('chance exists' + str(user_clickable.precomputed_chance))
+                else:
+                    user_clickable.precomputed_chance = 0
+
+            context["Clickables"] = user_clickables
+            context['Profile'] = ProfileDetails.objects.filter(is_active=1, user=user)
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                context['profile_pk'] = profile.pk
+                context['profile_url'] = reverse('showcase:profile', kwargs={'pk': profile.pk})
+
+        context['About'] = Event.objects.filter(page=self.template_name, is_active=1)
+        context['Feedback'] = Feedback.objects.filter(showcase=1, is_active=1)
+        context['Events'] = Event.objects.filter(page=self.template_name, is_active=1)
+        users = User.objects.all()
+
+        for user in users:
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                user.newprofile_profile_picture_url = profile.avatar.url
+                user.newprofile_profile_url = profile.get_profile_url()
+            else:
+                user.newprofile_profile_picture_url = None
+                user.newprofile_profile_url = "#"
+        context['Users'] = users
+
+        context['username'] = signed_in_user
+        context['room'] = signed_in_user
+        context['show_chat'] = True
+        context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
+        context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+
+        if self.request.user.is_authenticated:
+            context['StockObject'] = InventoryObject.objects.filter(
+                is_active=1, user=self.request.user
+            ).order_by("created_at")
+            context['preferenceform'] = MyPreferencesForm(user=self.request.user)
+        context['tophit'] = TopHits.objects.filter(is_active=True).order_by('-mfg_date')[:8]
+        print(FaviconBase.objects.all())
+        print(213324)
+
+        product = Item.objects.filter(is_active=1)
+
+        context['Products'] = product
+        total_items = product.count()
+        for product in context['Products']:
+            image = product.image
+            item = Item.objects.filter(slug=product.slug).first()
+            if product:
+                product.title = item.title
+                product.price = item.price
+                product.discount_price = item.discount_price
+                product.image_url = item.image.url
+                product.label = item.label
+                product.hyperlink = item.get_profile_url()
+                product.description = item.description
+
+        currencyobject = CurrencyMarket.objects.filter(is_active=1)
+
+        context['CurrencyItem'] = currencyobject
+
+        for currencyobject in context['CurrencyItem']:
+            image = currencyobject.file
+            item = CurrencyMarket.objects.filter(slug=currencyobject.slug).first()
+            if currencyobject:
+                currencyobject.title = item.name
+                currencyobject.price = item.price
+                currencyobject.discount_price = item.discount_price
+                currencyobject.image_url = item.file.url
+                currencyobject.label = item.label
+                currencyobject.hyperlink = item.get_profile_url()
+                currencyobject.description = item.flavor_text
+
+        events = Event.objects.filter(is_active=1)
+        context['NewEvents'] = events
+
+        for events in context['NewEvents']:
+            image = events.image
+            eventful = Event.objects.filter(date_and_time=events.date_and_time).first()
+            if events:
+                events.name = eventful.name
+                events.image_url = eventful.image.url
+                events.hyperlink = eventful.get_profile_url()
+                events.description = eventful.description
+
+        newprofile = NewsFeed.objects.filter(is_active=1)
+
+        context['News'] = newprofile
+
+        for newprofile in context['News']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        feed = Feedback.objects.filter(is_active=1).order_by('-timestamp')
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['Profiles'] = userprofile
+        else:
+            context['Profiles'] = None
+
+        if context['Profiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['Profiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        feed = Feedback.objects.filter(is_active=1).order_by('-timestamp')
+
+        context['FeedBacking'] = feed
+
+        for feed in context['FeedBacking']:
+            user = feed.username
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                feed.user_profile_picture_url = profile.avatar.url
+                feed.user_profile_url = feed.get_profile_url2()
+                feed.feedback_profile_url = feed.get_profile_url()
+                print(user)
+
+        messages = SupportMessage.objects.all().order_by('-date')
+        context['Messanger'] = messages
+        messages_data = []
+
+        for message in context['Messanger']:
+            profile_details = ProfileDetails.objects.filter(user=message.signed_in_user).first()
+            message_data = {
+                'user_profile_picture_url': profile_details.avatar.url if profile_details else '',
+                'user_profile_url': message.get_profile_url(),
+                'user': message.signed_in_user,
+                'value': message.value,
+                'date': message.date,
+            }
+            messages_data.append(message_data)
+
+        context['Messanger'] = messages_data
+
+        general_messages = Message.objects.filter(room="General").order_by('-date')[:3][::-1]
+        general_messages_data = []
+
+        for general_message in general_messages:
+            profile_details = ProfileDetails.objects.filter(user=general_message.signed_in_user).first()
+            general_message_data = {
+                'user_profile_picture_url': profile_details.avatar.url if profile_details else '',
+                'user_profile_url': general_message.get_profile_url(),
+                'user': general_message.signed_in_user,
+                'value': general_message.value,
+                'date': general_message.date,
+            }
+            general_messages_data.append(general_message_data)
+
+        context['GeneralMessanger'] = general_messages_data
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        if self.request.user.is_authenticated:
+            profile = (
+                ProfileDetails.objects
+                .filter(user=self.request.user, is_active=1)
+                .select_related('tier')
+                .first()
+            )
+        else:
+            profile = None
+        context['profiledetails'] = profile
+        context['user_tier_code']  = (
+            profile.tier.tier if profile and profile.tier else ''
+        )
+        return context
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -11195,8 +11786,12 @@ class EBackgroundView(BaseView, FormView):
         page_number = self.request.GET.get('page')
         paginated_items = paginator.get_page(page_number)
 
-        active_order = (Order.objects.filter(user=self.request.user, ordered=False).prefetch_related('items').first())
-        context['order'] = active_order
+        user = self.request.user
+        if user.is_authenticated:
+            active_order = (CurrencyFullOrder.objects.filter(user=user, ordered=False).prefetch_related('items').first())
+            context['order'] = active_order
+        else:
+            context['order'] = None
 
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
@@ -11845,8 +12440,108 @@ class ShowcaseCreatePostView(CreateView):
     template_name = "showcasebackgroundimagechange.html"
     success_url = reverse_lazy("showcase")
 
+
 def forbidden_access(request):
     return render(request, 'forbiddenaccess.html')
+
+
+class WeBuyView(BaseView):
+    form_class = WeBuyForm           # your model form for parent WeBuy
+    template_name = "webuy.html"
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        webuy_instance = None  # or fetch an existing instance if editing
+        form = self.form_class(instance=webuy_instance)
+        formset = BuyCardsFormSet(instance=webuy_instance)
+
+        context = self.get_context_data(**kwargs)
+        context.update({
+            'form': form,
+            'formset': formset,
+        })
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        webuy_instance = None  # leave None for "create"; set to existing instance for "edit"
+        form = self.form_class(request.POST, request.FILES, instance=webuy_instance)
+        formset = BuyCardsFormSet(request.POST, request.FILES, instance=webuy_instance)
+
+        if form.is_valid() and formset.is_valid():
+            with transaction.atomic():
+                parent = form.save(commit=False)
+                parent.seller = request.user  # <<< critical
+                parent.save()
+
+                formset.instance = parent
+                children = formset.save(commit=False)
+
+                for child in children:
+                    child.seller = request.user
+                    child.webuy = parent
+                    child.save()
+
+                for obj in formset.deleted_objects:
+                    obj.delete()
+
+            messages.success(request, 'Form submitted successfully.')
+            return render(request, "ehome.html", {'form': form})
+
+        messages.error(request, "Form submission invalid")
+        print("FORM ERRORS:", form.errors, form.non_field_errors())
+        print("FORMSET ERRORS:", formset.non_form_errors(), [f.errors for f in formset])
+
+        context = self.get_context_data(**kwargs)
+        context.update({'form': form, 'formset': formset})
+        return render(request, self.template_name, context)
+
+    def get_queryset(self):
+        return ShowcaseBackgroundImage.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
+        context['Background'] = BackgroundImageBase.objects.filter(page=self.template_name).order_by("position")
+        context['Titles'] = Titled.objects.filter(is_active=1).order_by("page")
+        context['UpdateProfile'] = UpdateProfile.objects.all()
+
+        newprofile = UpdateProfile.objects.filter(is_active=1)
+
+        context['Profiles'] = newprofile
+
+        for newprofile in context['Profiles']:
+            user = newprofile.user
+            profile = ProfileDetails.objects.filter(user=user).first()
+            if profile:
+                newprofile.newprofile_profile_picture_url = profile.avatar.url
+                newprofile.newprofile_profile_url = newprofile.get_profile_url()
+
+        if self.request.user.is_authenticated:
+            userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
+        else:
+            userprofile = None
+
+        if userprofile:
+            context['NewsProfiles'] = userprofile
+        else:
+            context['NewsProfiles'] = None
+
+        if context['NewsProfiles'] == None:
+
+            userprofile = type('', (), {})()
+            userprofile.newprofile_profile_picture_url = 'static/css/images/a.jpg'
+            userprofile.newprofile_profile_url = None
+        else:
+            for userprofile in context['NewsProfiles']:
+                user = userprofile.user
+                profile = ProfileDetails.objects.filter(user=user).first()
+                if profile:
+                    userprofile.newprofile_profile_picture_url = profile.avatar.url
+                    userprofile.newprofile_profile_url = userprofile.get_profile_url()
+
+        return context
+
 
 class SupportLineBackgroundView(BaseView):
     model = SupportInterface
@@ -11902,11 +12597,13 @@ class SupportLineBackgroundView(BaseView):
 
         return context
 
+
 class ChatCreatePostView(CreateView):
     model = ChatBackgroundImage
     form_class = ChatBackgroundImagery
     template_name = "chatbackgroundimagechange.html"
     success_url = reverse_lazy("home")
+
 
 class WhyBackgroundView(BaseView):
     model = WhyBackgroundImage
@@ -15917,6 +16614,7 @@ from django.http import JsonResponse
 
 @method_decorator(login_required, name='dispatch')
 class DirectedTradeOfferView(View):
+    template_name = 'directedtradeoffers.html'
 
     def is_ajax(self, request):
         return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
@@ -15940,6 +16638,7 @@ class DirectedTradeOfferView(View):
         })
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -16340,6 +17039,7 @@ class AdministrationChangeLogView(ListView):
         # (unchanged from your original get_context_data)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         # ─── User‐specific clickables & profile URLs ─────────────────────────────────
         user = self.request.user
@@ -16431,6 +17131,7 @@ class ChangeLogView(ListView):
         # (unchanged from your original get_context_data)
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         # ─── User‐specific clickables & profile URLs ─────────────────────────────────
         user = self.request.user
@@ -19904,6 +20605,7 @@ class PaymentView(EBaseView):
         context['BaseCopyrightTextFielded'] = BaseCopyrightTextField.objects.filter(is_active=1)
         context['Background'] = BackgroundImageBase.objects.filter(is_active=1, page=self.template_name).order_by(
             "position")
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
         if self.request.user.is_authenticated:
             userprofile = ProfileDetails.objects.filter(is_active=1, user=self.request.user)
         else:
@@ -19958,7 +20660,13 @@ class PaymentView(EBaseView):
             return redirect("showcase:checkout")
 
     def post(self, *args, **kwargs):
-        order = Order.objects.get(user=self.request.user, ordered=False)
+        order_user = self.request.user
+        orders = Order.objects.filter(user=order_user, ordered=False)
+
+        if not orders.exists():
+            messages.warning(self.request, "No active orders found.")
+            return redirect("/checkout/")
+
         if self.request.content_type == 'application/json':
             try:
                 data = json.loads(self.request.body.decode('utf-8'))
@@ -19971,30 +20679,27 @@ class PaymentView(EBaseView):
             token = self.request.POST.get('token')
             payment_method = self.request.POST.get('payment_method')
 
-        order_user = request.user
-        order = Order.objects.filter(user=order_user, ordered=False)
-        if not order.exists():
-            messages.warning(request, "No active orders found.")
-            return redirect("/checkout/")
         ruby_profile = get_object_or_404(ProfileDetails, user=order_user)
 
         total_amount = sum(order.get_total_price() for order in orders)
-        total_currency_amount = sum(order.items.amount for order in orders)
+        total_currency_amount = sum(
+            item.orderprice * item.quantity for order in orders for item in order.items.all()
+        )
 
         if token:
             try:
                 charge = stripe.Charge.create(
-                    amount=int(order.get_total_price() * 100),
+                    amount=int(total_amount * 100),
                     currency="usd",
                     source=token,
-                    description=f"Order {order.id}",
+                    description=f"User {order_user.id} purchase",
                 )
                 ruby_profile.total_currency_amount += total_amount
                 ruby_profile.save()
-
                 return JsonResponse({"success": "Thanks for purchasing!"})
             except stripe.error.StripeError as e:
                 return JsonResponse({"error": str(e)}, status=400)
+
         messages.warning(self.request, "Invalid data received")
         return redirect("/payment/stripe")
 

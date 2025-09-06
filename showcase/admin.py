@@ -1,11 +1,14 @@
 import random
+import uuid
 
 from django.contrib import admin
+from django.forms import BaseInlineFormSet
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ValidationError
 import re
 from django.contrib.auth import get_user_model
+from slugify import slugify
 
 from .models import UpdateProfile, Questionaire, PollQuestion, Choice, FrequentlyAskedQuestions, SupportLine, \
     SupportInterface, FeaturedNavigationBar, BlogHeader, BlogFilter, SocialMedia, ItemFilter, StoreViewType, Shuffler, \
@@ -18,7 +21,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
     TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences, GiftCode, \
     GiftCodeRedemption, FavoriteChests, IndividualChestStatistics, TotalChestStatistics, RubyDrop, Season, Tier, \
-    Benefits, ChangeLog
+    Benefits, ChangeLog, BuyCards, WeBuy
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -145,6 +148,57 @@ class TradeContractAdmin(admin.ModelAdmin):
 
 
 admin.site.register(TradeContract, TradeContractAdmin)
+
+
+class BuyCardsInlineFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+
+        remaining = 0
+        for form in self.forms:
+            if not hasattr(form, "cleaned_data"):
+                continue
+            if form.cleaned_data.get("DELETE", False):
+                continue
+            if not form.cleaned_data and not form.instance.pk:
+                continue
+            remaining += 1
+
+        if remaining > 5:
+            raise ValidationError("You can only attach up to 5 BuyCards to a single WeBuy.")
+
+
+class BuyCardsInline(admin.StackedInline):
+    model = BuyCards
+    formset = BuyCardsInlineFormSet
+    extra = 1
+    max_num = 5
+    can_delete = True
+    show_change_link = True
+    fields = (
+        "seller",
+        "image", "image2", "image3", "image4", "image5",
+        "is_active",
+    )
+
+
+@admin.register(WeBuy)
+class WeBuyAdmin(admin.ModelAdmin):
+    inlines = [BuyCardsInline]
+    list_display = ("id", "seller", "is_active", "buycards_count")
+    search_fields = ("seller__username", "seller__email")
+    list_filter = ("is_active",)
+
+    def buycards_count(self, obj):
+        return obj.cards.count()
+    buycards_count.short_description = "BuyCards (#)"
+
+
+@admin.register(BuyCards)
+class BuyCardsAdmin(admin.ModelAdmin):
+    list_display = ("id", "webuy", "seller", "is_active")
+    search_fields = ("seller__username", "seller__email")
+    list_filter = ("is_active", "webuy")
 
 
 class CardAPIAdmin(admin.ModelAdmin):
@@ -556,14 +610,16 @@ class TradeOfferAdmin(admin.ModelAdmin):
 admin.site.register(TradeOffer, TradeOfferAdmin)
 
 
+@admin.register(RespondingTradeOffer)
 class RespondingTradeOfferAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Trade Offer Information - Categorial Description', {
-            'fields': ('offered_trade_items', 'wanted_trade_items', 'estimated_trading_value', 'user', 'user2', 'trade_status', 'message', 'quantity'),
+            'fields': ('offered_trade_items', 'wanted_trade_items', 'estimated_trading_value',
+                       'slug', 'user', 'user2', 'trade_status', 'message', 'quantity'),
             'classes': ('open',),
         }),
         ('Trade Offer Information - Technical Description', {
-            'fields': ('is_active',),
+            'fields': ('is_active', 'timestamp'),  # include timestamp if you want it visible
             'classes': ('open',),
         }),
     )
@@ -571,7 +627,29 @@ class RespondingTradeOfferAdmin(admin.ModelAdmin):
     list_display = ('wanted_trade_items', 'slug', 'timestamp', 'trade_status')
 
 
-admin.site.register(RespondingTradeOffer, RespondingTradeOfferAdmin)
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        obj = form.instance
+        if not obj:
+            return
+
+        # Create a base slug if missing (now that PK and M2M exist)
+        if not obj.slug:
+            obj.slug = obj._build_slug()
+
+        offered_ids = list(obj.offered_trade_items.values_list("id", flat=True))
+        if offered_ids and "o" not in obj.slug:
+            from django.utils.text import slugify
+            import uuid
+            base_parts = []
+            if obj.wanted_trade_items_id:
+                base_parts.append(f"w{obj.wanted_trade_items_id}")
+            if obj.user_id:
+                base_parts.append(f"u{obj.user_id}")
+            base_parts.append("o" + "-".join(map(str, offered_ids[:5])))
+            obj.slug = f"{slugify('-'.join(base_parts))}-{uuid.uuid4().hex[:6]}"
+
+        obj.save(update_fields=["slug"])
 
 
 class NotificationAdmin(admin.ModelAdmin):

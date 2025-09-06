@@ -16,7 +16,8 @@ from .models import Idea, OrderItem, EmailField, Item, Questionaire, StoreViewTy
     FriendRequest, Game, CurrencyOrder, UploadACard, Room, InviteCode, InventoryObject, CommerceExchange, ExchangePrize, \
     Trade_In_Cards, DegeneratePlaylistLibrary, DegeneratePlaylist, Choice, CATEGORY_CHOICES, CONDITION_CHOICES, \
     SPECIAL_CHOICES, QuickItem, SpinPreference, TradeItem, PrizePool, BattleParticipant, BattleGame, Monstrosity, \
-    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet, GameChoice, MyPreferences, GiftCode, GiftCodeRedemption
+    MonstrositySprite, Ascension, InventoryTradeOffer, VoteOption, Bet, GameChoice, MyPreferences, GiftCode, \
+    GiftCodeRedemption, WeBuy, BuyCards
 from .models import UpdateProfile
 from .models import VoteQuery
 from .models import StaffApplication
@@ -168,6 +169,7 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = ProductReview
         fields = '__all__'"""
+
 
 class ShippingForm(forms.ModelForm):
     class Meta:
@@ -1605,12 +1607,13 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import Item
 
+
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
         fields = (
             'title', 'price', 'discount_price', 'specialty', 'label',
-            'slug', 'description', 'image'
+            'slug', 'description', 'image', 'image2', 'image3', 'image4', 'image5'
         )
         widgets = {
             # Floating fields
@@ -1895,6 +1898,32 @@ class SpinPreferenceForm(forms.ModelForm):
     class Meta:
         model = SpinPreference
         fields = ['quick_spin']
+
+
+class WeBuyForm(forms.ModelForm):
+    class Meta:
+        model = WeBuy
+        fields = ['is_active']
+
+
+class BuyCardsForm(forms.ModelForm):
+    class Meta:
+        model = BuyCards
+        fields = ['image', 'image2', 'image3', 'image4', 'image5',]
+
+
+BuyCardsFormSet = inlineformset_factory(
+    parent_model=WeBuy,
+    model=BuyCards,
+    form=BuyCardsForm,
+    fields=['image', 'image2', 'image3', 'image4', 'image5',],
+    extra=1,                # show 1 extra empty form by default
+    can_delete=True,        # allow deleting existing rows
+    min_num=0,
+    validate_min=False,
+    max_num=None,           # no upper limit
+    validate_max=False,
+)
 
 
 class QuestionForm(forms.Form):

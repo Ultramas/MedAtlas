@@ -428,6 +428,26 @@
 
     <form method="POST" enctype="multipart/form-data" class="form-content post">
   {% csrf_token %}
+  <div id="image-field-1">
+      {{ form.image.label_tag }} {{ form.image }}
+    </div>
+
+  <!-- Hidden by default -->
+  <div id="image-field-2" style="display:none;">
+    {{ form.image2.label_tag }} {{ form.image2 }}
+  </div>
+  <div id="image-field-3" style="display:none;">
+    {{ form.image3.label_tag }} {{ form.image3 }}
+  </div>
+  <div id="image-field-4" style="display:none;">
+    {{ form.image4.label_tag }} {{ form.image4 }}
+  </div>
+  <div id="image-field-5" style="display:none;">
+    {{ form.image5.label_tag }} {{ form.image5 }}
+  </div>
+
+  <button type="button" id="add-image">Add another image</button>
+  <br><br>
 
   {% for field in form %}
     {% if field.name in 'specialty,label,image' %}
@@ -445,11 +465,22 @@
     {% endif %}
   {% endfor %}
 
-  <button type="submit">Submit</button>
+  <input type="submit" value="Submit">
 </form>
 
 
-    <script>
+<script>
+  let imageFieldCount = 1;
+  document.getElementById("add-image").addEventListener("click", function() {
+    if (imageFieldCount < 5) {
+      imageFieldCount++;
+      document.getElementById(`image-field-${imageFieldCount}`).style.display = "block";
+      if (imageFieldCount === 5) {
+        this.style.display = "none";  // hide the button after 5 fields are shown
+      }
+    }
+  });
+
       document.addEventListener('DOMContentLoaded', function() {
         // Keep your existing tooltip + card animation JS if you like
         const formCard = document.querySelector('.forme-card');

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% include 'navtrove.html' %}
 {% load static %}
 
 {% block content %}
@@ -8,24 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{user.username}}'s Trade Offers</title>
-    {% if current_theme %}
-        {% if current_theme.file %}
-            <style>
-                body {
-                    background-image: url("{{ current_theme.file.url }}");
-                    background-size: cover;
-                    background-attachment: fixed;
-                    font-family: Arial, sans-serif;
-                    color: #333;
-                    line-height: 1.6;
-                }
-            </style>
-        {% else %}
-            <p style="color: black;">Error: Current theme does not have an image.</p>
-        {% endif %}
-    {% else %}
-        <p style="color: black;">Error: No current theme found.</p>
-    {% endif %}
+
     <style>
         .container {
             max-width: 1200px;

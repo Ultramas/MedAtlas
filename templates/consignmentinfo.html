@@ -2777,9 +2777,14 @@ rgba(26, 26, 46, 0.3), rgba(22, 33, 62, 0.3));*/
 </head>
 
 <body>
-<h1 style="text-align: center;">Consign With Us!</h1>
 
-<h4>PokeTrove consignment is a .</h4>
+<h1 style="text-align: center; margin-top: 12%;">Consign With Us!</h1>
+
+    {% for BackgroundImage in TextFielde %}
+    {% if BackgroundImage.page == "consignmentinfo.html" and BackgroundImage.section == 1 %}
+    <p>{{BackgroundImage.text}}</p>
+    {% endif %}
+    {% endfor %}
     <!-- External Scripts -->
     <script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
     <script src="{% static 'css/js/main.js' %}"></script>

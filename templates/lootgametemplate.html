@@ -334,6 +334,230 @@
             text-decoration: none;
             background-color: transparent;
         }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+            position: relative;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 3rem;
+        }
+
+        .nav-links a {
+
+    color: var(--primary);
+            text-decoration: none;
+            position: relative;
+            padding: 0.5rem 0;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            /*font-size: 1rem;*/
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+    .logo-icon h1::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+    }
+        .container {
+            gap: 3rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .username {
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.5);
+        }
+
+        .user-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 1rem;
+        }
+
+        .user-stat {
+            background: rgba(191, 151, 255, 0.1);
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid var(--primary);
+        }
+
+        .user-stat-icon {
+            font-size: 1.5rem;
+        }
+
+        .filters {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters h2, .collection-title {
+            color: var(--primary);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            position: relative;
+            text-shadow: 0 0 10px rgba(191, 151, 255, 0.3);
+        }
+
+        .filters h2::after, .collection-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #bf97ff, transparent);
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .type-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            width: 100%;
+            color: var(--text);
+            margin-bottom: 2rem;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+        }
+
+        .view-collection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.2), rgba(191, 151, 255, 0.1));
+            border: 2px solid var(--primary);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-collection::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            transition: transform 0.5s ease;
+        }
+
+        .view-collection:hover::before {
+            transform: translate(25%, 25%);
+        }
+
+        .view-collection:hover {
+            background: linear-gradient(45deg, rgba(191, 151, 255, 0.3), rgba(191, 151, 255, 0.2));
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(191, 151, 255, 0.3);
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
 
         .main-content h1 {
             color: var(--primary);
@@ -1066,50 +1290,14 @@ p.blog-meta span {
 <div class="total" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;
     position: relative;">
 	<!-- header -->
-{% include 'navtrove.html' %}
+{% include 'lootnavtrove.html' %}
 	<!-- end header -->
 
-<h2 class="chest-header">
-            </h2>
-            <div id="chestCollection" class="chest-collection animate-stagger">
-                {% for product in Products %}
-                {% if product.specialty == 'PR' %}
-                <div class="prismatic-chest">
-                    <a href="{{ product.get_profile_url }}">
-                        <div class="chest-base">
-                            <div class="chest-interior"></div>
-                            <div class="light-beam"></div>
-                        </div>
-                        <div class="floating-card">
-                            <div class="card-inner">
-                                <div class="card-image" style="background-image: url('{{ product.image.url }}');"></div>
-                                <div class="card-holographic-overlay"></div>
-                                <div class="card-shine"></div>
-                            </div>
-                        </div>
-                        <div class="chest-info">
-                            <h3 class="chest-title">{{ product.title }}</h3>
-                            <div class="price-tag">
-                                <!--<div class="diamond-icon">💎</div>-->
-                                {% if Game.discount_cost %}
-                                <div class="price-amount">${{ product.discount_price }}</div>
-                                <div class="original-price">${{ product.price }}</div>
-                                {% else %}
-                                <div class="price-amount">${{ product.price }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="view-button">Check It Out!</div>
-                        </div>
-                    </a>
-                </div>
-                {% endif %}
-                {% endfor %}
-            </div>
-<!--<div class="boxes" style="
+
+<div class="boxes" style="
     left: 0%;
     position: absolute;
     width: 100%;
-    height: 120%;
     opacity: 0.20;
     background: linear-gradient(to top, rgba(0,0,255,0) 70%, rgb(10, 10, 19) 100%), url('{{ game.image.url }}');
     background-size: cover;
@@ -1117,9 +1305,9 @@ p.blog-meta span {
     background-position: center;
 " alt="{{ game.name }}">
 </div>
-    <div class="selectionsWrapper">-->
-<!--<div class="selections">-->
-    <!--<div class="flame-effect"></div>
+    <div class="selectionsWrapper">
+<div class="selections">
+    <div class="flame-effect"></div>
     <div class="content">
         <label style="background: rgba(255, 255, 255, 0.3); padding: 2px; padding-left: 5px; padding-right: 5px;border-radius: 10px;"> Spin Boost Power</label>
         <div id="spinCount">
@@ -1195,8 +1383,8 @@ document.addEventListener("DOMContentLoaded", function () {
         <label for="quickspin-checkbox">Quick Spin</label>
         <input type="checkbox" id="persist-spin-checkbox">
         <label for="persist-spin-checkbox">Save Spin Boost</label><br>
-    </div>-->
-<!--
+    </div>
+
 
 {% if game.daily %}
 
@@ -1341,7 +1529,7 @@ document.addEventListener("DOMContentLoaded", function () {
     {% endif %}
 </button>
 {% endif %}
-</div>-->
+</div>
 
 <style>
 .gamer-button {
@@ -1741,7 +1929,7 @@ $(document).ready(function() {
 
     </div>
 
-<!--<div class="popupWrapper">
+<div class="popupWrapper">
     <div id="popup" class="popup" style="height:45em;">
         <div class="fire-container">
             <div class="fire">
@@ -1770,13 +1958,13 @@ $(document).ready(function() {
     </div>
 </div>
 
-    </div>-->
+    </div>
 <!--check mypreference of user, should one exist; default is classic-->
 
-<!--    <div class="wrapper">
+    <div class="wrapper">
         <div class="containerre"  style="display: flex;">
             <div class="slider" id="slider">
-
+<!--currently, the card ends up close to the middle, yet one off. make sure it ends up in the middle where it can be selected-->
 {% for item in choices_with_nonce %}
             {% with choice=item.choice %}
             {% with color=game|get_color:choice %}
@@ -1839,7 +2027,7 @@ $(document).ready(function() {
     </a>
     </div>
                     </div></div></div></div></div></div></div>
--->
+
     <script>
     const choicesWithNonce = {{ choices_with_nonce|safe }};
     const outcomeUrl = `/battles/${battleId}/games/${gameId}/outcome/`;
