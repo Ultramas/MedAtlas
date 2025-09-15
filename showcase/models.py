@@ -37,7 +37,7 @@ import random
 import string
 from random import randint
 
-from stripe.api_resources import order
+import stripe
 
 CATEGORY_CHOICES = (
     ('G', 'Gold'),
@@ -6962,6 +6962,26 @@ class BuyCards(models.Model):
 
     def __str__(self):
         return f"BuyCards #{self.pk} for WeBuy #{self.webuy_id}"
+
+
+class UserState(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="userstate")
+    state = models.BooleanField(default=False)
+    is_active = models.IntegerField(
+        default=1,
+        blank=True,
+        null=True,
+        help_text='1->Active, 0->Inactive',
+        choices=((1, 'Active'), (0, 'Inactive')),
+        verbose_name="Set active?"
+    )
+
+    class Meta:
+        verbose_name = "User State"
+        verbose_name_plural = "User States"
+
+    def __str__(self):
+        return f"{self.user.username}: {int(self.state)}"
 
 
 class ChatBackgroundImage(models.Model):

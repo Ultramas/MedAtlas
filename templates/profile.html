@@ -1703,7 +1703,7 @@ input:checked + .slider:before {
             <path d="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L5,8.09V15.91L12,19.85L19,15.91V8.09L12,4.15Z" />
           </svg>
         </div>
-        <span class="logo-text">CARDCADE - 2.0V</span>
+        <span class="logo-text">PokeTrove - 2.0V</span>
       </div>
 
       <div class="header-controls">
@@ -3243,23 +3243,9 @@ function initEventListeners() {
                 radial-gradient(circle at 20% 20%, rgba(191, 151, 255, 0.05) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(191, 151, 255, 0.05) 0%, transparent 50%);
             min-height: 100vh;
+
         }
 
-        .main-menu {
-            display: flex;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(
-                to right,
-                rgba(191, 151, 255, 0.1),
-                rgba(255, 255, 255, 0.05),
-                rgba(191, 151, 255, 0.1)
-            );
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
         a {
             color: var(--primary);
             text-decoration: none;
@@ -3345,6 +3331,7 @@ function initEventListeners() {
             font-size: 1.1rem;
             position: relative;
             overflow: hidden;
+            min-width: 275px;
         }
 
         .view-collection::before {

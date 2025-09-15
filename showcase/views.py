@@ -38,7 +38,7 @@ from .models import UpdateProfile, EmailField, Answer, FeedbackBackgroundImage, 
     SpinnerChoiceRenders, DefaultAvatar, Achievements, QuickItem, SpinPreference, Battle, \
     BattleParticipant, Monstrosity, MonstrositySprite, Product, Level, BattleGame, Notification, InventoryTradeOffer, \
     UserNotification, TopHits, Card, Clickable, GameChoice, Robot, MyPreferences, UserClickable, GiftCodeRedemption, \
-    GiftCode, IndividualChestStatistics, FavoriteChests, Season, Tier, ChangeLog, FavoriteCurrency
+    GiftCode, IndividualChestStatistics, FavoriteChests, Season, Tier, ChangeLog, FavoriteCurrency, UserState
 from .models import Idea
 from .models import VoteQuery
 from .models import StaffApplication
@@ -9378,6 +9378,7 @@ class TradeOfferCreateView(CreateView):
         context['Titles'] = Titled.objects.filter(is_active=1, page=self.template_name).order_by("position")
         context['Header'] = NavBarHeader.objects.filter(is_active=1).order_by("row")
         context['DropDown'] = NavBar.objects.filter(is_active=1).order_by('position')
+        context['Logo'] = LogoBase.objects.filter(Q(page=self.template_name) | Q(page='navtrove.html'), is_active=1)
 
         if self.request.user.is_authenticated:
             context['StockObject'] = InventoryObject.objects.filter(
@@ -12434,6 +12435,7 @@ class ShowcaseBackgroundView(BaseView):
 
         return context
 
+
 class ShowcaseCreatePostView(CreateView):
     model = ShowcaseBackgroundImage
     form_class = ShowcaseBackgroundImagery
@@ -12541,6 +12543,23 @@ class WeBuyView(BaseView):
                     userprofile.newprofile_profile_url = userprofile.get_profile_url()
 
         return context
+
+
+@require_POST
+@login_required
+def go_lootbox(request):
+    obj, _ = UserState.objects.get_or_create(user=request.user)
+    obj.state = True
+    obj.save()
+    return redirect("showcase:loothome")
+
+@require_POST
+@login_required
+def go_home(request):
+    obj, _ = UserState.objects.get_or_create(user=request.user)
+    obj.state = False
+    obj.save()
+    return redirect("showcase:index")
 
 
 class SupportLineBackgroundView(BaseView):
@@ -23024,6 +23043,7 @@ from .models import (
     BackgroundImageBase,
 )
 
+
 class CreateReviewView(LoginRequiredMixin, FormView):
     template_name = "create_review.html"
     form_class = FeedbackForm
@@ -23353,9 +23373,10 @@ class OrderHistory(ListView):
                 messages.warning(self.request, "You need to log in")
                 return redirect("accounts/login")
 
-        order = OrderItem.objects.filter(is_active=1, user=user)
+        current_user = self.request.user
+        order = OrderItem.objects.filter(is_active=1, user=current_user)
         context['orders'] = order
-        total_items = OrderItem.objects.filter(is_active=1).count()
+        total_items = OrderItem.objects.filter(is_active=1, user=current_user).count()
 
         paginate_by = int(self.request.GET.get('paginate_by', settings.DEFAULT_PAGINATE_BY))
 

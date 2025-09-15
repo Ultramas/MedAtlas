@@ -172,3 +172,13 @@ def increment_card_counter(sender, instance, created, **kwargs):
             print('profile card counter updated')
         except ProfileDetails.DoesNotExist:
             pass
+
+@receiver(post_save, sender=User)
+def create_user_state(sender, instance, created, **kwargs):
+    if created:
+        UserState.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_state(sender, instance, **kwargs):
+    # Ensure the related object exists for legacy users
+    UserState.objects.get_or_create(user=instance)

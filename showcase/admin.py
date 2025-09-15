@@ -21,7 +21,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
     TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences, GiftCode, \
     GiftCodeRedemption, FavoriteChests, IndividualChestStatistics, TotalChestStatistics, RubyDrop, Season, Tier, \
-    Benefits, ChangeLog, BuyCards, WeBuy
+    Benefits, ChangeLog, BuyCards, WeBuy, UserState
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -148,6 +148,20 @@ class TradeContractAdmin(admin.ModelAdmin):
 
 
 admin.site.register(TradeContract, TradeContractAdmin)
+
+
+class UserStateAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('User State Information - Personal Information', {
+            'fields': ('user', 'state',)
+        }),
+        ('User State Information - Attributes', {
+            'fields': ('is_active',)
+        }),
+    )
+
+
+admin.site.register(UserState, UserStateAdmin)
 
 
 class BuyCardsInlineFormSet(BaseInlineFormSet):

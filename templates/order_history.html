@@ -1,244 +1,514 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeTrove - Order History</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;700&display=swap');
+
+        :root {
+            --primary: #bf97ff;
+            --primary-dark: #9a6bff;
+            --background: #0a0a13;
+            --text: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent: #4db2ea;
+            --accent2: #ffd700;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --border-color: rgba(191, 151, 255, 0.3);
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            background-image: radial-gradient(circle at 20% 35%, rgba(0, 240, 255, 0.15) 0%, transparent 40%),
+                              radial-gradient(circle at 75% 65%, rgba(255, 0, 229, 0.15) 0%, transparent 40%);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        .main-menu {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(to right, rgba(191, 151, 255, 0.1), rgba(255, 255, 255, 0.05), rgba(191, 151, 255, 0.1));
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(191, 151, 255, 0.5);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            margin-top: 100px;
+        }
+
+        .main-content h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        /* Professional Order History Section */
+        .order-history-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .order-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(191, 151, 255, 0.15);
+            border-color: var(--primary);
+        }
+
+        .order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        /* User Profile Section */
+        .user-profile-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            object-fit: cover;
+        }
+
+        .user-info h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .user-info .user-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            transition: opacity 0.2s ease;
+        }
+
+        .user-info .user-link:hover {
+            opacity: 1;
+        }
+
+        /* Product Information */
+        .product-section {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .product-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .product-details {
+            flex: 1;
+        }
+
+        .product-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .order-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .order-date::before {
+            content: '📅';
+            font-size: 0.8rem;
+        }
+
+        /* Action Button */
+        .feedback-button {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: inherit;
+        }
+
+        .feedback-button:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(191, 151, 255, 0.3);
+        }
+
+        .feedback-button::after {
+            content: '→';
+            transition: transform 0.2s ease;
+        }
+
+        .feedback-button:hover::after {
+            transform: translateX(2px);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .order-history-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .product-section {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .product-image {
+                width: 100px;
+                height: 100px;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .main-content h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .order-card {
+                padding: 1rem;
+            }
+
+            .user-profile-section {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Footer */
+        .copyright-section {
+            background: linear-gradient(to right, rgba(191, 151, 255, 0.1), rgba(255, 255, 255, 0.05), rgba(191, 151, 255, 0.1));
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            text-align: center;
+            position: relative;
+            z-index: 100;
+            margin-top: 4rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .copyright-section p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* Loading and Animation States */
+        .order-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Status Indicators */
+        .order-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            margin-bottom: 1rem;
+        }
+
+        .order-status::before {
+            content: '✓';
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+
 {% include 'navtrove.html' %}
 
-{% load static %}
+<main class="main-content">
+    <h1>Order History <span style="font-weight: 400; font-size: 1.5rem; color: var(--text-secondary);">({{ orders|length }})</span></h1>
 
-{% block title %}
-    {% for EBackgroundImage in Titles %}
-      {% if EBackgroundImage.page == 'ehome.html' %}
-         {{ EBackgroundImage.overtitle }}
-      {% endif %}
-    {% endfor %}
-{% endblock title %} 
-
-{% block content %}
-   
-
-
-<head><!-- HTML !-->
-
-    <link rel="stylesheet" type="text/css" href="{% static 'css/buttonclasse.css' %}">
-<style>
-    h3, h4 {
-    color: white;
-}
-
-h3:hover, h4:hover {
-    color: black; /* Replace 'otherColor' with the color you want upon hover */
-}
-/* CSS */
-.button-64 {
-  align-items: center;
-  background-image: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
-  border: 0;
-  border-radius: 8px;
-  box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
-  box-sizing: border-box;
-  color: #FFFFFF;
-  font-family: Phantomsans, sans-serif;
-  font-size: 20px;
-  justify-content: center;
-  line-height: 1em;
-  min-width: 440px;
-  padding: 3px;
-  text-decoration: none;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.button-64:active,
-.button-64:hover {
-  outline: 0;
-}
-
-.button-64 span {
-  background-color: rgb(5, 6, 45);
-  padding: 16px 24px;
-  border-radius: 6px;
-  height: 100%;
-  transition: 300ms;
-}
-
-.button-64:hover span {
-  background: none;
-}
-
-@media (min-width: 768px) {
-  .button-64 {
-    font-size: 24px;
-    min-width: 16px;
-  }
-}
-</style>
-</head>
-
-<main>
-  <div class = "ecommerce">
-          {% for EBackgroundImage in Background %}
-     <img class = "ebackgroundimages" src="{{ EBackgroundImage.cover.url }}" alt="{{ EBackgroundImage.title }}">
-       <div class="view overlay">
-                  <div class="mask rgba-white-slight"></div>
-              </div>
-    {% endfor %}
-    
-<br>
-  <br>
-<div class = "search">
-
-
-<form class = "searchbar" action="{% url 'showcase:ecommercesearch_results' %}" method="get" style="border-radius: 30px;">
-  <input name="q" type="text" placeholder="Search Products..." style="border-radius: 30px;">
-</form>
-  <br>
-  <br>
-</div>
-
-      <!--Navbar-->
-      <div class="navbarbo">
-        
-        <!-- Navbar brand -->
-        <!--<span class="navbar-brand">Categories:</span>-->
-
-        <!-- Collapse button -->
-        <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav"
-          aria-controls="basicExampleNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>-->
-
-        <!-- Collapsible content -->
-        <div class="collapse navbar-collapse" id="basicExampleNav">
-
-          <!-- Links -->
-          <ul class="navbarbeo">
-              <a class="nav-link" href="#">All     
-              </a>
-            
-              <a class="nav-link" href="#">Gold Tier </a>
-            
-              <a class="nav-link" href="#">Platinum Tier</a>
-
-              <a class="nav-link" href="#">Emerald Tier</a>
-     
-              <a class="nav-link" href="#">Diamond Tier</a>
-          </ul>
-          <!-- Links -->
-
-          <form class="form-inline">
-            <div class="md-form my-0">
-              <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-            </div>
-          </form>
-        </div>
-        <!-- Collapsible content -->
-
-      </div>         
-      <!--/.Navbar-->
-
-         <!--pagination change station-->
-<form method="GET">
-    <label for="paginate-by" style="margin-right: 1%;">
-        <p style="color: white; font-size: 10x; margin-left: 50px;">Orders per page: </p>
-    </label>
-    <input type="number" name="paginate_by" id="paginate-by" value="{{ orders.paginator.per_page }}">
-<br>
-    <button class="button-64" role="button" type="submit" title="Update Page Filter" style="
-    background-color: rgb(5, 6, 45);
-    padding: 21px 3px;
-    border-radius: 6px;
-    margin-left: 50px;
-    transition: 300ms;"><span class="text">Submit</span></button>
-</form>
-
-
-
-      <!--Section: Products v.3-->
-      <section class="text-center mb-4">
-
-        <!--Grid row-->
-        <div class="row wow fadeIn"><!--eee-->
+    {% if orders %}
+        <div class="order-history-container">
             {% for order_item in orders %}
-    <div class="orderhistory" style="margin-top: 10%; justify-content: center; margin-left: auto; margin-right: auto;">
+                <div class="order-card">
+                    <div class="order-status">
+                        Delivered
+                    </div>
 
-        <ul style="align-items: center; justify-content: center;">
-            <li style="display: flex; align-items: center; justify-content: center;">
-                {% if order_item.author_profile_picture_url %}
-                    <a href="{{ order_item.profile_url }}">
-                        <img src="{{ order_item.author_profile_picture_url }}" alt="Profile Picture" width="50" height="50" style="border-radius: 25px;">
+                    <div class="user-profile-section">
+                        {% if order_item.author_profile_picture_url %}
+                        <a href="{{ order_item.profile_url }}">
+                            <img src="{{ order_item.author_profile_picture_url }}"
+                                 alt="Profile Picture"
+                                 class="profile-avatar">
+                        </a>
+                        {% else %}
+                            <img src="{% static 'css/images/a.jpg' %}"
+                                 alt="Default Avatar"
+                                 class="profile-avatar">
+                        {% endif %}
+
+                        <div class="user-info">
+                            <h3>{{ order_item.user.username }}</h3>
+                            {% if order_item.profile_url %}
+                                <a href="{{ order_item.profile_url }}" class="user-link">View Profile</a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="product-section">
+                        <img src="{{ order_item.image.url }}"
+                             alt="{{ order_item.item }}"
+                             class="product-image">
+
+                        <div class="product-details">
+                            <h4 class="product-name">{{ order_item.item }}</h4>
+                            <div class="order-date">{{ order_item.order_date|date:"M d, Y" }}</div>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'showcase:create_review' %}?item_slug={{ order_item.item.slug }}&orderitem_id={{ order_item.id }}"
+                       class="feedback-button">
+                        Leave Feedback
                     </a>
-                    <h2 style="padding-left: 10px; color: white;">{{ order_item.user.username }}</h2>
-                {% else %}
-                    <img src="{% static 'css/images/a.jpg' %}" alt="Default Avatar" width="50" height="50" style="border-radius: 25px;">
-                {% endif %}
-            </li>
-        </ul>
-
-
-<a href="{{ order_item.author_profile_url }}">
-
-            <h3>Product Name: {{ order_item.item }}</h3>
-            <br>
-            <h4>Order Date: {{ order_item.order_date }}</h4>
-            <img src="{{order_item.image.url}}" alt="{{order_item.item}}" style="width: 50%; height: 50%; border-radius: 20px;">
-                    </a>
-<br>
-<br>
-<a href="{% url 'showcase:create_review' %}?item_slug={{ order_item.item.slug }}&orderitem_id={{ order_item.id }}" class="button-64" role="button" style="width: 100%; height: 10%; justify-content: center; align-items: center;">
-
-    <span class="text" style="justify-content: center;
-padding: 1px 3px; border-radius: 6px;">Leave Feedback</span></a>
-
-<!--how to pass the orderitem.item to the form once the button is pressed based on the associated item-->
-            <br>
                 </div>
-{% endfor %}
+            {% endfor %}
         </div>
-        <!--Grid row-->
-
-      </section>
-      <!--Section: Products v.3-->
-
-      <!--Pagination-->
-      <div class="d-flex justify-content-center wow fadeIn">
-        <ul class="pagination pg-blue">
-<li class="page-item {% if not orders.has_previous %}disabled{% endif %}">
-    {% if orders.has_previous %}
-        <a class="page-link" href="?page={{ orders.previous_page_number }}&paginate_by={{ orders.paginator.per_page }}" aria-label="Previous">
-            <span aria-hidden="true">&laquo;</span>
-            <span class="sr-only">Previous</span>
-        </a>
+    {% else %}
+        <div class="empty-state">
+            <h3>No Orders Yet</h3>
+            <p>Your order history will appear here once you make your first purchase.</p>
+        </div>
     {% endif %}
-</li>
+</main>
 
-<!-- Page numbers -->
-{% for page in orders.paginator.page_range %}
-    <li class="page-item {% if page == orders.number %}active{% endif %}">
-        <a class="page-link" href="?page={{ page }}&paginate_by={{ orders.paginator.per_page }}">{{ page }}</a>
-    </li>
-{% endfor %}
+<footer class="copyright-section">
+    <div class="container">
+        <p>
+            {% for BaseCopyrightTextField in BaseCopyrightTextFielded %}
+                {{ BaseCopyrightTextField.copyright }}
+            {% endfor %}
+        </p>
+    </div>
+</footer>
 
-<!-- Arrow right -->
-<li class="page-item {% if not orders.has_next %}disabled{% endif %}">
-    {% if orders.has_next %}
-        <a class="page-link" href="?page={{ orders.next_page_number }}&paginate_by={{ orders.paginator.per_page }}" aria-label="Next">
-            <span aria-hidden="true">&raquo;</span>
-            <span class="sr-only">Next</span>
-        </a>
-    {% endif %}
-</li>
-        </ul>
-      </div>
-      <!--Pagination-->
-  </div>
+<script>
+// Enhanced AJAX form handling with better UX
+document.addEventListener("DOMContentLoaded", function () {
+    const forms = document.querySelectorAll(".ajax-form");
 
-  {% block javascript %}
-    <script src="{% static 'css/js/script.js' %}"></script>
-    <script src="{% static 'css/js.darkmode.js' %}"></script>
-    <script src="{% static 'css/js/navbar.js' %}"></script>
-    <script src="{% static 'css/js/scroll.js' %}"></script>
-  {% endblock javascript %}
-  </main>
-  <!--Main layout-->
+    forms.forEach(form => {
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
 
-{% endblock content %}
+            const formData = new FormData(this);
+            const url = this.getAttribute("action");
+            const submitButton = this.querySelector('button[type="submit"]');
+
+            // Add loading state
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Processing...';
+            }
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Update stock count with animation
+                    const stockCountElement = document.querySelector("#stock-count");
+                    if (stockCountElement) {
+                        stockCountElement.style.transform = 'scale(1.2)';
+                        stockCountElement.textContent = data.stock_count;
+                        setTimeout(() => {
+                            stockCountElement.style.transform = 'scale(1)';
+                        }, 200);
+                    }
+
+                    // Smooth removal animation
+                    const orderCard = this.closest(".order-card");
+                    if (orderCard) {
+                        orderCard.style.transform = 'translateX(100%)';
+                        orderCard.style.opacity = '0';
+                        setTimeout(() => orderCard.remove(), 300);
+                    }
+                } else {
+                    console.error("Action failed:", data.error);
+                    alert(data.error || "An error occurred. Please try again.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("An unexpected error occurred. Please try again.");
+            })
+            .finally(() => {
+                // Reset button state
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Leave Feedback';
+                }
+            });
+        });
+    });
+
+    // Add smooth scroll behavior for better UX
+    document.documentElement.style.scrollBehavior = 'smooth';
+
+    // Stagger animation for order cards
+    const orderCards = document.querySelectorAll('.order-card');
+    orderCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+});
+</script>
+
+<!-- External Scripts -->
+<script src="{% static 'css/js/jquery-1.11.3.min.js' %}"></script>
+<script src="{% static 'css/js/main.js' %}"></script>
+<script src="{% static 'css/js/css/bootstrapper.min.js' %}"></script>
+<script src="{% static 'css/js/jquery.countdown.js' %}"></script>
+<script src="{% static 'css/js/jquery.isotope-3.0.6.min.js' %}"></script>
+<script src="{% static 'css/js/waypoints.js' %}"></script>
+<script src="{% static 'css/js/jquery.magnific-popup.min.js' %}"></script>
+<script src="{% static 'css/js/owl.carousel.min.js' %}"></script>
+<script src="{% static 'css/js/jquery.meanmenu.min.js' %}"></script>
+<script src="{% static 'css/js/sticker.js' %}"></script>
+
+</body>
+</html>
