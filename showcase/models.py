@@ -37,7 +37,6 @@ import random
 import string
 from random import randint
 
-import stripe
 
 CATEGORY_CHOICES = (
     ('G', 'Gold'),

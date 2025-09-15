@@ -4473,8 +4473,8 @@ input[type=submit].btn-block {
 }
 
 .nav-link {
-    display: block;
-    padding: .5rem 1rem
+    gap: 15px;
+    padding: 1rem 1.3rem;
 }
 
 .nav-link:focus,

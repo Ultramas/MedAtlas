@@ -13,6 +13,7 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/meanmenu.min.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <style>
     /* Updated to professional color scheme and typography */
@@ -28,12 +29,12 @@
 
       --bg-primary: rgba(255, 255, 255, 0.2);
       --bg-secondary: #f8fafc;
-      --bg-tertiary: #f1f5f9;
+      --bg-tertiary: rgba(0, 0, 0, 0.9);
       --bg-card: rgba(255, 255, 255, 0.1);
       --bg-overlay: rgba(0, 0, 0, 0.05);
 
       --text-primary: rgba(255, 255, 255, 0.8);
-      --text-secondary: #00ffe4; 
+      --text-secondary: #00ffe4;
       --text-tertiary: #43ffb7;
       --text-inverse: #ffffff;
 
@@ -156,24 +157,6 @@
       display: grid;
       grid-template-columns: 280px 1fr;
       gap: 2rem;
-    }
-
-    .sidebar {
-      background: var(--bg-card);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      height: fit-content;
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border-light);
-    }
-
-    .sidebar-title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 1px solid var(--border-light);
     }
 
     .filter-group {
