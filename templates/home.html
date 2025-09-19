@@ -728,119 +728,152 @@ button[type="submit"] {
 {% include 'navtrove.html' %}
 		<div class="container-fluid h-100" style=" margin-top: 175px;">
 			<div class="row justify-content-center h-100">
-				<div class="col-md-4 col-xl-3 chat"><div class="card mb-sm-3 mb-md-0 contacts_card">
-					<div class="card-header">
-                        <form action="{% url 'showcase:home' %}" method="get">
-                            <div class="input-group">
-                                <input type="text" placeholder="Search..." name="search" class="form-control search" style="height: 35px;">
-                                <div class="input-group-prepend">
-                                    <button type="submit">
-                                        <i class="fas fa-search"></i>
-                                    </button>
+<div class="col-md-4 col-xl-3 chat"><div class="card mb-sm-3 mb-md-0 contacts_card">
+    <!-- Reorganized header with better spacing and alignment -->
+    <div class="card-header">
+        <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+            <!-- Search Section -->
+            <div class="search-section" style="flex: 1;">
+                <form action="{% url 'showcase:home' %}" method="get">
+                    <div class="input-group">
+                        <input type="text" placeholder="Search friends..." name="search" class="form-control search" style="height: 35px; border-radius: 20px 0 0 20px;">
+                        <div class="input-group-append">
+                            <button type="submit" style="height: 35px; border: 1px solid #ced4da; border-left: none; background: #f8f9fa; border-radius: 0 20px 20px 0; padding: 0 12px; cursor: pointer;">
+                                <i class="fas fa-search" style="color: #6c757d;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Add Friend Section -->
+            <div class="add-friend-section">
+                <a href="{% url 'showcase:send_friend_request' %}" class="add-friend-btn" style="
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 6px 12px;
+                    background: #007bff;
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 18px;
+                    font-size: 13px;
+                    font-weight: 500;
+                    transition: all 0.2s ease;
+                    white-space: nowrap;
+                ">
+                    <i class="fas fa-user-plus" style="font-size: 12px;"></i>
+                    Add Friend
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body contacts_body">
+        <ul class="contacts">
+            {% if search_results %}
+                {% for friend in search_results %}
+                    <li class="{% if friend.currently_active %}active{% endif %}" style="padding-top: 12px;">
+                        <div class="d-flex bd-highlight">
+                            <div class="img_cont">
+                                {% if friend.profile_picture_url %}
+                                    <a href="{{friend.user_profile_url}}">
+                                        <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
+                                        <span class="online_icon"></span>
+                                    </a>
+                                {% endif %}
+                            </div>
+                            <div class="user_info">
+                                <span>{{ friend.username }}</span>
+                                <p>{% if friend.online %}Online{% else %}Offline{% endif %}</p>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            {% else %}
+                {% for friend in item_list %}
+                    <li class="active">
+                        <div class="d-flex bd-highlight">
+                            <div class="img_cont">
+                                {% if friend.profile_picture_url %}
+                                    <a href="{{friend.user_profile_url}}">
+                                        <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
+                                        <span class="online_icon"></span>
+                                    </a>
+                                {% endif %}
+                            </div>
+                            <div class="user_info">
+                                <span>{{ friend.username }}</span>
+                                <p>{% if friend.online %}Online{% else %}Offline{% endif %}</p>
+                            </div>
+                        </div>
+                    </li>
+                {% empty %}
+                    {% for friend in friends_data %}
+                        <li class="{% if friend.currently_active %}active{% endif %}" style="padding-top: 12px;">
+                            <div class="d-flex bd-highlight">
+                                <div class="img_cont">
+                                    {% if friend.profile_picture_url %}
+                                        <a href="{{friend.user_profile_url}}">
+                                            <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
+                                            <span class="online_icon"></span>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                                <div class="user_info">
+                                    <span>{{ friend.username }}</span>
+                                    <p>{% if friend.online %}Online{% else %}Offline{% endif %}</p>
                                 </div>
                             </div>
-                        </form>
-                        <div class="add-friend">
-                            <a href="{% url 'showcase:send_friend_request' %}">
-                                Add A Friend
-                            </a>
-                        </div>
-					</div>
-					<div class="card-body contacts_body">
-            <ul class="contacts">
+                        </li>
+                    {% endfor %}
+                    {% if not friends_data %}
+                        <li><h5>No friends found.</h5></li>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </ul>
+    </div>
+</div></div>
 
-  {% if search_results %}
-     {% for friend in search_results %}
+<style>
+/* Added hover effects and responsive styles for the organized header */
+.add-friend-btn:hover {
+    background: #0056b3 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+}
 
-     									{% if friend.currently_active %}
-                <a href="{{friend.user_profile_url}}">
-              <li class="active" style="padding-top: 12px;">
-                  {% else %}
-                  <li>
-                  {% endif %}
-          <div class="d-flex bd-highlight">
-              <div class="img_cont">
-                  {% if friend.profile_picture_url %}
+.search-section .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
 
-                      <a href="{{friend.user_profile_url}}">
-                          <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
-                      <span class="online_icon"></span>
-                      </a>
-                  {% endif %}
-              </div>
-              <div class="user_info">
-                  <span>{{ friend.username }}</span>
-                  {% if friend.online == True %}
-                      <p>Online</p>
-                  {% else %}
-                      <p>Offline</p>
-                  {% endif %}
-              </div>
-          </div>
-      </li>
-</a>
-    {% endfor %}
-{% else %}
-  {% for friend in item_list %}
+.search-section button:hover {
+    background: #e9ecef !important;
+}
 
-                <a href="{{friend.user_profile_url}}">
-      <li class="active">
-          <div class="d-flex bd-highlight">
-              <div class="img_cont">
-                  {% if friend.profile_picture_url %}
-                      <a href="{{friend.user_profile_url}}">
-                          <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
-                      <span class="online_icon"></span>
-                      </a>
-                  {% endif %}
-              </div>
-              <div class="user_info">
-                  <span>{{ friend.username }}</span>
-                  {% if friend.online == True %}
-                      <p>Online</p>
-                  {% else %}
-                      <p>Offline</p>
-                  {% endif %}
-              </div>
-          </div>
-      </li>
-                </a>
-              {% empty %}
-                  {% for friend in friends_data %}
-                <a href="{{friend.user_profile_url}}">
-									{% if friend.currently_active %}
-              <li class="active" style="padding-top: 12px;">
-                  {% else %}
-                  <li>
-                  {% endif %}
-          <div class="d-flex bd-highlight">
-              <div class="img_cont">
-                  {% if friend.profile_picture_url %}
-                      <a href="{{friend.user_profile_url}}">
-                          <img src="{{ friend.profile_picture_url }}" class="rounded-circle user_img">
-                      <span class="online_icon"></span>
-                      </a>
-                  {% endif %}
-              </div>
-              <div class="user_info">
-                  <span>{{ friend.username }}</span>
-                  {% if friend.online == True %}
-                      <p>Online</p>
-                  {% else %}
-                      <p>Offline</p>
-                  {% endif %}
-              </div>
-          </div>
-                </li></a>
-  {% empty %}
-      <h5>No friends found.</h5>
-  {% endfor %}
-  {% endfor %}
-{% endif %}
-            </ul>
-          </div>
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .header-content {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
 
-				</div></div>
+    .search-section {
+        width: 100%;
+    }
+
+    .add-friend-section {
+        align-self: stretch;
+    }
+
+    .add-friend-btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+</style>
+
 				<div class="col-md-8 col-xl-6 chat">
 					<div class="card">
 						<div class="card-header msg_head">
