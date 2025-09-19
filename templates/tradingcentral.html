@@ -71,7 +71,7 @@ body {
 }
 
 .trade-offer {
-    background-color: #fff;
+    background: rgb(255, 255, 255, 0.25);
     border-radius: var(--border-radius);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     overflow: hidden;
@@ -85,7 +85,7 @@ body {
 
 .trade-offer__header {
     padding: 20px;
-    background-color: var(--color-primary);
+    background: rgb(0, 255, 204, 0.2);
     color: #fff;
 }
 
@@ -100,7 +100,6 @@ body {
     opacity: 0.8;
 }
 
-/* Hide the trade-offer__actions by default */
 .trade-offer__actions {
     display: flex;
     justify-content: space-between;
@@ -109,9 +108,9 @@ body {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
+    background: rgb(21, 200, 170, 0.20);
 }
 
-/* Show trade-offer__actions on hover */
 .trade-offer:hover .trade-offer__actions {
     opacity: 1;
     visibility: visible;
@@ -157,7 +156,7 @@ body {
 }
 
 .trade-item {
-    background-color: #fff;
+    background-color: #83f17cba;
     border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);

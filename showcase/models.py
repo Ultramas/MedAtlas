@@ -6372,6 +6372,9 @@ class Item(models.Model):
     def get_add_to_cart_url(self):
         return reverse("showcase:add-to-cart", kwargs={'slug': self.slug})
 
+    def get_buy_it_now_url(self):
+        return reverse("showcase:buy-it-now", kwargs={'slug': self.slug})
+
     def get_remove_from_cart_url(self):
         return reverse("showcase:remove-from-cart", kwargs={'slug': self.slug})
 
@@ -8082,18 +8085,22 @@ class State(models.Model):
 
         verbose_name = 'Website'
 
+
 class FileBase(models.Model):
     file_field = models.FileField(blank=True, null=True, verbose_name="File Field")
+
 
 def create_profile(sender, **kwargs):
     if kwargs['created']:
         user_profile = UserProfile2.objects.create(user=kwargs['instance'])
 
+
 post_save.connect(create_profile, sender=User)
+
 
 class Feedback(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True,
-                             null=True)
+                             null=True, editable=False)
     """orderitem = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)"""
     order = models.OneToOneField(OrderItem, on_delete=models.CASCADE)
 

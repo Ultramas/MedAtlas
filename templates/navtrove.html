@@ -2227,8 +2227,8 @@ function getIntervalStart() {
 
 
 
-        <br>
-        <style>.notification-bar {
+        <style>
+            .notification-bar {
   position: relative;
   overflow: hidden;
 }
@@ -2436,7 +2436,8 @@ function getIntervalStart() {
          <div class="containerents" style="font-family: 'Arial', sans-serif; background-image: linear-gradient(#12121f 0%, #1a1a2e 100%); display: flex; flex-direction: row; justify-content: center; align-items: center; margin: 0;">
     <div class="notification-bar" style="border-radius: 8px; padding: 15px 30px; color: white; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border-bottom: 2px solid #2d3748;" id="notificationBar">
         <div class="notification-content">
-      <div class="inner-section" style="display: flex; flex-direction: row; padding: 5px;">
+      <div class="inner-section" style="display: flex; flex-direction: row; padding: 5px;
+            margin-top: 4% !important;">
         <div class="left-section" style="display: flex; flex-direction: column;">
           <div class="title-container" style="display: flex; align-items: center; gap: 10px;">
             <div class="title" style="font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">INCOMING</div>
@@ -2490,12 +2491,12 @@ function getIntervalStart() {
     </div>
     </div>
     </div>
-            <br>
 
                                     {% if user.is_authenticated %}
             <div class="containerents" style="font-family: 'Arial', sans-serif; background-image: linear-gradient(#12121f 0%, #1a1a2e 100%); display: flex; flex-direction: row; justify-content: center; align-items: center; margin: 0;">
         <div class="notification-bar" style="border-radius: 8px; padding: 15px 20px; color: white; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border-bottom: 2px solid #2d3748;">
-        <div class="inner-section" style="display: flex; flex-direction: row; padding: 5px;">
+        <div class="inner-section" style="display: flex; flex-direction: row; padding: 5px;
+            margin-top: 4% !important;">
             <div class="left-section" style="display: flex; flex-direction: column;">
                 <div class="title-container" style="display: flex; align-items: center; gap: 10px;">
                     <div class="title" style="font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">INCOMING</div>
@@ -2744,19 +2745,6 @@ function updateCountdown() {
                             <a href="{% url 'login' %}?next={% url 'showcase:order-summary' %}" class="nav-link">
                                 <i class="fas fa-shopping-cart"></i>
                                 <span class="nav-text">My Cart</span>
-                           </a>
-                            {% endif %}
-                        </li>
-                        <li class="nav-item">
-                   {% if user.is_authenticated %}
-                            <a href="{% url 'showcase:achievements' %}" class="nav-link">
-                                <i class="fas fa-trophy"></i>
-                                <span class="nav-text">Achievements</span>
-                            </a>
-                            {% else %}
-                            <a href="{% url 'login' %}?next={% url 'showcase:achievements' %}" class="nav-link">
-                                <i class="fas fa-trophy"></i>
-                                <span class="nav-text">Achievements</span>
                            </a>
                             {% endif %}
                         </li>

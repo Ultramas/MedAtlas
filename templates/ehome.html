@@ -185,6 +185,7 @@
     .filter-select:focus {
       outline: none;
       border-color: var(--primary);
+      color: black;
     }
 
     /* Professional main content area */
@@ -362,6 +363,28 @@
       transform: translateY(0);
     }
 
+    .action-button2 {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--text-tertiary);
+      color: var(--text-inverse);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .action-button2:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .action-button2:active {
+      transform: translateY(0);
+    }
+
     /* Professional empty state */
     .empty-state {
       text-align: center;
@@ -444,6 +467,20 @@
         padding: 0 1rem;
       }
     }
+    .add-to-cart-btn {
+    color: black;
+    }
+    .add-to-cart-btn:hover{
+    color: white;
+    }
+
+    .buy-it-now-btn {
+    color: black;
+    }
+    .buy-it-now-btn:hover{
+    color: white;
+    }
+
   </style>
 </head>
 
@@ -453,41 +490,43 @@
   <!-- Professional main layout -->
   <div class="main-container" style="margin-top: 10%;">
     <aside class="sidebar">
-      <h2 class="sidebar-title">Filters</h2>
+      <aside class="sidebar-elements" style="background: rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 15px;">
 
-      <div class="filter-group">
-        <label class="filter-label">Category</label>
-        <select class="filter-select" id="categoryFilter">
-          <option value="all">All Categories</option>
-          <option value="pokemon">Pokemon</option>
-          <option value="magic">Magic The Gathering</option>
-          <option value="yugioh">Yu-Gi-Oh!</option>
-          <option value="bakugo">Bakugo</option>
-        </select>
-      </div>
 
-      <div class="filter-group">
-        <label class="filter-label">Condition</label>
-        <select class="filter-select" id="conditionFilter">
-          <option value="all">All Conditions</option>
-          <option value="mint">Mint</option>
-          <option value="near-mint">Near Mint</option>
-          <option value="excellent">Excellent</option>
-          <option value="good">Good</option>
-          <option value="fair">Fair</option>
-        </select>
-      </div>
+        <div class="filter-group">
+          <label class="filter-label">Category</label>
+          <select class="filter-select" id="categoryFilter">
+            <option value="all">All Categories</option>
+            <option value="p">Pokemon</option>
+            <option value="m">Magic The Gathering</option>
+            <option value="y">Yu-Gi-Oh!</option>
+            <option value="b">Bakugo</option>
+          </select>
+        </div>
 
-      <div class="filter-group">
-        <label class="filter-label">Price Range</label>
-        <select class="filter-select" id="priceFilter">
-          <option value="all">All Prices</option>
-          <option value="0-25">$0 - $25</option>
-          <option value="25-50">$25 - $50</option>
-          <option value="50-100">$50 - $100</option>
-          <option value="100+">$100+</option>
-        </select>
-      </div>
+        <div class="filter-group">
+          <label class="filter-label">Condition</label>
+          <select class="filter-select" id="conditionFilter">
+            <option value="all">All Conditions</option>
+            <option value="mint">Mint</option>
+            <option value="near-mint">Near Mint</option>
+            <option value="excellent">Excellent</option>
+            <option value="good">Good</option>
+            <option value="fair">Fair</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Price Range</label>
+          <select class="filter-select" id="priceFilter">
+            <option value="all">All Prices</option>
+            <option value="0-25">$0 - $25</option>
+            <option value="25-50">$25 - $50</option>
+            <option value="50-100">$50 - $100</option>
+            <option value="100+">$100+</option>
+          </select>
+        </div>
+      </aside>
     </aside>
 
     <main class="content-area">
@@ -561,9 +600,14 @@
                   </div>
                 </div>
 
-                <button class="action-button add-to-cart-btn" onclick="addToCart(this, event)">
+                <button class="action-button add-to-cart-btn">
                   Add to Cart
                 </button>
+                <a href="{{ item.get_buy_it_now_url }}">
+                    <button class="action-button2 buy-it-now-btn" style="margin-top: 5%;">
+                      Buy it Now
+                    </button>
+                </a>
               </div>
             </a>
           </article>
@@ -624,12 +668,12 @@
       }
     }
 
-    function initializeCartButtons() {
-      const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
-      addToCartBtns.forEach(btn => {
-        btn.addEventListener('click', handleAddToCart);
-      });
-    }
+    //function initializeCartButtons() {
+    //  const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
+    //  addToCartBtns.forEach(btn => {
+    //    btn.addEventListener('click', handleAddToCart);
+    //  });
+    //}
 
     function handleAddToCart(event) {
       event.preventDefault();

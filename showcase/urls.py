@@ -22,7 +22,7 @@ from .views import HomePageView, SearchResultsView, EcommerceSearchResultsView, 
     currency_remove_from_cart, currency_add_to_cart, currency_reduce_quantity_item, submit_seller_application, \
     PlaceWagerView, update_wager, SendFriendRequestView, FriendSearchResultsView, GameCategorySearchResultsView, \
     GameSearchResultsView, contact_trader, ExchangePrizesView, CommerceExchangeView, InventoryTradeView, \
-    CustomPasswordResetView, battle_create_outcome, BattleCreationView
+    CustomPasswordResetView, battle_create_outcome, BattleCreationView, buy_it_now
 
 # remove this:
 # from . import settings
@@ -549,6 +549,7 @@ urlpatterns = [
     path('success/', views.SuccessView.as_view(), name='success'),
     path('cancel/', views.CancelView.as_view(), name='cancel'),
     path('add-to-cart/<slug>/', add_to_cart, name='add-to-cart'),
+    path('buy-it-now/<slug>/', buy_it_now, name='buy-it-now'),
     path('add-coupon/', AddCouponView.as_view(), name='add-coupon'),
     path('remove-from-cart/<slug>/', remove_from_cart, name='remove-from-cart'),
     path('reduce-quantity-item/<slug>/', reduce_quantity_item, name='reduce-quantity-item'),
