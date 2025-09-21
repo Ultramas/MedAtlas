@@ -51,17 +51,37 @@
         box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
     }
 
-    .cart-list {
-        background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-        border-radius: 16px;
-        overflow: hidden;
-        border: 1px solid rgba(0, 240, 255, 0.3);
-        box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(10px);
-        margin-bottom: 1.5rem;
-        list-style: none;
-        padding: 0;
-    }
+.cart-list {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border-radius: 16px;
+  overflow: hidden;                 /* clips rounded corners */
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  margin-bottom: 1.5rem;
+  list-style: none;
+  padding: 0;
+
+  max-height: 605px;                /* scroll container */
+  overflow-y: auto;
+  position: relative;               /* establishes sticky context */
+}
+
+.cart-total {
+  position: sticky;
+  bottom: 0;
+  border-top: 1px solid rgba(0, 240, 255, 0.2);
+  padding: 1rem;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+  z-index: 1;
+  box-shadow: 0 -6px 12px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s ease;
+}
+
+.cart-total.scrolling {
+  background: rgba(0,0,0,0.65);  /* darker when list is still scrollable */
+}
 
     .cart-list::before {
         content: '';
@@ -299,7 +319,7 @@
             {% endif %}
         </li>
     </ul>
-    
+
     {% if DISPLAY_COUPON_FORM %}
     <form class="coupon-form" action="{% url 'showcase:add-coupon' %}" method="POST">        
         {% csrf_token %}
@@ -310,3 +330,19 @@
     </form>
     {% endif %}
 </div>
+
+<script>
+    const cartList = document.querySelector('.cart-list');
+const cartTotal = document.querySelector('.cart-total');
+
+cartList.addEventListener('scroll', () => {
+  const atBottom = cartList.scrollTop + cartList.clientHeight >= cartList.scrollHeight - 1;
+
+  if (atBottom) {
+    cartTotal.classList.remove('scrolling');
+  } else {
+    cartTotal.classList.add('scrolling');
+  }
+});
+
+</script>

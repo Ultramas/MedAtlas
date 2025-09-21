@@ -91,7 +91,8 @@
         .payment-methods {
             display: flex;
             gap: 1rem;
-            margin-bottom: 2rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
         }
 
         .payment-method {
@@ -317,6 +318,13 @@
             .payment-methods {
                 flex-direction: column;
             }
+        }
+        .cart-item{
+            border: 1px solid #afa2a2;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 5px;
+            background: rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
@@ -627,4 +635,7 @@
                 console.error('PayPal error:', err);
                 alert('PayPal payment failed. Please try again or use a different payment method.');
             }
-        }).render('#paypal-b
+                }).render('#paypal-button-container');
+    </script>
+</body>
+</html>
