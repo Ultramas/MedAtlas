@@ -4,7 +4,7 @@ from django.db.models.signals import m2m_changed, post_save, post_delete
 from django.dispatch import receiver
 
 from .models import Outcome, Achievements, ProfileDetails
-from .models import User, Profile, AdministrationChangeLog, Battle, Room, Message, Notification, Game, BattleParticipant
+from .models import User, Profile, AdministrationChangeLog, Battle, Room, Message, Notification, Game, BattleParticipant, UserState
 from .views import get_changes
 
 @receiver(post_save, sender=User, dispatch_uid='save_new_user_profile')
@@ -180,5 +180,4 @@ def create_user_state(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_state(sender, instance, **kwargs):
-    # Ensure the related object exists for legacy users
     UserState.objects.get_or_create(user=instance)
