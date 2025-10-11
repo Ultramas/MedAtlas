@@ -21,7 +21,7 @@ from .models import UpdateProfile, Questionaire, PollQuestion, Choice, Frequentl
     MonstrositySprite, Affiliation, Ascension, ProfileCurrency, InventoryTradeOffer, Notification, UserNotification, \
     TopHits, Address, Robot, Bet, LevelIcon, Clickable, GameChoice, UserClickable, MyPreferences, GiftCode, \
     GiftCodeRedemption, FavoriteChests, IndividualChestStatistics, TotalChestStatistics, RubyDrop, Season, Tier, \
-    Benefits, ChangeLog, BuyCards, WeBuy, UserState
+    Benefits, ChangeLog, BuyCards, WeBuy, UserState, Card, CardSet, Type, Subtype, Supertype
 from .models import Idea
 from .models import VoteQuery
 from .models import Product
@@ -1879,8 +1879,45 @@ class ShuffleTypeAdmin(admin.ModelAdmin):
     )
 
 
-# Register outside the class
 admin.site.register(ShuffleType, ShuffleTypeAdmin)
+
+
+from django.contrib import admin
+
+
+@admin.register(Card)
+class CardAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Card Information - Categorial Descriptions', {
+            'fields': ('card_id', 'name', 'hp', 'types', 'evolves_to',),
+            'classes': ('collapse-open',),
+        }),
+        ('Card Information - Card Description', {
+            'fields': ('supertype', 'subtypes', 'set', 'set_name', 'set_series', 'set_release_date', 'price',),
+            'classes': ('collapse-open',),
+        }),
+        ('Card Information - Card Text', {
+            'fields': ('rules', 'attacks', 'weaknesses', 'retreat_cost',),
+            'classes': ('collapse-open',),
+        }),
+        ('Card Information - Image', {
+            'fields': ('image_small', 'image_large',),
+            'classes': ('collapse-open',),
+        }),
+    )
+    list_display = ('card_id', 'name', 'set', 'price', 'updated_at')
+    search_fields = ('card_id', 'name', 'set__name', 'set__series')
+    list_filter = ('supertype', 'types', 'subtypes', 'set')
+    filter_horizontal = ('types', 'subtypes')
+
+@admin.register(CardSet)
+class CardSetAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'series', 'release_date')
+    search_fields = ('id', 'name', 'series')
+
+admin.site.register(Type)
+admin.site.register(Subtype)
+admin.site.register(Supertype)
 
 
 class CurrencyAdmin(admin.ModelAdmin):

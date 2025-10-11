@@ -391,7 +391,7 @@
 
 <div class="formset-forms">
   {% for f in formset.forms %}
-    <fieldset class="formset-form" data-formset-form>
+    <fieldset class="formset-form" data-formset-form style="padding: 15px;">
       <legend>Card {{ forloop.counter }}</legend>
 
       {% if f.non_field_errors %}

@@ -134,6 +134,13 @@
             font-size: 0.9rem;
         }
 
+        .payment-method.active span{
+            display: block;
+            font-weight: 600;
+            color: white !important;
+            font-size: 0.9rem;
+        }
+
         .payment-section {
             display: none;
         }
@@ -374,50 +381,47 @@
         {% endif %}
         </ul>
                 <!-- Payment Method Selection -->
-                <div class="payment-methods">
-                    <div class="payment-method active" data-method="stripe">
-                        <i class="fas fa-credit-card"></i>
-                        <span>Credit Card</span>
-                    </div>
-                    <div class="payment-method" data-method="paypal">
-                        <i class="fab fa-paypal"></i>
-                        <span>PayPal</span>
-                    </div>
-                </div>
+               <div class="payment-methods" role="tablist" aria-label="Payment methods">
+  <div class="payment-method active" data-method="stripe" data-target="#stripe-section" role="tab" aria-selected="true" tabindex="0">
+    <i class="fas fa-credit-card"></i>
+    <span>Credit Card</span>
+  </div>
+  <div class="payment-method" data-method="paypal" data-target="#paypal-section" role="tab" aria-selected="false" tabindex="-1">
+    <i class="fab fa-paypal"></i>
+    <span>PayPal</span>
+  </div>
+</div>
 
-                <!-- Stripe Payment Section -->
-                <div class="payment-section active" id="stripe-section">
-                    <form id="payment-form">
-                        <div class="form-group">
-                            <label for="card-element">
-                                Card Information <span class="required">*</span>
-                            </label>
-                         <div class="paymenting-container">
-                                        <div id="card-element" style="border: 1px solid #ddd; border-radius: 4px;"></div>
-                                        <div id="card-errors" role="alert" style="color: red; margin-top: 0.5rem;"></div>
+<!-- Stripe Payment Section -->
+<div class="payment-section active" id="stripe-section" role="tabpanel" aria-hidden="false">
+  <form id="payment-form">
+    <div class="form-group">
+      <label for="card-element">
+        Card Information <span class="required">*</span>
+      </label>
+      <div class="paymenting-container">
+        <div id="card-element" style="border: 1px solid #ddd; border-radius: 4px;"></div>
+        <div id="card-errors" role="alert" style="color: red; margin-top: 0.5rem;"></div>
 
-                                   <button type="submit" class="payment-button" id="submit-button">
-                                        <div class="spinner"></div>
-                                        <span class="button-text">
-                                            <i class="fas fa-lock"></i>
-                                            {% if order.get_total_price %}
-                                                Pay ${{ order.get_total_price|default:"0.00" }}
-                                            {% endif %}
-                                        </span>
-                                    </button>
-                                <!-- PayPal Button -->
-                                <div id="paypal-button-container"></div>
-                            </div>
-                        </div>
-                        
+        <button type="submit" class="payment-button" id="submit-button">
+          <div class="spinner"></div>
+          <span class="button-text">
+            <i class="fas fa-lock"></i>
+            {% if order.get_total_price %}
+              Pay ${{ order.get_total_price|default:"0.00" }}
+            {% endif %}
+          </span>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
 
-                    </form>
-                </div>
+<!-- PayPal Payment Section -->
+<div class="payment-section" id="paypal-section" role="tabpanel" aria-hidden="true">
+  <div id="paypal-button-container"></div>
+</div>
 
-                <!-- PayPal Payment Section -->
-                <div class="payment-section" id="paypal-section">
-                    <div id="paypal-button-container"></div>
-                </div>
 
                 <div class="security-info">
                     <i class="fas fa-shield-alt"></i>
@@ -636,6 +640,62 @@
                 alert('PayPal payment failed. Please try again or use a different payment method.');
             }
                 }).render('#paypal-button-container');
-    </script>
+    </script><script>
+(function () {
+  const methodEls = Array.from(document.querySelectorAll('.payment-method'));
+  const sections = {
+    stripe: document.querySelector('#stripe-section'),
+    paypal: document.querySelector('#paypal-section'),
+  };
+
+  function setAriaForTabs(activeEl) {
+    methodEls.forEach(el => {
+      const isActive = el === activeEl;
+      el.setAttribute('aria-selected', String(isActive));
+      el.setAttribute('tabindex', isActive ? '0' : '-1');
+    });
+  }
+
+  function showSection(method) {
+    Object.entries(sections).forEach(([key, section]) => {
+      const isActive = key === method;
+      section.classList.toggle('active', isActive);
+      section.setAttribute('aria-hidden', String(!isActive));
+    });
+
+    // If you need to disable Stripe submit while PayPal is active (optional):
+    const submitBtn = document.getElementById('submit-button');
+    if (submitBtn) submitBtn.disabled = (method !== 'stripe');
+  }
+
+  function activate(el) {
+    const method = el.dataset.method;
+    if (!method || !sections[method]) return;
+
+    methodEls.forEach(m => m.classList.remove('active'));
+    el.classList.add('active');
+    setAriaForTabs(el);
+    showSection(method);
+    try { localStorage.setItem('payment_method', method); } catch (_) {}
+  }
+
+  // Click + keyboard activation
+  methodEls.forEach(el => {
+    el.addEventListener('click', () => activate(el));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        activate(el);
+      }
+    });
+  });
+
+  // Initialize from saved preference or default active element
+  const saved = (() => { try { return localStorage.getItem('payment_method'); } catch (_) { return null; }})();
+  const startEl = saved ? methodEls.find(el => el.dataset.method === saved) : document.querySelector('.payment-method.active') || methodEls[0];
+  if (startEl) activate(startEl);
+})();
+</script>
+
 </body>
 </html>

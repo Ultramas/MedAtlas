@@ -2454,6 +2454,7 @@ class StaffApplication(models.Model):
         verbose_name = "Staff Application"
         verbose_name_plural = "Staff Applications"
 
+
 class CardCategory(models.Model):
     category = models.CharField(max_length=200)
     is_active = models.IntegerField(default=1,
@@ -3722,27 +3723,72 @@ class Choice(models.Model):
         verbose_name = "Choice"
         verbose_name_plural = "Choices"
 
-class Card(models.Model):
-    card_id = models.CharField(max_length=100, blank=True, null=True)
+
+# app/models.py
+from django.db import models
+from django.contrib.postgres.fields import ArrayField
+from django.core.validators import MinValueValidator
+from django.utils import timezone
+
+# Lookups populated from API
+class Supertype(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    def __str__(self): return self.name
+
+class Type(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    def __str__(self): return self.name
+
+class Subtype(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    def __str__(self): return self.name
+
+class CardSet(models.Model):
+    # Use API id (e.g., "swsh1") as primary key for stability
+    id = models.CharField(primary_key=True, max_length=50)     # API set id
     name = models.CharField(max_length=100)
-    supertype = models.CharField(max_length=50)
-    subtypes = models.CharField(max_length=100)
-    hp = models.CharField(max_length=10, null=True, blank=True)
-    types = models.CharField(max_length=100, null=True, blank=True)
-    evolves_to = models.CharField(max_length=100, null=True, blank=True)
-    rules = models.TextField(null=True, blank=True)
-    attacks = models.TextField(null=True, blank=True)
-    weaknesses = models.TextField(null=True, blank=True)
-    retreat_cost = models.CharField(max_length=50, null=True, blank=True)
-    set_name = models.CharField(max_length=100)
-    set_series = models.CharField(max_length=100)
+    series = models.CharField(max_length=100)
+    release_date = models.DateField(null=True, blank=True)     # from API releaseDate
+    def __str__(self): return f"{self.name} ({self.series})"
+
+class Card(models.Model):
+    # Core identifiers
+    card_id = models.CharField(max_length=50, unique=True)     # API card id (e.g., "swsh1-1")
+    name = models.CharField(max_length=200)
+
+    # Categorical / relations (choices from API-backed tables)
+    supertype = models.ForeignKey(Supertype, null=True, blank=True, on_delete=models.SET_NULL)
+    subtypes = models.ManyToManyField(Subtype, blank=True)
+    types = models.ManyToManyField(Type, blank=True)
+
+    # Set info (normalized + denormalized for convenience)
+    set = models.ForeignKey(CardSet, null=True, blank=True, on_delete=models.SET_NULL)
+    set_name = models.CharField(max_length=100, blank=True)
+    set_series = models.CharField(max_length=100, blank=True)
     set_release_date = models.DateField(null=True, blank=True)
-    image_small = models.URLField()
-    image_large = models.URLField()
+
+    # Card details
+    hp = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(0)])
+    evolves_to = ArrayField(models.CharField(max_length=100), blank=True, default=list)
+
+    # Textual / rules content (store raw JSON blobs from API)
+    rules = models.JSONField(blank=True, null=True)            # list[str]
+    attacks = models.JSONField(blank=True, null=True)          # list[dict]
+    weaknesses = models.JSONField(blank=True, null=True)       # list[dict]
+    retreat_cost = ArrayField(models.CharField(max_length=50), blank=True, default=list)
+
+    # Pricing (simple single number; you can expand as needed)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
-    def __str__(self):
-        return self.name
+    # Images
+    image_small = models.URLField(blank=True)
+    image_large = models.URLField(blank=True)
+
+    # Bookkeeping
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self): return f"{self.card_id} — {self.name}"
+
 
 class TopHits(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
@@ -6933,8 +6979,8 @@ class WeBuy(models.Model):
     )
 
     class Meta:
-        verbose_name = "We Buy Card"
-        verbose_name_plural = "We Buy Cards"
+        verbose_name = "Seller To PokeTrove"
+        verbose_name_plural = "Sellers To PokeTrove"
 
     def __str__(self):
         return f"WeBuy #{self.pk} - {self.seller}"
@@ -6959,8 +7005,8 @@ class BuyCards(models.Model):
     )
 
     class Meta:
-        verbose_name = "We Buy Card"
-        verbose_name_plural = "We Buy Cards"
+        verbose_name = "Buy A Card"
+        verbose_name_plural = "Buy Cards"
 
     def __str__(self):
         return f"BuyCards #{self.pk} for WeBuy #{self.webuy_id}"

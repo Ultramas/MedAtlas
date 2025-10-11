@@ -846,6 +846,9 @@
             background: var(--border-gradient);
             padding: 2px;
             transition: all 0.3s ease;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 25px;
         }
 
         .profile-picture:hover {
@@ -2413,22 +2416,24 @@ function getIntervalStart() {
         }
 
         </style>
-                  {% if user.is_authenticated %}
 
-
-{% endif %}
 
     </div>
 {% empty %}
     <div class="user-profile">
-        <div class="profile-picture" style="--profile-bg-image: url('/static/css/images/a.jpg'); margin-top: 40px;
-">
-            <a href="{% url 'login' %}?next={{ request.path }}" style="display: contents;">
-                <img src="/static/css/images/a.jpg" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;">
+
+        <div class="user-info">
+            <div class="profile-picture" style="--profile-bg-image: url('{{ userprofile.newprofile_profile_picture_url|default:'/static/css/images/a.jpg' }}');">
+            <a href="{{ userprofile.newprofile_profile_url }}">
+                <img src="{{ userprofile.newprofile_profile_picture_url|default:'/static/css/images/a.jpg' }}" alt="Profile Picture" style="border-radius: 50px; margin-right: 20px;" onerror="this.onerror=null; this.src='/static/css/images/a.jpg';">
+                {% if userprofile.level.icon %}
+                <div class="level-badge">{{ userprofile.level.icon }}</div>
+                {% else %}
+                <div class="level-badge">👑</div>
+                {% endif %}
             </a>
         </div>
-        <div class="user-info">
-            <h2 class="username">Guest</h2>
+            <h4 class="username">Guest</h4>
             <a href="{% url 'login' %}?next={% url 'showcase:currencymarket' %}" style="text-decoration: none;">
 
                 </a>
@@ -2448,8 +2453,7 @@ function getIntervalStart() {
         </div>
 
         <div class="right-section" style="display: flex; align-items: center; margin-left: 10px; gap: 15px;">
-<div
-  class="ruby-count tier-{{ user_tier_code }}"
+<div class="ruby-count tier-{{ user_tier_code }}"
   style="display: flex;
          align-items: center;
          gap: 8px;
@@ -2491,7 +2495,6 @@ function getIntervalStart() {
     </div>
     </div>
     </div>
-
                                     {% if user.is_authenticated %}
             <div class="containerents" style="font-family: 'Arial', sans-serif; background-image: linear-gradient(#12121f 0%, #1a1a2e 100%); display: flex; flex-direction: row; justify-content: center; align-items: center; margin: 0;">
         <div class="notification-bar" style="border-radius: 8px; padding: 15px 20px; color: white; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); border-bottom: 2px solid #2d3748;">
@@ -2775,48 +2778,90 @@ function updateCountdown() {
                     <h3 class="section-title"><i class="fas fa-compass"></i> Marketplace<i class="fas fa-chevron-down toggle-icon"></i></h3>
                      <div class="section-content">
                     <ul>
-                        <li class="nav-item">
-                            <a href="#limited" class="nav-link">
-                                <i class="fas fa-hourglass-half"></i>
-                                <span class="nav-text">Limited Edition</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#premium" class="nav-link">
-                                <i class="fa fa-rocket"></i>
-                                <span class="nav-text">Premium</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#featuredgame" class="nav-link">
-                                <i class="fa fa-space-shuttle"></i>
-                                <span class="nav-text">Featured</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#newgame" class="nav-link">
-                                <i class="fas fa-plane"></i>
-                                <span class="nav-text">New</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#populargame" class="nav-link">
-                                <i class="fas fa-fire"></i>
-                                <span class="nav-text">Popular</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#marketgame" class="nav-link">
-                                <i class="fas fa-store"></i>
-                                <span class="nav-text">Showcase</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'showcase:ehome' %}" class="nav-link">
-                                <i class="fas fa-globe"></i>
-                                <span class="nav-text">Marketplace</span>
-                            </a>
-                        </li>
+                        {% url 'showcase:index' as index_url %}
+                            {% if request.path == index_url %}
+                            <li class="nav-item">
+                                <a href="#limited" class="nav-link">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    <span class="nav-text">Limited Edition</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#premium" class="nav-link">
+                                    <i class="fa fa-rocket"></i>
+                                    <span class="nav-text">Premium</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#featuredgame" class="nav-link">
+                                    <i class="fa fa-space-shuttle"></i>
+                                    <span class="nav-text">Featured</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#newgame" class="nav-link">
+                                    <i class="fas fa-plane"></i>
+                                    <span class="nav-text">New</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#populargame" class="nav-link">
+                                    <i class="fas fa-fire"></i>
+                                    <span class="nav-text">Popular</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#marketgame" class="nav-link">
+                                    <i class="fas fa-store"></i>
+                                    <span class="nav-text">Showcase</span>
+                                </a>
+                            </li>
+
+                        {% else %}
+                                <li class="nav-item">
+                                    <a href="{% url 'showcase:index' %}#limited" class="nav-link">
+                                        <i class="fas fa-hourglass-half"></i>
+                                        <span class="nav-text">Limited Edition</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'showcase:index' %}#premium" class="nav-link">
+                                        <i class="fa fa-rocket"></i>
+                                        <span class="nav-text">Premium</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'showcase:index' %}#featuredgame" class="nav-link">
+                                        <i class="fa fa-space-shuttle"></i>
+                                        <span class="nav-text">Featured</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'showcase:index' %}#newgame" class="nav-link">
+                                        <i class="fas fa-plane"></i>
+                                        <span class="nav-text">New</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'showcase:index' %}#populargame" class="nav-link">
+                                        <i class="fas fa-fire"></i>
+                                        <span class="nav-text">Popular</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'showcase:index' %}#marketgame" class="nav-link">
+                                        <i class="fas fa-store"></i>
+                                        <span class="nav-text">Showcase</span>
+                                    </a>
+                                </li>
+
+                        {% endif %}
+                                <li class="nav-item">
+                                    <a href="{% url 'showcase:ehome' %}" class="nav-link">
+                                        <i class="fas fa-globe"></i>
+                                        <span class="nav-text">Marketplace</span>
+                                    </a>
+                                </li>
                     </ul>
                     </div>
                 </div>
