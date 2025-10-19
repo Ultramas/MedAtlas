@@ -1,0 +1,350 @@
+/* ============================================
+   KATACHI STUDIO - CUSTOM STYLES
+   ============================================ */
+
+/* ============================================
+   CSS VARIABLES
+   ============================================ */
+
+:root {
+  /* KATACHI Studio Color System */
+  --color-neutral-50: #fafafa;
+  --color-neutral-900: #0b0b0b;
+  --color-neutral-800: #1a1a1a;
+  --color-neutral-600: #525252;
+  --color-neutral-400: #c9b8a7;
+  --color-white: #ffffff;
+
+  /* Spacing Scale */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-8: 64px;
+  --space-10: 80px;
+  --space-12: 96px;
+  --space-15: 120px;
+
+  /* Typography Scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --text-7xl: 4.5rem;
+  --text-8xl: 6rem;
+  --text-9xl: 8rem;
+
+  /* Border Radius */
+  --radius: 0.625rem;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-400);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-800);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.container-custom {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+@media (max-width: 768px) {
+  .container-custom {
+    padding: 0 var(--space-4);
+  }
+}
+
+/* ============================================
+   HERO SECTION ANIMATIONS
+   ============================================ */
+
+.hero-text,
+.hero-text-italic,
+.hero-subtitle {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s cubic-bezier(0.21, 0.47, 0.32, 0.98), transform 0.8s cubic-bezier(0.21, 0.47, 0.32, 0.98);
+}
+
+.hero-image {
+  transition: transform 0.1s ease-out;
+  will-change: transform;
+}
+
+.hero-content {
+  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+  will-change: transform, opacity;
+}
+
+.info-strip {
+  transition: opacity 0.1s ease-out;
+  will-change: opacity;
+}
+
+/* ============================================
+   FADE IN ANIMATIONS
+   ============================================ */
+
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.21, 0.47, 0.32, 0.98), transform 0.8s cubic-bezier(0.21, 0.47, 0.32, 0.98);
+}
+
+.fade-in-up.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================
+   PRODUCT CARD STYLES
+   ============================================ */
+
+.product-card {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.21, 0.47, 0.32, 0.98), transform 0.8s cubic-bezier(0.21, 0.47, 0.32, 0.98);
+}
+
+.product-card.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.product-card-item {
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card-item:hover {
+  transform: translateY(-4px);
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 15px 60px;
+}
+
+.product-image {
+  transition: transform 0.6s cubic-bezier(0.21, 0.47, 0.32, 0.98);
+}
+
+.product-card-item:hover .product-image {
+  transform: scale(1.05);
+}
+
+/* Product info blur layers */
+.product-info-blur-1 {
+  mask-image: linear-gradient(to top, black 0%, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, black 0%, black 60%, transparent 100%);
+}
+
+.product-info-blur-2 {
+  mask-image: linear-gradient(to top, black 0%, black 40%, transparent 80%);
+  -webkit-mask-image: linear-gradient(to top, black 0%, black 40%, transparent 80%);
+}
+
+.product-info-blur-3 {
+  mask-image: linear-gradient(to top, black 0%, black 20%, transparent 60%);
+  -webkit-mask-image: linear-gradient(to top, black 0%, black 20%, transparent 60%);
+}
+
+/* Quick look button */
+.quick-look-btn {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+/* ============================================
+   MODAL STYLES
+   ============================================ */
+
+.modal-backdrop {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.modal-content {
+  transform: scale(0.9);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.21, 0.47, 0.32, 0.98), opacity 0.3s cubic-bezier(0.21, 0.47, 0.32, 0.98);
+}
+
+/* ============================================
+   HEADER STYLES
+   ============================================ */
+
+#main-header {
+  transition: background-color 0.3s ease;
+}
+
+#main-header .header-logo a {
+  transition: color 0.3s ease;
+}
+
+/* ============================================
+   GLASS PANEL EFFECT
+   ============================================ */
+
+.glass-panel {
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   GRAIN TEXTURE
+   ============================================ */
+
+.grain-texture {
+  background-image: radial-gradient(circle at 1px 1px, rgba(11, 11, 11, 0.15) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+/* ============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+.will-change-scroll {
+  will-change: scroll-position;
+}
+
+/* ============================================
+   REDUCED MOTION PREFERENCES
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .hero-text,
+  .hero-text-italic,
+  .hero-subtitle,
+  .fade-in-up,
+  .product-card {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ============================================
+   HIGH CONTRAST MODE SUPPORT
+   ============================================ */
+
+@media (prefers-contrast: high) {
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* ============================================
+   RESPONSIVE TYPOGRAPHY
+   ============================================ */
+
+@media (max-width: 768px) {
+  .text-display {
+    font-size: var(--text-5xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .text-display {
+    font-size: var(--text-4xl);
+  }
+}
+
+/* ============================================
+   FOCUS MANAGEMENT FOR ACCESSIBILITY
+   ============================================ */
+
+.focus-visible:focus {
+  outline: 2px solid var(--color-neutral-900);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--color-neutral-900);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   LOADING STATES
+   ============================================ */
+
+.loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+}

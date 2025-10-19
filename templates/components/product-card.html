@@ -1,0 +1,54 @@
+{% load static %}
+
+<div class="group relative bg-white overflow-hidden rounded-3xl shadow-xl product-card-item"
+     data-product-id="{{ product.id }}"
+     data-product-name="{{ product.name }}"
+     data-product-price="{{ product.price }}"
+     data-product-materials="{{ product.materials|join:', ' }}"
+     data-product-dimensions="{{ product.dimensions }}">
+
+     Badge
+    {% if product.badge %}
+    <div class="absolute top-4 left-4 z-20">
+        <span class="px-3 py-1 text-xs font-medium rounded-full backdrop-blur-sm
+            {% if product.badge == 'new' %}bg-green-500/90 text-white
+            {% elif product.badge == 'limited' %}bg-amber-500/90 text-white
+            {% elif product.badge == 'bestseller' %}bg-blue-500/90 text-white
+            {% endif %}">
+            {{ product.get_badge_display }}
+        </span>
+    </div>
+    {% endif %}
+
+     Product Image
+    <div class="relative overflow-hidden" style="aspect-ratio: 25/36;">
+        <div class="relative w-full h-full">
+            <img src="{{ product.image.url }}"
+                 alt="{{ product.name }}"
+                 class="w-full h-full object-cover product-image"
+                 loading="lazy">
+        </div>
+    </div>
+
+     Product Info
+    <div class="absolute bottom-0 left-0 right-0 p-6">
+        <div class="absolute inset-0 backdrop-blur-sm product-info-blur-1"></div>
+        <div class="absolute inset-0 backdrop-blur-md product-info-blur-2"></div>
+        <div class="absolute inset-0 backdrop-blur-lg product-info-blur-3"></div>
+
+        <div class="relative z-10">
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-1 drop-shadow-sm">{{ product.name }}</h3>
+                <p class="text-sm text-white/90 mb-2 drop-shadow-sm">{{ product.materials|join:", " }}</p>
+                <span class="text-xl font-bold text-white drop-shadow-sm">{{ product.price }}</span>
+            </div>
+        </div>
+    </div>
+
+     Quick Look Button (will be added via JS)
+    <button class="quick-look-btn absolute inset-0 w-full h-full opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/20 flex items-center justify-center">
+        <span class="bg-white text-neutral-900 px-6 py-3 rounded-full font-semibold hover:bg-neutral-100 transition-colors">
+            Quick Look
+        </span>
+    </button>
+</div>

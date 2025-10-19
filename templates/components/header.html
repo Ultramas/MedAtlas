@@ -1,0 +1,16 @@
+{% load static %}
+
+<header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md border-b border-white/[0.02] bg-white/[0.02]">
+    <div class="container-custom">
+        <div class="flex items-center justify-center h-12 lg:h-16 relative">
+             Logo
+            <div class="flex-shrink-0 header-logo">
+                <a href="{% url 'furniture:home' %}"
+                   class="text-xl lg:text-2xl font-bold tracking-tight transition-colors text-white hover:text-white/80"
+                   aria-label="KATACHI Studio Home">
+                    KATACHI
+                </a>
+            </div>
+        </div>
+    </div>
+</header>

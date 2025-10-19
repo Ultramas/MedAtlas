@@ -1,0 +1,553 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MedAtlas API Listings</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh; padding: 20px; line-height: 1.6;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,.1); margin-bottom: 30px; }
+    h1 { color:#667eea; font-size:2.5rem; font-weight:700; margin-bottom:8px; }
+    .tagline { color:#64748b; font-size:1.1rem; }
+
+    .filter-section { background:white; padding:30px; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,.1); margin-bottom:30px; }
+    .filter-section h2 { color:#1e293b; font-size:1.3rem; margin-bottom:20px; }
+    .filter-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:20px; }
+    .form-group { display:flex; flex-direction:column; }
+    label { color:#475569; font-size:.9rem; font-weight:500; margin-bottom:6px; }
+    input[type="text"], select {
+      padding:12px; border:2px solid #e2e8f0; border-radius:8px; font-size:1rem; transition:border-color .3s;
+    }
+    input[type="text"]:focus, select:focus { outline:none; border-color:#667eea; }
+    .checkbox-group { display:flex; align-items:center; gap:8px; padding:12px 0; }
+    .checkbox-group input[type="checkbox"] { width:18px; height:18px; cursor:pointer; }
+    .checkbox-group label { margin:0; cursor:pointer; }
+    .filter-actions { display:flex; gap:12px; margin-top:20px; }
+    .btn { padding:12px 24px; border:none; border-radius:8px; font-size:1rem; font-weight:600; cursor:pointer; transition:all .3s; }
+    .btn-primary { background:#667eea; color:white; }
+    .btn-primary:hover { background:#5568d3; transform:translateY(-2px); box-shadow:0 4px 12px rgba(102,126,234,.4); }
+    .btn-secondary { background:#e2e8f0; color:#475569; text-decoration:none; display:inline-block; }
+
+    .results-header { background:white; padding:20px 30px; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,.1); margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; }
+    .results-count { color:#475569; font-size:1.1rem; }
+    .results-count strong { color:#667eea; font-size:1.3rem; }
+
+    .listings-grid { display:grid; gap:20px; margin-bottom:30px; }
+    .listing-card { background:white; padding:25px; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,.1); transition:transform .3s, box-shadow .3s; }
+    .listing-card:hover { transform:translateY(-4px); box-shadow:0 8px 16px rgba(0,0,0,.15); }
+    .listing-header { display:flex; justify-content:space-between; align-items:start; margin-bottom:12px; }
+    .listing-title { color:#1e293b; font-size:1.3rem; font-weight:700; margin-bottom:4px; }
+    .verified-badge { background:#10b981; color:white; padding:4px 12px; border-radius:20px; font-size:.85rem; font-weight:600; display:inline-flex; align-items:center; gap:4px; }
+    .organization { color:#667eea; font-size:1rem; margin-bottom:12px; }
+
+    .listing-details { display:flex; flex-direction:column; gap:8px; margin-bottom:15px; }
+    .detail-item { color:#64748b; font-size:.95rem; display:flex; align-items:center; gap:8px; }
+    .detail-icon { color:#667eea; font-weight:bold; }
+
+    .cost-badge { display:inline-block; padding:4px 12px; border-radius:6px; font-size:.85rem; font-weight:600; margin-top:8px; }
+    .cost-free { background:#d1fae5; color:#065f46; }
+    .cost-low_cost { background:#e0f2fe; color:#075985; }
+    .cost-sliding { background:#dbeafe; color:#1e40af; }
+    .cost-varies { background:#fef3c7; color:#92400e; }
+
+    .listing-actions { display:flex; gap:10px; margin-top:15px; }
+    .btn-link { padding:8px 16px; background:#f1f5f9; color:#667eea; text-decoration:none; border-radius:6px; font-size:.9rem; font-weight:600; transition:all .3s; }
+    .btn-link:hover { background:#667eea; color:white; }
+
+    .pagination { background:white; padding:20px; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,.1); display:flex; justify-content:center; align-items:center; gap:15px; }
+    .page-info { color:#475569; font-weight:500; }
+    .no-results { background:white; padding:60px 30px; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,.1); text-align:center; }
+    .no-results h3 { color:#64748b; font-size:1.5rem; margin-bottom:10px; }
+    .no-results p { color:#94a3b8; }
+
+    @media (max-width: 768px) {
+      h1 { font-size:2rem; }
+      .filter-grid { grid-template-columns:1fr; }
+      .results-header { flex-direction:column; align-items:start; gap:10px; }
+      .filter-actions { flex-direction:column; }
+      .filter-actions .btn, .btn-secondary { width:100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🏥 MedAtlas</h1>
+      <p class="tagline">Find accessible healthcare services (API-powered)</p>
+    </header>
+
+    <div class="filter-section">
+      <h2>Search & Filter</h2>
+      <form id="filterForm">
+        <div class="filter-grid">
+          <div class="form-group">
+            <label for="searchQuery">Search</label>
+            <input type="text" id="searchQuery" placeholder="Name, organization, city, or state">
+          </div>
+          <div class="form-group">
+            <label for="cityFilter">City (slug / name)</label>
+            <input type="text" id="cityFilter" placeholder="e.g., Sacramento">
+          </div>
+          <div class="form-group">
+            <label for="stateFilter">State</label>
+            <input type="text" id="stateFilter" placeholder="e.g., CA">
+          </div>
+          <div class="form-group">
+            <label for="costFilter">Cost Type</label>
+            <select id="costFilter">
+              <option value="">Any cost</option>
+              <option value="free">Free</option>
+              <option value="low_cost">Low cost</option>
+              <option value="sliding">Sliding scale</option>
+              <option value="varies">Varies</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="verifiedOnly">
+          <label for="verifiedOnly">Show verified listings only</label>
+        </div>
+
+        <div class="form-group">
+          <label for="sourceFilter">Source</label>
+          <select id="sourceFilter">
+            <option value="internal">Internal DB</option>
+            <option value="google">Google Places (Text Search)</option>
+            <option value="osm">OpenStreetMap (global)</option>
+            <option value="hrsa">HRSA (U.S. health centers)</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="btn btn-primary">Apply Filters</button>
+          <button type="button" id="resetBtn" class="btn btn-secondary">Reset</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="results-header">
+      <div class="results-count">
+        Showing <strong id="resultCount">0</strong> results
+      </div>
+      <div id="activeFilters" class="results-count" style="display:none;"></div>
+    </div>
+
+    <div class="listings-grid" id="listingsContainer"></div>
+
+    <div class="pagination" id="pagination" style="display:none;">
+      <a class="btn-secondary" href="#" id="prevBtn" style="display:none;">Previous</a>
+      <span class="page-info" id="pageInfo">Page 1 of 1</span>
+      <a class="btn-secondary" href="#" id="nextBtn" style="display:none;">Next</a>
+    </div>
+  </div>
+<script>
+  window.addEventListener('error', e => console.error('JS error:', e.error || e));
+  window.addEventListener('unhandledrejection', e => console.error('Promise rejection:', e.reason));
+  console.log("Endpoints", {INTERNAL_URL, GOOGLE_URL, OSM_URL, HRSA_URL});
+</script>
+
+<script>
+  const INTERNAL_URL = "{% url 'showcase:listings' %}";
+  const GOOGLE_URL   = "{% url 'showcase:external-google' %}";
+  const OSM_URL      = "{% url 'showcase:external-osm' %}";
+  const HRSA_URL     = "{% url 'showcase:external-hrsa' %}";
+
+  // Debug: confirm they rendered
+  console.log("API endpoints:", { INTERNAL_URL, GOOGLE_URL, OSM_URL, HRSA_URL });
+
+  const els = {
+    form: document.getElementById('filterForm'),
+    query: document.getElementById('searchQuery'),
+    city: document.getElementById('cityFilter'),
+    state: document.getElementById('stateFilter'),
+    cost: document.getElementById('costFilter'),
+    verified: document.getElementById('verifiedOnly'),
+    source: document.getElementById('sourceFilter'),
+    reset: document.getElementById('resetBtn'),
+    list: document.getElementById('listingsContainer'),
+    count: document.getElementById('resultCount'),
+    pagination: document.getElementById('pagination'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    pageInfo: document.getElementById('pageInfo'),
+    activeFilters: document.getElementById('activeFilters'),
+  };
+
+  // Google token-based paging
+  let googlePageStack = [];
+  let googleNextToken = null;
+
+  function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+  function escapeAttr(s){return escapeHtml(s).replace(/"/g,'&quot;');}
+  function costClass(c){return c?`cost-${c.replace(/\s+/g,'_')}`:'';}
+
+  function paramsForNumeric(page) {
+    const p = new URLSearchParams();
+    const q = els.query.value.trim();
+    const city = els.city.value.trim();
+    const state = els.state.value.trim();
+    const cost = els.cost.value;
+    const verified = els.verified.checked;
+
+    if (q) p.set('q', q);
+    if (city) p.set('city', city);
+    if (state) p.set('state', state);
+    if (cost) p.set('cost', cost);
+    if (verified) p.set('verified', '1');
+    if (page) p.set('page', page);
+    return p;
+  }
+
+  function paramsForGoogle(pageToken) {
+    const p = new URLSearchParams();
+    const q = els.query.value.trim();
+    const city = els.city.value.trim();
+    const state = els.state.value.trim();
+
+    if (q) p.set('q', q);
+    if (city) p.set('city', city);
+    if (state) p.set('state', state);
+    if (pageToken) p.set('page_token', pageToken);
+    return p;
+  }
+
+  function currentEndpoint(source) {
+    if (source === 'google') return GOOGLE_URL;
+    if (source === 'osm') return OSM_URL;
+    if (source === 'hrsa') return HRSA_URL;
+    return INTERNAL_URL; // 'internal' or anything else
+  }
+
+  async function fetchInternal(page=1) {
+    const url = `${INTERNAL_URL}?${paramsForNumeric(page).toString()}`;
+    console.log("Fetching INTERNAL:", url);
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error(`INTERNAL API error ${res.status}`);
+    return res.json();
+  }
+
+  async function fetchGoogle(pageLabel=1) {
+    // pageLabel can be 1 | 'NEXT' | 'PREV'
+    const pageToken = (pageLabel === 'NEXT') ? googleNextToken
+                     : (pageLabel === 'PREV') ? (googlePageStack.at(-2) || null)
+                     : null;
+    const url = `${GOOGLE_URL}?${paramsForGoogle(pageToken).toString()}`;
+    console.log("Fetching GOOGLE:", url);
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error(`GOOGLE API error ${res.status}`);
+    const data = await res.json();
+
+    // manage tokens
+    const newToken = data.next_page_token || null;
+    if (pageLabel === 1) {
+      googlePageStack = [null];
+    } else if (pageLabel === 'NEXT') {
+      googlePageStack.push(googleNextToken);
+    } else if (pageLabel === 'PREV') {
+      googlePageStack.pop();
+    }
+    googleNextToken = newToken;
+
+    return data;
+  }
+
+  function card(item) {
+    const costLabel = item.cost_label || (item.cost ? item.cost.toString() : '');
+    return `
+      <div class="listing-card">
+        <div class="listing-header">
+          <div>
+            <h3 class="listing-title">${escapeHtml(item.name)}</h3>
+            ${item.organization_name ? `<div class="organization">${escapeHtml(item.organization_name)}</div>` : ''}
+          </div>
+          ${item.verified ? '<span class="verified-badge">✓ Verified</span>' : ''}
+        </div>
+        <div class="listing-details">
+          <div class="detail-item">
+            <span class="detail-icon">📍</span>
+            <span>${escapeHtml(item.city_text || '')}${item.state ? `, ${escapeHtml(item.state)}`:''}</span>
+          </div>
+          ${item.phone ? `
+            <div class="detail-item">
+              <span class="detail-icon">📞</span>
+              <span>${escapeHtml(item.phone)}</span>
+            </div>` : ''}
+        </div>
+        ${costLabel ? `<span class="cost-badge ${costClass(item.cost)}">${escapeHtml(costLabel)}</span>` : ''}
+        <div class="listing-actions">
+          ${item.website ? `<a class="btn-link" target="_blank" href="${escapeAttr(item.website)}">Website →</a>` : ''}
+          ${item.source_url ? `<a class="btn-link" target="_blank" href="${escapeAttr(item.source_url)}">Source →</a>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderActiveFilters(sourceLabel) {
+    const bits = [];
+    if (els.query.value) bits.push(`q="${escapeHtml(els.query.value)}"`);
+    if (els.city.value) bits.push(`city="${escapeHtml(els.city.value)}"`);
+    if (els.state.value) bits.push(`state="${escapeHtml(els.state.value)}"`);
+    if (els.cost.value && (sourceLabel === 'internal' || sourceLabel === 'auto')) bits.push(`cost="${escapeHtml(els.cost.value)}"`);
+    if (els.verified.checked && (sourceLabel === 'internal' || sourceLabel === 'auto')) bits.push('verified');
+    bits.push(`source="${escapeHtml(sourceLabel)}"`);
+
+    const box = els.activeFilters;
+    if (bits.length) {
+      box.style.display = '';
+      box.innerHTML = `Active filters: <em>${bits.join('</em> <em>')}</em>`;
+    } else {
+      box.style.display = 'none';
+      box.innerHTML = '';
+    }
+  }
+
+  function renderResults(data, sourceLabel, pageLabel) {
+    const rows = data.results || [];
+    els.count.textContent = data.count ?? rows.length;
+
+    els.list.innerHTML = rows.length
+      ? rows.map(card).join('')
+      : `<div class="no-results"><h3>No listings found</h3><p>Try adjusting your filters</p></div>`;
+
+    // Pagination
+    if (sourceLabel === 'google') {
+      const canPrev = googlePageStack.length > 1;
+      const canNext = !!googleNextToken;
+      els.pagination.style.display = (canPrev || canNext) ? '' : 'none';
+      els.prevBtn.style.display = canPrev ? '' : 'none';
+      els.nextBtn.style.display = canNext ? '' : 'none';
+      els.prevBtn.onclick = (e)=>{ e.preventDefault(); go('PREV'); };
+      els.nextBtn.onclick = (e)=>{ e.preventDefault(); go('NEXT'); };
+      els.pageInfo.textContent = `Page ${googlePageStack.length}`;
+    } else {
+      const size = rows.length || 1;
+      const total = data.count || rows.length;
+      const pages = Math.max(1, Math.ceil(total / size));
+      const currentPage = (typeof pageLabel === 'number') ? pageLabel : 1;
+      els.pageInfo.textContent = `Page ${currentPage} of ${pages}`;
+      const hasPrev = !!data.previous;
+      const hasNext = !!data.next;
+      if (pages > 1) {
+        els.pagination.style.display = '';
+        els.prevBtn.style.display = hasPrev ? '' : 'none';
+        els.nextBtn.style.display = hasNext ? '' : 'none';
+        els.prevBtn.onclick = (e)=>{ e.preventDefault(); go(currentPage - 1); };
+        els.nextBtn.onclick = (e)=>{ e.preventDefault(); go(currentPage + 1); };
+      } else {
+        els.pagination.style.display = 'none';
+      }
+    }
+  }
+
+  async function go(page=1) {
+    const chosen = els.source.value;
+    // Deep link update
+    const updateUrl = (params) => {
+      const url = new URL(window.location);
+      url.search = params.toString();
+      history.replaceState(null,'',url.toString());
+    };
+
+    try {
+      if (chosen === 'auto') {
+        renderActiveFilters('auto');
+        // 1) Try INTERNAL
+        const data1 = await fetchInternal(typeof page === 'number' ? page : 1);
+        if ((data1.results || []).length > 0) {
+          const p = paramsForNumeric(typeof page === 'number' ? page : 1); p.set('source','auto');
+          updateUrl(p);
+          renderResults(data1, 'internal', page);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+        // 2) Fallback to GOOGLE
+        googlePageStack = [null]; googleNextToken = null;
+        const data2 = await fetchGoogle(1);
+        const p2 = paramsForGoogle(null); p2.set('source','auto');
+        updateUrl(p2);
+        renderResults(data2, 'google', 1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      if (chosen === 'google') {
+        renderActiveFilters('google');
+        const data = await fetchGoogle(page === 'NEXT' || page === 'PREV' ? page : 1);
+        const p = paramsForGoogle(page === 'NEXT' ? googleNextToken : (page === 'PREV' ? (googlePageStack.at(-2)||null) : null));
+        p.set('source','google');
+        updateUrl(p);
+        renderResults(data, 'google', page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      // OSM / HRSA / Internal (numeric style)
+      renderActiveFilters(chosen);
+      const url = `${currentEndpoint(chosen)}?${paramsForNumeric(typeof page === 'number' ? page : 1).toString()}`;
+      console.log("Fetching", chosen.toUpperCase()+":", url);
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error(`${chosen.toUpperCase()} API error ${res.status}`);
+      const data = await res.json();
+      const p = paramsForNumeric(typeof page === 'number' ? page : 1); p.set('source', chosen);
+      updateUrl(p);
+      renderResults(data, chosen, page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      console.error(err);
+      els.list.innerHTML = `<div class="no-results"><h3>Error loading results</h3><p>${escapeHtml(err.message)}</p></div>`;
+      els.pagination.style.display = 'none';
+    }
+  }
+
+  els.form.addEventListener('submit', (e)=>{ e.preventDefault(); googlePageStack=[null]; googleNextToken=null; go(1); });
+  els.reset.addEventListener('click', ()=>{
+    els.query.value = ''; els.city.value = ''; els.state.value = '';
+    els.cost.value = ''; els.verified.checked = false; els.source.value = 'auto';
+    googlePageStack=[null]; googleNextToken=null;
+    go(1);
+  });
+  els.source.addEventListener('change', ()=>{ googlePageStack=[null]; googleNextToken=null; go(1); });
+
+  (function init(){
+    const p = new URLSearchParams(location.search);
+    if (p.has('q')) els.query.value = p.get('q');
+    if (p.has('city')) els.city.value = p.get('city');
+    if (p.has('state')) els.state.value = p.get('state');
+    if (p.has('cost')) els.cost.value = p.get('cost');
+    if (p.has('verified')) els.verified.checked = ['1','true','yes','on'].includes(p.get('verified'));
+    els.source.value = p.get('source') || 'auto';
+    // Prime Google tokens if present
+    googlePageStack=[null]; googleNextToken=p.get('page_token')||null;
+    go(1);
+  })();
+</script>
+<script defer>
+document.addEventListener('DOMContentLoaded', () => {
+  const els = {
+    form: document.getElementById('filterForm'),
+    query: document.getElementById('searchQuery'),
+    city: document.getElementById('cityFilter'),
+    state: document.getElementById('stateFilter'),
+    cost: document.getElementById('costFilter'),
+    verified: document.getElementById('verifiedOnly'),
+    source: document.getElementById('sourceFilter'),
+    reset: document.getElementById('resetBtn'),
+    list: document.getElementById('listingsContainer'),
+    count: document.getElementById('resultCount'),
+    pagination: document.getElementById('pagination'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    pageInfo: document.getElementById('pageInfo'),
+    activeFilters: document.getElementById('activeFilters'),
+  };
+
+  const INTERNAL_URL = "{% url 'showcase:listings' %}";
+  const GOOGLE_URL   = "{% url 'showcase:external-google' %}";
+  console.log('Endpoints:', {INTERNAL_URL, GOOGLE_URL});
+
+  function params(obj) {
+    const p = new URLSearchParams();
+    Object.entries(obj).forEach(([k,v]) => { if (v) p.set(k, v); });
+    return p.toString();
+  }
+
+  async function fetchInternal(qs) {
+    const url = `${INTERNAL_URL}?${qs}`;
+    const r = await fetch(url, { headers: { Accept: 'application/json' } });
+    if (!r.ok) throw new Error(`Internal API: ${r.status}`);
+    return r.json();
+  }
+
+  async function fetchGoogle(qs) {
+    const url = `${GOOGLE_URL}?${qs}`;
+    const r = await fetch(url, { headers: { Accept: 'application/json' } });
+    if (!r.ok) throw new Error(`Google API proxy: ${r.status}`);
+    return r.json();
+  }
+
+  function card(x) {
+    return `
+      <div class="listing-card">
+        <div class="listing-header">
+          <div>
+            <h3 class="listing-title">${(x.name||'').replace(/&/g,'&amp;')}</h3>
+            ${x.organization_name ? `<div class="organization">${x.organization_name}</div>` : ``}
+          </div>
+          ${x.verified ? '<span class="verified-badge">✓ Verified</span>' : ''}
+        </div>
+        <div class="listing-details">
+          <div class="detail-item"><span class="detail-icon">📍</span>
+            <span>${x.city_text||''}${x.state ? `, ${x.state}`:''}</span>
+          </div>
+        </div>
+        <div class="listing-actions">
+          ${x.website ? `<a class="btn-link" target="_blank" href="${x.website}">Website →</a>` : ``}
+          ${x.source_url ? `<a class="btn-link" target="_blank" href="${x.source_url}">Source →</a>` : ``}
+        </div>
+      </div>
+    `;
+  }
+
+  function render(data) {
+    const rows = data.results || [];
+    els.count.textContent = data.count ?? rows.length;
+    els.list.innerHTML = rows.length
+      ? rows.map(card).join('')
+      : `<div class="no-results"><h3>No listings found</h3><p>Try adjusting your filters</p></div>`;
+    els.pagination.style.display = 'none'; // keep simple here
+  }
+
+  async function runSearch() {
+    try {
+      const qs = params({
+        q: (els.query.value||'').trim(),
+        city: (els.city.value||'').trim(),
+        state: (els.state.value||'').trim(),
+        cost: els.cost.value || '',
+        verified: els.verified.checked ? '1' : ''
+      });
+
+      // Try internal first
+      const internal = await fetchInternal(qs);
+      if ((internal.results||[]).length) {
+        render(internal);
+        return;
+      }
+      // Fallback to Google Places
+      const google = await fetchGoogle(params({
+        q: (els.query.value||'').trim() || 'clinic',
+        city: (els.city.value||'').trim(),
+        state: (els.state.value||'').trim()
+      }));
+      render(google);
+    } catch (e) {
+      console.error(e);
+      els.list.innerHTML = `<div class="no-results"><h3>Error</h3><p>${String(e.message)}</p></div>`;
+      els.pagination.style.display = 'none';
+      els.count.textContent = '0';
+    }
+  }
+
+  els.form.addEventListener('submit', (e) => { e.preventDefault(); runSearch(); });
+  els.reset.addEventListener('click', () => {
+    els.query.value = ''; els.city.value=''; els.state.value='';
+    els.cost.value=''; els.verified.checked=false;
+    runSearch();
+  });
+
+  // Kick off an initial search so you see something immediately
+  runSearch();
+});
+</script>
+
+
+</body>
+</html>

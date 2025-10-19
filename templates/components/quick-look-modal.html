@@ -1,0 +1,95 @@
+{% load static %}
+
+ Quick Look Modal Template (Hidden by default, populated by JS)
+<div id="quick-look-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+     Backdrop
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm modal-backdrop"></div>
+
+     Modal Content
+    <div class="relative w-full max-w-4xl max-h-[90vh] overflow-auto modal-content bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+             Image Gallery
+            <div class="relative">
+                <div class="relative aspect-square rounded-lg overflow-hidden mb-4">
+                    <img id="modal-main-image"
+                         src="/placeholder.svg"
+                         alt=""
+                         class="w-full h-full object-cover">
+
+                     Navigation Arrows
+                    <button id="modal-prev-btn"
+                            class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </button>
+                    <button id="modal-next-btn"
+                            class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                 Image Thumbnails
+                <div id="modal-thumbnails" class="flex gap-2">
+                     Populated by JS
+                </div>
+            </div>
+
+             Product Details
+            <div class="flex flex-col">
+                <div class="flex items-start justify-between mb-6">
+                    <div>
+                        <h2 id="modal-product-name" class="text-3xl font-bold text-neutral-900 mb-2"></h2>
+                        <p id="modal-product-materials" class="text-lg text-neutral-600"></p>
+                    </div>
+                    <button id="modal-close-btn"
+                            class="p-2 hover:bg-neutral-100 rounded-full transition-colors duration-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="space-y-6 flex-1">
+                     Price
+                    <div id="modal-product-price" class="text-2xl font-bold text-neutral-900"></div>
+
+                     Dimensions
+                    <div>
+                        <h4 class="text-sm font-medium text-neutral-900 mb-2">DIMENSIONS</h4>
+                        <p id="modal-product-dimensions" class="text-neutral-600"></p>
+                    </div>
+
+                     Material Swatches
+                    <div>
+                        <h4 class="text-sm font-medium text-neutral-900 mb-3">FINISH</h4>
+                        <div id="modal-swatches" class="flex gap-3">
+                             Populated by JS
+                        </div>
+                    </div>
+
+                     Features
+                    <div>
+                        <h4 class="text-sm font-medium text-neutral-900 mb-3">FEATURES</h4>
+                        <ul class="space-y-2 text-sm text-neutral-600">
+                            <li>• Sustainably sourced materials</li>
+                            <li>• Hand-finished edges</li>
+                            <li>• Made to order in Belgium</li>
+                            <li>• Lifetime repair program</li>
+                        </ul>
+                    </div>
+                </div>
+
+                 Add to Cart
+                <button class="w-full bg-neutral-900 text-white py-4 rounded-full font-medium text-lg hover:bg-neutral-800 transition-colors duration-200 flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Add to Cart
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

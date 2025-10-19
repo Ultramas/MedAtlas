@@ -31,6 +31,7 @@ django.utils.encoding.python_2_unicode_compatible = python_2_unicode_compatible
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY", "")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
@@ -79,9 +80,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'sslserver',
     'showcase.apps.ShowcaseConfig',
-    'user_management.apps.UserManagementConfig',
-    # 'django.chatbot',
-    # 'chat',
 ]
 
 REST_FRAMEWORK = {
@@ -105,11 +103,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'showcase.middleware.current_room.CurrentRoomMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'showcase.middleware.middleware.CurrentUserMiddleware',
-    'showcase.middleware.middleware.NotificationStatusMiddleware',
     'django.middleware.locale.LocaleMiddleware'
 ]
 
