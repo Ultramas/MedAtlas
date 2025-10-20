@@ -268,11 +268,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://0.0.0.0:3000',
     'http://0.0.0.0:8000',
     'http://127.0.0.1:8000',
-    'https://poketrove-official-website.onrender.com',
-    'https://poketrove.org',
-    'https://poketrove.net',
-    'https://www.poketrove.store',
-    'https://poketrove.store',
+    'https://www.med-atlas.com',
+    'https://med-atlas.com',
 ]
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 200000
