@@ -1,6 +1,7 @@
 from rest_framework import generics, response
 from rest_framework import permissions
-from stripe.http_client import requests
+import requests
+import stripe
 
 from mysite import views
 from django.views.generic import ListView, DetailView, View
