@@ -1,7 +1,7 @@
 import os
 import sys
 
-project_path = '/home/PokeTrove/PokeTrove-Official-Website'
+project_path = '/home/PokeTrove/MedAtlas'
 if project_path not in sys.path:
     sys.path.append(project_path)
 
