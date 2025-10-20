@@ -1,7 +1,7 @@
 import os
 import sys
 
-PROJECT_ROOT = "/home/PokeTrove/MedAtlas"
+PROJECT_ROOT = "/home/PokeTrove/MedAtlas/mental-health-research"
 
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
