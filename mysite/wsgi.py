@@ -1,11 +1,12 @@
 import os
 import sys
 
-project_path = '/home/PokeTrove/MedAtlas'
-if project_path not in sys.path:
-    sys.path.append(project_path)
+PROJECT_ROOT = "/home/PokeTrove/MedAtlas"
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
