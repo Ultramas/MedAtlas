@@ -270,6 +270,8 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
     'https://www.med-atlas.com',
     'https://med-atlas.com',
+    'http://www.med-atlas.com',
+    'http://med-atlas.com',
 ]
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 200000
